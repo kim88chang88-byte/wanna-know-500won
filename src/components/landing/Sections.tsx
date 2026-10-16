@@ -8,6 +8,7 @@ import {
   SAMPLE_CAPSULES,
   SLOTS,
 } from "./data";
+import MenuButton from "./MenuButton";
 import { HOBO_IMAGE, MACHINE_IMAGE, PREMIUM_MACHINE_IMAGE } from "./images";
 
 export type SpinHandler = (key: string, fortune: string, price: string) => void;
@@ -46,18 +47,20 @@ export function Header({ onOpenLogin }: { onOpenLogin: () => void }) {
             </div>
           </div>
 
-          {/* 오른쪽 위: 마이페이지 (로그인 모달 열기) */}
-          <div className="shrink-0">
+          {/* 오른쪽 위: 햄버거 메뉴 + 마이페이지 (로그인 모달 열기) */}
+          <div className="shrink-0 flex items-center gap-2">
+            <MenuButton />
             <button
               onClick={onOpenLogin}
               type="button"
               aria-haspopup="dialog"
-              className="group flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-brand-50 hover:bg-brand-100/70 border border-brand-200/60 transition-all text-left shadow-sm"
+              className="group flex items-center gap-2.5 p-1.5 sm:px-3.5 sm:py-1.5 rounded-full bg-brand-50 hover:bg-brand-100/70 border border-brand-200/60 transition-all text-left shadow-sm"
             >
               <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-brand-600 group-hover:scale-105 transition-transform">
                 <span className="material-symbols-outlined text-[20px]">person</span>
               </div>
-              <div>
+              <span className="sr-only sm:hidden">마이페이지</span>
+              <div className="hidden sm:block">
                 <span className="block text-xs font-bold text-gray-800 group-hover:text-brand-600 transition-colors">
                   마이페이지
                 </span>
@@ -120,8 +123,8 @@ export function HeroSection({ counts }: { counts: DrawCounts }) {
       </div>
 
       <p className="font-serifKr text-base sm:text-lg text-gray-600 font-medium leading-relaxed max-w-2xl mx-auto">
-        “철학관은 너무 무거워. 동전 하나로 오늘의 운 뽑아봐.”
-        <br className="hidden sm:inline" /> 매일 첫 1회는 무료, 그다음부터는 500원 동전 하나면 충분해요.
+        “궁금해요? 궁금하면 500원!!”
+        <br className="hidden sm:inline" /> 매일 첫 1회는 무료, 그 다음부터는 500원 짜리 동전 하나면 충분해요.
       </p>
       </div>
     </section>
