@@ -30,8 +30,24 @@ export function Header({ onOpenLogin }: { onOpenLogin: () => void }) {
     <>
       <header className="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-brand-100 shadow-[0_2px_15px_rgba(244,63,104,0.05)]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex items-center justify-between gap-3">
-          {/* 왼쪽 위: 마이페이지 (로그인 모달 열기) */}
-          <div>
+          {/* 왼쪽 위: 로고 + 베타 안내 (좁은 화면에서는 아래 띠로 따로 보여줘요) */}
+          <div className="flex flex-col items-start gap-1 min-w-0">
+            <div className="flex items-center gap-2">
+              <span className="text-xl floating-anim" aria-hidden="true">
+                🌸
+              </span>
+              <h1 className="font-serifKr font-black text-lg sm:text-2xl tracking-tight bg-gradient-to-r from-brand-600 to-purple-600 bg-clip-text text-transparent">
+                꽃거지의 신묘한 사주
+              </h1>
+            </div>
+            <div className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-rose-50 border border-rose-200 text-brand-700 text-[11px] font-medium">
+              <span className="w-1.5 h-1.5 rounded-full bg-brand-500 animate-ping" aria-hidden="true" />
+              <span>{BETA_NOTICE_TEXT}</span>
+            </div>
+          </div>
+
+          {/* 오른쪽 위: 마이페이지 (로그인 모달 열기) */}
+          <div className="shrink-0">
             <button
               onClick={onOpenLogin}
               type="button"
@@ -49,22 +65,6 @@ export function Header({ onOpenLogin }: { onOpenLogin: () => void }) {
               </div>
             </button>
           </div>
-
-          {/* 오른쪽 위: 로고 + 베타 안내 (좁은 화면에서는 아래 띠로 따로 보여줘요) */}
-          <div className="flex flex-col items-end gap-1">
-            <div className="flex items-center gap-2">
-              <span className="text-xl floating-anim" aria-hidden="true">
-                🌸
-              </span>
-              <h1 className="font-serifKr font-black text-lg sm:text-2xl tracking-tight bg-gradient-to-r from-brand-600 to-purple-600 bg-clip-text text-transparent">
-                꽃거지의 신묘한 사주
-              </h1>
-            </div>
-            <div className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-rose-50 border border-rose-200 text-brand-700 text-[11px] font-medium">
-              <span className="w-1.5 h-1.5 rounded-full bg-brand-500 animate-ping" aria-hidden="true" />
-              <span>{BETA_NOTICE_TEXT}</span>
-            </div>
-          </div>
         </div>
       </header>
 
@@ -79,9 +79,10 @@ export function Header({ onOpenLogin }: { onOpenLogin: () => void }) {
 
 export function HeroSection({ counts }: { counts: DrawCounts }) {
   return (
-    <section className="text-center max-w-4xl mx-auto mb-12">
-      {/* 뽑기 횟수 (이 기기에서 센 값) */}
-      <div className="inline-flex flex-wrap items-center justify-center gap-3 mb-6 p-2 rounded-2xl bg-white/80 backdrop-blur-sm border border-brand-100 shadow-sm">
+    <section className="mb-12">
+      {/* 뽑기 횟수 (이 기기에서 센 값) — 화면 맨 오른쪽 */}
+      <div className="flex justify-end mb-6">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 w-fit p-2 rounded-2xl bg-white/80 backdrop-blur-sm border border-brand-100 shadow-sm">
         <div className="flex items-center gap-2.5 px-4 py-2 rounded-xl bg-brand-50/80 border border-brand-100 text-left">
           <span className="material-symbols-outlined text-brand-600 text-[22px]">calendar_today</span>
           <div>
@@ -105,7 +106,10 @@ export function HeroSection({ counts }: { counts: DrawCounts }) {
           </div>
         </div>
       </div>
+      </div>
 
+      {/* 제목: 가운데 정렬 */}
+      <div className="text-center max-w-4xl mx-auto">
       <div className="relative inline-block mb-3">
         <h2 className="font-serifKr text-3xl sm:text-5xl font-extrabold tracking-tight text-gray-900 leading-tight">
           꽃거지의 신묘한 사주
@@ -119,6 +123,7 @@ export function HeroSection({ counts }: { counts: DrawCounts }) {
         “철학관은 너무 무거워. 동전 하나로 오늘의 운 뽑아봐.”
         <br className="hidden sm:inline" /> 매일 첫 1회는 무료, 그다음부터는 500원 동전 하나면 충분해요.
       </p>
+      </div>
     </section>
   );
 }
