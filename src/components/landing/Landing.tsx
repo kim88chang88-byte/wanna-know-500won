@@ -2,7 +2,8 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { getBrowserStorage, readCounts, recordDraw, type DrawCounts } from "@/lib/drawCounter";
-import { LoginModal, SpinModal, type SpinState } from "./Modals";
+import IntakeModal, { type IntakeTarget } from "./IntakeModal";
+import { LoginModal } from "./Modals";
 import {
   Footer,
   Header,
@@ -19,7 +20,7 @@ const MODAL_DELAY_MS = 350;
 
 export default function Landing() {
   const [loginOpen, setLoginOpen] = useState(false);
-  const [spin, setSpin] = useState<SpinState | null>(null);
+  const [intake, setIntake] = useState<IntakeTarget | null>(null);
   const [spinningKey, setSpinningKey] = useState<string | null>(null);
   const [counts, setCounts] = useState<DrawCounts>({ today: 0, month: 0 });
   // 화면에 보이는 최신 횟수. (상태 업데이터 안에서 저장소에 쓰면 개발 모드에서 두 번 실행되어 2씩 늘어나서 ref 를 씁니다)
@@ -42,19 +43,18 @@ export default function Landing() {
     (key: string, fortune: string, price: string) => {
       setSpinningKey(key);
       timers.current.push(window.setTimeout(() => setSpinningKey(null), LEVER_ANIMATION_MS));
-      timers.current.push(
-        window.setTimeout(() => {
-          setSpin({ fortune, price });
-          applyCounts(recordDraw(getBrowserStorage(), new Date(), countsRef.current));
-        }, MODAL_DELAY_MS),
-      );
+      timers.current.push(window.setTimeout(() => setIntake({ fortune, price }), MODAL_DELAY_MS));
     },
-    [applyCounts],
+    [],
   );
 
   const openLogin = useCallback(() => setLoginOpen(true), []);
   const closeLogin = useCallback(() => setLoginOpen(false), []);
-  const closeSpin = useCallback(() => setSpin(null), []);
+  const closeIntake = useCallback(() => setIntake(null), []);
+  // 생년월일시 입력이 끝나 결과를 받았을 때만 뽑기 횟수를 올려요. (입력창만 열고 닫은 건 세지 않아요)
+  const completeDraw = useCallback(() => {
+    applyCounts(recordDraw(getBrowserStorage(), new Date(), countsRef.current));
+  }, [applyCounts]);
 
   return (
     <>
@@ -72,7 +72,7 @@ export default function Landing() {
       <Footer />
 
       {loginOpen && <LoginModal onClose={closeLogin} />}
-      {spin && <SpinModal spin={spin} onClose={closeSpin} />}
+      {intake && <IntakeModal target={intake} onClose={closeIntake} onComplete={completeDraw} />}
     </>
   );
 }

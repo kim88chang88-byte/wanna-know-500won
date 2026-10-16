@@ -59,7 +59,7 @@ describe("이미지 주소", () => {
 
 describe("문구 가이드 (BRIEF.md: 뽑기 언어, 겁주거나 신비롭게 포장하지 않기)", () => {
   const dir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-  const text = ["Sections.tsx", "Modals.tsx", "Landing.tsx", "data.ts"]
+  const text = ["Sections.tsx", "Modals.tsx", "Landing.tsx", "IntakeModal.tsx", "MenuButton.tsx", "data.ts"]
     .map((f) => readFileSync(path.join(dir, f), "utf8").replace(/\/\*[\s\S]*?\*\/|\/\/.*$|\{\/\*[\s\S]*?\*\/\}/gm, ""))
     .join("\n");
 
