@@ -480,18 +480,17 @@ export function Footer() {
           “오늘 이 마음, 맞지? 동전 하나로 뽑아봐.”
         </p>
         <div className="flex items-center gap-3 text-gray-400 mt-2">
-          {/* TODO: 출시 전에 이용약관/환불 안내 페이지를 만들어 연결하세요. */}
-          <a href="#" className="hover:text-brand-600">
+                    <Link href="/terms" className="hover:text-brand-600">
             이용약관
-          </a>
+          </Link>
           <span aria-hidden="true">•</span>
           <Link href="/privacy" className="hover:text-brand-600">
             개인정보처리방침
           </Link>
           <span aria-hidden="true">•</span>
-          <a href="#" className="hover:text-brand-600">
+          <Link href="/refund" className="hover:text-brand-600">
             환불 안내
-          </a>
+          </Link>
         </div>
         <div className="text-[11px] text-gray-400 mt-1">
           © <span suppressHydrationWarning>{new Date().getFullYear()}</span> 꽃거지의 신묘한 사주. All rights reserved.

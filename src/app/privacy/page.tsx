@@ -1,32 +1,17 @@
-import Link from "next/link";
 import type { Metadata } from "next";
+import { ContactList, H2, LegalPage } from "@/components/legal/Legal";
+import { OPERATOR } from "@/lib/siteInfo";
 
 export const metadata: Metadata = {
   title: "개인정보처리방침 | 꽃거지의 신묘한 사주",
   description: "꽃거지의 신묘한 사주가 어떤 개인정보를 왜 받고, 얼마나 보관하는지 안내합니다.",
 };
 
-/*
- * TODO(출시 전): 아래 운영자 정보를 실제 값으로 채워 주세요.
- * 이 문서는 서비스 현재 기능 기준의 초안이며, 법률 검토를 받은 것이 아닙니다.
- * 로그인·결제·AI 풀이·후기 기능이 실제로 붙을 때 해당 항목을 함께 고쳐야 합니다.
- */
-const OPERATOR = "운영자 정보 입력 예정";
-const CONTACT = "문의 이메일 입력 예정";
-const EFFECTIVE_DATE = "2026년 10월 16일";
-
-function H2({ children }: { children: React.ReactNode }) {
-  return <h2 className="font-serifKr font-bold text-lg text-gray-900 mt-8 mb-2">{children}</h2>;
-}
+/* 이 문서는 현재 기능 기준의 초안이며 법률 검토를 받은 것이 아닙니다. 로그인·결제·AI 풀이·후기 기능이 붙을 때 해당 항목을 함께 고쳐야 합니다. */
 
 export default function PrivacyPage() {
   return (
-    <main className="max-w-2xl mx-auto px-4 py-10 text-sm leading-relaxed text-gray-700">
-      <Link href="/" className="text-xs text-brand-600 hover:underline">
-        ← 처음으로
-      </Link>
-      <h1 className="font-serifKr font-black text-2xl text-gray-900 mt-3">개인정보처리방침</h1>
-      <p className="text-xs text-gray-500 mt-1">시행일: {EFFECTIVE_DATE}</p>
+    <LegalPage title="개인정보처리방침">
 
       <p className="mt-4">
         &lsquo;꽃거지의 신묘한 사주&rsquo;(이하 &ldquo;서비스&rdquo;)는 생년월일시로 사주를 계산하고 풀이를 보여주기 위해 꼭
@@ -118,16 +103,15 @@ export default function PrivacyPage() {
       </p>
 
       <H2>7. 개인정보 보호 문의</H2>
-      <ul className="list-disc pl-5 space-y-1">
-        <li>운영자: {OPERATOR}</li>
-        <li>문의: {CONTACT}</li>
-      </ul>
+      <p>운영자: {OPERATOR}</p>
+      <p className="mt-1">문의 이메일:</p>
+      <ContactList />
       <p className="mt-2">
         개인정보 침해 신고나 상담은 개인정보침해신고센터(privacy.kisa.or.kr, 국번없이 118) 등에서도 받을 수 있어요.
       </p>
 
       <H2>8. 방침이 바뀔 때</H2>
       <p>내용이 바뀌면 시행일을 갱신하고 이 페이지에 먼저 알립니다. 이용자에게 중요한 변경은 서비스 화면에서 따로 안내해요.</p>
-    </main>
+    </LegalPage>
   );
 }
