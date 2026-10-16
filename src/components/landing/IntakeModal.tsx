@@ -11,6 +11,7 @@ import {
   type IntakeForm,
   type StepId,
 } from "@/lib/intake";
+import type { PublicReading } from "@/lib/ai/reading";
 import { BRANCHES, STEMS } from "@/lib/saju/constants";
 import type { Pillar, SajuChart } from "@/lib/saju/types";
 import { CloseButton, ModalShell } from "./Modals";
@@ -24,7 +25,7 @@ export interface IntakeTarget {
 interface Props {
   target: IntakeTarget;
   onClose: () => void;
-  /** 명식을 성공적으로 받아왔을 때 한 번 호출돼요. (뽑기 횟수 기록용) */
+  /** 풀이(캡슐)를 성공적으로 받았을 때 한 번 호출돼요. (뽑기 횟수 기록용) */
   onComplete: () => void;
 }
 
@@ -63,6 +64,17 @@ function ChoiceButton({
   );
 }
 
+type ReadingStatus = "ok" | "unavailable" | "failed";
+
+function Stars({ score }: { score: number }) {
+  return (
+    <span role="img" aria-label={`5점 만점에 ${score}점`} className="text-amber-500 tracking-tight">
+      {"★".repeat(score)}
+      <span className="text-gray-300">{"★".repeat(5 - score)}</span>
+    </span>
+  );
+}
+
 function PillarCell({ pillar }: { pillar: Pillar | null }) {
   if (!pillar) {
     return (
@@ -94,6 +106,9 @@ export default function IntakeModal({ target, onClose, onComplete }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [phase, setPhase] = useState<"form" | "loading" | "result">("form");
   const [chart, setChart] = useState<SajuChart | null>(null);
+  const [reading, setReading] = useState<PublicReading | null>(null);
+  const [readingStatus, setReadingStatus] = useState<ReadingStatus>("ok");
+  const [unlockNotice, setUnlockNotice] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
 
   // 창이 닫히면 진행 중인 요청도 멈춰요.
@@ -118,14 +133,23 @@ export default function IntakeModal({ target, onClose, onComplete }: Props) {
       const res = await fetch("/api/reading", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(input),
+        body: JSON.stringify({ ...input, topic: target.fortune }),
         signal: ctrl.signal,
       });
-      const data = (await res.json().catch(() => null)) as { chart?: SajuChart; error?: string } | null;
+      const data = (await res.json().catch(() => null)) as {
+        chart?: SajuChart;
+        reading?: PublicReading | null;
+        readingStatus?: ReadingStatus;
+        error?: string;
+      } | null;
       if (!res.ok || !data?.chart) throw new Error(data?.error ?? "캡슐을 만들지 못했어요. 잠시 뒤에 다시 해볼래요?");
+      const status: ReadingStatus = data.readingStatus ?? "failed";
       setChart(data.chart);
+      setReading(data.reading ?? null);
+      setReadingStatus(status);
       setPhase("result");
-      onComplete();
+      // 풀이를 실제로 받았을 때만 뽑기 횟수로 세요.
+      if (status === "ok" && data.reading) onComplete();
     } catch (err) {
       if (ctrl.signal.aborted) return;
       setError(err instanceof Error ? err.message : "알 수 없는 오류가 생겼어요.");
@@ -185,52 +209,117 @@ export default function IntakeModal({ target, onClose, onComplete }: Props) {
 
       {phase === "result" && chart && (
         <div data-testid="intake-result">
-          <p className="font-serifKr font-black text-lg text-gray-900 text-center">네 사주의 네 기둥을 뽑았어요!</p>
-          <p className="text-xs text-gray-500 text-center mt-1">
-            양력 {chart.solarDate.year}.{chart.solarDate.month}.{chart.solarDate.day}
-          </p>
+          {reading ? (
+            <>
+              <p className="text-center text-[11px] text-gray-500">오늘의 키워드</p>
+              <p className="text-center font-serifKr font-black text-2xl text-brand-600 mt-0.5" data-testid="reading-keyword">
+                {reading.keyword}
+              </p>
 
-          <table className="w-full mt-4 text-center border-collapse">
-            <thead>
-              <tr className="text-xs text-gray-500">
-                <th className="pb-1.5 font-semibold">시</th>
-                <th className="pb-1.5 font-semibold">일</th>
-                <th className="pb-1.5 font-semibold">월</th>
-                <th className="pb-1.5 font-semibold">연</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <PillarCell pillar={chart.hour} />
-                <PillarCell pillar={chart.day} />
-                <PillarCell pillar={chart.month} />
-                <PillarCell pillar={chart.year} />
-              </tr>
-            </tbody>
-          </table>
+              <div className="mt-4 p-4 rounded-2xl bg-brand-50/60 border border-brand-100">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-brand-700">총운</span>
+                  <Stars score={reading.total.score} />
+                </div>
+                <p className="mt-1.5 font-serifKr text-sm text-gray-800 leading-relaxed">{reading.total.summary}</p>
+              </div>
 
-          {chart.uncertainPillars.length > 0 && (
-            <p className="mt-3 text-[11px] text-amber-700">
-              이 날은 절기가 바뀌는 날이라, 태어난 시간을 알아야 연·월 기둥이 정확해져요.
-            </p>
+              <div className="mt-3 flex items-start gap-2.5">
+                <span className="text-2xl" aria-hidden="true">
+                  🌸
+                </span>
+                <div className="flex-1 rounded-2xl rounded-tl-sm bg-white border border-brand-200 px-3.5 py-2.5">
+                  <div className="text-[11px] font-bold text-brand-700 mb-0.5">꽃거지의 한마디</div>
+                  <p className="font-serifKr text-sm text-gray-800 leading-relaxed">{reading.kkotgeoji}</p>
+                </div>
+              </div>
+
+              <ul className="mt-3 space-y-2">
+                {reading.indicators.map((ind) => (
+                  <li key={ind.key} className="rounded-2xl border border-gray-100 bg-white p-3" data-testid={`indicator-${ind.key}`}>
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-bold text-gray-700">{ind.label}</span>
+                      <Stars score={ind.score} />
+                    </div>
+                    {ind.locked ? (
+                      // 내용은 서버에서 보내지 않아요. 아래는 모양만 흉내 낸 가림막이에요.
+                      <p aria-hidden="true" className="mt-1.5 text-xs text-gray-500 blur-sm select-none">
+                        꽃거지가 더 할 말이 있대요 꽃거지가 더 할 말이 있대요
+                      </p>
+                    ) : (
+                      <p className="mt-1.5 text-xs text-gray-700">{ind.comment}</p>
+                    )}
+                  </li>
+                ))}
+              </ul>
+
+              <p className="mt-3 text-center text-[11px] text-gray-500">꽃거지가 더 할 말이 있대요 👀</p>
+              <button
+                type="button"
+                onClick={() => setUnlockNotice(true)}
+                className="mt-1 w-full py-2.5 rounded-full bg-gradient-to-r from-brand-600 to-rose-500 text-white font-serifKr font-bold text-sm shadow-md"
+              >
+                500원으로 전부 듣기
+              </button>
+              {unlockNotice && (
+                <p role="status" className="mt-2 text-center text-[11px] font-bold text-brand-600">
+                  결제는 아직 준비 중이에요. 곧 열릴 예정이에요 🌸
+                </p>
+              )}
+            </>
+          ) : (
+            <div className="p-4 rounded-2xl bg-brand-50/60 border border-brand-100 text-center" data-testid="reading-missing">
+              <p className="font-serifKr text-sm text-gray-800 leading-relaxed">
+                {readingStatus === "unavailable"
+                  ? "꽃거지의 한마디는 아직 준비 중이에요."
+                  : "꽃거지가 잠깐 자리를 비웠어요. 잠시 뒤에 다시 뽑아볼래요?"}
+              </p>
+            </div>
           )}
-          {chart.warnings.map((w) => (
-            <p key={w} className="mt-2 text-[11px] text-amber-700">
-              {w}
-            </p>
-          ))}
 
-          <div className="mt-4 p-4 rounded-2xl bg-brand-50/60 border border-brand-100 text-left">
-            <div className="text-[11px] font-bold text-brand-700 mb-1">🌸 꽃거지의 한마디</div>
-            <p className="font-serifKr text-xs text-gray-700 leading-relaxed">
-              아직 준비 중이에요. 곧 이 자리에 네 캡슐 속 한마디가 담길 거예요.
+          <details className="mt-4 rounded-2xl border border-gray-100 p-3">
+            <summary className="cursor-pointer text-xs font-bold text-gray-600">내 사주 네 기둥 보기</summary>
+            <p className="text-[11px] text-gray-500 text-center mt-2">
+              양력 {chart.solarDate.year}.{chart.solarDate.month}.{chart.solarDate.day}
             </p>
-          </div>
+            <table className="w-full mt-2 text-center border-collapse">
+              <thead>
+                <tr className="text-xs text-gray-500">
+                  <th className="pb-1.5 font-semibold">시</th>
+                  <th className="pb-1.5 font-semibold">일</th>
+                  <th className="pb-1.5 font-semibold">월</th>
+                  <th className="pb-1.5 font-semibold">연</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <PillarCell pillar={chart.hour} />
+                  <PillarCell pillar={chart.day} />
+                  <PillarCell pillar={chart.month} />
+                  <PillarCell pillar={chart.year} />
+                </tr>
+              </tbody>
+            </table>
+            {chart.uncertainPillars.length > 0 && (
+              <p className="mt-3 text-[11px] text-amber-700">
+                이 날은 절기가 바뀌는 날이라, 태어난 시간을 알아야 연·월 기둥이 정확해져요.
+              </p>
+            )}
+            {chart.warnings.map((w) => (
+              <p key={w} className="mt-2 text-[11px] text-amber-700">
+                {w}
+              </p>
+            ))}
+          </details>
+
+          <p className="mt-3 text-center text-[10px] text-gray-400">
+            * 재미와 위로를 위한 풀이예요. 실제 일을 보장하지 않아요.
+          </p>
 
           <button
             type="button"
             onClick={onClose}
-            className="mt-4 w-full py-2.5 rounded-full bg-brand-600 text-white font-serifKr font-bold text-sm shadow-md hover:bg-brand-700 transition-colors"
+            className="mt-3 w-full py-2.5 rounded-full border border-brand-200 text-brand-700 font-serifKr font-bold text-sm hover:bg-brand-50 transition-colors"
           >
             확인했어요 ✧
           </button>

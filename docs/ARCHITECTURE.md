@@ -13,7 +13,7 @@
 2. `POST /api/reading` 호출
 3. (예정) 결제 확인
 4. `calculateSaju` 로 사주 명식 계산
-5. `interpretSaju` 로 명식 기반 풀이 생성 (구현 전에는 명식만 반환)
+5. `interpretSaju` 로 명식 기반 풀이 생성 (Claude API, 자세한 내용은 `docs/AI_READING.md`. 키가 없으면 명식만 반환)
 6. 결과를 화면에 표시
 
 ## 폴더 구조
