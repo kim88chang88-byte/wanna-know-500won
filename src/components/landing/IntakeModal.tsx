@@ -11,10 +11,11 @@ import {
   type IntakeForm,
   type StepId,
 } from "@/lib/intake";
-import type { PublicReading } from "@/lib/ai/reading";
+import { normalizeTopic, TOPIC_LABEL, type PublicReading } from "@/lib/ai/reading";
 import { BRANCHES, STEMS } from "@/lib/saju/constants";
 import type { Pillar, SajuChart } from "@/lib/saju/types";
 import { CloseButton, ModalShell } from "./Modals";
+import ResultCard from "./ResultCard";
 
 export interface IntakeTarget {
   /** 어떤 뽑기에서 열었는지 (예: "연애운") */
@@ -66,13 +67,9 @@ function ChoiceButton({
 
 type ReadingStatus = "ok" | "unavailable" | "failed";
 
-function Stars({ score }: { score: number }) {
-  return (
-    <span role="img" aria-label={`5점 만점에 ${score}점`} className="text-amber-500 tracking-tight">
-      {"★".repeat(score)}
-      <span className="text-gray-300">{"★".repeat(5 - score)}</span>
-    </span>
-  );
+/** "연애운 슬롯" 같은 화면 문구를 "연애운" 처럼 카드에 쓸 이름으로 줄여요. 주제를 못 찾으면 "오늘의 운". */
+function topicLabel(fortune: string): string {
+  return TOPIC_LABEL[normalizeTopic(fortune)];
 }
 
 function PillarCell({ pillar }: { pillar: Pillar | null }) {
@@ -211,47 +208,7 @@ export default function IntakeModal({ target, onClose, onComplete }: Props) {
         <div data-testid="intake-result">
           {reading ? (
             <>
-              <p className="text-center text-[11px] text-gray-500">오늘의 키워드</p>
-              <p className="text-center font-serifKr font-black text-2xl text-brand-600 mt-0.5" data-testid="reading-keyword">
-                {reading.keyword}
-              </p>
-
-              <div className="mt-4 p-4 rounded-2xl bg-brand-50/60 border border-brand-100">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-brand-700">총운</span>
-                  <Stars score={reading.total.score} />
-                </div>
-                <p className="mt-1.5 font-serifKr text-sm text-gray-800 leading-relaxed">{reading.total.summary}</p>
-              </div>
-
-              <div className="mt-3 flex items-start gap-2.5">
-                <span className="text-2xl" aria-hidden="true">
-                  🌸
-                </span>
-                <div className="flex-1 rounded-2xl rounded-tl-sm bg-white border border-brand-200 px-3.5 py-2.5">
-                  <div className="text-[11px] font-bold text-brand-700 mb-0.5">꽃거지의 한마디</div>
-                  <p className="font-serifKr text-sm text-gray-800 leading-relaxed">{reading.kkotgeoji}</p>
-                </div>
-              </div>
-
-              <ul className="mt-3 space-y-2">
-                {reading.indicators.map((ind) => (
-                  <li key={ind.key} className="rounded-2xl border border-gray-100 bg-white p-3" data-testid={`indicator-${ind.key}`}>
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-bold text-gray-700">{ind.label}</span>
-                      <Stars score={ind.score} />
-                    </div>
-                    {ind.locked ? (
-                      // 내용은 서버에서 보내지 않아요. 아래는 모양만 흉내 낸 가림막이에요.
-                      <p aria-hidden="true" className="mt-1.5 text-xs text-gray-500 blur-sm select-none">
-                        꽃거지가 더 할 말이 있대요 꽃거지가 더 할 말이 있대요
-                      </p>
-                    ) : (
-                      <p className="mt-1.5 text-xs text-gray-700">{ind.comment}</p>
-                    )}
-                  </li>
-                ))}
-              </ul>
+              <ResultCard reading={reading} topicLabel={topicLabel(target.fortune)} />
 
               <p className="mt-3 text-center text-[11px] text-gray-500">꽃거지가 더 할 말이 있대요 👀</p>
               <button

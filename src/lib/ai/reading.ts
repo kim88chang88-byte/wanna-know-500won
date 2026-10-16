@@ -70,7 +70,7 @@ export const READING_SCHEMA = {
     love: indicatorSchema("연애운"),
     money: indicatorSchema("금전운"),
     mind: indicatorSchema("마음운"),
-    kkotgeoji: { type: "string", description: `꽃거지의 응원 한마디. 2~3문장, ${MAX.kkotgeoji}자 이내` },
+    kkotgeoji: { type: "string", description: "꽃거지의 응원 한마디. 2~3문장, 120자 안팎으로 짧게 (결과지 카드에 들어가야 해요)" },
   },
   required: ["keyword", "total", "love", "money", "mind", "kkotgeoji"],
   additionalProperties: false,
