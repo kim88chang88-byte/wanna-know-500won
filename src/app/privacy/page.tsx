@@ -42,6 +42,11 @@ export default function PrivacyPage() {
               <td className="p-2 border border-brand-100">시주 계산 (입력하지 않으면 시주는 표시되지 않아요)</td>
             </tr>
             <tr>
+              <td className="p-2 border border-brand-100">선택 (카카오 로그인 시)</td>
+              <td className="p-2 border border-brand-100">카카오 회원번호, 닉네임</td>
+              <td className="p-2 border border-brand-100">로그인 상태 유지, 인사 표시 (이메일·프로필 사진·연락처는 받지 않아요)</td>
+            </tr>
+            <tr>
               <td className="p-2 border border-brand-100">자동 저장(내 기기)</td>
               <td className="p-2 border border-brand-100">오늘/이번 달 뽑기 횟수</td>
               <td className="p-2 border border-brand-100">&ldquo;매일 첫 1회 무료&rdquo; 안내 표시</td>
@@ -50,8 +55,8 @@ export default function PrivacyPage() {
         </table>
       </div>
       <p className="mt-2">
-        이름, 연락처, 주소 같은 식별 정보는 사주 계산에 필요하지 않아 받지 않습니다. 현재 서비스는 로그인과 결제 기능이
-        없으며, 이 기능이 추가될 때 받는 정보(예: 로그인 계정 식별값, 결제 내역)와 목적을 이 방침에 먼저 반영합니다.
+        이름, 연락처, 주소 같은 식별 정보는 사주 계산에 필요하지 않아 받지 않습니다. 로그인은 카카오 간편 로그인만 쓰며 위 표의 항목만
+        받습니다. 결제 기능은 아직 없으며, 추가될 때 받는 정보(예: 결제 내역)와 목적을 이 방침에 먼저 반영합니다.
       </p>
 
       <H2>2. 보관 기간과 파기</H2>
@@ -59,6 +64,11 @@ export default function PrivacyPage() {
         <li>
           입력하신 생년월일시와 성별은 풀이 결과를 만들기 위해 요청 처리 중에만 사용하며, 서비스 서버에 따로 저장하지
           않습니다. (현재 기준)
+        </li>
+        <li>
+          카카오 로그인 정보(회원번호·닉네임)는 서버 데이터베이스에 저장하지 않고, 로그인 상태를 유지하는 쿠키(최대 30일,
+          서명되어 위조할 수 없는 값)에만 담깁니다. 로그아웃하면 쿠키가 지워지고, 브라우저에서 쿠키를 지워도 같습니다.
+          카카오에서 받은 접근 토큰은 저장하지 않습니다.
         </li>
         <li>
           뽑기 횟수는 내 브라우저(localStorage)에만 저장되고 서버로 보내지 않아요. 브라우저의 사이트 데이터를 지우면
@@ -81,6 +91,9 @@ export default function PrivacyPage() {
         <li>이용 목적: 풀이 문장 생성</li>
         <li>전달 시점과 방법: 풀이를 요청할 때, 암호화된 통신(HTTPS)으로 전달</li>
       </ul>
+      <p className="mt-2">
+        카카오 로그인을 이용하면 로그인 인증은 ㈜카카오가 처리하며, 이 서비스는 인증이 끝난 뒤 위 표의 항목만 받아요.
+      </p>
       <p className="mt-2">그 밖에 개인정보를 광고나 마케팅 목적으로 제3자에게 제공하지 않습니다.</p>
 
       <H2>4. 이용자의 권리</H2>

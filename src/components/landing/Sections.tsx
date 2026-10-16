@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { DrawCounts } from "@/lib/drawCounter";
+import type { AuthUser } from "./useAuth";
 import {
   FREE_PRICE_LABEL,
   GOLDEN_MACHINE,
@@ -26,7 +27,7 @@ const BETA_NOTICE_TEXT = (
 
 /* ------------------------------------------------------------------ 헤더 */
 
-export function Header({ onOpenLogin }: { onOpenLogin: () => void }) {
+export function Header({ onOpenLogin, user = null }: { onOpenLogin: () => void; user?: AuthUser | null }) {
   return (
     <>
       <header className="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-brand-100 shadow-[0_2px_15px_rgba(244,63,104,0.05)]">
@@ -58,12 +59,12 @@ export function Header({ onOpenLogin }: { onOpenLogin: () => void }) {
               <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-brand-600 group-hover:scale-105 transition-transform">
                 <span className="material-symbols-outlined text-[20px]">person</span>
               </div>
-              <span className="sr-only sm:hidden">마이페이지</span>
+              <span className="sr-only sm:hidden">{user ? `${user.nickname ? `${user.nickname}님` : "마이페이지"} (로그인됨)` : "마이페이지"}</span>
               <div className="hidden sm:block">
                 <span className="block text-xs font-bold text-gray-800 group-hover:text-brand-600 transition-colors">
-                  마이페이지
+                  {user ? (user.nickname ? `${user.nickname}님` : "마이페이지") : "마이페이지"}
                 </span>
-                <span className="block text-[10px] text-gray-500">로그인 / 회원가입</span>
+                <span className="block text-[10px] text-gray-500">{user ? "로그인됨" : "로그인 / 회원가입"}</span>
               </div>
             </button>
             <MenuButton />

@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { getBrowserStorage, readCounts, recordDraw, type DrawCounts } from "@/lib/drawCounter";
 import IntakeModal, { type IntakeTarget } from "./IntakeModal";
 import { LoginModal } from "./Modals";
+import { useAuth } from "./useAuth";
 import {
   Footer,
   Header,
@@ -19,6 +20,7 @@ const LEVER_ANIMATION_MS = 600;
 const MODAL_DELAY_MS = 350;
 
 export default function Landing() {
+  const { user, result: loginResult, clearResult, logout } = useAuth();
   const [loginOpen, setLoginOpen] = useState(false);
   const [intake, setIntake] = useState<IntakeTarget | null>(null);
   const [spinningKey, setSpinningKey] = useState<string | null>(null);
@@ -49,7 +51,14 @@ export default function Landing() {
   );
 
   const openLogin = useCallback(() => setLoginOpen(true), []);
-  const closeLogin = useCallback(() => setLoginOpen(false), []);
+  const closeLogin = useCallback(() => {
+    setLoginOpen(false);
+    clearResult();
+  }, [clearResult]);
+  // 카카오에서 돌아왔는데 실패·취소였다면 로그인 창을 다시 열어 이유를 알려줘요.
+  useEffect(() => {
+    if (loginResult) setLoginOpen(true);
+  }, [loginResult]);
   const closeIntake = useCallback(() => setIntake(null), []);
   // 생년월일시 입력이 끝나 결과를 받았을 때만 뽑기 횟수를 올려요. (입력창만 열고 닫은 건 세지 않아요)
   const completeDraw = useCallback(() => {
@@ -58,7 +67,7 @@ export default function Landing() {
 
   return (
     <>
-      <Header onOpenLogin={openLogin} />
+      <Header onOpenLogin={openLogin} user={user} />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
         <HeroSection counts={counts} />
@@ -71,7 +80,7 @@ export default function Landing() {
 
       <Footer />
 
-      {loginOpen && <LoginModal onClose={closeLogin} />}
+      {loginOpen && <LoginModal onClose={closeLogin} user={user} result={loginResult} onLogout={logout} />}
       {intake && <IntakeModal target={intake} onClose={closeIntake} onComplete={completeDraw} />}
     </>
   );

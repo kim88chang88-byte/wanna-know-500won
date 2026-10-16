@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
+import { LOGIN_RESULT_MESSAGE, type AuthUser, type LoginResult } from "./useAuth";
 
 interface ShellProps {
   labelId: string;
@@ -62,8 +63,15 @@ export function CloseButton({ onClose }: { onClose: () => void }) {
   );
 }
 
-export function LoginModal({ onClose }: { onClose: () => void }) {
-  const [notice, setNotice] = useState(false);
+interface LoginModalProps {
+  onClose: () => void;
+  user?: AuthUser | null;
+  result?: LoginResult | null;
+  onLogout?: () => void | Promise<void>;
+}
+
+export function LoginModal({ onClose, user = null, result = null, onLogout }: LoginModalProps) {
+  const [naverNotice, setNaverNotice] = useState(false);
 
   return (
     <ModalShell labelId="login-title" panelClass="max-w-sm p-6 sm:p-7 border border-brand-200" onClose={onClose}>
@@ -73,34 +81,63 @@ export function LoginModal({ onClose }: { onClose: () => void }) {
           🌸
         </div>
         <h4 id="login-title" className="font-serifKr font-bold text-lg text-gray-900">
-          꽃거지의 사주방 로그인
+          {user ? "꽃거지의 사주방" : "꽃거지의 사주방 로그인"}
         </h4>
-        <p className="text-xs text-gray-500 mt-1">간편 가입하고 매일 첫 1회 무료 뽑기를 챙기세요!</p>
+        <p className="text-xs text-gray-500 mt-1">
+          {user
+            ? `${user.nickname ? `${user.nickname}님, ` : ""}어서 와요! 로그인되어 있어요.`
+            : "간편 가입하고 매일 첫 1회 무료 뽑기를 챙기세요!"}
+        </p>
       </div>
 
-      <div className="flex flex-col gap-2.5 mb-4">
-        <button
-          onClick={() => setNotice(true)}
-          type="button"
-          className="w-full py-2.5 px-4 rounded-full bg-[#FEE500] text-[#191919] font-bold text-xs flex items-center justify-center gap-2 shadow-sm"
-        >
-          <span>카카오 3초 간편 로그인</span>
-        </button>
-        <button
-          onClick={() => setNotice(true)}
-          type="button"
-          className="w-full py-2.5 px-4 rounded-full bg-[#03C75A] text-white font-bold text-xs flex items-center justify-center gap-2 shadow-sm"
-        >
-          <span>네이버 로그인</span>
-        </button>
-      </div>
+      {user ? (
+        <div className="flex flex-col gap-2.5 mb-4">
+          <button
+            onClick={async () => {
+              await onLogout?.();
+              onClose();
+            }}
+            type="button"
+            className="w-full py-2.5 px-4 rounded-full bg-gray-100 text-gray-700 font-bold text-xs hover:bg-gray-200"
+          >
+            로그아웃
+          </button>
+        </div>
+      ) : (
+        <div className="flex flex-col gap-2.5 mb-4">
+          {/* 카카오 로그인은 서버 주소로 이동해서 진행해요 (카카오 로그인 화면 → 다시 이 서비스로) */}
+          <a
+            href="/api/auth/kakao"
+            className="w-full py-2.5 px-4 rounded-full bg-[#FEE500] text-[#191919] font-bold text-xs flex items-center justify-center gap-2 shadow-sm"
+          >
+            <span>카카오 3초 간편 로그인</span>
+          </a>
+          <button
+            onClick={() => setNaverNotice(true)}
+            type="button"
+            className="w-full py-2.5 px-4 rounded-full bg-[#03C75A] text-white font-bold text-xs flex items-center justify-center gap-2 shadow-sm"
+          >
+            <span>네이버 로그인</span>
+          </button>
+        </div>
+      )}
 
-      {notice && (
+      {result && (
         <p role="status" className="text-center text-xs font-bold text-brand-600 mb-2">
-          로그인 기능은 아직 준비 중이에요. 곧 열릴 예정이에요 🌸
+          {LOGIN_RESULT_MESSAGE[result]}
+        </p>
+      )}
+      {naverNotice && !user && (
+        <p role="status" className="text-center text-xs font-bold text-brand-600 mb-2">
+          네이버 로그인은 아직 준비 중이에요. 곧 열릴 예정이에요 🌸
         </p>
       )}
 
+      {!user && (
+        <p className="text-center text-[10px] text-gray-400 mb-1">
+          로그인하면 카카오 회원번호와 닉네임만 받아요. 자세한 내용은 개인정보처리방침을 확인해 주세요.
+        </p>
+      )}
       <div className="text-center text-[10px] text-gray-400 mt-3">
         * 현재 Beta 테스트 버전으로 별도 결제 없이 무료 체험이 가능합니다.
       </div>
