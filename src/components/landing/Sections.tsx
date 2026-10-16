@@ -47,9 +47,8 @@ export function Header({ onOpenLogin }: { onOpenLogin: () => void }) {
             </div>
           </div>
 
-          {/* 오른쪽 위: 햄버거 메뉴 + 마이페이지 (로그인 모달 열기) */}
+          {/* 오른쪽 위: 마이페이지 (로그인 모달 열기) + 햄버거 메뉴 */}
           <div className="shrink-0 flex items-center gap-2">
-            <MenuButton />
             <button
               onClick={onOpenLogin}
               type="button"
@@ -67,6 +66,7 @@ export function Header({ onOpenLogin }: { onOpenLogin: () => void }) {
                 <span className="block text-[10px] text-gray-500">로그인 / 회원가입</span>
               </div>
             </button>
+            <MenuButton />
           </div>
         </div>
       </header>
