@@ -6,9 +6,12 @@ export const metadata = {
 };
 
 /** 랜딩(/)과 별개로, 만세력 계산 결과를 확인하는 개발용 화면입니다. */
+// 빌드할 때 미리 만들어 두면 이 검사가 빠질 수 있어서, 요청이 올 때마다 검사하도록 해요.
+export const dynamic = "force-dynamic";
+
 export default function SajuPage() {
-  // 배포 환경에서는 개발용 화면을 열지 않아요.
-  if (process.env.NODE_ENV === "production") notFound();
+  // 개발 서버(npm run dev)에서만 열어요. 배포(next start, Vercel)에서는 항상 404예요.
+  if (process.env.NODE_ENV !== "development") notFound();
   return (
     <div className="legacy">
       <main className="legacy-container">

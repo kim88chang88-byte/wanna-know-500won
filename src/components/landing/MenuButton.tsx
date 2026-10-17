@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 
 // 개발용 계산 화면(/saju)은 배포(production)에서는 메뉴에도, 주소로도 열리지 않아요.
-const SHOW_DEV_LINKS = process.env.NODE_ENV !== "production";
+const SHOW_DEV_LINKS = process.env.NODE_ENV === "development";
 
 const MENU_ITEMS: readonly { href: string; label: string }[] = [
   { href: "/", label: "처음으로" },
