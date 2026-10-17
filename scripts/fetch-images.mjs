@@ -1,7 +1,7 @@
 // Stitch 가 호스팅한 랜딩 이미지를 public/images/ 로 내려받아 imageManifest.json 을 로컬 경로로 바꿉니다.
 // - 이미 "/images/..." 로 바뀐 항목은 건너뜁니다. (여러 번 실행해도 안전)
 // - 네트워크가 안 되면 경고만 남기고 정상 종료해서 dev/build 를 막지 않습니다.
-import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { access, mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -28,6 +28,23 @@ let changed = false;
 
 for (const [name, value] of Object.entries(manifest)) {
   if (!/^https?:\/\//.test(value)) continue;
+  // 브라우저에서 직접 저장해 둔 파일(public/images/<이름>.png 등)이 있으면 그걸 쓰도록 목록만 바꿔요.
+  let manual = null;
+  for (const ext of ["png", "jpg", "jpeg", "webp", "avif", "gif"]) {
+    try {
+      await access(path.join(outDir, `${name}.${ext}`));
+      manual = ext;
+      break;
+    } catch {
+      /* 다음 확장자 */
+    }
+  }
+  if (manual) {
+    manifest[name] = `/images/${name}.${manual}`;
+    changed = true;
+    console.log(`직접 저장한 파일 사용: public/images/${name}.${manual}`);
+    continue;
+  }
   try {
     // 흔한 이미지 형식(png/jpeg/webp)으로 달라고 요청해요. 서버가 특수 형식으로 보내는 걸 줄여줘요.
     const res = await fetch(value, {
