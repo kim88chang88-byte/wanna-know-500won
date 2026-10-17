@@ -126,32 +126,6 @@ export function Header({ onOpenLogin, user = null }: { onOpenLogin: () => void; 
 export function HeroSection({ counts }: { counts: DrawCounts }) {
   return (
     <section className="text-center max-w-4xl mx-auto mb-12">
-      {/* 뽑기 횟수 (로그인했다면 서버가, 아니라면 이 기기에서 센 값) */}
-      <div className="inline-flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-2 sm:gap-3 mb-6 p-2 rounded-2xl bg-white/80 backdrop-blur-sm border border-brand-100 shadow-sm">
-        <div className="flex items-center gap-2.5 px-4 py-2 rounded-xl bg-brand-50/90 border border-brand-200/80 text-left">
-          <span className="material-symbols-outlined text-brand-500 text-[22px]">water_drop</span>
-          <div>
-            <div className="text-[11px] text-gray-500 font-medium">오늘 뽑기 횟수</div>
-            <div className="font-bold text-sm text-brand-500" data-testid="count-today">
-              {counts.today}회 참여{" "}
-              {counts.today === 0 && <span className="text-xs font-normal text-sky-600">(무료 1회 잔여 ✦)</span>}
-            </div>
-          </div>
-        </div>
-
-        <div className="w-px h-8 bg-brand-200 hidden sm:block" />
-
-        <div className="flex items-center gap-2.5 px-4 py-2 rounded-xl bg-indigo-50/80 border border-indigo-200 text-left">
-          <span className="material-symbols-outlined text-indigo-600 text-[22px]">auto_awesome</span>
-          <div>
-            <div className="text-[11px] text-gray-500 font-medium">이번달 누적 뽑기 횟수</div>
-            <div className="font-bold text-sm text-indigo-800" data-testid="count-month">
-              {counts.month}회 참여 ✧
-            </div>
-          </div>
-        </div>
-      </div>
-
       <div className="relative inline-block mb-3">
         <h2 className="font-serifKr text-3xl sm:text-5xl font-extrabold tracking-tight text-gray-900 leading-tight">
           퐁당퐁당 수달 &apos;도리&apos;의 신비한 운세자판기 🦦
@@ -165,6 +139,26 @@ export function HeroSection({ counts }: { counts: DrawCounts }) {
         “수달 도사 &apos;도리&apos;가 점쳐주는 오늘의 물빛 운세!
         <br className="hidden sm:inline" /> 달콤한 조개와 달빛 캡슐을 뽑아보세요 🌙✨ 매일 첫 1회는 무료, 그다음부터는 부담 없는 500원의 온기”
       </p>
+
+      {/* 뽑기 횟수: 한 줄짜리 작은 알약 (로그인했다면 서버가, 아니라면 이 기기에서 센 값) */}
+      <div className="mt-4 inline-flex flex-wrap items-center justify-center gap-x-3 gap-y-1 rounded-full bg-white/80 border border-brand-100 px-4 py-1.5 text-xs shadow-sm">
+        <span className="inline-flex items-center gap-1 text-gray-500">
+          <span className="material-symbols-outlined text-brand-500 text-[16px]">water_drop</span>
+          오늘
+          <b className="font-bold text-brand-500" data-testid="count-today">
+            {counts.today}회 참여{" "}
+            {counts.today === 0 && <span className="font-normal text-sky-600">(무료 1회 잔여 ✦)</span>}
+          </b>
+        </span>
+        <span aria-hidden="true" className="h-3 w-px bg-brand-200" />
+        <span className="inline-flex items-center gap-1 text-gray-500">
+          <span className="material-symbols-outlined text-indigo-600 text-[16px]">auto_awesome</span>
+          이번달
+          <b className="font-bold text-indigo-800" data-testid="count-month">
+            {counts.month}회 참여 ✧
+          </b>
+        </span>
+      </div>
     </section>
   );
 }
