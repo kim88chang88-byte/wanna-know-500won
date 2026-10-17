@@ -11,10 +11,12 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@sazuapp/client": "^0.10.1",
     "lunar-typescript": "^1.0.0",
     "next": "^15.5.28",
     "react": "^19.3.1",
-    "react-dom": "^19.3.1"
+    "react-dom": "^19.3.1",
+    "ssaju": "^0.2.0"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
