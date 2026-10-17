@@ -1,9 +1,16 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL;
+const TITLE = "꽃거지의 신묘한 사주";
+const DESCRIPTION = "500원 동전 하나로 뽑아보는 낭만 사주. 매일 첫 1회 무료 뽑기!";
+
 export const metadata: Metadata = {
-  title: "꽃거지의 신묘한 사주",
-  description: "500원 동전 하나로 뽑아보는 낭만 사주. 매일 첫 1회 무료 뽑기!",
+  // 공유할 때 미리보기 주소를 만들 기준 주소 (배포 주소를 NEXT_PUBLIC_SITE_URL 로 넣어요)
+  ...(SITE_URL ? { metadataBase: new URL(SITE_URL) } : {}),
+  title: TITLE,
+  description: DESCRIPTION,
+  openGraph: { title: TITLE, description: DESCRIPTION, type: "website", locale: "ko_KR" },
 };
 
 export const viewport: Viewport = {

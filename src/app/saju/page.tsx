@@ -1,3 +1,4 @@
+import { notFound } from "next/navigation";
 import BirthForm from "@/components/BirthForm";
 
 export const metadata = {
@@ -6,6 +7,8 @@ export const metadata = {
 
 /** 랜딩(/)과 별개로, 만세력 계산 결과를 확인하는 개발용 화면입니다. */
 export default function SajuPage() {
+  // 배포 환경에서는 개발용 화면을 열지 않아요.
+  if (process.env.NODE_ENV === "production") notFound();
   return (
     <div className="legacy">
       <main className="legacy-container">

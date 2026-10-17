@@ -3,13 +3,16 @@
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 
-const MENU_ITEMS = [
+// 개발용 계산 화면(/saju)은 배포(production)에서는 메뉴에도, 주소로도 열리지 않아요.
+const SHOW_DEV_LINKS = process.env.NODE_ENV !== "production";
+
+const MENU_ITEMS: readonly { href: string; label: string }[] = [
   { href: "/", label: "처음으로" },
-  { href: "/saju", label: "사주 계산해보기 (개발용)" },
+  ...(SHOW_DEV_LINKS ? [{ href: "/saju", label: "사주 계산해보기 (개발용)" }] : []),
   { href: "/terms", label: "이용약관" },
   { href: "/privacy", label: "개인정보처리방침" },
   { href: "/refund", label: "환불 안내" },
-] as const;
+];
 
 /** 헤더의 햄버거 메뉴. (패널은 헤더(sticky) 기준으로 오른쪽 끝에 맞춰 열려요.) 바깥을 누르거나 Esc 를 누르면 닫히고, 닫히면 버튼으로 포커스가 돌아와요. */
 export default function MenuButton() {

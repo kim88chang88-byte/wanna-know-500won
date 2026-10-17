@@ -6,6 +6,9 @@ import { calculateSaju } from "@/lib/saju/calculate";
 import { SajuInputError } from "@/lib/saju/errors";
 import type { BirthInput, SajuChart } from "@/lib/saju/types";
 
+// 풀이(AI 호출)는 오래 걸릴 수 있어서 배포 환경(Vercel)의 함수 제한 시간을 늘려 둬요.
+export const maxDuration = 60;
+
 // 풀이는 유료 API 를 쓰기 때문에, 한 주소(IP)에서 1분에 몇 번까지만 받아요. (자세한 한계는 rateLimit.ts 참고)
 const limiter = createRateLimiter(6, 60_000);
 
