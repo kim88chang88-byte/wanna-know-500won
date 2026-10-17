@@ -43,10 +43,10 @@ export default function Landing() {
   }, [applyCounts]);
 
   const handleSpin = useCallback(
-    (key: string, fortune: string, price: string) => {
+    (key: string, fortune: string, price: string, premium?: boolean) => {
       setSpinningKey(key);
       timers.current.push(window.setTimeout(() => setSpinningKey(null), LEVER_ANIMATION_MS));
-      timers.current.push(window.setTimeout(() => setIntake({ fortune, price }), MODAL_DELAY_MS));
+      timers.current.push(window.setTimeout(() => setIntake({ fortune, price, premium: premium === true }), MODAL_DELAY_MS));
     },
     [],
   );

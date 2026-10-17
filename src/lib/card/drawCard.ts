@@ -198,7 +198,7 @@ export function drawResultCard(ctx: CanvasRenderingContext2D, d: CardData): void
   ctx.fillStyle = "#E3F0FF";
   setFont(ctx, 700, 22, SERIF);
   ctx.textBaseline = "middle";
-  ctx.fillText("花", sx, sy + 1);
+  ctx.fillText("水", sx, sy + 1);
   ctx.textBaseline = "alphabetic";
 
   /* ---------- 오늘의 키워드 ---------- */

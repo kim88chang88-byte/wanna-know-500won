@@ -36,3 +36,9 @@ npm run dev
 - `birthMonth` 는 1~12 예요. 시간을 모르면 `birthHour: null`.
 - 에러: `SazuApiError` 의 `isAuthError`(키 문제 → 503) · `isRateLimited`(429) · `isTransient`(502) · 그 외(400).
 - 유료 플랜에서 격국·용신·세운 등 모듈이 늘어나면 `report.ts` 에 변환을 추가하고 `ManseReport.tsx` 에 카드를 더하면 돼요.
+
+## 프리미엄 자판기 결과창 연동
+프리미엄 자판기(2,990원 카드)에서 레버를 돌려 생년월일시를 입력하면, 결과창에 `/api/sazu` 결과(4기둥·오행·신강/신약)가 함께 나와요.
+- 출생 도시는 묻지 않고 `서울`로 보내요. (`IntakeModal.tsx` 의 `DEFAULT_BIRTH_CITY`)
+- SAZU 호출이 실패해도 기본 풀이는 그대로 보이고, 그 자리에 안내 문구가 나와요.
+- 일반 자판기는 SAZU 를 호출하지 않아요. (월 호출 한도 보호)

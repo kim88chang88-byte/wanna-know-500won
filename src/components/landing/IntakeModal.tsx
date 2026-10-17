@@ -16,11 +16,16 @@ import { BRANCHES, STEMS } from "@/lib/saju/constants";
 import type { Pillar, SajuChart } from "@/lib/saju/types";
 import { CloseButton, ModalShell } from "./Modals";
 import ResultCard from "./ResultCard";
+import ManseReport from "@/components/premium/ManseReport";
+import type { ManseReportView, SazuFormInput } from "@/lib/sazu/types";
+import type { BirthInput } from "@/lib/saju/types";
 
 export interface IntakeTarget {
   /** 어떤 뽑기에서 열었는지 (예: "연애운") */
   fortune: string;
   price: string;
+  /** 프리미엄 자판기에서 열었으면 true. SAZU 만세력 리포트를 함께 보여줘요. */
+  premium?: boolean;
 }
 
 interface Props {
@@ -67,6 +72,40 @@ function ChoiceButton({
 
 type ReadingStatus = "ok" | "unavailable" | "failed";
 
+const DEFAULT_BIRTH_CITY = "서울";
+
+/** 입력창에서 받은 값을 SAZU 만세력 API 입력으로 바꿔요. (출생 도시는 묻지 않아 서울로 둬요) */
+function toSazuInput(b: BirthInput): SazuFormInput {
+  return {
+    year: b.year,
+    month: b.month,
+    day: b.day,
+    hour: b.hour ?? null,
+    minute: b.hour == null ? null : (b.minute ?? 0),
+    isFemale: b.gender === "female",
+    isLunar: b.calendar === "lunar",
+    city: DEFAULT_BIRTH_CITY,
+  };
+}
+
+/** 프리미엄 리포트를 받아요. 실패해도 예외 대신 사용자에게 보여 줄 문장을 돌려줘요. */
+async function fetchPremiumReport(input: BirthInput, signal: AbortSignal): Promise<{ report: ManseReportView | null; error: string | null }> {
+  try {
+    const res = await fetch("/api/sazu", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(toSazuInput(input)),
+      signal,
+    });
+    const data = (await res.json().catch(() => null)) as { report?: ManseReportView; error?: string } | null;
+    if (res.ok && data?.report) return { report: data.report, error: null };
+    return { report: null, error: data?.error ?? "프리미엄 리포트를 불러오지 못했어요. 잠시 뒤에 다시 시도해 주세요." };
+  } catch {
+    if (signal.aborted) return { report: null, error: null };
+    return { report: null, error: "프리미엄 리포트를 불러오지 못했어요. 잠시 뒤에 다시 시도해 주세요." };
+  }
+}
+
 /** "연애운 슬롯" 같은 화면 문구를 "연애운" 처럼 카드에 쓸 이름으로 줄여요. 주제를 못 찾으면 "오늘의 운". */
 function topicLabel(fortune: string): string {
   return TOPIC_LABEL[normalizeTopic(fortune)];
@@ -106,6 +145,8 @@ export default function IntakeModal({ target, onClose, onComplete }: Props) {
   const [reading, setReading] = useState<PublicReading | null>(null);
   const [readingStatus, setReadingStatus] = useState<ReadingStatus>("ok");
   const [unlockNotice, setUnlockNotice] = useState(false);
+  const [premiumReport, setPremiumReport] = useState<ManseReportView | null>(null);
+  const [premiumError, setPremiumError] = useState<string | null>(null);
   const abortRef = useRef<AbortController | null>(null);
 
   // 창이 닫히면 진행 중인 요청도 멈춰요.
@@ -127,6 +168,8 @@ export default function IntakeModal({ target, onClose, onComplete }: Props) {
     const ctrl = new AbortController();
     abortRef.current = ctrl;
     try {
+      // 프리미엄이면 SAZU 리포트도 함께 받아요. (실패해도 기본 풀이는 그대로 보여줘요)
+      const premiumPromise = target.premium ? fetchPremiumReport(input, ctrl.signal) : null;
       const res = await fetch("/api/reading", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -142,6 +185,12 @@ export default function IntakeModal({ target, onClose, onComplete }: Props) {
       } | null;
       if (!res.ok || !data?.chart) throw new Error(data?.error ?? "캡슐을 만들지 못했어요. 잠시 뒤에 다시 해볼래요?");
       const status: ReadingStatus = data.readingStatus ?? "failed";
+      if (premiumPromise) {
+        const p = await premiumPromise;
+        if (ctrl.signal.aborted) return;
+        setPremiumReport(p.report);
+        setPremiumError(p.error);
+      }
       setChart(data.chart);
       setReading(data.reading ?? null);
       setReadingStatus(status);
@@ -226,6 +275,7 @@ export default function IntakeModal({ target, onClose, onComplete }: Props) {
               )}
             </>
           ) : (
+            !target.premium && (
             <div className="p-4 rounded-2xl bg-brand-50/60 border border-brand-100 text-center" data-testid="reading-missing">
               <p className="font-serifKr text-sm text-gray-800 leading-relaxed">
                 {readingStatus === "unavailable"
@@ -233,8 +283,22 @@ export default function IntakeModal({ target, onClose, onComplete }: Props) {
                   : "도리가 잠깐 물놀이하러 갔어요. 잠시 뒤에 다시 뽑아볼래요?"}
               </p>
             </div>
+            )
           )}
 
+          {target.premium && (
+            <div data-testid="premium-result" className="mt-4">
+              {premiumReport ? (
+                <ManseReport report={premiumReport} />
+              ) : (
+                <p role="status" data-testid="premium-error" className="p-4 rounded-2xl bg-amber-50 border border-amber-200 text-center text-sm text-amber-800">
+                  {premiumError ?? "프리미엄 리포트를 불러오지 못했어요."}
+                </p>
+              )}
+            </div>
+          )}
+
+          {!(target.premium && premiumReport) && (
           <details className="mt-4 rounded-2xl border border-gray-100 p-3">
             <summary className="cursor-pointer text-xs font-bold text-gray-600">내 사주 네 기둥 보기</summary>
             <p className="text-[11px] text-gray-500 text-center mt-2">
@@ -269,6 +333,7 @@ export default function IntakeModal({ target, onClose, onComplete }: Props) {
               </p>
             ))}
           </details>
+          )}
 
           <p className="mt-3 text-center text-[10px] text-gray-400">
             * 재미와 위로를 위한 풀이예요. 실제 일을 보장하지 않아요.

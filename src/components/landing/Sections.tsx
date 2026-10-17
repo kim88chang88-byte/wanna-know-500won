@@ -7,7 +7,7 @@ import MenuButton from "./MenuButton";
 import { HERO_IMAGE, IMAGES, LOGO_IMAGE } from "./images";
 import SafeImage from "./SafeImage";
 
-export type SpinHandler = (key: string, fortune: string, price: string) => void;
+export type SpinHandler = (key: string, fortune: string, price: string, premium?: boolean) => void;
 
 interface SpinProps {
   onSpin: SpinHandler;
@@ -346,7 +346,7 @@ export function PremiumSection({ onSpin, spinningKey }: SpinProps) {
                 </div>
 
                 <button
-                  onClick={() => onSpin(p.key, p.fortune, "2,990원")}
+                  onClick={() => onSpin(p.key, p.fortune, "2,990원", true)}
                   type="button"
                   aria-label={`${p.title} 레버 돌리기`}
                   className={`w-full py-2.5 px-4 rounded-full text-white font-serifKr font-bold text-sm shadow-sm transition-all flex items-center justify-center gap-1.5 mb-3.5 active:scale-95 ${p.button}`}
