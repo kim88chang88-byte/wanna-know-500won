@@ -26,8 +26,8 @@ export interface IntakeTarget {
 interface Props {
   target: IntakeTarget;
   onClose: () => void;
-  /** 풀이(캡슐)를 성공적으로 받았을 때 한 번 호출돼요. (뽑기 횟수 기록용) */
-  onComplete: () => void;
+  /** 풀이(캡슐)를 성공적으로 받았을 때 한 번 호출돼요. 로그인 회원이면 서버가 센 횟수를 함께 줘요. (뽑기 횟수 기록용) */
+  onComplete: (serverCounts?: { today: number; month: number } | null) => void;
 }
 
 const BUBBLE: Record<StepId, string> = {
@@ -137,6 +137,7 @@ export default function IntakeModal({ target, onClose, onComplete }: Props) {
         chart?: SajuChart;
         reading?: PublicReading | null;
         readingStatus?: ReadingStatus;
+        counts?: { today: number; month: number } | null;
         error?: string;
       } | null;
       if (!res.ok || !data?.chart) throw new Error(data?.error ?? "캡슐을 만들지 못했어요. 잠시 뒤에 다시 해볼래요?");
@@ -146,7 +147,7 @@ export default function IntakeModal({ target, onClose, onComplete }: Props) {
       setReadingStatus(status);
       setPhase("result");
       // 풀이를 실제로 받았을 때만 뽑기 횟수로 세요.
-      if (status === "ok" && data.reading) onComplete();
+      if (status === "ok" && data.reading) onComplete(data.counts ?? null);
     } catch (err) {
       if (ctrl.signal.aborted) return;
       setError(err instanceof Error ? err.message : "알 수 없는 오류가 생겼어요.");

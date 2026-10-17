@@ -6,6 +6,12 @@ export interface AuthUser {
   nickname: string | null;
 }
 
+/** 서버가 센 뽑기 횟수 (로그인 + DB 연결 시) */
+export interface ServerCounts {
+  today: number;
+  month: number;
+}
+
 /** 로그인 후 돌아왔을 때 주소에 붙는 결과 (?login=...) */
 export type LoginResult = "unavailable" | "cancelled" | "error";
 
@@ -22,6 +28,7 @@ export function useAuth() {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [result, setResult] = useState<LoginResult | null>(null);
   const [justLoggedIn, setJustLoggedIn] = useState(false);
+  const [serverCounts, setServerCounts] = useState<ServerCounts | null>(null);
 
   useEffect(() => {
     let alive = true;
@@ -40,8 +47,10 @@ export function useAuth() {
     }
     fetch("/api/auth/me", { cache: "no-store" })
       .then((r) => (r.ok ? r.json() : null))
-      .then((data: { loggedIn?: boolean; nickname?: string | null } | null) => {
-        if (alive && data?.loggedIn) setUser({ nickname: data.nickname ?? null });
+      .then((data: { loggedIn?: boolean; nickname?: string | null; counts?: ServerCounts | null } | null) => {
+        if (!alive || !data?.loggedIn) return;
+        setUser({ nickname: data.nickname ?? null });
+        setServerCounts(data.counts ?? null);
       })
       .catch(() => {
         /* 로그인 상태를 못 읽어도 비로그인으로 동작해요 */
@@ -58,10 +67,24 @@ export function useAuth() {
       /* 무시 */
     }
     setUser(null);
+    setServerCounts(null);
+  }, []);
+
+  /** 회원 탈퇴. 성공하면 true. (서버가 회원 정보와 뽑기 기록을 지워요) */
+  const withdraw = useCallback(async (): Promise<boolean> => {
+    try {
+      const res = await fetch("/api/auth/withdraw", { method: "POST" });
+      if (!res.ok) return false;
+    } catch {
+      return false;
+    }
+    setUser(null);
+    setServerCounts(null);
+    return true;
   }, []);
 
   const clearResult = useCallback(() => setResult(null), []);
   const clearWelcome = useCallback(() => setJustLoggedIn(false), []);
 
-  return { user, result, clearResult, justLoggedIn, clearWelcome, logout };
+  return { user, serverCounts, setServerCounts, result, clearResult, justLoggedIn, clearWelcome, logout, withdraw };
 }

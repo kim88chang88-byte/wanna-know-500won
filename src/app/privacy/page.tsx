@@ -44,11 +44,16 @@ export default function PrivacyPage() {
             <tr>
               <td className="p-2 border border-brand-100">선택 (카카오 로그인 시)</td>
               <td className="p-2 border border-brand-100">카카오 회원번호, 닉네임</td>
-              <td className="p-2 border border-brand-100">로그인 상태 유지, 인사 표시 (이메일·프로필 사진·연락처는 받지 않아요)</td>
+              <td className="p-2 border border-brand-100">로그인 상태 유지, 인사 표시, 회원 식별 (이메일·프로필 사진·연락처는 받지 않아요)</td>
+            </tr>
+            <tr>
+              <td className="p-2 border border-brand-100">자동 생성 (로그인 회원)</td>
+              <td className="p-2 border border-brand-100">뽑기 기록(날짜와 주제), 마지막 로그인 시각</td>
+              <td className="p-2 border border-brand-100">&ldquo;매일 첫 1회 무료&rdquo; 횟수 계산, 이번 달 뽑기 횟수 표시</td>
             </tr>
             <tr>
               <td className="p-2 border border-brand-100">자동 저장(내 기기)</td>
-              <td className="p-2 border border-brand-100">오늘/이번 달 뽑기 횟수</td>
+              <td className="p-2 border border-brand-100">오늘/이번 달 뽑기 횟수 (로그인하지 않았을 때)</td>
               <td className="p-2 border border-brand-100">&ldquo;매일 첫 1회 무료&rdquo; 안내 표시</td>
             </tr>
           </tbody>
@@ -66,13 +71,17 @@ export default function PrivacyPage() {
           않습니다. (현재 기준)
         </li>
         <li>
-          카카오 로그인 정보(회원번호·닉네임)는 서버 데이터베이스에 저장하지 않고, 로그인 상태를 유지하는 쿠키(최대 30일,
-          서명되어 위조할 수 없는 값)에만 담깁니다. 로그아웃하면 쿠키가 지워지고, 브라우저에서 쿠키를 지워도 같습니다.
-          카카오에서 받은 접근 토큰은 저장하지 않습니다.
+          카카오 로그인 회원의 회원번호·닉네임·뽑기 기록(날짜와 주제)·마지막 로그인 시각은 서비스 데이터베이스에 저장하며,
+          <b>회원 탈퇴 시 지체 없이 모두 삭제</b>합니다. 로그인 화면의 &lsquo;회원 탈퇴&rsquo;에서 직접 탈퇴할 수 있어요. 뽑기
+          기록에는 생년월일시·성별·풀이 내용이 들어가지 않습니다.
         </li>
         <li>
-          뽑기 횟수는 내 브라우저(localStorage)에만 저장되고 서버로 보내지 않아요. 브라우저의 사이트 데이터를 지우면
-          사라집니다.
+          로그인 상태는 쿠키(최대 30일, 서명되어 위조할 수 없는 값)로 유지되며, 로그아웃하거나 브라우저에서 쿠키를 지우면
+          사라집니다. 카카오에서 받은 접근 토큰은 저장하지 않습니다.
+        </li>
+        <li>
+          로그인하지 않았을 때의 뽑기 횟수는 내 브라우저(localStorage)에만 저장되고 서버로 보내지 않아요. 브라우저의 사이트
+          데이터를 지우면 사라집니다.
         </li>
         <li>
           나중에 결과 보관함 같은 기능으로 정보를 저장하게 되면, 저장 항목과 기간을 이 방침에 먼저 알리고 동의를 받습니다.
@@ -90,6 +99,13 @@ export default function PrivacyPage() {
         <li>전달 항목: 사주 계산 결과와 성별 (이름·연락처는 전달하지 않아요)</li>
         <li>이용 목적: 풀이 문장 생성</li>
         <li>전달 시점과 방법: 풀이를 요청할 때, 암호화된 통신(HTTPS)으로 전달</li>
+      </ul>
+      <p className="mt-2">회원 정보와 뽑기 기록을 저장하는 데이터베이스는 아래 업체의 서비스를 이용합니다.</p>
+      <ul className="list-disc pl-5 space-y-1 mt-2">
+        <li>맡기는 곳: Supabase, Inc. (미국 법인) — 데이터베이스 호스팅, 데이터는 대한민국(서울) 리전에 저장</li>
+        <li>맡기는 항목: 카카오 회원번호, 닉네임, 뽑기 기록(날짜·주제), 마지막 로그인 시각</li>
+        <li>이용 목적: 회원 식별과 무료 횟수 계산을 위한 저장</li>
+        <li>보관 기간: 회원 탈퇴 시까지 (탈퇴하면 삭제)</li>
       </ul>
       <p className="mt-2">
         카카오 로그인을 이용하면 로그인 인증은 ㈜카카오가 처리하며, 이 서비스는 인증이 끝난 뒤 위 표의 항목만 받아요.

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { loadAuthConfig } from "@/lib/auth/config";
 import { fetchKakaoProfile } from "@/lib/auth/kakao";
+import { createDb, loadDbConfig } from "@/lib/db/supabase";
 import {
   createSessionToken,
   readCookie,
@@ -34,6 +35,15 @@ export async function GET(request: Request) {
 
   try {
     const profile = await fetchKakaoProfile(config.kakao, code);
+    // DB 가 연결되어 있으면 회원을 저장·갱신해요. 실패해도 로그인은 계속돼요.
+    const dbConfig = loadDbConfig(process.env);
+    if (dbConfig) {
+      try {
+        await createDb(dbConfig).upsertUser(profile.id, profile.nickname);
+      } catch (err) {
+        console.error("upsertUser failed:", err instanceof Error ? err.message : "unknown");
+      }
+    }
     const exp = Math.floor(Date.now() / 1000) + SESSION_MAX_AGE_SEC;
     const token = createSessionToken({ sub: profile.id, nick: profile.nickname, exp }, config.secret);
     const res = NextResponse.redirect(new URL("/?login=success", base));

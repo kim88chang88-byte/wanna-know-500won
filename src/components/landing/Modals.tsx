@@ -68,10 +68,15 @@ interface LoginModalProps {
   user?: AuthUser | null;
   result?: LoginResult | null;
   onLogout?: () => void | Promise<void>;
+  /** 회원 탈퇴. 성공하면 true */
+  onWithdraw?: () => Promise<boolean>;
 }
 
-export function LoginModal({ onClose, user = null, result = null, onLogout }: LoginModalProps) {
+export function LoginModal({ onClose, user = null, result = null, onLogout, onWithdraw }: LoginModalProps) {
   const [naverNotice, setNaverNotice] = useState(false);
+  const [confirmWithdraw, setConfirmWithdraw] = useState(false);
+  const [withdrawing, setWithdrawing] = useState(false);
+  const [withdrawError, setWithdrawError] = useState(false);
 
   return (
     <ModalShell labelId="login-title" panelClass="max-w-sm p-6 sm:p-7 border border-brand-200" onClose={onClose}>
@@ -102,6 +107,56 @@ export function LoginModal({ onClose, user = null, result = null, onLogout }: Lo
           >
             로그아웃
           </button>
+          {onWithdraw && !confirmWithdraw && (
+            <button
+              onClick={() => setConfirmWithdraw(true)}
+              type="button"
+              className="text-[11px] text-gray-400 underline underline-offset-2 hover:text-gray-600"
+            >
+              회원 탈퇴
+            </button>
+          )}
+          {onWithdraw && confirmWithdraw && (
+            <div role="group" aria-label="회원 탈퇴 확인" className="rounded-2xl bg-rose-50 border border-rose-200 p-3 text-center">
+              <p className="text-xs font-bold text-gray-800">정말 탈퇴할까요?</p>
+              <p className="text-[11px] text-gray-600 mt-1">
+                저장된 회원 정보(카카오 회원번호·닉네임)와 뽑기 기록이 모두 삭제되고 되돌릴 수 없어요.
+              </p>
+              {withdrawError && (
+                <p role="alert" className="text-[11px] font-bold text-brand-600 mt-1">
+                  탈퇴 처리에 실패했어요. 잠시 뒤에 다시 시도해줘요.
+                </p>
+              )}
+              <div className="flex gap-2 mt-2">
+                <button
+                  type="button"
+                  disabled={withdrawing}
+                  onClick={() => {
+                    setConfirmWithdraw(false);
+                    setWithdrawError(false);
+                  }}
+                  className="flex-1 py-2 rounded-full bg-white border border-gray-200 text-xs font-bold text-gray-700"
+                >
+                  취소
+                </button>
+                <button
+                  type="button"
+                  disabled={withdrawing}
+                  onClick={async () => {
+                    setWithdrawing(true);
+                    setWithdrawError(false);
+                    const ok = await onWithdraw();
+                    setWithdrawing(false);
+                    if (ok) onClose();
+                    else setWithdrawError(true);
+                  }}
+                  className="flex-1 py-2 rounded-full bg-brand-600 text-white text-xs font-bold disabled:opacity-60"
+                >
+                  {withdrawing ? "처리 중…" : "탈퇴하기"}
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       ) : (
         <div className="flex flex-col gap-2.5 mb-4">

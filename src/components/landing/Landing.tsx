@@ -20,7 +20,7 @@ const LEVER_ANIMATION_MS = 600;
 const MODAL_DELAY_MS = 350;
 
 export default function Landing() {
-  const { user, result: loginResult, clearResult, justLoggedIn, clearWelcome, logout } = useAuth();
+  const { user, serverCounts, setServerCounts, result: loginResult, clearResult, justLoggedIn, clearWelcome, logout, withdraw } = useAuth();
   const [loginOpen, setLoginOpen] = useState(false);
   const [intake, setIntake] = useState<IntakeTarget | null>(null);
   const [spinningKey, setSpinningKey] = useState<string | null>(null);
@@ -68,9 +68,24 @@ export default function Landing() {
   }, [loginResult]);
   const closeIntake = useCallback(() => setIntake(null), []);
   // 생년월일시 입력이 끝나 결과를 받았을 때만 뽑기 횟수를 올려요. (입력창만 열고 닫은 건 세지 않아요)
-  const completeDraw = useCallback(() => {
-    applyCounts(recordDraw(getBrowserStorage(), new Date(), countsRef.current));
-  }, [applyCounts]);
+  // 로그인 회원이고 서버가 횟수를 세어 줬다면 그 값을 쓰고, 아니면 이 브라우저에서만 세요.
+  const completeDraw = useCallback(
+    (fromServer?: { today: number; month: number } | null) => {
+      if (fromServer) {
+        setServerCounts(fromServer);
+        applyCounts(fromServer);
+        return;
+      }
+      applyCounts(recordDraw(getBrowserStorage(), new Date(), countsRef.current));
+    },
+    [applyCounts, setServerCounts],
+  );
+
+  // 로그인 직후엔 서버가 센 횟수를, 로그아웃·탈퇴 후엔 이 브라우저의 횟수를 보여줘요.
+  useEffect(() => {
+    if (serverCounts) applyCounts(serverCounts);
+    else if (!user) applyCounts(readCounts(getBrowserStorage(), new Date()));
+  }, [serverCounts, user, applyCounts]);
 
   return (
     <>
@@ -102,7 +117,7 @@ export default function Landing() {
         </div>
       )}
 
-      {loginOpen && <LoginModal onClose={closeLogin} user={user} result={loginResult} onLogout={logout} />}
+      {loginOpen && <LoginModal onClose={closeLogin} user={user} result={loginResult} onLogout={logout} onWithdraw={withdraw} />}
       {intake && <IntakeModal target={intake} onClose={closeIntake} onComplete={completeDraw} />}
     </>
   );

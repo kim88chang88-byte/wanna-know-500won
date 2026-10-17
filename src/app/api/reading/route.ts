@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 import { interpretSaju, ReadingUnavailableError } from "@/lib/ai/interpret";
 import { normalizeTopic, toPublicReading, type PublicReading } from "@/lib/ai/reading";
+import { readCookie, SESSION_COOKIE, verifySessionToken } from "@/lib/auth/session";
+import { FREE_PER_DAY, isDailyLimitEnforced } from "@/lib/db/config";
+import { createDb, loadDbConfig, type DrawCounts } from "@/lib/db/supabase";
 import { createRateLimiter } from "@/lib/rateLimit";
 import { calculateSaju } from "@/lib/saju/calculate";
 import { SajuInputError } from "@/lib/saju/errors";
@@ -39,6 +42,27 @@ export async function POST(request: Request) {
   }
   const { topic: rawTopic, ...input } = body;
 
+  // 로그인한 회원이고 DB 가 연결되어 있으면, 뽑기 횟수를 서버에서 세요. (아니면 브라우저 카운터만 써요)
+  const session = verifySessionToken(readCookie(request.headers.get("cookie"), SESSION_COOKIE), process.env.AUTH_SECRET);
+  const dbConfig = loadDbConfig(process.env);
+  const db = dbConfig ? createDb(dbConfig) : null;
+  const userId = session && db ? session.sub : null;
+  let counts: DrawCounts | null = null;
+  if (userId && db) {
+    try {
+      counts = await db.getCounts(userId);
+    } catch (err) {
+      // DB 가 잠깐 안 되어도 서비스는 계속돼요. (횟수 제한만 건너뛰어요)
+      console.error("getCounts failed:", err instanceof Error ? err.message : "unknown");
+    }
+    if (counts && isDailyLimitEnforced(process.env) && counts.today >= FREE_PER_DAY) {
+      return NextResponse.json(
+        { error: "오늘의 무료 뽑기는 이미 사용했어요. 결제는 아직 준비 중이에요. 내일 다시 만나요 🌸", code: "free_used", counts },
+        { status: 402 },
+      );
+    }
+  }
+
   // TODO: 결제 확인(500원)을 통과한 요청만 전체 풀이를 주도록 연결. 지금은 항상 무료 공개 범위만 내려가요.
 
   let chart: SajuChart;
@@ -67,5 +91,15 @@ export async function POST(request: Request) {
     }
   }
 
-  return NextResponse.json({ chart, reading, readingStatus });
+  // 풀이가 정상으로 나갔을 때만 뽑기 1회로 기록해요. (실패한 요청은 세지 않아요)
+  if (userId && db && readingStatus === "ok" && reading) {
+    try {
+      await db.recordDraw(userId, normalizeTopic(rawTopic));
+      counts = counts ? { today: counts.today + 1, month: counts.month + 1 } : null;
+    } catch (err) {
+      console.error("recordDraw failed:", err instanceof Error ? err.message : "unknown");
+    }
+  }
+
+  return NextResponse.json({ chart, reading, readingStatus, counts });
 }
