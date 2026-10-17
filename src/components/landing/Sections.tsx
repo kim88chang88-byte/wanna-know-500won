@@ -253,22 +253,22 @@ export function MachinesSection({ onSpin, spinningKey }: SpinProps) {
         </span>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto items-stretch">
+      <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6 max-w-7xl mx-auto items-stretch">
         {MACHINES.map((m) => (
           <div
             key={m.key}
             data-testid="machine-card"
-            className={`card-water-glow flex flex-col justify-between rounded-3xl p-6 hover:shadow-xl hover:-translate-y-1.5 transition-all group ${m.card}`}
+            className={`card-water-glow flex flex-col justify-between rounded-3xl p-3 sm:p-6 hover:shadow-xl hover:-translate-y-1.5 transition-all group ${m.card}`}
           >
             <div>
-              <div className="flex items-center justify-between mb-3.5">
-                <span className={`text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1 ${m.badgeClass}`}>
+              <div className="flex flex-wrap items-center justify-between gap-1 mb-2.5 sm:mb-3.5">
+                <span className={`text-[10px] sm:text-xs font-bold px-2 sm:px-3 py-1 rounded-full flex items-center gap-1 ${m.badgeClass}`}>
                   <span aria-hidden="true">{m.emoji}</span> {m.badge}
                 </span>
-                <span className={`text-xs font-bold px-2.5 py-0.5 rounded-full ${m.tagClass}`}>{m.tag}</span>
+                <span className={`text-[10px] sm:text-xs font-bold px-2 sm:px-2.5 py-0.5 rounded-full ${m.tagClass}`}>{m.tag}</span>
               </div>
 
-              <div className={`w-full h-56 rounded-2xl p-2.5 flex items-center justify-center overflow-hidden mb-4 border ${m.imageBox}`}>
+              <div className={`w-full h-32 sm:h-56 rounded-2xl p-2 sm:p-2.5 flex items-center justify-center overflow-hidden mb-3 sm:mb-4 border ${m.imageBox}`}>
                 <SafeImage
                   src={IMAGES[m.image]}
                   alt={`${m.name} 자판기`}
@@ -277,23 +277,23 @@ export function MachinesSection({ onSpin, spinningKey }: SpinProps) {
                 />
               </div>
 
-              <h4 className={`font-serifKr font-bold text-lg text-center mb-1.5 ${m.titleClass}`}>{m.name}</h4>
-              <p className="text-xs text-slate-500 text-center leading-relaxed min-h-[36px]">{m.desc}</p>
+              <h4 className={`font-serifKr font-bold text-sm sm:text-lg text-center mb-1.5 ${m.titleClass}`}>{m.name}</h4>
+              <p className="text-[11px] sm:text-xs text-slate-500 text-center leading-relaxed sm:min-h-[36px]">{m.desc}</p>
             </div>
 
-            <div className={`mt-4 pt-3 border-t flex flex-col gap-2.5 ${m.divider}`}>
+            <div className={`mt-3 sm:mt-4 pt-3 border-t flex flex-col gap-2 sm:gap-2.5 ${m.divider}`}>
               <button
                 onClick={() => onSpin(m.key, m.fortune, FREE_PRICE_LABEL)}
                 type="button"
                 aria-label={`${m.name} 레버 돌리기`}
-                className={`w-full py-2.5 px-4 rounded-full text-white font-serifKr font-bold text-sm shadow-sm transition-all flex items-center justify-center gap-1.5 active:scale-95 ${m.button}`}
+                className={`w-full py-2 sm:py-2.5 px-2 sm:px-4 rounded-full text-white font-serifKr font-bold text-xs sm:text-sm shadow-sm transition-all flex items-center justify-center gap-1 sm:gap-1.5 active:scale-95 ${m.button}`}
               >
                 <span className={`material-symbols-outlined text-[18px] ${spinningKey === m.key ? "lever-rotating" : ""}`}>
                   autorenew
                 </span>
                 <span>{m.leverLabel}</span>
               </button>
-              <div className="text-center text-xs text-slate-500">
+              <div className="text-center text-[11px] sm:text-xs text-slate-500">
                 매일 첫 1회 무료 <span className="text-[11px] text-slate-400">(이후 500원)</span>
               </div>
             </div>
