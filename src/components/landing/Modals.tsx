@@ -120,7 +120,7 @@ export function LoginModal({ onClose, user = null, result = null, onLogout, onWi
             <div role="group" aria-label="회원 탈퇴 확인" className="rounded-2xl bg-rose-50 border border-rose-200 p-3 text-center">
               <p className="text-xs font-bold text-gray-800">정말 탈퇴할까요?</p>
               <p className="text-[11px] text-gray-600 mt-1">
-                저장된 회원 정보(카카오 회원번호·닉네임)와 뽑기 기록이 모두 삭제되고 되돌릴 수 없어요.
+                저장된 회원 정보(회원번호·닉네임)와 뽑기 기록이 모두 삭제되고 되돌릴 수 없어요.
               </p>
               {withdrawError && (
                 <p role="alert" className="text-[11px] font-bold text-brand-600 mt-1">
@@ -167,6 +167,19 @@ export function LoginModal({ onClose, user = null, result = null, onLogout, onWi
           >
             <span>카카오 3초 간편 로그인</span>
           </a>
+          <a
+            href="/api/auth/google"
+            data-testid="google-login"
+            className="w-full py-2.5 px-4 rounded-full bg-white text-[#3c4043] border border-gray-300 font-bold text-xs flex items-center justify-center gap-2 shadow-sm"
+          >
+            <svg width="14" height="14" viewBox="0 0 48 48" aria-hidden="true">
+              <path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.6l6.8-6.8C35.8 2.4 30.3 0 24 0 14.6 0 6.5 5.4 2.6 13.2l7.9 6.1C12.4 13.6 17.7 9.5 24 9.5z"/>
+              <path fill="#4285F4" d="M46.5 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.7c-.6 3-2.3 5.5-4.8 7.2l7.5 5.8c4.4-4.1 7.1-10.1 7.1-17.5z"/>
+              <path fill="#FBBC05" d="M10.5 28.7a14.5 14.5 0 0 1 0-9.4l-7.9-6.1a24 24 0 0 0 0 21.6l7.9-6.1z"/>
+              <path fill="#34A853" d="M24 48c6.5 0 11.9-2.1 15.9-5.8l-7.5-5.8c-2.1 1.4-4.8 2.3-8.4 2.3-6.3 0-11.6-4.1-13.5-9.8l-7.9 6.1C6.5 42.6 14.6 48 24 48z"/>
+            </svg>
+            <span>Google로 로그인</span>
+          </a>
           <button
             onClick={() => setNaverNotice(true)}
             type="button"
@@ -190,7 +203,7 @@ export function LoginModal({ onClose, user = null, result = null, onLogout, onWi
 
       {!user && (
         <p className="text-center text-[10px] text-gray-400 mb-1">
-          로그인하면 카카오 회원번호와 닉네임만 받아요. 자세한 내용은 개인정보처리방침을 확인해 주세요.
+          로그인하면 카카오 회원번호·닉네임 또는 구글 계정 고유번호·이름만 받아요. 자세한 내용은 개인정보처리방침을 확인해 주세요.
         </p>
       )}
       <div className="text-center text-[10px] text-gray-400 mt-3">

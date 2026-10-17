@@ -1,3 +1,4 @@
+import type { GoogleConfig } from "./google";
 import type { KakaoConfig } from "./kakao";
 import { isSecretValid } from "./session";
 
@@ -13,6 +14,19 @@ export function loadAuthConfig(
   const redirectUri = env.KAKAO_REDIRECT_URI || new URL("/api/auth/kakao/callback", requestUrl).toString();
   return {
     kakao: { clientId: env.KAKAO_CLIENT_ID, clientSecret: env.KAKAO_CLIENT_SECRET || undefined, redirectUri },
+    secret: env.AUTH_SECRET,
+  };
+}
+
+/** 구글 로그인 설정. 클라이언트 ID·비밀번호·AUTH_SECRET 이 모두 있을 때만 값을 돌려줘요. */
+export function loadGoogleAuthConfig(
+  env: AuthEnv,
+  requestUrl: string,
+): { google: GoogleConfig; secret: string } | null {
+  if (!env.GOOGLE_CLIENT_ID || !env.GOOGLE_CLIENT_SECRET || !isSecretValid(env.AUTH_SECRET)) return null;
+  const redirectUri = env.GOOGLE_REDIRECT_URI || new URL("/api/auth/google/callback", requestUrl).toString();
+  return {
+    google: { clientId: env.GOOGLE_CLIENT_ID, clientSecret: env.GOOGLE_CLIENT_SECRET, redirectUri },
     secret: env.AUTH_SECRET,
   };
 }
