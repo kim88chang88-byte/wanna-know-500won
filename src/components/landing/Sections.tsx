@@ -27,6 +27,11 @@ const BETA_NOTICE_TEXT = (
 
 /* ------------------------------------------------------------------ 헤더 */
 
+/** 닉네임의 첫 글자. 이모지처럼 글자 하나가 두 칸을 차지하는 문자도 깨지지 않게 Array.from 으로 나눠요. */
+export function firstGlyph(nickname: string | null | undefined): string {
+  return Array.from((nickname ?? "").trim())[0] ?? "🌸";
+}
+
 export function Header({ onOpenLogin, user = null }: { onOpenLogin: () => void; user?: AuthUser | null }) {
   return (
     <>
@@ -68,7 +73,7 @@ export function Header({ onOpenLogin, user = null }: { onOpenLogin: () => void; 
                 }`}
               >
                 {user ? (
-                  <span aria-hidden="true">{(user.nickname ?? "🌸").trim().charAt(0) || "🌸"}</span>
+                  <span aria-hidden="true">{firstGlyph(user.nickname)}</span>
                 ) : (
                   <span className="material-symbols-outlined text-[20px]">person</span>
                 )}

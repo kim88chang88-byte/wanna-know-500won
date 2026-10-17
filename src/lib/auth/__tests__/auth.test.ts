@@ -55,7 +55,7 @@ describe("kakao", () => {
     expect(u.searchParams.get("redirect_uri")).toBe(cfg.redirectUri);
     expect(u.searchParams.get("response_type")).toBe("code");
     expect(u.searchParams.get("state")).toBe("st");
-    expect(u.searchParams.get("scope")).toBe(null);
+    expect(u.searchParams.get("scope")).toBe("profile_nickname");
   });
   it("코드를 프로필로 바꿔요", async () => {
     const calls: { url: string; init?: RequestInit }[] = [];
@@ -82,6 +82,13 @@ describe("kakao", () => {
       msg = (e as Error).message;
     }
     expect(msg).toBe("token HTTP 401");
+  });
+  it("예전 방식(properties) 닉네임도 읽어요", async () => {
+    const f = async (url: string) =>
+      url.includes("token")
+        ? new Response(JSON.stringify({ access_token: "AT" }), { status: 200 })
+        : new Response(JSON.stringify({ id: 8, properties: { nickname: "달" } }), { status: 200 });
+    expect(await fetchKakaoProfile(cfg, "C", f)).toEqual({ id: "8", nickname: "달" });
   });
   it("닉네임이 없어도 괜찮아요", async () => {
     const f = async (url: string) =>

@@ -18,13 +18,17 @@ export class KakaoAuthError extends Error {}
 
 type FetchLike = (input: string, init?: RequestInit) => Promise<Response>;
 
-/** 카카오 로그인 화면 주소. 닉네임만 쓰므로 추가 scope 는 요청하지 않아요. */
+/** 닉네임 동의항목 ID. 아직 동의하지 않은 사용자에게는 로그인 때 동의를 한 번 더 물어요. (콘솔에서 닉네임 동의항목을 켜 둬야 해요) */
+export const NICKNAME_SCOPE = "profile_nickname";
+
+/** 카카오 로그인 화면 주소. 받는 정보는 닉네임뿐이에요. */
 export function buildAuthorizeUrl(config: KakaoConfig, state: string): string {
   const url = new URL(AUTHORIZE_URL);
   url.searchParams.set("client_id", config.clientId);
   url.searchParams.set("redirect_uri", config.redirectUri);
   url.searchParams.set("response_type", "code");
   url.searchParams.set("state", state);
+  url.searchParams.set("scope", NICKNAME_SCOPE);
   return url.toString();
 }
 
@@ -63,9 +67,11 @@ export async function fetchKakaoProfile(
   const me = (await meRes.json()) as {
     id?: unknown;
     kakao_account?: { profile?: { nickname?: unknown } };
+    properties?: { nickname?: unknown };
   };
   if (typeof me.id !== "number" && typeof me.id !== "string") throw new KakaoAuthError("me missing id");
-  const nick = me.kakao_account?.profile?.nickname;
+  // 예전 방식(properties)으로만 내려오는 경우도 있어서 함께 확인해요.
+  const nick = me.kakao_account?.profile?.nickname ?? me.properties?.nickname;
   return {
     id: String(me.id),
     nickname: typeof nick === "string" && nick.trim() ? nick.trim().slice(0, 20) : undefined,
