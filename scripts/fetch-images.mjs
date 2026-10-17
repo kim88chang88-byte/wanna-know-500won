@@ -15,6 +15,8 @@ const kinds = [
   [[0x47, 0x49, 0x46, 0x38], "gif"],
 ];
 function detectExt(buf) {
+  // AVIF: 4~12번째 바이트가 "ftypavif" / "ftypavis"
+  if (buf.subarray(4, 8).toString() === "ftyp" && /^avi[fs]$/.test(buf.subarray(8, 12).toString())) return "avif";
   for (const [sig, ext] of kinds) if (sig.every((b, i) => buf[i] === b)) return ext;
   if (buf.subarray(0, 4).toString() === "RIFF" && buf.subarray(8, 12).toString() === "WEBP") return "webp";
   return null;
@@ -27,11 +29,21 @@ let changed = false;
 for (const [name, value] of Object.entries(manifest)) {
   if (!/^https?:\/\//.test(value)) continue;
   try {
-    const res = await fetch(value);
+    // 흔한 이미지 형식(png/jpeg/webp)으로 달라고 요청해요. 서버가 특수 형식으로 보내는 걸 줄여줘요.
+    const res = await fetch(value, {
+      headers: {
+        Accept: "image/png,image/jpeg,image/webp,image/*;q=0.8",
+        "User-Agent": "Mozilla/5.0 (compatible; wanna-know-500won fetch-images)",
+      },
+    });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const buf = Buffer.from(await res.arrayBuffer());
     const ext = detectExt(buf);
-    if (!ext) throw new Error("이미지 형식을 알 수 없어요");
+    if (!ext) {
+      const type = res.headers.get("content-type") ?? "알 수 없음";
+      const head = buf.subarray(0, 24).toString("hex");
+      throw new Error(`이미지 형식을 알 수 없어요 (content-type: ${type}, 크기: ${buf.length}바이트, 앞부분: ${head})`);
+    }
     await writeFile(path.join(outDir, `${name}.${ext}`), buf);
     manifest[name] = `/images/${name}.${ext}`;
     changed = true;
