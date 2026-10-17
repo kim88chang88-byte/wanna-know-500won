@@ -73,7 +73,6 @@ interface LoginModalProps {
 }
 
 export function LoginModal({ onClose, user = null, result = null, onLogout, onWithdraw }: LoginModalProps) {
-  const [naverNotice, setNaverNotice] = useState(false);
   const [confirmWithdraw, setConfirmWithdraw] = useState(false);
   const [withdrawing, setWithdrawing] = useState(false);
   const [withdrawError, setWithdrawError] = useState(false);
@@ -180,13 +179,13 @@ export function LoginModal({ onClose, user = null, result = null, onLogout, onWi
             </svg>
             <span>Google로 로그인</span>
           </a>
-          <button
-            onClick={() => setNaverNotice(true)}
-            type="button"
+          <a
+            href="/api/auth/naver"
+            data-testid="naver-login"
             className="w-full py-2.5 px-4 rounded-full bg-[#03C75A] text-white font-bold text-xs flex items-center justify-center gap-2 shadow-sm"
           >
             <span>네이버 로그인</span>
-          </button>
+          </a>
         </div>
       )}
 
@@ -195,15 +194,10 @@ export function LoginModal({ onClose, user = null, result = null, onLogout, onWi
           {LOGIN_RESULT_MESSAGE[result]}
         </p>
       )}
-      {naverNotice && !user && (
-        <p role="status" className="text-center text-xs font-bold text-brand-600 mb-2">
-          네이버 로그인은 아직 준비 중이에요. 곧 열릴 예정이에요 🌸
-        </p>
-      )}
 
       {!user && (
         <p className="text-center text-[10px] text-gray-400 mb-1">
-          로그인하면 카카오 회원번호·닉네임 또는 구글 계정 고유번호·이름만 받아요. 자세한 내용은 개인정보처리방침을 확인해 주세요.
+          로그인하면 카카오·구글·네이버 계정의 고유번호와 닉네임(이름)만 받아요. 자세한 내용은 개인정보처리방침을 확인해 주세요.
         </p>
       )}
       <div className="text-center text-[10px] text-gray-400 mt-3">

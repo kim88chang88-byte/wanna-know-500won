@@ -1,5 +1,6 @@
 import type { GoogleConfig } from "./google";
 import type { KakaoConfig } from "./kakao";
+import type { NaverConfig } from "./naver";
 import { isSecretValid } from "./session";
 
 /** 환경변수 모음. (process.env 를 그대로 넘길 수 있게 아무 이름이나 받아요) */
@@ -27,6 +28,19 @@ export function loadGoogleAuthConfig(
   const redirectUri = env.GOOGLE_REDIRECT_URI || new URL("/api/auth/google/callback", requestUrl).toString();
   return {
     google: { clientId: env.GOOGLE_CLIENT_ID, clientSecret: env.GOOGLE_CLIENT_SECRET, redirectUri },
+    secret: env.AUTH_SECRET,
+  };
+}
+
+/** 네이버 로그인 설정. 클라이언트 ID·시크릿·AUTH_SECRET 이 모두 있을 때만 값을 돌려줘요. */
+export function loadNaverAuthConfig(
+  env: AuthEnv,
+  requestUrl: string,
+): { naver: NaverConfig; secret: string } | null {
+  if (!env.NAVER_CLIENT_ID || !env.NAVER_CLIENT_SECRET || !isSecretValid(env.AUTH_SECRET)) return null;
+  const redirectUri = env.NAVER_REDIRECT_URI || new URL("/api/auth/naver/callback", requestUrl).toString();
+  return {
+    naver: { clientId: env.NAVER_CLIENT_ID, clientSecret: env.NAVER_CLIENT_SECRET, redirectUri },
     secret: env.AUTH_SECRET,
   };
 }
