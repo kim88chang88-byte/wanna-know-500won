@@ -84,4 +84,9 @@ describe("문구 가이드 (BRIEF.md: 뽑기 언어, 겁주거나 신비롭게 �
   it('무료 안내는 항상 "매일 첫 1회 무료"로 쓴다', () => {
     expect(text).not.toMatch(/(?<!매일 )첫 ?1회 ?무료/);
   });
+
+  it("금액이 그려진 그림: 일반 자판기는 500원, 프리미엄은 2,990원 그림만 쓴다", () => {
+    for (const m of MACHINES) expect(IMAGES[m.image]).toBe("/images/machine.jpg");
+    for (const c of PREMIUM_CARDS) expect(IMAGES[c.image]).toBe("/images/premiumMachine.jpg");
+  });
 });
