@@ -1,11 +1,15 @@
 # 프리미엄 사주 리포트 (ssaju)
 
-프리미엄 자판기(2,990원 카드)에서 생년월일시를 입력하면 결과창에 사주 리포트가 함께 나와요. `/premium` 화면에서 따로 볼 수도 있어요.
+자판기에서 생년월일시를 입력하면 결과창에 사주 리포트가 함께 나와요. `/premium` 화면에서 따로 볼 수도 있어요.
+
+| 구분 | 레벨 | 보여주는 것 |
+|------|------|------------|
+| 일반 자판기 6종 | `basic` | 원국 4기둥(십성) · 오행 · 신강/신약(점수) |
+| 프리미엄 카드 3종, `/premium` | `full` | 위 + 격국 · 용신 · 길흉신 · 구조 설명 · 올해 세운 · 대운 10칸 |
+
+`basic` 일 때 격국·용신·대운 등은 **서버에서 비워서** 내려보내요. (화면에서 숨기기만 하는 게 아니에요) 레벨은 요청의 `level` 로 정하고, 지금은 결제가 없어 클라이언트 값을 그대로 따르니, 결제를 붙일 때 서버에서 권한을 확인하세요.
 
 계산은 오픈소스 라이브러리 [golbin/ssaju](https://github.com/golbin/ssaju) (MIT, 의존성 0개)로 **서버 안에서 직접** 해요. API 키도, 외부 호출도, 월 호출 한도도 없어요.
-
-## 보여주는 것
-사주 원국 4기둥(십성 포함) · 오행 분포 · 신강/신약(+점수) · 격국 · 용신 · 길신/흉신 · 올해 세운 · 대운 10칸(현재 대운 강조)
 
 ## 파일 구조
 | 파일 | 역할 |
@@ -16,7 +20,7 @@
 | `src/components/premium/ManseReport.tsx` | 리포트 화면 |
 | `src/components/premium/PremiumReportApp.tsx` | `/premium` 입력 폼 |
 | `src/app/premium/page.tsx` | `/premium` 화면 |
-| `src/components/landing/IntakeModal.tsx` | 프리미엄 카드에서 열면 `/api/premium` 도 함께 호출 |
+| `src/components/landing/IntakeModal.tsx` | 모든 자판기에서 `/api/premium` 을 함께 호출 (프리미엄=full, 일반=basic) |
 
 ## 설치
 ```bash

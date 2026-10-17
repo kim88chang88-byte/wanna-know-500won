@@ -1,7 +1,7 @@
 import { calculateSaju } from "ssaju";
 import { STEMS } from "@/lib/saju/constants";
 import type { BirthInput } from "@/lib/saju/types";
-import type { DaeunView, ElementKind, ElementView, PillarView, PremiumReportView, SeyunView } from "./types";
+import type { DaeunView, ElementKind, ElementView, PillarView, PremiumReportView, ReportLevel, SeyunView } from "./types";
 
 const PILLARS: { key: PillarView["key"]; label: string }[] = [
   { key: "year", label: "연주" },
@@ -30,7 +30,7 @@ function isRecord(v: unknown): v is Record<string, unknown> {
   return typeof v === "object" && v !== null;
 }
 
-export type ValidationResult = { ok: true; value: BirthInput } | { ok: false; error: string };
+export type ValidationResult = { ok: true; value: BirthInput; level: ReportLevel } | { ok: false; error: string };
 
 /** 서버 입력 검사. /api/reading 과 같은 BirthInput 모양을 받아요. */
 export function validatePremiumInput(raw: unknown): ValidationResult {
@@ -54,18 +54,24 @@ export function validatePremiumInput(raw: unknown): ValidationResult {
   }
   if (raw.calendar !== "solar" && raw.calendar !== "lunar") return { ok: false, error: "양력/음력을 선택해 주세요." };
   if (raw.gender !== "male" && raw.gender !== "female") return { ok: false, error: "성별을 선택해 주세요." };
+  // level 을 안 보내면 기본(basic). 알 수 없는 값도 basic 으로 처리해요.
+  const level: ReportLevel = raw.level === "full" ? "full" : "basic";
   return {
     ok: true,
+    level,
     value: { year, month, day, hour, minute, calendar: raw.calendar, isLeapMonth: raw.isLeapMonth === true, gender: raw.gender },
   };
 }
 
 /**
- * 생년월일시로 프리미엄 리포트(원국·오행·신강신약·격국·용신·대운·세운)를 만들어요.
+ * 생년월일시로 사주 리포트를 만들어요.
+ * - level "basic": 원국·오행·신강신약 (일반 자판기)
+ * - level "full": 위 + 격국·용신·길흉신·대운·세운·구조 설명 (프리미엄)
+ * basic 일 때 나머지 값은 서버에서 비워서 내려보내요. (화면에서 숨기기만 하는 게 아니에요)
  * ssaju 는 순수 계산 라이브러리라 API 키도, 외부 호출도 없어요.
  * 잘못된 날짜(없는 음력 윤달 등)면 ssaju 가 던진 Error 를 그대로 던져요.
  */
-export function buildPremiumReport(input: BirthInput, now: Date = new Date()): PremiumReportView {
+export function buildPremiumReport(input: BirthInput, now: Date = new Date(), level: ReportLevel = "full"): PremiumReportView {
   const hourUnknown = input.hour === null || input.hour === undefined;
   const r = calculateSaju({
     year: input.year,
@@ -118,17 +124,19 @@ export function buildPremiumReport(input: BirthInput, now: Date = new Date()): P
   const sy = r.seyun.find((s) => s.year === r.currentYear);
   const seyun: SeyunView | null = sy ? { year: sy.year, ganzhi: sy.ganzhi, tenGodStem: sy.tenGodStem, tenGodBranch: sy.tenGodBranch } : null;
 
+  const full = level === "full";
   return {
+    level,
     pillars,
     elements,
     strength: { grade: GRADE[r.advanced.dayStrength.strength] ?? r.advanced.dayStrength.strength, score: r.advanced.dayStrength.score },
-    geukguk: r.advanced.geukguk,
-    yongsin: r.advanced.yongsin.map(withReading),
-    gilsin: r.advanced.sinsal.gilsin,
-    hyungsin: r.advanced.sinsal.hyungsin,
-    daeun,
-    seyun,
-    summary: r.advanced.interpretation,
+    geukguk: full ? r.advanced.geukguk : "",
+    yongsin: full ? r.advanced.yongsin.map(withReading) : [],
+    gilsin: full ? r.advanced.sinsal.gilsin : [],
+    hyungsin: full ? r.advanced.sinsal.hyungsin : [],
+    daeun: full ? daeun : null,
+    seyun: full ? seyun : null,
+    summary: full ? r.advanced.interpretation : "",
     hourUnknown,
   };
 }

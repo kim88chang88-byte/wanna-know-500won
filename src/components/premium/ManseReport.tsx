@@ -74,6 +74,7 @@ export default function ManseReport({ report }: { report: PremiumReportView }) {
             <span className="rounded-full bg-brand-500 text-white font-bold text-sm px-4 py-1.5">{report.strength.grade}</span>
             <span className="text-xs text-slate-500">강도 점수 {report.strength.score}</span>
           </div>
+          {report.level === "full" && (
           <dl className="mt-4 grid grid-cols-[4.5rem_1fr] gap-y-2 text-sm">
             <dt className="font-bold text-brand-600">격국</dt>
             <dd data-testid="geukguk" className="text-slate-700">
@@ -96,10 +97,16 @@ export default function ManseReport({ report }: { report: PremiumReportView }) {
               </>
             )}
           </dl>
+          )}
           {report.summary && <p className="mt-4 text-sm leading-relaxed text-slate-700 whitespace-pre-line">{report.summary}</p>}
+          {report.level === "basic" && (
+            <p data-testid="basic-upsell" className="mt-4 text-[11px] text-slate-500">
+              격국·용신·대운 흐름은 프리미엄 리포트에서 볼 수 있어요.
+            </p>
+          )}
           {report.hourUnknown && (
             <p data-testid="hour-unknown-note" className="mt-3 text-[11px] leading-relaxed text-amber-700">
-              태어난 시간을 몰라 정오(12시)를 기준으로 계산했어요. 신강·신약, 격국, 용신은 태어난 시간에 따라 달라질 수 있어요.
+              태어난 시간을 몰라 정오(12시)를 기준으로 계산했어요. 신강·신약{report.level === "full" ? ", 격국, 용신" : ""}은 태어난 시간에 따라 달라질 수 있어요.
             </p>
           )}
         </div>

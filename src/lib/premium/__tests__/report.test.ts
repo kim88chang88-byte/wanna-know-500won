@@ -25,6 +25,19 @@ describe("buildPremiumReport", () => {
     expect(r.seyun?.year).toBe(2026);
     expect(r.seyun?.ganzhi).toBe("丙午");
   });
+  it("basic 이면 원국·오행·신강신약만 주고, 격국·용신·대운·세운·설명은 비운다", () => {
+    const r = buildPremiumReport(base, NOW, "basic");
+    expect(r.level).toBe("basic");
+    expect(r.pillars.map((p) => p.full)).toEqual(["庚午", "癸未", "己卯", "戊辰"]);
+    expect(r.strength.grade.length).toBeGreaterThan(0);
+    expect(r.geukguk).toBe("");
+    expect(r.yongsin).toEqual([]);
+    expect(r.gilsin).toEqual([]);
+    expect(r.daeun).toBeNull();
+    expect(r.seyun).toBeNull();
+    expect(r.summary).toBe("");
+    expect(buildPremiumReport(base, NOW).level).toBe("full");
+  });
   it("시간을 모르면 시주를 비우고, 오행은 보이는 세 기둥(6글자)만 센다", () => {
     const r = buildPremiumReport({ ...base, hour: null, minute: null }, NOW);
     expect(r.hourUnknown).toBe(true);
@@ -44,6 +57,13 @@ describe("buildPremiumReport", () => {
 describe("validatePremiumInput", () => {
   it("정상 입력", () => {
     expect(validatePremiumInput(base).ok).toBe(true);
+  });
+  it("level 은 full 일 때만 full, 나머지는 basic", () => {
+    const lv = (v: unknown) => { const r = validatePremiumInput({ ...base, level: v }); return r.ok ? r.level : null; };
+    expect(lv("full")).toBe("full");
+    expect(lv("basic")).toBe("basic");
+    expect(lv(undefined)).toBe("basic");
+    expect(lv("admin")).toBe("basic");
   });
   it("시간 미상(null)도 허용", () => {
     const r = validatePremiumInput({ ...base, hour: null, minute: null });

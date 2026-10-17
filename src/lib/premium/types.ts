@@ -37,8 +37,12 @@ export interface SeyunView {
   tenGodBranch: string;
 }
 
-/** 프리미엄 결과창에 그릴 리포트. ssaju 계산 결과에서 필요한 것만 추렸어요. */
+/** basic: 일반 자판기(원국·오행·신강신약) / full: 프리미엄(격국·용신·대운·세운 포함) */
+export type ReportLevel = "basic" | "full";
+
+/** 결과창에 그릴 리포트. ssaju 계산 결과에서 필요한 것만 추렸어요. */
 export interface PremiumReportView {
+  level: ReportLevel;
   pillars: PillarView[];
   elements: ElementView[];
   strength: StrengthView;

@@ -73,20 +73,20 @@ function ChoiceButton({
 type ReadingStatus = "ok" | "unavailable" | "failed";
 
 /** 프리미엄 리포트를 받아요. 실패해도 예외 대신 사용자에게 보여 줄 문장을 돌려줘요. */
-async function fetchPremiumReport(input: BirthInput, signal: AbortSignal): Promise<{ report: PremiumReportView | null; error: string | null }> {
+async function fetchPremiumReport(input: BirthInput, level: "basic" | "full", signal: AbortSignal): Promise<{ report: PremiumReportView | null; error: string | null }> {
   try {
     const res = await fetch("/api/premium", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(input),
+      body: JSON.stringify({ ...input, level }),
       signal,
     });
     const data = (await res.json().catch(() => null)) as { report?: PremiumReportView; error?: string } | null;
     if (res.ok && data?.report) return { report: data.report, error: null };
-    return { report: null, error: data?.error ?? "프리미엄 리포트를 불러오지 못했어요. 잠시 뒤에 다시 시도해 주세요." };
+    return { report: null, error: data?.error ?? "사주 리포트를 불러오지 못했어요. 잠시 뒤에 다시 시도해 주세요." };
   } catch {
     if (signal.aborted) return { report: null, error: null };
-    return { report: null, error: "프리미엄 리포트를 불러오지 못했어요. 잠시 뒤에 다시 시도해 주세요." };
+    return { report: null, error: "사주 리포트를 불러오지 못했어요. 잠시 뒤에 다시 시도해 주세요." };
   }
 }
 
@@ -152,8 +152,8 @@ export default function IntakeModal({ target, onClose, onComplete }: Props) {
     const ctrl = new AbortController();
     abortRef.current = ctrl;
     try {
-      // 프리미엄이면 사주 리포트도 함께 받아요. (실패해도 기본 풀이는 그대로 보여줘요)
-      const premiumPromise = target.premium ? fetchPremiumReport(input, ctrl.signal) : null;
+      // 사주 리포트도 함께 받아요. 프리미엄은 전체, 일반 자판기는 기본(원국·오행·신강신약). 실패해도 기본 풀이는 그대로 보여줘요.
+      const premiumPromise = fetchPremiumReport(input, target.premium ? "full" : "basic", ctrl.signal);
       const res = await fetch("/api/reading", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -169,7 +169,7 @@ export default function IntakeModal({ target, onClose, onComplete }: Props) {
       } | null;
       if (!res.ok || !data?.chart) throw new Error(data?.error ?? "캡슐을 만들지 못했어요. 잠시 뒤에 다시 해볼래요?");
       const status: ReadingStatus = data.readingStatus ?? "failed";
-      if (premiumPromise) {
+      {
         const p = await premiumPromise;
         if (ctrl.signal.aborted) return;
         setPremiumReport(p.report);
@@ -259,7 +259,7 @@ export default function IntakeModal({ target, onClose, onComplete }: Props) {
               )}
             </>
           ) : (
-            !target.premium && (
+            !premiumReport && (
             <div className="p-4 rounded-2xl bg-brand-50/60 border border-brand-100 text-center" data-testid="reading-missing">
               <p className="font-serifKr text-sm text-gray-800 leading-relaxed">
                 {readingStatus === "unavailable"
@@ -270,19 +270,19 @@ export default function IntakeModal({ target, onClose, onComplete }: Props) {
             )
           )}
 
-          {target.premium && (
+          {(premiumReport || premiumError) && (
             <div data-testid="premium-result" className="mt-4">
               {premiumReport ? (
                 <ManseReport report={premiumReport} />
               ) : (
                 <p role="status" data-testid="premium-error" className="p-4 rounded-2xl bg-amber-50 border border-amber-200 text-center text-sm text-amber-800">
-                  {premiumError ?? "프리미엄 리포트를 불러오지 못했어요."}
+                  {premiumError ?? "사주 리포트를 불러오지 못했어요."}
                 </p>
               )}
             </div>
           )}
 
-          {!(target.premium && premiumReport) && (
+          {!premiumReport && (
           <details className="mt-4 rounded-2xl border border-gray-100 p-3">
             <summary className="cursor-pointer text-xs font-bold text-gray-600">내 사주 네 기둥 보기</summary>
             <p className="text-[11px] text-gray-500 text-center mt-2">
