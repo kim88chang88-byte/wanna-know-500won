@@ -34,7 +34,7 @@ export function Header({ onOpenLogin, user = null }: { onOpenLogin: () => void; 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex items-center justify-between gap-3">
           {/* 왼쪽 위: 로고 + 베타 안내 (좁은 화면에서는 아래 띠로 따로 보여줘요) */}
           <div className="flex flex-col items-start gap-1 min-w-0">
-            <div className="flex items-center gap-2.5">
+            <Link href="/" aria-label={`${SERVICE_NAME} 홈으로`} data-testid="home-link" className="flex items-center gap-2.5">
               <div className="relative w-10 h-10 sm:w-11 sm:h-11 rounded-full overflow-hidden border-2 border-brand-500/40 shadow-sm shrink-0 bg-sky-50 flex items-center justify-center">
                 <SafeImage
                   src={LOGO_IMAGE}
@@ -51,7 +51,7 @@ export function Header({ onOpenLogin, user = null }: { onOpenLogin: () => void; 
                   ✨ 퐁당
                 </span>
               </h1>
-            </div>
+            </Link>
             <div className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-sky-50 border border-sky-200 text-brand-500 text-[11px] font-medium">
               <span className="w-1.5 h-1.5 rounded-full bg-sky-500 animate-ping" aria-hidden="true" />
               <span>{BETA_NOTICE_TEXT}</span>
