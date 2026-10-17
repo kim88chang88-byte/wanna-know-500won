@@ -80,4 +80,74 @@ describe("프리미엄 10페이지 리포트", () => {
     expect(a.book[6].title).not.toBe(b.book[6].title);
     expect(JSON.stringify(a.book)).toBe(JSON.stringify(buildPremiumReport(base, NOW, "full", RAW.love).book));
   });
+
+  describe("잠금(블러) 처리", () => {
+    const open = buildPremiumReport(base, NOW, "full", RAW.love, false);
+    const locked = buildPremiumReport(base, NOW, "full", RAW.love, true);
+    const secs = locked.book.flatMap((p) => p.sections);
+    const lockedSecs = secs.filter((x) => x.locked);
+
+    it("잠금을 끄면 locked=false, 모든 풀이가 열려 있고 용신·요약도 내려온다", () => {
+      expect(open.locked).toBe(false);
+      expect(open.book.flatMap((p) => p.sections).some((x) => x.locked)).toBe(false);
+      expect(open.yongsin.length).toBeGreaterThan(0);
+      expect(open.summary.length).toBeGreaterThan(0);
+    });
+
+    it("잠그면 일부(25~55%)만 잠기고, 모든 페이지에 열린 풀이가 남아 있다", () => {
+      const ratio = lockedSecs.length / secs.length;
+      expect(ratio).toBeGreaterThan(0.25);
+      expect(ratio).toBeLessThan(0.5);
+      for (const p of locked.book) expect(p.sections.some((x) => !x.locked)).toBe(true);
+      expect(locked.locked).toBe(true);
+    });
+
+    it("잠긴 풀이는 서버에서 같은 길이의 의미 없는 글자로 바뀌어 진짜 문장이 없다", () => {
+      const original = open.book.flatMap((p) => p.sections);
+      const lockedJson = JSON.stringify(locked);
+      locked.book.forEach((p, pi) =>
+        p.sections.forEach((sec, si) => {
+          if (!sec.locked) return;
+          const real = open.book[pi].sections[si].body;
+          expect(sec.body.length).toBe(real.length);
+          expect(sec.body).not.toBe(real);
+          // 같은 문장이 다른 열린 풀이에 일부러 들어 있는 경우(공통 문장)는 제외하고 확인해요.
+          const sharedWithFree = original.some((o, k) => !secs[k].locked && o.body.includes(real));
+          if (!sharedWithFree) expect(lockedJson.includes(real)).toBe(false);
+        }),
+      );
+      expect(original.length).toBe(secs.length);
+    });
+
+    it("잠금 상태에서는 용신·길신·요약·올해 흐름(timing)도 비어서 내려온다", () => {
+      expect(locked.yongsin).toEqual([]);
+      expect(locked.gilsin).toEqual([]);
+      expect(locked.hyungsin).toEqual([]);
+      expect(locked.summary).toBe("");
+      expect(locked.topic.timing).toEqual([]);
+      const j = JSON.stringify(locked);
+      for (const y of open.yongsin) expect(j.includes(y)).toBe(false);
+    });
+
+    it("잠긴 표 칸은 가려지고, 현재 대운 이전 칸은 그대로 보인다", () => {
+      const rows = locked.book[7].tables[0].rows;
+      const cur = rows.findIndex((x) => x.highlight);
+      rows.forEach((r, i) => expect(Boolean(r.locked)).toBe(i > cur));
+      expect(locked.book[8].tables[1].rows.filter((r) => r.locked).length).toBe(10);
+    });
+
+    it("시간 모름·여러 주제에서도 잠금이 오류 없이 동작한다", () => {
+      for (const t of Object.keys(RAW) as TopicKey[]) {
+        const r = buildPremiumReport({ ...base, hour: null, minute: null, gender: "male" }, NOW, "full", RAW[t], true);
+        expect(r.book.length).toBe(10);
+        expect(JSON.stringify(r.book).includes("undefined")).toBe(false);
+      }
+    });
+
+    it("basic 은 잠금 값이 있어도 본문 자체가 없다", () => {
+      const r = buildPremiumReport(base, NOW, "basic", RAW.love, true);
+      expect(r.book).toEqual([]);
+      expect(r.locked).toBe(false);
+    });
+  });
 });

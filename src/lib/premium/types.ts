@@ -61,11 +61,15 @@ export interface TopicInsight {
 export interface BookSection {
   heading: string;
   body: string;
+  /** 잠긴 풀이: body 는 서버에서 같은 길이의 의미 없는 글자로 바꿔 내려보내요. (화면에서만 가리는 게 아니에요) */
+  locked?: boolean;
 }
 export interface BookRow {
   label: string;
   value: string;
   note?: string;
+  /** 잠긴 칸: value/note 는 서버에서 가려서 내려보내요 */
+  locked?: boolean;
   /** 표에서 눈에 띄게 (현재 대운, 포인트 달 등) */
   highlight?: boolean;
 }
@@ -108,6 +112,8 @@ export interface PremiumReportView {
   hourUnknown: boolean;
   /** 자판기(주제)별 맞춤 분석 */
   topic: TopicInsight;
+  /** true 면 일부 풀이가 잠겨 있어요(서버에서 가려서 내려보냄). 프리미엄 결제 전 미리 보기용 */
+  locked: boolean;
   /** 프리미엄(full)만: 10페이지 상세 리포트. basic 은 빈 배열 */
   book: BookPage[];
 }

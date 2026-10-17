@@ -2,6 +2,7 @@ import { calculateSaju } from "ssaju";
 import { STEMS } from "@/lib/saju/constants";
 import type { BirthInput } from "@/lib/saju/types";
 import { buildBook } from "./book";
+import { applyLocks } from "./book/lock";
 import { buildTopicInsight, resolveTopic } from "./topic";
 import type { DaeunView, ElementKind, ElementView, PillarView, PremiumReportView, ReportLevel, SeyunView } from "./types";
 
@@ -74,7 +75,7 @@ export function validatePremiumInput(raw: unknown): ValidationResult {
  * ssaju 는 순수 계산 라이브러리라 API 키도, 외부 호출도 없어요.
  * 잘못된 날짜(없는 음력 윤달 등)면 ssaju 가 던진 Error 를 그대로 던져요.
  */
-export function buildPremiumReport(input: BirthInput, now: Date = new Date(), level: ReportLevel = "full", topicRaw: unknown = ""): PremiumReportView {
+export function buildPremiumReport(input: BirthInput, now: Date = new Date(), level: ReportLevel = "full", topicRaw: unknown = "", lock = false): PremiumReportView {
   const hourUnknown = input.hour === null || input.hour === undefined;
   const r = calculateSaju({
     year: input.year,
@@ -130,6 +131,7 @@ export function buildPremiumReport(input: BirthInput, now: Date = new Date(), le
   const full = level === "full";
   const topicKey = resolveTopic(topicRaw);
   const topic = buildTopicInsight(topicKey, r, { elements, hourUnknown, level });
+  const locking = full && lock;
   const gradeLabel = GRADE[r.advanced.dayStrength.strength] ?? r.advanced.dayStrength.strength;
   return {
     level,
@@ -137,14 +139,16 @@ export function buildPremiumReport(input: BirthInput, now: Date = new Date(), le
     elements,
     strength: { grade: GRADE[r.advanced.dayStrength.strength] ?? r.advanced.dayStrength.strength, score: r.advanced.dayStrength.score },
     geukguk: full ? r.advanced.geukguk : "",
-    yongsin: full ? r.advanced.yongsin.map(withReading) : [],
-    gilsin: full ? r.advanced.sinsal.gilsin : [],
-    hyungsin: full ? r.advanced.sinsal.hyungsin : [],
+    yongsin: full && !locking ? r.advanced.yongsin.map(withReading) : [],
+    gilsin: full && !locking ? r.advanced.sinsal.gilsin : [],
+    hyungsin: full && !locking ? r.advanced.sinsal.hyungsin : [],
     daeun: full ? daeun : null,
     seyun: full ? seyun : null,
-    summary: full ? r.advanced.interpretation : "",
+    summary: full && !locking ? r.advanced.interpretation : "",
     hourUnknown,
-    topic,
-    book: full ? buildBook(r, { elements, pillars, hourUnknown, topicKey, insight: topic, gradeLabel }) : [],
+    // 잠긴 상태에서는 흐름(timing) 문장도 내려보내지 않아요. (7쪽에서 잠긴 글과 같은 내용이에요)
+    topic: locking ? { ...topic, timing: [] } : topic,
+    locked: locking,
+    book: full ? (locking ? applyLocks(buildBook(r, { elements, pillars, hourUnknown, topicKey, insight: topic, gradeLabel }), r.currentYear) : buildBook(r, { elements, pillars, hourUnknown, topicKey, insight: topic, gradeLabel })) : [],
   };
 }

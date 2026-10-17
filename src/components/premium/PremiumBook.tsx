@@ -29,8 +29,19 @@ function Table({ t }: { t: BookTable }) {
           <li key={`${row.label}-${i}`} data-testid="book-row" className={`flex gap-3 px-4 py-2.5 text-[13px] leading-snug ${row.highlight ? "bg-[#e6c887]/10" : ""}`}>
             <span className={`w-[5.2rem] shrink-0 font-bold ${row.highlight ? "text-[#f6dfa8]" : "text-[#e8dfca]/70"}`}>{row.label}</span>
             <span className="flex-1 text-[#f5efe0]">
-              {row.value}
-              {row.note && <span className="ml-2 text-[11px] text-[#e6c887]">{row.note}</span>}
+              {row.locked ? (
+                <span data-testid="locked-row" className="select-none blur-[5px]" aria-hidden="true">
+                  {row.value}
+                </span>
+              ) : (
+                row.value
+              )}
+              {row.locked && <span className="sr-only">잠긴 칸이에요</span>}
+              {row.note && (
+                <span className={`ml-2 text-[11px] text-[#e6c887] ${row.locked ? "select-none blur-[4px]" : ""}`} aria-hidden={row.locked ? "true" : undefined}>
+                  {row.note}
+                </span>
+              )}
             </span>
           </li>
         ))}
@@ -107,7 +118,18 @@ function Visual({ page, report }: { page: BookPage; report: PremiumReportView })
           </dd>
           <dt className={`font-bold ${GOLD}`}>용신</dt>
           <dd data-testid="yongsin" className="text-[#f5efe0]">
-            {report.yongsin.length ? report.yongsin.join(" · ") : "-"}
+            {report.locked ? (
+              <>
+                <span className="select-none blur-[5px]" aria-hidden="true">
+                  丙(병) · 癸(계)
+                </span>
+                <span className="sr-only">잠긴 칸이에요</span>
+              </>
+            ) : report.yongsin.length ? (
+              report.yongsin.join(" · ")
+            ) : (
+              "-"
+            )}
           </dd>
         </dl>
       );
@@ -142,6 +164,7 @@ function Visual({ page, report }: { page: BookPage; report: PremiumReportView })
 export default function PremiumBook({ report }: { report: PremiumReportView }) {
   const pages = report.book;
   const [i, setI] = useState(0);
+  const [unlockMsg, setUnlockMsg] = useState(false);
   const top = useRef<HTMLDivElement>(null);
   const first = useRef(true);
   useEffect(() => {
@@ -156,6 +179,18 @@ export default function PremiumBook({ report }: { report: PremiumReportView }) {
   if (!page) return null;
   const go = (n: number) => setI(Math.min(pages.length - 1, Math.max(0, n)));
   const num = (n: number) => String(n).padStart(2, "0");
+  const lockedTotal = pages.reduce((a, p) => a + p.sections.filter((x) => x.locked).length, 0);
+  const lockedHere = page.sections.filter((x) => x.locked).length;
+  const unlock = (
+    <button
+      type="button"
+      data-testid="unlock-button"
+      onClick={() => setUnlockMsg(true)}
+      className="mt-3 w-full rounded-full bg-gradient-to-r from-[#f0d9a0] to-[#d3ac62] py-2.5 text-[13px] font-bold text-[#1b1824] active:scale-95 transition-transform"
+    >
+      2,990원으로 전체 열기
+    </button>
+  );
 
   return (
     <div
@@ -191,6 +226,21 @@ export default function PremiumBook({ report }: { report: PremiumReportView }) {
         ))}
       </nav>
 
+      {lockedTotal > 0 && (
+        <div data-testid="unlock-bar" className={`mt-3 rounded-2xl border ${HAIR} bg-[#e6c887]/[0.07] px-4 py-3`}>
+          <p className="text-[12.5px] leading-relaxed text-[#f3e7c9]">
+            <span aria-hidden="true">🔒 </span>
+            전체 {pages.length}쪽 중 <b className={GOLD}>{lockedTotal}개 풀이</b>가 잠겨 있어요. 흐리게 보이는 부분이 가장 궁금한 ‘언제’와 ‘어떻게’예요.
+          </p>
+          {unlock}
+          {unlockMsg && (
+            <p role="status" data-testid="unlock-message" className="mt-2 text-center text-[11.5px] font-bold text-[#f6dfa8]">
+              결제는 아직 준비 중이에요. 베타 기간에는 과금되지 않아요 🫧
+            </p>
+          )}
+        </div>
+      )}
+
       <article aria-labelledby="book-title" data-testid="book-page" data-page={page.no} className="mt-7">
         <div className="relative">
           <span aria-hidden="true" className="absolute -top-3 right-0 font-serifKr font-black text-[5.5rem] leading-none text-[#e6c887]/[0.09] select-none">
@@ -209,13 +259,22 @@ export default function PremiumBook({ report }: { report: PremiumReportView }) {
         <Visual page={page} report={report} />
 
         <div className="space-y-5">
-          {page.sections.map((s) => (
-            <section key={s.heading} data-testid="book-section">
+          {page.sections.map((s, n) => (
+            <section key={`${n}-${s.heading}`} data-testid={s.locked ? "book-section-locked" : "book-section"}>
               <h4 className={`text-[13px] font-bold ${GOLD}`}>
-                <span aria-hidden="true" className="mr-1.5">◆</span>
+                <span aria-hidden="true" className="mr-1.5">{s.locked ? "🔒" : "◆"}</span>
                 {s.heading}
               </h4>
-              <p className="mt-1.5 text-[14px] leading-[1.8] text-[#efe7d3]">{s.body}</p>
+              {s.locked ? (
+                <div className="relative mt-1.5">
+                  <p aria-hidden="true" className="select-none text-[14px] leading-[1.8] text-[#efe7d3] blur-[6px]">
+                    {s.body}
+                  </p>
+                  <span className="sr-only">잠긴 풀이예요. 전체 열기를 누르면 볼 수 있어요.</span>
+                </div>
+              ) : (
+                <p className="mt-1.5 text-[14px] leading-[1.8] text-[#efe7d3]">{s.body}</p>
+              )}
             </section>
           ))}
         </div>
@@ -226,6 +285,12 @@ export default function PremiumBook({ report }: { report: PremiumReportView }) {
           </div>
         ))}
       </article>
+
+      {lockedHere > 0 && (
+        <p data-testid="page-lock-hint" className="mt-6 text-center text-[12px] text-[#e6c887]">
+          이 페이지에 잠긴 풀이 {lockedHere}개 · 위의 ‘전체 열기’로 볼 수 있어요
+        </p>
+      )}
 
       <div className="mt-8 flex items-center gap-3">
         <button
