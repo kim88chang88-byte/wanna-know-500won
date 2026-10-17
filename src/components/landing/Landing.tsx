@@ -20,7 +20,7 @@ const LEVER_ANIMATION_MS = 600;
 const MODAL_DELAY_MS = 350;
 
 export default function Landing() {
-  const { user, result: loginResult, clearResult, logout } = useAuth();
+  const { user, result: loginResult, clearResult, justLoggedIn, clearWelcome, logout } = useAuth();
   const [loginOpen, setLoginOpen] = useState(false);
   const [intake, setIntake] = useState<IntakeTarget | null>(null);
   const [spinningKey, setSpinningKey] = useState<string | null>(null);
@@ -49,6 +49,13 @@ export default function Landing() {
     },
     [],
   );
+
+  // 로그인 직후 환영 안내는 4초 뒤 사라져요.
+  useEffect(() => {
+    if (!justLoggedIn) return;
+    const t = window.setTimeout(clearWelcome, 4000);
+    return () => window.clearTimeout(t);
+  }, [justLoggedIn, clearWelcome]);
 
   const openLogin = useCallback(() => setLoginOpen(true), []);
   const closeLogin = useCallback(() => {
@@ -79,6 +86,21 @@ export default function Landing() {
       </main>
 
       <Footer />
+
+      {justLoggedIn && user && (
+        <div
+          role="status"
+          data-testid="welcome-toast"
+          className="fixed left-1/2 -translate-x-1/2 top-20 z-[60] w-[calc(100%-2rem)] max-w-sm rounded-2xl bg-emerald-600 text-white shadow-xl px-4 py-3 text-sm font-bold flex items-center justify-between gap-3"
+        >
+          <span>
+            🌸 {user.nickname ? `${user.nickname}님, ` : ""}로그인됐어요! 매일 첫 1회는 무료예요.
+          </span>
+          <button type="button" onClick={clearWelcome} aria-label="알림 닫기" className="shrink-0 text-white/80 hover:text-white">
+            <span className="material-symbols-outlined text-[18px]">close</span>
+          </button>
+        </div>
+      )}
 
       {loginOpen && <LoginModal onClose={closeLogin} user={user} result={loginResult} onLogout={logout} />}
       {intake && <IntakeModal target={intake} onClose={closeIntake} onComplete={completeDraw} />}

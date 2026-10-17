@@ -54,18 +54,50 @@ export function Header({ onOpenLogin, user = null }: { onOpenLogin: () => void; 
               onClick={onOpenLogin}
               type="button"
               aria-haspopup="dialog"
-              className="group flex items-center gap-2.5 p-1.5 sm:px-3.5 sm:py-1.5 rounded-full bg-brand-50 hover:bg-brand-100/70 border border-brand-200/60 transition-all text-left shadow-sm"
+              data-testid="mypage-button"
+              data-logged-in={user ? "true" : "false"}
+              className={`group flex items-center gap-2 p-1.5 pr-3 sm:px-3.5 sm:py-1.5 rounded-full border transition-all text-left shadow-sm ${
+                user
+                  ? "bg-emerald-50 hover:bg-emerald-100/70 border-emerald-300/70"
+                  : "bg-brand-50 hover:bg-brand-100/70 border-brand-200/60"
+              }`}
             >
-              <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-brand-600 group-hover:scale-105 transition-transform">
-                <span className="material-symbols-outlined text-[20px]">person</span>
+              <div
+                className={`relative w-8 h-8 shrink-0 rounded-full bg-white flex items-center justify-center group-hover:scale-105 transition-transform ${
+                  user ? "text-emerald-700 font-bold text-sm" : "text-brand-600"
+                }`}
+              >
+                {user ? (
+                  <span aria-hidden="true">{(user.nickname ?? "🌸").trim().charAt(0) || "🌸"}</span>
+                ) : (
+                  <span className="material-symbols-outlined text-[20px]">person</span>
+                )}
+                {user && (
+                  <span
+                    aria-hidden="true"
+                    className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-emerald-500 border-2 border-white"
+                  />
+                )}
               </div>
-              <span className="sr-only sm:hidden">{user ? `${user.nickname ? `${user.nickname}님` : "마이페이지"} (로그인됨)` : "마이페이지"}</span>
-              <div className="hidden sm:block">
-                <span className="block text-xs font-bold text-gray-800 group-hover:text-brand-600 transition-colors">
-                  {user ? (user.nickname ? `${user.nickname}님` : "마이페이지") : "마이페이지"}
-                </span>
-                <span className="block text-[10px] text-gray-500">{user ? "로그인됨" : "로그인 / 회원가입"}</span>
-              </div>
+              {user ? (
+                // 로그인된 상태는 작은 화면에서도 닉네임이 보이게 해요 (길면 말줄임)
+                <div className="min-w-0">
+                  <span data-testid="mypage-name" className="block max-w-[5.5rem] sm:max-w-[9rem] truncate text-xs font-bold text-gray-800">
+                    {user ? (user.nickname ? `${user.nickname}님` : "회원님") : "마이페이지"}
+                  </span>
+                  <span className="block text-[10px] font-medium text-emerald-700">로그인됨</span>
+                </div>
+              ) : (
+                <>
+                  <span className="sr-only sm:hidden">마이페이지</span>
+                  <div className="hidden sm:block">
+                    <span className="block text-xs font-bold text-gray-800 group-hover:text-brand-600 transition-colors">
+                      마이페이지
+                    </span>
+                    <span className="block text-[10px] text-gray-500">로그인 / 회원가입</span>
+                  </div>
+                </>
+              )}
             </button>
             <MenuButton />
           </div>

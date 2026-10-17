@@ -36,7 +36,7 @@ export async function GET(request: Request) {
     const profile = await fetchKakaoProfile(config.kakao, code);
     const exp = Math.floor(Date.now() / 1000) + SESSION_MAX_AGE_SEC;
     const token = createSessionToken({ sub: profile.id, nick: profile.nickname, exp }, config.secret);
-    const res = NextResponse.redirect(new URL("/", base));
+    const res = NextResponse.redirect(new URL("/?login=success", base));
     res.cookies.set(SESSION_COOKIE, token, {
       httpOnly: true,
       sameSite: "lax",

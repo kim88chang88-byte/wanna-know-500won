@@ -21,15 +21,17 @@ export const LOGIN_RESULT_MESSAGE: Record<LoginResult, string> = {
 export function useAuth() {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [result, setResult] = useState<LoginResult | null>(null);
+  const [justLoggedIn, setJustLoggedIn] = useState(false);
 
   useEffect(() => {
     let alive = true;
     // 로그인 결과 표시 후 주소에서 지워서 새로고침 때 다시 뜨지 않게 해요.
     try {
       const url = new URL(window.location.href);
-      const r = url.searchParams.get("login") as LoginResult | null;
-      if (r && RESULTS.includes(r)) {
-        setResult(r);
+      const r = url.searchParams.get("login");
+      if (r === "success" || (r && RESULTS.includes(r as LoginResult))) {
+        if (r === "success") setJustLoggedIn(true);
+        else setResult(r as LoginResult);
         url.searchParams.delete("login");
         window.history.replaceState(null, "", url.pathname + url.search + url.hash);
       }
@@ -59,6 +61,7 @@ export function useAuth() {
   }, []);
 
   const clearResult = useCallback(() => setResult(null), []);
+  const clearWelcome = useCallback(() => setJustLoggedIn(false), []);
 
-  return { user, result, clearResult, logout };
+  return { user, result, clearResult, justLoggedIn, clearWelcome, logout };
 }
