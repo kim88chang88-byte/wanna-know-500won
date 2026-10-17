@@ -3,8 +3,8 @@ import { ContactList, H2, LegalPage } from "@/components/legal/Legal";
 import { OPERATOR } from "@/lib/siteInfo";
 
 export const metadata: Metadata = {
-  title: "개인정보처리방침 | 꽃거지의 신묘한 사주",
-  description: "꽃거지의 신묘한 사주가 어떤 개인정보를 왜 받고, 얼마나 보관하는지 안내합니다.",
+  title: "개인정보처리방침 | 도리 운세 사주",
+  description: "도리 운세 사주가 어떤 개인정보를 왜 받고, 얼마나 보관하는지 안내합니다.",
 };
 
 /* 이 문서는 현재 기능 기준의 초안이며 법률 검토를 받은 것이 아닙니다. 로그인·결제·AI 풀이·후기 기능이 붙을 때 해당 항목을 함께 고쳐야 합니다. */
@@ -14,7 +14,7 @@ export default function PrivacyPage() {
     <LegalPage title="개인정보처리방침">
 
       <p className="mt-4">
-        &lsquo;꽃거지의 신묘한 사주&rsquo;(이하 &ldquo;서비스&rdquo;)는 생년월일시로 사주를 계산하고 풀이를 보여주기 위해 꼭
+        &lsquo;도리 운세 사주&rsquo;(이하 &ldquo;서비스&rdquo;)는 생년월일시로 사주를 계산하고 풀이를 보여주기 위해 꼭
         필요한 정보만 받습니다. 아래에서 무엇을, 왜, 얼마나 오래 쓰는지 안내해요.
       </p>
 

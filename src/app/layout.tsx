@@ -2,8 +2,8 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL;
-const TITLE = "꽃거지의 신묘한 사주";
-const DESCRIPTION = "500원 동전 하나로 뽑아보는 낭만 사주. 매일 첫 1회 무료 뽑기!";
+const TITLE = "도리 운세 사주";
+const DESCRIPTION = "수달 도사 도리의 신비한 운세자판기. 매일 첫 1회 무료, 그다음부터는 500원!";
 
 export const metadata: Metadata = {
   // 공유할 때 미리보기 주소를 만들 기준 주소 (배포 주소를 NEXT_PUBLIC_SITE_URL 로 넣어요)
@@ -25,7 +25,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
-          href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Noto+Serif+KR:wght@500;600;700;900&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Noto+Serif+KR:wght@500;600;700;900&display=swap"
           rel="stylesheet"
         />
         <link
@@ -33,7 +33,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           rel="stylesheet"
         />
       </head>
-      <body className="bg-[#FFF8FA] text-[#2D2226] font-sans antialiased selection:bg-brand-200">{children}</body>
+      <body className="bg-[#F4F8FD] text-[#1E293B] font-sans antialiased selection:bg-brand-200">{children}</body>
     </html>
   );
 }

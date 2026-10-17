@@ -3,7 +3,7 @@
 ## 1. 구글 클라우드 프로젝트
 1. https://console.cloud.google.com 접속 → 상단 프로젝트 선택 → **새 프로젝트** (이름 예: `wanna-know-500won`)
 2. **API 및 서비스 → OAuth 동의 화면** (새 콘솔: *Google Auth Platform → 브랜딩/대상*)
-   - 앱 이름: 꽃거지의 신묘한 사주 / 지원 이메일: 본인 이메일
+   - 앱 이름: 도리 운세 사주 / 지원 이메일: 본인 이메일
    - 대상(User type): **외부(External)**
    - 승인된 도메인: 배포 도메인 (예: `vercel.app` 은 등록 불가일 수 있어요. 비워도 테스트는 됩니다)
    - 개인정보처리방침 링크: `https://<도메인>/privacy`, 서비스 약관 링크: `https://<도메인>/terms`

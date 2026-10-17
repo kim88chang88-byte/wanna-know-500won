@@ -31,7 +31,7 @@ interface Props {
 }
 
 const BUBBLE: Record<StepId, string> = {
-  date: "먼저, 언제 태어났어? 🌸",
+  date: "먼저, 언제 태어났어? 🫧",
   time: "태어난 시간도 알면 더 또렷하게 볼 수 있어. 몰라도 괜찮아!",
   gender: "거의 다 왔어! 성별도 알려줄래?",
   consent: "캡슐 만들기 전에, 정보 처리만 확인할게.",
@@ -196,7 +196,7 @@ export default function IntakeModal({ target, onClose, onComplete }: Props) {
       {phase === "loading" && (
         <div role="status" className="py-10 text-center">
           <div className="text-4xl floating-anim" aria-hidden="true">
-            🌸
+            🫧
           </div>
           <p className="mt-3 font-serifKr font-bold text-gray-900">캡슐이 만들어지고 있어요</p>
           <div className="mt-4 h-1.5 rounded-full bg-brand-100 overflow-hidden" aria-hidden="true">
@@ -211,17 +211,17 @@ export default function IntakeModal({ target, onClose, onComplete }: Props) {
             <>
               <ResultCard reading={reading} topicLabel={topicLabel(target.fortune)} />
 
-              <p className="mt-3 text-center text-[11px] text-gray-500">꽃거지가 더 할 말이 있대요 👀</p>
+              <p className="mt-3 text-center text-[11px] text-gray-500">도리가 더 할 말이 있대요 👀</p>
               <button
                 type="button"
                 onClick={() => setUnlockNotice(true)}
-                className="mt-1 w-full py-2.5 rounded-full bg-gradient-to-r from-brand-600 to-rose-500 text-white font-serifKr font-bold text-sm shadow-md"
+                className="mt-1 w-full py-2.5 rounded-full bg-gradient-to-r from-brand-500 to-indigo-600 text-white font-serifKr font-bold text-sm shadow-md"
               >
                 500원으로 전부 듣기
               </button>
               {unlockNotice && (
                 <p role="status" className="mt-2 text-center text-[11px] font-bold text-brand-600">
-                  결제는 아직 준비 중이에요. 곧 열릴 예정이에요 🌸
+                  결제는 아직 준비 중이에요. 곧 열릴 예정이에요 🫧
                 </p>
               )}
             </>
@@ -229,8 +229,8 @@ export default function IntakeModal({ target, onClose, onComplete }: Props) {
             <div className="p-4 rounded-2xl bg-brand-50/60 border border-brand-100 text-center" data-testid="reading-missing">
               <p className="font-serifKr text-sm text-gray-800 leading-relaxed">
                 {readingStatus === "unavailable"
-                  ? "꽃거지의 한마디는 아직 준비 중이에요."
-                  : "꽃거지가 잠깐 자리를 비웠어요. 잠시 뒤에 다시 뽑아볼래요?"}
+                  ? "도리의 한마디는 아직 준비 중이에요."
+                  : "도리가 잠깐 물놀이하러 갔어요. 잠시 뒤에 다시 뽑아볼래요?"}
               </p>
             </div>
           )}
@@ -305,7 +305,7 @@ export default function IntakeModal({ target, onClose, onComplete }: Props) {
 
           <div className="flex items-start gap-2.5 mb-4">
             <span className="text-2xl" aria-hidden="true">
-              🌸
+              🫧
             </span>
             <p className="flex-1 rounded-2xl rounded-tl-sm bg-brand-50 border border-brand-100 px-3.5 py-2.5 font-serifKr text-sm text-gray-800">
               {BUBBLE[step]}

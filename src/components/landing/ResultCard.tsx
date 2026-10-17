@@ -81,7 +81,7 @@ export default function ResultCard({ reading, topicLabel }: Props) {
       const file = await makeFile();
       if (!file) throw new Error("no file");
       download(file);
-      setMessage("이미지로 저장했어요. 인스타 스토리에 올려보세요 🌸");
+      setMessage("이미지로 저장했어요. 인스타 스토리에 올려보세요 🫧");
     } catch {
       setMessage("이미지를 만들지 못했어요. 잠시 뒤에 다시 해볼래요?");
     } finally {
@@ -94,7 +94,7 @@ export default function ResultCard({ reading, topicLabel }: Props) {
     try {
       const file = await makeFile();
       if (!file) throw new Error("no file");
-      const payload = { files: [file], title: "꽃거지의 신묘한 사주", text: `오늘의 키워드는 "${reading.keyword}"` };
+      const payload = { files: [file], title: "도리 운세 사주", text: `오늘의 키워드는 "${reading.keyword}"` };
       if (typeof navigator.share === "function" && navigator.canShare?.({ files: [file] })) {
         await navigator.share(payload);
         setMessage(null);

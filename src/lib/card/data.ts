@@ -37,7 +37,7 @@ export function buildCardData(reading: PublicReading, topicLabel: string, date: 
 /** 캔버스는 글자를 읽을 수 없으니, 같은 내용을 화면 읽기 프로그램용 설명으로도 만들어 둡니다. */
 export function cardAltText(c: CardData): string {
   const inds = c.indicators.map((i) => `${i.label} ${i.score}점`).join(", ");
-  return `${c.topicLabel} 캡슐 결과지. 오늘의 키워드 ${c.keyword}. 총운 5점 만점에 ${c.totalScore}점, ${c.totalSummary} ${inds}. 꽃거지의 한마디: ${c.kkotgeoji}`;
+  return `${c.topicLabel} 캡슐 결과지. 오늘의 키워드 ${c.keyword}. 총운 5점 만점에 ${c.totalScore}점, ${c.totalSummary} ${inds}. 도리의 한마디: ${c.kkotgeoji}`;
 }
 
 /** 파일 이름은 영문으로 해요. 일부 브라우저/환경에서 한글 이름이 "download" 로 바뀌는 경우가 있어서요. */

@@ -37,7 +37,7 @@ export interface Reading {
   love: Indicator;
   money: Indicator;
   mind: Indicator;
-  /** 꽃거지의 한마디 (응원 메시지) */
+  /** 도리(수달 도사)의 한마디 (응원 메시지) */
   kkotgeoji: string;
 }
 
@@ -70,7 +70,7 @@ export const READING_SCHEMA = {
     love: indicatorSchema("연애운"),
     money: indicatorSchema("금전운"),
     mind: indicatorSchema("마음운"),
-    kkotgeoji: { type: "string", description: "꽃거지의 응원 한마디. 2~3문장, 120자 안팎으로 짧게 (결과지 카드에 들어가야 해요)" },
+    kkotgeoji: { type: "string", description: "도리의 응원 한마디. 2~3문장, 120자 안팎으로 짧게 (결과지 카드에 들어가야 해요)" },
   },
   required: ["keyword", "total", "love", "money", "mind", "kkotgeoji"],
   additionalProperties: false,
@@ -145,7 +145,7 @@ export interface PublicReading {
 
 /**
  * 손님에게 내려보낼 내용을 고릅니다.
- * 무료: 키워드 + 총운 + 꽃거지 한마디 + 세 지표의 점수. 세 지표의 풀이 문장은 서버에서 빼고 보내요.
+ * 무료: 키워드 + 총운 + 도리 한마디 + 세 지표의 점수. 세 지표의 풀이 문장은 서버에서 빼고 보내요.
  * (CSS 블러로만 가리면 개발자 도구로 그대로 보이기 때문에, 잠긴 내용은 응답에 아예 넣지 않습니다.)
  */
 export function toPublicReading(r: Reading, tier: ReadingTier = "free"): PublicReading {

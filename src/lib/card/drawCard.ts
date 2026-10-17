@@ -2,17 +2,17 @@ import { CARD_H, CARD_W, type CardData } from "./data";
 import { fitText } from "./text";
 
 /*
- * 인스타 스토리용 결과지(양피지 + 밀랍 씰 + 꽃거지 말풍선)를 캔버스에 그립니다.
+ * 인스타 스토리용 결과지(양피지 + 밀랍 씰 + 도리 말풍선)를 캔버스에 그립니다.
  * 좌표는 360×640 기준이고, 호출하는 쪽에서 ctx.scale(CARD_SCALE) 을 먼저 해 주세요.
  * 무작위 값은 쓰지 않아서(고정된 의사난수) 같은 입력이면 항상 같은 그림이 나와요.
  */
 
-const SERIF = `"Noto Serif KR", "Playfair Display", "Apple SD Gothic Neo", "Malgun Gothic", serif`;
+const SERIF = `"Noto Serif KR", "Apple SD Gothic Neo", "Malgun Gothic", serif`;
 const SANS = `"Plus Jakarta Sans", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif`;
 
 const C = {
-  brand: "#D6204D",
-  brandDark: "#9E1B3C",
+  brand: "#225EAA",
+  brandDark: "#163E72",
   ink: "#3F3024",
   muted: "#8A7355",
   gold: "#F2A413",
@@ -80,7 +80,7 @@ function petal(ctx: CanvasRenderingContext2D, x: number, y: number, size: number
   ctx.translate(x, y);
   ctx.rotate(rot);
   ctx.globalAlpha = alpha;
-  ctx.fillStyle = "#F7A8BE";
+  ctx.fillStyle = "#A9D4FB";
   ctx.beginPath();
   ctx.ellipse(0, 0, size, size * 0.62, 0, 0, Math.PI * 2);
   ctx.fill();
@@ -110,11 +110,11 @@ export function drawResultCard(ctx: CanvasRenderingContext2D, d: CardData): void
   ctx.save();
   ctx.textBaseline = "alphabetic";
 
-  /* ---------- 배경 + 벚꽃잎 ---------- */
+  /* ---------- 배경 + 물방울 꽃잎 ---------- */
   const bg = ctx.createLinearGradient(0, 0, 0, H);
-  bg.addColorStop(0, "#FFDCE6");
-  bg.addColorStop(0.55, "#FFEEF3");
-  bg.addColorStop(1, "#FFF8FA");
+  bg.addColorStop(0, "#D6E9FF");
+  bg.addColorStop(0.55, "#EAF4FF");
+  bg.addColorStop(1, "#F7FBFF");
   ctx.fillStyle = bg;
   ctx.fillRect(0, 0, W, H);
   const rnd = rng(7);
@@ -162,7 +162,7 @@ export function drawResultCard(ctx: CanvasRenderingContext2D, d: CardData): void
   ctx.textAlign = "center";
   ctx.fillStyle = C.brand;
   setFont(ctx, 700, 12, SERIF);
-  ctx.fillText("꽃거지의 신묘한 사주", W / 2, py + 52);
+  ctx.fillText("도리 운세 사주", W / 2, py + 52);
   ctx.fillStyle = C.muted;
   setFont(ctx, 500, 9.5, SANS);
   ctx.fillText(`${d.topicLabel} 캡슐  ·  ${d.dateLabel}`, W / 2, py + 68);
@@ -170,11 +170,11 @@ export function drawResultCard(ctx: CanvasRenderingContext2D, d: CardData): void
   /* ---------- 밀랍 씰 ---------- */
   const sx = W / 2, sy = py, sr = 25;
   ctx.save();
-  ctx.shadowColor = "rgba(80, 10, 30, 0.35)";
+  ctx.shadowColor = "rgba(10, 30, 80, 0.35)";
   ctx.shadowBlur = 8;
   ctx.shadowOffsetY = 3;
   const wax = ctx.createRadialGradient(sx - 7, sy - 8, 3, sx, sy, sr + 3);
-  wax.addColorStop(0, "#E4506F");
+  wax.addColorStop(0, "#4C8FD9");
   wax.addColorStop(1, C.brandDark);
   ctx.fillStyle = wax;
   ctx.beginPath();
@@ -190,12 +190,12 @@ export function drawResultCard(ctx: CanvasRenderingContext2D, d: CardData): void
   ctx.closePath();
   ctx.fill();
   ctx.restore();
-  ctx.strokeStyle = "rgba(255, 220, 230, 0.55)";
+  ctx.strokeStyle = "rgba(220, 235, 255, 0.55)";
   ctx.lineWidth = 1.2;
   ctx.beginPath();
   ctx.arc(sx, sy, sr - 6, 0, Math.PI * 2);
   ctx.stroke();
-  ctx.fillStyle = "#FFE3EA";
+  ctx.fillStyle = "#E3F0FF";
   setFont(ctx, 700, 22, SERIF);
   ctx.textBaseline = "middle";
   ctx.fillText("花", sx, sy + 1);
@@ -220,7 +220,7 @@ export function drawResultCard(ctx: CanvasRenderingContext2D, d: CardData): void
   ctx.moveTo(W / 2 + 14, oy);
   ctx.lineTo(W - px - 40, oy);
   ctx.stroke();
-  flower(ctx, W / 2, oy, 6, "#F58BA6");
+  flower(ctx, W / 2, oy, 6, "#7ECBFB");
 
   /* ---------- 총운 ---------- */
   const left = px + 24;
@@ -262,20 +262,20 @@ export function drawResultCard(ctx: CanvasRenderingContext2D, d: CardData): void
     ctx.fill();
   });
 
-  /* ---------- 꽃거지 말풍선 ---------- */
+  /* ---------- 도리 말풍선 ---------- */
   const by = y + 3 * 46 + 6;
   const bh = py + ph - 18 - by;
   const bx = left - 8;
   const bw = right - left + 16;
   ctx.save();
-  ctx.shadowColor = "rgba(214, 32, 77, 0.18)";
+  ctx.shadowColor = "rgba(34, 94, 170, 0.18)";
   ctx.shadowBlur = 10;
   ctx.shadowOffsetY = 3;
   ctx.fillStyle = "#FFFFFF";
   roundRect(ctx, bx, by, bw, bh, 12);
   ctx.fill();
   ctx.restore();
-  ctx.strokeStyle = "#F7B5C6";
+  ctx.strokeStyle = "#B9D9FA";
   ctx.lineWidth = 1;
   roundRect(ctx, bx, by, bw, bh, 12);
   ctx.stroke();
@@ -287,7 +287,7 @@ export function drawResultCard(ctx: CanvasRenderingContext2D, d: CardData): void
   ctx.lineTo(bx + 40, by);
   ctx.closePath();
   ctx.fill();
-  ctx.strokeStyle = "#F7B5C6";
+  ctx.strokeStyle = "#B9D9FA";
   ctx.beginPath();
   ctx.moveTo(bx + 18, by - 9);
   ctx.lineTo(bx + 26, by);
@@ -297,10 +297,10 @@ export function drawResultCard(ctx: CanvasRenderingContext2D, d: CardData): void
   ctx.fillStyle = "#FFFFFF";
   ctx.fillRect(bx + 27, by - 1.5, 12, 3);
 
-  flower(ctx, bx + 16, by + 17, 6.5, "#F58BA6");
+  flower(ctx, bx + 16, by + 17, 6.5, "#7ECBFB");
   ctx.fillStyle = C.brand;
   setFont(ctx, 700, 10, SERIF);
-  ctx.fillText("꽃거지의 한마디", bx + 28, by + 20.5);
+  ctx.fillText("도리의 한마디", bx + 28, by + 20.5);
 
   const textTop = by + 36;
   const avail = by + bh - 10 - textTop;
@@ -319,10 +319,10 @@ export function drawResultCard(ctx: CanvasRenderingContext2D, d: CardData): void
 
   /* ---------- 바닥글 ---------- */
   ctx.textAlign = "center";
-  ctx.fillStyle = "#C3647E";
+  ctx.fillStyle = "#4F78B0";
   setFont(ctx, 600, 9.5, SANS);
   ctx.fillText("동전 하나로 뽑는 오늘의 운", W / 2, H - 22);
-  ctx.fillStyle = "#D79AAB";
+  ctx.fillStyle = "#8FB1D6";
   setFont(ctx, 400, 8, SANS);
   ctx.fillText("재미와 위로를 위한 풀이예요", W / 2, H - 10);
 

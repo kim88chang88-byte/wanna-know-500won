@@ -70,7 +70,7 @@ describe("toPublicReading (무료 공개 범위)", () => {
   const r = parseReading(good)!;
   const pub = toPublicReading(r, "free");
 
-  it("키워드·총운·꽃거지 한마디와 지표 점수는 보여준다", () => {
+  it("키워드·총운·도리 한마디와 지표 점수는 보여준다", () => {
     expect(pub.keyword).toBe("설렘 충전");
     expect(pub.total.score).toBe(4);
     expect(pub.kkotgeoji).toBe(good.kkotgeoji);

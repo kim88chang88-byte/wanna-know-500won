@@ -5,14 +5,15 @@ import { getBrowserStorage, readCounts, recordDraw, type DrawCounts } from "@/li
 import IntakeModal, { type IntakeTarget } from "./IntakeModal";
 import { LoginModal } from "./Modals";
 import { useAuth } from "./useAuth";
+import BubbleBackground from "./BubbleBackground";
 import {
   Footer,
   Header,
   HeroSection,
+  MachinesSection,
   PremiumSection,
   SampleSection,
   ShowcaseSection,
-  SlotsSection,
   TrustSection,
 } from "./Sections";
 
@@ -57,6 +58,28 @@ export default function Landing() {
     return () => window.clearTimeout(t);
   }, [justLoggedIn, clearWelcome]);
 
+  // 화면을 누르면 작은 물방울이 톡 터져요. (움직임 줄이기 설정이면 만들지 않아요)
+  useEffect(() => {
+    if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return;
+    const onPointerDown = (e: PointerEvent) => {
+      for (let i = 0; i < 4; i++) {
+        const el = document.createElement("span");
+        const size = 8 + Math.random() * 10;
+        el.className = "click-bubble";
+        el.style.width = el.style.height = `${size}px`;
+        el.style.left = `${e.clientX}px`;
+        el.style.top = `${e.clientY}px`;
+        el.style.setProperty("--dx", `${(Math.random() - 0.5) * 70}px`);
+        el.style.setProperty("--dy", `${-20 - Math.random() * 40}px`);
+        el.setAttribute("aria-hidden", "true");
+        document.body.appendChild(el);
+        window.setTimeout(() => el.remove(), 800);
+      }
+    };
+    document.addEventListener("pointerdown", onPointerDown);
+    return () => document.removeEventListener("pointerdown", onPointerDown);
+  }, []);
+
   const openLogin = useCallback(() => setLoginOpen(true), []);
   const closeLogin = useCallback(() => {
     setLoginOpen(false);
@@ -89,14 +112,15 @@ export default function Landing() {
 
   return (
     <>
+      <BubbleBackground />
       <Header onOpenLogin={openLogin} user={user} />
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+      <main className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
         <HeroSection counts={counts} />
-        <ShowcaseSection onSpin={handleSpin} spinningKey={spinningKey} />
-        <SampleSection />
-        <SlotsSection onSpin={handleSpin} spinningKey={spinningKey} />
+        <ShowcaseSection />
+        <MachinesSection onSpin={handleSpin} spinningKey={spinningKey} />
         <PremiumSection onSpin={handleSpin} spinningKey={spinningKey} />
+        <SampleSection />
         <TrustSection />
       </main>
 
@@ -109,7 +133,7 @@ export default function Landing() {
           className="fixed left-1/2 -translate-x-1/2 top-20 z-[60] w-[calc(100%-2rem)] max-w-sm rounded-2xl bg-emerald-600 text-white shadow-xl px-4 py-3 text-sm font-bold flex items-center justify-between gap-3"
         >
           <span>
-            🌸 {user.nickname ? `${user.nickname}님, ` : ""}로그인됐어요! 매일 첫 1회는 무료예요.
+            🫧 {user.nickname ? `${user.nickname}님, ` : ""}로그인됐어요! 매일 첫 1회는 무료예요.
           </span>
           <button type="button" onClick={clearWelcome} aria-label="알림 닫기" className="shrink-0 text-white/80 hover:text-white">
             <span className="material-symbols-outlined text-[18px]">close</span>

@@ -1,6 +1,6 @@
 import type { BirthInput, Gender } from "@/lib/saju/types";
 
-/** 생년월일시 입력 화면(꽃거지 질문 4단계)의 입력값과 검사 규칙입니다. 화면 없이 테스트할 수 있게 따로 뒀어요. */
+/** 생년월일시 입력 화면(도리 질문 4단계)의 입력값과 검사 규칙입니다. 화면 없이 테스트할 수 있게 따로 뒀어요. */
 
 export const MIN_YEAR = 1900;
 export const MAX_YEAR = 2100;

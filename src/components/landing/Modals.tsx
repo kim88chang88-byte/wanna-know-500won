@@ -82,10 +82,10 @@ export function LoginModal({ onClose, user = null, result = null, onLogout, onWi
       <CloseButton onClose={onClose} />
       <div className="text-center mb-5">
         <div className="w-12 h-12 rounded-full bg-brand-50 text-2xl flex items-center justify-center mx-auto mb-2">
-          🌸
+          🫧
         </div>
         <h4 id="login-title" className="font-serifKr font-bold text-lg text-gray-900">
-          {user ? "꽃거지의 사주방" : "꽃거지의 사주방 로그인"}
+          {user ? "도리의 사주방" : "도리의 사주방 로그인"}
         </h4>
         <p className="text-xs text-gray-500 mt-1">
           {user
@@ -116,7 +116,7 @@ export function LoginModal({ onClose, user = null, result = null, onLogout, onWi
             </button>
           )}
           {onWithdraw && confirmWithdraw && (
-            <div role="group" aria-label="회원 탈퇴 확인" className="rounded-2xl bg-rose-50 border border-rose-200 p-3 text-center">
+            <div role="group" aria-label="회원 탈퇴 확인" className="rounded-2xl bg-sky-50 border border-sky-200 p-3 text-center">
               <p className="text-xs font-bold text-gray-800">정말 탈퇴할까요?</p>
               <p className="text-[11px] text-gray-600 mt-1">
                 저장된 회원 정보(회원번호·닉네임)와 뽑기 기록이 모두 삭제되고 되돌릴 수 없어요.
