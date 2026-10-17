@@ -58,6 +58,33 @@ export interface TopicInsight {
   lucky: { element: string; color: string; hex: string; direction: string };
 }
 
+export interface BookSection {
+  heading: string;
+  body: string;
+}
+export interface BookRow {
+  label: string;
+  value: string;
+  note?: string;
+  /** 표에서 눈에 띄게 (현재 대운, 포인트 달 등) */
+  highlight?: boolean;
+}
+export interface BookTable {
+  title: string;
+  rows: BookRow[];
+}
+/** 프리미엄 리포트의 한 페이지 */
+export interface BookPage {
+  no: number;
+  key: string;
+  title: string;
+  subtitle: string;
+  /** 페이지 맨 위 한 줄 요약 */
+  lead: string;
+  sections: BookSection[];
+  tables: BookTable[];
+}
+
 /** basic: 일반 자판기(원국·오행·신강신약) / full: 프리미엄(격국·용신·대운·세운 포함) */
 export type ReportLevel = "basic" | "full";
 
@@ -81,6 +108,8 @@ export interface PremiumReportView {
   hourUnknown: boolean;
   /** 자판기(주제)별 맞춤 분석 */
   topic: TopicInsight;
+  /** 프리미엄(full)만: 10페이지 상세 리포트. basic 은 빈 배열 */
+  book: BookPage[];
 }
 
 export type PremiumErrorCode = "bad_request" | "rate_limited" | "failed";

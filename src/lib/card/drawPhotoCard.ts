@@ -1,4 +1,5 @@
 import { CARD_H, CARD_W, type PhotoCardData } from "./photoData";
+import { drawPremiumCard } from "./drawPremiumCard";
 import { fitText } from "./text";
 import type { TopicKey } from "@/lib/premium/types";
 
@@ -108,6 +109,7 @@ function fitLines(ctx: CanvasRenderingContext2D, text: string, family: string, w
 }
 
 export function drawPhotoCard(ctx: CanvasRenderingContext2D, d: PhotoCardData): void {
+  if (d.tier === "premium" && d.luxe) return drawPremiumCard(ctx, d);
   const W = CARD_W;
   const H = CARD_H;
   const th = THEME[d.topic];

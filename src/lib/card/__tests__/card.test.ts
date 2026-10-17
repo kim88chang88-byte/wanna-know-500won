@@ -80,6 +80,25 @@ describe("buildPhotoCardData", () => {
   });
 });
 
+describe("프리미엄 포토카드 데이터", () => {
+  const full = buildPremiumReport(input, new Date("2026-10-18T00:00:00+09:00"), "full", "연애 매력 리포트");
+  const date = new Date(2026, 9, 18);
+  it("일반(basic)은 basic 카드, 프리미엄(full)은 premium 카드", () => {
+    expect(buildPhotoCardData(report, { date, siteLabel: "x" }).tier).toBe("basic");
+    expect(buildPhotoCardData(report, { date, siteLabel: "x" }).luxe).toBeNull();
+    const d = buildPhotoCardData(full, { date, siteLabel: "x" });
+    expect(d.tier).toBe("premium");
+    expect(d.luxe?.pillars.length).toBe(4);
+    expect(d.luxe?.dayLabel.endsWith("일주")).toBe(true);
+    expect(photoAltText(d).startsWith("프리미엄 ")).toBe(true);
+    expect(shareCaption(d, "https://x.app").includes("#프리미엄사주")).toBe(true);
+  });
+  it("시간을 모르면 시주는 null", () => {
+    const r = buildPremiumReport({ ...input, hour: null, minute: null }, new Date("2026-10-18T00:00:00+09:00"), "full", "");
+    expect(buildPhotoCardData(r, { date, siteLabel: "x" }).luxe?.pillars[3]).toBeNull();
+  });
+});
+
 describe("clipQuote", () => {
   it("이모지는 캔버스에서 깨지지 않도록 뺀다", () => {
     expect(clipQuote("오늘 마음, 맞지? 🌸")).toBe("오늘 마음, 맞지?");

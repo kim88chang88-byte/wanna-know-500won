@@ -1,4 +1,5 @@
 import type { ElementKind, PremiumReportView } from "@/lib/premium/types";
+import PremiumBook from "./PremiumBook";
 
 const ELEMENT_STYLE: Record<ElementKind, { bar: string; chip: string }> = {
   wood: { bar: "bg-emerald-500", chip: "bg-emerald-50 text-emerald-700" },
@@ -14,6 +15,8 @@ const H2 = "font-serifKr font-bold text-lg text-brand-700 mb-4";
 
 export default function ManseReport({ report }: { report: PremiumReportView }) {
   const max = Math.max(1, ...report.elements.map((e) => e.count));
+  // 프리미엄: 10페이지 상세 리포트
+  if (report.level === "full" && report.book.length > 0) return <PremiumBook report={report} />;
 
   return (
     <div data-testid="manse-report" className="space-y-6">
@@ -125,7 +128,7 @@ export default function ManseReport({ report }: { report: PremiumReportView }) {
             )}
             {report.hyungsin.length > 0 && (
               <>
-                <dt className="font-bold text-brand-600">흉신</dt>
+                <dt className="font-bold text-brand-600">주의 신살</dt>
                 <dd className="text-slate-700">{report.hyungsin.join(", ")}</dd>
               </>
             )}

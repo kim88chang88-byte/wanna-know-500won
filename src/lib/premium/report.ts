@@ -1,6 +1,7 @@
 import { calculateSaju } from "ssaju";
 import { STEMS } from "@/lib/saju/constants";
 import type { BirthInput } from "@/lib/saju/types";
+import { buildBook } from "./book";
 import { buildTopicInsight, resolveTopic } from "./topic";
 import type { DaeunView, ElementKind, ElementView, PillarView, PremiumReportView, ReportLevel, SeyunView } from "./types";
 
@@ -127,6 +128,9 @@ export function buildPremiumReport(input: BirthInput, now: Date = new Date(), le
   const seyun: SeyunView | null = sy ? { year: sy.year, ganzhi: sy.ganzhi, tenGodStem: sy.tenGodStem, tenGodBranch: sy.tenGodBranch } : null;
 
   const full = level === "full";
+  const topicKey = resolveTopic(topicRaw);
+  const topic = buildTopicInsight(topicKey, r, { elements, hourUnknown, level });
+  const gradeLabel = GRADE[r.advanced.dayStrength.strength] ?? r.advanced.dayStrength.strength;
   return {
     level,
     pillars,
@@ -140,6 +144,7 @@ export function buildPremiumReport(input: BirthInput, now: Date = new Date(), le
     seyun: full ? seyun : null,
     summary: full ? r.advanced.interpretation : "",
     hourUnknown,
-    topic: buildTopicInsight(resolveTopic(topicRaw), r, { elements, hourUnknown, level }),
+    topic,
+    book: full ? buildBook(r, { elements, pillars, hourUnknown, topicKey, insight: topic, gradeLabel }) : [],
   };
 }

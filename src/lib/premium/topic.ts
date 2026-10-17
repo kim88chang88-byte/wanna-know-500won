@@ -32,8 +32,8 @@ export function resolveTopic(raw: unknown): TopicKey {
   return hit ? hit[0] : "general";
 }
 
-type Group = "비겁" | "식상" | "재성" | "관성" | "인성";
-const GROUPS: Group[] = ["비겁", "식상", "재성", "관성", "인성"];
+export type Group = "비겁" | "식상" | "재성" | "관성" | "인성";
+export const GROUPS: Group[] = ["비겁", "식상", "재성", "관성", "인성"];
 const GROUP_OF: Record<string, Group> = {
   비견: "비겁",
   겁재: "비겁",
@@ -47,7 +47,7 @@ const GROUP_OF: Record<string, Group> = {
   정인: "인성",
 };
 
-const ELEMENT_INFO: Record<string, { color: string; hex: string; direction: string; trait: string }> = {
+export const ELEMENT_INFO: Record<string, { color: string; hex: string; direction: string; trait: string }> = {
   목: { color: "민트 그린", hex: "#8FD3B6", direction: "동쪽", trait: "성장하고 배려하는 따뜻한 사람" },
   화: { color: "코랄 핑크", hex: "#FF9AA2", direction: "남쪽", trait: "밝고 열정적인 사람" },
   토: { color: "크림 베이지", hex: "#E8D3A8", direction: "가운데(중앙)", trait: "듬직하고 안정감 있는 사람" },
@@ -68,7 +68,7 @@ const SPOUSE_PALACE: Record<string, string> = {
   정인: "배려받고 이해받는다고 느낄 때 가장 안정감을 느끼는 스타일이에요.",
 };
 
-const GROUP_TRAIT: Record<Group, string> = {
+export const GROUP_TRAIT: Record<Group, string> = {
   비겁: "독립심과 자기 주관",
   식상: "표현력과 아이디어",
   재성: "현실 감각과 실속",
@@ -85,7 +85,7 @@ const GROUP_TAG: Record<Group, string> = {
 };
 
 /** 올해 세운·현재 대운이 어떤 십성 기운인지에 따른 한 줄 (주제별 문장 아래 공통으로 써요) */
-const FLOW_LINE: Record<Group, string> = {
+export const FLOW_LINE: Record<Group, string> = {
   비겁: "나 자신과 주변 사람들의 기운이 강해지는 흐름이에요. 주관이 또렷해지는 만큼 비교나 경쟁에서는 여유를 갖는 게 좋아요.",
   식상: "표현하고 만들어 내는 기운이 커지는 흐름이에요. 아이디어나 감정을 밖으로 꺼낼수록 좋은 일이 생기기 쉬워요.",
   재성: "현실적인 결과와 실속이 눈에 들어오는 흐름이에요. 계획을 세우고 움직이면 손에 잡히는 성과를 만들기 좋아요.",
@@ -155,7 +155,7 @@ const KEYWORD: Record<TopicKey, string> = {
   general: "#퐁당운세",
 };
 
-function groupOf(god: string | undefined): Group | null {
+export function groupOf(god: string | undefined): Group | null {
   return god ? (GROUP_OF[god] ?? null) : null;
 }
 
