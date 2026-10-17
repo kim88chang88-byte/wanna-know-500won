@@ -29,7 +29,7 @@ export async function POST(request: Request) {
   if (!parsed.ok) return NextResponse.json({ code: "bad_request", error: parsed.error }, { status: 400 });
 
   try {
-    return NextResponse.json({ report: buildPremiumReport(parsed.value, new Date(), parsed.level) });
+    return NextResponse.json({ report: buildPremiumReport(parsed.value, new Date(), parsed.level, parsed.topic) });
   } catch (err) {
     // 없는 날짜(예: 윤달이 없는 해의 윤달)처럼 계산할 수 없는 입력이에요.
     console.error("premium report failed:", err instanceof Error ? err.message : "unknown");

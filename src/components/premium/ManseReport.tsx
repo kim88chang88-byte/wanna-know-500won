@@ -17,6 +17,39 @@ export default function ManseReport({ report }: { report: PremiumReportView }) {
 
   return (
     <div data-testid="manse-report" className="space-y-6">
+      <section aria-labelledby="topic-h" data-testid="topic-card" className="rounded-3xl bg-gradient-to-br from-violet-50 via-white to-sky-50 border border-violet-100 p-5 sm:p-6 shadow-[0_8px_30px_rgba(120,100,220,0.10)]">
+        <h2 id="topic-h" className="font-serifKr font-bold text-lg text-brand-700">
+          <span aria-hidden="true">{report.topic.emoji}</span> {report.topic.label} 분석
+        </h2>
+        <p data-testid="topic-headline" className="mt-2 font-serifKr font-bold text-[15px] leading-snug text-slate-800">
+          {report.topic.headline}
+        </p>
+        <ul className="mt-4 space-y-3">
+          {report.topic.points.map((pt) => (
+            <li key={pt.title} data-testid="topic-point" className="rounded-2xl bg-white/80 border border-violet-100 px-4 py-3">
+              <div className="text-xs font-bold text-violet-600">{pt.title}</div>
+              <p className="mt-1 text-sm leading-relaxed text-slate-700">{pt.body}</p>
+            </li>
+          ))}
+        </ul>
+        {report.topic.timing.length > 0 && (
+          <div data-testid="topic-timing" className="mt-4">
+            <div className="text-xs font-bold text-brand-600 mb-2">올해와 지금의 흐름</div>
+            <ul className="space-y-2">
+              {report.topic.timing.map((t) => (
+                <li key={t.title} className="rounded-2xl bg-brand-50 border border-brand-100 px-4 py-3">
+                  <div className="text-xs font-bold text-brand-700">{t.title}</div>
+                  <p className="mt-1 text-sm leading-relaxed text-slate-700">{t.body}</p>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+        {report.level === "basic" && (
+          <p className="mt-4 text-[11px] text-slate-500">올해·대운 흐름과 더 깊은 분석은 프리미엄 리포트에서 볼 수 있어요.</p>
+        )}
+      </section>
+
       <section aria-labelledby="pillars-h" className={CARD}>
         <h2 id="pillars-h" className={H2}>
           사주 원국

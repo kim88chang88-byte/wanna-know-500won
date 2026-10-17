@@ -1,6 +1,7 @@
 import { calculateSaju } from "ssaju";
 import { STEMS } from "@/lib/saju/constants";
 import type { BirthInput } from "@/lib/saju/types";
+import { buildTopicInsight, resolveTopic } from "./topic";
 import type { DaeunView, ElementKind, ElementView, PillarView, PremiumReportView, ReportLevel, SeyunView } from "./types";
 
 const PILLARS: { key: PillarView["key"]; label: string }[] = [
@@ -30,7 +31,7 @@ function isRecord(v: unknown): v is Record<string, unknown> {
   return typeof v === "object" && v !== null;
 }
 
-export type ValidationResult = { ok: true; value: BirthInput; level: ReportLevel } | { ok: false; error: string };
+export type ValidationResult = { ok: true; value: BirthInput; level: ReportLevel; topic: string } | { ok: false; error: string };
 
 /** 서버 입력 검사. /api/reading 과 같은 BirthInput 모양을 받아요. */
 export function validatePremiumInput(raw: unknown): ValidationResult {
@@ -59,6 +60,7 @@ export function validatePremiumInput(raw: unknown): ValidationResult {
   return {
     ok: true,
     level,
+    topic: typeof raw.topic === "string" ? raw.topic.slice(0, 40) : "",
     value: { year, month, day, hour, minute, calendar: raw.calendar, isLeapMonth: raw.isLeapMonth === true, gender: raw.gender },
   };
 }
@@ -71,7 +73,7 @@ export function validatePremiumInput(raw: unknown): ValidationResult {
  * ssaju 는 순수 계산 라이브러리라 API 키도, 외부 호출도 없어요.
  * 잘못된 날짜(없는 음력 윤달 등)면 ssaju 가 던진 Error 를 그대로 던져요.
  */
-export function buildPremiumReport(input: BirthInput, now: Date = new Date(), level: ReportLevel = "full"): PremiumReportView {
+export function buildPremiumReport(input: BirthInput, now: Date = new Date(), level: ReportLevel = "full", topicRaw: unknown = ""): PremiumReportView {
   const hourUnknown = input.hour === null || input.hour === undefined;
   const r = calculateSaju({
     year: input.year,
@@ -138,5 +140,6 @@ export function buildPremiumReport(input: BirthInput, now: Date = new Date(), le
     seyun: full ? seyun : null,
     summary: full ? r.advanced.interpretation : "",
     hourUnknown,
+    topic: buildTopicInsight(resolveTopic(topicRaw), r, { elements, hourUnknown, level }),
   };
 }

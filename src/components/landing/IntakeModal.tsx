@@ -11,11 +11,11 @@ import {
   type IntakeForm,
   type StepId,
 } from "@/lib/intake";
-import { normalizeTopic, TOPIC_LABEL, type PublicReading } from "@/lib/ai/reading";
+import type { PublicReading } from "@/lib/ai/reading";
 import { BRANCHES, STEMS } from "@/lib/saju/constants";
 import type { Pillar, SajuChart } from "@/lib/saju/types";
 import { CloseButton, ModalShell } from "./Modals";
-import ResultCard from "./ResultCard";
+import PhotoCard from "./PhotoCard";
 import ManseReport from "@/components/premium/ManseReport";
 import type { PremiumReportView } from "@/lib/premium/types";
 import type { BirthInput } from "@/lib/saju/types";
@@ -73,12 +73,12 @@ function ChoiceButton({
 type ReadingStatus = "ok" | "unavailable" | "failed";
 
 /** 프리미엄 리포트를 받아요. 실패해도 예외 대신 사용자에게 보여 줄 문장을 돌려줘요. */
-async function fetchPremiumReport(input: BirthInput, level: "basic" | "full", signal: AbortSignal): Promise<{ report: PremiumReportView | null; error: string | null }> {
+async function fetchPremiumReport(input: BirthInput, level: "basic" | "full", topic: string, signal: AbortSignal): Promise<{ report: PremiumReportView | null; error: string | null }> {
   try {
     const res = await fetch("/api/premium", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...input, level }),
+      body: JSON.stringify({ ...input, level, topic }),
       signal,
     });
     const data = (await res.json().catch(() => null)) as { report?: PremiumReportView; error?: string } | null;
@@ -88,11 +88,6 @@ async function fetchPremiumReport(input: BirthInput, level: "basic" | "full", si
     if (signal.aborted) return { report: null, error: null };
     return { report: null, error: "사주 리포트를 불러오지 못했어요. 잠시 뒤에 다시 시도해 주세요." };
   }
-}
-
-/** "연애운 슬롯" 같은 화면 문구를 "연애운" 처럼 카드에 쓸 이름으로 줄여요. 주제를 못 찾으면 "오늘의 운". */
-function topicLabel(fortune: string): string {
-  return TOPIC_LABEL[normalizeTopic(fortune)];
 }
 
 function PillarCell({ pillar }: { pillar: Pillar | null }) {
@@ -128,7 +123,6 @@ export default function IntakeModal({ target, onClose, onComplete }: Props) {
   const [chart, setChart] = useState<SajuChart | null>(null);
   const [reading, setReading] = useState<PublicReading | null>(null);
   const [readingStatus, setReadingStatus] = useState<ReadingStatus>("ok");
-  const [unlockNotice, setUnlockNotice] = useState(false);
   const [premiumReport, setPremiumReport] = useState<PremiumReportView | null>(null);
   const [premiumError, setPremiumError] = useState<string | null>(null);
   const abortRef = useRef<AbortController | null>(null);
@@ -153,7 +147,7 @@ export default function IntakeModal({ target, onClose, onComplete }: Props) {
     abortRef.current = ctrl;
     try {
       // 사주 리포트도 함께 받아요. 프리미엄은 전체, 일반 자판기는 기본(원국·오행·신강신약). 실패해도 기본 풀이는 그대로 보여줘요.
-      const premiumPromise = fetchPremiumReport(input, target.premium ? "full" : "basic", ctrl.signal);
+      const premiumPromise = fetchPremiumReport(input, target.premium ? "full" : "basic", target.fortune, ctrl.signal);
       const res = await fetch("/api/reading", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -169,18 +163,17 @@ export default function IntakeModal({ target, onClose, onComplete }: Props) {
       } | null;
       if (!res.ok || !data?.chart) throw new Error(data?.error ?? "캡슐을 만들지 못했어요. 잠시 뒤에 다시 해볼래요?");
       const status: ReadingStatus = data.readingStatus ?? "failed";
-      {
-        const p = await premiumPromise;
-        if (ctrl.signal.aborted) return;
-        setPremiumReport(p.report);
-        setPremiumError(p.error);
-      }
+      const p = await premiumPromise;
+      if (ctrl.signal.aborted) return;
+      setPremiumReport(p.report);
+      setPremiumError(p.error);
       setChart(data.chart);
       setReading(data.reading ?? null);
       setReadingStatus(status);
       setPhase("result");
-      // 풀이를 실제로 받았을 때만 뽑기 횟수로 세요.
+      // 풀이(AI 한마디 또는 사주 리포트)를 실제로 받았을 때만 뽑기 횟수로 세요.
       if (status === "ok" && data.reading) onComplete(data.counts ?? null);
+      else if (p.report) onComplete(null);
     } catch (err) {
       if (ctrl.signal.aborted) return;
       setError(err instanceof Error ? err.message : "알 수 없는 오류가 생겼어요.");
@@ -240,46 +233,32 @@ export default function IntakeModal({ target, onClose, onComplete }: Props) {
 
       {phase === "result" && chart && (
         <div data-testid="intake-result">
-          {reading ? (
+          {premiumReport ? (
             <>
-              <ResultCard reading={reading} topicLabel={topicLabel(target.fortune)} />
+              {/* 1) 인스타 감성 포토카드 + 공유 */}
+              <PhotoCard report={premiumReport} aiQuote={reading?.kkotgeoji ?? null} />
 
-              <p className="mt-3 text-center text-[11px] text-gray-500">도리가 더 할 말이 있대요 👀</p>
-              <button
-                type="button"
-                onClick={() => setUnlockNotice(true)}
-                className="mt-1 w-full py-2.5 rounded-full bg-gradient-to-r from-brand-500 to-indigo-600 text-white font-serifKr font-bold text-sm shadow-md"
-              >
-                500원으로 전부 듣기
-              </button>
-              {unlockNotice && (
-                <p role="status" className="mt-2 text-center text-[11px] font-bold text-brand-600">
-                  결제는 아직 준비 중이에요. 곧 열릴 예정이에요 🫧
+              {/* 2) 주제별 맞춤 분석 + 사주 리포트 */}
+              <div data-testid="premium-result" className="mt-6">
+                <ManseReport report={premiumReport} />
+              </div>
+            </>
+          ) : (
+            <>
+              <p role="status" data-testid="premium-error" className="p-4 rounded-2xl bg-amber-50 border border-amber-200 text-center text-sm text-amber-800">
+                {premiumError ?? "사주 리포트를 불러오지 못했어요."}
+              </p>
+              {reading?.kkotgeoji && (
+                <p data-testid="reading-quote" className="mt-3 p-4 rounded-2xl bg-brand-50/60 border border-brand-100 text-center font-serifKr text-sm text-gray-800 leading-relaxed">
+                  {reading.kkotgeoji}
+                </p>
+              )}
+              {!reading && readingStatus !== "unavailable" && (
+                <p data-testid="reading-missing" className="mt-3 text-center text-xs text-gray-500">
+                  도리가 잠깐 물놀이하러 갔어요. 잠시 뒤에 다시 뽑아볼래요?
                 </p>
               )}
             </>
-          ) : (
-            !premiumReport && (
-            <div className="p-4 rounded-2xl bg-brand-50/60 border border-brand-100 text-center" data-testid="reading-missing">
-              <p className="font-serifKr text-sm text-gray-800 leading-relaxed">
-                {readingStatus === "unavailable"
-                  ? "도리의 한마디는 아직 준비 중이에요."
-                  : "도리가 잠깐 물놀이하러 갔어요. 잠시 뒤에 다시 뽑아볼래요?"}
-              </p>
-            </div>
-            )
-          )}
-
-          {(premiumReport || premiumError) && (
-            <div data-testid="premium-result" className="mt-4">
-              {premiumReport ? (
-                <ManseReport report={premiumReport} />
-              ) : (
-                <p role="status" data-testid="premium-error" className="p-4 rounded-2xl bg-amber-50 border border-amber-200 text-center text-sm text-amber-800">
-                  {premiumError ?? "사주 리포트를 불러오지 못했어요."}
-                </p>
-              )}
-            </div>
           )}
 
           {!premiumReport && (
@@ -326,9 +305,10 @@ export default function IntakeModal({ target, onClose, onComplete }: Props) {
           <button
             type="button"
             onClick={onClose}
-            className="mt-3 w-full py-2.5 rounded-full border border-brand-200 text-brand-700 font-serifKr font-bold text-sm hover:bg-brand-50 transition-colors"
+            data-testid="close-result"
+            className="mt-3 w-full py-2 text-xs font-bold text-gray-400 hover:text-gray-600 transition-colors"
           >
-            확인했어요 ✧
+            닫기
           </button>
         </div>
       )}

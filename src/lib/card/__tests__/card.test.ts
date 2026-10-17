@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { toPublicReading, type Reading } from "@/lib/ai/reading";
-import { buildCardData, cardAltText, cardFileName, formatDate } from "../data";
+import { buildPremiumReport } from "@/lib/premium/report";
+import type { BirthInput } from "@/lib/saju/types";
+import { buildPhotoCardData, clipQuote, formatDate, photoAltText, photoFileName, shareCaption } from "../photoData";
 import { fitText, wrapText } from "../text";
 
 /** 글자 하나를 폭 10 으로 치는 가짜 측정기 (공백은 4) */
@@ -46,39 +47,55 @@ describe("fitText", () => {
   });
 });
 
-const reading: Reading = {
-  keyword: "설렘 충전",
-  total: { score: 4, summary: "마음이 한결 가벼워지는 하루야." },
-  love: { score: 5, comment: "SECRET-LOVE" },
-  money: { score: 3, comment: "SECRET-MONEY" },
-  mind: { score: 4, comment: "SECRET-MIND" },
-  kkotgeoji: "오늘 이 마음, 맞지?",
-};
+const input: BirthInput = { year: 1990, month: 7, day: 13, hour: 8, minute: 30, calendar: "solar", isLeapMonth: false, gender: "female" };
+const report = buildPremiumReport(input, new Date("2026-10-18T00:00:00+09:00"), "basic", "연애운");
 
-describe("buildCardData", () => {
-  const data = buildCardData(toPublicReading(reading), "연애운", new Date(2026, 9, 16));
-  it("카드에 필요한 값만 담는다", () => {
-    expect(data.keyword).toBe("설렘 충전");
-    expect(data.dateLabel).toBe("2026.10.16");
-    expect(data.indicators).toEqual([
-      { label: "연애운", score: 5 },
-      { label: "금전운", score: 3 },
-      { label: "마음운", score: 4 },
-    ]);
+describe("buildPhotoCardData", () => {
+  const date = new Date(2026, 9, 18);
+  const data = buildPhotoCardData(report, { date, siteLabel: "example.vercel.app" });
+  it("주제별 분석에서 카드에 필요한 값만 가져온다", () => {
+    expect(data.topic).toBe("love");
+    expect(data.topicLabel).toBe("연애운");
+    expect(data.headline).toBe(report.topic.headline);
+    expect(data.quote).toBe(report.topic.quote);
+    expect(data.tags).toEqual(report.topic.tags);
+    expect(data.dateLabel).toBe("2026.10.18");
+    expect(data.siteLabel).toBe("example.vercel.app");
   });
-  it("잠긴 풀이 문장은 어디에도 들어가지 않는다", () => {
-    const all = JSON.stringify(data) + cardAltText(data);
-    expect(/SECRET/.test(all)).toBe(false);
+  it("AI 한마디가 있으면 그 문장을 쓰고, 길면 줄인다", () => {
+    const ai = buildPhotoCardData(report, { date, siteLabel: "x", aiQuote: "오늘 마음, 맞지? 천천히 가도 괜찮아." });
+    expect(ai.quote).toBe("오늘 마음, 맞지? 천천히 가도 괜찮아.");
+    const long = buildPhotoCardData(report, { date, siteLabel: "x", aiQuote: "가".repeat(200) });
+    expect(Array.from(long.quote).length).toBeLessThanOrEqual(65);
   });
-  it("읽기용 설명에 핵심 내용이 모두 있다", () => {
-    const alt = cardAltText(data);
-    for (const s of ["연애운 캡슐", "설렘 충전", "4점", "금전운 3점", "오늘 이 마음, 맞지?"]) expect(alt.includes(s)).toBe(true);
+  it("사주 원국 같은 자세한 풀이 문장은 카드에 넣지 않는다", () => {
+    const all = JSON.stringify(data);
+    expect(all.includes("庚午")).toBe(false);
+  });
+  it("읽기용 설명과 공유 문구에 핵심 내용이 있다", () => {
+    const alt = photoAltText(data);
+    for (const s of ["연애운 포토카드", data.headline, data.quote, data.lucky.color]) expect(alt.includes(s)).toBe(true);
+    const cap = shareCaption(data, "https://example.vercel.app");
+    for (const s of [data.headline, ...data.tags, "#도리운세사주", "https://example.vercel.app"]) expect(cap.includes(s)).toBe(true);
+  });
+});
+
+describe("clipQuote", () => {
+  it("이모지는 캔버스에서 깨지지 않도록 뺀다", () => {
+    expect(clipQuote("오늘 마음, 맞지? 🌸")).toBe("오늘 마음, 맞지?");
+  });
+  it("짧으면 그대로, 공백은 정리", () => {
+    expect(clipQuote("  안녕   하세요 ")).toBe("안녕 하세요");
+  });
+  it("문장 끝에서 자연스럽게 자른다", () => {
+    const t = "오늘은 천천히 가도 괜찮아요. " + "나".repeat(80);
+    expect(clipQuote(t, 30)).toBe("오늘은 천천히 가도 괜찮아요.");
   });
 });
 
 describe("파일 이름/날짜", () => {
   it("월·일을 두 자리로 맞춘다", () => {
     expect(formatDate(new Date(2026, 0, 5))).toBe("2026.01.05");
-    expect(cardFileName(new Date(2026, 9, 16))).toBe("kkotgeoji-capsule-20261016.png");
+    expect(photoFileName("love", new Date(2026, 9, 18))).toBe("dori-photocard-love-20261018.png");
   });
 });
