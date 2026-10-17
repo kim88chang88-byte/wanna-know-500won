@@ -94,6 +94,7 @@ export async function POST(request: Request) {
   // 풀이가 정상으로 나갔을 때만 뽑기 1회로 기록해요. (실패한 요청은 세지 않아요)
   if (userId && db && readingStatus === "ok" && reading) {
     try {
+      await db.ensureUser(userId, session?.nick);
       await db.recordDraw(userId, normalizeTopic(rawTopic));
       counts = counts ? { today: counts.today + 1, month: counts.month + 1 } : null;
     } catch (err) {

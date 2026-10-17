@@ -77,6 +77,18 @@ export function createDb(config: DbConfig, fetchImpl: FetchLike = fetch) {
       });
     },
 
+    /**
+     * 회원 행이 없을 때만 만들어요. (이미 있으면 건드리지 않아요)
+     * DB 를 연결하기 전에 로그인해 둔 사람처럼 로그인 쿠키만 있는 경우를 바로잡고, 뽑기 기록이 회원 행 없이 실패하는 일을 막아요.
+     */
+    async ensureUser(id: string, nickname: string | undefined): Promise<void> {
+      await call("users?on_conflict=id", {
+        method: "POST",
+        headers: headers({ Prefer: "resolution=ignore-duplicates,return=minimal" }),
+        body: JSON.stringify({ id: safeId(id), nickname: nickname ?? null }),
+      });
+    },
+
     /** 오늘(한국 시간)·이번 달 뽑기 횟수 */
     async getCounts(userId: string, now: Date = new Date()): Promise<DrawCounts> {
       const id = safeId(userId);

@@ -56,6 +56,15 @@ describe("createDb", () => {
     expect(JSON.parse(String(r.calls[0].init?.body))).toEqual({ id: "123", nickname: "별이", last_login_at: "2026-10-17T00:00:00.000Z" });
   });
 
+  it("ensureUser: 이미 있으면 건드리지 않는 방식으로 보내요", async () => {
+    const r = recorder(() => new Response(null, { status: 201 }));
+    await createDb(cfg, r.f).ensureUser("n_abc", undefined);
+    expect(r.calls[0].url).toBe("https://x.supabase.co/rest/v1/users?on_conflict=id");
+    const h = r.calls[0].init?.headers as Record<string, string>;
+    expect(h.Prefer).toBe("resolution=ignore-duplicates,return=minimal");
+    expect(JSON.parse(String(r.calls[0].init?.body))).toEqual({ id: "n_abc", nickname: null });
+  });
+
   it("getCounts: 오늘·이번 달 조건과 Content-Range 를 읽어요", async () => {
     const r = recorder((url) =>
       new Response("[]", { status: 206, headers: { "content-range": url.includes("day=eq.") ? "0-0/2" : "0-0/9" } }),
