@@ -1,12 +1,8 @@
 import type { KakaoConfig } from "./kakao";
 import { isSecretValid } from "./session";
 
-export interface AuthEnv {
-  KAKAO_CLIENT_ID?: string;
-  KAKAO_CLIENT_SECRET?: string;
-  KAKAO_REDIRECT_URI?: string;
-  AUTH_SECRET?: string;
-}
+/** 환경변수 모음. (process.env 를 그대로 넘길 수 있게 아무 이름이나 받아요) */
+export type AuthEnv = Record<string, string | undefined>;
 
 /** 로그인에 필요한 설정이 다 있을 때만 값을 돌려줘요. (없으면 null → "준비 중" 안내) */
 export function loadAuthConfig(
