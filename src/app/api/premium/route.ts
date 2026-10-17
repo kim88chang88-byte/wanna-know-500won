@@ -1,10 +1,9 @@
 import { NextResponse } from "next/server";
+import { buildPremiumReport, validatePremiumInput } from "@/lib/premium/report";
 import { createRateLimiter } from "@/lib/rateLimit";
-import { fetchManse, toErrorResponse } from "@/lib/sazu/client";
-import { parseManseResult, validateSazuInput } from "@/lib/sazu/report";
 
-// SAZU 호출은 월 호출 한도가 있는 외부 API 라서, 한 주소(IP)에서 1분에 5번까지만 받아요.
-const limiter = createRateLimiter(5, 60_000);
+// 계산은 가볍지만, 한 주소(IP)에서 마구 부르지 못하게 1분에 20번까지만 받아요.
+const limiter = createRateLimiter(20, 60_000);
 
 function clientKey(request: Request): string {
   const forwarded = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim();
@@ -26,14 +25,17 @@ export async function POST(request: Request) {
   } catch {
     return NextResponse.json({ code: "bad_request", error: "잘못된 요청입니다." }, { status: 400 });
   }
-  const parsed = validateSazuInput(raw);
+  const parsed = validatePremiumInput(raw);
   if (!parsed.ok) return NextResponse.json({ code: "bad_request", error: parsed.error }, { status: 400 });
 
   try {
-    const result = await fetchManse(parsed.value);
-    return NextResponse.json({ report: parseManseResult(result) });
+    return NextResponse.json({ report: buildPremiumReport(parsed.value) });
   } catch (err) {
-    const { status, body } = toErrorResponse(err);
-    return NextResponse.json(body, { status });
+    // 없는 날짜(예: 윤달이 없는 해의 윤달)처럼 계산할 수 없는 입력이에요.
+    console.error("premium report failed:", err instanceof Error ? err.message : "unknown");
+    return NextResponse.json(
+      { code: "bad_request", error: "입력한 날짜로는 리포트를 만들 수 없어요. 생년월일(음력·윤달 포함)을 다시 확인해 주세요." },
+      { status: 400 },
+    );
   }
 }

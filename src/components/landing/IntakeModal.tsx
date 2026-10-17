@@ -17,14 +17,14 @@ import type { Pillar, SajuChart } from "@/lib/saju/types";
 import { CloseButton, ModalShell } from "./Modals";
 import ResultCard from "./ResultCard";
 import ManseReport from "@/components/premium/ManseReport";
-import type { ManseReportView, SazuFormInput } from "@/lib/sazu/types";
+import type { PremiumReportView } from "@/lib/premium/types";
 import type { BirthInput } from "@/lib/saju/types";
 
 export interface IntakeTarget {
   /** 어떤 뽑기에서 열었는지 (예: "연애운") */
   fortune: string;
   price: string;
-  /** 프리미엄 자판기에서 열었으면 true. SAZU 만세력 리포트를 함께 보여줘요. */
+  /** 프리미엄 자판기에서 열었으면 true. 사주 리포트(원국·오행·신강신약·대운)를 함께 보여줘요. */
   premium?: boolean;
 }
 
@@ -72,32 +72,16 @@ function ChoiceButton({
 
 type ReadingStatus = "ok" | "unavailable" | "failed";
 
-const DEFAULT_BIRTH_CITY = "서울";
-
-/** 입력창에서 받은 값을 SAZU 만세력 API 입력으로 바꿔요. (출생 도시는 묻지 않아 서울로 둬요) */
-function toSazuInput(b: BirthInput): SazuFormInput {
-  return {
-    year: b.year,
-    month: b.month,
-    day: b.day,
-    hour: b.hour ?? null,
-    minute: b.hour == null ? null : (b.minute ?? 0),
-    isFemale: b.gender === "female",
-    isLunar: b.calendar === "lunar",
-    city: DEFAULT_BIRTH_CITY,
-  };
-}
-
 /** 프리미엄 리포트를 받아요. 실패해도 예외 대신 사용자에게 보여 줄 문장을 돌려줘요. */
-async function fetchPremiumReport(input: BirthInput, signal: AbortSignal): Promise<{ report: ManseReportView | null; error: string | null }> {
+async function fetchPremiumReport(input: BirthInput, signal: AbortSignal): Promise<{ report: PremiumReportView | null; error: string | null }> {
   try {
-    const res = await fetch("/api/sazu", {
+    const res = await fetch("/api/premium", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(toSazuInput(input)),
+      body: JSON.stringify(input),
       signal,
     });
-    const data = (await res.json().catch(() => null)) as { report?: ManseReportView; error?: string } | null;
+    const data = (await res.json().catch(() => null)) as { report?: PremiumReportView; error?: string } | null;
     if (res.ok && data?.report) return { report: data.report, error: null };
     return { report: null, error: data?.error ?? "프리미엄 리포트를 불러오지 못했어요. 잠시 뒤에 다시 시도해 주세요." };
   } catch {
@@ -145,7 +129,7 @@ export default function IntakeModal({ target, onClose, onComplete }: Props) {
   const [reading, setReading] = useState<PublicReading | null>(null);
   const [readingStatus, setReadingStatus] = useState<ReadingStatus>("ok");
   const [unlockNotice, setUnlockNotice] = useState(false);
-  const [premiumReport, setPremiumReport] = useState<ManseReportView | null>(null);
+  const [premiumReport, setPremiumReport] = useState<PremiumReportView | null>(null);
   const [premiumError, setPremiumError] = useState<string | null>(null);
   const abortRef = useRef<AbortController | null>(null);
 
@@ -168,7 +152,7 @@ export default function IntakeModal({ target, onClose, onComplete }: Props) {
     const ctrl = new AbortController();
     abortRef.current = ctrl;
     try {
-      // 프리미엄이면 SAZU 리포트도 함께 받아요. (실패해도 기본 풀이는 그대로 보여줘요)
+      // 프리미엄이면 사주 리포트도 함께 받아요. (실패해도 기본 풀이는 그대로 보여줘요)
       const premiumPromise = target.premium ? fetchPremiumReport(input, ctrl.signal) : null;
       const res = await fetch("/api/reading", {
         method: "POST",

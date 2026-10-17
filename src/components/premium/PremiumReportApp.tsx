@@ -1,10 +1,10 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-import type { ManseReportView, SazuErrorBody, SazuFormInput } from "@/lib/sazu/types";
+import type { PremiumErrorBody, PremiumReportView } from "@/lib/premium/types";
+import type { BirthInput } from "@/lib/saju/types";
 import ManseReport from "./ManseReport";
 
-const CITIES = ["서울", "부산", "대구", "인천", "광주", "대전", "울산", "세종", "수원", "제주"];
 const field = "w-full rounded-2xl border border-brand-200 bg-white px-4 py-3 text-base text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-300";
 const seg = (active: boolean) =>
   `flex-1 rounded-full py-2.5 text-sm font-bold border transition-colors ${active ? "bg-brand-500 text-white border-brand-500" : "bg-white text-brand-600 border-brand-200"}`;
@@ -15,10 +15,10 @@ export default function PremiumReportApp() {
   const [timeUnknown, setTimeUnknown] = useState(false);
   const [isFemale, setIsFemale] = useState<boolean | null>(null);
   const [isLunar, setIsLunar] = useState(false);
-  const [city, setCity] = useState("서울");
+  const [isLeap, setIsLeap] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [report, setReport] = useState<ManseReportView | null>(null);
+  const [report, setReport] = useState<PremiumReportView | null>(null);
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
@@ -27,20 +27,20 @@ export default function PremiumReportApp() {
     if (!m) return setError("생년월일을 입력해 주세요.");
     if (isFemale === null) return setError("성별을 선택해 주세요.");
     const [hh, mm] = time.split(":").map(Number);
-    const body: SazuFormInput = {
+    const body: BirthInput = {
       year: Number(m[1]),
       month: Number(m[2]),
       day: Number(m[3]),
       hour: timeUnknown || Number.isNaN(hh) ? null : hh,
       minute: timeUnknown || Number.isNaN(mm) ? null : mm,
-      isFemale,
-      isLunar,
-      city: city.trim(),
+      calendar: isLunar ? "lunar" : "solar",
+      isLeapMonth: isLunar && isLeap,
+      gender: isFemale ? "female" : "male",
     };
     setBusy(true);
     try {
-      const res = await fetch("/api/sazu", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) });
-      const json = (await res.json()) as { report?: ManseReportView } & Partial<SazuErrorBody>;
+      const res = await fetch("/api/premium", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) });
+      const json = (await res.json()) as { report?: PremiumReportView } & Partial<PremiumErrorBody>;
       if (!res.ok || !json.report) {
         setError(json.error ?? "리포트를 만들지 못했어요. 잠시 뒤에 다시 시도해 주세요.");
         return;
@@ -79,6 +79,12 @@ export default function PremiumReportApp() {
             음력
           </button>
         </div>
+        {isLunar && (
+          <label className="mt-2 flex items-center gap-2 text-sm text-slate-600">
+            <input type="checkbox" checked={isLeap} onChange={(e) => setIsLeap(e.target.checked)} className="h-4 w-4 accent-brand-500" />
+            윤달이에요
+          </label>
+        )}
       </div>
 
       <div>
@@ -102,18 +108,6 @@ export default function PremiumReportApp() {
             남성
           </button>
         </div>
-      </div>
-
-      <div>
-        <label htmlFor="birth-city" className="block text-sm font-bold text-slate-700 mb-1.5">
-          출생 도시 <span className="font-normal text-slate-400">(진태양시 보정에 써요)</span>
-        </label>
-        <input id="birth-city" list="city-list" value={city} onChange={(e) => setCity(e.target.value)} maxLength={20} className={field} />
-        <datalist id="city-list">
-          {CITIES.map((c) => (
-            <option key={c} value={c} />
-          ))}
-        </datalist>
       </div>
 
       {error && (
