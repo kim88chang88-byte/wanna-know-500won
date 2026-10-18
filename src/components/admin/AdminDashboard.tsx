@@ -68,6 +68,7 @@ function Kpi({ label, value, testId }: { label: string; value: number; testId: s
 export default function AdminDashboard() {
   const [days, setDays] = useState<number>(30);
   const [state, setState] = useState<State>({ kind: "loading" });
+  const [hideError, setHideError] = useState<string | null>(null);
 
   const load = useCallback(async (d: number) => {
     setState({ kind: "loading" });
@@ -82,6 +83,21 @@ export default function AdminDashboard() {
       setState({ kind: "error", message: "네트워크 오류가 났어요. 잠시 뒤에 다시 시도해 주세요." });
     }
   }, []);
+
+  async function toggleHidden(id: number, hidden: boolean) {
+    setHideError(null);
+    try {
+      const res = await fetch("/api/admin/reviews", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id, hidden }) });
+      if (!res.ok) throw new Error();
+      setState((cur) => {
+        if (cur.kind !== "ok") return cur;
+        const list = cur.stats.reviews.list.map((r) => (r.id === id ? { ...r, hidden } : r));
+        return { kind: "ok", stats: { ...cur.stats, reviews: { ...cur.stats.reviews, list } } };
+      });
+    } catch {
+      setHideError("처리하지 못했어요. 잠시 뒤에 다시 시도해 주세요.");
+    }
+  }
 
   useEffect(() => {
     void load(days);
@@ -160,12 +176,81 @@ export default function AdminDashboard() {
               </a>
             </div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
               <Kpi label="전체 회원" value={state.stats.totals.users} testId="kpi-users" />
               <Kpi label="생년월일시 기억한 회원" value={state.stats.totals.profiles} testId="kpi-profiles" />
               <Kpi label="전체 뽑기" value={state.stats.totals.draws} testId="kpi-draws" />
               <Kpi label="고민 통계 동의 건수(전체)" value={state.stats.totals.concernLogs} testId="kpi-concerns" />
+              <Kpi label="전체 후기" value={state.stats.totals.reviews} testId="kpi-reviews" />
             </div>
+
+            <section className={CARD} data-testid="reviews-section">
+              <div className="flex items-center justify-between gap-2 flex-wrap mb-3">
+                <h2 className="font-serifKr font-bold text-base text-brand-700">사용후기 (최근 {state.stats.days}일)</h2>
+                <a data-testid="reviews-csv-link" href={`/api/admin/reviews?days=${days}`} className="text-xs font-bold text-brand-600 underline underline-offset-2">
+                  후기 CSV 내려받기
+                </a>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="rounded-xl bg-brand-50 px-3 py-2" data-testid="review-average">
+                  <div className="text-[11px] font-bold text-gray-500">평균 별점</div>
+                  <div className="font-serifKr text-2xl font-black text-amber-500 tabular-nums">{state.stats.reviews.average === null ? "-" : `★ ${state.stats.reviews.average.toFixed(1)}`}</div>
+                </div>
+                <div className="rounded-xl bg-brand-50 px-3 py-2" data-testid="review-count">
+                  <div className="text-[11px] font-bold text-gray-500">후기 수 (숨김 제외)</div>
+                  <div className="font-serifKr text-2xl font-black text-brand-700 tabular-nums">{state.stats.reviews.count}</div>
+                </div>
+              </div>
+              <div className="mt-3">
+                <p className="text-[11px] font-bold text-gray-500 mb-1">별점 분포</p>
+                <Bars testId="bars-rating" rows={[5, 4, 3, 2, 1].map((n) => ({ label: `${"★".repeat(n)}`, count: state.stats.reviews.distribution[n - 1] ?? 0 }))} />
+              </div>
+              {state.stats.reviews.reasons.length > 0 && (
+                <div className="mt-3">
+                  <p className="text-[11px] font-bold text-gray-500 mb-1">아쉬웠던 점</p>
+                  <Bars testId="bars-reasons" rows={state.stats.reviews.reasons.map((r) => ({ label: r.label, count: r.count }))} />
+                </div>
+              )}
+              {hideError && (
+                <p role="alert" className="mt-2 text-[11px] font-bold text-red-600">
+                  {hideError}
+                </p>
+              )}
+              {state.stats.reviews.list.length === 0 ? (
+                <p className="mt-3 text-xs text-gray-400">아직 후기가 없어요.</p>
+              ) : (
+                <ul data-testid="review-list" className="mt-3 divide-y divide-brand-100">
+                  {state.stats.reviews.list.map((r) => (
+                    <li key={r.id} data-testid="review-item" data-hidden={r.hidden ? "true" : "false"} className={`py-2 text-xs ${r.hidden ? "opacity-50" : ""}`}>
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="min-w-0">
+                          <div className="text-[10px] text-gray-400">
+                            <span className="text-amber-500 text-[13px]" aria-label={`${r.rating}점`}>
+                              {"★".repeat(r.rating)}
+                              <span className="text-gray-300">{"★".repeat(5 - r.rating)}</span>
+                            </span>{" "}
+                            {r.day} · {r.topic}
+                            {r.premium ? " · 프리미엄" : ""}
+                            {r.reasons.length > 0 ? ` · ${r.reasons.join(", ")}` : ""}
+                            {r.hidden ? " · 숨김" : ""}
+                          </div>
+                          {r.text ? <p className="mt-0.5 text-gray-800 whitespace-pre-wrap break-words">{r.text}</p> : <p className="mt-0.5 text-gray-300">(글 없음)</p>}
+                        </div>
+                        <button
+                          type="button"
+                          data-testid="review-hide"
+                          onClick={() => toggleHidden(r.id, !r.hidden)}
+                          className="shrink-0 text-[11px] font-bold text-gray-500 underline underline-offset-2 hover:text-gray-700"
+                        >
+                          {r.hidden ? "다시 보이기" : "숨기기"}
+                        </button>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              )}
+              <p className="mt-2 text-[10px] text-gray-400">숨긴 후기는 평균과 분포에서 빠져요. 글에 개인정보가 있으면 외부에 공유하지 마세요.</p>
+            </section>
 
             <section className={CARD}>
               <h2 className={H2}>로그인 회원의 뽑기 (최근 {state.stats.days}일)</h2>

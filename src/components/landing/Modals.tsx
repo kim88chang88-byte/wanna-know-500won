@@ -152,7 +152,7 @@ export function LoginModal({ onClose, user = null, result = null, onLogout, onWi
             <div role="group" aria-label="회원 탈퇴 확인" className="rounded-2xl bg-sky-50 border border-sky-200 p-3 text-center">
               <p className="text-xs font-bold text-gray-800">정말 탈퇴할까요?</p>
               <p className="text-[11px] text-gray-600 mt-1">
-                저장된 회원 정보(회원번호·닉네임), 뽑기 기록, 기억해 둔 생년월일시와 동의해서 남긴 고민 통계가 모두 삭제되고 되돌릴 수 없어요.
+                저장된 회원 정보(회원번호·닉네임), 뽑기 기록, 기억해 둔 생년월일시, 동의해서 남긴 고민 통계, 로그인해서 남긴 후기가 모두 삭제되고 되돌릴 수 없어요.
               </p>
               {withdrawError && (
                 <p role="alert" className="text-[11px] font-bold text-brand-600 mt-1">

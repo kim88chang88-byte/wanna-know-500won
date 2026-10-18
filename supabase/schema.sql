@@ -62,3 +62,23 @@ create index if not exists concern_logs_day_idx on public.concern_logs (day);
 
 alter table public.profiles enable row level security;
 alter table public.concern_logs enable row level security;
+
+-- ─────────────────────────────────────────────────────────────────────────────
+-- 사용후기: 결과 화면에서 이용자가 직접 남긴 별점과 한 줄 후기예요. (로그인하지 않아도 남길 수 있어요)
+-- Supabase 대시보드 > SQL Editor 에서 이 파일 전체를 다시 Run 하면 추가돼요. (기존 데이터는 그대로예요)
+-- ─────────────────────────────────────────────────────────────────────────────
+create table if not exists public.reviews (
+  id bigint generated always as identity primary key,
+  user_id text references public.users(id) on delete cascade,  -- 로그인한 경우에만. 탈퇴하면 함께 지워져요
+  rating int not null check (rating between 1 and 5),
+  review_text text,                              -- 한 줄 후기(200자 이내, 선택)
+  reasons text[] not null default '{}',          -- 별점이 낮을 때 고른 아쉬운 점
+  topic text not null default 'general',
+  premium boolean not null default false,
+  hidden boolean not null default false,         -- 관리자가 숨긴 후기
+  created_at timestamptz not null default now()
+);
+
+create index if not exists reviews_created_idx on public.reviews (created_at);
+
+alter table public.reviews enable row level security;

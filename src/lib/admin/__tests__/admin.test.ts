@@ -29,7 +29,7 @@ describe("집계", () => {
     const s = buildStats({
       days: 7,
       now,
-      totals: { users: 5, profiles: 2, draws: 9, concernLogs: 3 },
+      totals: { users: 5, profiles: 2, draws: 9, concernLogs: 3, reviews: 0 },
       draws: [
         { day: "2026-10-17", topic: "love" },
         { day: "2026-10-17", topic: "money" },

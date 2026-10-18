@@ -165,4 +165,26 @@ describe("createDb", () => {
     expect(JSON.parse(String(r.calls[1].init?.body)).user_id).toBe("4242");
     expect(JSON.parse(String(r.calls[1].init?.body)).concern_text).toBeNull();
   });
+
+  it("insertReview/setReviewHidden: 필요한 칸만, 비로그인은 user_id null", async () => {
+    const r = recorder(() => new Response(null, { status: 201 }));
+    const db = createDb(cfg, r.f);
+    await db.insertReview({ userId: null, review: { rating: 4, text: "좋아요", reasons: [] }, topic: "love", premium: true });
+    expect(r.calls[0].url).toBe("https://x.supabase.co/rest/v1/reviews");
+    expect(JSON.parse(String(r.calls[0].init?.body))).toEqual({ user_id: null, rating: 4, review_text: "좋아요", reasons: [], topic: "love", premium: true });
+    await db.insertReview({ userId: "4242", review: { rating: 1, text: "", reasons: ["wrong"] }, topic: "general", premium: false });
+    expect(JSON.parse(String(r.calls[1].init?.body)).user_id).toBe("4242");
+    expect(JSON.parse(String(r.calls[1].init?.body)).review_text).toBeNull();
+    await db.setReviewHidden(7, true);
+    expect(r.calls[2].init?.method).toBe("PATCH");
+    expect(r.calls[2].url).toBe("https://x.supabase.co/rest/v1/reviews?id=eq.7");
+    expect(JSON.parse(String(r.calls[2].init?.body))).toEqual({ hidden: true });
+    let threw = false;
+    try {
+      await db.setReviewHidden(0, true);
+    } catch {
+      threw = true;
+    }
+    expect(threw).toBe(true);
+  });
 });

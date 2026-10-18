@@ -19,6 +19,7 @@ import { BRANCHES, STEMS } from "@/lib/saju/constants";
 import type { Pillar, SajuChart } from "@/lib/saju/types";
 import { CloseButton, ModalShell } from "./Modals";
 import PhotoCard from "./PhotoCard";
+import ReviewBox from "./ReviewBox";
 import ScrollHint from "./ScrollHint";
 import ManseReport from "@/components/premium/ManseReport";
 import type { PremiumReportView } from "@/lib/premium/types";
@@ -333,6 +334,8 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
             ))}
           </details>
           )}
+
+          <ReviewBox topic={target.fortune} premium={target.premium === true} />
 
           {!loggedIn && (
             <div data-testid="login-nudge-result" className="mt-4 rounded-2xl bg-amber-50 border border-amber-200 px-4 py-3 text-center">

@@ -1,4 +1,5 @@
 import type { Concern } from "@/lib/concerns";
+import type { ReviewInput } from "@/lib/reviews";
 import { parseProfileRow, type SavedProfile } from "@/lib/profile";
 import { kstDay, kstMonthRange } from "./kst";
 
@@ -15,6 +16,17 @@ export interface DrawCounts {
 }
 
 export class DbError extends Error {}
+
+export interface ReviewRow {
+  id: number;
+  rating: number;
+  review_text: string | null;
+  reasons: string[];
+  topic: string;
+  premium: boolean;
+  hidden: boolean;
+  created_at: string;
+}
 
 export interface ConcernLogRow {
   day: string;
@@ -102,9 +114,9 @@ export function createDb(config: DbConfig, fetchImpl: FetchLike = fetch) {
 
   return {
     /** 관리자 통계: 표별 전체 줄 수 */
-    async tableCounts(): Promise<{ users: number; profiles: number; draws: number; concernLogs: number }> {
-      const [users, profiles, draws, concernLogs] = await Promise.all([countTable("users"), countTable("profiles"), countTable("draws"), countTable("concern_logs")]);
-      return { users, profiles, draws, concernLogs };
+    async tableCounts(): Promise<{ users: number; profiles: number; draws: number; concernLogs: number; reviews: number }> {
+      const [users, profiles, draws, concernLogs, reviews] = await Promise.all([countTable("users"), countTable("profiles"), countTable("draws"), countTable("concern_logs"), countTable("reviews")]);
+      return { users, profiles, draws, concernLogs, reviews };
     },
 
     /** 관리자 통계: 기간 안의 뽑기 기록(날짜·주제만) */
@@ -123,6 +135,36 @@ export function createDb(config: DbConfig, fetchImpl: FetchLike = fetch) {
         `concern_logs?select=day,topic,tags,concern_text,gender,age_band&day=gte.${encodeURIComponent(sinceDay)}&order=id.desc`,
         maxRows,
       );
+    },
+
+    /** 사용후기 저장. 로그인한 경우에만 userId 를 남겨요. */
+    async insertReview(row: { userId: string | null; review: ReviewInput; topic: string; premium: boolean }): Promise<void> {
+      await call("reviews", {
+        method: "POST",
+        headers: headers({ Prefer: "return=minimal" }),
+        body: JSON.stringify({
+          user_id: row.userId ? safeId(row.userId) : null,
+          rating: row.review.rating,
+          review_text: row.review.text || null,
+          reasons: row.review.reasons,
+          topic: row.topic.slice(0, 40),
+          premium: row.premium,
+        }),
+      });
+    },
+
+    /** 관리자: 기간 안의 후기 (최신순) */
+    listReviews(sinceIso: string, maxRows = 20000): Promise<ReviewRow[]> {
+      return fetchAll(
+        `reviews?select=id,rating,review_text,reasons,topic,premium,hidden,created_at&created_at=gte.${encodeURIComponent(sinceIso)}&order=id.desc`,
+        maxRows,
+      );
+    },
+
+    /** 관리자: 후기를 숨기거나 다시 보이게 해요 */
+    async setReviewHidden(id: number, hidden: boolean): Promise<void> {
+      if (!Number.isInteger(id) || id < 1) throw new DbError("invalid id");
+      await call(`reviews?id=eq.${id}`, { method: "PATCH", headers: headers({ Prefer: "return=minimal" }), body: JSON.stringify({ hidden }) });
     },
 
     /** 로그인할 때 회원을 만들거나(처음) 마지막 로그인 시각·닉네임을 갱신해요. */

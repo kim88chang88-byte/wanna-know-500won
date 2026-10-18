@@ -36,13 +36,14 @@ export async function GET(request: Request) {
   const since = sinceDayFor(days, now);
   const db = createDb(dbConfig);
   try {
-    const [totals, draws, signups, concerns] = await Promise.all([
+    const [totals, draws, signups, concerns, reviews] = await Promise.all([
       db.tableCounts(),
       db.listDraws(since),
       db.listSignups(`${since}T00:00:00+09:00`),
       db.listConcernLogs(since),
+      db.listReviews(`${since}T00:00:00+09:00`),
     ]);
-    return NextResponse.json({ stats: buildStats({ days, now, totals, draws, signups, concerns }) }, { headers: NO_STORE });
+    return NextResponse.json({ stats: buildStats({ days, now, totals, draws, signups, concerns, reviews }) }, { headers: NO_STORE });
   } catch (err) {
     console.error("admin stats failed:", err instanceof Error ? err.message : "unknown");
     return NextResponse.json({ error: "통계를 불러오지 못했어요. (concern_logs / profiles 테이블을 만들었는지 확인해 주세요)" }, { status: 502, headers: NO_STORE });

@@ -1,12 +1,13 @@
 import { CONCERN_CHIPS, concernLabel, type ConcernId } from "@/lib/concerns";
-import type { ConcernLogRow } from "@/lib/db/supabase";
+import type { ConcernLogRow, ReviewRow } from "@/lib/db/supabase";
+import { reasonLabel } from "@/lib/reviews";
 import { kstDay } from "@/lib/db/kst";
 
 /** 관리자 화면에 내려주는 집계 결과. 개인 식별 정보(회원번호·생년월일)는 들어 있지 않아요. */
 export interface AdminStats {
   days: number;
   sinceDay: string;
-  totals: { users: number; profiles: number; draws: number; concernLogs: number };
+  totals: { users: number; profiles: number; draws: number; concernLogs: number; reviews: number };
   /** 기간 안의 날짜별 뽑기 수 (빈 날도 0으로 채워요) */
   drawsByDay: Array<{ day: string; count: number }>;
   drawsByTopic: Array<{ topic: string; count: number }>;
@@ -16,6 +17,16 @@ export interface AdminStats {
   /** 나이대 × 고민 (고민 버튼을 고른 줄만) */
   concernByAge: Array<{ ageBand: string; total: number; tags: Array<{ id: string; label: string; count: number }> }>;
   genderSplit: Array<{ gender: string; count: number }>;
+  reviews: {
+    /** 기간 안의 후기 수 (숨긴 것 제외) */
+    count: number;
+    /** 평균 별점 (숨긴 것 제외, 없으면 null) */
+    average: number | null;
+    /** 별점별 개수 [1점, 2점, 3점, 4점, 5점] */
+    distribution: number[];
+    reasons: Array<{ id: string; label: string; count: number }>;
+    list: Array<{ id: number; day: string; rating: number; text: string; reasons: string[]; topic: string; premium: boolean; hidden: boolean }>;
+  };
   recentTexts: Array<{ day: string; ageBand: string; gender: string; topic: string; tags: string[]; text: string }>;
 }
 
@@ -54,7 +65,9 @@ export function buildStats(input: {
   draws: Array<{ day: string; topic: string }>;
   signups: Array<{ created_at: string }>;
   concerns: ConcernLogRow[];
+  reviews?: ReviewRow[];
   textLimit?: number;
+  reviewLimit?: number;
 }): AdminStats {
   const now = input.now ?? new Date();
   const today = kstDay(now);
@@ -82,6 +95,10 @@ export function buildStats(input: {
   }
 
   const limit = input.textLimit ?? 50;
+  const reviewRows = input.reviews ?? [];
+  const visible = reviewRows.filter((r) => !r.hidden);
+  const distribution = [1, 2, 3, 4, 5].map((n) => visible.filter((r) => r.rating === n).length);
+  const reviewReasons = tally(visible.flatMap((r) => r.reasons ?? []));
   return {
     days: input.days,
     sinceDay,
@@ -99,6 +116,22 @@ export function buildStats(input: {
       }))
       .sort((a, b) => a.ageBand.localeCompare(b.ageBand)),
     genderSplit: [...tally(input.concerns.map((c) => c.gender || "알 수 없음"))].map(([g, count]) => ({ gender: g === "female" ? "여성" : g === "male" ? "남성" : g, count })).sort(sortDesc),
+    reviews: {
+      count: visible.length,
+      average: visible.length ? Math.round((visible.reduce((a, r) => a + r.rating, 0) / visible.length) * 10) / 10 : null,
+      distribution,
+      reasons: [...reviewReasons].map(([id, count]) => ({ id, label: reasonLabel(id), count })).sort(sortDesc),
+      list: reviewRows.slice(0, input.reviewLimit ?? 50).map((r) => ({
+        id: r.id,
+        day: kstDay(new Date(r.created_at)),
+        rating: r.rating,
+        text: r.review_text ?? "",
+        reasons: (r.reasons ?? []).map(reasonLabel),
+        topic: TOPIC_LABEL[r.topic] ?? r.topic,
+        premium: r.premium === true,
+        hidden: r.hidden === true,
+      })),
+    },
     recentTexts: input.concerns
       .filter((c) => c.concern_text)
       .slice(0, limit)
@@ -122,4 +155,12 @@ export function concernsToCsv(rows: ConcernLogRow[]): string {
   );
   // 엑셀에서 한글이 깨지지 않게 BOM 을 붙여요.
   return "﻿" + [head.map(csvCell).join(","), ...lines].join("\r\n") + "\r\n";
+}
+
+export function reviewsToCsv(rows: ReviewRow[]): string {
+  const head = ["날짜", "별점", "후기", "아쉬운 점", "주제", "프리미엄", "숨김"];
+  const lines = rows.map((r) =>
+    [kstDay(new Date(r.created_at)), r.rating, r.review_text, (r.reasons ?? []).map(reasonLabel).join(" / "), TOPIC_LABEL[r.topic] ?? r.topic, r.premium ? "예" : "", r.hidden ? "숨김" : ""].map(csvCell).join(","),
+  );
+  return "\uFEFF" + [head.map(csvCell).join(","), ...lines].join("\r\n") + "\r\n";
 }
