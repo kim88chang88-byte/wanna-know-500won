@@ -58,7 +58,7 @@ export function Header({ onOpenLogin, user = null }: { onOpenLogin: () => void; 
             </div>
           </div>
 
-          {/* 오른쪽 위: 마이페이지 (로그인 모달 열기) + 햄버거 메뉴 */}
+          {/* 오른쪽 위: 로그인 전에는 "로그인" 버튼, 로그인 후에는 닉네임(마이페이지) + 햄버거 메뉴. 둘 다 같은 창(로그인/내 정보)을 열어요 */}
           <div className="shrink-0 flex items-center gap-2">
             <button
               onClick={onOpenLogin}
@@ -69,18 +69,18 @@ export function Header({ onOpenLogin, user = null }: { onOpenLogin: () => void; 
               className={`group flex items-center gap-2 p-1.5 pr-3 sm:px-3.5 sm:py-1.5 rounded-full border transition-all text-left shadow-sm ${
                 user
                   ? "bg-emerald-50 hover:bg-emerald-100/70 border-emerald-300/70"
-                  : "bg-brand-50 hover:bg-brand-100/90 border-brand-200/80"
+                  : "bg-brand-600 hover:bg-brand-700 border-brand-600 text-white"
               }`}
             >
               <div
                 className={`relative w-8 h-8 shrink-0 rounded-full bg-white flex items-center justify-center group-hover:scale-105 transition-transform ${
-                  user ? "text-emerald-700 font-bold text-sm" : "text-brand-500"
+                  user ? "text-emerald-700 font-bold text-sm" : "text-brand-600"
                 }`}
               >
                 {user ? (
                   <span aria-hidden="true">{firstGlyph(user.nickname)}</span>
                 ) : (
-                  <span className="material-symbols-outlined text-[20px]">person</span>
+                  <span aria-hidden="true" className="material-symbols-outlined text-[20px]">person</span>
                 )}
                 {user && (
                   <span
@@ -93,20 +93,18 @@ export function Header({ onOpenLogin, user = null }: { onOpenLogin: () => void; 
                 // 로그인된 상태는 작은 화면에서도 닉네임이 보이게 해요 (길면 말줄임)
                 <div className="min-w-0">
                   <span data-testid="mypage-name" className="block max-w-[5.5rem] sm:max-w-[9rem] truncate text-xs font-bold text-gray-800">
-                    {user ? (user.nickname ? `${user.nickname}님` : "회원님") : "마이페이지"}
+                    {user.nickname ? `${user.nickname}님` : "회원님"}
                   </span>
                   <span className="block text-[10px] font-medium text-emerald-700">로그인됨</span>
                 </div>
               ) : (
-                <>
-                  <span className="sr-only sm:hidden">마이페이지</span>
-                  <div className="hidden sm:block">
-                    <span className="block text-xs font-bold text-gray-800 group-hover:text-brand-600 transition-colors">
-                      마이페이지
-                    </span>
-                    <span className="block text-[10px] text-gray-500">로그인 / 회원가입</span>
-                  </div>
-                </>
+                // 로그인 전에는 작은 화면에서도 "로그인" 글자가 보이게 해요
+                <div>
+                  <span data-testid="login-label" className="block text-xs font-bold text-white leading-tight">
+                    로그인
+                  </span>
+                  <span className="hidden sm:block text-[10px] text-brand-100 leading-tight">카카오·구글·네이버</span>
+                </div>
               )}
             </button>
             <MenuButton />
