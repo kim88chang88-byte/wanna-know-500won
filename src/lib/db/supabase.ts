@@ -16,6 +16,15 @@ export interface DrawCounts {
 
 export class DbError extends Error {}
 
+export interface ConcernLogRow {
+  day: string;
+  topic: string;
+  tags: string[];
+  concern_text: string | null;
+  gender: string | null;
+  age_band: string | null;
+}
+
 type FetchLike = (input: string, init?: RequestInit) => Promise<Response>;
 
 /** 환경변수가 다 있을 때만 설정을 돌려줘요. (없으면 DB 없이 동작해요) */
@@ -69,7 +78,53 @@ export function createDb(config: DbConfig, fetchImpl: FetchLike = fetch) {
     return n;
   }
 
+  // 많은 줄을 1000줄씩 나눠서 가져와요. (PostgREST 는 한 번에 최대 1000줄까지 줘요)
+  async function fetchAll<T>(path: string, maxRows: number): Promise<T[]> {
+    const out: T[] = [];
+    const page = 1000;
+    for (let from = 0; from < maxRows; from += page) {
+      const to = Math.min(from + page, maxRows) - 1;
+      const res = await call(path, { method: "GET", headers: headers({ Range: `${from}-${to}`, "Range-Unit": "items" }) });
+      const rows = (await res.json().catch(() => [])) as T[];
+      if (!Array.isArray(rows)) break;
+      out.push(...rows);
+      if (rows.length < to - from + 1) break;
+    }
+    return out;
+  }
+
+  async function countTable(table: string): Promise<number> {
+    const res = await call(`${table}?select=*&limit=1`, { method: "GET", headers: headers({ Prefer: "count=exact" }) });
+    const n = Number(res.headers.get("content-range")?.split("/")[1]);
+    if (!Number.isInteger(n) || n < 0) throw new DbError("bad count");
+    return n;
+  }
+
   return {
+    /** 관리자 통계: 표별 전체 줄 수 */
+    async tableCounts(): Promise<{ users: number; profiles: number; draws: number; concernLogs: number }> {
+      const [users, profiles, draws, concernLogs] = await Promise.all([countTable("users"), countTable("profiles"), countTable("draws"), countTable("concern_logs")]);
+      return { users, profiles, draws, concernLogs };
+    },
+
+    /** 관리자 통계: 기간 안의 뽑기 기록(날짜·주제만) */
+    listDraws(sinceDay: string, maxRows = 20000): Promise<Array<{ day: string; topic: string }>> {
+      return fetchAll(`draws?select=day,topic&day=gte.${encodeURIComponent(sinceDay)}&order=day.asc`, maxRows);
+    },
+
+    /** 관리자 통계: 기간 안에 가입한 회원의 가입 시각 */
+    listSignups(sinceIso: string, maxRows = 20000): Promise<Array<{ created_at: string }>> {
+      return fetchAll(`users?select=created_at&created_at=gte.${encodeURIComponent(sinceIso)}&order=created_at.asc`, maxRows);
+    },
+
+    /** 관리자 통계: 기간 안의 고민 통계 줄 (최신순) */
+    listConcernLogs(sinceDay: string, maxRows = 20000): Promise<ConcernLogRow[]> {
+      return fetchAll(
+        `concern_logs?select=day,topic,tags,concern_text,gender,age_band&day=gte.${encodeURIComponent(sinceDay)}&order=id.desc`,
+        maxRows,
+      );
+    },
+
     /** 로그인할 때 회원을 만들거나(처음) 마지막 로그인 시각·닉네임을 갱신해요. */
     async upsertUser(id: string, nickname: string | undefined, now: Date = new Date()): Promise<void> {
       await call("users?on_conflict=id", {
