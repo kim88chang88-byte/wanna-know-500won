@@ -1,5 +1,6 @@
 "use client";
 
+import ConcernCard from "./ConcernCard";
 import { useEffect, useRef, useState } from "react";
 import type { BookPage, BookTable, ElementKind, PremiumReportView } from "@/lib/premium/types";
 
@@ -209,6 +210,12 @@ export default function PremiumBook({ report }: { report: PremiumReportView }) {
           {num(page.no)} / {num(pages.length)}
         </span>
       </div>
+
+      {i === 0 && report.concern && (
+        <div className="mt-3">
+          <ConcernCard concern={report.concern} dark />
+        </div>
+      )}
 
       <nav aria-label="리포트 페이지" className="mt-1 flex gap-1">
         {pages.map((p, k) => (

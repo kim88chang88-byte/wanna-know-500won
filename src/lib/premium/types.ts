@@ -90,6 +90,20 @@ export interface BookPage {
 }
 
 /** basic: 일반 자판기(원국·오행·신강신약) / full: 프리미엄(격국·용신·대운·세운 포함) */
+export interface ConcernAnswer {
+  id: string;
+  emoji: string;
+  title: string;
+  body: string;
+}
+
+/** 손님이 적은 "요즘 고민"과 도리의 답 */
+export interface ConcernView {
+  /** 직접 적은 글(정리된 상태). 풀이에는 쓰지 않고 그대로 보여 줘요. */
+  text: string;
+  answers: ConcernAnswer[];
+}
+
 export type ReportLevel = "basic" | "full";
 
 /** 결과창에 그릴 리포트. ssaju 계산 결과에서 필요한 것만 추렸어요. */
@@ -112,6 +126,8 @@ export interface PremiumReportView {
   hourUnknown: boolean;
   /** 자판기(주제)별 맞춤 분석 */
   topic: TopicInsight;
+  /** 요즘 고민을 적었으면 그에 대한 답. 안 적었으면 null */
+  concern: ConcernView | null;
   /** true 면 일부 풀이가 잠겨 있어요(서버에서 가려서 내려보냄). 프리미엄 결제 전 미리 보기용 */
   locked: boolean;
   /** 프리미엄(full)만: 10페이지 상세 리포트. basic 은 빈 배열 */

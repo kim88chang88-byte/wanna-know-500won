@@ -3,6 +3,8 @@ import { STEMS } from "@/lib/saju/constants";
 import type { BirthInput } from "@/lib/saju/types";
 import { buildBook } from "./book";
 import { applyLocks } from "./book/lock";
+import { CONCERN_CHIPS, hasConcern, parseConcern, type Concern } from "@/lib/concerns";
+import { buildConcernAnswers } from "./concernAnswer";
 import { buildTopicInsight, resolveTopic } from "./topic";
 import type { DaeunView, ElementKind, ElementView, PillarView, PremiumReportView, ReportLevel, SeyunView } from "./types";
 
@@ -33,7 +35,7 @@ function isRecord(v: unknown): v is Record<string, unknown> {
   return typeof v === "object" && v !== null;
 }
 
-export type ValidationResult = { ok: true; value: BirthInput; level: ReportLevel; topic: string } | { ok: false; error: string };
+export type ValidationResult = { ok: true; value: BirthInput; level: ReportLevel; topic: string; concern: Concern } | { ok: false; error: string };
 
 /** 서버 입력 검사. /api/reading 과 같은 BirthInput 모양을 받아요. */
 export function validatePremiumInput(raw: unknown): ValidationResult {
@@ -63,6 +65,7 @@ export function validatePremiumInput(raw: unknown): ValidationResult {
     ok: true,
     level,
     topic: typeof raw.topic === "string" ? raw.topic.slice(0, 40) : "",
+    concern: parseConcern(raw.concern),
     value: { year, month, day, hour, minute, calendar: raw.calendar, isLeapMonth: raw.isLeapMonth === true, gender: raw.gender },
   };
 }
@@ -75,7 +78,7 @@ export function validatePremiumInput(raw: unknown): ValidationResult {
  * ssaju 는 순수 계산 라이브러리라 API 키도, 외부 호출도 없어요.
  * 잘못된 날짜(없는 음력 윤달 등)면 ssaju 가 던진 Error 를 그대로 던져요.
  */
-export function buildPremiumReport(input: BirthInput, now: Date = new Date(), level: ReportLevel = "full", topicRaw: unknown = "", lock = false): PremiumReportView {
+export function buildPremiumReport(input: BirthInput, now: Date = new Date(), level: ReportLevel = "full", topicRaw: unknown = "", lock = false, concern: Concern | null = null): PremiumReportView {
   const hourUnknown = input.hour === null || input.hour === undefined;
   const r = calculateSaju({
     year: input.year,
@@ -129,7 +132,10 @@ export function buildPremiumReport(input: BirthInput, now: Date = new Date(), le
   const seyun: SeyunView | null = sy ? { year: sy.year, ganzhi: sy.ganzhi, tenGodStem: sy.tenGodStem, tenGodBranch: sy.tenGodBranch } : null;
 
   const full = level === "full";
-  const topicKey = resolveTopic(topicRaw);
+  // 일반 자판기(주제 없음)에서 고민 버튼을 골랐으면, 첫 번째 고민과 가까운 주제로 맞춤 분석을 보여 줘요.
+  const picked = resolveTopic(topicRaw);
+  const firstChip = concern && concern.tags.length > 0 ? CONCERN_CHIPS.find((c) => c.id === concern.tags[0]) : undefined;
+  const topicKey = picked === "general" && firstChip ? firstChip.topic : picked;
   const topic = buildTopicInsight(topicKey, r, { elements, hourUnknown, level });
   const locking = full && lock;
   const gradeLabel = GRADE[r.advanced.dayStrength.strength] ?? r.advanced.dayStrength.strength;
@@ -148,6 +154,7 @@ export function buildPremiumReport(input: BirthInput, now: Date = new Date(), le
     hourUnknown,
     // 잠긴 상태에서는 흐름(timing) 문장도 내려보내지 않아요. (7쪽에서 잠긴 글과 같은 내용이에요)
     topic: locking ? { ...topic, timing: [] } : topic,
+    concern: hasConcern(concern) ? { text: concern.text, answers: buildConcernAnswers(concern, elements, gradeLabel) } : null,
     locked: locking,
     book: full ? (locking ? applyLocks(buildBook(r, { elements, pillars, hourUnknown, topicKey, insight: topic, gradeLabel }), r.currentYear) : buildBook(r, { elements, pillars, hourUnknown, topicKey, insight: topic, gradeLabel })) : [],
   };

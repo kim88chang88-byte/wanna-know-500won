@@ -67,7 +67,7 @@ export default function PrivacyPage() {
       <H2>2. 보관 기간과 파기</H2>
       <ul className="list-disc pl-5 space-y-1">
         <li>
-          입력하신 생년월일시와 성별은 풀이 결과를 만들기 위해 요청 처리 중에만 사용하며, 서비스 서버에 따로 저장하지
+          입력하신 생년월일시·성별과 '요즘 고민'(선택)은 풀이 결과를 만들기 위해 요청 처리 중에만 사용하며, 서비스 서버에 따로 저장하지
           않습니다. (현재 기준)
         </li>
         <li>
@@ -96,7 +96,7 @@ export default function PrivacyPage() {
       </p>
       <ul className="list-disc pl-5 space-y-1 mt-2">
         <li>받는 곳: Anthropic, PBC (미국) — Claude API</li>
-        <li>전달 항목: 사주 계산 결과와 성별 (이름·연락처는 전달하지 않아요)</li>
+        <li>전달 항목: 사주 계산 결과와 성별, 이용자가 선택해서 적은 '요즘 고민' 내용 (이름·연락처는 전달하지 않아요. 고민 칸에 개인정보를 적지 말아 주세요)</li>
         <li>이용 목적: 풀이 문장 생성</li>
         <li>전달 시점과 방법: 풀이를 요청할 때, 암호화된 통신(HTTPS)으로 전달</li>
       </ul>

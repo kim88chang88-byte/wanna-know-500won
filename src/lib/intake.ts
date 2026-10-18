@@ -1,12 +1,13 @@
+import { cleanConcernText, MAX_CONCERN_TAGS, MAX_CONCERN_TEXT, type Concern, type ConcernId } from "@/lib/concerns";
 import type { BirthInput, Gender } from "@/lib/saju/types";
 
-/** 생년월일시 입력 화면(도리 질문 4단계)의 입력값과 검사 규칙입니다. 화면 없이 테스트할 수 있게 따로 뒀어요. */
+/** 생년월일시 입력 화면(도리 질문 5단계)의 입력값과 검사 규칙입니다. 화면 없이 테스트할 수 있게 따로 뒀어요. */
 
 export const MIN_YEAR = 1900;
 export const MAX_YEAR = 2100;
 
-export type StepId = "date" | "time" | "gender" | "consent";
-export const STEPS: readonly StepId[] = ["date", "time", "gender", "consent"];
+export type StepId = "date" | "time" | "gender" | "concern" | "consent";
+export const STEPS: readonly StepId[] = ["date", "time", "gender", "concern", "consent"];
 
 export interface IntakeForm {
   calendar: "solar" | "lunar";
@@ -22,6 +23,9 @@ export interface IntakeForm {
   /** "HH:MM" */
   time: string;
   gender: Gender | null;
+  /** 요즘 고민 (선택): 추천 버튼 + 직접 적기 */
+  concernTags: ConcernId[];
+  concernText: string;
   consent: boolean;
 }
 
@@ -35,6 +39,8 @@ export const EMPTY_FORM: IntakeForm = {
   timeKnown: true,
   time: "",
   gender: null,
+  concernTags: [],
+  concernText: "",
   consent: false,
 };
 
@@ -87,6 +93,10 @@ export function validateStep(step: StepId, f: IntakeForm): string | null {
       return parseTime(f.time) ? null : "태어난 시간을 골라줘요. 모르면 '모르겠어요'를 눌러도 돼요.";
     case "gender":
       return f.gender ? null : "성별을 골라줘요.";
+    case "concern":
+      if (f.concernTags.length > MAX_CONCERN_TAGS) return `고민 버튼은 ${MAX_CONCERN_TAGS}개까지 고를 수 있어요.`;
+      if (f.concernText.length > MAX_CONCERN_TEXT) return `고민은 ${MAX_CONCERN_TEXT}자까지 적을 수 있어요.`;
+      return null;
     case "consent":
       return f.consent ? null : "개인정보 처리에 동의해야 캡슐을 만들 수 있어요.";
   }
@@ -119,4 +129,10 @@ export function buildBirthInput(f: IntakeForm): BirthInput | null {
     isLeapMonth: f.calendar === "lunar" && f.isLeapMonth,
     gender: f.gender,
   };
+}
+
+/** 고민 단계의 입력을 서버로 보낼 모양으로 바꿔요. 아무것도 안 골랐으면 null. */
+export function buildConcern(f: IntakeForm): Concern | null {
+  const c: Concern = { tags: f.concernTags.slice(0, MAX_CONCERN_TAGS), text: cleanConcernText(f.concernText) };
+  return c.tags.length > 0 || c.text.length > 0 ? c : null;
 }

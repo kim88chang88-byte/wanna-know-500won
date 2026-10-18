@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { interpretSaju, ReadingUnavailableError } from "@/lib/ai/interpret";
 import { normalizeTopic, toPublicReading, type PublicReading } from "@/lib/ai/reading";
+import { parseConcern } from "@/lib/concerns";
 import { readCookie, SESSION_COOKIE, verifySessionToken } from "@/lib/auth/session";
 import { FREE_PER_DAY, isDailyLimitEnforced } from "@/lib/db/config";
 import { createDb, loadDbConfig, type DrawCounts } from "@/lib/db/supabase";
@@ -31,16 +32,17 @@ export async function POST(request: Request) {
     );
   }
 
-  let body: (BirthInput & { topic?: unknown }) | null;
+  let body: (BirthInput & { topic?: unknown; concern?: unknown }) | null;
   try {
-    body = (await request.json()) as BirthInput & { topic?: unknown };
+    body = (await request.json()) as BirthInput & { topic?: unknown; concern?: unknown };
   } catch {
     return NextResponse.json({ error: "잘못된 요청입니다." }, { status: 400 });
   }
   if (typeof body !== "object" || body === null) {
     return NextResponse.json({ error: "잘못된 요청입니다." }, { status: 400 });
   }
-  const { topic: rawTopic, ...input } = body;
+  const { topic: rawTopic, concern: rawConcern, ...input } = body;
+  const concern = parseConcern(rawConcern);
 
   // 로그인한 회원이고 DB 가 연결되어 있으면, 뽑기 횟수를 서버에서 세요. (아니면 브라우저 카운터만 써요)
   const session = verifySessionToken(readCookie(request.headers.get("cookie"), SESSION_COOKIE), process.env.AUTH_SECRET);
@@ -80,7 +82,7 @@ export async function POST(request: Request) {
   let reading: PublicReading | null = null;
   let readingStatus: ReadingStatus = "ok";
   try {
-    const full = await interpretSaju(chart, { topic: normalizeTopic(rawTopic), gender: input.gender });
+    const full = await interpretSaju(chart, { topic: normalizeTopic(rawTopic), gender: input.gender, concern });
     reading = toPublicReading(full, "free");
   } catch (err) {
     if (err instanceof ReadingUnavailableError) {

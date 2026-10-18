@@ -1,4 +1,5 @@
 import type { ElementKind, PremiumReportView } from "@/lib/premium/types";
+import ConcernCard from "./ConcernCard";
 import PremiumBook from "./PremiumBook";
 
 const ELEMENT_STYLE: Record<ElementKind, { bar: string; chip: string }> = {
@@ -20,6 +21,7 @@ export default function ManseReport({ report }: { report: PremiumReportView }) {
 
   return (
     <div data-testid="manse-report" className="space-y-6">
+      {report.concern && <ConcernCard concern={report.concern} />}
       <section aria-labelledby="topic-h" data-testid="topic-card" className="rounded-3xl bg-gradient-to-br from-violet-50 via-white to-sky-50 border border-violet-100 p-5 sm:p-6 shadow-[0_8px_30px_rgba(120,100,220,0.10)]">
         <h2 id="topic-h" className="font-serifKr font-bold text-lg text-brand-700">
           <span aria-hidden="true">{report.topic.emoji}</span> {report.topic.label} 분석

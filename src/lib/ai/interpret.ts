@@ -1,3 +1,4 @@
+import type { Concern } from "@/lib/concerns";
 import type { Gender, SajuChart } from "@/lib/saju/types";
 import { buildUserMessage, SYSTEM_PROMPT } from "./prompt";
 import { parseReading, READING_SCHEMA, type Reading, type ReadingTopic } from "./reading";
@@ -21,6 +22,8 @@ export class ReadingFailedError extends Error {
 export interface InterpretOptions {
   topic: ReadingTopic;
   gender: Gender;
+  /** 요즘 고민 (선택) */
+  concern?: Concern | null;
   /** 테스트용. 기본은 환경변수 ANTHROPIC_API_KEY */
   apiKey?: string;
   /** 기본은 환경변수 ANTHROPIC_MODEL, 없으면 DEFAULT_MODEL */
@@ -46,6 +49,7 @@ interface ApiResponse {
 type Attempt = { reading: Reading } | { retry: true; reason: string } | { fatal: string };
 
 async function attemptOnce(chart: SajuChart, o: Required<Pick<InterpretOptions, "topic" | "gender">> & {
+  concern?: Concern | null;
   apiKey: string; model: string; fetchImpl: typeof fetch; timeoutMs: number;
 }): Promise<Attempt> {
   const ctrl = new AbortController();
@@ -58,7 +62,7 @@ async function attemptOnce(chart: SajuChart, o: Required<Pick<InterpretOptions, 
         model: o.model,
         max_tokens: MAX_TOKENS,
         system: SYSTEM_PROMPT,
-        messages: [{ role: "user", content: buildUserMessage(chart, o.topic, o.gender) }],
+        messages: [{ role: "user", content: buildUserMessage(chart, o.topic, o.gender, o.concern) }],
         output_config: { format: { type: "json_schema", schema: READING_SCHEMA } },
       }),
       signal: ctrl.signal,
@@ -105,7 +109,7 @@ export async function interpretSaju(chart: SajuChart, opts: InterpretOptions): P
 
   let lastReason = "알 수 없음";
   for (let i = 0; i < maxAttempts; i++) {
-    const r = await attemptOnce(chart, { topic: opts.topic, gender: opts.gender, apiKey, model, fetchImpl, timeoutMs });
+    const r = await attemptOnce(chart, { topic: opts.topic, gender: opts.gender, concern: opts.concern, apiKey, model, fetchImpl, timeoutMs });
     if ("reading" in r) return r.reading;
     if ("fatal" in r) throw new ReadingFailedError(r.fatal);
     lastReason = r.reason;

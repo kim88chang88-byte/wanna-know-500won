@@ -7,11 +7,13 @@ import {
   MIN_YEAR,
   STEPS,
   buildBirthInput,
+  buildConcern,
   validateStep,
   type IntakeForm,
   type StepId,
 } from "@/lib/intake";
 import type { PublicReading } from "@/lib/ai/reading";
+import { CONCERN_CHIPS, MAX_CONCERN_TAGS, MAX_CONCERN_TEXT, type Concern, type ConcernId } from "@/lib/concerns";
 import { BRANCHES, STEMS } from "@/lib/saju/constants";
 import type { Pillar, SajuChart } from "@/lib/saju/types";
 import { CloseButton, ModalShell } from "./Modals";
@@ -38,7 +40,8 @@ interface Props {
 const BUBBLE: Record<StepId, string> = {
   date: "먼저, 언제 태어났어? 🫧",
   time: "태어난 시간도 알면 더 또렷하게 볼 수 있어. 몰라도 괜찮아!",
-  gender: "거의 다 왔어! 성별도 알려줄래?",
+  gender: "성별도 알려줄래?",
+  concern: "요즘 마음에 걸리는 게 있어? 골라주면 그 얘기를 더 살려서 풀어줄게 🫧",
   consent: "캡슐 만들기 전에, 정보 처리만 확인할게.",
 };
 
@@ -73,12 +76,12 @@ function ChoiceButton({
 type ReadingStatus = "ok" | "unavailable" | "failed";
 
 /** 프리미엄 리포트를 받아요. 실패해도 예외 대신 사용자에게 보여 줄 문장을 돌려줘요. */
-async function fetchPremiumReport(input: BirthInput, level: "basic" | "full", topic: string, signal: AbortSignal): Promise<{ report: PremiumReportView | null; error: string | null }> {
+async function fetchPremiumReport(input: BirthInput, level: "basic" | "full", topic: string, concern: Concern | null, signal: AbortSignal): Promise<{ report: PremiumReportView | null; error: string | null }> {
   try {
     const res = await fetch("/api/premium", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...input, level, topic }),
+      body: JSON.stringify({ ...input, level, topic, concern }),
       signal,
     });
     const data = (await res.json().catch(() => null)) as { report?: PremiumReportView; error?: string } | null;
@@ -143,15 +146,16 @@ export default function IntakeModal({ target, onClose, onComplete }: Props) {
     if (!input) return;
     setPhase("loading");
     setError(null);
+    const concern = buildConcern(form);
     const ctrl = new AbortController();
     abortRef.current = ctrl;
     try {
       // 사주 리포트도 함께 받아요. 프리미엄은 전체, 일반 자판기는 기본(원국·오행·신강신약). 실패해도 기본 풀이는 그대로 보여줘요.
-      const premiumPromise = fetchPremiumReport(input, target.premium ? "full" : "basic", target.fortune, ctrl.signal);
+      const premiumPromise = fetchPremiumReport(input, target.premium ? "full" : "basic", target.fortune, concern, ctrl.signal);
       const res = await fetch("/api/reading", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...input, topic: target.fortune }),
+        body: JSON.stringify({ ...input, topic: target.fortune, concern }),
         signal: ctrl.signal,
       });
       const data = (await res.json().catch(() => null)) as {
@@ -192,6 +196,15 @@ export default function IntakeModal({ target, onClose, onComplete }: Props) {
     }
     if (isLast) void submit();
     else setStepIndex((i) => i + 1);
+  }
+
+  function toggleConcern(id: ConcernId) {
+    setForm((f) => {
+      if (f.concernTags.includes(id)) return { ...f, concernTags: f.concernTags.filter((t) => t !== id) };
+      if (f.concernTags.length >= MAX_CONCERN_TAGS) return f;
+      return { ...f, concernTags: [...f.concernTags, id] };
+    });
+    setError(null);
   }
 
   function back() {
@@ -450,6 +463,57 @@ export default function IntakeModal({ target, onClose, onComplete }: Props) {
             </div>
           )}
 
+          {step === "concern" && (
+            <div className="space-y-3">
+              <div className="flex items-center justify-between text-[11px] text-gray-500">
+                <span>최대 {MAX_CONCERN_TAGS}개까지 고를 수 있어요 (건너뛰어도 돼요)</span>
+                <span data-testid="concern-count" className="font-bold text-brand-600">
+                  {form.concernTags.length}/{MAX_CONCERN_TAGS}
+                </span>
+              </div>
+              <div className="flex flex-wrap gap-1.5" role="group" aria-label="요즘 고민 추천">
+                {CONCERN_CHIPS.map((c) => {
+                  const on = form.concernTags.includes(c.id);
+                  const full = !on && form.concernTags.length >= MAX_CONCERN_TAGS;
+                  return (
+                    <button
+                      key={c.id}
+                      type="button"
+                      data-testid={`concern-chip-${c.id}`}
+                      aria-pressed={on}
+                      aria-disabled={full}
+                      onClick={() => toggleConcern(c.id)}
+                      className={`px-3 py-2 rounded-full border text-xs font-bold transition-colors ${on ? CHOICE_ON : CHOICE_OFF} ${full ? "opacity-40" : ""}`}
+                    >
+                      <span aria-hidden="true">{c.emoji}</span> {c.label}
+                    </button>
+                  );
+                })}
+              </div>
+              <div>
+                <label htmlFor="concern-text" className="block text-xs font-bold text-gray-600 mb-1">
+                  직접 적고 싶다면 (선택)
+                </label>
+                <textarea
+                  id="concern-text"
+                  name="concernText"
+                  rows={3}
+                  maxLength={MAX_CONCERN_TEXT}
+                  value={form.concernText}
+                  onChange={(e) => update({ concernText: e.target.value })}
+                  placeholder="예) 3년 다닌 회사를 옮길지 고민이에요"
+                  className={`${INPUT} resize-none`}
+                />
+                <div className="mt-1 text-right text-[10px] text-gray-400" data-testid="concern-text-count">
+                  {form.concernText.length}/{MAX_CONCERN_TEXT}
+                </div>
+              </div>
+              <p className="text-[11px] text-gray-400 leading-relaxed">
+                병원·약·투자 종목 같은 건 풀이에 쓰지 않아요. 개인정보(이름·연락처 등)는 적지 말아줘요.
+              </p>
+            </div>
+          )}
+
           {step === "consent" && (
             <div className="space-y-3">
               <label className="flex items-start gap-2 text-xs text-gray-700 leading-relaxed">
@@ -461,7 +525,7 @@ export default function IntakeModal({ target, onClose, onComplete }: Props) {
                   onChange={(e) => update({ consent: e.target.checked })}
                 />
                 <span>
-                  (필수) 사주 계산을 위해 생년월일·성별(선택: 태어난 시간)을 처리하는 것에 동의해요.{" "}
+                  (필수) 사주 계산을 위해 생년월일·성별(선택: 태어난 시간·고민 내용)을 처리하는 것에 동의해요.{" "}
                   <a href="/privacy" target="_blank" rel="noopener noreferrer" className="text-brand-600 underline">
                     개인정보처리방침 보기
                   </a>
@@ -491,7 +555,7 @@ export default function IntakeModal({ target, onClose, onComplete }: Props) {
               type="submit"
               className="flex-1 py-2.5 rounded-full bg-brand-600 text-white font-serifKr font-bold text-sm shadow-md hover:bg-brand-700 transition-colors"
             >
-              {isLast ? "캡슐 만들기 ✧" : "다음"}
+              {isLast ? "캡슐 만들기 ✧" : step === "concern" && form.concernTags.length === 0 && !form.concernText.trim() ? "건너뛰기" : "다음"}
             </button>
           </div>
           <p className="mt-3 text-center text-[10px] text-gray-400">* 베타 기간이라 결제는 발생하지 않아요.</p>

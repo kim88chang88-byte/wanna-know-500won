@@ -55,6 +55,14 @@ describe("analyzeChart", () => {
 });
 
 describe("buildUserMessage", () => {
+  it("요즘 고민이 있으면 프롬프트에 데이터로 들어가고, 없으면 빠져요", () => {
+    const withC = buildUserMessage(chart, "general", "female", { tags: ["job"], text: "이직할까" });
+    expect(withC).toContain("요즘고민");
+    expect(withC).toContain("이직·퇴사 타이밍");
+    expect(withC).toContain("이직할까");
+    expect(buildUserMessage(chart, "general", "female", null)).not.toContain("요즘고민");
+  });
+
   it("계산 결과와 주제를 담고, 출생 날짜는 담지 않는다", () => {
     const msg = buildUserMessage(chart, "love", "female");
     expect(msg).toContain("연애운");
