@@ -3,7 +3,7 @@ import type { DrawCounts } from "@/lib/drawCounter";
 import { SERVICE_NAME } from "@/lib/siteInfo";
 import type { AuthUser } from "./useAuth";
 import { FREE_PRICE_LABEL, MACHINES, PREMIUM_CARDS, SAMPLE_CAPSULES } from "./data";
-import MenuButton from "./MenuButton";
+import { HelpMenuButton, MachineMenuButton } from "./MenuButton";
 import { HERO_IMAGE, IMAGES, LOGO_IMAGE } from "./images";
 import SafeImage from "./SafeImage";
 
@@ -31,11 +31,11 @@ export function Header({ onOpenLogin, user = null }: { onOpenLogin: () => void; 
   return (
     <>
       <header className="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-brand-100 shadow-[0_2px_15px_rgba(34,94,170,0.06)]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex items-center justify-between gap-3">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-3.5 flex items-center justify-between gap-2 sm:gap-3">
           {/* 왼쪽 위: 로고 + 베타 안내 (좁은 화면에서는 아래 띠로 따로 보여줘요) */}
           <div className="flex flex-col items-start gap-1 min-w-0">
-            <Link href="/" aria-label={`${SERVICE_NAME} 홈으로`} data-testid="home-link" className="flex items-center gap-2.5">
-              <div className="relative w-10 h-10 sm:w-11 sm:h-11 rounded-full overflow-hidden border-2 border-brand-500/40 shadow-sm shrink-0 bg-sky-50 flex items-center justify-center">
+            <Link href="/" aria-label={`${SERVICE_NAME} 홈으로`} data-testid="home-link" className="flex items-center gap-2 sm:gap-2.5">
+              <div className="relative w-9 h-9 sm:w-11 sm:h-11 rounded-full overflow-hidden border-2 border-brand-500/40 shadow-sm shrink-0 bg-sky-50 flex items-center justify-center">
                 <SafeImage
                   src={LOGO_IMAGE}
                   alt="도리 운세 사주 로고"
@@ -44,8 +44,8 @@ export function Header({ onOpenLogin, user = null }: { onOpenLogin: () => void; 
                   fallbackClass="text-2xl"
                 />
               </div>
-              <h1 className="font-serifKr font-black text-lg sm:text-2xl tracking-tight bg-gradient-to-r from-brand-500 via-blue-600 to-indigo-600 bg-clip-text text-transparent inline-flex items-center gap-1.5">
-                <span aria-hidden="true" className="text-xl">🌙</span>
+              <h1 className="font-serifKr font-black text-[15px] min-[400px]:text-lg sm:text-2xl whitespace-nowrap tracking-tight bg-gradient-to-r from-brand-500 via-blue-600 to-indigo-600 bg-clip-text text-transparent inline-flex items-center gap-1.5">
+                <span aria-hidden="true" className="hidden min-[400px]:inline text-xl">🌙</span>
                 {SERVICE_NAME}
                 <span className="hidden sm:inline text-xs text-amber-600 font-sans font-bold px-2 py-0.5 rounded-full bg-amber-50 border border-amber-200/80">
                   ✨ 퐁당
@@ -58,22 +58,22 @@ export function Header({ onOpenLogin, user = null }: { onOpenLogin: () => void; 
             </div>
           </div>
 
-          {/* 오른쪽 위: 로그인 전에는 "로그인" 버튼, 로그인 후에는 닉네임(마이페이지) + 햄버거 메뉴. 둘 다 같은 창(로그인/내 정보)을 열어요 */}
-          <div className="shrink-0 flex items-center gap-2">
+          {/* 오른쪽 위: 로그인 전에는 "로그인" 버튼, 로그인 후에는 닉네임(마이페이지) + "?" 안내 메뉴 + 햄버거(자판기) 메뉴. 둘 다 같은 창(로그인/내 정보)을 열어요 */}
+          <div className="shrink-0 flex items-center gap-1.5 sm:gap-2">
             <button
               onClick={onOpenLogin}
               type="button"
               aria-haspopup="dialog"
               data-testid="mypage-button"
               data-logged-in={user ? "true" : "false"}
-              className={`group flex items-center gap-2 p-1.5 pr-3 sm:px-3.5 sm:py-1.5 rounded-full border transition-all text-left shadow-sm ${
+              className={`group flex items-center gap-1.5 sm:gap-2 p-1 pr-2.5 sm:px-3.5 sm:py-1.5 rounded-full border transition-all text-left shadow-sm ${
                 user
                   ? "bg-emerald-50 hover:bg-emerald-100/70 border-emerald-300/70"
                   : "bg-brand-600 hover:bg-brand-700 border-brand-600 text-white"
               }`}
             >
               <div
-                className={`relative w-8 h-8 shrink-0 rounded-full bg-white flex items-center justify-center group-hover:scale-105 transition-transform ${
+                className={`relative w-7 h-7 sm:w-8 sm:h-8 shrink-0 rounded-full bg-white flex items-center justify-center group-hover:scale-105 transition-transform ${
                   user ? "text-emerald-700 font-bold text-sm" : "text-brand-600"
                 }`}
               >
@@ -92,10 +92,10 @@ export function Header({ onOpenLogin, user = null }: { onOpenLogin: () => void; 
               {user ? (
                 // 로그인된 상태는 작은 화면에서도 닉네임이 보이게 해요 (길면 말줄임)
                 <div className="min-w-0">
-                  <span data-testid="mypage-name" className="block max-w-[5.5rem] sm:max-w-[9rem] truncate text-xs font-bold text-gray-800">
+                  <span data-testid="mypage-name" className="block max-w-[3.5rem] min-[400px]:max-w-[5.5rem] sm:max-w-[9rem] truncate text-xs font-bold text-gray-800">
                     {user.nickname ? `${user.nickname}님` : "회원님"}
                   </span>
-                  <span className="block text-[10px] font-medium text-emerald-700">로그인됨</span>
+                  <span className="sr-only sm:not-sr-only sm:block text-[10px] font-medium text-emerald-700">로그인됨</span>
                 </div>
               ) : (
                 // 로그인 전에는 작은 화면에서도 "로그인" 글자가 보이게 해요
@@ -107,7 +107,8 @@ export function Header({ onOpenLogin, user = null }: { onOpenLogin: () => void; 
                 </div>
               )}
             </button>
-            <MenuButton />
+            <HelpMenuButton />
+            <MachineMenuButton />
           </div>
         </div>
       </header>
@@ -260,8 +261,9 @@ export function MachinesSection({ onSpin, spinningKey }: SpinProps) {
         {MACHINES.map((m) => (
           <div
             key={m.key}
+            id={m.key}
             data-testid="machine-card"
-            className={`card-water-glow flex flex-col justify-between rounded-3xl p-3 sm:p-6 hover:shadow-xl hover:-translate-y-1.5 transition-all group ${m.card}`}
+            className={`scroll-mt-24 card-water-glow flex flex-col justify-between rounded-3xl p-3 sm:p-6 hover:shadow-xl hover:-translate-y-1.5 transition-all group ${m.card}`}
           >
             <div>
               <div className="flex flex-wrap items-center justify-between gap-1 mb-2.5 sm:mb-3.5">
@@ -334,8 +336,9 @@ export function PremiumSection({ onSpin, spinningKey }: SpinProps) {
           {PREMIUM_CARDS.map((p) => (
             <div
               key={p.key}
+              id={p.key}
               data-testid="premium-card"
-              className={`card-water-glow flex flex-col justify-between rounded-3xl p-6 bg-white hover:shadow-lg hover:-translate-y-1 transition-all group ${p.card}`}
+              className={`scroll-mt-24 card-water-glow flex flex-col justify-between rounded-3xl p-6 bg-white hover:shadow-lg hover:-translate-y-1 transition-all group ${p.card}`}
             >
               {p.ribbon && (
                 <div className="absolute -top-0 right-5 px-3 py-0.5 rounded-b-full bg-amber-600 text-white text-[11px] font-bold shadow-sm z-10">
