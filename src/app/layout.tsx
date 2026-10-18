@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL;
@@ -33,7 +34,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           rel="stylesheet"
         />
       </head>
-      <body className="bg-[#F4F8FD] text-[#1E293B] font-sans antialiased selection:bg-brand-200">{children}</body>
+      <body className="bg-[#F4F8FD] text-[#1E293B] font-sans antialiased selection:bg-brand-200">
+        {children}
+        <Analytics />
+      </body>
     </html>
   );
 }
