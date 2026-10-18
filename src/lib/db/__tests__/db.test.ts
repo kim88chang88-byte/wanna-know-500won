@@ -141,7 +141,7 @@ describe("createDb", () => {
     const db = createDb(cfg, r.f);
     await db.upsertProfile("4242", { year: 1995, month: 3, day: 4, hour: 9, minute: 5, calendar: "solar", isLeapMonth: false, gender: "female" }, new Date("2026-10-18T00:00:00Z"));
     expect(r.calls[0].url).toBe("https://x.supabase.co/rest/v1/profiles?on_conflict=user_id");
-    expect(JSON.parse(String(r.calls[0].init?.body))).toEqual({ user_id: "4242", calendar: "solar", year: 1995, month: 3, day: 4, is_leap: false, hour: 9, minute: 5, gender: "female", updated_at: "2026-10-18T00:00:00.000Z" });
+    expect(JSON.parse(String(r.calls[0].init?.body))).toEqual({ user_id: "4242", calendar: "solar", year: 1995, month: 3, day: 4, is_leap: false, hour: 9, minute: 5, gender: "female", updated_at: "2026-10-18T00:00:00.000Z", consent_version: "2026-10-18", consented_at: "2026-10-18T00:00:00.000Z" });
     const p = await db.getProfile("4242");
     expect(p).toEqual({ year: 1995, month: 3, day: 4, hour: 9, minute: 5, calendar: "solar", isLeapMonth: false, gender: "female" });
     expect(r.calls[1].url).toContain("profiles?user_id=eq.4242");
@@ -160,7 +160,7 @@ describe("createDb", () => {
     const db = createDb(cfg, r.f);
     await db.recordConcern({ userId: null, topic: "love", concern: { tags: ["crush"], text: "썸이에요" }, gender: "female", ageBand: "30s" }, new Date("2026-10-18T00:00:00Z"));
     expect(r.calls[0].url).toBe("https://x.supabase.co/rest/v1/concern_logs");
-    expect(JSON.parse(String(r.calls[0].init?.body))).toEqual({ user_id: null, day: "2026-10-18", topic: "love", tags: ["crush"], concern_text: "썸이에요", gender: "female", age_band: "30s" });
+    expect(JSON.parse(String(r.calls[0].init?.body))).toEqual({ user_id: null, day: "2026-10-18", topic: "love", tags: ["crush"], concern_text: "썸이에요", gender: "female", age_band: "30s", consent_version: "2026-10-18", consented_at: "2026-10-18T00:00:00.000Z" });
     await db.recordConcern({ userId: "4242", topic: "general", concern: { tags: [], text: "" }, gender: "male", ageBand: "20s" });
     expect(JSON.parse(String(r.calls[1].init?.body)).user_id).toBe("4242");
     expect(JSON.parse(String(r.calls[1].init?.body)).concern_text).toBeNull();

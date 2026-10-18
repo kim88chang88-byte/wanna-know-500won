@@ -37,6 +37,14 @@
 | `KAKAO_REDIRECT_URI` | `https://배포주소/api/auth/kakao/callback` |
 | `AUTH_SECRET` | 32자 이상 무작위 값. **로컬과 다른 새 값**을 만들어 쓰세요 (`openssl rand -base64 32`) |
 | `NEXT_PUBLIC_SITE_URL` | `https://배포주소` |
+| `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` / `GOOGLE_REDIRECT_URI` | 구글 로그인 (`docs/GOOGLE_LOGIN.md`) |
+| `NAVER_CLIENT_ID` / `NAVER_CLIENT_SECRET` / `NAVER_REDIRECT_URI` | 네이버 로그인 (`docs/NAVER_LOGIN.md`) |
+| `SUPABASE_URL` / `SUPABASE_SERVICE_ROLE_KEY` | DB 연결 (`docs/SUPABASE.md`). service_role 키는 서버 전용이라 절대 공개 금지 |
+| `ADMIN_USER_IDS` | 관리자 화면(/admin)에 들어갈 회원번호 목록 (쉼표로 구분, `docs/ADMIN.md`) |
+| `DAILY_FREE_LIMIT_ENFORCED` | `true` 면 하루 무료 횟수를 서버에서 강제해요. 결제 연동 전에는 비워 두세요 |
+| `PREMIUM_UNLOCK_ALL` | `true` 면 프리미엄 리포트가 전부 열려요. **베타 전용**, 결제를 열 때 반드시 비우세요 |
+
+> DB 스키마(`supabase/schema.sql`)는 **코드를 배포하기 전에** 먼저 Supabase SQL Editor 에서 Run 하세요. 새 컬럼이 없으면 저장이 실패해요.
 
 값은 이름 칸/값 칸에 **값만** 넣어요 (`이름=값` 통째로 붙여넣지 않기). 환경변수를 바꾼 뒤에는 **Redeploy** 해야 반영돼요.
 배포 주소는 처음에는 `프로젝트이름.vercel.app` 이에요. 도메인을 연결하면 아래 3번의 주소들을 새 도메인으로 바꿔요.

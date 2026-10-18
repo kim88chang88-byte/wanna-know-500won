@@ -15,7 +15,8 @@ export default function ScrollHint({ label }: { label: string }) {
     const el = end.current;
     if (!el || typeof IntersectionObserver === "undefined") return;
     // 맨 아래 표시(sentinel)가 화면에 안 보이면 = 아래에 더 있다는 뜻이에요.
-    const io = new IntersectionObserver(([entry]) => setMore(!entry.isIntersecting), { threshold: 0 });
+    // rootMargin 으로 바닥 72px 앞에서 미리 숨겨서, 맨 아래 "닫기" 같은 글자를 가리지 않아요.
+    const io = new IntersectionObserver(([entry]) => setMore(!entry.isIntersecting), { threshold: 0, rootMargin: "0px 0px 72px 0px" });
     io.observe(el);
     return () => io.disconnect();
   }, []);

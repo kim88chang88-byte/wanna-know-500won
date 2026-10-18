@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { ContactList, H2, LegalPage } from "@/components/legal/Legal";
-import { OPERATOR } from "@/lib/siteInfo";
+import { LEGAL_REVISIONS, OPERATOR } from "@/lib/siteInfo";
 
 export const metadata: Metadata = {
   title: "개인정보처리방침 | 도리 운세 사주",
@@ -93,7 +93,7 @@ export default function PrivacyPage() {
           (2) 고민 통계: 동의하면 고른 고민 버튼·직접 적은 고민 글·나이대·성별·날짜·주제를 저장해 서비스 개선 통계로 씁니다. 생년월일은 저장하지
           않습니다. 로그인 상태에서 동의한 기록은 회원과 연결되어 <b>탈퇴 시 함께 삭제</b>되고, 로그인하지 않고 동의한 기록은 누구의 것인지 알 수
           없는 형태로 저장되어 삭제 요청을 받더라도 찾아서 지울 수 없습니다. 고민 글에는 이름·연락처 등 개인정보를 적지 말아 주세요. 보관 기간은
-          서비스 운영 기간 동안이며, 통계 목적이 끝나면 지체 없이 파기합니다.
+          수집일로부터 24개월이며, 기간이 지나거나 통계 목적이 끝나면 지체 없이 파기합니다.
         </li>
         <li>
           카카오·구글·네이버 로그인 회원의 회원번호(고유번호)·닉네임(이름)·뽑기 기록(날짜와 주제)·마지막 로그인 시각은 서비스 데이터베이스에 저장하며,
@@ -101,7 +101,7 @@ export default function PrivacyPage() {
           기록에는 생년월일시·성별·풀이 내용이 들어가지 않습니다.
         </li>
         <li>
-          사용후기는 이용자가 직접 남길 때만 저장하며, 서비스 운영 기간 동안 보관하고 목적이 끝나면 지체 없이 파기합니다. 로그인한 상태로 남긴 후기는
+          사용후기는 이용자가 직접 남길 때만 저장하며, 작성일로부터 24개월 보관한 뒤(또는 목적이 끝나면 그 전에) 지체 없이 파기합니다. 로그인한 상태로 남긴 후기는
           <b>회원 탈퇴 시 함께 삭제</b>되고, 로그인하지 않고 남긴 후기는 누구의 것인지 알 수 없어 삭제 요청을 받더라도 찾아서 지울 수 없습니다.
           후기 글에는 이름·연락처 등 개인정보를 적지 말아 주세요. 후기를 사이트에 공개하게 되면 따로 안내하고 동의를 받습니다.
         </li>
@@ -172,6 +172,18 @@ export default function PrivacyPage() {
 
       <H2>8. 방침이 바뀔 때</H2>
       <p>내용이 바뀌면 시행일을 갱신하고 이 페이지에 먼저 알립니다. 이용자에게 중요한 변경은 서비스 화면에서 따로 안내해요.</p>
+      <p className="mt-2">
+        선택 동의(생년월일시 기억하기, 고민 통계)를 하시면 동의한 시각과 당시 동의 문구의 버전을 함께 기록합니다. 동의가 있었음을 확인하고 문구가 바뀐 뒤에도
+        과거 동의를 구분하기 위한 용도로만 쓰며, 해당 정보와 함께 삭제됩니다.
+      </p>
+      <p className="mt-3 font-bold text-gray-800">개정 이력</p>
+      <ul className="list-disc pl-5 space-y-1" data-testid="legal-revisions">
+        {LEGAL_REVISIONS.map((r) => (
+          <li key={r.date}>
+            {r.date}: {r.note}
+          </li>
+        ))}
+      </ul>
     </LegalPage>
   );
 }

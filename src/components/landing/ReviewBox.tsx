@@ -63,7 +63,16 @@ export default function ReviewBox({ topic, premium }: { topic: string; premium: 
             aria-checked={rating === n}
             aria-label={`${n}점 ${LABELS[n]}`}
             data-testid={`star-${n}`}
+            tabIndex={rating === n || (rating === 0 && n === 1) ? 0 : -1}
             onClick={() => setRating(n)}
+            onKeyDown={(e) => {
+              // 라디오 그룹처럼 화살표 키로 별점을 바꿀 수 있어요.
+              const next = e.key === "ArrowRight" || e.key === "ArrowUp" ? Math.min(5, (rating || n) + 1) : e.key === "ArrowLeft" || e.key === "ArrowDown" ? Math.max(1, (rating || n) - 1) : 0;
+              if (!next) return;
+              e.preventDefault();
+              setRating(next);
+              (e.currentTarget.parentElement?.querySelector(`[data-testid="star-${next}"]`) as HTMLElement | null)?.focus();
+            }}
             className={`text-3xl leading-none px-0.5 transition-transform hover:scale-110 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-300 rounded ${n <= rating ? "text-amber-400" : "text-gray-300"}`}
           >
             <span aria-hidden="true">★</span>

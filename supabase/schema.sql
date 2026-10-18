@@ -82,3 +82,15 @@ create table if not exists public.reviews (
 create index if not exists reviews_created_idx on public.reviews (created_at);
 
 alter table public.reviews enable row level security;
+
+-- ─────────────────────────────────────────────────────────────────────────────
+-- 동의 기록: 선택 동의(생년월일시 기억하기·고민 통계) 때 '언제, 어떤 문구 버전에' 동의했는지 남겨요.
+-- 이 파일 전체를 다시 Run 하면 추가돼요. (기존 행은 null 로 남아요)
+-- ※ 코드를 배포하기 '전에' 먼저 Run 해주세요. (컬럼이 없으면 저장이 실패해요)
+-- ─────────────────────────────────────────────────────────────────────────────
+alter table public.profiles add column if not exists consent_version text;
+alter table public.profiles add column if not exists consented_at timestamptz;
+alter table public.concern_logs add column if not exists consent_version text;
+alter table public.concern_logs add column if not exists consented_at timestamptz;
+create index if not exists reviews_created_idx on public.reviews (created_at);
+create index if not exists concern_logs_created_idx on public.concern_logs (created_at);

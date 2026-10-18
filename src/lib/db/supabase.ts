@@ -1,3 +1,4 @@
+import { CONSENT_VERSION } from "@/lib/siteInfo";
 import type { Concern } from "@/lib/concerns";
 import type { ReviewInput } from "@/lib/reviews";
 import { parseProfileRow, type SavedProfile } from "@/lib/profile";
@@ -233,6 +234,8 @@ export function createDb(config: DbConfig, fetchImpl: FetchLike = fetch) {
           minute: p.hour === null || p.hour === undefined ? null : (p.minute ?? 0),
           gender: p.gender,
           updated_at: now.toISOString(),
+          consent_version: CONSENT_VERSION,
+          consented_at: now.toISOString(),
         }),
       });
     },
@@ -258,6 +261,8 @@ export function createDb(config: DbConfig, fetchImpl: FetchLike = fetch) {
           concern_text: row.concern.text || null,
           gender: row.gender,
           age_band: row.ageBand,
+          consent_version: CONSENT_VERSION,
+          consented_at: now.toISOString(),
         }),
       });
     },
