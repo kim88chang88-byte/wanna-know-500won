@@ -150,6 +150,20 @@ describe("createDb", () => {
     expect(r.calls[2].url).toBe("https://x.supabase.co/rest/v1/profiles?user_id=eq.4242");
   });
 
+  it("takeAiBudget: rpc 로 날짜·한도를 보내고 true/false 를 돌려줘요", async () => {
+    const r = recorder(() => new Response("true", { status: 200 }));
+    const db = createDb(cfg, r.f);
+    expect(await db.takeAiBudget("2026-10-18", 300)).toBe(true);
+    expect(r.calls[0].url).toBe("https://x.supabase.co/rest/v1/rpc/ai_usage_take");
+    expect(JSON.parse(String(r.calls[0].init?.body))).toEqual({ p_day: "2026-10-18", p_cap: 300 });
+    const r2 = recorder(() => new Response("false", { status: 200 }));
+    expect(await createDb(cfg, r2.f).takeAiBudget("2026-10-18", 300)).toBe(false);
+    const r3 = recorder(() => new Response("x", { status: 404 }));
+    let threw = false;
+    try { await createDb(cfg, r3.f).takeAiBudget("2026-10-18", 300); } catch { threw = true; }
+    expect(threw).toBe(true);
+  });
+
   it("getProfile: 행이 없으면 null", async () => {
     const r = recorder(() => new Response("[]", { status: 200 }));
     expect(await createDb(cfg, r.f).getProfile("4242")).toBeNull();

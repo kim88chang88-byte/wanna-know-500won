@@ -211,6 +211,19 @@ export function createDb(config: DbConfig, fetchImpl: FetchLike = fetch) {
       });
     },
 
+    /**
+     * 오늘 AI 호출 한 번을 써도 되는지 확인하고, 되면 1 늘려요. (한도에 닿으면 false)
+     * 여러 서버가 동시에 불러도 틀어지지 않게 DB 함수(ai_usage_take) 안에서 한 번에 처리해요.
+     */
+    async takeAiBudget(day: string, cap: number): Promise<boolean> {
+      const res = await call("rpc/ai_usage_take", {
+        method: "POST",
+        headers: headers(),
+        body: JSON.stringify({ p_day: day, p_cap: cap }),
+      });
+      return (await res.json().catch(() => null)) === true;
+    },
+
     /** 저장된 생년월일시를 읽어요. 없으면 null. */
     async getProfile(userId: string): Promise<SavedProfile | null> {
       const res = await call(`profiles?user_id=eq.${safeId(userId)}&select=*&limit=1`, { method: "GET", headers: headers() });

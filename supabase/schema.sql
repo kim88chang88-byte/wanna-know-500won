@@ -94,3 +94,32 @@ alter table public.concern_logs add column if not exists consent_version text;
 alter table public.concern_logs add column if not exists consented_at timestamptz;
 create index if not exists reviews_created_idx on public.reviews (created_at);
 create index if not exists concern_logs_created_idx on public.concern_logs (created_at);
+
+-- ─────────────────────────────────────────────────────────────────────────────
+-- AI 비용 방어: 하루에 AI 를 몇 번 불렀는지 세는 표와, 한도를 안 넘을 때만 1 올리는 함수예요.
+-- 이 파일 전체를 다시 Run 하면 추가돼요. (코드를 배포하기 '전에' Run 하세요. 없으면 서버 메모리 임시 카운터로 동작해요)
+-- 사용량 확인: select * from public.ai_usage order by day desc;
+-- ─────────────────────────────────────────────────────────────────────────────
+create table if not exists public.ai_usage (
+  day date primary key,                          -- 한국 시간(KST) 기준 날짜
+  calls int not null default 0
+);
+alter table public.ai_usage enable row level security;
+
+create or replace function public.ai_usage_take(p_day date, p_cap int)
+returns boolean
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare n int;
+begin
+  insert into public.ai_usage as u (day, calls) values (p_day, 1)
+  on conflict (day) do update set calls = u.calls + 1 where u.calls < p_cap
+  returning calls into n;
+  return n is not null;
+end;
+$$;
+
+revoke all on function public.ai_usage_take(date, int) from public, anon, authenticated;
+grant execute on function public.ai_usage_take(date, int) to service_role;

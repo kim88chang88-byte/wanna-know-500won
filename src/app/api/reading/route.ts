@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { takeAiBudget } from "@/lib/ai/budget";
 import { interpretSaju, ReadingUnavailableError } from "@/lib/ai/interpret";
 import { normalizeTopic, toPublicReading, type PublicReading } from "@/lib/ai/reading";
 import { hasConcern, parseConcern } from "@/lib/concerns";
@@ -105,6 +106,14 @@ export async function POST(request: Request) {
   let reading: PublicReading | null = null;
   let readingStatus: ReadingStatus = "ok";
   try {
+    // 키가 있을 때만 비용 한도를 확인해요. 한도를 넘었거나 비상 차단 중이면 AI 한마디만 빼고 사주 리포트는 그대로 나가요.
+    if (process.env.ANTHROPIC_API_KEY) {
+      const gate = await takeAiBudget(process.env, db);
+      if (gate !== "ok") {
+        if (gate === "cap") console.warn("AI daily cap reached");
+        throw new ReadingUnavailableError();
+      }
+    }
     const full = await interpretSaju(chart, { topic: normalizeTopic(rawTopic), gender: input.gender, concern });
     reading = toPublicReading(full, "free");
   } catch (err) {

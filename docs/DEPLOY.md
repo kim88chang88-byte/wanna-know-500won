@@ -42,6 +42,8 @@
 | `SUPABASE_URL` / `SUPABASE_SERVICE_ROLE_KEY` | DB 연결 (`docs/SUPABASE.md`). service_role 키는 서버 전용이라 절대 공개 금지 |
 | `ADMIN_USER_IDS` | 관리자 화면(/admin)에 들어갈 회원번호 목록 (쉼표로 구분, `docs/ADMIN.md`) |
 | `DAILY_FREE_LIMIT_ENFORCED` | `true` 면 하루 무료 횟수를 서버에서 강제해요. 결제 연동 전에는 비워 두세요 |
+| `AI_DAILY_CAP` | 하루(한국 시간)에 서버 전체에서 AI를 부를 수 있는 최대 횟수. 비우면 300, `0`이면 AI를 안 불러요 (`docs/COST_GUARD.md`) |
+| `AI_DISABLED` | `true`면 AI 호출을 즉시 막아요(비상 차단). 사주 리포트는 그대로 나가요 |
 | `PREMIUM_UNLOCK_ALL` | `true` 면 프리미엄 리포트가 전부 열려요. **베타 전용**, 결제를 열 때 반드시 비우세요 |
 
 > DB 스키마(`supabase/schema.sql`)는 **코드를 배포하기 전에** 먼저 Supabase SQL Editor 에서 Run 하세요. 새 컬럼이 없으면 저장이 실패해요.
