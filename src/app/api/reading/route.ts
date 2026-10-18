@@ -91,8 +91,12 @@ export async function POST(request: Request) {
     }
   }
 
-  // 풀이가 정상으로 나갔을 때만 뽑기 1회로 기록해요. (실패한 요청은 세지 않아요)
-  if (userId && db && readingStatus === "ok" && reading) {
+  // 뽑기 1회로 기록하는 경우:
+  //  - AI 한마디가 정상으로 나갔을 때
+  //  - AI 키가 없어서 한마디를 아예 안 쓰는 상태(unavailable)일 때: 이때는 사주 리포트가 서비스 본체라서 그대로 센다
+  // AI 호출이 일시적으로 실패한 요청(failed)은 세지 않아요.
+  const countable = readingStatus === "unavailable" || (readingStatus === "ok" && reading !== null);
+  if (userId && db && countable) {
     try {
       await db.ensureUser(userId, session?.nick);
       await db.recordDraw(userId, normalizeTopic(rawTopic));

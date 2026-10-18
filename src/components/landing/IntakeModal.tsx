@@ -172,7 +172,8 @@ export default function IntakeModal({ target, onClose, onComplete }: Props) {
       setReadingStatus(status);
       setPhase("result");
       // 풀이(AI 한마디 또는 사주 리포트)를 실제로 받았을 때만 뽑기 횟수로 세요.
-      if (status === "ok" && data.reading) onComplete(data.counts ?? null);
+      // AI 키가 없는 상태(unavailable)에서도 사주 리포트가 나갔으면 센 것으로 봐요. (서버도 같은 기준으로 기록해요)
+      if ((status === "ok" && data.reading) || status === "unavailable") onComplete(data.counts ?? null);
       else if (p.report) onComplete(null);
     } catch (err) {
       if (ctrl.signal.aborted) return;
