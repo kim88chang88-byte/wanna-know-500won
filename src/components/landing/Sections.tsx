@@ -198,13 +198,9 @@ export function ShowcaseSection() {
                   </span>
                   <span className="text-xs text-sky-600 font-semibold">퐁당! 💦</span>
                 </div>
-                <h3 className="font-serifKr font-black text-xl sm:text-2xl text-brand-500 mt-1 mb-2 leading-snug">
-                  “조개 속에 든 네 고민, 도리가 톡- 까서 알려줄게! 🌙”
+                <h3 className="font-serifKr font-black text-xl sm:text-2xl text-brand-500 mt-1 mb-4 leading-snug">
+                  궁금행? 궁금하면 500원이야 &gt;_&lt;
                 </h3>
-                <p className="text-sm text-slate-600 leading-relaxed mb-4">
-                  궁금해? 궁금하면 500원이야!! 맑은 샘물에 깃든 6대 운명의 자판기에서 레버를 돌려보시게~ 수달 도사가 전하는
-                  오늘의 따스한 물빛 조언을 만나보세요.
-                </p>
                 <div className="flex flex-wrap items-center gap-2.5 pt-4 border-t border-sky-200/80">
                   <span className="text-xs font-semibold text-brand-500 flex items-center gap-1">
                     <span className="material-symbols-outlined text-base">verified</span> 매일 첫 1회 무료 체험
