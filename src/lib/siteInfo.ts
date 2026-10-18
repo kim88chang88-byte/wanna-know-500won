@@ -2,9 +2,10 @@
 export const SERVICE_NAME = "도리 운세 사주";
 export const CONTACT_EMAILS = ["jhthe88@hanmail.net", "kacellizer88@naver.com"] as const;
 export const OPERATOR = "The New Kim&Chang";
-export const LEGAL_EFFECTIVE_DATE = "2026년 10월 18일";
+export const LEGAL_EFFECTIVE_DATE = "2026년 10월 19일";
 /** 방침 개정 이력 (최신이 위). 내용이 바뀔 때마다 한 줄 추가하고 시행일을 함께 고쳐요. */
 export const LEGAL_REVISIONS = [
+  { date: "2026년 10월 19일", note: "카카오 계정에서 서비스 연결을 끊으면 저장된 회원 정보가 자동으로 삭제된다는 안내를 추가했어요." },
   { date: "2026년 10월 18일", note: "생년월일시 기억하기(선택), 고민 통계(선택), 사용후기 수집 항목과 보관 기간을 추가하고, 동의 기록(시각·동의서 버전) 저장을 안내했어요." },
   { date: "2026년 10월 16일", note: "최초 시행" },
 ] as const;

@@ -37,6 +37,7 @@
 | `KAKAO_REDIRECT_URI` | `https://배포주소/api/auth/kakao/callback` |
 | `AUTH_SECRET` | 32자 이상 무작위 값. **로컬과 다른 새 값**을 만들어 쓰세요 (`openssl rand -base64 32`) |
 | `NEXT_PUBLIC_SITE_URL` | `https://배포주소` |
+| `KAKAO_ADMIN_KEY` | 카카오 앱 어드민 키. 연결 끊기 웹훅이 진짜 카카오가 보낸 것인지 확인해요 (`docs/KAKAO_LOGIN.md` 4번) |
 | `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` / `GOOGLE_REDIRECT_URI` | 구글 로그인 (`docs/GOOGLE_LOGIN.md`) |
 | `NAVER_CLIENT_ID` / `NAVER_CLIENT_SECRET` / `NAVER_REDIRECT_URI` | 네이버 로그인 (`docs/NAVER_LOGIN.md`) |
 | `SUPABASE_URL` / `SUPABASE_SERVICE_ROLE_KEY` | DB 연결 (`docs/SUPABASE.md`). service_role 키는 서버 전용이라 절대 공개 금지 |
