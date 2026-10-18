@@ -126,17 +126,14 @@ export function HeroSection({ counts }: { counts: DrawCounts }) {
     <section className="text-center max-w-4xl mx-auto mb-12">
       <div className="relative inline-block mb-3">
         <h2 className="font-serifKr text-3xl sm:text-5xl font-extrabold tracking-tight text-gray-900 leading-tight">
-          퐁당퐁당 수달 &apos;도리&apos;의 신비한 운세자판기 🦦
+          수달 도사 &apos;도리&apos;의
+          <br />
+          신비한 운세 자판기
         </h2>
         <span className="absolute -top-3 -right-4 sm:-right-6 text-2xl select-none floating-anim" aria-hidden="true">
           🫧
         </span>
       </div>
-
-      <p className="font-serifKr text-base sm:text-lg text-slate-600 font-medium leading-relaxed max-w-2xl mx-auto">
-        “수달 도사 &apos;도리&apos;가 점쳐주는 오늘의 물빛 운세!
-        <br className="hidden sm:inline" /> 달콤한 조개와 달빛 캡슐을 뽑아보세요 🌙✨ 매일 첫 1회는 무료, 그다음부터는 부담 없는 500원의 온기”
-      </p>
 
       {/* 뽑기 횟수: 한 줄짜리 작은 알약 (로그인했다면 서버가, 아니라면 이 기기에서 센 값) */}
       <div className="mt-4 inline-flex flex-wrap items-center justify-center gap-x-3 gap-y-1 rounded-full bg-white/80 border border-brand-100 px-4 py-1.5 text-xs shadow-sm">
@@ -157,18 +154,6 @@ export function HeroSection({ counts }: { counts: DrawCounts }) {
           </b>
         </span>
       </div>
-
-      {/* 자판기는 화면 아래쪽에 있어서, 첫 화면에서 스크롤을 내려야 한다는 걸 알려줘요 */}
-      <a
-        href="#machines"
-        data-testid="scroll-cue"
-        className="mt-6 inline-flex flex-col items-center gap-0.5 rounded-2xl px-4 py-2 text-xs sm:text-sm font-bold text-brand-600 hover:text-brand-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-300"
-      >
-        <span>아래로 스크롤해서 운명의 자판기를 골라보세요</span>
-        <span className="material-symbols-outlined text-[28px] leading-none motion-safe:animate-bounce" aria-hidden="true">
-          keyboard_double_arrow_down
-        </span>
-      </a>
     </section>
   );
 }
@@ -234,6 +219,20 @@ export function ShowcaseSection() {
             </div>
           </div>
         </div>
+      </div>
+
+      <div className="relative z-10 mt-7 text-center">
+        {/* 소개 카드 바로 아래, 자판기 바로 위: "이제 아래 자판기를 골라보세요" 안내 */}
+        <a
+          href="#machines"
+          data-testid="scroll-cue"
+          className="inline-flex flex-col items-center gap-0.5 rounded-2xl px-4 py-2 text-xs sm:text-sm font-bold text-brand-600 hover:text-brand-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-300"
+        >
+          <span>아래로 스크롤해서 운명의 자판기를 골라보세요</span>
+          <span className="material-symbols-outlined text-[28px] leading-none motion-safe:animate-bounce" aria-hidden="true">
+            keyboard_double_arrow_down
+          </span>
+        </a>
       </div>
     </section>
   );
