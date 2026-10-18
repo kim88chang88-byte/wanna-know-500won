@@ -592,7 +592,7 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
               </p>
 
               {loggedIn ? (
-                savedProfile && sameBirth(savedProfile, buildBirthInput(form)) ? (
+                savedProfile && sameBirth(savedProfile, buildBirthInput({ ...form, consent: true })) ? (
                   <p data-testid="profile-kept" className="text-[11px] text-gray-500 leading-relaxed">
                     기억해 둔 생년월일시로 풀어요. 지우고 싶으면 로그인 창의 &lsquo;기억한 정보 지우기&rsquo;를 눌러줘요.
                   </p>
