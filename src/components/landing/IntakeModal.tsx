@@ -19,6 +19,7 @@ import { BRANCHES, STEMS } from "@/lib/saju/constants";
 import type { Pillar, SajuChart } from "@/lib/saju/types";
 import { CloseButton, ModalShell } from "./Modals";
 import PhotoCard from "./PhotoCard";
+import ScrollHint from "./ScrollHint";
 import ManseReport from "@/components/premium/ManseReport";
 import type { PremiumReportView } from "@/lib/premium/types";
 import type { BirthInput } from "@/lib/saju/types";
@@ -648,6 +649,8 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
           <p className="mt-3 text-center text-[10px] text-gray-400">* 베타 기간이라 결제는 발생하지 않아요.</p>
         </form>
       )}
+      {/* 창이 길어서 아래에 더 볼 내용이 있을 때만 보이는 안내 */}
+      {phase !== "loading" && <ScrollHint label={phase === "result" ? "아래로 스크롤하면 사주 리포트가 더 있어요" : "아래로 스크롤해 주세요"} />}
     </ModalShell>
   );
 }

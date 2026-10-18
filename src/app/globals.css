@@ -299,3 +299,10 @@
   color: #1a1a1a;
   text-decoration: underline;
 }
+
+/* 안내 링크(#machines)를 눌렀을 때 부드럽게 내려가요. (움직임을 줄이도록 설정한 사람은 바로 이동) */
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}

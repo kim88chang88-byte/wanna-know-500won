@@ -159,6 +159,18 @@ export function HeroSection({ counts }: { counts: DrawCounts }) {
           </b>
         </span>
       </div>
+
+      {/* 자판기는 화면 아래쪽에 있어서, 첫 화면에서 스크롤을 내려야 한다는 걸 알려줘요 */}
+      <a
+        href="#machines"
+        data-testid="scroll-cue"
+        className="mt-6 inline-flex flex-col items-center gap-0.5 rounded-2xl px-4 py-2 text-xs sm:text-sm font-bold text-brand-600 hover:text-brand-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-300"
+      >
+        <span>아래로 스크롤해서 운명의 자판기를 골라보세요</span>
+        <span className="material-symbols-outlined text-[28px] leading-none motion-safe:animate-bounce" aria-hidden="true">
+          keyboard_double_arrow_down
+        </span>
+      </a>
     </section>
   );
 }
@@ -233,7 +245,7 @@ export function ShowcaseSection() {
 
 export function MachinesSection({ onSpin, spinningKey }: SpinProps) {
   return (
-    <section className="mb-16 relative z-10">
+    <section id="machines" className="mb-16 relative z-10 scroll-mt-20">
       <div className="flex flex-col sm:flex-row items-center justify-between gap-3 mb-8">
         <div className="text-center sm:text-left">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-sky-100 text-brand-500 text-xs font-bold mb-1.5">
