@@ -1,5 +1,6 @@
 "use client";
 
+import type { SavedProfile } from "@/lib/profile";
 import { useCallback, useEffect, useState } from "react";
 
 export interface AuthUser {
@@ -29,6 +30,7 @@ export function useAuth() {
   const [result, setResult] = useState<LoginResult | null>(null);
   const [justLoggedIn, setJustLoggedIn] = useState(false);
   const [serverCounts, setServerCounts] = useState<ServerCounts | null>(null);
+  const [profile, setProfile] = useState<SavedProfile | null>(null);
 
   useEffect(() => {
     let alive = true;
@@ -47,10 +49,11 @@ export function useAuth() {
     }
     fetch("/api/auth/me", { cache: "no-store" })
       .then((r) => (r.ok ? r.json() : null))
-      .then((data: { loggedIn?: boolean; nickname?: string | null; counts?: ServerCounts | null } | null) => {
+      .then((data: { loggedIn?: boolean; nickname?: string | null; counts?: ServerCounts | null; profile?: SavedProfile | null } | null) => {
         if (!alive || !data?.loggedIn) return;
         setUser({ nickname: data.nickname ?? null });
         setServerCounts(data.counts ?? null);
+        setProfile(data.profile ?? null);
       })
       .catch(() => {
         /* 로그인 상태를 못 읽어도 비로그인으로 동작해요 */
@@ -68,6 +71,7 @@ export function useAuth() {
     }
     setUser(null);
     setServerCounts(null);
+    setProfile(null);
   }, []);
 
   /** 회원 탈퇴. 성공하면 true. (서버가 회원 정보와 뽑기 기록을 지워요) */
@@ -80,11 +84,24 @@ export function useAuth() {
     }
     setUser(null);
     setServerCounts(null);
+    setProfile(null);
+    return true;
+  }, []);
+
+  /** 기억해 둔 생년월일시만 지워요. 성공하면 true */
+  const deleteProfile = useCallback(async (): Promise<boolean> => {
+    try {
+      const res = await fetch("/api/profile", { method: "DELETE" });
+      if (!res.ok) return false;
+    } catch {
+      return false;
+    }
+    setProfile(null);
     return true;
   }, []);
 
   const clearResult = useCallback(() => setResult(null), []);
   const clearWelcome = useCallback(() => setJustLoggedIn(false), []);
 
-  return { user, serverCounts, setServerCounts, result, clearResult, justLoggedIn, clearWelcome, logout, withdraw };
+  return { user, profile, setProfile, deleteProfile, serverCounts, setServerCounts, result, clearResult, justLoggedIn, clearWelcome, logout, withdraw };
 }

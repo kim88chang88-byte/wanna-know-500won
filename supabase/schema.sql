@@ -24,3 +24,41 @@ create index if not exists draws_user_day_idx on public.draws (user_id, day);
 -- 정책(policy)을 만들지 않았기 때문에, 서버에서 쓰는 service_role 키로만 읽고 쓸 수 있어요.
 alter table public.users enable row level security;
 alter table public.draws enable row level security;
+
+-- ─────────────────────────────────────────────────────────────────────────────
+-- 아래 두 테이블은 '이용자가 직접 동의(선택)한 경우에만' 채워져요.
+-- Supabase 대시보드 > SQL Editor 에서 이 파일 전체를 다시 Run 하면 추가돼요. (기존 데이터는 그대로예요)
+-- ─────────────────────────────────────────────────────────────────────────────
+
+-- 저장된 생년월일시: 로그인한 회원이 "도리가 기억하게 할래요"에 동의했을 때만 저장해요. 회원당 1줄이고, 회원을 지우면 함께 지워져요.
+create table if not exists public.profiles (
+  user_id text primary key references public.users(id) on delete cascade,
+  calendar text not null check (calendar in ('solar', 'lunar')),
+  year int not null,
+  month int not null,
+  day int not null,
+  is_leap boolean not null default false,
+  hour int,                                      -- 태어난 시간을 모르면 null
+  minute int,
+  gender text not null check (gender in ('female', 'male')),
+  updated_at timestamptz not null default now()
+);
+
+-- 고민 통계: 이용자가 "고민 내용을 통계에 써도 좋아요"에 동의했을 때만 한 줄씩 쌓여요.
+-- 생년월일은 담지 않고 나이대(예: 20s)와 성별만 남겨요. 로그인한 경우에만 user_id 를 남겨서, 탈퇴하면 함께 지워져요.
+create table if not exists public.concern_logs (
+  id bigint generated always as identity primary key,
+  user_id text references public.users(id) on delete cascade,
+  day date not null,                             -- 한국 시간(KST) 기준 날짜
+  topic text not null default 'general',
+  tags text[] not null default '{}',             -- 고른 추천 버튼 id
+  concern_text text,                             -- 직접 쓴 글(200자 이내)
+  gender text,
+  age_band text,
+  created_at timestamptz not null default now()
+);
+
+create index if not exists concern_logs_day_idx on public.concern_logs (day);
+
+alter table public.profiles enable row level security;
+alter table public.concern_logs enable row level security;

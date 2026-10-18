@@ -14,6 +14,7 @@ import {
 } from "@/lib/intake";
 import type { PublicReading } from "@/lib/ai/reading";
 import { CONCERN_CHIPS, MAX_CONCERN_TAGS, MAX_CONCERN_TEXT, type Concern, type ConcernId } from "@/lib/concerns";
+import { profileSummary, profileToForm, sameBirth, type SavedProfile } from "@/lib/profile";
 import { BRANCHES, STEMS } from "@/lib/saju/constants";
 import type { Pillar, SajuChart } from "@/lib/saju/types";
 import { CloseButton, ModalShell } from "./Modals";
@@ -35,7 +36,18 @@ interface Props {
   onClose: () => void;
   /** 풀이(캡슐)를 성공적으로 받았을 때 한 번 호출돼요. 로그인 회원이면 서버가 센 횟수를 함께 줘요. (뽑기 횟수 기록용) */
   onComplete: (serverCounts?: { today: number; month: number } | null) => void;
+  /** 로그인한 회원이면 true. 아니면 "로그인하면 생년월일시를 기억해요" 안내를 보여줘요. */
+  loggedIn?: boolean;
+  /** 로그인한 회원이 전에 저장해 둔 생년월일시. 있으면 질문지를 미리 채우고 고민 단계부터 시작해요. */
+  savedProfile?: SavedProfile | null;
+  /** 안내 문구의 "로그인하기" 버튼 */
+  onRequestLogin?: () => void;
+  /** 서버가 생년월일시를 저장했을 때 */
+  onProfileSaved?: (p: SavedProfile) => void;
 }
+
+/** 로그인 안내 문구 (질문지 첫 화면·결과 화면에서 써요) */
+export const LOGIN_NUDGE = "로그인하시면 도리가 생년월일시를 기억해서 또 다시 입력할 필요가 없어요!";
 
 const BUBBLE: Record<StepId, string> = {
   date: "먼저, 언제 태어났어? 🫧",
@@ -118,9 +130,13 @@ function PillarCell({ pillar }: { pillar: Pillar | null }) {
   );
 }
 
-export default function IntakeModal({ target, onClose, onComplete }: Props) {
-  const [form, setForm] = useState<IntakeForm>(EMPTY_FORM);
-  const [stepIndex, setStepIndex] = useState(0);
+export default function IntakeModal({ target, onClose, onComplete, loggedIn = false, savedProfile = null, onRequestLogin, onProfileSaved }: Props) {
+  // 저장된 생년월일시가 있으면 미리 채우고, 이미 입력한 질문(생년월일·시간·성별)은 건너뛰어 고민 단계에서 시작해요.
+  const [form, setForm] = useState<IntakeForm>(() => (savedProfile ? { ...EMPTY_FORM, ...profileToForm(savedProfile) } : EMPTY_FORM));
+  const [stepIndex, setStepIndex] = useState(() => (savedProfile ? STEPS.indexOf("concern") : 0));
+  // 선택 동의: 둘 다 기본은 꺼짐. (이미 저장해 둔 회원이 정보를 고치는 경우만, 전에 동의한 "기억하기"를 켜 둬요)
+  const [saveProfile, setSaveProfile] = useState(savedProfile !== null);
+  const [shareConcern, setShareConcern] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [phase, setPhase] = useState<"form" | "loading" | "result">("form");
   const [chart, setChart] = useState<SajuChart | null>(null);
@@ -147,6 +163,9 @@ export default function IntakeModal({ target, onClose, onComplete }: Props) {
     setPhase("loading");
     setError(null);
     const concern = buildConcern(form);
+    // 저장된 정보를 그대로 쓰는 경우엔 다시 저장하지 않아요.
+    const wantSave = loggedIn && saveProfile && !sameBirth(savedProfile, input);
+    const wantShare = shareConcern && concern !== null;
     const ctrl = new AbortController();
     abortRef.current = ctrl;
     try {
@@ -155,7 +174,7 @@ export default function IntakeModal({ target, onClose, onComplete }: Props) {
       const res = await fetch("/api/reading", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...input, topic: target.fortune, concern }),
+        body: JSON.stringify({ ...input, topic: target.fortune, concern, saveProfile: wantSave, shareConcern: wantShare }),
         signal: ctrl.signal,
       });
       const data = (await res.json().catch(() => null)) as {
@@ -163,6 +182,7 @@ export default function IntakeModal({ target, onClose, onComplete }: Props) {
         reading?: PublicReading | null;
         readingStatus?: ReadingStatus;
         counts?: { today: number; month: number } | null;
+        profileSaved?: boolean;
         error?: string;
       } | null;
       if (!res.ok || !data?.chart) throw new Error(data?.error ?? "캡슐을 만들지 못했어요. 잠시 뒤에 다시 해볼래요?");
@@ -174,6 +194,7 @@ export default function IntakeModal({ target, onClose, onComplete }: Props) {
       setChart(data.chart);
       setReading(data.reading ?? null);
       setReadingStatus(status);
+      if (data.profileSaved) onProfileSaved?.(input);
       setPhase("result");
       // 풀이(AI 한마디 또는 사주 리포트)를 실제로 받았을 때만 뽑기 횟수로 세요.
       // AI 키가 없는 상태(unavailable)에서도 사주 리포트가 나갔으면 센 것으로 봐요. (서버도 같은 기준으로 기록해요)
@@ -312,6 +333,17 @@ export default function IntakeModal({ target, onClose, onComplete }: Props) {
           </details>
           )}
 
+          {!loggedIn && (
+            <div data-testid="login-nudge-result" className="mt-4 rounded-2xl bg-amber-50 border border-amber-200 px-4 py-3 text-center">
+              <p className="text-xs font-bold text-amber-900">🫧 {LOGIN_NUDGE}</p>
+              {onRequestLogin && (
+                <button type="button" onClick={onRequestLogin} className="mt-1.5 text-[11px] font-bold text-brand-600 underline underline-offset-2">
+                  로그인하러 가기
+                </button>
+              )}
+            </div>
+          )}
+
           <p className="mt-3 text-center text-[10px] text-gray-400">
             * 재미와 위로를 위한 풀이예요. 실제 일을 보장하지 않아요.
           </p>
@@ -354,6 +386,30 @@ export default function IntakeModal({ target, onClose, onComplete }: Props) {
               {BUBBLE[step]}
             </p>
           </div>
+
+          {savedProfile && stepIndex >= STEPS.indexOf("concern") && (
+            <div data-testid="saved-profile" className="mb-3 flex items-center justify-between gap-2 rounded-xl bg-brand-50 border border-brand-100 px-3 py-2">
+              <span className="text-[11px] text-gray-600 leading-snug">
+                <b className="text-brand-700">기억해 둔 정보</b>
+                <br />
+                {profileSummary(savedProfile)}
+              </span>
+              <button type="button" data-testid="edit-profile" onClick={() => setStepIndex(0)} className="shrink-0 text-[11px] font-bold text-brand-600 underline underline-offset-2">
+                수정하기
+              </button>
+            </div>
+          )}
+
+          {step === "date" && !loggedIn && (
+            <div data-testid="login-nudge" className="mb-3 rounded-xl bg-amber-50 border border-amber-200 px-3 py-2.5 text-center">
+              <p className="text-[12px] font-bold text-amber-900 leading-snug">🫧 {LOGIN_NUDGE}</p>
+              {onRequestLogin && (
+                <button type="button" data-testid="nudge-login" onClick={onRequestLogin} className="mt-1.5 text-[11px] font-bold text-brand-600 underline underline-offset-2">
+                  로그인하러 가기
+                </button>
+              )}
+            </div>
+          )}
 
           {step === "date" && (
             <div className="space-y-3">
@@ -531,7 +587,38 @@ export default function IntakeModal({ target, onClose, onComplete }: Props) {
                   </a>
                 </span>
               </label>
-              <p className="text-[11px] text-gray-400">입력한 정보는 서버에 저장하지 않아요.</p>
+              <p className="text-[11px] text-gray-400">
+                {loggedIn || buildConcern(form) ? "아래 선택 항목에 동의하지 않으면, 입력한 정보는 서버에 저장하지 않아요." : "입력한 정보는 서버에 저장하지 않아요."}
+              </p>
+
+              {loggedIn ? (
+                savedProfile && sameBirth(savedProfile, buildBirthInput(form)) ? (
+                  <p data-testid="profile-kept" className="text-[11px] text-gray-500 leading-relaxed">
+                    기억해 둔 생년월일시로 풀어요. 지우고 싶으면 로그인 창의 &lsquo;기억한 정보 지우기&rsquo;를 눌러줘요.
+                  </p>
+                ) : (
+                  <label className="flex items-start gap-2 text-xs text-gray-700 leading-relaxed">
+                    <input type="checkbox" name="saveProfile" className="mt-0.5" checked={saveProfile} onChange={(e) => setSaveProfile(e.target.checked)} />
+                    <span>
+                      (선택) 도리가 생년월일시·성별을 기억하게 저장해요. 다음부터 다시 입력하지 않아도 돼요. 로그인 창에서 언제든 지울 수 있고, 탈퇴하면 함께 삭제돼요.
+                    </span>
+                  </label>
+                )
+              ) : (
+                <p data-testid="login-nudge-consent" className="text-[11px] text-amber-800 bg-amber-50 border border-amber-100 rounded-lg px-2.5 py-2 leading-relaxed">
+                  🫧 {LOGIN_NUDGE}
+                </p>
+              )}
+
+              {buildConcern(form) && (
+                <label className="flex items-start gap-2 text-xs text-gray-700 leading-relaxed">
+                  <input type="checkbox" name="shareConcern" className="mt-0.5" checked={shareConcern} onChange={(e) => setShareConcern(e.target.checked)} />
+                  <span>
+                    (선택) 적어 준 고민을 서비스 개선을 위한 통계에 써도 좋아요. 생년월일은 남기지 않고 나이대·성별만 함께 저장해요.
+                    {loggedIn ? " 로그인 상태에서 동의하면 탈퇴할 때 함께 삭제돼요." : " 로그인하지 않으면 누구의 것인지 알 수 없는 형태로 저장돼서 나중에 지우기 어려워요."}
+                  </span>
+                </label>
+              )}
             </div>
           )}
 

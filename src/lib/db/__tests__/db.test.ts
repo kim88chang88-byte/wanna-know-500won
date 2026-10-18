@@ -131,4 +131,38 @@ describe("createDb", () => {
     }
     expect(msg).toBe("network");
   });
+
+  it("upsertProfile/getProfile/deleteProfile: 본인 행만, 필요한 칸만", async () => {
+    const r = recorder((url, init) =>
+      init?.method === "GET"
+        ? new Response(JSON.stringify([{ user_id: "4242", calendar: "solar", year: 1995, month: 3, day: 4, is_leap: false, hour: 9, minute: 5, gender: "female", updated_at: "x" }]), { status: 200 })
+        : new Response(null, { status: 201 }),
+    );
+    const db = createDb(cfg, r.f);
+    await db.upsertProfile("4242", { year: 1995, month: 3, day: 4, hour: 9, minute: 5, calendar: "solar", isLeapMonth: false, gender: "female" }, new Date("2026-10-18T00:00:00Z"));
+    expect(r.calls[0].url).toBe("https://x.supabase.co/rest/v1/profiles?on_conflict=user_id");
+    expect(JSON.parse(String(r.calls[0].init?.body))).toEqual({ user_id: "4242", calendar: "solar", year: 1995, month: 3, day: 4, is_leap: false, hour: 9, minute: 5, gender: "female", updated_at: "2026-10-18T00:00:00.000Z" });
+    const p = await db.getProfile("4242");
+    expect(p).toEqual({ year: 1995, month: 3, day: 4, hour: 9, minute: 5, calendar: "solar", isLeapMonth: false, gender: "female" });
+    expect(r.calls[1].url).toContain("profiles?user_id=eq.4242");
+    await db.deleteProfile("4242");
+    expect(r.calls[2].init?.method).toBe("DELETE");
+    expect(r.calls[2].url).toBe("https://x.supabase.co/rest/v1/profiles?user_id=eq.4242");
+  });
+
+  it("getProfile: 행이 없으면 null", async () => {
+    const r = recorder(() => new Response("[]", { status: 200 }));
+    expect(await createDb(cfg, r.f).getProfile("4242")).toBeNull();
+  });
+
+  it("recordConcern: 생년월일 없이 나이대·성별만, 비로그인은 user_id null", async () => {
+    const r = recorder(() => new Response(null, { status: 201 }));
+    const db = createDb(cfg, r.f);
+    await db.recordConcern({ userId: null, topic: "love", concern: { tags: ["crush"], text: "썸이에요" }, gender: "female", ageBand: "30s" }, new Date("2026-10-18T00:00:00Z"));
+    expect(r.calls[0].url).toBe("https://x.supabase.co/rest/v1/concern_logs");
+    expect(JSON.parse(String(r.calls[0].init?.body))).toEqual({ user_id: null, day: "2026-10-18", topic: "love", tags: ["crush"], concern_text: "썸이에요", gender: "female", age_band: "30s" });
+    await db.recordConcern({ userId: "4242", topic: "general", concern: { tags: [], text: "" }, gender: "male", ageBand: "20s" });
+    expect(JSON.parse(String(r.calls[1].init?.body)).user_id).toBe("4242");
+    expect(JSON.parse(String(r.calls[1].init?.body)).concern_text).toBeNull();
+  });
 });

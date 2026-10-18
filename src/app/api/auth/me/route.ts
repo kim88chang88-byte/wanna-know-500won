@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { readCookie, SESSION_COOKIE, verifySessionToken } from "@/lib/auth/session";
+import type { SavedProfile } from "@/lib/profile";
 import { createDb, loadDbConfig, type DrawCounts } from "@/lib/db/supabase";
 
 export const runtime = "nodejs";
@@ -9,6 +10,7 @@ export async function GET(request: Request) {
   const session = verifySessionToken(readCookie(request.headers.get("cookie"), SESSION_COOKIE), process.env.AUTH_SECRET);
 
   let counts: DrawCounts | null = null;
+  let profile: SavedProfile | null = null;
   // 진단용 상태: off(환경변수 없음) / skipped(로그아웃 상태) / ok / error(요청 실패)
   let dbStatus: "off" | "skipped" | "ok" | "error" = "off";
   let dbError: string | null = null;
@@ -21,6 +23,12 @@ export async function GET(request: Request) {
         // 로그인 쿠키만 있고 회원 행이 없는 경우(DB 연결 전에 로그인한 사람)를 바로잡아요.
         [counts] = await Promise.all([db.getCounts(session.sub), db.ensureUser(session.sub, session.nick)]);
         dbStatus = "ok";
+        // 저장된 생년월일시는 보조 기능이라, 읽지 못해도(예: profiles 테이블을 아직 안 만든 경우) 로그인 상태 확인은 그대로 성공시켜요.
+        try {
+          profile = await db.getProfile(session.sub);
+        } catch (err) {
+          console.error("me profile failed:", err instanceof Error ? err.message : "unknown");
+        }
       } catch (err) {
         dbStatus = "error";
         dbError = err instanceof Error ? err.message : "unknown";
@@ -34,6 +42,7 @@ export async function GET(request: Request) {
       loggedIn: Boolean(session),
       nickname: session?.nick ?? null,
       counts,
+      profile,
       db: dbStatus,
       dbError,
       configured: Boolean(process.env.KAKAO_CLIENT_ID && process.env.AUTH_SECRET),

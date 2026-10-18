@@ -1,3 +1,5 @@
+import type { Concern } from "@/lib/concerns";
+import { parseProfileRow, type SavedProfile } from "@/lib/profile";
 import { kstDay, kstMonthRange } from "./kst";
 
 export interface DbConfig {
@@ -111,7 +113,59 @@ export function createDb(config: DbConfig, fetchImpl: FetchLike = fetch) {
       });
     },
 
-    /** 회원 탈퇴: 회원 정보와 뽑기 기록을 모두 지워요. (draws 는 users 삭제 때 함께 삭제돼요) */
+    /** 저장된 생년월일시를 읽어요. 없으면 null. */
+    async getProfile(userId: string): Promise<SavedProfile | null> {
+      const res = await call(`profiles?user_id=eq.${safeId(userId)}&select=*&limit=1`, { method: "GET", headers: headers() });
+      const rows = (await res.json().catch(() => [])) as unknown[];
+      return Array.isArray(rows) && rows.length > 0 ? parseProfileRow(rows[0]) : null;
+    },
+
+    /** 생년월일시를 저장해요. (동의한 회원만. 이미 있으면 덮어써요) */
+    async upsertProfile(userId: string, p: SavedProfile, now: Date = new Date()): Promise<void> {
+      await call("profiles?on_conflict=user_id", {
+        method: "POST",
+        headers: headers({ Prefer: "resolution=merge-duplicates,return=minimal" }),
+        body: JSON.stringify({
+          user_id: safeId(userId),
+          calendar: p.calendar,
+          year: p.year,
+          month: p.month,
+          day: p.day,
+          is_leap: p.calendar === "lunar" && p.isLeapMonth === true,
+          hour: p.hour ?? null,
+          minute: p.hour === null || p.hour === undefined ? null : (p.minute ?? 0),
+          gender: p.gender,
+          updated_at: now.toISOString(),
+        }),
+      });
+    },
+
+    /** 저장된 생년월일시만 지워요. (회원 정보는 그대로) */
+    async deleteProfile(userId: string): Promise<void> {
+      await call(`profiles?user_id=eq.${safeId(userId)}`, { method: "DELETE", headers: headers({ Prefer: "return=minimal" }) });
+    },
+
+    /**
+     * 고민 통계 한 줄. (동의한 경우에만 호출해요)
+     * 생년월일은 담지 않고 나이대·성별만 남겨요. 로그인한 경우에만 userId 를 남겨서 탈퇴 때 함께 지워져요.
+     */
+    async recordConcern(row: { userId: string | null; topic: string; concern: Concern; gender: string; ageBand: string }, now: Date = new Date()): Promise<void> {
+      await call("concern_logs", {
+        method: "POST",
+        headers: headers({ Prefer: "return=minimal" }),
+        body: JSON.stringify({
+          user_id: row.userId ? safeId(row.userId) : null,
+          day: kstDay(now),
+          topic: row.topic.slice(0, 40),
+          tags: row.concern.tags,
+          concern_text: row.concern.text || null,
+          gender: row.gender,
+          age_band: row.ageBand,
+        }),
+      });
+    },
+
+    /** 회원 탈퇴: 회원 정보와 뽑기 기록을 모두 지워요. (draws·profiles·concern_logs 의 본인 행은 users 삭제 때 함께 삭제돼요) */
     async deleteUser(userId: string): Promise<void> {
       await call(`users?id=eq.${safeId(userId)}`, {
         method: "DELETE",

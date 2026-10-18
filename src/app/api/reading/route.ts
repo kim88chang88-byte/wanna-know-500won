@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { interpretSaju, ReadingUnavailableError } from "@/lib/ai/interpret";
 import { normalizeTopic, toPublicReading, type PublicReading } from "@/lib/ai/reading";
-import { parseConcern } from "@/lib/concerns";
+import { hasConcern, parseConcern } from "@/lib/concerns";
+import { ageBand } from "@/lib/profile";
 import { readCookie, SESSION_COOKIE, verifySessionToken } from "@/lib/auth/session";
 import { FREE_PER_DAY, isDailyLimitEnforced } from "@/lib/db/config";
 import { createDb, loadDbConfig, type DrawCounts } from "@/lib/db/supabase";
@@ -32,16 +33,16 @@ export async function POST(request: Request) {
     );
   }
 
-  let body: (BirthInput & { topic?: unknown; concern?: unknown }) | null;
+  let body: (BirthInput & { topic?: unknown; concern?: unknown; saveProfile?: unknown; shareConcern?: unknown }) | null;
   try {
-    body = (await request.json()) as BirthInput & { topic?: unknown; concern?: unknown };
+    body = (await request.json()) as BirthInput & { topic?: unknown; concern?: unknown; saveProfile?: unknown; shareConcern?: unknown };
   } catch {
     return NextResponse.json({ error: "잘못된 요청입니다." }, { status: 400 });
   }
   if (typeof body !== "object" || body === null) {
     return NextResponse.json({ error: "잘못된 요청입니다." }, { status: 400 });
   }
-  const { topic: rawTopic, concern: rawConcern, ...input } = body;
+  const { topic: rawTopic, concern: rawConcern, saveProfile, shareConcern, ...input } = body;
   const concern = parseConcern(rawConcern);
 
   // 로그인한 회원이고 DB 가 연결되어 있으면, 뽑기 횟수를 서버에서 세요. (아니면 브라우저 카운터만 써요)
@@ -78,6 +79,28 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "사주 계산 중 오류가 발생했어요." }, { status: 500 });
   }
 
+  // 이용자가 직접 동의(선택)한 경우에만 저장해요. 둘 다 풀이와 별개라서, 저장이 실패해도 풀이는 그대로 나가요.
+  //  - saveProfile: 로그인한 회원의 생년월일시를 기억 (다음부터 다시 입력하지 않게)
+  //  - shareConcern: 고민 내용을 통계에 사용 (로그인 여부와 상관없이, 나이대·성별만 함께 남김)
+  let profileSaved = false;
+  if (db && userId && saveProfile === true) {
+    try {
+      await db.ensureUser(userId, session?.nick);
+      await db.upsertProfile(userId, { ...input, hour: input.hour ?? null, minute: input.hour == null ? null : (input.minute ?? 0), isLeapMonth: input.calendar === "lunar" && input.isLeapMonth === true });
+      profileSaved = true;
+    } catch (err) {
+      console.error("upsertProfile failed:", err instanceof Error ? err.message : "unknown");
+    }
+  }
+  if (db && shareConcern === true && hasConcern(concern)) {
+    try {
+      if (userId) await db.ensureUser(userId, session?.nick);
+      await db.recordConcern({ userId, topic: normalizeTopic(rawTopic), concern, gender: input.gender, ageBand: ageBand(input.year) });
+    } catch (err) {
+      console.error("recordConcern failed:", err instanceof Error ? err.message : "unknown");
+    }
+  }
+
   // 풀이가 실패해도 계산된 명식은 돌려줘서, 화면이 완전히 비지 않게 해요.
   let reading: PublicReading | null = null;
   let readingStatus: ReadingStatus = "ok";
@@ -108,5 +131,5 @@ export async function POST(request: Request) {
     }
   }
 
-  return NextResponse.json({ chart, reading, readingStatus, counts });
+  return NextResponse.json({ chart, reading, readingStatus, counts, profileSaved });
 }

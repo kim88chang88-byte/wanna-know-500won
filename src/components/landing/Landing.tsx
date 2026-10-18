@@ -21,7 +21,7 @@ const LEVER_ANIMATION_MS = 600;
 const MODAL_DELAY_MS = 350;
 
 export default function Landing() {
-  const { user, serverCounts, setServerCounts, result: loginResult, clearResult, justLoggedIn, clearWelcome, logout, withdraw } = useAuth();
+  const { user, profile, setProfile, deleteProfile, serverCounts, setServerCounts, result: loginResult, clearResult, justLoggedIn, clearWelcome, logout, withdraw } = useAuth();
   const [loginOpen, setLoginOpen] = useState(false);
   const [intake, setIntake] = useState<IntakeTarget | null>(null);
   const [spinningKey, setSpinningKey] = useState<string | null>(null);
@@ -141,8 +141,21 @@ export default function Landing() {
         </div>
       )}
 
-      {loginOpen && <LoginModal onClose={closeLogin} user={user} result={loginResult} onLogout={logout} onWithdraw={withdraw} />}
-      {intake && <IntakeModal target={intake} onClose={closeIntake} onComplete={completeDraw} />}
+      {loginOpen && <LoginModal onClose={closeLogin} user={user} result={loginResult} onLogout={logout} onWithdraw={withdraw} profile={profile} onDeleteProfile={deleteProfile} />}
+      {intake && (
+        <IntakeModal
+          target={intake}
+          onClose={closeIntake}
+          onComplete={completeDraw}
+          loggedIn={Boolean(user)}
+          savedProfile={profile}
+          onRequestLogin={() => {
+            setIntake(null);
+            setLoginOpen(true);
+          }}
+          onProfileSaved={setProfile}
+        />
+      )}
     </>
   );
 }

@@ -1,5 +1,6 @@
 "use client";
 
+import { profileSummary, type SavedProfile } from "@/lib/profile";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { LOGIN_RESULT_MESSAGE, type AuthUser, type LoginResult } from "./useAuth";
 
@@ -70,9 +71,15 @@ interface LoginModalProps {
   onLogout?: () => void | Promise<void>;
   /** 회원 탈퇴. 성공하면 true */
   onWithdraw?: () => Promise<boolean>;
+  /** 기억해 둔 생년월일시 (있을 때만 보여줘요) */
+  profile?: SavedProfile | null;
+  /** 기억해 둔 생년월일시 삭제. 성공하면 true */
+  onDeleteProfile?: () => Promise<boolean>;
 }
 
-export function LoginModal({ onClose, user = null, result = null, onLogout, onWithdraw }: LoginModalProps) {
+export function LoginModal({ onClose, user = null, result = null, onLogout, onWithdraw, profile = null, onDeleteProfile }: LoginModalProps) {
+  const [profileBusy, setProfileBusy] = useState(false);
+  const [profileError, setProfileError] = useState(false);
   const [confirmWithdraw, setConfirmWithdraw] = useState(false);
   const [withdrawing, setWithdrawing] = useState(false);
   const [withdrawError, setWithdrawError] = useState(false);
@@ -87,15 +94,41 @@ export function LoginModal({ onClose, user = null, result = null, onLogout, onWi
         <h4 id="login-title" className="font-serifKr font-bold text-lg text-gray-900">
           {user ? "도리의 사주방" : "도리의 사주방 로그인"}
         </h4>
-        <p className="text-xs text-gray-500 mt-1">
+        <p className="text-xs text-gray-500 mt-1 whitespace-pre-line">
           {user
             ? `${user.nickname ? `${user.nickname}님, ` : ""}어서 와요! 로그인되어 있어요.`
-            : "간편 가입하고 매일 첫 1회 무료 뽑기를 챙기세요!"}
+            : "간편 가입하고 매일 첫 1회 무료 뽑기를 챙기세요!\n로그인하시면 도리가 생년월일시를 기억해서 또 다시 입력할 필요가 없어요!"}
         </p>
       </div>
 
       {user ? (
         <div className="flex flex-col gap-2.5 mb-4">
+          {profile && onDeleteProfile && (
+            <div data-testid="saved-profile-box" className="rounded-2xl bg-brand-50 border border-brand-100 p-3 text-center">
+              <p className="text-[11px] font-bold text-brand-700">도리가 기억하고 있는 정보</p>
+              <p className="text-xs text-gray-700 mt-1">{profileSummary(profile)}</p>
+              {profileError && (
+                <p role="alert" className="text-[11px] font-bold text-brand-600 mt-1">
+                  지우지 못했어요. 잠시 뒤에 다시 시도해줘요.
+                </p>
+              )}
+              <button
+                type="button"
+                data-testid="delete-profile"
+                disabled={profileBusy}
+                onClick={async () => {
+                  setProfileBusy(true);
+                  setProfileError(false);
+                  const done = await onDeleteProfile();
+                  setProfileBusy(false);
+                  if (!done) setProfileError(true);
+                }}
+                className="mt-1.5 text-[11px] text-gray-500 underline underline-offset-2 hover:text-gray-700 disabled:opacity-50"
+              >
+                {profileBusy ? "지우는 중…" : "기억한 정보 지우기"}
+              </button>
+            </div>
+          )}
           <button
             onClick={async () => {
               await onLogout?.();
@@ -119,7 +152,7 @@ export function LoginModal({ onClose, user = null, result = null, onLogout, onWi
             <div role="group" aria-label="회원 탈퇴 확인" className="rounded-2xl bg-sky-50 border border-sky-200 p-3 text-center">
               <p className="text-xs font-bold text-gray-800">정말 탈퇴할까요?</p>
               <p className="text-[11px] text-gray-600 mt-1">
-                저장된 회원 정보(회원번호·닉네임)와 뽑기 기록이 모두 삭제되고 되돌릴 수 없어요.
+                저장된 회원 정보(회원번호·닉네임), 뽑기 기록, 기억해 둔 생년월일시와 동의해서 남긴 고민 통계가 모두 삭제되고 되돌릴 수 없어요.
               </p>
               {withdrawError && (
                 <p role="alert" className="text-[11px] font-bold text-brand-600 mt-1">
