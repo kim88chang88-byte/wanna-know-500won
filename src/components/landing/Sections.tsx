@@ -66,7 +66,7 @@ export function Header({ onOpenLogin, user = null }: { onOpenLogin: () => void; 
                 />
               </div>
               <h1 className="font-cute font-normal text-[19px] min-[400px]:text-[22px] sm:text-[30px] leading-none whitespace-nowrap tracking-normal bg-gradient-to-r from-brand-500 via-fuchsia-500 to-pink-500 bg-clip-text text-transparent inline-flex items-center gap-1.5">
-                &apos;홍이&apos;운세사주
+                &apos;도리&apos;운세사주
                 <span className="hidden sm:inline text-xs text-amber-600 font-sans font-bold px-2 py-0.5 rounded-full bg-amber-50 border border-amber-200/80">
                   ✨ 퐁당
                 </span>
