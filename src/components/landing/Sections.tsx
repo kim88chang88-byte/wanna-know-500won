@@ -124,7 +124,7 @@ export function Header({ onOpenLogin, user = null }: { onOpenLogin: () => void; 
 
 export function HeroSection({ counts }: { counts: DrawCounts }) {
   return (
-    <section className="text-center max-w-4xl mx-auto mb-12">
+    <section className="text-center max-w-4xl mx-auto mb-3">
       {/* 뽑기 횟수: 한 줄짜리 작은 알약 (로그인했다면 서버가, 아니라면 이 기기에서 센 값) */}
       <div className="inline-flex flex-wrap items-center justify-center gap-x-3 gap-y-1 rounded-full bg-white/80 border border-brand-100 px-4 py-1.5 text-xs shadow-sm">
         <span className="inline-flex items-center gap-1 text-gray-500">
@@ -152,11 +152,11 @@ export function HeroSection({ counts }: { counts: DrawCounts }) {
 
 export function ShowcaseSection() {
   return (
-    <section className="rounded-[2.5rem] bg-gradient-to-b from-white via-sky-50/40 to-white border border-brand-200/70 p-6 sm:p-10 mb-16 shadow-[0_12px_40px_rgba(34,94,170,0.06)] relative overflow-hidden">
+    <section className="rounded-[2.5rem] bg-gradient-to-b from-white via-sky-50/40 to-white border border-brand-200/70 p-3 sm:p-5 mb-6 shadow-[0_12px_40px_rgba(34,94,170,0.06)] relative overflow-hidden">
       <div className="pointer-events-none absolute -top-16 -right-16 w-80 h-80 rounded-full bg-sky-200/35 blur-3xl" aria-hidden="true" />
       <div className="pointer-events-none absolute -bottom-16 -left-16 w-80 h-80 rounded-full bg-indigo-100/40 blur-3xl" aria-hidden="true" />
 
-      <div className="relative w-full max-w-5xl mx-auto rounded-3xl shadow-[0_14px_34px_rgba(34,94,170,0.12)] bg-white p-5 sm:p-8 border-2 border-sky-200 overflow-hidden z-10">
+      <div className="relative w-full max-w-5xl mx-auto rounded-3xl shadow-[0_14px_34px_rgba(34,94,170,0.12)] bg-white p-3 sm:p-5 border-2 border-sky-200 overflow-hidden z-10">
         {/* 둥둥 떠 있는 물방울 장식 */}
         <div aria-hidden="true" className="pointer-events-none absolute -top-4 -left-3 w-9 h-9 rounded-full bg-gradient-to-br from-white via-sky-100 to-sky-300/40 border border-white/80 shadow-md otter-bubble-aura flex items-center justify-center text-sm z-20">
           🫧
@@ -164,7 +164,7 @@ export function ShowcaseSection() {
         <div aria-hidden="true" className="pointer-events-none absolute top-12 -right-3 w-8 h-8 rounded-full bg-gradient-to-br from-white via-blue-100 to-indigo-200/50 border border-white/80 shadow-sm otter-bubble-aura z-20" style={{ animationDelay: "1.5s" }} />
         <div aria-hidden="true" className="pointer-events-none absolute bottom-12 -left-2 w-6 h-6 rounded-full bg-white/70 border border-sky-200 shadow-sm otter-bubble-aura z-20" style={{ animationDelay: "2.7s" }} />
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 sm:gap-5 items-center">
           <div className="lg:col-span-6 relative w-full aspect-[16/9] rounded-2xl overflow-hidden bg-sky-50 flex items-center justify-center border border-sky-100 shadow-sm">
             <SafeImage
               src={HERO_IMAGE}
@@ -175,7 +175,7 @@ export function ShowcaseSection() {
             />
           </div>
 
-          <div className="lg:col-span-6 flex flex-col justify-center bg-sky-50/70 p-6 sm:p-8 rounded-2xl border border-sky-200">
+          <div className="lg:col-span-6 flex flex-col justify-center bg-sky-50/70 p-4 sm:p-6 rounded-2xl border border-sky-200">
             <div className="flex items-start gap-3">
               <span className="text-3xl shrink-0" aria-hidden="true">
                 🦦
@@ -187,10 +187,10 @@ export function ShowcaseSection() {
                   </span>
                   <span className="text-xs text-sky-600 font-semibold">퐁당! 💦</span>
                 </div>
-                <h3 className="font-serifKr font-black text-xl sm:text-2xl text-brand-500 mt-1 mb-4 leading-snug">
+                <h3 className="font-serifKr font-black text-xl sm:text-2xl text-brand-500 mt-1 mb-2 leading-snug">
                   궁금행? 궁금하면 500원이야 &gt;_&lt;
                 </h3>
-                <div className="flex flex-wrap items-center gap-2.5 pt-4 border-t border-sky-200/80">
+                <div className="flex flex-wrap items-center gap-2.5 pt-3 border-t border-sky-200/80">
                   <span className="text-xs font-semibold text-brand-500 flex items-center gap-1">
                     <span className="material-symbols-outlined text-base">verified</span> 매일 첫 1회 무료 체험
                   </span>
@@ -207,12 +207,12 @@ export function ShowcaseSection() {
         </div>
       </div>
 
-      <div className="relative z-10 mt-7 text-center">
+      <div className="relative z-10 mt-2 text-center">
         {/* 소개 카드 바로 아래, 자판기 바로 위: "이제 아래 자판기를 골라보세요" 안내 */}
         <a
           href="#machines"
           data-testid="scroll-cue"
-          className="inline-flex flex-col items-center gap-0.5 rounded-2xl px-4 py-2 text-xs sm:text-sm font-bold text-brand-600 hover:text-brand-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-300"
+          className="inline-flex flex-col items-center gap-0.5 rounded-2xl px-4 py-1 text-xs sm:text-sm font-bold text-brand-600 hover:text-brand-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-300"
         >
           <span>아래로 스크롤해서 운명의 자판기를 골라보세요</span>
           <span className="material-symbols-outlined text-[28px] leading-none motion-safe:animate-bounce" aria-hidden="true">
@@ -228,8 +228,8 @@ export function ShowcaseSection() {
 
 export function MachinesSection({ onSpin, spinningKey }: SpinProps) {
   return (
-    <section id="machines" className="mb-16 relative z-10 scroll-mt-20">
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-3 mb-8">
+    <section id="machines" className="mb-8 relative z-10 scroll-mt-20">
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-3 mb-4">
         <div className="text-center sm:text-left">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-sky-100 text-brand-500 text-xs font-bold mb-1.5">
             <span aria-hidden="true">🌊</span>
@@ -298,12 +298,12 @@ export function MachinesSection({ onSpin, spinningKey }: SpinProps) {
 
 export function PremiumSection({ onSpin, spinningKey }: SpinProps) {
   return (
-    <section className="mb-16 relative z-10">
-      <div className="card-water-glow rounded-[2.5rem] p-6 sm:p-10 bg-gradient-to-b from-amber-50/90 via-white to-sky-50/40 border-2 border-amber-300 shadow-[0_12px_36px_rgba(204,167,47,0.18)] relative overflow-hidden">
+    <section className="mb-8 relative z-10">
+      <div className="card-water-glow rounded-[2.5rem] p-4 sm:p-6 bg-gradient-to-b from-amber-50/90 via-white to-sky-50/40 border-2 border-amber-300 shadow-[0_12px_36px_rgba(204,167,47,0.18)] relative overflow-hidden">
         <div className="pointer-events-none absolute -top-16 -right-16 w-80 h-80 rounded-full bg-amber-200/35 blur-3xl" aria-hidden="true" />
         <div className="pointer-events-none absolute -bottom-16 -left-16 w-80 h-80 rounded-full bg-purple-100/40 blur-3xl" aria-hidden="true" />
 
-        <div className="text-center max-w-2xl mx-auto mb-10 relative z-10">
+        <div className="text-center max-w-2xl mx-auto mb-5 relative z-10">
           <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-amber-100 text-amber-900 text-xs font-bold mb-2">
             <span aria-hidden="true">👑</span>
             <span>수달 도사의 심층 리포트</span>
@@ -317,7 +317,7 @@ export function PremiumSection({ onSpin, spinningKey }: SpinProps) {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto relative z-10">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-6xl mx-auto relative z-10">
           {PREMIUM_CARDS.map((p) => (
             <div
               key={p.key}
@@ -384,8 +384,8 @@ export function PremiumSection({ onSpin, spinningKey }: SpinProps) {
 
 export function SampleSection() {
   return (
-    <section className="mb-16 relative z-10">
-      <div className="flex items-center justify-between mb-6">
+    <section className="mb-8 relative z-10">
+      <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-2xl bg-sky-100 flex items-center justify-center text-brand-500">
             <span className="material-symbols-outlined text-[22px]">bubble_chart</span>
@@ -433,8 +433,8 @@ const TRUST_POINTS = [
 
 export function TrustSection() {
   return (
-    <section className="rounded-[2.5rem] bg-white border border-sky-100 p-6 sm:p-10 mb-8 shadow-sm relative z-10">
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+    <section className="rounded-[2.5rem] bg-white border border-sky-100 p-4 sm:p-6 mb-4 shadow-sm relative z-10">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-center">
         <div className="lg:col-span-5 flex flex-col gap-3">
           <div className="inline-flex items-center gap-1.5 text-brand-500 font-bold text-xs">
             <span className="material-symbols-outlined text-[18px]">verified</span>
@@ -469,7 +469,7 @@ export function TrustSection() {
 
 export function Footer() {
   return (
-    <footer className="relative z-10 bg-white border-t border-brand-100 py-10 text-center text-xs text-gray-500">
+    <footer className="relative z-10 bg-white border-t border-brand-100 py-5 text-center text-xs text-gray-500">
       <div className="max-w-7xl mx-auto px-4 flex flex-col items-center gap-2">
         <div className="flex items-center gap-1.5 text-brand-500 font-serifKr font-bold">
           <span aria-hidden="true">🦦</span> {SERVICE_NAME} <span aria-hidden="true">🫧</span>
