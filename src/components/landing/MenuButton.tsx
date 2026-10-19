@@ -21,7 +21,7 @@ const HELP_GROUPS: readonly MenuGroup[] = [
 /** 도리 운세 사주에서 즐길 수 있는 자판기들. 누르면 그 자판기 카드로 스크롤해요. */
 const MACHINE_GROUPS: readonly MenuGroup[] = [
   {
-    heading: "🌊 6대 운명의 자판기 (매일 첫 1회 무료)",
+    heading: "🐾 6대 운명의 자판기 (매일 첫 1회 무료)",
     items: MACHINES.map((m) => ({ href: `#${m.key}`, label: m.name, emoji: m.emoji })),
   },
   {

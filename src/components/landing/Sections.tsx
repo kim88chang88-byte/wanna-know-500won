@@ -183,7 +183,7 @@ export function ShowcaseSection() {
                 •
               </span>
               <span className="text-xs font-semibold text-slate-600 flex items-center gap-1">
-                <span className="material-symbols-outlined text-base">water_drop</span> 맑고 청명한 운세 풀이
+                <span className="material-symbols-outlined text-base">favorite</span> 말랑말랑 운세 풀이
               </span>
             </div>
           </div>
@@ -276,12 +276,12 @@ export function MachinesSection({ onSpin, spinningKey }: SpinProps) {
 export function PremiumSection({ onSpin, spinningKey }: SpinProps) {
   return (
     <section className="mb-8 relative z-10">
-      <div className="card-water-glow rounded-[2.5rem] p-4 sm:p-6 bg-gradient-to-b from-amber-50/90 via-white to-sky-50/40 border-2 border-amber-300 shadow-[0_12px_36px_rgba(204,167,47,0.18)] relative overflow-hidden">
-        <div className="pointer-events-none absolute -top-16 -right-16 w-80 h-80 rounded-full bg-amber-200/35 blur-3xl" aria-hidden="true" />
-        <div className="pointer-events-none absolute -bottom-16 -left-16 w-80 h-80 rounded-full bg-purple-100/40 blur-3xl" aria-hidden="true" />
+      <div className="card-water-glow rounded-[2.5rem] p-4 sm:p-6 bg-gradient-to-b from-pink-50 via-white to-brand-50/70 border-2 border-pink-200 shadow-[0_12px_36px_rgba(128,87,224,0.14)] relative overflow-hidden">
+        <div className="pointer-events-none absolute -top-16 -right-16 w-80 h-80 rounded-full bg-pink-200/40 blur-3xl" aria-hidden="true" />
+        <div className="pointer-events-none absolute -bottom-16 -left-16 w-80 h-80 rounded-full bg-brand-100/50 blur-3xl" aria-hidden="true" />
 
         <div className="text-center max-w-2xl mx-auto mb-5 relative z-10">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-amber-100 text-amber-900 text-xs font-bold mb-2">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-pink-100 text-pink-700 text-xs font-bold mb-2">
             <span aria-hidden="true">👑</span>
             <span>수달 도사의 심층 리포트</span>
             <span className="bg-brand-500 text-white text-[10px] px-2 py-0.5 rounded-full font-sans">SPECIAL</span>
@@ -371,7 +371,7 @@ export function SampleSection() {
             <span className="material-symbols-outlined text-[22px]">bubble_chart</span>
           </div>
           <div>
-            <h3 className="font-cute text-xl sm:text-2xl font-normal text-gray-900">이런 물빛 운세 캡슐이 나와요</h3>
+            <h3 className="font-cute text-xl sm:text-2xl font-normal text-gray-900">이런 운세 캡슐이 나와요</h3>
             <p className="text-xs text-slate-500">수달 도사가 건네는 캡슐 속 한마디, 이런 느낌이에요</p>
           </div>
         </div>

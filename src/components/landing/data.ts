@@ -42,7 +42,7 @@ export const MACHINES: readonly MachineCard[] = [
     name: "성공운",
     fortune: "성공운",
     desc: "승진, 이직, 시험 합격까지 거침없이 뚫어주는 성취의 물길",
-    leverLabel: "물빛 레버 돌리기",
+    leverLabel: "말랑 레버 돌리기",
     tag: "매일 첫 1회 무료",
     best: false,
     card: "bg-gradient-to-b from-amber-50/70 via-white to-white border border-amber-200 shadow-sm",
