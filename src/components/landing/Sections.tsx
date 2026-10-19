@@ -404,9 +404,9 @@ export function SampleSection() {
 /* ------------------------------------------------------------------ 소개 (후기 자리) */
 
 const TRUST_POINTS = [
-  { title: "500원", desc: "동전 하나면 충분한 1회", titleClass: "text-amber-600", box: "bg-amber-50/40 border-amber-100" },
-  { title: "매일 첫 1회 무료", desc: "가벼운 마음으로 오늘의 운 뽑아보기", titleClass: "text-brand-500", box: "bg-sky-50/60 border-sky-100" },
-  { title: "결과지 카드", desc: "인스타 스토리용 모바일 결과지", titleClass: "text-indigo-600", box: "bg-indigo-50/40 border-indigo-100" },
+  { title: "500원", desc: "동전 하나면 충분한 1회", titleClass: "text-amber-600", box: "border-amber-300" },
+  { title: "매일 첫 1회 무료", desc: "가벼운 마음으로 오늘의 운 뽑아보기", titleClass: "text-brand-500", box: "border-pink-300" },
+  { title: "결과지 카드", desc: "인스타 스토리용 모바일 결과지", titleClass: "text-indigo-600", box: "border-indigo-300" },
 ] as const;
 
 export function TrustSection() {
@@ -429,9 +429,9 @@ export function TrustSection() {
           </p>
         </div>
 
-        <div className="lg:col-span-7 grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+        <div className="lg:col-span-7 grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
           {TRUST_POINTS.map((t) => (
-            <div key={t.title} className={`p-4 rounded-2xl border flex flex-col justify-between ${t.box}`}>
+            <div key={t.title} className={`pl-4 py-1 border-l-[3px] flex flex-col justify-center ${t.box}`}>
               <div className={`font-cute text-xl font-normal ${t.titleClass}`}>{t.title}</div>
               <div className="text-xs text-slate-600 mt-2 leading-relaxed">{t.desc}</div>
             </div>
