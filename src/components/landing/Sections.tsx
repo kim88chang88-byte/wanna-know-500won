@@ -262,14 +262,6 @@ export function MachinesSection({ onSpin }: SpinProps) {
               <p className="text-[11px] sm:text-xs text-slate-500 text-center leading-relaxed sm:min-h-[36px]">{m.desc}</p>
             </div>
 
-            <div className={`mt-3 sm:mt-4 pt-3 border-t flex flex-col gap-2 sm:gap-2.5 ${m.divider}`}>
-              <div className={`text-center font-cute font-normal text-xs sm:text-sm ${m.titleClass}`} aria-hidden="true">
-                눌러서 운세 보기 ›
-              </div>
-              <div className="text-center text-[11px] sm:text-xs text-slate-500">
-                매일 첫 1회 무료 <span className="text-[11px] text-slate-400">(이후 500원)</span>
-              </div>
-            </div>
           </div>
         ))}
       </div>
@@ -339,8 +331,7 @@ export function PremiumSection({ onSpin }: SpinProps) {
                 <h4 className="font-cute font-normal text-base text-gray-900 text-center mb-1">{p.title}</h4>
                 <p className="text-xs text-slate-500 text-center leading-relaxed">{p.desc}</p>
               </div>
-              <div className={`mt-4 pt-3 border-t flex items-center justify-between ${p.divider}`}>
-                <span className={`font-cute font-normal text-sm ${p.priceClass}`} aria-hidden="true">눌러서 보기 ›</span>
+              <div className={`mt-4 pt-3 border-t flex items-center justify-center ${p.divider}`}>
                 <span className={`text-sm font-extrabold ${p.priceClass}`}>2,990원</span>
               </div>
             </div>
