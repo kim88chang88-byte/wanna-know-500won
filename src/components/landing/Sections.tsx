@@ -165,10 +165,10 @@ export function ShowcaseSection() {
         <div aria-hidden="true" className="pointer-events-none absolute bottom-12 -left-2 w-6 h-6 rounded-full bg-white/70 border border-sky-200 shadow-sm otter-bubble-aura z-20" style={{ animationDelay: "2.7s" }} />
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-          <div className="lg:col-span-6 relative w-full aspect-[16/10] sm:aspect-[16/9] lg:aspect-square rounded-2xl overflow-hidden bg-sky-50 flex items-center justify-center border border-sky-100 shadow-sm">
+          <div className="lg:col-span-6 relative w-full aspect-[16/9] rounded-2xl overflow-hidden bg-sky-50 flex items-center justify-center border border-sky-100 shadow-sm">
             <SafeImage
               src={HERO_IMAGE}
-              alt="신묘한 수달 도사 도리"
+              alt="수달 도사 도리와 목·화·토·금·수 오행 친구들"
               className="w-full h-full object-cover hover:scale-105 transition-transform duration-700"
               fallback="🦦"
               fallbackClass="text-8xl"
