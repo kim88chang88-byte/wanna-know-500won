@@ -300,11 +300,14 @@ export function PremiumSection({ onSpin, spinningKey }: SpinProps) {
               key={p.key}
               id={p.key}
               data-testid="premium-card"
-              className={`scroll-mt-24 card-water-glow flex flex-col justify-between rounded-3xl p-6 bg-white hover:shadow-lg hover:-translate-y-1 transition-all group ${p.card}`}
+              className={`scroll-mt-24 card-water-glow relative flex flex-col justify-between rounded-3xl p-6 bg-white hover:shadow-lg hover:-translate-y-1 transition-all group ${p.card}`}
             >
               {p.ribbon && (
-                <div className="absolute -top-0 right-5 px-3 py-0.5 rounded-b-full bg-amber-600 text-white text-[11px] font-bold shadow-sm z-10">
-                  {p.ribbon}
+                <div
+                  data-testid="premium-sticker"
+                  className="absolute -top-3 -right-2 rotate-[8deg] px-3.5 py-1.5 rounded-full bg-gradient-to-r from-pink-500 to-fuchsia-500 text-white font-cute font-normal text-sm shadow-md ring-2 ring-white z-10"
+                >
+                  <span aria-hidden="true">🦦 </span>[{p.ribbon}]
                 </div>
               )}
               <div>

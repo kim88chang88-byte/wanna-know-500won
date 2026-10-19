@@ -88,6 +88,13 @@ describe("문구 가이드 (BRIEF.md: 뽑기 언어, 겁주거나 신비롭게 �
   it("일반 자판기는 동물 그림(성공운 용, 재물운 토끼, 연애운 남자 팬더, 결혼운 여자 팬더, 건강운 여우, 학업운 수달)을 쓰고, 프리미엄은 2,990원 그림만 쓴다", () => {
     const animal: Record<string, string> = { 성공운: "dragon", 재물운: "rabbit", 연애운: "panda-m", 결혼운: "panda-f", 건강운: "fox", 학업운: "otter" };
     for (const m of MACHINES) expect(IMAGES[m.image]).toBe(`/images/animal-${animal[m.fortune]}.webp`);
-    for (const c of PREMIUM_CARDS) expect(IMAGES[c.image]).toBe("/images/premiumMachine.jpg");
+    const premiumAnimal: Record<string, string> = { "premium-compat": "otter", "premium-dohwa": "rabbit", "premium-fortune": "dragon" };
+    for (const c of PREMIUM_CARDS) expect(IMAGES[c.image]).toBe(`/images/animal-${premiumAnimal[c.key]}.webp`);
+  });
+
+  it("프리미엄은 궁합이 맨 앞이고 '도리 강추' 스티커는 궁합에만 붙는다", () => {
+    expect(PREMIUM_CARDS[0].key).toBe("premium-compat");
+    expect(PREMIUM_CARDS.filter((c) => c.ribbon).map((c) => c.key)).toEqual(["premium-compat"]);
+    expect(PREMIUM_CARDS[0].ribbon).toBe("도리 강추");
   });
 });
