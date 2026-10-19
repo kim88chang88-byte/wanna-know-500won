@@ -123,9 +123,9 @@ export function Header({ onOpenLogin, user = null }: { onOpenLogin: () => void; 
 
 export function HeroSection({ counts }: { counts: DrawCounts }) {
   return (
-    <section className="text-center max-w-4xl mx-auto mb-3">
+    <section className="text-left mb-3">
       {/* 뽑기 횟수: 한 줄짜리 작은 알약 (로그인했다면 서버가, 아니라면 이 기기에서 센 값) */}
-      <div className="inline-flex flex-wrap items-center justify-center gap-x-3 gap-y-1 rounded-full bg-white/80 border border-brand-100 px-4 py-1.5 text-xs shadow-sm">
+      <div className="inline-flex flex-wrap items-center justify-start gap-x-3 gap-y-1 rounded-full bg-white/80 border border-brand-100 px-4 py-1.5 text-xs shadow-sm">
         <span className="inline-flex items-center gap-1 text-gray-500">
           <span className="material-symbols-outlined text-brand-500 text-[16px]">water_drop</span>
           오늘
