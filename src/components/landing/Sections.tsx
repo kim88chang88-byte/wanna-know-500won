@@ -175,29 +175,16 @@ export function ShowcaseSection() {
           </div>
 
           <div className="lg:col-span-6 flex flex-col justify-center bg-sky-50/70 p-4 sm:p-6 rounded-2xl border border-sky-200">
-            <div className="flex items-start gap-3">
-              <span className="text-3xl shrink-0" aria-hidden="true">
-                🦦
+            <div className="flex flex-wrap items-center gap-2.5">
+              <span className="text-xs font-semibold text-brand-500 flex items-center gap-1">
+                <span className="material-symbols-outlined text-base">verified</span> 매일 첫 1회 무료 체험
               </span>
-              <div className="flex-1">
-                <div className="flex items-center gap-2 mb-3">
-                  <span className="text-xs font-bold px-3 py-0.5 rounded-full bg-sky-100 text-brand-500">
-                    신묘한 수달 도사의 속삭임
-                  </span>
-                  <span className="text-xs text-sky-600 font-semibold">퐁당! 💦</span>
-                </div>
-                <div className="flex flex-wrap items-center gap-2.5 pt-3 border-t border-sky-200/80">
-                  <span className="text-xs font-semibold text-brand-500 flex items-center gap-1">
-                    <span className="material-symbols-outlined text-base">verified</span> 매일 첫 1회 무료 체험
-                  </span>
-                  <span className="text-slate-400" aria-hidden="true">
-                    •
-                  </span>
-                  <span className="text-xs font-semibold text-slate-600 flex items-center gap-1">
-                    <span className="material-symbols-outlined text-base">water_drop</span> 맑고 청명한 운세 풀이
-                  </span>
-                </div>
-              </div>
+              <span className="text-slate-400" aria-hidden="true">
+                •
+              </span>
+              <span className="text-xs font-semibold text-slate-600 flex items-center gap-1">
+                <span className="material-symbols-outlined text-base">water_drop</span> 맑고 청명한 운세 풀이
+              </span>
             </div>
           </div>
         </div>
