@@ -9,6 +9,14 @@ export const MAX_YEAR = 2100;
 export type StepId = "date" | "time" | "gender" | "concern" | "consent";
 export const STEPS: readonly StepId[] = ["date", "time", "gender", "concern", "consent"];
 
+/** 궁합 리포트에서 상대방 생년월일시를 받는 단계 (내 성별 다음, 고민 앞) */
+export type PartnerStepId = "pdate" | "ptime" | "pgender";
+export type AnyStepId = StepId | PartnerStepId;
+export const COMPAT_STEPS: readonly AnyStepId[] = ["date", "time", "gender", "pdate", "ptime", "pgender", "concern", "consent"];
+
+/** 한 사람의 생년월일시·성별 입력값 (상대방은 이것만 받아요) */
+export type BirthFields = Pick<IntakeForm, "calendar" | "solarDate" | "lunarYear" | "lunarMonth" | "lunarDay" | "isLeapMonth" | "timeKnown" | "time" | "gender">;
+
 export interface IntakeForm {
   calendar: "solar" | "lunar";
   /** 양력 입력 (달력 입력창 값, 예: "1990-05-17") */
@@ -28,6 +36,18 @@ export interface IntakeForm {
   concernText: string;
   consent: boolean;
 }
+
+export const EMPTY_BIRTH: BirthFields = {
+  calendar: "solar",
+  solarDate: "",
+  lunarYear: "",
+  lunarMonth: "",
+  lunarDay: "",
+  isLeapMonth: false,
+  timeKnown: true,
+  time: "",
+  gender: null,
+};
 
 export const EMPTY_FORM: IntakeForm = {
   calendar: "solar",
@@ -102,9 +122,16 @@ export function validateStep(step: StepId, f: IntakeForm): string | null {
   }
 }
 
-/** 모든 단계가 올바를 때 만세력 계산에 넘길 입력으로 바꿔요. 올바르지 않으면 null. */
-export function buildBirthInput(f: IntakeForm): BirthInput | null {
-  if (STEPS.some((s) => validateStep(s, f) !== null) || !f.gender) return null;
+/** 상대방 단계(pdate/ptime/pgender)를 같은 규칙으로 검사해요. 일반 단계는 그대로 검사해요. */
+export function validatePartnerStep(step: PartnerStepId, p: BirthFields): string | null {
+  const base: Record<PartnerStepId, StepId> = { pdate: "date", ptime: "time", pgender: "gender" };
+  return validateStep(base[step], { ...EMPTY_FORM, ...p });
+}
+
+/** 한 사람의 날짜·시간·성별이 모두 올바르면 계산 입력으로 바꿔요. 아니면 null. */
+export function buildBirthFields(f: BirthFields): BirthInput | null {
+  const full: IntakeForm = { ...EMPTY_FORM, ...f };
+  if ((["date", "time", "gender"] as const).some((s) => validateStep(s, full) !== null) || !f.gender) return null;
 
   let year: number;
   let month: number;
@@ -129,6 +156,12 @@ export function buildBirthInput(f: IntakeForm): BirthInput | null {
     isLeapMonth: f.calendar === "lunar" && f.isLeapMonth,
     gender: f.gender,
   };
+}
+
+/** 모든 단계가 올바를 때 만세력 계산에 넘길 입력으로 바꿔요. 올바르지 않으면 null. */
+export function buildBirthInput(f: IntakeForm): BirthInput | null {
+  if (STEPS.some((s) => validateStep(s, f) !== null)) return null;
+  return buildBirthFields(f);
 }
 
 /** 고민 단계의 입력을 서버로 보낼 모양으로 바꿔요. 아무것도 안 골랐으면 null. */

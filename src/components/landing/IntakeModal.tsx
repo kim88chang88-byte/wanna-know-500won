@@ -2,16 +2,24 @@
 
 import { useEffect, useRef, useState } from "react";
 import {
+  COMPAT_STEPS,
+  EMPTY_BIRTH,
   EMPTY_FORM,
   MAX_YEAR,
   MIN_YEAR,
   STEPS,
+  buildBirthFields,
   buildBirthInput,
   buildConcern,
+  validatePartnerStep,
   validateStep,
+  type AnyStepId,
+  type BirthFields,
   type IntakeForm,
+  type PartnerStepId,
   type StepId,
 } from "@/lib/intake";
+import { isCompatFortune } from "@/lib/premium/compat";
 import type { PublicReading } from "@/lib/ai/reading";
 import { CONCERN_CHIPS, MAX_CONCERN_TAGS, MAX_CONCERN_TEXT, type Concern, type ConcernId } from "@/lib/concerns";
 import { profileSummary, profileToForm, sameBirth, type SavedProfile } from "@/lib/profile";
@@ -51,12 +59,15 @@ interface Props {
 /** 로그인 안내 문구 (질문지 첫 화면·결과 화면에서 써요) */
 export const LOGIN_NUDGE = "로그인하시면 도리가 생년월일시를 기억해서 또 다시 입력할 필요가 없어요!";
 
-const BUBBLE: Record<StepId, string> = {
+const BUBBLE: Record<AnyStepId, string> = {
   date: "먼저, 언제 태어났어? 🫧",
   time: "태어난 시간도 알면 더 또렷하게 볼 수 있어. 몰라도 괜찮아!",
   gender: "성별도 알려줄래?",
   concern: "요즘 마음에 걸리는 게 있어? 골라주면 그 얘기를 더 살려서 풀어줄게 🫧",
   consent: "캡슐 만들기 전에, 정보 처리만 확인할게.",
+  pdate: "이번엔 궁합을 볼 상대방이야! 상대방은 언제 태어났어? 💞",
+  ptime: "상대방이 태어난 시간도 알면 더 또렷해. 몰라도 괜찮아!",
+  pgender: "상대방의 성별도 알려줄래?",
 };
 
 const INPUT =
@@ -90,12 +101,12 @@ function ChoiceButton({
 type ReadingStatus = "ok" | "unavailable" | "failed";
 
 /** 프리미엄 리포트를 받아요. 실패해도 예외 대신 사용자에게 보여 줄 문장을 돌려줘요. */
-async function fetchPremiumReport(input: BirthInput, level: "basic" | "full", topic: string, concern: Concern | null, signal: AbortSignal): Promise<{ report: PremiumReportView | null; error: string | null }> {
+async function fetchPremiumReport(input: BirthInput, level: "basic" | "full", topic: string, concern: Concern | null, partner: BirthInput | null, signal: AbortSignal): Promise<{ report: PremiumReportView | null; error: string | null }> {
   try {
     const res = await fetch("/api/premium", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...input, level, topic, concern }),
+      body: JSON.stringify({ ...input, level, topic, concern, ...(partner ? { partner } : {}) }),
       signal,
     });
     const data = (await res.json().catch(() => null)) as { report?: PremiumReportView; error?: string } | null;
@@ -132,10 +143,130 @@ function PillarCell({ pillar }: { pillar: Pillar | null }) {
   );
 }
 
+/** 날짜·시간·성별 질문 화면. 내 것과 상대방 것이 같은 화면을 써요. */
+function BirthStepFields({ kind, f, patch }: { kind: "date" | "time" | "gender"; f: BirthFields; patch: (p: Partial<BirthFields>) => void }) {
+  return (
+    <>
+    {kind === "date" && (
+      <div className="space-y-3">
+        <div className="grid grid-cols-2 gap-2" role="group" aria-label="양력 또는 음력">
+          <ChoiceButton selected={f.calendar === "solar"} onClick={() => patch({ calendar: "solar" })}>
+            양력
+          </ChoiceButton>
+          <ChoiceButton selected={f.calendar === "lunar"} onClick={() => patch({ calendar: "lunar" })}>
+            음력
+          </ChoiceButton>
+        </div>
+
+        {f.calendar === "solar" ? (
+          <label className="block text-xs font-semibold text-gray-600">
+            생년월일
+            <input
+              type="date"
+              name="date"
+              value={f.solarDate}
+              min={`${MIN_YEAR}-01-01`}
+              max={`${MAX_YEAR}-12-31`}
+              onChange={(e) => patch({ solarDate: e.target.value })}
+              className={`${INPUT} mt-1`}
+            />
+          </label>
+        ) : (
+          <>
+            <div className="grid grid-cols-3 gap-2">
+              <label className="block text-xs font-semibold text-gray-600">
+                음력 연
+                <input
+                  inputMode="numeric"
+                  name="ly"
+                  placeholder="1990"
+                  value={f.lunarYear}
+                  onChange={(e) => patch({ lunarYear: e.target.value })}
+                  className={`${INPUT} mt-1`}
+                />
+              </label>
+              <label className="block text-xs font-semibold text-gray-600">
+                월
+                <input
+                  inputMode="numeric"
+                  name="lm"
+                  placeholder="4"
+                  value={f.lunarMonth}
+                  onChange={(e) => patch({ lunarMonth: e.target.value })}
+                  className={`${INPUT} mt-1`}
+                />
+              </label>
+              <label className="block text-xs font-semibold text-gray-600">
+                일
+                <input
+                  inputMode="numeric"
+                  name="ld"
+                  placeholder="23"
+                  value={f.lunarDay}
+                  onChange={(e) => patch({ lunarDay: e.target.value })}
+                  className={`${INPUT} mt-1`}
+                />
+              </label>
+            </div>
+            <label className="flex items-center gap-2 text-xs text-gray-600">
+              <input
+                type="checkbox"
+                checked={f.isLeapMonth}
+                onChange={(e) => patch({ isLeapMonth: e.target.checked })}
+              />
+              윤달이에요
+            </label>
+          </>
+        )}
+      </div>
+    )}
+
+    {kind === "time" && (
+      <div className="space-y-3">
+        <label className="block text-xs font-semibold text-gray-600">
+          태어난 시간
+          <input
+            type="time"
+            name="time"
+            value={f.time}
+            disabled={!f.timeKnown}
+            onChange={(e) => patch({ time: e.target.value })}
+            className={`${INPUT} mt-1 disabled:opacity-40`}
+          />
+        </label>
+        <ChoiceButton
+          selected={!f.timeKnown}
+          onClick={() => patch({ timeKnown: !f.timeKnown })}
+          className="w-full"
+        >
+          태어난 시간은 모르겠어요
+        </ChoiceButton>
+      </div>
+    )}
+
+    {kind === "gender" && (
+      <div className="grid grid-cols-2 gap-2" role="group" aria-label="성별">
+        <ChoiceButton selected={f.gender === "female"} onClick={() => patch({ gender: "female" })}>
+          여성
+        </ChoiceButton>
+        <ChoiceButton selected={f.gender === "male"} onClick={() => patch({ gender: "male" })}>
+          남성
+        </ChoiceButton>
+      </div>
+    )}
+    </>
+  );
+}
+
 export default function IntakeModal({ target, onClose, onComplete, loggedIn = false, savedProfile = null, onRequestLogin, onProfileSaved }: Props) {
   // 저장된 생년월일시가 있으면 미리 채우고, 이미 입력한 질문(생년월일·시간·성별)은 건너뛰어 고민 단계에서 시작해요.
   const [form, setForm] = useState<IntakeForm>(() => (savedProfile ? { ...EMPTY_FORM, ...profileToForm(savedProfile) } : EMPTY_FORM));
-  const [stepIndex, setStepIndex] = useState(() => (savedProfile ? STEPS.indexOf("concern") : 0));
+  // 궁합 리포트면 상대방의 생년월일시·성별을 더 받아요. (상대방 정보는 계산에만 쓰고 저장하지 않아요)
+  const compat = target.premium === true && isCompatFortune(target.fortune);
+  const steps: readonly AnyStepId[] = compat ? COMPAT_STEPS : STEPS;
+  const firstAfterMe = steps.indexOf(compat ? "pdate" : "concern");
+  const [partner, setPartner] = useState<BirthFields>(EMPTY_BIRTH);
+  const [stepIndex, setStepIndex] = useState(() => (savedProfile ? firstAfterMe : 0));
   // 선택 동의: 둘 다 기본은 꺼짐. (이미 저장해 둔 회원이 정보를 고치는 경우만, 전에 동의한 "기억하기"를 켜 둬요)
   const [saveProfile, setSaveProfile] = useState(savedProfile !== null);
   const [shareConcern, setShareConcern] = useState(false);
@@ -151,17 +282,24 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
   // 창이 닫히면 진행 중인 요청도 멈춰요.
   useEffect(() => () => abortRef.current?.abort(), []);
 
-  const step = STEPS[stepIndex];
-  const isLast = stepIndex === STEPS.length - 1;
+  const step = steps[stepIndex];
+  const isLast = stepIndex === steps.length - 1;
 
   function update(patch: Partial<IntakeForm>) {
     setForm((f) => ({ ...f, ...patch }));
     setError(null);
   }
 
+  function updatePartner(patch: Partial<BirthFields>) {
+    setPartner((p) => ({ ...p, ...patch }));
+    setError(null);
+  }
+
   async function submit() {
     const input = buildBirthInput(form);
     if (!input) return;
+    const partnerInput = compat ? buildBirthFields(partner) : null;
+    if (compat && !partnerInput) return;
     setPhase("loading");
     setError(null);
     const concern = buildConcern(form);
@@ -172,7 +310,7 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
     abortRef.current = ctrl;
     try {
       // 사주 리포트도 함께 받아요. 프리미엄은 전체, 일반 자판기는 기본(원국·오행·신강신약). 실패해도 기본 풀이는 그대로 보여줘요.
-      const premiumPromise = fetchPremiumReport(input, target.premium ? "full" : "basic", target.fortune, concern, ctrl.signal);
+      const premiumPromise = fetchPremiumReport(input, target.premium ? "full" : "basic", target.fortune, concern, partnerInput, ctrl.signal);
       const res = await fetch("/api/reading", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -212,7 +350,7 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
 
   function next(e: React.FormEvent) {
     e.preventDefault();
-    const problem = validateStep(step, form);
+    const problem = step === "pdate" || step === "ptime" || step === "pgender" ? validatePartnerStep(step as PartnerStepId, partner) : validateStep(step as StepId, form);
     if (problem) {
       setError(problem);
       return;
@@ -369,17 +507,17 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
             role="progressbar"
             aria-label="입력 진행"
             aria-valuemin={1}
-            aria-valuemax={STEPS.length}
+            aria-valuemax={steps.length}
             aria-valuenow={stepIndex + 1}
             className="h-1.5 rounded-full bg-brand-100 overflow-hidden mb-1"
           >
             <div
               className="h-full bg-brand-500 transition-all"
-              style={{ width: `${((stepIndex + 1) / STEPS.length) * 100}%` }}
+              style={{ width: `${((stepIndex + 1) / steps.length) * 100}%` }}
             />
           </div>
           <div className="text-[11px] text-gray-400 text-right mb-3" data-testid="intake-step">
-            {stepIndex + 1} / {STEPS.length}
+            {stepIndex + 1} / {steps.length}
           </div>
 
           <div className="flex items-start gap-2.5 mb-4">
@@ -391,7 +529,7 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
             </p>
           </div>
 
-          {savedProfile && stepIndex >= STEPS.indexOf("concern") && (
+          {savedProfile && stepIndex >= firstAfterMe && (
             <div data-testid="saved-profile" className="mb-3 flex items-center justify-between gap-2 rounded-xl bg-brand-50 border border-brand-100 px-3 py-2">
               <span className="text-[11px] text-gray-600 leading-snug">
                 <b className="text-brand-700">기억해 둔 정보</b>
@@ -415,112 +553,9 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
             </div>
           )}
 
-          {step === "date" && (
-            <div className="space-y-3">
-              <div className="grid grid-cols-2 gap-2" role="group" aria-label="양력 또는 음력">
-                <ChoiceButton selected={form.calendar === "solar"} onClick={() => update({ calendar: "solar" })}>
-                  양력
-                </ChoiceButton>
-                <ChoiceButton selected={form.calendar === "lunar"} onClick={() => update({ calendar: "lunar" })}>
-                  음력
-                </ChoiceButton>
-              </div>
-
-              {form.calendar === "solar" ? (
-                <label className="block text-xs font-semibold text-gray-600">
-                  생년월일
-                  <input
-                    type="date"
-                    name="date"
-                    value={form.solarDate}
-                    min={`${MIN_YEAR}-01-01`}
-                    max={`${MAX_YEAR}-12-31`}
-                    onChange={(e) => update({ solarDate: e.target.value })}
-                    className={`${INPUT} mt-1`}
-                  />
-                </label>
-              ) : (
-                <>
-                  <div className="grid grid-cols-3 gap-2">
-                    <label className="block text-xs font-semibold text-gray-600">
-                      음력 연
-                      <input
-                        inputMode="numeric"
-                        name="ly"
-                        placeholder="1990"
-                        value={form.lunarYear}
-                        onChange={(e) => update({ lunarYear: e.target.value })}
-                        className={`${INPUT} mt-1`}
-                      />
-                    </label>
-                    <label className="block text-xs font-semibold text-gray-600">
-                      월
-                      <input
-                        inputMode="numeric"
-                        name="lm"
-                        placeholder="4"
-                        value={form.lunarMonth}
-                        onChange={(e) => update({ lunarMonth: e.target.value })}
-                        className={`${INPUT} mt-1`}
-                      />
-                    </label>
-                    <label className="block text-xs font-semibold text-gray-600">
-                      일
-                      <input
-                        inputMode="numeric"
-                        name="ld"
-                        placeholder="23"
-                        value={form.lunarDay}
-                        onChange={(e) => update({ lunarDay: e.target.value })}
-                        className={`${INPUT} mt-1`}
-                      />
-                    </label>
-                  </div>
-                  <label className="flex items-center gap-2 text-xs text-gray-600">
-                    <input
-                      type="checkbox"
-                      checked={form.isLeapMonth}
-                      onChange={(e) => update({ isLeapMonth: e.target.checked })}
-                    />
-                    윤달이에요
-                  </label>
-                </>
-              )}
-            </div>
-          )}
-
-          {step === "time" && (
-            <div className="space-y-3">
-              <label className="block text-xs font-semibold text-gray-600">
-                태어난 시간
-                <input
-                  type="time"
-                  name="time"
-                  value={form.time}
-                  disabled={!form.timeKnown}
-                  onChange={(e) => update({ time: e.target.value })}
-                  className={`${INPUT} mt-1 disabled:opacity-40`}
-                />
-              </label>
-              <ChoiceButton
-                selected={!form.timeKnown}
-                onClick={() => update({ timeKnown: !form.timeKnown })}
-                className="w-full"
-              >
-                태어난 시간은 모르겠어요
-              </ChoiceButton>
-            </div>
-          )}
-
-          {step === "gender" && (
-            <div className="grid grid-cols-2 gap-2" role="group" aria-label="성별">
-              <ChoiceButton selected={form.gender === "female"} onClick={() => update({ gender: "female" })}>
-                여성
-              </ChoiceButton>
-              <ChoiceButton selected={form.gender === "male"} onClick={() => update({ gender: "male" })}>
-                남성
-              </ChoiceButton>
-            </div>
+          {(step === "date" || step === "time" || step === "gender") && <BirthStepFields kind={step} f={form} patch={update} />}
+          {(step === "pdate" || step === "ptime" || step === "pgender") && (
+            <BirthStepFields kind={step === "pdate" ? "date" : step === "ptime" ? "time" : "gender"} f={partner} patch={updatePartner} />
           )}
 
           {step === "concern" && (
@@ -585,7 +620,7 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
                   onChange={(e) => update({ consent: e.target.checked })}
                 />
                 <span>
-                  (필수) 사주 계산을 위해 생년월일·성별(선택: 태어난 시간·고민 내용)을 처리하는 것에 동의해요.{" "}
+                  (필수) 사주 계산을 위해 생년월일·성별(선택: 태어난 시간·고민 내용){compat ? "과 상대방의 생년월일·성별(선택: 태어난 시간)" : ""}을 처리하는 것에 동의해요.{compat ? " 상대방 정보는 궁합 계산에만 쓰고 서버에 저장하지 않아요." : ""}{" "}
                   <a href="/privacy" target="_blank" rel="noopener noreferrer" className="text-brand-600 underline">
                     개인정보처리방침 보기
                   </a>

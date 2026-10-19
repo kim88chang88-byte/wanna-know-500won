@@ -1,4 +1,5 @@
 import type { ElementKind, PremiumReportView } from "@/lib/premium/types";
+import CompatCard from "./CompatCard";
 import ConcernCard from "./ConcernCard";
 import PremiumBook from "./PremiumBook";
 
@@ -17,10 +18,20 @@ const H2 = "font-serifKr font-bold text-lg text-brand-700 mb-4";
 export default function ManseReport({ report }: { report: PremiumReportView }) {
   const max = Math.max(1, ...report.elements.map((e) => e.count));
   // 프리미엄: 10페이지 상세 리포트
-  if (report.level === "full" && report.book.length > 0) return <PremiumBook report={report} />;
+  if (report.level === "full" && report.book.length > 0) {
+    return report.compat ? (
+      <div className="space-y-6">
+        <CompatCard compat={report.compat} />
+        <PremiumBook report={report} />
+      </div>
+    ) : (
+      <PremiumBook report={report} />
+    );
+  }
 
   return (
     <div data-testid="manse-report" className="space-y-6">
+      {report.compat && <CompatCard compat={report.compat} />}
       {report.concern && <ConcernCard concern={report.concern} />}
       <section aria-labelledby="topic-h" data-testid="topic-card" className="rounded-3xl bg-gradient-to-br from-violet-50 via-white to-sky-50 border border-violet-100 p-5 sm:p-6 shadow-[0_8px_30px_rgba(120,100,220,0.10)]">
         <h2 id="topic-h" className="font-serifKr font-bold text-lg text-brand-700">

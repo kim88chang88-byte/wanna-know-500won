@@ -30,12 +30,12 @@ export async function POST(request: Request) {
   if (!parsed.ok) return NextResponse.json({ code: "bad_request", error: parsed.error }, { status: 400 });
 
   try {
-    return NextResponse.json({ report: buildPremiumReport(parsed.value, new Date(), parsed.level, parsed.topic, isPremiumLocked(process.env), parsed.concern) });
+    return NextResponse.json({ report: buildPremiumReport(parsed.value, new Date(), parsed.level, parsed.topic, isPremiumLocked(process.env), parsed.concern, parsed.partner) });
   } catch (err) {
     // 없는 날짜(예: 윤달이 없는 해의 윤달)처럼 계산할 수 없는 입력이에요.
     console.error("premium report failed:", err instanceof Error ? err.message : "unknown");
     return NextResponse.json(
-      { code: "bad_request", error: "입력한 날짜로는 리포트를 만들 수 없어요. 생년월일(음력·윤달 포함)을 다시 확인해 주세요." },
+      { code: "bad_request", error: "입력한 날짜로는 리포트를 만들 수 없어요. 생년월일(음력·윤달 포함, 궁합이면 상대방 것도)을 다시 확인해 주세요." },
       { status: 400 },
     );
   }

@@ -180,7 +180,7 @@ export const PREMIUM_CARDS: readonly PremiumCard[] = [
     tag: "🔮 둘의 궁합",
     tagClass: "bg-brand-50 text-brand-700 border border-brand-100",
     title: "궁합 리포트",
-    desc: "두 사람의 사주가 만나는 지점, 잘 맞는 부분과 서로 맞춰가면 좋은 부분을 정리했어요.",
+    desc: "상대방의 생년월일시도 함께 넣으면, 두 사람의 사주가 만나는 지점과 잘 맞는 부분, 맞춰가면 좋은 부분을 정리해요.",
     card: "border-2 border-brand-300 shadow-md",
     imageBox: "bg-white border-amber-300 ring-2 ring-amber-100 ring-offset-2 ring-offset-white",
     button: "bg-gradient-to-r from-brand-500 to-fuchsia-500 hover:brightness-105",

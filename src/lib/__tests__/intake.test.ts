@@ -71,3 +71,20 @@ describe("buildBirthInput", () => {
     expect(buildBirthInput(ok({ solarDate: "" }))).toBeNull();
   });
 });
+
+describe("상대방(궁합) 입력", () => {
+  it("상대방 단계는 내 단계와 같은 규칙으로 검사한다", async () => {
+    const { validatePartnerStep, EMPTY_BIRTH, buildBirthFields, COMPAT_STEPS } = await import("../intake");
+    expect(validatePartnerStep("pdate", EMPTY_BIRTH)).not.toBeNull();
+    expect(validatePartnerStep("pgender", EMPTY_BIRTH)).not.toBeNull();
+    const ok = { ...EMPTY_BIRTH, solarDate: "1992-03-04", time: "09:30", gender: "male" as const };
+    expect(validatePartnerStep("pdate", ok)).toBeNull();
+    expect(validatePartnerStep("ptime", ok)).toBeNull();
+    expect(validatePartnerStep("pgender", ok)).toBeNull();
+    expect(buildBirthFields(ok)).toMatchObject({ year: 1992, month: 3, day: 4, hour: 9, minute: 30, gender: "male", calendar: "solar" });
+    expect(buildBirthFields({ ...ok, timeKnown: false })).toMatchObject({ hour: null, minute: null });
+    expect(buildBirthFields(EMPTY_BIRTH)).toBeNull();
+    // 내 질문 뒤, 고민 앞에 상대방 질문 3개가 들어간다
+    expect(COMPAT_STEPS.slice(3, 6)).toEqual(["pdate", "ptime", "pgender"]);
+  });
+});

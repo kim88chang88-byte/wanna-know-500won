@@ -42,6 +42,11 @@ export default function PrivacyPage() {
               <td className="p-2 border border-brand-100">시주 계산 (입력하지 않으면 시주는 표시되지 않아요)</td>
             </tr>
             <tr>
+              <td className="p-2 border border-brand-100">선택 (궁합 리포트를 볼 때)</td>
+              <td className="p-2 border border-brand-100">상대방의 생년월일(양력/음력)·태어난 시간(알면)·성별 (이름·연락처는 받지 않아요)</td>
+              <td className="p-2 border border-brand-100">두 사람의 궁합 계산에만 쓰고, 계산이 끝나면 서버에 저장하지 않아요. 상대방 정보는 사용자가 상대방에게 알려도 괜찮다고 판단한 범위에서만 입력해 주세요</td>
+            </tr>
+            <tr>
               <td className="p-2 border border-brand-100">선택 (카카오·구글·네이버 로그인 시)</td>
               <td className="p-2 border border-brand-100">카카오 회원번호·닉네임, 구글 계정 고유번호·이름 또는 네이버 회원 고유 ID·별명</td>
               <td className="p-2 border border-brand-100">로그인 상태 유지, 인사 표시, 회원 식별 (이메일·프로필 사진·연락처는 받지 않아요)</td>

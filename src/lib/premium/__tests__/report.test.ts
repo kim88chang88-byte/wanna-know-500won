@@ -80,3 +80,20 @@ describe("validatePremiumInput", () => {
     expect(validatePremiumInput(input).ok).toBe(false);
   });
 });
+
+describe("validatePremiumInput · 상대방(궁합)", () => {
+  const me = { year: 1990, month: 5, day: 17, hour: 9, minute: 30, calendar: "solar", gender: "female" };
+  it("partner 가 없으면 null", () => {
+    const r = validatePremiumInput(me);
+    expect(r.ok && r.partner).toBe(null);
+  });
+  it("올바른 partner 를 받는다 (시간 모름 포함)", () => {
+    const r = validatePremiumInput({ ...me, partner: { year: 1992, month: 3, day: 4, hour: null, minute: null, calendar: "solar", gender: "male" } });
+    expect(r.ok && r.partner).toMatchObject({ year: 1992, month: 3, day: 4, hour: null, gender: "male" });
+  });
+  it("잘못된 partner 는 상대방 안내 문구로 거절한다", () => {
+    const r = validatePremiumInput({ ...me, partner: { year: 1992, month: 13, day: 4, calendar: "solar", gender: "male" } });
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.error).toContain("상대방");
+  });
+});

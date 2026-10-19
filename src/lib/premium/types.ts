@@ -132,6 +132,40 @@ export interface PremiumReportView {
   locked: boolean;
   /** 프리미엄(full)만: 10페이지 상세 리포트. basic 은 빈 배열 */
   book: BookPage[];
+  /** 궁합 리포트에서 상대방 정보를 받았을 때만 채워져요. 아니면 null */
+  compat: CompatView | null;
+}
+
+/** 두 사람 궁합 결과 (궁합 리포트에서만 채워져요) */
+export interface CompatPerson {
+  /** "나" / "상대" */
+  label: string;
+  /** 일주 한자 (예: 庚午). 없으면 null */
+  dayPillar: string | null;
+  /** 일주 한글 읽기 (예: 경오) */
+  dayReading: string | null;
+  /** 오행 분포 */
+  elements: ElementView[];
+  /** 태어난 시간을 몰라 시주를 뺀 경우 true */
+  hourUnknown: boolean;
+}
+
+export interface CompatPoint {
+  title: string;
+  body: string;
+  /** good: 잘 맞는 점, tip: 맞춰 가면 좋은 점 */
+  tone: "good" | "tip";
+}
+
+export interface CompatView {
+  /** 재미로 보는 참고 지수 (55~96) */
+  score: number;
+  headline: string;
+  me: CompatPerson;
+  partner: CompatPerson;
+  points: CompatPoint[];
+  /** 마무리 한마디 */
+  closing: string;
 }
 
 export type PremiumErrorCode = "bad_request" | "rate_limited" | "failed";

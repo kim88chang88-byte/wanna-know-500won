@@ -4,6 +4,7 @@ import type { BirthInput } from "@/lib/saju/types";
 import { buildBook } from "./book";
 import { applyLocks } from "./book/lock";
 import { CONCERN_CHIPS, hasConcern, parseConcern, type Concern } from "@/lib/concerns";
+import { buildCompat } from "./compat";
 import { buildConcernAnswers } from "./concernAnswer";
 import { buildTopicInsight, resolveTopic } from "./topic";
 import type { DaeunView, ElementKind, ElementView, PillarView, PremiumReportView, ReportLevel, SeyunView } from "./types";
@@ -35,18 +36,22 @@ function isRecord(v: unknown): v is Record<string, unknown> {
   return typeof v === "object" && v !== null;
 }
 
-export type ValidationResult = { ok: true; value: BirthInput; level: ReportLevel; topic: string; concern: Concern } | { ok: false; error: string };
+export type ValidationResult =
+  | { ok: true; value: BirthInput; level: ReportLevel; topic: string; concern: Concern; partner: BirthInput | null }
+  | { ok: false; error: string };
 
-/** 서버 입력 검사. /api/reading 과 같은 BirthInput 모양을 받아요. */
-export function validatePremiumInput(raw: unknown): ValidationResult {
+type BirthResult = { ok: true; value: BirthInput } | { ok: false; error: string };
+
+/** 생년월일시·성별 한 사람 분을 검사해요. /api/reading 과 같은 BirthInput 모양을 받아요. */
+function parseBirth(raw: unknown, who: string): BirthResult {
   if (!isRecord(raw)) return { ok: false, error: "잘못된 요청입니다." };
   const int = (v: unknown) => (typeof v === "number" && Number.isInteger(v) ? v : null);
   const year = int(raw.year);
   const month = int(raw.month);
   const day = int(raw.day);
-  if (year === null || year < 1900 || year > 2100) return { ok: false, error: "태어난 해를 1900~2100 사이로 입력해 주세요." };
-  if (month === null || month < 1 || month > 12) return { ok: false, error: "태어난 달을 확인해 주세요." };
-  if (day === null || day < 1 || day > 31) return { ok: false, error: "태어난 날을 확인해 주세요." };
+  if (year === null || year < 1900 || year > 2100) return { ok: false, error: `${who}태어난 해를 1900~2100 사이로 입력해 주세요.` };
+  if (month === null || month < 1 || month > 12) return { ok: false, error: `${who}태어난 달을 확인해 주세요.` };
+  if (day === null || day < 1 || day > 31) return { ok: false, error: `${who}태어난 날을 확인해 주세요.` };
 
   let hour: number | null = null;
   let minute: number | null = null;
@@ -54,11 +59,25 @@ export function validatePremiumInput(raw: unknown): ValidationResult {
     hour = int(raw.hour);
     minute = raw.minute === null || raw.minute === undefined ? 0 : int(raw.minute);
     if (hour === null || hour < 0 || hour > 23 || minute === null || minute < 0 || minute > 59) {
-      return { ok: false, error: "태어난 시간을 확인해 주세요." };
+      return { ok: false, error: `${who}태어난 시간을 확인해 주세요.` };
     }
   }
-  if (raw.calendar !== "solar" && raw.calendar !== "lunar") return { ok: false, error: "양력/음력을 선택해 주세요." };
-  if (raw.gender !== "male" && raw.gender !== "female") return { ok: false, error: "성별을 선택해 주세요." };
+  if (raw.calendar !== "solar" && raw.calendar !== "lunar") return { ok: false, error: `${who}양력/음력을 선택해 주세요.` };
+  if (raw.gender !== "male" && raw.gender !== "female") return { ok: false, error: `${who}성별을 선택해 주세요.` };
+  return { ok: true, value: { year, month, day, hour, minute, calendar: raw.calendar, isLeapMonth: raw.isLeapMonth === true, gender: raw.gender } };
+}
+
+/** 서버 입력 검사. 궁합이면 `partner`(상대방 생년월일시)도 같은 모양으로 받아요. */
+export function validatePremiumInput(raw: unknown): ValidationResult {
+  if (!isRecord(raw)) return { ok: false, error: "잘못된 요청입니다." };
+  const me = parseBirth(raw, "");
+  if (!me.ok) return me;
+  let partner: BirthInput | null = null;
+  if (raw.partner !== undefined && raw.partner !== null) {
+    const p = parseBirth(raw.partner, "상대방의 ");
+    if (!p.ok) return p;
+    partner = p.value;
+  }
   // level 을 안 보내면 기본(basic). 알 수 없는 값도 basic 으로 처리해요.
   const level: ReportLevel = raw.level === "full" ? "full" : "basic";
   return {
@@ -66,8 +85,26 @@ export function validatePremiumInput(raw: unknown): ValidationResult {
     level,
     topic: typeof raw.topic === "string" ? raw.topic.slice(0, 40) : "",
     concern: parseConcern(raw.concern),
-    value: { year, month, day, hour, minute, calendar: raw.calendar, isLeapMonth: raw.isLeapMonth === true, gender: raw.gender },
+    value: me.value,
+    partner,
   };
+}
+
+/** 상대방 사주를 계산해 두 사람의 궁합을 만들어요. 계산할 수 없는 입력이면 ssaju 의 Error 를 그대로 던져요. */
+function computeCompat(meResult: Parameters<typeof buildCompat>[0], meHourUnknown: boolean, partner: BirthInput, now: Date) {
+  const pHourUnknown = partner.hour === null || partner.hour === undefined;
+  const pr = calculateSaju({
+    year: partner.year,
+    month: partner.month,
+    day: partner.day,
+    hour: pHourUnknown ? undefined : (partner.hour as number),
+    minute: pHourUnknown ? undefined : (partner.minute ?? 0),
+    gender: partner.gender === "female" ? "여" : "남",
+    calendar: partner.calendar,
+    leap: partner.calendar === "lunar" && partner.isLeapMonth === true,
+    now,
+  });
+  return buildCompat(meResult, pr as unknown as Parameters<typeof buildCompat>[0], !meHourUnknown, !pHourUnknown);
 }
 
 /**
@@ -78,7 +115,7 @@ export function validatePremiumInput(raw: unknown): ValidationResult {
  * ssaju 는 순수 계산 라이브러리라 API 키도, 외부 호출도 없어요.
  * 잘못된 날짜(없는 음력 윤달 등)면 ssaju 가 던진 Error 를 그대로 던져요.
  */
-export function buildPremiumReport(input: BirthInput, now: Date = new Date(), level: ReportLevel = "full", topicRaw: unknown = "", lock = false, concern: Concern | null = null): PremiumReportView {
+export function buildPremiumReport(input: BirthInput, now: Date = new Date(), level: ReportLevel = "full", topicRaw: unknown = "", lock = false, concern: Concern | null = null, partner: BirthInput | null = null): PremiumReportView {
   const hourUnknown = input.hour === null || input.hour === undefined;
   const r = calculateSaju({
     year: input.year,
@@ -156,6 +193,7 @@ export function buildPremiumReport(input: BirthInput, now: Date = new Date(), le
     topic: locking ? { ...topic, timing: [] } : topic,
     concern: hasConcern(concern) ? { text: concern.text, answers: buildConcernAnswers(concern, elements, gradeLabel) } : null,
     locked: locking,
+    compat: partner ? computeCompat(r as unknown as Parameters<typeof buildCompat>[0], hourUnknown, partner, now) : null,
     book: full ? (locking ? applyLocks(buildBook(r, { elements, pillars, hourUnknown, topicKey, insight: topic, gradeLabel }), r.currentYear) : buildBook(r, { elements, pillars, hourUnknown, topicKey, insight: topic, gradeLabel })) : [],
   };
 }
