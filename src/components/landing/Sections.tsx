@@ -175,7 +175,7 @@ export function ShowcaseSection() {
           </div>
 
           <div className="lg:col-span-6 flex flex-col justify-center bg-sky-50/70 p-4 sm:p-6 rounded-2xl border border-sky-200">
-            <div className="flex flex-wrap items-center gap-2.5">
+            <div className="flex flex-wrap items-center justify-center gap-2.5">
               <span className="text-xs font-semibold text-brand-500 flex items-center gap-1">
                 <span className="material-symbols-outlined text-base">verified</span> 매일 첫 1회 무료 체험
               </span>
