@@ -13,7 +13,7 @@ describe("랜딩 카드 데이터", () => {
     expect(PREMIUM_CARDS).toHaveLength(3);
   });
 
-  it("모든 뽑기 버튼의 key 가 서로 다르다 (회전 애니메이션이 한 버튼에만 걸리도록)", () => {
+  it("모든 카드의 key 가 서로 다르다", () => {
     expect(new Set(allKeys).size).toBe(allKeys.length);
   });
 
@@ -27,10 +27,10 @@ describe("랜딩 카드 데이터", () => {
 
   it("비어 있는 문구가 없다", () => {
     for (const m of MACHINES) {
-      expect([m.badge, m.name, m.fortune, m.desc, m.leverLabel, m.tag, m.emoji].every(Boolean)).toBe(true);
+      expect([m.badge, m.name, m.fortune, m.desc, m.tag, m.emoji].every(Boolean)).toBe(true);
     }
     for (const p of PREMIUM_CARDS) {
-      expect([p.tag, p.title, p.desc, p.leverLabel, p.emoji].every(Boolean)).toBe(true);
+      expect([p.tag, p.title, p.desc, p.emoji].every(Boolean)).toBe(true);
     }
   });
 

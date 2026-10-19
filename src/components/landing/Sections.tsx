@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type React from "react";
 import type { DrawCounts } from "@/lib/drawCounter";
 import { SERVICE_NAME } from "@/lib/siteInfo";
 import type { AuthUser } from "./useAuth";
@@ -11,7 +12,15 @@ export type SpinHandler = (key: string, fortune: string, price: string, premium?
 
 interface SpinProps {
   onSpin: SpinHandler;
-  spinningKey: string | null;
+}
+
+/** 카드를 키보드(Enter·Space)로도 열 수 있게 해요. */
+function activateOnKey(e: React.KeyboardEvent, run: () => void) {
+  if (e.target !== e.currentTarget) return;
+  if (e.key === "Enter" || e.key === " ") {
+    e.preventDefault();
+    run();
+  }
 }
 
 const BETA_NOTICE_TEXT = (
@@ -209,11 +218,11 @@ export function ShowcaseSection() {
 
 /* ------------------------------------------------------------------ 6대 운명의 자판기 */
 
-export function MachinesSection({ onSpin, spinningKey }: SpinProps) {
+export function MachinesSection({ onSpin }: SpinProps) {
   return (
     <section id="machines" className="mb-8 relative z-10 scroll-mt-20">
       <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-4">
-        <h3 className="sr-only">6대 운명의 자판기</h3>
+        <h3 className="sr-only">6대 운세 카드</h3>
         <span className="text-xs font-semibold px-3.5 py-1.5 rounded-full bg-sky-50 text-brand-500 border border-sky-200">
           아래 운세는 <strong className="underline font-bold">매일 첫 1회는 무료</strong>야!! (이후 500원)
         </span>
@@ -225,7 +234,12 @@ export function MachinesSection({ onSpin, spinningKey }: SpinProps) {
             key={m.key}
             id={m.key}
             data-testid="machine-card"
-            className={`scroll-mt-24 card-water-glow flex flex-col justify-between rounded-3xl p-3 sm:p-6 hover:shadow-xl hover:-translate-y-1.5 transition-all group ${m.card}`}
+            role="button"
+            tabIndex={0}
+            aria-label={`${m.name} 운세 보기`}
+            onClick={() => onSpin(m.key, m.fortune, FREE_PRICE_LABEL)}
+            onKeyDown={(e) => activateOnKey(e, () => onSpin(m.key, m.fortune, FREE_PRICE_LABEL))}
+            className={`scroll-mt-24 card-water-glow flex flex-col justify-between rounded-3xl p-3 sm:p-6 cursor-pointer select-none hover:shadow-xl hover:-translate-y-1.5 active:scale-[0.98] transition-all group focus:outline-none focus-visible:ring-4 focus-visible:ring-brand-300 ${m.card}`}
           >
             <div>
               <div className="flex flex-wrap items-center justify-between gap-1 mb-2.5 sm:mb-3.5">
@@ -238,7 +252,7 @@ export function MachinesSection({ onSpin, spinningKey }: SpinProps) {
               <div className={`w-full h-32 sm:h-56 rounded-2xl p-2 sm:p-2.5 flex items-center justify-center overflow-hidden mb-3 sm:mb-4 border ${m.imageBox}`}>
                 <SafeImage
                   src={IMAGES[m.image]}
-                  alt={`${m.name} 자판기`}
+                  alt={m.name}
                   className="h-full w-auto max-w-full object-contain group-hover:scale-105 transition-transform duration-500"
                   fallback={m.emoji}
                 />
@@ -249,17 +263,9 @@ export function MachinesSection({ onSpin, spinningKey }: SpinProps) {
             </div>
 
             <div className={`mt-3 sm:mt-4 pt-3 border-t flex flex-col gap-2 sm:gap-2.5 ${m.divider}`}>
-              <button
-                onClick={() => onSpin(m.key, m.fortune, FREE_PRICE_LABEL)}
-                type="button"
-                aria-label={`${m.name} 레버 돌리기`}
-                className={`w-full py-2 sm:py-2.5 px-2 sm:px-4 rounded-full text-white font-cute font-normal text-xs sm:text-sm shadow-sm transition-all flex items-center justify-center gap-1 sm:gap-1.5 active:scale-95 ${m.button}`}
-              >
-                <span className={`material-symbols-outlined text-[18px] ${spinningKey === m.key ? "lever-rotating" : ""}`}>
-                  autorenew
-                </span>
-                <span>{m.leverLabel}</span>
-              </button>
+              <div className={`text-center font-cute font-normal text-xs sm:text-sm ${m.titleClass}`} aria-hidden="true">
+                눌러서 운세 보기 ›
+              </div>
               <div className="text-center text-[11px] sm:text-xs text-slate-500">
                 매일 첫 1회 무료 <span className="text-[11px] text-slate-400">(이후 500원)</span>
               </div>
@@ -273,7 +279,7 @@ export function MachinesSection({ onSpin, spinningKey }: SpinProps) {
 
 /* ------------------------------------------------------------------ 프리미엄 심층 사주서 */
 
-export function PremiumSection({ onSpin, spinningKey }: SpinProps) {
+export function PremiumSection({ onSpin }: SpinProps) {
   return (
     <section className="mb-8 relative z-10">
       <div className="card-water-glow rounded-[2.5rem] p-4 sm:p-6 bg-gradient-to-b from-pink-50 via-white to-brand-50/70 border-2 border-pink-200 shadow-[0_12px_36px_rgba(128,87,224,0.14)] relative overflow-hidden">
@@ -287,7 +293,7 @@ export function PremiumSection({ onSpin, spinningKey }: SpinProps) {
             <span className="bg-brand-500 text-white text-[10px] px-2 py-0.5 rounded-full font-sans">SPECIAL</span>
           </div>
           <h3 className="font-cute text-2xl sm:text-3xl font-normal text-gray-900 leading-snug">
-            2,990원 프리미엄 3대 테마 자판기
+            2,990원 프리미엄 3대 테마 리포트
           </h3>
           <p className="text-xs sm:text-sm text-slate-600 mt-2 leading-relaxed">
             캡슐 한 알로는 아쉬운 날을 위한 <strong>10쪽 분량의 심층 리포트</strong>예요. 흐름과 조언을 차분하게 담았어요.
@@ -300,7 +306,12 @@ export function PremiumSection({ onSpin, spinningKey }: SpinProps) {
               key={p.key}
               id={p.key}
               data-testid="premium-card"
-              className={`scroll-mt-24 card-water-glow relative flex flex-col justify-between rounded-3xl p-6 bg-white hover:shadow-lg hover:-translate-y-1 transition-all group ${p.card}`}
+              role="button"
+              tabIndex={0}
+              aria-label={`${p.title} 보기`}
+              onClick={() => onSpin(p.key, p.fortune, "2,990원", true)}
+              onKeyDown={(e) => activateOnKey(e, () => onSpin(p.key, p.fortune, "2,990원", true))}
+              className={`scroll-mt-24 card-water-glow relative flex flex-col justify-between rounded-3xl p-6 bg-white cursor-pointer select-none hover:shadow-lg hover:-translate-y-1 active:scale-[0.98] transition-all group focus:outline-none focus-visible:ring-4 focus-visible:ring-brand-300 ${p.card}`}
             >
               {p.ribbon && (
                 <div
@@ -316,22 +327,10 @@ export function PremiumSection({ onSpin, spinningKey }: SpinProps) {
                   <span className="text-xs text-slate-400">10쪽 리포트</span>
                 </div>
 
-                <button
-                  onClick={() => onSpin(p.key, p.fortune, "2,990원", true)}
-                  type="button"
-                  aria-label={`${p.title} 레버 돌리기`}
-                  className={`w-full py-2.5 px-4 rounded-full text-white font-cute font-normal text-sm shadow-sm transition-all flex items-center justify-center gap-1.5 mb-3.5 active:scale-95 ${p.button}`}
-                >
-                  <span className={`material-symbols-outlined text-[18px] ${spinningKey === p.key ? "lever-rotating" : ""}`}>
-                    autorenew
-                  </span>
-                  <span>{p.leverLabel}</span>
-                </button>
-
                 <div className={`w-full h-52 rounded-2xl p-2 flex items-center justify-center overflow-hidden mb-3.5 border ${p.imageBox}`}>
                   <SafeImage
                     src={IMAGES[p.image]}
-                    alt={`${p.title} 자판기`}
+                    alt={p.title}
                     className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
                     fallback={p.emoji}
                   />
@@ -341,14 +340,14 @@ export function PremiumSection({ onSpin, spinningKey }: SpinProps) {
                 <p className="text-xs text-slate-500 text-center leading-relaxed">{p.desc}</p>
               </div>
               <div className={`mt-4 pt-3 border-t flex items-center justify-between ${p.divider}`}>
-                <span className="text-xs text-slate-400">1회</span>
+                <span className={`font-cute font-normal text-sm ${p.priceClass}`} aria-hidden="true">눌러서 보기 ›</span>
                 <span className={`text-sm font-extrabold ${p.priceClass}`}>2,990원</span>
               </div>
             </div>
           ))}
         </div>
         <p className="relative z-10 mt-6 text-center text-[11px] text-slate-500">
-          * 프리미엄 심층 리포트는 준비 중이에요. 베타 기간에는 결제 없이 체험할 수 있고, 지금 뽑으면 간단 풀이가 나와요.
+          * 프리미엄 심층 리포트는 준비 중이에요. 베타 기간에는 결제 없이 체험할 수 있고, 지금 누르면 간단 풀이가 나와요.
         </p>
         <div className="relative z-10 mt-3 text-center">
           <Link href="/premium" data-testid="premium-report-link" className="text-sm font-bold text-brand-600 underline underline-offset-4">

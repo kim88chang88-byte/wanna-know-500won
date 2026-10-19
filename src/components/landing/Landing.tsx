@@ -17,14 +17,12 @@ import {
   TrustSection,
 } from "./Sections";
 
-const LEVER_ANIMATION_MS = 600;
-const MODAL_DELAY_MS = 350;
+const MODAL_DELAY_MS = 150;
 
 export default function Landing() {
   const { user, profile, setProfile, deleteProfile, serverCounts, setServerCounts, result: loginResult, clearResult, justLoggedIn, clearWelcome, logout, withdraw } = useAuth();
   const [loginOpen, setLoginOpen] = useState(false);
   const [intake, setIntake] = useState<IntakeTarget | null>(null);
-  const [spinningKey, setSpinningKey] = useState<string | null>(null);
   const [counts, setCounts] = useState<DrawCounts>({ today: 0, month: 0 });
   // 화면에 보이는 최신 횟수. (상태 업데이터 안에서 저장소에 쓰면 개발 모드에서 두 번 실행되어 2씩 늘어나서 ref 를 씁니다)
   const countsRef = useRef<DrawCounts>(counts);
@@ -43,9 +41,7 @@ export default function Landing() {
   }, [applyCounts]);
 
   const handleSpin = useCallback(
-    (key: string, fortune: string, price: string, premium?: boolean) => {
-      setSpinningKey(key);
-      timers.current.push(window.setTimeout(() => setSpinningKey(null), LEVER_ANIMATION_MS));
+    (_key: string, fortune: string, price: string, premium?: boolean) => {
       timers.current.push(window.setTimeout(() => setIntake({ fortune, price, premium: premium === true }), MODAL_DELAY_MS));
     },
     [],
@@ -118,8 +114,8 @@ export default function Landing() {
       <main className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-5">
         <HeroSection counts={counts} />
         <ShowcaseSection />
-        <MachinesSection onSpin={handleSpin} spinningKey={spinningKey} />
-        <PremiumSection onSpin={handleSpin} spinningKey={spinningKey} />
+        <MachinesSection onSpin={handleSpin} />
+        <PremiumSection onSpin={handleSpin} />
         <SampleSection />
         <TrustSection />
       </main>

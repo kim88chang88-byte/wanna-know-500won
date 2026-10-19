@@ -19,7 +19,6 @@ export interface MachineCard {
   /** 모달에 표시되는 운 이름 (서버가 주제를 알아보는 글자가 들어 있어야 해요) */
   fortune: string;
   desc: string;
-  leverLabel: string;
   /** 오른쪽 위 작은 표시 */
   tag: string;
   best: boolean;
@@ -42,7 +41,6 @@ export const MACHINES: readonly MachineCard[] = [
     name: "성공운",
     fortune: "성공운",
     desc: "승진, 이직, 시험 합격까지 거침없이 뚫어주는 성취의 물길",
-    leverLabel: "말랑 레버 돌리기",
     tag: "매일 첫 1회 무료",
     best: false,
     card: "bg-gradient-to-b from-amber-50/70 via-white to-white border border-amber-200 shadow-sm",
@@ -61,7 +59,6 @@ export const MACHINES: readonly MachineCard[] = [
     name: "재물운",
     fortune: "재물운",
     desc: "통장에 차곡차곡 쌓일 황금 조개와 금전 행운",
-    leverLabel: "황금 레버 돌리기",
     tag: "매일 첫 1회 무료",
     best: false,
     card: "bg-gradient-to-b from-pink-50/70 via-white to-white border border-pink-200 shadow-sm",
@@ -80,7 +77,6 @@ export const MACHINES: readonly MachineCard[] = [
     name: "연애운",
     fortune: "연애운",
     desc: "수달 도사가 짚어주는 설레는 썸과 인연의 타이밍",
-    leverLabel: "달빛 레버 돌리기",
     tag: "인기 BEST",
     best: true,
     card: "bg-gradient-to-b from-brand-50 via-white to-white border-2 border-brand-300 shadow-md",
@@ -99,7 +95,6 @@ export const MACHINES: readonly MachineCard[] = [
     name: "결혼운",
     fortune: "결혼운",
     desc: "평생의 짝꿍과 함께할 인연의 시기와 궁합 이야기",
-    leverLabel: "인연 레버 돌리기",
     tag: "매일 첫 1회 무료",
     best: false,
     card: "bg-gradient-to-b from-fuchsia-50/70 via-white to-white border border-fuchsia-200 shadow-sm",
@@ -118,7 +113,6 @@ export const MACHINES: readonly MachineCard[] = [
     name: "건강운",
     fortune: "건강운",
     desc: "수달의 맑은 옹달샘처럼 몸과 마음을 가볍게 챙기는 한마디",
-    leverLabel: "생기 레버 돌리기",
     tag: "매일 첫 1회 무료",
     best: false,
     card: "bg-gradient-to-b from-emerald-50/70 via-white to-white border border-emerald-200 shadow-sm",
@@ -137,7 +131,6 @@ export const MACHINES: readonly MachineCard[] = [
     name: "학업운",
     fortune: "학업운",
     desc: "자격증, 어학, 시험 준비에 힘이 되는 집중력 충전 한마디",
-    leverLabel: "지혜 레버 돌리기",
     tag: "매일 첫 1회 무료",
     best: false,
     card: "bg-gradient-to-b from-blue-50/70 via-white to-white border border-blue-200 shadow-sm",
@@ -160,7 +153,6 @@ export interface PremiumCard {
   tagClass: string;
   title: string;
   desc: string;
-  leverLabel: string;
   card: string;
   imageBox: string;
   button: string;
@@ -181,7 +173,6 @@ export const PREMIUM_CARDS: readonly PremiumCard[] = [
     tagClass: "bg-brand-50 text-brand-700 border border-brand-100",
     title: "궁합 리포트",
     desc: "두 사람의 사주가 만나는 지점, 잘 맞는 부분과 서로 맞춰가면 좋은 부분을 정리했어요.",
-    leverLabel: "미스틱 퍼플 레버 돌리기 ✧",
     card: "border-2 border-brand-300 shadow-md",
     imageBox: "bg-white border-amber-300 ring-2 ring-amber-100 ring-offset-2 ring-offset-white",
     button: "bg-gradient-to-r from-brand-500 to-fuchsia-500 hover:brightness-105",
@@ -199,7 +190,6 @@ export const PREMIUM_CARDS: readonly PremiumCard[] = [
     tagClass: "bg-pink-50 text-pink-700 border border-pink-100",
     title: "연애 매력 리포트",
     desc: "나만의 매력 포인트와 인연이 찾아오기 쉬운 시기를 사주 흐름으로 차근차근 풀어봤어요.",
-    leverLabel: "로즈골드 레버 돌리기 ✧",
     card: "border border-pink-200 shadow-sm",
     imageBox: "bg-white border-amber-300 ring-2 ring-amber-100 ring-offset-2 ring-offset-white",
     button: "bg-gradient-to-r from-pink-400 to-rose-400 hover:brightness-105",
@@ -216,7 +206,6 @@ export const PREMIUM_CARDS: readonly PremiumCard[] = [
     tagClass: "bg-amber-100 text-amber-900 border border-amber-200",
     title: "재물·직장 리포트",
     desc: "월별(1~12월) 금전·이직운을 달력처럼 정리하고, 흐름이 좋은 시기를 짚어드려요.",
-    leverLabel: "황금 레버 돌리기 ✧",
     card: "border border-amber-200 shadow-sm",
     imageBox: "bg-white border-amber-300 ring-2 ring-amber-100 ring-offset-2 ring-offset-white",
     button: "bg-gradient-to-r from-amber-400 to-orange-400 hover:brightness-105",
