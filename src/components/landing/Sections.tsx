@@ -288,20 +288,20 @@ export function MachinesSection({ onSpin }: SpinProps) {
 export function PremiumSection({ onSpin }: SpinProps) {
   return (
     <section className="mb-8 relative z-10">
-      <div className="card-water-glow rounded-[2.5rem] p-4 sm:p-6 bg-gradient-to-b from-pink-50 via-white to-brand-50/70 border-2 border-pink-200 shadow-[0_12px_36px_rgba(128,87,224,0.14)] relative overflow-hidden">
-        <div className="pointer-events-none absolute -top-16 -right-16 w-80 h-80 rounded-full bg-pink-200/40 blur-3xl" aria-hidden="true" />
-        <div className="pointer-events-none absolute -bottom-16 -left-16 w-80 h-80 rounded-full bg-brand-100/50 blur-3xl" aria-hidden="true" />
-
+      <div
+        className="card-water-glow rounded-[2.5rem] p-4 sm:p-6 bg-[#2a1a5e] border-2 border-brand-300 shadow-[0_12px_36px_rgba(80,40,160,0.35)] relative overflow-hidden"
+        style={{ backgroundImage: "url(/images/premium-bg.webp)", backgroundSize: "cover", backgroundPosition: "80% top" }}
+      >
         <div className="text-center max-w-2xl mx-auto mb-5 relative z-10">
           <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-pink-100 text-pink-700 text-xs font-bold mb-2">
             <span aria-hidden="true">👑</span>
             <span>수달 도사의 심층 리포트</span>
             <span className="bg-brand-500 text-white text-[10px] px-2 py-0.5 rounded-full font-sans">SPECIAL</span>
           </div>
-          <h3 className="font-cute text-2xl sm:text-3xl font-normal text-gray-900 leading-snug">
+          <h3 className="font-cute text-2xl sm:text-3xl font-normal text-white leading-snug drop-shadow-[0_2px_8px_rgba(40,20,90,0.6)]">
             2,990원 프리미엄 3대 테마 리포트
           </h3>
-          <p className="text-xs sm:text-sm text-slate-600 mt-2 leading-relaxed">
+          <p className="text-xs sm:text-sm text-white/85 mt-2 leading-relaxed">
             캡슐 한 알로는 아쉬운 날을 위한 <strong>10쪽 분량의 심층 리포트</strong>예요. 흐름과 조언을 차분하게 담았어요.
           </p>
         </div>
@@ -345,11 +345,11 @@ export function PremiumSection({ onSpin }: SpinProps) {
             </div>
           ))}
         </div>
-        <p className="relative z-10 mt-6 text-center text-[11px] text-slate-500">
+        <p className="relative z-10 mt-6 text-center text-[11px] text-white/70">
           * 프리미엄 심층 리포트는 준비 중이에요. 베타 기간에는 결제 없이 체험할 수 있고, 지금 누르면 간단 풀이가 나와요.
         </p>
         <div className="relative z-10 mt-3 text-center">
-          <Link href="/premium" data-testid="premium-report-link" className="text-sm font-bold text-brand-600 underline underline-offset-4">
+          <Link href="/premium" data-testid="premium-report-link" className="text-sm font-bold text-pink-200 hover:text-white underline underline-offset-4">
             사주 원국 리포트 미리 보기 →
           </Link>
         </div>
