@@ -124,6 +124,26 @@ export function buildCompatBook(me: BookSource, other: BookSource, ctx: CompatBo
     ],
   );
 
+  // 1쪽: 두 사람에게 해당하는지 눌러 볼 문장과 계산 근거
+  const firstSentence = (t: string) => t.split(/(?<=[.!?요])\s/)[0] ?? t;
+  const checkItems = compat.points.slice(0, 3).map((p) => firstSentence(p.body)).filter((t) => t.length > 0);
+  if (checkItems.length > 0) {
+    pages[0].sections.splice(1, 0, {
+      heading: "두 사람, 이런 모습 있지 않나요?",
+      body: "두 사람의 사주에서 읽히는 모습이에요. 실제로 비슷하다고 느껴지는 것만 눌러 보세요.",
+      checks: checkItems,
+    });
+  }
+  pages[0].evidence = [
+    { label: "나의 일주", value: `${meDay} · ${mp.image}` },
+    { label: "상대의 일주", value: `${otDay} · ${op.image}` },
+    { label: "내가 보는 상대", value: `${god}` },
+    { label: "상대가 보는 나", value: `${godBack}` },
+    { label: "일지 관계", value: dayRel.label },
+    ...(combine ? [{ label: "일간", value: "서로 합(어울림)" }] : clash ? [{ label: "일간", value: "서로 충(부딪힘)" }] : []),
+    ...(bothHour ? [] : [{ label: "참고", value: "시간을 모르는 사람이 있어 시주는 빼고 계산" }]),
+  ];
+
   // ── 2. 각자의 타고난 기질
   const meGrade = GRADE[me.advanced.dayStrength.strength] ?? "중화";
   const otGrade = GRADE[other.advanced.dayStrength.strength] ?? "중화";

@@ -59,3 +59,26 @@ describe("addBookNotes", () => {
     expect(body.model).toBe("claude-sonnet-5-5");
   });
 });
+
+describe("맞춤 조언(advice)", () => {
+  const advice = "이직 고민이 길어져 마음이 무거웠죠. 일지의 흐름을 보면 차분히 준비할 때 힘이 붙는 구조예요. 이번 주엔 가고 싶은 회사 두 곳의 공고만 저장해 두세요.";
+  const mk = (adv: string) =>
+    (async () => okBody({ notes: pages.map((p) => ({ no: p.no, note: `${p.no}쪽: 오늘은 작은 안부 한 줄부터 건네 보세요.` })), advice: adv })) as unknown as typeof fetch;
+
+  it("고민이 있으면 마지막 쪽에만 붙는다", async () => {
+    const out = await addBookNotes(pages, { kind: "personal", apiKey: "k", fetchImpl: mk(advice), concern: { tags: ["job"], text: "이직" } });
+    expect(out[2].advice).toBe(advice);
+    expect(out[0].advice).toBeUndefined();
+  });
+  it("고민이 없으면 붙이지 않는다", async () => {
+    const out = await addBookNotes(pages, { kind: "personal", apiKey: "k", fetchImpl: mk(advice) });
+    expect(out.every((p) => p.advice === undefined)).toBe(true);
+  });
+  it("너무 짧거나 금지 표현이 있으면 버린다", async () => {
+    const c = { tags: ["job"], text: "이직" } as const;
+    const a = await addBookNotes(pages, { kind: "personal", apiKey: "k", fetchImpl: mk("힘내요"), concern: c });
+    const b = await addBookNotes(pages, { kind: "personal", apiKey: "k", fetchImpl: mk(`${advice} 이혼수가 있어요.`), concern: c });
+    expect(a[2].advice).toBeUndefined();
+    expect(b[2].advice).toBeUndefined();
+  });
+});

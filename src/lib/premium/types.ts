@@ -63,6 +63,8 @@ export interface BookSection {
   body: string;
   /** 잠긴 풀이: body 는 서버에서 같은 길이의 의미 없는 글자로 바꿔 내려보내요. (화면에서만 가리는 게 아니에요) */
   locked?: boolean;
+  /** 이용자가 '나와 비슷해요'를 눌러 확인해 볼 수 있는 문장들 (화면에서 체크 목록으로 보여줘요) */
+  checks?: string[];
 }
 export interface BookRow {
   label: string;
@@ -87,6 +89,10 @@ export interface BookPage {
   lead: string;
   /** AI 가 덧붙이는 "도리의 한 줄" (없을 수 있어요) */
   note?: string;
+  /** 고민을 적은 이용자에게 AI 가 쓰는 맞춤 조언 한 문단 (마지막 쪽) */
+  advice?: string;
+  /** '이 풀이의 근거 보기'에 접어서 보여주는 계산 근거 */
+  evidence?: BookRow[];
   sections: BookSection[];
   tables: BookTable[];
 }

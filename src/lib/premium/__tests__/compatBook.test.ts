@@ -116,3 +116,13 @@ describe("조사", () => {
     expect(text).not.toMatch(/흙가|흙를|정관로|정재으로|사주이에요/);
   });
 });
+
+describe("확인 문장과 근거", () => {
+  it("1쪽에 '이런 모습 있지 않나요?' 확인 문장과 계산 근거가 있다", () => {
+    const p1 = book().pages[0];
+    const s = p1.sections.find((x) => x.heading.includes("이런 모습"));
+    expect((s?.checks ?? []).length).toBeGreaterThan(0);
+    expect((p1.evidence ?? []).length).toBeGreaterThan(3);
+    expect(JSON.stringify(p1.evidence)).toContain("일지 관계");
+  });
+});

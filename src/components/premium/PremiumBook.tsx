@@ -2,7 +2,8 @@
 
 import ConcernCard from "./ConcernCard";
 import { useEffect, useRef, useState } from "react";
-import type { BookPage, BookTable, ElementKind, PremiumReportView } from "@/lib/premium/types";
+import { checkMessage } from "@/lib/premium/book/resonance";
+import type { BookPage, BookRow, BookTable, ElementKind, PremiumReportView } from "@/lib/premium/types";
 
 /*
  * 프리미엄 10페이지 리포트 리더. 한 번에 한 페이지씩 넘겨 보는 고급스러운 책 형태예요.
@@ -20,6 +21,57 @@ const BAR: Record<ElementKind, string> = {
 
 const GOLD = "text-[#e6c887]";
 const HAIR = "border-[#e6c887]/25";
+
+/** "나와 비슷해요"를 눌러 확인해 보는 목록. 누른 개수에 따라 한마디가 나와요. (저장하지 않고 화면에서만 써요) */
+function CheckList({ items }: { items: string[] }) {
+  const [on, setOn] = useState<boolean[]>(() => items.map(() => false));
+  const hit = on.filter(Boolean).length;
+  const touched = hit > 0;
+  return (
+    <div data-testid="book-checks" className="mt-2.5 space-y-2">
+      {items.map((t, i) => (
+        <button
+          key={i}
+          type="button"
+          aria-pressed={on[i]}
+          onClick={() => setOn((p) => p.map((v, j) => (j === i ? !v : v)))}
+          className={`flex w-full items-start gap-2.5 rounded-xl border px-3.5 py-3 text-left text-[13.5px] leading-relaxed transition-colors ${
+            on[i] ? "border-[#e6c887] bg-[#e6c887]/15 text-[#fbf3de]" : "border-[#e6c887]/25 bg-white/[0.03] text-[#efe7d3] hover:border-[#e6c887]/60"
+          }`}
+        >
+          <span
+            aria-hidden="true"
+            className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border text-[11px] font-black ${on[i] ? "border-[#e6c887] bg-[#e6c887] text-[#2a1f45]" : "border-[#e6c887]/50 text-transparent"}`}
+          >
+            ✓
+          </span>
+          <span>{t}</span>
+        </button>
+      ))}
+      <p role="status" data-testid="book-checks-result" className="min-h-[1.25rem] pt-0.5 text-[12.5px] font-bold text-[#f6dfa8]">
+        {touched ? `${items.length}개 중 ${hit}개가 나와 비슷해요. ${checkMessage(hit, items.length)}` : ""}
+      </p>
+    </div>
+  );
+}
+
+/** 이 풀이를 어떤 계산에서 가져왔는지 접어서 보여줘요. */
+function Evidence({ rows }: { rows: BookRow[] }) {
+  return (
+    <details data-testid="book-evidence" className="mt-6 rounded-xl border border-[#e6c887]/25 bg-white/[0.03] px-4 py-3 text-[13px] text-[#efe7d3]">
+      <summary className="cursor-pointer select-none font-bold text-[#e6c887]">이 풀이의 근거 보기</summary>
+      <ul className="mt-2.5 space-y-1.5">
+        {rows.map((r, i) => (
+          <li key={`${r.label}-${i}`} className="flex gap-3 leading-snug">
+            <span className="w-24 shrink-0 text-[#e8dfca]/70">{r.label}</span>
+            <span>{r.value}</span>
+          </li>
+        ))}
+      </ul>
+      <p className="mt-2.5 text-[11.5px] leading-relaxed text-[#e8dfca]/60">입력하신 생년월일시로 계산한 값이에요. 풀이는 재미와 참고용이에요.</p>
+    </details>
+  );
+}
 
 function Table({ t }: { t: BookTable }) {
   return (
@@ -357,6 +409,7 @@ export default function PremiumBook({ report }: { report: PremiumReportView }) {
               ) : (
                 <p className="mt-1.5 text-[14px] leading-[1.8] text-[#efe7d3]">{s.body}</p>
               )}
+              {!s.locked && s.checks && s.checks.length > 0 && <CheckList items={s.checks} />}
             </section>
           ))}
         </div>
@@ -366,6 +419,15 @@ export default function PremiumBook({ report }: { report: PremiumReportView }) {
             <Table t={t} />
           </div>
         ))}
+
+        {page.advice && (
+          <div data-testid="book-advice" className="mt-6 rounded-2xl border border-[#e6c887]/40 bg-[#e6c887]/[0.08] px-4 py-4">
+            <p className={`text-[12px] font-bold tracking-wide ${GOLD}`}>🦦 도리의 맞춤 조언</p>
+            <p className="mt-1.5 font-serifKr text-[14px] leading-[1.85] text-[#fbf3de]">{page.advice}</p>
+          </div>
+        )}
+
+        {page.evidence && page.evidence.length > 0 && <Evidence rows={page.evidence} />}
       </article>
 
       {lockedHere > 0 && (
