@@ -326,11 +326,11 @@ export function PremiumSection({ onSpin }: SpinProps) {
                   <span className="text-xs text-slate-400">10쪽 리포트</span>
                 </div>
 
-                <div className={`w-full h-52 rounded-2xl p-2 flex items-center justify-center overflow-hidden mb-3.5 border ${p.imageBox}`}>
+                <div className={`w-full aspect-[16/9] rounded-2xl flex items-center justify-center overflow-hidden mb-3.5 border ${p.imageBox}`}>
                   <SafeImage
                     src={IMAGES[p.image]}
                     alt={p.title}
-                    className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     fallback={p.emoji}
                   />
                 </div>
