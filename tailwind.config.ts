@@ -36,6 +36,8 @@ const config: Config = {
       },
       fontFamily: {
         serifKr: ['"Noto Serif KR"', "serif"],
+        // 헤더 서비스 이름용 둥글둥글 귀여운 손글씨체 (주아체). 못 불러오면 기본 한글 글꼴로 보여요.
+        cute: ['Jua', '"Apple SD Gothic Neo"', '"Malgun Gothic"', "sans-serif"],
         // 한글 글자가 폰트 로딩 전에도 자연스럽게 보이도록 시스템 한글 폰트를 뒤에 추가했어요.
         sans: ['"Plus Jakarta Sans"', '"Apple SD Gothic Neo"', '"Malgun Gothic"', "sans-serif"],
       },

@@ -44,8 +44,8 @@ export function Header({ onOpenLogin, user = null }: { onOpenLogin: () => void; 
                   fallbackClass="text-2xl"
                 />
               </div>
-              <h1 className="font-serifKr font-black text-[15px] min-[400px]:text-lg sm:text-2xl whitespace-nowrap tracking-tight bg-gradient-to-r from-brand-500 via-blue-600 to-indigo-600 bg-clip-text text-transparent inline-flex items-center gap-1.5">
-                {SERVICE_NAME}
+              <h1 className="font-cute font-normal text-[19px] min-[400px]:text-[22px] sm:text-[30px] leading-none whitespace-nowrap tracking-normal bg-gradient-to-r from-brand-500 via-blue-600 to-indigo-600 bg-clip-text text-transparent inline-flex items-center gap-1.5">
+                &apos;도리&apos;운세사주
                 <span className="hidden sm:inline text-xs text-amber-600 font-sans font-bold px-2 py-0.5 rounded-full bg-amber-50 border border-amber-200/80">
                   ✨ 퐁당
                 </span>
