@@ -45,7 +45,6 @@ export function Header({ onOpenLogin, user = null }: { onOpenLogin: () => void; 
                 />
               </div>
               <h1 className="font-serifKr font-black text-[15px] min-[400px]:text-lg sm:text-2xl whitespace-nowrap tracking-tight bg-gradient-to-r from-brand-500 via-blue-600 to-indigo-600 bg-clip-text text-transparent inline-flex items-center gap-1.5">
-                <span aria-hidden="true" className="hidden min-[400px]:inline text-xl">🌙</span>
                 {SERVICE_NAME}
                 <span className="hidden sm:inline text-xs text-amber-600 font-sans font-bold px-2 py-0.5 rounded-full bg-amber-50 border border-amber-200/80">
                   ✨ 퐁당
