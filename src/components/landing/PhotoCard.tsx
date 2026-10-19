@@ -145,7 +145,7 @@ export default function PhotoCard({ report, aiQuote }: Props) {
         onClick={handleShare}
         disabled={busy}
         data-testid="share-button"
-        className="mt-3 w-full py-3 rounded-full bg-gradient-to-r from-fuchsia-400 via-violet-500 to-brand-500 text-white font-serifKr font-bold text-sm shadow-md hover:opacity-95 disabled:opacity-50 active:scale-95 transition-transform"
+        className="mt-3 w-full py-3 rounded-full bg-gradient-to-r from-fuchsia-400 via-violet-500 to-brand-500 text-white font-cute font-normal text-sm shadow-md hover:opacity-95 disabled:opacity-50 active:scale-95 transition-transform"
       >
         인스타·SNS에 공유하기
       </button>
@@ -155,7 +155,7 @@ export default function PhotoCard({ report, aiQuote }: Props) {
           onClick={handleSave}
           disabled={busy}
           data-testid="save-button"
-          className="py-2.5 rounded-full border border-brand-200 text-brand-700 font-serifKr font-bold text-sm hover:bg-brand-50 disabled:opacity-50"
+          className="py-2.5 rounded-full border border-brand-200 text-brand-700 font-cute font-normal text-sm hover:bg-brand-50 disabled:opacity-50"
         >
           이미지로 저장
         </button>
@@ -163,7 +163,7 @@ export default function PhotoCard({ report, aiQuote }: Props) {
           type="button"
           onClick={handleCopy}
           data-testid="copy-button"
-          className="py-2.5 rounded-full border border-brand-200 text-brand-700 font-serifKr font-bold text-sm hover:bg-brand-50"
+          className="py-2.5 rounded-full border border-brand-200 text-brand-700 font-cute font-normal text-sm hover:bg-brand-50"
         >
           해시태그 복사
         </button>

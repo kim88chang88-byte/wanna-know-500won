@@ -9,7 +9,7 @@ export const metadata = {
 
 export default function PremiumPage() {
   return (
-    <div className="min-h-screen bg-[#F4F8FD]">
+    <div className="min-h-screen bg-[#FBF7FF]">
       <header className="border-b border-brand-100 bg-white/90">
         <div className="max-w-2xl mx-auto px-4 py-3.5">
           <Link href="/" className="font-serifKr font-black text-lg text-brand-600">

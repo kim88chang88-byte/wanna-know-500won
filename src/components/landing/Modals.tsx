@@ -91,7 +91,7 @@ export function LoginModal({ onClose, user = null, result = null, onLogout, onWi
         <div className="w-12 h-12 rounded-full bg-brand-50 text-2xl flex items-center justify-center mx-auto mb-2">
           🫧
         </div>
-        <h4 id="login-title" className="font-serifKr font-bold text-lg text-gray-900">
+        <h4 id="login-title" className="font-cute font-normal text-lg text-gray-900">
           {user ? "도리의 사주방" : "도리의 사주방 로그인"}
         </h4>
         <p className="text-xs text-gray-500 mt-1 whitespace-pre-line">

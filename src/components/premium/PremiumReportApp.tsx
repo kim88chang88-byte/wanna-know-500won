@@ -65,7 +65,7 @@ export default function PremiumReportApp() {
   }
 
   return (
-    <form onSubmit={onSubmit} noValidate className="space-y-5 rounded-3xl bg-white border border-brand-100 p-5 sm:p-7 shadow-[0_8px_30px_rgba(34,94,170,0.08)]">
+    <form onSubmit={onSubmit} noValidate className="space-y-5 rounded-3xl bg-white border border-brand-100 p-5 sm:p-7 shadow-[0_8px_30px_rgba(128,87,224,0.08)]">
       <div>
         <label htmlFor="birth-date" className="block text-sm font-bold text-slate-700 mb-1.5">
           생년월일

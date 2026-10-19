@@ -30,7 +30,7 @@ export function firstGlyph(nickname: string | null | undefined): string {
 export function Header({ onOpenLogin, user = null }: { onOpenLogin: () => void; user?: AuthUser | null }) {
   return (
     <>
-      <header className="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-brand-100 shadow-[0_2px_15px_rgba(34,94,170,0.06)]">
+      <header className="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-brand-100 shadow-[0_2px_15px_rgba(128,87,224,0.06)]">
         <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-3.5 flex items-center justify-between gap-2 sm:gap-3">
           {/* 왼쪽 위: 로고 + 베타 안내 (좁은 화면에서는 아래 띠로 따로 보여줘요) */}
           <div className="flex flex-col items-start gap-1 min-w-0">
@@ -44,7 +44,7 @@ export function Header({ onOpenLogin, user = null }: { onOpenLogin: () => void; 
                   fallbackClass="text-2xl"
                 />
               </div>
-              <h1 className="font-cute font-normal text-[19px] min-[400px]:text-[22px] sm:text-[30px] leading-none whitespace-nowrap tracking-normal bg-gradient-to-r from-brand-500 via-blue-600 to-indigo-600 bg-clip-text text-transparent inline-flex items-center gap-1.5">
+              <h1 className="font-cute font-normal text-[19px] min-[400px]:text-[22px] sm:text-[30px] leading-none whitespace-nowrap tracking-normal bg-gradient-to-r from-brand-500 via-fuchsia-500 to-pink-500 bg-clip-text text-transparent inline-flex items-center gap-1.5">
                 &apos;도리&apos;운세사주
                 <span className="hidden sm:inline text-xs text-amber-600 font-sans font-bold px-2 py-0.5 rounded-full bg-amber-50 border border-amber-200/80">
                   ✨ 퐁당
@@ -151,11 +151,11 @@ export function HeroSection({ counts }: { counts: DrawCounts }) {
 
 export function ShowcaseSection() {
   return (
-    <section className="rounded-[2.5rem] bg-gradient-to-b from-white via-sky-50/40 to-white border border-brand-200/70 p-3 sm:p-5 mb-6 shadow-[0_12px_40px_rgba(34,94,170,0.06)] relative overflow-hidden">
+    <section className="rounded-[2.5rem] bg-gradient-to-b from-white via-sky-50/40 to-white border border-brand-200/70 p-3 sm:p-5 mb-6 shadow-[0_12px_40px_rgba(128,87,224,0.06)] relative overflow-hidden">
       <div className="pointer-events-none absolute -top-16 -right-16 w-80 h-80 rounded-full bg-sky-200/35 blur-3xl" aria-hidden="true" />
       <div className="pointer-events-none absolute -bottom-16 -left-16 w-80 h-80 rounded-full bg-indigo-100/40 blur-3xl" aria-hidden="true" />
 
-      <div className="relative w-full max-w-5xl mx-auto rounded-3xl shadow-[0_14px_34px_rgba(34,94,170,0.12)] bg-white p-3 sm:p-5 border-2 border-sky-200 overflow-hidden z-10">
+      <div className="relative w-full max-w-5xl mx-auto rounded-3xl shadow-[0_14px_34px_rgba(128,87,224,0.12)] bg-white p-3 sm:p-5 border-2 border-sky-200 overflow-hidden z-10">
         {/* 둥둥 떠 있는 물방울 장식 */}
         <div aria-hidden="true" className="pointer-events-none absolute -top-4 -left-3 w-9 h-9 rounded-full bg-gradient-to-br from-white via-sky-100 to-sky-300/40 border border-white/80 shadow-md otter-bubble-aura flex items-center justify-center text-sm z-20">
           🫧
@@ -163,8 +163,8 @@ export function ShowcaseSection() {
         <div aria-hidden="true" className="pointer-events-none absolute top-12 -right-3 w-8 h-8 rounded-full bg-gradient-to-br from-white via-blue-100 to-indigo-200/50 border border-white/80 shadow-sm otter-bubble-aura z-20" style={{ animationDelay: "1.5s" }} />
         <div aria-hidden="true" className="pointer-events-none absolute bottom-12 -left-2 w-6 h-6 rounded-full bg-white/70 border border-sky-200 shadow-sm otter-bubble-aura z-20" style={{ animationDelay: "2.7s" }} />
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 sm:gap-5 items-center">
-          <div className="lg:col-span-6 relative w-full aspect-[16/9] rounded-2xl overflow-hidden bg-sky-50 flex items-center justify-center border border-sky-100 shadow-sm">
+        <div className="grid grid-cols-1 gap-3 sm:gap-4 items-center">
+          <div className="relative w-full max-w-3xl mx-auto aspect-[16/9] rounded-2xl overflow-hidden bg-sky-50 flex items-center justify-center border border-sky-100 shadow-sm">
             <SafeImage
               src={HERO_IMAGE}
               alt="수달 도사 도리와 오행 친구들이 말해요: 궁금행? 궁금하면 500원!!"
@@ -174,7 +174,7 @@ export function ShowcaseSection() {
             />
           </div>
 
-          <div className="lg:col-span-6 flex flex-col justify-center bg-sky-50/70 p-4 sm:p-6 rounded-2xl border border-sky-200">
+          <div className="w-full max-w-3xl mx-auto flex flex-col justify-center bg-sky-50/70 p-4 sm:p-5 rounded-2xl border border-sky-200">
             <div className="flex flex-wrap items-center justify-center gap-2.5">
               <span className="text-xs font-semibold text-brand-500 flex items-center gap-1">
                 <span className="material-symbols-outlined text-base">verified</span> 매일 첫 1회 무료 체험
@@ -244,7 +244,7 @@ export function MachinesSection({ onSpin, spinningKey }: SpinProps) {
                 />
               </div>
 
-              <h4 className={`font-serifKr font-bold text-sm sm:text-lg text-center mb-1.5 ${m.titleClass}`}>{m.name}</h4>
+              <h4 className={`font-cute font-normal text-sm sm:text-lg text-center mb-1.5 ${m.titleClass}`}>{m.name}</h4>
               <p className="text-[11px] sm:text-xs text-slate-500 text-center leading-relaxed sm:min-h-[36px]">{m.desc}</p>
             </div>
 
@@ -253,7 +253,7 @@ export function MachinesSection({ onSpin, spinningKey }: SpinProps) {
                 onClick={() => onSpin(m.key, m.fortune, FREE_PRICE_LABEL)}
                 type="button"
                 aria-label={`${m.name} 레버 돌리기`}
-                className={`w-full py-2 sm:py-2.5 px-2 sm:px-4 rounded-full text-white font-serifKr font-bold text-xs sm:text-sm shadow-sm transition-all flex items-center justify-center gap-1 sm:gap-1.5 active:scale-95 ${m.button}`}
+                className={`w-full py-2 sm:py-2.5 px-2 sm:px-4 rounded-full text-white font-cute font-normal text-xs sm:text-sm shadow-sm transition-all flex items-center justify-center gap-1 sm:gap-1.5 active:scale-95 ${m.button}`}
               >
                 <span className={`material-symbols-outlined text-[18px] ${spinningKey === m.key ? "lever-rotating" : ""}`}>
                   autorenew
@@ -286,10 +286,10 @@ export function PremiumSection({ onSpin, spinningKey }: SpinProps) {
             <span>수달 도사의 심층 리포트</span>
             <span className="bg-brand-500 text-white text-[10px] px-2 py-0.5 rounded-full font-sans">SPECIAL</span>
           </div>
-          <h3 className="font-serifKr text-2xl sm:text-3xl font-extrabold text-gray-900 leading-snug">
+          <h3 className="font-cute text-2xl sm:text-3xl font-normal text-gray-900 leading-snug">
             2,990원 프리미엄 3대 테마 자판기
           </h3>
-          <p className="text-xs sm:text-sm text-slate-600 mt-2 font-serifKr leading-relaxed">
+          <p className="text-xs sm:text-sm text-slate-600 mt-2 leading-relaxed">
             캡슐 한 알로는 아쉬운 날을 위한 <strong>10쪽 분량의 심층 리포트</strong>예요. 흐름과 조언을 차분하게 담았어요.
           </p>
         </div>
@@ -317,7 +317,7 @@ export function PremiumSection({ onSpin, spinningKey }: SpinProps) {
                   onClick={() => onSpin(p.key, p.fortune, "2,990원", true)}
                   type="button"
                   aria-label={`${p.title} 레버 돌리기`}
-                  className={`w-full py-2.5 px-4 rounded-full text-white font-serifKr font-bold text-sm shadow-sm transition-all flex items-center justify-center gap-1.5 mb-3.5 active:scale-95 ${p.button}`}
+                  className={`w-full py-2.5 px-4 rounded-full text-white font-cute font-normal text-sm shadow-sm transition-all flex items-center justify-center gap-1.5 mb-3.5 active:scale-95 ${p.button}`}
                 >
                   <span className={`material-symbols-outlined text-[18px] ${spinningKey === p.key ? "lever-rotating" : ""}`}>
                     autorenew
@@ -334,7 +334,7 @@ export function PremiumSection({ onSpin, spinningKey }: SpinProps) {
                   />
                 </div>
 
-                <h4 className="font-serifKr font-bold text-base text-gray-900 text-center mb-1">{p.title}</h4>
+                <h4 className="font-cute font-normal text-base text-gray-900 text-center mb-1">{p.title}</h4>
                 <p className="text-xs text-slate-500 text-center leading-relaxed">{p.desc}</p>
               </div>
               <div className={`mt-4 pt-3 border-t flex items-center justify-between ${p.divider}`}>
@@ -368,7 +368,7 @@ export function SampleSection() {
             <span className="material-symbols-outlined text-[22px]">bubble_chart</span>
           </div>
           <div>
-            <h3 className="font-serifKr text-xl sm:text-2xl font-bold text-gray-900">이런 물빛 운세 캡슐이 나와요</h3>
+            <h3 className="font-cute text-xl sm:text-2xl font-normal text-gray-900">이런 물빛 운세 캡슐이 나와요</h3>
             <p className="text-xs text-slate-500">수달 도사가 건네는 캡슐 속 한마디, 이런 느낌이에요</p>
           </div>
         </div>
@@ -387,7 +387,7 @@ export function SampleSection() {
               <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold ${s.tagClass}`}>{s.tag}</span>
               <span className="text-xs text-slate-400">예시</span>
             </div>
-            <p className="font-serifKr text-sm text-slate-800 leading-relaxed">
+            <p className="text-sm text-slate-800 leading-relaxed">
               {s.parts.map((p, i) => (p.strong ? <strong key={i}>{p.text}</strong> : <span key={i}>{p.text}</span>))}
             </p>
           </div>
@@ -417,7 +417,7 @@ export function TrustSection() {
             <span className="material-symbols-outlined text-[18px]">verified</span>
             <span>500원짜리 동전 하나의 온기</span>
           </div>
-          <h3 className="font-serifKr text-2xl sm:text-3xl font-extrabold text-gray-900 leading-snug">
+          <h3 className="font-cute text-2xl sm:text-3xl font-normal text-gray-900 leading-snug">
             철학관 대신,
             <br />
             <span className="text-brand-500">동전 하나</span>면 충분해요.
@@ -431,7 +431,7 @@ export function TrustSection() {
         <div className="lg:col-span-7 grid grid-cols-1 sm:grid-cols-3 gap-3.5">
           {TRUST_POINTS.map((t) => (
             <div key={t.title} className={`p-4 rounded-2xl border flex flex-col justify-between ${t.box}`}>
-              <div className={`font-serifKr text-xl font-bold ${t.titleClass}`}>{t.title}</div>
+              <div className={`font-cute text-xl font-normal ${t.titleClass}`}>{t.title}</div>
               <div className="text-xs text-slate-600 mt-2 leading-relaxed">{t.desc}</div>
             </div>
           ))}
@@ -448,10 +448,10 @@ export function Footer() {
   return (
     <footer className="relative z-10 bg-white border-t border-brand-100 py-5 text-center text-xs text-gray-500">
       <div className="max-w-7xl mx-auto px-4 flex flex-col items-center gap-2">
-        <div className="flex items-center gap-1.5 text-brand-500 font-serifKr font-bold">
+        <div className="flex items-center gap-1.5 text-brand-500 font-cute font-normal">
           <span aria-hidden="true">🦦</span> {SERVICE_NAME} <span aria-hidden="true">🫧</span>
         </div>
-        <p className="text-gray-400 font-serifKr italic">“궁금하면 500원! 퐁당, 오늘의 운을 뽑아봐.”</p>
+        <p className="text-gray-400">“궁금하면 500원! 퐁당, 오늘의 운을 뽑아봐.”</p>
         <div className="flex items-center gap-3 text-gray-400 mt-2">
           <Link href="/terms" className="hover:text-brand-500">
             이용약관

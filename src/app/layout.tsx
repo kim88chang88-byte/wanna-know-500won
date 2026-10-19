@@ -33,7 +33,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           rel="stylesheet"
         />
       </head>
-      <body className="bg-[#F4F8FD] text-[#1E293B] font-sans antialiased selection:bg-brand-200">{children}</body>
+      <body className="bg-[#FFF8FC] text-[#2A2140] font-sans antialiased selection:bg-brand-200">{children}</body>
     </html>
   );
 }

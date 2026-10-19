@@ -1,17 +1,31 @@
 import type { Config } from "tailwindcss";
 
-// 수달 도사 도리 랜딩 시안(Stitch)의 색상과 글꼴을 옮긴 설정입니다. DESIGN.md 와 같이 보세요.
+// 도리 운세 사주의 색상·글꼴 설정입니다. (연보라 + 핑크 파스텔, 둥글둥글 주아체 제목) DESIGN.md 와 같이 보세요.
 const otter = {
-  50: "#f0f7ff",
-  100: "#e0effe",
-  200: "#bae0fd",
-  300: "#7ecbfb",
-  400: "#3baaf5",
-  500: "#225eaa",
-  600: "#1b4d8d",
-  700: "#163e72",
-  800: "#14355f",
-  900: "#152d4f",
+  50: "#f7f3ff",
+  100: "#eee7ff",
+  200: "#dccffc",
+  300: "#c3a9fa",
+  400: "#a07df0",
+  500: "#8057e0",
+  600: "#6d44cc",
+  700: "#5a36a8",
+  800: "#482b85",
+  900: "#382366",
+};
+
+// 연한 분홍(블러시). Tailwind 의 sky(하늘색) 자리에 넣어서 기존 sky-* 클래스가 모두 말랑한 핑크 톤이 돼요.
+const blush = {
+  50: "#fff7fb",
+  100: "#ffeaf5",
+  200: "#ffd7ea",
+  300: "#ffb9d9",
+  400: "#ff95c6",
+  500: "#e5508b",
+  600: "#c8326f",
+  700: "#a72a5e",
+  800: "#86244e",
+  900: "#6b1f41",
 };
 
 const config: Config = {
@@ -19,8 +33,9 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // 수달 도사 '도리' 테마: 맑은 물빛 블루. (brand 와 otter 는 같은 팔레트의 다른 이름이에요)
+        // 깜찍 파스텔 테마: 연보라(brand) + 말랑 핑크(sky 자리). (brand 와 otter 는 같은 팔레트의 다른 이름이에요)
         brand: otter,
+        sky: blush,
         otter,
         gold: {
           50: "#fdfbf2",

@@ -11,7 +11,7 @@ type State =
   | { kind: "ok"; stats: AdminStats };
 
 const PERIODS = [7, 30, 90] as const;
-const CARD = "rounded-2xl bg-white border border-brand-100 p-4 sm:p-5 shadow-[0_4px_20px_rgba(34,94,170,0.06)]";
+const CARD = "rounded-2xl bg-white border border-brand-100 p-4 sm:p-5 shadow-[0_4px_20px_rgba(128,87,224,0.06)]";
 const H2 = "font-serifKr font-bold text-base text-brand-700 mb-3";
 
 function Bars({ rows, testId }: { rows: Array<{ label: string; count: number }>; testId: string }) {
@@ -104,7 +104,7 @@ export default function AdminDashboard() {
   }, [days, load]);
 
   return (
-    <main className="min-h-screen bg-[#F4F8FD] px-4 py-6 sm:py-10">
+    <main className="min-h-screen bg-[#FBF7FF] px-4 py-6 sm:py-10">
       <div className="mx-auto max-w-4xl">
         <header className="flex flex-wrap items-center justify-between gap-3 mb-5">
           <div>

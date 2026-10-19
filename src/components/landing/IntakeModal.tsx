@@ -120,11 +120,11 @@ function PillarCell({ pillar }: { pillar: Pillar | null }) {
   const branch = BRANCHES.find((b) => b.hanja === pillar.branch);
   return (
     <td className="p-2 border border-brand-100">
-      <div className="text-2xl font-serifKr text-gray-900 leading-tight">
+      <div className="text-2xl font-cute text-gray-900 leading-tight">
         {pillar.stem}
         <small className="block text-[11px] text-gray-500 font-sans">{stem?.hangul}</small>
       </div>
-      <div className="text-2xl font-serifKr text-gray-900 leading-tight mt-1">
+      <div className="text-2xl font-cute text-gray-900 leading-tight mt-1">
         {pillar.branch}
         <small className="block text-[11px] text-gray-500 font-sans">{branch?.hangul}</small>
       </div>
@@ -261,7 +261,7 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
           <div className="text-4xl floating-anim" aria-hidden="true">
             🫧
           </div>
-          <p className="mt-3 font-serifKr font-bold text-gray-900">캡슐이 만들어지고 있어요</p>
+          <p className="mt-3 font-bold text-gray-900">캡슐이 만들어지고 있어요</p>
           <div className="mt-4 h-1.5 rounded-full bg-brand-100 overflow-hidden" aria-hidden="true">
             <div className="h-full w-1/2 rounded-full bg-brand-500 animate-pulse" />
           </div>
@@ -286,7 +286,7 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
                 {premiumError ?? "사주 리포트를 불러오지 못했어요."}
               </p>
               {reading?.kkotgeoji && (
-                <p data-testid="reading-quote" className="mt-3 p-4 rounded-2xl bg-brand-50/60 border border-brand-100 text-center font-serifKr text-sm text-gray-800 leading-relaxed">
+                <p data-testid="reading-quote" className="mt-3 p-4 rounded-2xl bg-brand-50/60 border border-brand-100 text-center text-sm text-gray-800 leading-relaxed">
                   {reading.kkotgeoji}
                 </p>
               )}
@@ -386,7 +386,7 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
             <span className="text-2xl" aria-hidden="true">
               🫧
             </span>
-            <p className="flex-1 rounded-2xl rounded-tl-sm bg-brand-50 border border-brand-100 px-3.5 py-2.5 font-serifKr text-sm text-gray-800">
+            <p className="flex-1 rounded-2xl rounded-tl-sm bg-brand-50 border border-brand-100 px-3.5 py-2.5 text-sm text-gray-800">
               {BUBBLE[step]}
             </p>
           </div>
@@ -644,7 +644,7 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
             )}
             <button
               type="submit"
-              className="flex-1 py-2.5 rounded-full bg-brand-600 text-white font-serifKr font-bold text-sm shadow-md hover:bg-brand-700 transition-colors"
+              className="flex-1 py-2.5 rounded-full bg-brand-600 text-white font-cute font-normal text-sm shadow-md hover:bg-brand-700 transition-colors"
             >
               {isLast ? "캡슐 만들기 ✧" : step === "concern" && form.concernTags.length === 0 && !form.concernText.trim() ? "건너뛰기" : "다음"}
             </button>

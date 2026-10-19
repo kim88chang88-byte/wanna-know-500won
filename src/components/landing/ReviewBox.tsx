@@ -43,7 +43,7 @@ export default function ReviewBox({ topic, premium }: { topic: string; premium: 
   if (phase === "done") {
     return (
       <div data-testid="review-done" role="status" className="mt-5 rounded-2xl bg-emerald-50 border border-emerald-200 px-4 py-4 text-center">
-        <p className="font-serifKr font-bold text-emerald-800 text-sm">후기 고마워요 🫧</p>
+        <p className="font-bold text-emerald-800 text-sm">후기 고마워요 🫧</p>
         <p className="mt-1 text-[11px] text-emerald-700">도리가 더 잘 풀어줄 수 있게 소중하게 읽어볼게요.</p>
       </div>
     );
@@ -51,7 +51,7 @@ export default function ReviewBox({ topic, premium }: { topic: string; premium: 
 
   return (
     <section data-testid="review-box" aria-labelledby="review-h" className="mt-5 rounded-2xl bg-white border border-brand-100 px-4 py-4 shadow-sm">
-      <h4 id="review-h" className="font-serifKr font-bold text-sm text-gray-900 text-center">
+      <h4 id="review-h" className="font-cute font-normal text-sm text-gray-900 text-center">
         오늘 도리의 풀이는 어땠어요?
       </h4>
       <div role="radiogroup" aria-label="별점" className="mt-2 flex justify-center gap-1">
@@ -135,7 +135,7 @@ export default function ReviewBox({ topic, premium }: { topic: string; premium: 
             data-testid="review-submit"
             disabled={phase === "sending"}
             onClick={submit}
-            className="w-full py-2.5 rounded-full bg-brand-600 text-white font-serifKr font-bold text-sm shadow-md hover:bg-brand-700 disabled:opacity-60"
+            className="w-full py-2.5 rounded-full bg-brand-600 text-white font-cute font-normal text-sm shadow-md hover:bg-brand-700 disabled:opacity-60"
           >
             {phase === "sending" ? "보내는 중…" : "후기 남기기"}
           </button>

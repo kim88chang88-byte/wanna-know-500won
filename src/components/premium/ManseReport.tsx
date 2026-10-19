@@ -11,7 +11,7 @@ const ELEMENT_STYLE: Record<ElementKind, { bar: string; chip: string }> = {
   unknown: { bar: "bg-brand-500", chip: "bg-brand-50 text-brand-700" },
 };
 
-const CARD = "rounded-3xl bg-white border border-brand-100 p-5 sm:p-6 shadow-[0_8px_30px_rgba(34,94,170,0.08)]";
+const CARD = "rounded-3xl bg-white border border-brand-100 p-5 sm:p-6 shadow-[0_8px_30px_rgba(128,87,224,0.08)]";
 const H2 = "font-serifKr font-bold text-lg text-brand-700 mb-4";
 
 export default function ManseReport({ report }: { report: PremiumReportView }) {
