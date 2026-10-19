@@ -167,7 +167,7 @@ export function ShowcaseSection() {
           <div className="lg:col-span-6 relative w-full aspect-[16/9] rounded-2xl overflow-hidden bg-sky-50 flex items-center justify-center border border-sky-100 shadow-sm">
             <SafeImage
               src={HERO_IMAGE}
-              alt="수달 도사 도리와 목·화·토·금·수 오행 친구들"
+              alt="수달 도사 도리와 오행 친구들이 말해요: 궁금행? 궁금하면 500원!!"
               className="w-full h-full object-cover hover:scale-105 transition-transform duration-700"
               fallback="🦦"
               fallbackClass="text-8xl"
@@ -180,15 +180,12 @@ export function ShowcaseSection() {
                 🦦
               </span>
               <div className="flex-1">
-                <div className="flex items-center gap-2 mb-2">
+                <div className="flex items-center gap-2 mb-3">
                   <span className="text-xs font-bold px-3 py-0.5 rounded-full bg-sky-100 text-brand-500">
                     신묘한 수달 도사의 속삭임
                   </span>
                   <span className="text-xs text-sky-600 font-semibold">퐁당! 💦</span>
                 </div>
-                <h3 className="font-serifKr font-black text-xl sm:text-2xl text-brand-500 mt-1 mb-2 leading-snug">
-                  궁금행? 궁금하면 500원이야 &gt;_&lt;
-                </h3>
                 <div className="flex flex-wrap items-center gap-2.5 pt-3 border-t border-sky-200/80">
                   <span className="text-xs font-semibold text-brand-500 flex items-center gap-1">
                     <span className="material-symbols-outlined text-base">verified</span> 매일 첫 1회 무료 체험
