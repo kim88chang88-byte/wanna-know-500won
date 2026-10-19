@@ -117,6 +117,9 @@ export function parseReading(value: unknown): Reading | null {
   const kkotgeoji = str(o.kkotgeoji, MAX.kkotgeoji);
   if (!keyword || totalScore === null || !summary || !love || !money || !mind || !kkotgeoji) return null;
 
+  // 네 점수가 전부 같으면 성의 없는 풀이라서 다시 받아요. (프롬프트에서 지표마다 다르게 달라고 했어요)
+  if (new Set([totalScore, love.score, money.score, mind.score]).size === 1) return null;
+
   const reading: Reading = { keyword, total: { score: totalScore, summary }, love, money, mind, kkotgeoji };
   const allText = [keyword, summary, love.comment, money.comment, mind.comment, kkotgeoji].join(" ");
   return containsForbidden(allText) ? null : reading;

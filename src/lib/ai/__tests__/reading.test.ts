@@ -49,6 +49,12 @@ describe("parseReading", () => {
     expect(containsForbidden("오늘은 설레는 날")).toBeNull();
   });
 
+  it("네 점수가 모두 같으면 거절하고, 하나라도 다르면 통과", () => {
+    const flat = { ...good, total: { ...good.total, score: 4 }, love: { ...good.love, score: 4 }, money: { ...good.money, score: 4 }, mind: { ...good.mind, score: 4 } };
+    expect(parseReading(flat)).toBeNull();
+    expect(parseReading({ ...flat, money: { ...flat.money, score: 3 } })).not.toBeNull();
+  });
+
   it("앞뒤 공백은 잘라서 돌려준다", () => {
     expect(parseReading({ ...good, keyword: "  설렘 충전  " })?.keyword).toBe("설렘 충전");
   });

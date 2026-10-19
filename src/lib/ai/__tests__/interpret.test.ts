@@ -102,6 +102,17 @@ describe("interpretSaju", () => {
     expect(body.system.length > 50).toBe(true);
   });
 
+  it("extra 재료(오늘의 일진·사주 핵심)를 요청 본문에 담는다", async () => {
+    const { impl, calls } = fakeFetch([() => okBody(JSON.stringify(goodJson))]);
+    await interpretSaju(chart, {
+      topic: "general", gender: "male", apiKey: "k", fetchImpl: impl,
+      extra: { today: { year: 2000, month: 1, day: 1 }, core: { 신강신약: "신약" } },
+    });
+    const content = JSON.parse(calls[0].init.body).messages[0].content as string;
+    expect(content).toContain("오늘의일진");
+    expect(content).toContain("사주핵심");
+  });
+
   it("모델은 옵션으로 바꿀 수 있다", async () => {
     const { impl, calls } = fakeFetch([() => okBody(JSON.stringify(goodJson))]);
     await interpretSaju(chart, { topic: "general", gender: "male", apiKey: "k", model: "claude-sonnet-5-5", fetchImpl: impl });

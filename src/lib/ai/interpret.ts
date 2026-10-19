@@ -1,6 +1,6 @@
 import type { Concern } from "@/lib/concerns";
 import type { Gender, SajuChart } from "@/lib/saju/types";
-import { buildUserMessage, SYSTEM_PROMPT } from "./prompt";
+import { buildUserMessage, SYSTEM_PROMPT, type ExtraFacts } from "./prompt";
 import { parseReading, READING_SCHEMA, type Reading, type ReadingTopic } from "./reading";
 
 /** API 키가 설정되지 않은 경우 (개발 중에는 정상 상황이에요) */
@@ -24,6 +24,8 @@ export interface InterpretOptions {
   gender: Gender;
   /** 요즘 고민 (선택) */
   concern?: Concern | null;
+  /** 오늘의 일진·사주 핵심 같은 추가 재료 (선택). 오늘 날짜는 한국 기준으로 넘겨 주세요. */
+  extra?: ExtraFacts;
   /** 테스트용. 기본은 환경변수 ANTHROPIC_API_KEY */
   apiKey?: string;
   /** 기본은 환경변수 ANTHROPIC_MODEL, 없으면 DEFAULT_MODEL */
@@ -50,6 +52,7 @@ type Attempt = { reading: Reading } | { retry: true; reason: string } | { fatal:
 
 async function attemptOnce(chart: SajuChart, o: Required<Pick<InterpretOptions, "topic" | "gender">> & {
   concern?: Concern | null;
+  extra?: ExtraFacts;
   apiKey: string; model: string; fetchImpl: typeof fetch; timeoutMs: number;
 }): Promise<Attempt> {
   const ctrl = new AbortController();
@@ -62,7 +65,7 @@ async function attemptOnce(chart: SajuChart, o: Required<Pick<InterpretOptions, 
         model: o.model,
         max_tokens: MAX_TOKENS,
         system: SYSTEM_PROMPT,
-        messages: [{ role: "user", content: buildUserMessage(chart, o.topic, o.gender, o.concern) }],
+        messages: [{ role: "user", content: buildUserMessage(chart, o.topic, o.gender, o.concern, o.extra) }],
         output_config: { format: { type: "json_schema", schema: READING_SCHEMA } },
       }),
       signal: ctrl.signal,
@@ -109,7 +112,7 @@ export async function interpretSaju(chart: SajuChart, opts: InterpretOptions): P
 
   let lastReason = "알 수 없음";
   for (let i = 0; i < maxAttempts; i++) {
-    const r = await attemptOnce(chart, { topic: opts.topic, gender: opts.gender, concern: opts.concern, apiKey, model, fetchImpl, timeoutMs });
+    const r = await attemptOnce(chart, { topic: opts.topic, gender: opts.gender, concern: opts.concern, extra: opts.extra, apiKey, model, fetchImpl, timeoutMs });
     if ("reading" in r) return r.reading;
     if ("fatal" in r) throw new ReadingFailedError(r.fatal);
     lastReason = r.reason;

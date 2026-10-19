@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import { takeAiBudget } from "@/lib/ai/budget";
+import { buildCoreFacts } from "@/lib/ai/coreFacts";
+import { kstToday } from "@/lib/ai/dailyFacts";
 import { interpretSaju, ReadingUnavailableError } from "@/lib/ai/interpret";
 import { normalizeTopic, toPublicReading, type PublicReading } from "@/lib/ai/reading";
 import { hasConcern, parseConcern } from "@/lib/concerns";
@@ -114,7 +116,10 @@ export async function POST(request: Request) {
         throw new ReadingUnavailableError();
       }
     }
-    const full = await interpretSaju(chart, { topic: normalizeTopic(rawTopic), gender: input.gender, concern });
+    // 오늘의 일진과 사주 핵심(신강/신약·용신 등)을 더해 풀이의 근거를 풍부하게 해요. 계산이 실패해도 풀이는 기본 재료로 나가요.
+    const now = new Date();
+    const extra = { today: kstToday(now), core: buildCoreFacts(input, now) };
+    const full = await interpretSaju(chart, { topic: normalizeTopic(rawTopic), gender: input.gender, concern, extra });
     reading = toPublicReading(full, "free");
   } catch (err) {
     if (err instanceof ReadingUnavailableError) {
