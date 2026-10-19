@@ -5,9 +5,10 @@ import { buildBook } from "./book";
 import { applyLocks } from "./book/lock";
 import { CONCERN_CHIPS, hasConcern, parseConcern, type Concern } from "@/lib/concerns";
 import { buildCompat } from "./compat";
+import { buildCompatBook, lockCompatBook, type BookSource } from "./book/compatBook";
 import { buildConcernAnswers } from "./concernAnswer";
 import { buildTopicInsight, resolveTopic } from "./topic";
-import type { DaeunView, ElementKind, ElementView, PillarView, PremiumReportView, ReportLevel, SeyunView } from "./types";
+import type { BookPage, DaeunView, ElementKind, ElementView, PillarView, PremiumReportView, ReportLevel, SeyunView } from "./types";
 
 const PILLARS: { key: PillarView["key"]; label: string }[] = [
   { key: "year", label: "연주" },
@@ -90,8 +91,8 @@ export function validatePremiumInput(raw: unknown): ValidationResult {
   };
 }
 
-/** 상대방 사주를 계산해 두 사람의 궁합을 만들어요. 계산할 수 없는 입력이면 ssaju 의 Error 를 그대로 던져요. */
-function computeCompat(meResult: Parameters<typeof buildCompat>[0], meHourUnknown: boolean, partner: BirthInput, now: Date) {
+/** 상대방 사주를 계산해 두 사람의 궁합과 10페이지 궁합 리포트를 만들어요. 계산할 수 없는 입력이면 ssaju 의 Error 를 그대로 던져요. */
+function computeCompat(meResult: BookSource, meHourUnknown: boolean, partner: BirthInput, now: Date, full: boolean, lock: boolean) {
   const pHourUnknown = partner.hour === null || partner.hour === undefined;
   const pr = calculateSaju({
     year: partner.year,
@@ -103,8 +104,11 @@ function computeCompat(meResult: Parameters<typeof buildCompat>[0], meHourUnknow
     calendar: partner.calendar,
     leap: partner.calendar === "lunar" && partner.isLeapMonth === true,
     now,
-  });
-  return buildCompat(meResult, pr as unknown as Parameters<typeof buildCompat>[0], !meHourUnknown, !pHourUnknown);
+  }) as unknown as BookSource;
+  const compat = buildCompat(meResult, pr, !meHourUnknown, !pHourUnknown);
+  if (!full) return { compat, book: [] as BookPage[] };
+  const book = buildCompatBook(meResult, pr, { compat, meHourKnown: !meHourUnknown, otherHourKnown: !pHourUnknown });
+  return { compat, book: lock ? lockCompatBook(book, meResult.currentYear) : book };
 }
 
 /**
@@ -175,6 +179,8 @@ export function buildPremiumReport(input: BirthInput, now: Date = new Date(), le
   const topicKey = picked === "general" && firstChip ? firstChip.topic : picked;
   const topic = buildTopicInsight(topicKey, r, { elements, hourUnknown, level });
   const locking = full && lock;
+  // 궁합이면 10페이지 리포트도 두 사람 기준 궁합 리포트로 바꿔요.
+  const pair = partner ? computeCompat(r as unknown as BookSource, hourUnknown, partner, now, full, locking) : null;
   const gradeLabel = GRADE[r.advanced.dayStrength.strength] ?? r.advanced.dayStrength.strength;
   return {
     level,
@@ -193,7 +199,7 @@ export function buildPremiumReport(input: BirthInput, now: Date = new Date(), le
     topic: locking ? { ...topic, timing: [] } : topic,
     concern: hasConcern(concern) ? { text: concern.text, answers: buildConcernAnswers(concern, elements, gradeLabel) } : null,
     locked: locking,
-    compat: partner ? computeCompat(r as unknown as Parameters<typeof buildCompat>[0], hourUnknown, partner, now) : null,
-    book: full ? (locking ? applyLocks(buildBook(r, { elements, pillars, hourUnknown, topicKey, insight: topic, gradeLabel }), r.currentYear) : buildBook(r, { elements, pillars, hourUnknown, topicKey, insight: topic, gradeLabel })) : [],
+    compat: pair ? pair.compat : null,
+    book: pair ? pair.book : full ? (locking ? applyLocks(buildBook(r, { elements, pillars, hourUnknown, topicKey, insight: topic, gradeLabel }), r.currentYear) : buildBook(r, { elements, pillars, hourUnknown, topicKey, insight: topic, gradeLabel })) : [],
   };
 }

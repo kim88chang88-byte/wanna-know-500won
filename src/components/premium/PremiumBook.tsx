@@ -89,6 +89,73 @@ function Visual({ page, report }: { page: BookPage; report: PremiumReportView })
           )}
         </div>
       );
+    case "c-overview":
+      return report.compat ? (
+        <div data-testid="compat-pair" className="mb-6">
+          <div className="flex items-center gap-2">
+            {[report.compat.me, report.compat.partner].flatMap((p, k) => [
+              k === 1 ? (
+                <div key="heart" aria-hidden="true" className="text-2xl text-[#e6c887]">
+                  ♡
+                </div>
+              ) : null,
+              <div key={p.label} className={`flex-1 rounded-2xl border ${HAIR} bg-white/[0.04] py-4 text-center`}>
+                <div className={`text-[11px] font-bold ${GOLD}`}>{p.label}</div>
+                <div className="mt-1 font-serifKr font-black text-3xl leading-tight text-[#fbf3de]" aria-label={`${p.label}의 일주 ${p.dayPillar ?? ""}`}>
+                  {p.dayPillar ? Array.from(p.dayPillar).map((ch, n) => <div key={n}>{ch}</div>) : "?"}
+                </div>
+                <div className="mt-1 text-[11px] text-[#e8dfca]/70">{p.dayReading ? `${p.dayReading} 일주` : ""}</div>
+              </div>,
+            ])}
+          </div>
+          <div data-testid="compat-score" className="mt-4 text-center">
+            <span className={`text-[11px] font-bold tracking-[0.2em] ${GOLD}`}>도리 궁합 지수</span>
+            <div className="mt-1 font-serifKr font-black text-5xl text-[#fbf3de] tabular-nums">
+              {report.compat.score}
+              <span className="text-base font-bold text-[#e8dfca]/60"> / 100</span>
+            </div>
+            <div className="mx-auto mt-3 h-2 max-w-[16rem] rounded-full bg-white/10 overflow-hidden" role="img" aria-label={`궁합 지수 ${report.compat.score}점`}>
+              <div className="h-full rounded-full bg-gradient-to-r from-[#f0d9a0] to-[#d3ac62]" style={{ width: `${report.compat.score}%` }} />
+            </div>
+            <p className="mt-3 text-[12px] text-[#e8dfca]/60">재미로 보는 참고 점수예요</p>
+          </div>
+        </div>
+      ) : null;
+    case "c-elements":
+      return report.compat ? (
+        <div data-testid="compat-elements" className="mb-6">
+          <div className="mb-2 flex justify-end gap-3 text-[11px] text-[#e8dfca]/70">
+            <span>
+              <span aria-hidden="true" className="mr-1 inline-block h-2 w-2 rounded-full bg-[#e6c887]" />나
+            </span>
+            <span>
+              <span aria-hidden="true" className="mr-1 inline-block h-2 w-2 rounded-full bg-pink-300" />상대
+            </span>
+          </div>
+          <ul className="space-y-3">
+            {report.compat.me.elements.map((e) => {
+              const o = report.compat?.partner.elements.find((x) => x.name === e.name)?.count ?? 0;
+              const top = Math.max(1, ...report.compat!.me.elements.map((x) => x.count), ...report.compat!.partner.elements.map((x) => x.count));
+              return (
+                <li key={e.name} data-testid="compat-element-row" className="flex items-center gap-3">
+                  <span className={`w-10 shrink-0 text-center text-xs font-bold rounded-full py-1 border ${HAIR} ${GOLD}`}>{e.name}</span>
+                  <div className="flex-1 space-y-1" role="img" aria-label={`${e.name} 나 ${e.count} 상대 ${o}`}>
+                    <div className="h-2 rounded-full bg-white/10 overflow-hidden">
+                      <div className="h-full rounded-full bg-[#e6c887]" style={{ width: `${(e.count / top) * 100}%` }} />
+                    </div>
+                    <div className="h-2 rounded-full bg-white/10 overflow-hidden">
+                      <div className="h-full rounded-full bg-pink-300" style={{ width: `${(o / top) * 100}%` }} />
+                    </div>
+                  </div>
+                  <span className="w-12 text-right text-xs font-bold text-[#f5efe0] tabular-nums">
+                    {e.count} · {o}
+                  </span>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      ) : null;
     case "nature":
       return (
         <div data-testid="strength-box" className="mb-6 flex flex-wrap items-center gap-2">

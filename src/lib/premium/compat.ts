@@ -25,7 +25,7 @@ const ELEMENTS: { name: string; kind: ElementKind }[] = [
 const STEM_COMBINE: ReadonlyArray<[string, string]> = [["甲", "己"], ["乙", "庚"], ["丙", "辛"], ["丁", "壬"], ["戊", "癸"]];
 
 /** 일간 기준으로 상대 글자가 어떤 십성인지에 따른 관계 풀이 (겁주는 말은 쓰지 않아요) */
-const GOD_MEANING: Record<TenGod, { text: string; good: boolean }> = {
+export const GOD_MEANING: Record<TenGod, { text: string; good: boolean }> = {
   비견: { text: "친구처럼 편하고 대등한 사이예요. 서로의 페이스를 존중하면 오래가요.", good: true },
   겁재: { text: "서로 지지 않으려는 승부욕이 있는 사이예요. 경쟁 대신 응원으로 바꾸면 든든해져요.", good: false },
   식신: { text: "함께 있으면 여유롭고 즐거운 사이예요. 맛집, 취미, 수다가 잘 어울려요.", good: true },
@@ -38,16 +38,16 @@ const GOD_MEANING: Record<TenGod, { text: string; good: boolean }> = {
   정인: { text: "기대고 챙김받는 포근한 사이예요. 서로에게 마음의 쉼터가 되어 줘요.", good: true },
 };
 
-const RELATION_TEXT = {
+export const RELATION_TEXT = {
   합: "서로 끌어당겨 어울리는 사이예요. 손발이 잘 맞고 편안해요.",
   충: "서로 부딪혀 움직임이 생기는 사이예요. 변화와 활력이 있지만, 의견이 다를 땐 한 박자 쉬어 가면 좋아요.",
   해: "사소한 엇박자가 생길 수 있는 사이예요. 오해가 생기면 바로 풀면 가볍게 지나가요.",
 } as const;
 
-const stemOf = (pillar: string) => pillar.charAt(0);
-const branchOf = (pillar: string) => pillar.charAt(1);
+export const stemOf = (pillar: string) => pillar.charAt(0);
+export const branchOf = (pillar: string) => pillar.charAt(1);
 
-function hangulStem(hanja: string): string {
+export function hangulStem(hanja: string): string {
   return STEMS.find((s) => s.hanja === hanja)?.hangul ?? hanja;
 }
 
@@ -72,6 +72,16 @@ function person(label: string, r: SsajuForCompat, hourKnown: boolean): CompatPer
     elements: countElements(r, hourKnown),
     hourUnknown: !hourKnown,
   };
+}
+
+/** 천간합 (갑-기, 을-경, 병-신, 정-임, 무-계) */
+export function isStemCombine(a: string, b: string): boolean {
+  return STEM_COMBINE.some(([x, y]) => (x === a && y === b) || (x === b && y === a));
+}
+
+/** 천간 충: 같은 음양끼리 6칸 떨어진 사이 (갑-경, 을-신, 병-임, 정-계) */
+export function isStemClash(a: string, b: string): boolean {
+  return Math.abs(STEMS.findIndex((x) => x.hanja === a) - STEMS.findIndex((x) => x.hanja === b)) === 6;
 }
 
 const clamp = (n: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, n));
@@ -102,9 +112,8 @@ export function buildCompat(me: SsajuForCompat, other: SsajuForCompat, meHourKno
   // 2) 일간끼리 합 / 충
   const meStem = stemOf(meDay);
   const otStem = stemOf(otDay);
-  const combine = STEM_COMBINE.some(([a, b]) => (a === meStem && b === otStem) || (a === otStem && b === meStem));
-  // 천간 충: 같은 음양끼리 6칸 떨어진 사이 (갑-경, 을-신, 병-임, 정-계)
-  const clash = Math.abs(STEMS.findIndex((x) => x.hanja === meStem) - STEMS.findIndex((x) => x.hanja === otStem)) === 6;
+  const combine = isStemCombine(meStem, otStem);
+  const clash = isStemClash(meStem, otStem);
   if (combine) {
     score += 10;
     points.push({ title: "일간의 합 · 끌림", body: `나의 ${meStem}(${hangulStem(meStem)})과 상대의 ${otStem}(${hangulStem(otStem)})이 서로 합을 이뤄요. 처음부터 마음이 가는 인연의 결이 있어요.`, tone: "good" });
