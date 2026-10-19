@@ -197,7 +197,7 @@ export function ShowcaseSection() {
           data-testid="scroll-cue"
           className="inline-flex flex-col items-center gap-0.5 rounded-2xl px-4 py-1 text-xs sm:text-sm font-bold text-brand-600 hover:text-brand-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-300"
         >
-          <span>아래로 스크롤해서 운명의 자판기를 골라보세요</span>
+          <span>아래로 스크롤해서 운명을 만나봐!!</span>
           <span className="material-symbols-outlined text-[28px] leading-none motion-safe:animate-bounce" aria-hidden="true">
             keyboard_double_arrow_down
           </span>
@@ -212,16 +212,10 @@ export function ShowcaseSection() {
 export function MachinesSection({ onSpin, spinningKey }: SpinProps) {
   return (
     <section id="machines" className="mb-8 relative z-10 scroll-mt-20">
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-3 mb-4">
-        <div className="text-center sm:text-left">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-sky-100 text-brand-500 text-xs font-bold mb-1.5">
-            <span aria-hidden="true">🌊</span>
-            <span>수달 도사의 6대 운명의 자판기</span>
-          </div>
-          <h3 className="font-serifKr text-2xl sm:text-3xl font-bold text-gray-900">원하는 테마의 레버를 직접 돌려보세요</h3>
-        </div>
+      <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-4">
+        <h3 className="sr-only">6대 운명의 자판기</h3>
         <span className="text-xs font-semibold px-3.5 py-1.5 rounded-full bg-sky-50 text-brand-500 border border-sky-200">
-          모든 자판기: <strong className="underline font-bold">매일 첫 1회 무료</strong> (이후 500원)
+          아래 운세는 <strong className="underline font-bold">매일 첫 1회는 무료</strong>야!! (이후 500원)
         </span>
       </div>
 
