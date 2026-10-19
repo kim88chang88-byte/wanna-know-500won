@@ -242,8 +242,9 @@ export function MachinesSection({ onSpin }: SpinProps) {
 
       <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6 max-w-7xl mx-auto items-stretch">
         {MACHINES.map((m) => (
+          <div key={m.key} className="relative h-full transition-transform hover:-translate-y-1.5 active:scale-[0.98]">
+            {m.sticker && <Sticker text={m.sticker} testId="machine-sticker" />}
           <div
-            key={m.key}
             id={m.key}
             data-testid="machine-card"
             role="button"
@@ -251,9 +252,8 @@ export function MachinesSection({ onSpin }: SpinProps) {
             aria-label={`${m.name} 운세 보기`}
             onClick={() => onSpin(m.key, m.fortune, FREE_PRICE_LABEL)}
             onKeyDown={(e) => activateOnKey(e, () => onSpin(m.key, m.fortune, FREE_PRICE_LABEL))}
-            className={`scroll-mt-24 card-water-glow relative flex flex-col justify-between rounded-3xl p-3 sm:p-6 cursor-pointer select-none hover:shadow-xl hover:-translate-y-1.5 active:scale-[0.98] transition-all group focus:outline-none focus-visible:ring-4 focus-visible:ring-brand-300 ${m.card}`}
+            className={`scroll-mt-24 card-water-glow relative flex flex-col justify-between rounded-3xl p-3 sm:p-6 h-full cursor-pointer select-none hover:shadow-xl transition-shadow group focus:outline-none focus-visible:ring-4 focus-visible:ring-brand-300 ${m.card}`}
           >
-            {m.sticker && <Sticker text={m.sticker} testId="machine-sticker" />}
             <div>
               <div className="flex flex-wrap items-center justify-between gap-1 mb-2.5 sm:mb-3.5">
                 <span className={`text-[10px] sm:text-xs font-bold px-2 sm:px-3 py-1 rounded-full flex items-center gap-1 ${m.badgeClass}`}>
@@ -275,6 +275,7 @@ export function MachinesSection({ onSpin }: SpinProps) {
               <p className="text-[11px] sm:text-xs text-slate-500 text-center leading-relaxed sm:min-h-[36px]">{m.desc}</p>
             </div>
 
+          </div>
           </div>
         ))}
       </div>
@@ -307,8 +308,9 @@ export function PremiumSection({ onSpin }: SpinProps) {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-6xl mx-auto relative z-10">
           {PREMIUM_CARDS.map((p) => (
+            <div key={p.key} className="relative h-full transition-transform hover:-translate-y-1 active:scale-[0.98]">
+            {p.ribbon && <Sticker text={p.ribbon} testId="premium-sticker" />}
             <div
-              key={p.key}
               id={p.key}
               data-testid="premium-card"
               role="button"
@@ -316,9 +318,8 @@ export function PremiumSection({ onSpin }: SpinProps) {
               aria-label={`${p.title} 보기`}
               onClick={() => onSpin(p.key, p.fortune, "2,990원", true)}
               onKeyDown={(e) => activateOnKey(e, () => onSpin(p.key, p.fortune, "2,990원", true))}
-              className={`scroll-mt-24 card-water-glow relative flex flex-col justify-between rounded-3xl p-6 bg-white cursor-pointer select-none hover:shadow-lg hover:-translate-y-1 active:scale-[0.98] transition-all group focus:outline-none focus-visible:ring-4 focus-visible:ring-brand-300 ${p.card}`}
+              className={`scroll-mt-24 card-water-glow relative flex flex-col justify-between rounded-3xl p-6 h-full bg-white cursor-pointer select-none hover:shadow-lg transition-shadow group focus:outline-none focus-visible:ring-4 focus-visible:ring-brand-300 ${p.card}`}
             >
-              {p.ribbon && <Sticker text={p.ribbon} testId="premium-sticker" />}
               <div>
                 <div className="flex items-center justify-between mb-3">
                   <span className={`text-xs font-bold px-3 py-1 rounded-full ${p.tagClass}`}>{p.tag}</span>
@@ -340,6 +341,7 @@ export function PremiumSection({ onSpin }: SpinProps) {
               <div className={`mt-4 pt-3 border-t flex items-center justify-center ${p.divider}`}>
                 <span className={`text-sm font-extrabold ${p.priceClass}`}>2,990원</span>
               </div>
+            </div>
             </div>
           ))}
         </div>
