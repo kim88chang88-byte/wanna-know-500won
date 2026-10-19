@@ -118,7 +118,7 @@ export function validateStep(step: StepId, f: IntakeForm): string | null {
       if (f.concernText.length > MAX_CONCERN_TEXT) return `고민은 ${MAX_CONCERN_TEXT}자까지 적을 수 있어요.`;
       return null;
     case "consent":
-      return f.consent ? null : "개인정보 처리에 동의해야 캡슐을 만들 수 있어요.";
+      return f.consent ? null : "개인정보 처리에 동의해야 풀이를 볼 수 있어요.";
   }
 }
 

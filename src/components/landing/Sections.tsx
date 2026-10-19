@@ -302,7 +302,7 @@ export function PremiumSection({ onSpin }: SpinProps) {
             2,990원 프리미엄 3대 테마 리포트
           </h3>
           <p className="text-xs sm:text-sm text-white/85 mt-2 leading-relaxed">
-            캡슐 한 알로는 아쉬운 날을 위한 <strong>10쪽 분량의 심층 리포트</strong>예요. 흐름과 조언을 차분하게 담았어요.
+            간단 풀이로는 아쉬운 날을 위한 <strong>10쪽 분량의 심층 리포트</strong>예요. 흐름과 조언을 차분하게 담았어요.
           </p>
         </div>
 
@@ -369,8 +369,8 @@ export function SampleSection() {
             <span className="material-symbols-outlined text-[22px]">bubble_chart</span>
           </div>
           <div>
-            <h3 className="font-cute text-xl sm:text-2xl font-normal text-gray-900">이런 운세 캡슐이 나와요</h3>
-            <p className="text-xs text-slate-500">수달 도사가 건네는 캡슐 속 한마디, 이런 느낌이에요</p>
+            <h3 className="font-cute text-xl sm:text-2xl font-normal text-gray-900">이런 운세 풀이가 나와요</h3>
+            <p className="text-xs text-slate-500">수달 도사 '도리'가 건네는 한마디, 이런 느낌이에요</p>
           </div>
         </div>
         <span className="hidden sm:inline-flex text-xs font-semibold px-3 py-1.5 rounded-full bg-sky-50 text-brand-500 border border-sky-200">

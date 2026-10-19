@@ -244,9 +244,9 @@ export interface SampleCapsule {
 export const SAMPLE_CAPSULES: readonly SampleCapsule[] = [
   {
     key: "sample-love",
-    tag: "🌙 달빛 연애운",
-    tagClass: "bg-sky-50 text-brand-500",
-    border: "border-sky-100",
+    tag: "🌙 연애운",
+    tagClass: "bg-brand-500 text-white",
+    border: "border-brand-200",
     parts: [
       { text: "“달빛이 수면 위로 맑게 부서지듯, 이번 주말엔 좋아하는 사람이 " },
       { text: "'같이 산책할래요?'", strong: true },
@@ -255,9 +255,9 @@ export const SAMPLE_CAPSULES: readonly SampleCapsule[] = [
   },
   {
     key: "sample-career",
-    tag: "✨ 물길 성취/이직",
-    tagClass: "bg-indigo-50 text-indigo-700",
-    border: "border-indigo-100",
+    tag: "💧 성공운",
+    tagClass: "bg-amber-100 text-amber-800",
+    border: "border-amber-200",
     parts: [
       { text: "“새로운 물길이 슬쩍 열려 있어요. 미뤄 둔 지원서, 오늘은 한 줄만 써봐요. " },
       { text: "500원짜리 작은 용기!", strong: true },
@@ -265,13 +265,13 @@ export const SAMPLE_CAPSULES: readonly SampleCapsule[] = [
     ],
   },
   {
-    key: "sample-night",
-    tag: "🫧 심야 물빛 위로",
-    tagClass: "bg-amber-50 text-amber-800",
-    border: "border-amber-100",
+    key: "sample-health",
+    tag: "🌿 건강운",
+    tagClass: "bg-emerald-100 text-emerald-800",
+    border: "border-emerald-200",
     parts: [
       {
-        text: "“어깨에 얹힌 짐이 무거웠죠? 오늘 밤은 자책은 내려놓고 옹달샘처럼 맑게 푹 자도 괜찮아요. 내일은 한결 가벼울 거예요.”",
+        text: "“어깨에 얹힌 짐이 무거웠죠? 오늘 밤은 따뜻한 물 한 잔 마시고 옹달샘처럼 맑게 푹 자도 괜찮아요. 내일은 몸도 마음도 한결 가벼울 거예요.”",
       },
     ],
   },

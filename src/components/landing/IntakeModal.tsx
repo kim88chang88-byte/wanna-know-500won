@@ -44,7 +44,7 @@ export interface IntakeTarget {
 interface Props {
   target: IntakeTarget;
   onClose: () => void;
-  /** 풀이(캡슐)를 성공적으로 받았을 때 한 번 호출돼요. 로그인 회원이면 서버가 센 횟수를 함께 줘요. (뽑기 횟수 기록용) */
+  /** 풀이를 성공적으로 받았을 때 한 번 호출돼요. 로그인 회원이면 서버가 센 횟수를 함께 줘요. (뽑기 횟수 기록용) */
   onComplete: (serverCounts?: { today: number; month: number } | null) => void;
   /** 로그인한 회원이면 true. 아니면 "로그인하면 생년월일시를 기억해요" 안내를 보여줘요. */
   loggedIn?: boolean;
@@ -64,7 +64,7 @@ const BUBBLE: Record<AnyStepId, string> = {
   time: "태어난 시간도 알면 더 또렷하게 볼 수 있어. 몰라도 괜찮아!",
   gender: "성별도 알려줄래?",
   concern: "요즘 마음에 걸리는 게 있어? 골라주면 그 얘기를 더 살려서 풀어줄게 🫧",
-  consent: "캡슐 만들기 전에, 정보 처리만 확인할게.",
+  consent: "풀이를 만들기 전에, 정보 처리만 확인할게.",
   pdate: "이번엔 궁합을 볼 상대방이야! 상대방은 언제 태어났어? 💞",
   ptime: "상대방이 태어난 시간도 알면 더 또렷해. 몰라도 괜찮아!",
   pgender: "상대방의 성별도 알려줄래?",
@@ -325,7 +325,7 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
         profileSaved?: boolean;
         error?: string;
       } | null;
-      if (!res.ok || !data?.chart) throw new Error(data?.error ?? "캡슐을 만들지 못했어요. 잠시 뒤에 다시 해볼래요?");
+      if (!res.ok || !data?.chart) throw new Error(data?.error ?? "풀이를 만들지 못했어요. 잠시 뒤에 다시 해볼래요?");
       const status: ReadingStatus = data.readingStatus ?? "failed";
       const p = await premiumPromise;
       if (ctrl.signal.aborted) return;
@@ -376,7 +376,7 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
   const header = (
     <div className="text-center mb-4">
       <span className="px-2.5 py-0.5 rounded-full bg-brand-100 text-brand-700 text-xs font-bold">
-        {target.fortune} 캡슐 · {target.price}
+        {target.fortune} · {target.price}
       </span>
     </div>
   );
@@ -399,7 +399,7 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
           <div className="text-4xl floating-anim" aria-hidden="true">
             🫧
           </div>
-          <p className="mt-3 font-bold text-gray-900">캡슐이 만들어지고 있어요</p>
+          <p className="mt-3 font-bold text-gray-900">풀이를 만들고 있어요</p>
           <div className="mt-4 h-1.5 rounded-full bg-brand-100 overflow-hidden" aria-hidden="true">
             <div className="h-full w-1/2 rounded-full bg-brand-500 animate-pulse" />
           </div>
@@ -681,7 +681,7 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
               type="submit"
               className="flex-1 py-2.5 rounded-full bg-brand-600 text-white font-cute font-normal text-sm shadow-md hover:bg-brand-700 transition-colors"
             >
-              {isLast ? "캡슐 만들기 ✧" : step === "concern" && form.concernTags.length === 0 && !form.concernText.trim() ? "건너뛰기" : "다음"}
+              {isLast ? "풀이 보기 ✧" : step === "concern" && form.concernTags.length === 0 && !form.concernText.trim() ? "건너뛰기" : "다음"}
             </button>
           </div>
           <p className="mt-3 text-center text-[10px] text-gray-400">* 베타 기간이라 결제는 발생하지 않아요.</p>
