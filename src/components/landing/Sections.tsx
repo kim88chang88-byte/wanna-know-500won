@@ -239,7 +239,7 @@ export function MachinesSection({ onSpin, spinningKey }: SpinProps) {
                 <SafeImage
                   src={IMAGES[m.image]}
                   alt={`${m.name} 자판기`}
-                  className="h-full w-auto max-w-full object-contain rounded-xl group-hover:scale-105 transition-transform duration-500"
+                  className="h-full w-auto max-w-full object-contain group-hover:scale-105 transition-transform duration-500"
                   fallback={m.emoji}
                 />
               </div>

@@ -1,12 +1,12 @@
 {
   "logo": "https://lh3.googleusercontent.com/aida-public/AB6AXuDQdeFK7kvkxy94Zq1nrPLSeB5PTBy4hHb1IswZrN5EpY1dK8XXnmVEADYSkGdGjv_Fk3V-vyei8vjJRA-3Ir4k1fNxqcEiwqySWs8-woHE_ZYSu5gy2iiKPQEn8F2HcBqGIfQ1fVljyVRe5fLW0CDyZkf3wIC15Verda8yfDn95tIae67s-f-0cAYSzqkG-zNvcx2eqxCgm_ruhvxjrS_MMd2j1iPIAUZcx0gs_8XLvnZvF7TDMAcD8j751dAulhSm8A",
   "hero": "/images/hero.jpg",
-  "machineSuccess": "/images/animal-dragon.jpg",
-  "machineMoney": "/images/animal-rabbit.jpg",
-  "machineLove": "/images/animal-panda-m.jpg",
-  "machineMarriage": "/images/animal-panda-f.jpg",
-  "machineHealth": "/images/animal-fox.jpg",
-  "machineStudy": "/images/animal-otter.jpg",
+  "machineSuccess": "/images/animal-dragon.webp",
+  "machineMoney": "/images/animal-rabbit.webp",
+  "machineLove": "/images/animal-panda-m.webp",
+  "machineMarriage": "/images/animal-panda-f.webp",
+  "machineHealth": "/images/animal-fox.webp",
+  "machineStudy": "/images/animal-otter.webp",
   "premiumDohwa": "/images/premiumMachine.jpg",
   "premiumFortune": "/images/premiumMachine.jpg",
   "premiumCompat": "/images/premiumMachine.jpg"
