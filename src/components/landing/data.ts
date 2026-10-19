@@ -81,7 +81,7 @@ export const MACHINES: readonly MachineCard[] = [
     name: "연애운",
     fortune: "연애운",
     desc: "수달 도사가 짚어주는 설레는 썸과 인연의 타이밍",
-    tag: "인기 BEST",
+    tag: "매일 첫 1회 무료",
     best: true,
     sticker: "도리 강추",
     card: "bg-gradient-to-b from-brand-50 via-white to-white border-2 border-brand-300 shadow-md",
