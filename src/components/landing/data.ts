@@ -22,6 +22,8 @@ export interface MachineCard {
   /** 오른쪽 위 작은 표시 */
   tag: string;
   best: boolean;
+  /** 카드 모서리에 붙는 스티커 문구 (없으면 null) */
+  sticker: string | null;
   card: string;
   badgeClass: string;
   tagClass: string;
@@ -43,6 +45,7 @@ export const MACHINES: readonly MachineCard[] = [
     desc: "승진, 이직, 시험 합격까지 거침없이 뚫어주는 성취의 물길",
     tag: "매일 첫 1회 무료",
     best: false,
+    sticker: "도리 강추",
     card: "bg-gradient-to-b from-amber-50/70 via-white to-white border border-amber-200 shadow-sm",
     badgeClass: "bg-amber-100 text-amber-800 border border-amber-200/80",
     tagClass: "text-amber-700 bg-amber-50 border border-amber-200",
@@ -61,6 +64,7 @@ export const MACHINES: readonly MachineCard[] = [
     desc: "통장에 차곡차곡 쌓일 황금 조개와 금전 행운",
     tag: "매일 첫 1회 무료",
     best: false,
+    sticker: "도리 강추",
     card: "bg-gradient-to-b from-pink-50/70 via-white to-white border border-pink-200 shadow-sm",
     badgeClass: "bg-pink-100 text-pink-700 border border-pink-200/80",
     tagClass: "text-pink-700 bg-pink-50 border border-pink-200",
@@ -79,6 +83,7 @@ export const MACHINES: readonly MachineCard[] = [
     desc: "수달 도사가 짚어주는 설레는 썸과 인연의 타이밍",
     tag: "인기 BEST",
     best: true,
+    sticker: "도리 강추",
     card: "bg-gradient-to-b from-brand-50 via-white to-white border-2 border-brand-300 shadow-md",
     badgeClass: "bg-brand-500 text-white shadow-sm",
     tagClass: "text-brand-600 bg-brand-100 border border-brand-200",
@@ -97,6 +102,7 @@ export const MACHINES: readonly MachineCard[] = [
     desc: "평생의 짝꿍과 함께할 인연의 시기와 궁합 이야기",
     tag: "매일 첫 1회 무료",
     best: false,
+    sticker: null,
     card: "bg-gradient-to-b from-fuchsia-50/70 via-white to-white border border-fuchsia-200 shadow-sm",
     badgeClass: "bg-fuchsia-100 text-fuchsia-800 border border-fuchsia-200/80",
     tagClass: "text-fuchsia-700 bg-fuchsia-50 border border-fuchsia-200",
@@ -115,6 +121,7 @@ export const MACHINES: readonly MachineCard[] = [
     desc: "수달의 맑은 옹달샘처럼 몸과 마음을 가볍게 챙기는 한마디",
     tag: "매일 첫 1회 무료",
     best: false,
+    sticker: null,
     card: "bg-gradient-to-b from-emerald-50/70 via-white to-white border border-emerald-200 shadow-sm",
     badgeClass: "bg-emerald-100 text-emerald-800 border border-emerald-200/80",
     tagClass: "text-emerald-700 bg-emerald-50 border border-emerald-200",
@@ -133,6 +140,7 @@ export const MACHINES: readonly MachineCard[] = [
     desc: "자격증, 어학, 시험 준비에 힘이 되는 집중력 충전 한마디",
     tag: "매일 첫 1회 무료",
     best: false,
+    sticker: null,
     card: "bg-gradient-to-b from-blue-50/70 via-white to-white border border-blue-200 shadow-sm",
     badgeClass: "bg-blue-100 text-blue-800 border border-blue-200/80",
     tagClass: "text-blue-700 bg-blue-50 border border-blue-200",

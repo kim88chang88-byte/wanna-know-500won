@@ -17,6 +17,11 @@ describe("랜딩 카드 데이터", () => {
     expect(new Set(allKeys).size).toBe(allKeys.length);
   });
 
+  it("'도리 강추' 스티커는 성공운·재물운·연애운 카드에만 붙는다", () => {
+    expect(MACHINES.filter((m) => m.sticker).map((m) => m.fortune)).toEqual(["성공운", "재물운", "연애운"]);
+    expect(MACHINES.filter((m) => m.sticker).every((m) => m.sticker === "도리 강추")).toBe(true);
+  });
+
   it("BEST 는 연애운 자판기 하나뿐", () => {
     expect(MACHINES.filter((m) => m.best).map((m) => m.fortune)).toEqual(["연애운"]);
   });

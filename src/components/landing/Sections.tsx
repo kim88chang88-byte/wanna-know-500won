@@ -14,6 +14,18 @@ interface SpinProps {
   onSpin: SpinHandler;
 }
 
+/** 카드 모서리에 비스듬히 붙는 "도리 강추" 스티커. (카드는 relative 여야 해요) */
+function Sticker({ text, testId }: { text: string; testId: string }) {
+  return (
+    <div
+      data-testid={testId}
+      className="absolute -top-3.5 -right-1.5 sm:-right-2 rotate-[8deg] px-2.5 sm:px-3.5 py-1 sm:py-1.5 rounded-full bg-gradient-to-r from-pink-500 to-fuchsia-500 text-white font-cute font-normal text-xs sm:text-sm shadow-md ring-2 ring-white z-10 whitespace-nowrap pointer-events-none"
+    >
+      <span aria-hidden="true">🦦 </span>[{text}]
+    </div>
+  );
+}
+
 /** 카드를 키보드(Enter·Space)로도 열 수 있게 해요. */
 function activateOnKey(e: React.KeyboardEvent, run: () => void) {
   if (e.target !== e.currentTarget) return;
@@ -239,8 +251,9 @@ export function MachinesSection({ onSpin }: SpinProps) {
             aria-label={`${m.name} 운세 보기`}
             onClick={() => onSpin(m.key, m.fortune, FREE_PRICE_LABEL)}
             onKeyDown={(e) => activateOnKey(e, () => onSpin(m.key, m.fortune, FREE_PRICE_LABEL))}
-            className={`scroll-mt-24 card-water-glow flex flex-col justify-between rounded-3xl p-3 sm:p-6 cursor-pointer select-none hover:shadow-xl hover:-translate-y-1.5 active:scale-[0.98] transition-all group focus:outline-none focus-visible:ring-4 focus-visible:ring-brand-300 ${m.card}`}
+            className={`scroll-mt-24 card-water-glow relative flex flex-col justify-between rounded-3xl p-3 sm:p-6 cursor-pointer select-none hover:shadow-xl hover:-translate-y-1.5 active:scale-[0.98] transition-all group focus:outline-none focus-visible:ring-4 focus-visible:ring-brand-300 ${m.card}`}
           >
+            {m.sticker && <Sticker text={m.sticker} testId="machine-sticker" />}
             <div>
               <div className="flex flex-wrap items-center justify-between gap-1 mb-2.5 sm:mb-3.5">
                 <span className={`text-[10px] sm:text-xs font-bold px-2 sm:px-3 py-1 rounded-full flex items-center gap-1 ${m.badgeClass}`}>
@@ -305,14 +318,7 @@ export function PremiumSection({ onSpin }: SpinProps) {
               onKeyDown={(e) => activateOnKey(e, () => onSpin(p.key, p.fortune, "2,990원", true))}
               className={`scroll-mt-24 card-water-glow relative flex flex-col justify-between rounded-3xl p-6 bg-white cursor-pointer select-none hover:shadow-lg hover:-translate-y-1 active:scale-[0.98] transition-all group focus:outline-none focus-visible:ring-4 focus-visible:ring-brand-300 ${p.card}`}
             >
-              {p.ribbon && (
-                <div
-                  data-testid="premium-sticker"
-                  className="absolute -top-3 -right-2 rotate-[8deg] px-3.5 py-1.5 rounded-full bg-gradient-to-r from-pink-500 to-fuchsia-500 text-white font-cute font-normal text-sm shadow-md ring-2 ring-white z-10"
-                >
-                  <span aria-hidden="true">🦦 </span>[{p.ribbon}]
-                </div>
-              )}
+              {p.ribbon && <Sticker text={p.ribbon} testId="premium-sticker" />}
               <div>
                 <div className="flex items-center justify-between mb-3">
                   <span className={`text-xs font-bold px-3 py-1 rounded-full ${p.tagClass}`}>{p.tag}</span>
