@@ -295,7 +295,7 @@ export function PremiumSection({ onSpin }: SpinProps) {
         <div className="text-center max-w-2xl mx-auto mb-5 relative z-10">
           <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-pink-100 text-pink-700 text-xs font-bold mb-2">
             <span aria-hidden="true">👑</span>
-            <span>수달 도사의 심층 리포트</span>
+            <span>수달 도사 '도리'의 심층 리포트</span>
             <span className="bg-brand-500 text-white text-[10px] px-2 py-0.5 rounded-full font-sans">SPECIAL</span>
           </div>
           <h3 className="font-cute text-2xl sm:text-3xl font-normal text-white leading-snug drop-shadow-[0_2px_8px_rgba(40,20,90,0.6)]">
