@@ -125,19 +125,8 @@ export function Header({ onOpenLogin, user = null }: { onOpenLogin: () => void; 
 export function HeroSection({ counts }: { counts: DrawCounts }) {
   return (
     <section className="text-center max-w-4xl mx-auto mb-12">
-      <div className="relative inline-block mb-3">
-        <h2 className="font-serifKr text-3xl sm:text-5xl font-extrabold tracking-tight text-gray-900 leading-tight">
-          수달 도사 &apos;도리&apos;의
-          <br />
-          신비한 운세 자판기
-        </h2>
-        <span className="absolute -top-3 -right-4 sm:-right-6 text-2xl select-none floating-anim" aria-hidden="true">
-          🫧
-        </span>
-      </div>
-
       {/* 뽑기 횟수: 한 줄짜리 작은 알약 (로그인했다면 서버가, 아니라면 이 기기에서 센 값) */}
-      <div className="mt-4 inline-flex flex-wrap items-center justify-center gap-x-3 gap-y-1 rounded-full bg-white/80 border border-brand-100 px-4 py-1.5 text-xs shadow-sm">
+      <div className="inline-flex flex-wrap items-center justify-center gap-x-3 gap-y-1 rounded-full bg-white/80 border border-brand-100 px-4 py-1.5 text-xs shadow-sm">
         <span className="inline-flex items-center gap-1 text-gray-500">
           <span className="material-symbols-outlined text-brand-500 text-[16px]">water_drop</span>
           오늘
