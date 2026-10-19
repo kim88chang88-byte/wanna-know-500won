@@ -190,3 +190,13 @@ describe("interpretSaju", () => {
     expect(calls.length).toBe(2);
   });
 });
+
+describe("모델 선택", () => {
+  it("무료는 기본(Haiku), 유료 tier 는 Sonnet 을 쓴다", async () => {
+    const models: string[] = [];
+    const impl = (async (_u: any, init: any) => { models.push(JSON.parse(init.body).model); return okBody(JSON.stringify(goodJson)); }) as unknown as typeof fetch;
+    await interpretSaju(chart, { topic: "general", gender: "female", apiKey: "k", fetchImpl: impl });
+    await interpretSaju(chart, { topic: "general", gender: "female", apiKey: "k", fetchImpl: impl, tier: "paid" });
+    expect(models).toEqual(["claude-haiku-5-5", "claude-sonnet-5-5"]);
+  });
+});

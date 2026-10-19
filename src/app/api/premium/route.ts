@@ -2,6 +2,9 @@ import { NextResponse } from "next/server";
 import { isPremiumLocked } from "@/lib/premium/config";
 import { buildPremiumReport, validatePremiumInput } from "@/lib/premium/report";
 import { createRateLimiter } from "@/lib/rateLimit";
+import { addBookNotes } from "@/lib/ai/bookNotes";
+import { takeAiBudget } from "@/lib/ai/budget";
+import { createDb, loadDbConfig } from "@/lib/db/supabase";
 
 // 계산은 가볍지만, 한 주소(IP)에서 마구 부르지 못하게 1분에 20번까지만 받아요.
 const limiter = createRateLimiter(20, 60_000);
@@ -30,7 +33,19 @@ export async function POST(request: Request) {
   if (!parsed.ok) return NextResponse.json({ code: "bad_request", error: parsed.error }, { status: 400 });
 
   try {
-    return NextResponse.json({ report: buildPremiumReport(parsed.value, new Date(), parsed.level, parsed.topic, isPremiumLocked(process.env), parsed.concern, parsed.partner) });
+    const report = buildPremiumReport(parsed.value, new Date(), parsed.level, parsed.topic, isPremiumLocked(process.env), parsed.concern, parsed.partner);
+    // 프리미엄(전체) 리포트에는 쪽마다 AI 가 쓴 '도리의 한 줄'을 붙여요. 키가 없거나 한도를 넘거나 실패하면 한 줄만 빠져요.
+    if (parsed.level === "full" && report.book.length > 0 && process.env.ANTHROPIC_API_KEY) {
+      try {
+        const gate = await takeAiBudget(process.env, (() => { const c = loadDbConfig(process.env); return c ? createDb(c) : null; })());
+        if (gate === "ok") {
+          report.book = await addBookNotes(report.book, { kind: parsed.partner ? "compat" : "personal", concern: parsed.concern });
+        }
+      } catch (err) {
+        console.error("book notes failed:", err instanceof Error ? err.message : "unknown");
+      }
+    }
+    return NextResponse.json({ report });
   } catch (err) {
     // 없는 날짜(예: 윤달이 없는 해의 윤달)처럼 계산할 수 없는 입력이에요.
     console.error("premium report failed:", err instanceof Error ? err.message : "unknown");

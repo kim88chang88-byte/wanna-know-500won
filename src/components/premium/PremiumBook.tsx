@@ -330,6 +330,14 @@ export default function PremiumBook({ report }: { report: PremiumReportView }) {
           {page.lead}
         </p>
 
+        {page.note && (
+          <p data-testid="book-note" className="mb-6 -mt-2 rounded-xl border border-[#e6c887]/30 bg-[#e6c887]/[0.07] px-3.5 py-2.5 text-[13px] leading-relaxed text-[#f3e7c9]">
+            <span aria-hidden="true" className="mr-1">🦦</span>
+            <span className={`mr-1.5 font-bold ${GOLD}`}>도리의 한 줄</span>
+            {page.note}
+          </p>
+        )}
+
         <Visual page={page} report={report} />
 
         <div className="space-y-5">

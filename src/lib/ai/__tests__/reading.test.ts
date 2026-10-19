@@ -89,3 +89,10 @@ describe("toPublicReading (무료 공개 범위)", () => {
     for (const secret of [good.love.comment, good.money.comment, good.mind.comment]) expect(json.includes(secret)).toBe(false);
   });
 });
+
+describe("뻔한 풀이 걸러내기", () => {
+  it("도리 한마디가 너무 짧거나 뻔한 말뿐이면 null", () => {
+    expect(parseReading({ ...good, kkotgeoji: "힘내!" })).toBeNull();
+    expect(parseReading({ ...good, kkotgeoji: "오늘도 좋은 하루 될 거야, 파이팅 해보자!" })).toBeNull();
+  });
+});

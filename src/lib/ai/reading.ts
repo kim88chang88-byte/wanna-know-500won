@@ -79,6 +79,13 @@ export const READING_SCHEMA = {
 /** 겁주거나 불안을 키우는 표현이 섞이면 걸러냅니다. (BRIEF: 무섭거나 모호한 예언 금지) */
 const FORBIDDEN = ["사망", "죽음", "재앙", "저주", "액운", "파산", "이혼", "불행", "흉운", "큰일 난", "조심하세요"];
 
+/** 누구에게나 맞는 뻔한 문장. 이런 말만 있으면 성의 없는 풀이라서 다시 받아요. */
+const GENERIC = ["좋은 하루 될 거야", "좋은 하루 보내", "좋은 일이 있을 거", "마음 편히 가져", "모든 게 잘 될 거", "행복한 하루"];
+
+export function isGeneric(text: string): boolean {
+  return GENERIC.some((g) => text.includes(g));
+}
+
 export function containsForbidden(text: string): string | null {
   return FORBIDDEN.find((w) => text.includes(w)) ?? null;
 }
@@ -119,6 +126,9 @@ export function parseReading(value: unknown): Reading | null {
 
   // 네 점수가 전부 같으면 성의 없는 풀이라서 다시 받아요. (프롬프트에서 지표마다 다르게 달라고 했어요)
   if (new Set([totalScore, love.score, money.score, mind.score]).size === 1) return null;
+
+  // 도리 한마디가 너무 짧거나 뻔한 말뿐이면 다시 받아요.
+  if (kkotgeoji.length < 20 || isGeneric(kkotgeoji)) return null;
 
   const reading: Reading = { keyword, total: { score: totalScore, summary }, love, money, mind, kkotgeoji };
   const allText = [keyword, summary, love.comment, money.comment, mind.comment, kkotgeoji].join(" ");

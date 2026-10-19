@@ -85,6 +85,8 @@ export interface BookPage {
   subtitle: string;
   /** 페이지 맨 위 한 줄 요약 */
   lead: string;
+  /** AI 가 덧붙이는 "도리의 한 줄" (없을 수 있어요) */
+  note?: string;
   sections: BookSection[];
   tables: BookTable[];
 }

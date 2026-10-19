@@ -28,8 +28,10 @@ export interface InterpretOptions {
   extra?: ExtraFacts;
   /** 테스트용. 기본은 환경변수 ANTHROPIC_API_KEY */
   apiKey?: string;
-  /** 기본은 환경변수 ANTHROPIC_MODEL, 없으면 DEFAULT_MODEL */
+  /** 기본은 환경변수 ANTHROPIC_MODEL, 없으면 DEFAULT_MODEL. tier "paid" 면 ANTHROPIC_MODEL_PAID, 없으면 PAID_MODEL */
   model?: string;
+  /** 유료 풀이는 더 똑똑한 모델을 써요. 기본은 무료. */
+  tier?: "free" | "paid";
   /** 테스트용. 기본은 전역 fetch */
   fetchImpl?: typeof fetch;
   timeoutMs?: number;
@@ -41,6 +43,8 @@ const API_URL = "https://api.anthropic.com/v1/messages";
 const API_VERSION = "2023-06-01";
 /** 500원 한 건에 맞게 가볍고 싼 모델이 기본값이에요. 품질이 아쉬우면 ANTHROPIC_MODEL 로 바꾸세요. */
 export const DEFAULT_MODEL = "claude-haiku-5-5";
+/** 유료(500원 이상) 풀이 기본 모델 */
+export const PAID_MODEL = "claude-sonnet-5-5";
 const MAX_TOKENS = 1024;
 
 interface ApiResponse {
@@ -105,7 +109,7 @@ export async function interpretSaju(chart: SajuChart, opts: InterpretOptions): P
   const apiKey = opts.apiKey ?? process.env.ANTHROPIC_API_KEY;
   if (!apiKey) throw new ReadingUnavailableError();
 
-  const model = opts.model ?? process.env.ANTHROPIC_MODEL ?? DEFAULT_MODEL;
+  const model = opts.model ?? (opts.tier === "paid" ? (process.env.ANTHROPIC_MODEL_PAID ?? PAID_MODEL) : (process.env.ANTHROPIC_MODEL ?? DEFAULT_MODEL));
   const fetchImpl = opts.fetchImpl ?? fetch;
   const timeoutMs = opts.timeoutMs ?? 25_000;
   const maxAttempts = Math.max(1, opts.maxAttempts ?? 2);
