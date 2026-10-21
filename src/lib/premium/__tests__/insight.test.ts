@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { careerSections, comboSections, hiddenGods, hiddenGroupCount, interactionLine, interactions, johuSection, loveSections, mainStemOf, monthSection, natalRelations, yongsinRoleSection, GOD_MONTH_LINE, GOD_PAST_YEAR, PLACE_GROUP } from "../book/insight";
+import { gzTopic, careerSections, comboSections, hiddenGods, hiddenGroupCount, interactionLine, interactions, johuSection, loveSections, mainStemOf, monthSection, natalRelations, yongsinRoleSection, GOD_MONTH_LINE, GOD_PAST_YEAR, PLACE_GROUP } from "../book/insight";
 import { buildLookBack } from "../book/resonance";
 
 // 1988-11-04 16:55 남자: 戊辰 壬戌 癸亥 庚申
@@ -143,5 +143,12 @@ describe("재물·성공 심층", () => {
   it("월주가 충·합에 얽히면 일·직업 자리의 어울림 섹션이 붙는다", () => {
     const c = careerSections(base, "success");
     expect(c.core.some((x) => x.heading.startsWith("일·직업 자리의 어울림"))).toBe(true);
+  });
+});
+
+describe("간지 조사", () => {
+  it("丙午 → 丙午(병오)는, 丙寅 → 丙寅(병인)은", () => {
+    expect(gzTopic("丙午")).toBe("丙午(병오)는");
+    expect(gzTopic("丙寅")).toBe("丙寅(병인)은");
   });
 });

@@ -387,6 +387,13 @@ function hj(ch: string, kind: "이/가" | "과/와"): string {
   return `${ch}(${ko})${josa(ko, kind).slice(ko.length)}`;
 }
 
+/** 간지 뒤에 '은/는'을 붙여요. 예: 丙午 → 丙午(병오)는 */
+export function gzTopic(gz: string): string {
+  const ko = [...gz].map((c) => STEMS.find((x) => x.hanja === c)?.hangul ?? BRANCHES.find((x) => x.hanja === c)?.hangul ?? "").join("");
+  if (!ko) return gz;
+  return `${gz}(${ko})${josa(ko, "은/는").slice(ko.length)}`;
+}
+
 const STEM_POS: PosKey[] = ["year", "month", "day", "hour"];
 
 /** 들어오는 간지(세운·대운·월운)가 원국 천간·지지와 만드는 관계를 모아요. */
@@ -544,7 +551,7 @@ export function loveSections(i: LoveInput): { core: BookSection[]; timing: BookS
             : "원국에 없던 인연의 기운이 들어오는 시기라 존재감이 크게 느껴지기 쉬워요.";
       parts.push(`지금 대운 ${i.daeunNow.ganzhi}(${i.daeunNow.startAge}~${i.daeunNow.endAge}세)에는 ${starName}이 들어와요(${h.gods.join("·")}). ${meaning}`);
     } else {
-      parts.push(`지금 대운 ${i.daeunNow.ganzhi}은 인연의 별이 직접 들어오는 시기는 아니에요. 대신 나를 가꾸고 접점을 넓히는 데 힘을 쓰기 좋아요.`);
+      parts.push(`지금 대운 ${gzTopic(i.daeunNow.ganzhi)} 인연의 별이 직접 들어오는 시기는 아니에요. 대신 나를 가꾸고 접점을 넓히는 데 힘을 쓰기 좋아요.`);
     }
     const inter = interactionLine(i.pillars, { label: "대운", ganzhi: i.daeunNow.ganzhi });
     if (inter) parts.push(`대운이 원국과 만나는 모습: ${inter}`);
@@ -554,7 +561,7 @@ export function loveSections(i: LoveInput): { core: BookSection[]; timing: BookS
     parts.push(
       h.stem || h.branch
         ? `${i.year}년 세운 ${i.seyun}에도 ${starName}이 들어와요(${h.gods.join("·")}). 인연과 관련된 일이 마음에 자주 오르내리기 쉬운 해예요.`
-        : `${i.year}년 세운 ${i.seyun}은 인연의 별이 직접 들어오는 해는 아니에요.`,
+        : `${i.year}년 세운 ${gzTopic(i.seyun)} 인연의 별이 직접 들어오는 해는 아니에요.`,
     );
     const inter = interactionLine(i.pillars, { label: `${i.year}년 세운`, ganzhi: i.seyun });
     if (inter) parts.push(`올해 세운이 원국과 만나는 모습: ${inter}`);
@@ -564,7 +571,7 @@ export function loveSections(i: LoveInput): { core: BookSection[]; timing: BookS
     parts.push(
       h.stem || h.branch
         ? `${i.daeunNext.startAge}세부터의 대운 ${i.daeunNext.ganzhi}에도 ${starName}이 이어져요.`
-        : `${i.daeunNext.startAge}세부터의 대운 ${i.daeunNext.ganzhi}은 분위기가 달라지는 시기예요.`,
+        : `${i.daeunNext.startAge}세부터의 대운 ${gzTopic(i.daeunNext.ganzhi)} 분위기가 달라지는 시기예요.`,
     );
   }
   const timing: BookSection | null = parts.length > 0 ? { heading: `${i.year}년 흐름 · 인연의 시기`, body: parts.join(" ") } : null;
@@ -628,7 +635,7 @@ export function careerSections(i: CareerInput, topic: "money" | "success"): { co
       const meaning = visible.length > 0 ? `원래 있던 ${label}의 기운이 한층 선명해져요.` : hid.length > 0 ? `숨어 있던 ${label}의 기운이 겉으로 드러나요.` : `원국에 없던 ${label}의 기운이 들어와 존재감이 크게 느껴져요.`;
       parts.push(`${who} ${gz}에는 ${starName}이 들어와요(${h.gods.join("·")}). ${meaning}${endText ?? ""}`);
     } else {
-      parts.push(`${who} ${gz}은 ${label}의 별이 직접 들어오는 흐름은 아니에요.`);
+      parts.push(`${who} ${gzTopic(gz)} ${label}의 별이 직접 들어오는 흐름은 아니에요.`);
     }
     const inter = interactionLine(i.pillars, { label: who.replace(/\(.*$/, "").trim(), ganzhi: gz });
     if (inter) parts.push(`${who.replace(/\(.*$/, "").trim()}이 원국과 만나는 모습: ${inter}`);

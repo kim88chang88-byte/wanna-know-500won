@@ -1,3 +1,4 @@
+import { josa } from "./josa";
 import type { SajuResult } from "ssaju";
 import type { ElementView, ReportLevel, TopicInsight, TopicKey } from "./types";
 
@@ -220,7 +221,7 @@ export function buildTopicInsight(topic: TopicKey, r: SajuResult, ctx: TopicCont
             ? "말솜씨와 센스로 분위기를 부드럽게 만드는 매력이 있어요."
             : counts.인성 >= 2
               ? "상대 이야기를 잘 들어 주는 안정감이 큰 매력이에요."
-              : `${GROUP_TRAIT[dominant]}이 매력으로 드러나는 타입이에요.`,
+              : `${josa(GROUP_TRAIT[dominant], "이/가")} 매력으로 드러나는 타입이에요.`,
       });
       if (ctx.level === "full") {
         if (dayRel("육합")) points.push({ title: "관계의 결", body: "마음을 연 사람과는 호흡이 잘 맞고 조화로운 관계를 만들기 쉬워요." });
@@ -267,7 +268,7 @@ export function buildTopicInsight(topic: TopicKey, r: SajuResult, ctx: TopicCont
         body: dominant === "관성" ? "맡은 역할을 책임감 있게 해내는 스타일이에요. 신뢰가 곧 나의 경쟁력이에요." : dominant === "식상" ? "아이디어를 내고 표현하는 일에서 빛나요. 새로운 시도를 즐기는 편이에요." : dominant === "재성" ? "결과와 실속을 중시하는 현실파예요. 목표를 숫자로 정하면 속도가 붙어요." : dominant === "인성" ? "배우고 정리하며 실력을 쌓는 스타일이에요. 전문성이 가장 큰 무기예요." : "주관이 뚜렷하고 독립적으로 일할 때 능률이 올라요.",
       });
       points.push({ title: "잘 맞는 환경", body: counts.관성 >= 2 ? "체계와 역할이 분명한 조직에서 안정적으로 성장해요." : counts.식상 >= 2 ? "자율성과 창의성이 보장되는 환경에서 힘이 나요." : counts.비겁 >= 2 ? "내 결정권이 있는 독립적인 환경이 잘 맞아요." : "배울 점이 많은 사람들과 함께하는 환경이 성장에 좋아요." });
-      points.push({ title: "성장 포인트", body: `${GROUP_TRAIT[dominant]}이 강점이에요. ${lowest.name} 기운(${lucky.color})처럼 비어 있는 부분을 의식적으로 채우면 균형이 좋아져요.` });
+      points.push({ title: "성장 포인트", body: `${josa(GROUP_TRAIT[dominant], "이/가")} 강점이에요. ${lowest.name} 기운(${lucky.color})처럼 비어 있는 부분을 의식적으로 채우면 균형이 좋아져요.` });
       break;
     }
     case "health": {
@@ -303,8 +304,8 @@ export function buildTopicInsight(topic: TopicKey, r: SajuResult, ctx: TopicCont
       break;
     }
     default: {
-      headline = `${GROUP_TRAIT[dominant]}이 돋보이는 하루가 될 수 있어요`;
-      points.push({ title: "나의 기질", body: `${GROUP_TRAIT[dominant]}이 가장 두드러지는 사주예요.` });
+      headline = `${josa(GROUP_TRAIT[dominant], "이/가")} 돋보이는 하루가 될 수 있어요`;
+      points.push({ title: "나의 기질", body: `${josa(GROUP_TRAIT[dominant], "이/가")} 가장 두드러지는 사주예요.` });
       points.push({ title: "채우면 좋은 기운", body: `${lowest.name} 기운(${lucky.color})이 적은 편이라, 그 색을 가까이 두면 기분 전환에 도움이 돼요.` });
     }
   }

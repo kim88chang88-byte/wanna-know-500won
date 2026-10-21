@@ -274,7 +274,7 @@ export function buildBook(r: SajuResult, ctx: BookContext): BookPage[] {
     [
       { heading: `${GROUP_LONG[dominant].name} — 나의 주력`, body: `${GROUP_LONG[dominant].talent} ${GROUP_LONG[dominant].work}` },
       { heading: "사람들과의 관계", body: `${GROUP_LONG[dominant].relation} ${GROUP_LONG[dominant].care}` },
-      { heading: `사회적 얼굴 — ${GROUP_TRAIT[monthGroup]}`, body: `월주(사회·직업 자리)에 ${monthGroup} 기운이 있어서, 일터와 사회에서는 ${GROUP_TRAIT[monthGroup]}이 먼저 드러나기 쉬워요.` },
+      { heading: `사회적 얼굴 — ${GROUP_TRAIT[monthGroup]}`, body: `월주(사회·직업 자리)에 ${monthGroup} 기운이 있어서, 일터와 사회에서는 ${josa(GROUP_TRAIT[monthGroup], "이/가")} 먼저 드러나기 쉬워요.` },
       { heading: `어울리는 분야`, body: `${GROUP_JOBS[dominant]}에서 강점이 잘 드러나요.` },
       ...GROUPS.filter((g) => g !== dominant).map((g) => {
         if (counts[g] > 0) return { heading: `${GROUP_LONG[g].name} — ${counts[g]}개`, body: `${GROUP_LONG[g].talent} ${GROUP_LONG[g].care}` };
