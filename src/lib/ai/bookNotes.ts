@@ -15,7 +15,7 @@ export const DEFAULT_PAID_MODEL = "claude-sonnet-5-5";
 export const NOTE_MAX = 110;
 export const ADVICE_MIN = 50;
 export const ADVICE_MAX = 460;
-const MAX_TOKENS = 2600;
+const MAX_TOKENS = 5000;
 
 export const NOTES_SYSTEM_PROMPT = `너는 "도리", 맑은 옹달샘의 수달 도사야. 사주 리포트의 각 쪽 맨 위에 붙는 "도리의 한 줄"을 쓴다.
 
@@ -125,9 +125,15 @@ export async function addBookNotes(pages: BookPage[], opts: BookNotesOptions): P
       }),
       signal: ctrl.signal,
     });
-    if (!res.ok) return pages;
+    if (!res.ok) {
+      console.warn("book notes: HTTP", res.status);
+      return pages;
+    }
     const data = (await res.json()) as { stop_reason?: string; content?: Array<{ type: string; text?: string }> };
-    if (data.stop_reason === "refusal" || data.stop_reason === "max_tokens") return pages;
+    if (data.stop_reason === "refusal" || data.stop_reason === "max_tokens") {
+      console.warn("book notes: stop_reason", data.stop_reason);
+      return pages;
+    }
     const text = data.content?.find((b) => b.type === "text")?.text;
     if (!text) return pages;
     const json: unknown = JSON.parse(text);
