@@ -183,7 +183,7 @@ export function buildBook(r: SajuResult, ctx: BookContext): BookPage[] {
   // 기둥 사이의 합·충·형·해·원진을 '어느 자리끼리 만났는지'로 풀어요. (제목이 관계 이름으로 시작해야 잠금 규칙에 걸려요)
   const relationRows: BookSection[] = natalRelations(natal).slice(0, 5).map((x) => ({ heading: x.heading, body: x.body }));
   for (const rel of r.stemRelations) {
-    relationRows.push({ heading: `천간 ${rel.type} · ${rel.desc}`, body: rel.type === "합" ? "하늘의 기운이 서로 어울려 새로운 기운으로 바뀌는 흐름이에요. 협력과 조화의 힌트로 읽어요." : "하늘의 기운이 부딪히는 흐름이에요. 생각과 방향이 달라질 수 있어 대화로 맞추면 좋아요." });
+    relationRows.push({ heading: `천간 ${rel.type} · ${rel.desc} — ${rel.type === "합" ? "마음이 잘 맞물려요" : "생각이 엇갈리기 쉬워요"}`, body: rel.type === "합" ? "하늘의 기운이 서로 어울려 새로운 기운으로 바뀌는 흐름이에요. 협력과 조화의 힌트로 읽어요." : "하늘의 기운이 부딪히는 흐름이에요. 생각과 방향이 달라질 수 있어 대화로 맞추면 좋아요." });
   }
   add(
     "pillars",
@@ -299,7 +299,7 @@ export function buildBook(r: SajuResult, ctx: BookContext): BookPage[] {
 
   // ── 6. 격국과 용신
   const yongsinSections: BookSection[] = yongsinEls.map((el) => ({
-    heading: `용신 ${el} — ${ELEMENT_INFO[el].color}`,
+    heading: `나를 돕는 기운 · ${el} (용신) — ${ELEMENT_INFO[el].color}`,
     body: `${el} 기운은 나의 균형을 돕는 힘이에요. 추천 습관: ${ELEMENT_HABIT[el].habit}. 분위기 아이템: ${ELEMENT_HABIT[el].item}. 행운 방향은 ${ELEMENT_INFO[el].direction}, 숫자는 ${ELEMENT_HABIT[el].number}이에요.`,
   }));
   add(
