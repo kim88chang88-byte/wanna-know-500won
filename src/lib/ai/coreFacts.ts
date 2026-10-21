@@ -1,6 +1,7 @@
 import { calculateSaju as ssajuCalculate } from "ssaju";
 import { STEMS } from "@/lib/saju/constants";
 import type { BirthInput } from "@/lib/saju/types";
+import { hiddenGods, interactions, natalRelations, POS_LABEL, type PosKey } from "@/lib/premium/book/insight";
 
 /*
  * 프리미엄 리포트 엔진(ssaju)이 이미 계산하는 값 중, 오늘 풀이에 쓸 핵심만 추려서 AI 에게 넘겨요.
@@ -20,6 +21,8 @@ export interface SsajuLike {
   daeun?: { current?: { startAge?: number; ganzhi?: string } | null };
   seyun?: Array<{ year?: number; ganzhi?: string; tenGodStem?: string; tenGodBranch?: string }>;
   currentYear?: number;
+  pillars?: { year?: string; month?: string; day?: string; hour?: string };
+  wolun?: Array<{ month: number; ganzhi?: string; stemTenGod?: string; branchTenGod?: string }>;
 }
 
 export interface CoreFacts {
@@ -30,6 +33,15 @@ export interface CoreFacts {
   길신?: string[];
   지금대운?: string;
   올해세운?: { 간지: string; 천간십성?: string; 지지십성?: string };
+  /** 원국 안의 합·충·형 (예: 월주-일주 午戌반합) */
+  원국관계?: string[];
+  /** 지장간 속에 숨은 십성 (겉으로 안 보이는 별) */
+  숨은십성?: string[];
+  /** 올해 세운이 원국과 만나는 합충 */
+  세운과원국?: string[];
+  /** 지금 대운이 원국과 만나는 합충 */
+  대운과원국?: string[];
+  이번달월운?: { 간지: string; 천간십성?: string; 지지십성?: string; 원국과?: string[] };
   참고?: string;
 }
 
@@ -41,8 +53,56 @@ function withReading(stem: string): string {
 const strs = (v: unknown, max: number): string[] =>
   Array.isArray(v) ? v.filter((x): x is string => typeof x === "string" && x.length > 0).slice(0, max) : [];
 
+/** 풀이에 '왜 그런지'를 담을 수 있게, 합충·지장간·세운·월운 근거를 덧붙여요. 값이 없으면 조용히 건너뛰어요. */
+function addInteractionFacts(facts: CoreFacts, r: SsajuLike, hourKnown: boolean, now: Date): void {
+  try {
+    const pl = r.pillars;
+    if (!pl?.year || !pl.month || !pl.day) return;
+    const natal: Partial<Record<PosKey, string>> = { year: pl.year, month: pl.month, day: pl.day };
+    if (hourKnown && pl.hour) natal.hour = pl.hour;
+    const rels = natalRelations(natal)
+      .slice(0, 4)
+      .map((x) => `${POS_LABEL[x.a]}-${POS_LABEL[x.b]} ${x.branches}${x.type}${x.element ? `(${x.element})` : ""}`);
+    if (rels.length) facts.원국관계 = rels;
+
+    const dayStem = pl.day[0];
+    const hid = hiddenGods(dayStem, natal)
+      .slice(0, 6)
+      .map((h) => `${POS_LABEL[h.pos]} 속 ${h.stem}(${h.god})`);
+    if (hid.length) facts.숨은십성 = hid;
+
+    const texts = (label: string, gz: string) => interactions(natal, { label, ganzhi: gz }).slice(0, 3).map((x) => x.text.split(" — ")[0]);
+    const sy = r.seyun?.find((x) => x.year === r.currentYear);
+    if (sy?.ganzhi) {
+      const t = texts("세운", sy.ganzhi);
+      if (t.length) facts.세운과원국 = t;
+    }
+    if (r.daeun?.current?.ganzhi) {
+      const t = texts("대운", r.daeun.current.ganzhi);
+      if (t.length) facts.대운과원국 = t;
+    }
+    // 이번 달 월운 (절기가 매달 7일 무렵 바뀌어서, 그 전이면 지난달로 봐요. r.wolun[0] 은 양력 2월경 寅월)
+    const k = new Date(now.getTime() + 9 * 3600 * 1000);
+    const day = k.getUTCDate();
+    const solar = k.getUTCMonth() + 1;
+    const eff = day >= 7 ? solar : solar === 1 ? 12 : solar - 1;
+    const w = r.wolun?.[eff >= 2 ? eff - 2 : 11];
+    if (w?.ganzhi) {
+      const t = texts("이번 달", w.ganzhi);
+      facts.이번달월운 = {
+        간지: w.ganzhi,
+        ...(w.stemTenGod ? { 천간십성: w.stemTenGod } : {}),
+        ...(w.branchTenGod ? { 지지십성: w.branchTenGod } : {}),
+        ...(t.length ? { 원국과: t } : {}),
+      };
+    }
+  } catch {
+    /* 근거를 못 만들어도 기본 풀이는 나가요 */
+  }
+}
+
 /** ssaju 결과에서 핵심만 뽑아요. 값이 없거나 모양이 달라도 던지지 않고 가능한 것만 담아요. */
-export function extractCoreFacts(r: SsajuLike, hourKnown: boolean): CoreFacts | null {
+export function extractCoreFacts(r: SsajuLike, hourKnown: boolean, now: Date = new Date()): CoreFacts | null {
   const strength = r.advanced?.dayStrength?.strength;
   if (!strength) return null;
 
@@ -64,6 +124,7 @@ export function extractCoreFacts(r: SsajuLike, hourKnown: boolean): CoreFacts | 
       ...(sy.tenGodBranch ? { 지지십성: sy.tenGodBranch } : {}),
     };
   }
+  addInteractionFacts(facts, r, hourKnown, now);
   if (!hourKnown) facts.참고 = "태어난 시간을 몰라서 신강/신약과 용신은 참고용이에요";
   return facts;
 }
@@ -83,7 +144,7 @@ export function buildCoreFacts(input: BirthInput, now: Date = new Date()): CoreF
       leap: input.calendar === "lunar" && input.isLeapMonth === true,
       now,
     });
-    return extractCoreFacts(r as unknown as SsajuLike, !hourUnknown);
+    return extractCoreFacts(r as unknown as SsajuLike, !hourUnknown, now);
   } catch {
     return null;
   }

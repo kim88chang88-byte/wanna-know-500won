@@ -106,3 +106,25 @@ describe("extractCoreFacts", () => {
     expect(extractCoreFacts({}, true)).toBeNull();
   });
 });
+
+describe("extractCoreFacts 합충 근거", () => {
+  const r = {
+    advanced: { dayStrength: { strength: "strong" } },
+    pillars: { year: "戊辰", month: "壬戌", day: "丙午", hour: "乙未" },
+    currentYear: 2026,
+    seyun: [{ year: 2026, ganzhi: "丙午" }],
+    daeun: { current: { startAge: 31, ganzhi: "丙寅" } },
+    wolun: Array.from({ length: 12 }, (_, i) => ({ month: i + 1, ganzhi: "戊戌", stemTenGod: "식신", branchTenGod: "식신" })),
+  };
+  it("원국 반합·세운 천간충·이번 달 월운을 담는다", () => {
+    const f = extractCoreFacts(r, true, new Date("2026-10-21T02:00:00Z"));
+    expect(f?.원국관계?.some((x) => x.includes("戌午반합"))).toBe(true);
+    expect(f?.세운과원국?.some((x) => x.includes("丙壬충"))).toBe(true);
+    expect(f?.이번달월운?.간지).toBe("戊戌");
+    expect(Array.isArray(f?.숨은십성)).toBe(true);
+  });
+  it("기둥이 없어도 던지지 않는다", () => {
+    const f = extractCoreFacts({ advanced: { dayStrength: { strength: "weak" } } }, false);
+    expect(f?.원국관계).toBeUndefined();
+  });
+});
