@@ -39,9 +39,11 @@ export interface Reading {
   mind: Indicator;
   /** 도리(수달 도사)의 한마디 (응원 메시지) */
   kkotgeoji: string;
+  /** "도리가 본 이유": 이 풀이가 나온 사주 근거를 쉬운 말로 한두 문장. 없을 수도 있어요. */
+  reason?: string;
 }
 
-const MAX = { keyword: 20, summary: 120, comment: 160, kkotgeoji: 300 } as const;
+const MAX = { keyword: 20, summary: 120, comment: 160, kkotgeoji: 300, reason: 200 } as const;
 
 const indicatorSchema = (what: string) => ({
   type: "object",
@@ -71,8 +73,9 @@ export const READING_SCHEMA = {
     money: indicatorSchema("금전운"),
     mind: indicatorSchema("마음운"),
     kkotgeoji: { type: "string", description: "도리의 응원 한마디. 2~3문장, 120자 안팎으로 짧게 (결과지 카드에 들어가야 해요)" },
+    reason: { type: "string", description: `도리가 본 이유. 이 풀이의 사주 근거(합·충·세운·월운·숨은 기운 중 입력에 실제로 있는 것)를 쉬운 말로 풀어 1~2문장, 100자 안팎. ${MAX.reason}자 이내. 근거가 없으면 빈 문자열` },
   },
-  required: ["keyword", "total", "love", "money", "mind", "kkotgeoji"],
+  required: ["keyword", "total", "love", "money", "mind", "kkotgeoji", "reason"],
   additionalProperties: false,
 } as const;
 
@@ -130,8 +133,9 @@ export function parseReading(value: unknown): Reading | null {
   // 도리 한마디가 너무 짧거나 뻔한 말뿐이면 다시 받아요.
   if (kkotgeoji.length < 20 || isGeneric(kkotgeoji)) return null;
 
-  const reading: Reading = { keyword, total: { score: totalScore, summary }, love, money, mind, kkotgeoji };
-  const allText = [keyword, summary, love.comment, money.comment, mind.comment, kkotgeoji].join(" ");
+  const reason = str(o.reason, MAX.reason);
+  const reading: Reading = { keyword, total: { score: totalScore, summary }, love, money, mind, kkotgeoji, ...(reason && reason.length >= 20 && !isGeneric(reason) ? { reason } : {}) };
+  const allText = [keyword, summary, love.comment, money.comment, mind.comment, kkotgeoji, reason ?? ""].join(" ");
   return containsForbidden(allText) ? null : reading;
 }
 
@@ -153,6 +157,7 @@ export interface PublicReading {
   keyword: string;
   total: { score: number; summary: string };
   kkotgeoji: string;
+  reason?: string;
   indicators: PublicIndicator[];
 }
 
@@ -167,5 +172,5 @@ export function toPublicReading(r: Reading, tier: ReadingTier = "free"): PublicR
     { key: "money", label: "금전운", score: r.money.score, comment: null, locked: true },
     { key: "mind", label: "마음운", score: r.mind.score, comment: null, locked: true },
   ];
-  return { tier, keyword: r.keyword, total: r.total, kkotgeoji: r.kkotgeoji, indicators };
+  return { tier, keyword: r.keyword, total: r.total, kkotgeoji: r.kkotgeoji, ...(r.reason ? { reason: r.reason } : {}), indicators };
 }

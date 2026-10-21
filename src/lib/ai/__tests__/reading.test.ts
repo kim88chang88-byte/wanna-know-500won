@@ -96,3 +96,19 @@ describe("뻔한 풀이 걸러내기", () => {
     expect(parseReading({ ...good, kkotgeoji: "오늘도 좋은 하루 될 거야, 파이팅 해보자!" })).toBeNull();
   });
 });
+
+describe("도리가 본 이유(reason)", () => {
+  const reason = "올해 흐름이 월주 자리와 부딪혀서 일터 쪽 마음이 분주해지기 쉬워(병임충).";
+  it("있으면 담아서 공개 응답에도 내려보낸다", () => {
+    const r = parseReading({ ...good, reason });
+    expect(r?.reason).toBe(reason);
+    expect(toPublicReading(r!).reason).toBe(reason);
+  });
+  it("비어 있거나 짧으면 reason 만 빼고 통과한다", () => {
+    expect(parseReading({ ...good, reason: "" })?.reason).toBeUndefined();
+    expect(parseReading({ ...good, reason: "짧음" })?.reason).toBeUndefined();
+  });
+  it("금지 표현이 섞이면 전체를 거른다", () => {
+    expect(parseReading({ ...good, reason: "올해는 이혼 이야기가 나오기 쉬운 흐름이라 조심하세요 그렇대" })).toBeNull();
+  });
+});

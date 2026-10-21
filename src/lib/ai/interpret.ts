@@ -45,7 +45,7 @@ const API_VERSION = "2023-06-01";
 export const DEFAULT_MODEL = "claude-haiku-5-5";
 /** 유료(500원 이상) 풀이 기본 모델 */
 export const PAID_MODEL = "claude-sonnet-5-5";
-const MAX_TOKENS = 1024;
+const MAX_TOKENS = 1500;
 
 interface ApiResponse {
   stop_reason?: string;

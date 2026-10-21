@@ -413,6 +413,13 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
               {/* 1) 인스타 감성 포토카드 + 공유 */}
               <PhotoCard report={premiumReport} aiQuote={reading?.kkotgeoji ?? null} />
 
+              {reading?.reason && (
+                <div data-testid="reading-reason" className="mt-4 p-4 rounded-2xl bg-white border border-brand-100 text-sm text-gray-800 leading-relaxed">
+                  <p className="text-xs font-semibold text-brand-700 mb-1">🔎 도리가 본 이유</p>
+                  {reading.reason}
+                </div>
+              )}
+
               {/* 2) 주제별 맞춤 분석 + 사주 리포트 */}
               <div data-testid="premium-result" className="mt-6">
                 <ManseReport report={premiumReport} />
