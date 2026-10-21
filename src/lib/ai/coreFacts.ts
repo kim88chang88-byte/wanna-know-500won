@@ -18,7 +18,7 @@ export interface SsajuLike {
     yongsin?: string[];
     sinsal?: { gilsin?: string[] };
   };
-  daeun?: { current?: { startAge?: number; ganzhi?: string } | null };
+  daeun?: { current?: { startAge?: number; endAge?: number; ganzhi?: string } | null };
   seyun?: Array<{ year?: number; ganzhi?: string; tenGodStem?: string; tenGodBranch?: string }>;
   currentYear?: number;
   pillars?: { year?: string; month?: string; day?: string; hour?: string };
@@ -41,6 +41,9 @@ export interface CoreFacts {
   세운과원국?: string[];
   /** 지금 대운이 원국과 만나는 합충 */
   대운과원국?: string[];
+  /** (질문 칩용) 올해 월별 흐름. 예: "2월경 戊寅(식신)" */
+  올해월운?: string[];
+  지금대운나이?: string;
   이번달월운?: { 간지: string; 천간십성?: string; 지지십성?: string; 원국과?: string[] };
   참고?: string;
 }
@@ -102,7 +105,7 @@ function addInteractionFacts(facts: CoreFacts, r: SsajuLike, hourKnown: boolean,
 }
 
 /** ssaju 결과에서 핵심만 뽑아요. 값이 없거나 모양이 달라도 던지지 않고 가능한 것만 담아요. */
-export function extractCoreFacts(r: SsajuLike, hourKnown: boolean, now: Date = new Date()): CoreFacts | null {
+export function extractCoreFacts(r: SsajuLike, hourKnown: boolean, now: Date = new Date(), detail = false): CoreFacts | null {
   const strength = r.advanced?.dayStrength?.strength;
   if (!strength) return null;
 
@@ -125,12 +128,19 @@ export function extractCoreFacts(r: SsajuLike, hourKnown: boolean, now: Date = n
     };
   }
   addInteractionFacts(facts, r, hourKnown, now);
+  if (detail) {
+    if (dae?.startAge !== undefined && dae.endAge !== undefined) facts.지금대운나이 = `${dae.startAge}~${dae.endAge}세`;
+    const months = (r.wolun ?? [])
+      .filter((m) => m.ganzhi)
+      .map((m) => `${(m.month % 12) + 1}월경 ${m.ganzhi}(${m.stemTenGod ?? ""}/${m.branchTenGod ?? ""})`);
+    if (months.length) facts.올해월운 = months;
+  }
   if (!hourKnown) facts.참고 = "태어난 시간을 몰라서 신강/신약과 용신은 참고용이에요";
   return facts;
 }
 
 /** 출생 정보로 핵심 사실을 계산해요. 어떤 이유로든 실패하면 null — 이 경우 풀이는 기본 재료만으로 나가요. */
-export function buildCoreFacts(input: BirthInput, now: Date = new Date()): CoreFacts | null {
+export function buildCoreFacts(input: BirthInput, now: Date = new Date(), detail = false): CoreFacts | null {
   try {
     const hourUnknown = input.hour === null || input.hour === undefined;
     const r = ssajuCalculate({
@@ -144,7 +154,7 @@ export function buildCoreFacts(input: BirthInput, now: Date = new Date()): CoreF
       leap: input.calendar === "lunar" && input.isLeapMonth === true,
       now,
     });
-    return extractCoreFacts(r as unknown as SsajuLike, !hourUnknown, now);
+    return extractCoreFacts(r as unknown as SsajuLike, !hourUnknown, now, detail);
   } catch {
     return null;
   }

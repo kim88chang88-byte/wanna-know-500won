@@ -21,6 +21,7 @@ import {
 } from "@/lib/intake";
 import { isCompatFortune } from "@/lib/premium/compat";
 import type { PublicReading } from "@/lib/ai/reading";
+import { AskChips } from "./AskChips";
 import { CONCERN_CHIPS, MAX_CONCERN_TAGS, MAX_CONCERN_TEXT, type Concern, type ConcernId } from "@/lib/concerns";
 import { profileSummary, profileToForm, sameBirth, type SavedProfile } from "@/lib/profile";
 import { BRANCHES, STEMS } from "@/lib/saju/constants";
@@ -277,6 +278,7 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
   const [readingStatus, setReadingStatus] = useState<ReadingStatus>("ok");
   const [premiumReport, setPremiumReport] = useState<PremiumReportView | null>(null);
   const [premiumError, setPremiumError] = useState<string | null>(null);
+  const [askInput, setAskInput] = useState<BirthInput | null>(null);
   const abortRef = useRef<AbortController | null>(null);
 
   // 창이 닫히면 진행 중인 요청도 멈춰요.
@@ -332,6 +334,7 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
       setPremiumReport(p.report);
       setPremiumError(p.error);
       setChart(data.chart);
+      setAskInput(input);
       setReading(data.reading ?? null);
       setReadingStatus(status);
       if (data.profileSaved) onProfileSaved?.(input);
@@ -419,6 +422,8 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
                   {reading.reason}
                 </div>
               )}
+
+              {askInput && <AskChips input={askInput} />}
 
               {/* 2) 주제별 맞춤 분석 + 사주 리포트 */}
               <div data-testid="premium-result" className="mt-6">
