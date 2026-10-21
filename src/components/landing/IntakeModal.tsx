@@ -22,6 +22,7 @@ import {
 import { isCompatFortune } from "@/lib/premium/compat";
 import type { PublicReading } from "@/lib/ai/reading";
 import { AskChips } from "./AskChips";
+import { CompareCard } from "./CompareCard";
 import { CONCERN_CHIPS, MAX_CONCERN_TAGS, MAX_CONCERN_TEXT, type Concern, type ConcernId } from "@/lib/concerns";
 import { profileSummary, profileToForm, sameBirth, type SavedProfile } from "@/lib/profile";
 import { BRANCHES, STEMS } from "@/lib/saju/constants";
@@ -424,6 +425,7 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
               )}
 
               {askInput && <AskChips input={askInput} />}
+              {askInput && <CompareCard input={askInput} />}
 
               {/* 2) 주제별 맞춤 분석 + 사주 리포트 */}
               <div data-testid="premium-result" className="mt-6">
