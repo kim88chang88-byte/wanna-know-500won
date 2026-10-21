@@ -152,3 +152,20 @@ describe("간지 조사", () => {
     expect(gzTopic("丙寅")).toBe("丙寅(병인)은");
   });
 });
+
+describe("사주 vs 현실 3갈래", () => {
+  it("모든 갈래가 응원으로 끝나고 금액·나이 같은 숫자 단정이 없다", async () => {
+    const { realityCheck } = await import("../book/reality");
+    for (const k of ["money", "career", "love"] as const) {
+      const rc = realityCheck(k);
+      expect(rc.options.length).toBe(3);
+      expect(rc.options.map((o) => o.label)).toEqual(["아직 못 미쳐요", "딱 맞아요", "이미 넘어섰어요"]);
+      for (const o of rc.options) {
+        expect(/[0-9]+\s?(억|원|만원|세)/.test(o.message)).toBe(false);
+        expect(/(망|불행|파산|이혼|위험)/.test(o.message)).toBe(false);
+      }
+      expect(rc.options[0].message).toContain("이 운을 잡아 봐요");
+      expect(rc.options[1].message).toContain("맞죠");
+    }
+  });
+});

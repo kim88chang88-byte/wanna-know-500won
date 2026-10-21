@@ -3,6 +3,7 @@ import { BRANCHES, STEMS, type Element } from "@/lib/saju/constants";
 import { josa } from "../josa";
 import { groupOf, type Group } from "../topic";
 import type { BookSection } from "../types";
+import { realityCheck } from "./reality";
 
 /*
  * 전문가 풀이처럼 읽히게 하는 '규칙 기반' 해석 모음. (외부 호출 없이 표와 규칙만 써요)
@@ -537,7 +538,7 @@ export function loveSections(i: LoveInput): { core: BookSection[]; timing: BookS
   } else {
     star = `원국에 ${starName}이 여러 개(${visible.slice(0, 3).join("·")}) 있어요. 끌리는 유형이 여러 갈래라 마음의 기준을 한 번 정리해 두면 선택이 편해져요.`;
   }
-  core.push({ heading: `연애의 별 · ${pg}`, body: star });
+  core.push({ heading: `연애의 별 · ${pg}`, body: star, reality: realityCheck("love") });
 
   const palaceGroup = groupOf(i.dayBranchGod);
   if (palaceGroup) {
@@ -626,7 +627,7 @@ export function careerSections(i: CareerInput, topic: "money" | "success"): { co
   } else {
     star = `원국에 ${starName}이 여러 개(${visible.slice(0, 3).join("·")}) 있어요. ${topic === "money" ? "돈과 성과를 다루는 감각이 좋지만 신경 쓸 곳이 많아 우선순위 정리가 필요해요" : "책임과 기대가 겹쳐 오기 쉬워서 우선순위를 줄이는 것이 중요해요"}.`;
   }
-  core.push({ heading: `${label}의 별 · ${pg}`, body: star });
+  core.push({ heading: `${label}의 별 · ${pg}`, body: star, reality: realityCheck(topic === "money" ? "money" : "career") });
 
   const mg = groupOf(i.monthBranchGod);
   if (mg) {

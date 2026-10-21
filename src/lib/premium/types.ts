@@ -65,6 +65,12 @@ export interface BookSection {
   locked?: boolean;
   /** 이용자가 '나와 비슷해요'를 눌러 확인해 볼 수 있는 문장들 (화면에서 체크 목록으로 보여줘요) */
   checks?: string[];
+  /** '사주 vs 지금 내 현실' 3갈래 비교 (화면에서 세 버튼으로 보여줘요) */
+  reality?: RealityCheck;
+}
+export interface RealityCheck {
+  question: string;
+  options: Array<{ label: string; message: string }>;
 }
 export interface BookRow {
   label: string;

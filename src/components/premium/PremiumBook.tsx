@@ -3,7 +3,7 @@
 import ConcernCard from "./ConcernCard";
 import { useEffect, useRef, useState } from "react";
 import { checkMessage } from "@/lib/premium/book/resonance";
-import type { BookPage, BookRow, BookTable, ElementKind, PremiumReportView } from "@/lib/premium/types";
+import type { BookPage, BookRow, BookTable, ElementKind, PremiumReportView, RealityCheck } from "@/lib/premium/types";
 
 /*
  * 프리미엄 10페이지 리포트 리더. 한 번에 한 페이지씩 넘겨 보는 고급스러운 책 형태예요.
@@ -50,6 +50,35 @@ function CheckList({ items }: { items: string[] }) {
       ))}
       <p role="status" data-testid="book-checks-result" className="min-h-[1.25rem] pt-0.5 text-[12.5px] font-bold text-[#f6dfa8]">
         {touched ? `${items.length}개 중 ${hit}개가 나와 비슷해요. ${checkMessage(hit, items.length)}` : ""}
+      </p>
+    </div>
+  );
+}
+
+/** 사주가 보여 준 흐름과 지금 내 현실을 견줘 보는 세 갈래. 어느 쪽이든 응원으로 마무리해요. */
+function RealityPick({ rc }: { rc: RealityCheck }) {
+  const [pick, setPick] = useState<number | null>(null);
+  return (
+    <div data-testid="book-reality" className="mt-4 rounded-xl border border-[#e6c887]/30 bg-white/[0.03] px-4 py-3.5">
+      <p className="text-[13px] font-bold text-[#e6c887]">🔎 지금 내 현실과 견줘 보기</p>
+      <p className="mt-1 text-[13px] leading-relaxed text-[#efe7d3]">{rc.question}</p>
+      <div className="mt-2.5 flex flex-wrap gap-2">
+        {rc.options.map((o, i) => (
+          <button
+            key={o.label}
+            type="button"
+            aria-pressed={pick === i}
+            onClick={() => setPick(i)}
+            className={`rounded-full border px-3.5 py-1.5 text-[12.5px] font-bold transition-colors ${
+              pick === i ? "border-[#e6c887] bg-[#e6c887] text-[#2a1f45]" : "border-[#e6c887]/40 text-[#efe7d3] hover:border-[#e6c887]"
+            }`}
+          >
+            {o.label}
+          </button>
+        ))}
+      </div>
+      <p role="status" data-testid="book-reality-result" className="min-h-[1.25rem] pt-2.5 text-[13.5px] leading-relaxed text-[#fbf3de]">
+        {pick !== null ? rc.options[pick].message : ""}
       </p>
     </div>
   );
@@ -410,6 +439,7 @@ export default function PremiumBook({ report }: { report: PremiumReportView }) {
                 <p className="mt-1.5 text-[14px] leading-[1.8] text-[#efe7d3]">{s.body}</p>
               )}
               {!s.locked && s.checks && s.checks.length > 0 && <CheckList items={s.checks} />}
+              {!s.locked && s.reality && <RealityPick rc={s.reality} />}
             </section>
           ))}
         </div>
