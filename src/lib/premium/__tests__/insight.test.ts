@@ -169,3 +169,20 @@ describe("사주 vs 현실 3갈래", () => {
     }
   });
 });
+
+describe("사주 vs 현실 — 학업·컨디션·시기", () => {
+  it("세 갈래가 있고 숫자 단정·겁주는 말이 없다", async () => {
+    const { realityCheck } = await import("../book/reality");
+    for (const k of ["study", "health", "flow"] as const) {
+      const rc = realityCheck(k);
+      expect(rc.options.length).toBe(3);
+      for (const o of rc.options) {
+        expect(/[0-9]+\s?(억|원|만원|세)/.test(o.message)).toBe(false);
+        expect(/(망|불행|파산|이혼|위험|병)/.test(o.message)).toBe(false);
+        expect(o.message.length > 40).toBe(true);
+      }
+    }
+    expect(realityCheck("health").options[0].label).toBe("요즘 좀 지쳐요");
+    expect(realityCheck("flow").options[0].message).toContain("이 운을 잡아 봐요");
+  });
+});

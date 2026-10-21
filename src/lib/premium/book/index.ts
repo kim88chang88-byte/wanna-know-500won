@@ -19,6 +19,7 @@ import {
 import { buildLookBack, buildTraits } from "./resonance";
 import { ELEMENT_INFO, FLOW_LINE, GROUP_TRAIT, GROUPS, groupOf, type Group } from "../topic";
 import type { BookPage, BookRow, BookSection, ElementView, PillarView, TopicInsight, TopicKey } from "../types";
+import { realityCheck } from "./reality";
 import {
   ELEMENT_DOMAIN,
   ELEMENT_EXCESS,
@@ -360,6 +361,9 @@ export function buildBook(r: SajuResult, ctx: BookContext): BookPage[] {
     if (cs.timing) topicSections.push(cs.timing);
   }
   for (const t of insight.timing) topicSections.push({ heading: t.title, body: t.body });
+  if ((topicKey === "study" || topicKey === "health") && topicSections.length > 0 && !topicSections[0].reality) {
+    topicSections[0] = { ...topicSections[0], reality: realityCheck(topicKey) };
+  }
   for (const sit of TOPIC_SITUATIONS[topicKey]) topicSections.push({ heading: `상황별 가이드 · ${sit.title}`, body: sit.body });
   topicSections.push({ heading: "실천 처방", body: deep.prescription });
   topicSections.push({ heading: "줄이면 좋은 습관", body: deep.avoid });
@@ -376,7 +380,7 @@ export function buildBook(r: SajuResult, ctx: BookContext): BookPage[] {
   const daeunSections: BookSection[] = [];
   if (cur) {
     const g = groupsOf(cur.stemTenGod, cur.branchTenGod)[0] ?? dominant;
-    daeunSections.push({ heading: `지금 대운 · ${cur.ganzhi} (${cur.startAge}~${cur.endAge}세)`, body: `${FLOW_LINE[g]} ${STAGE12_TEXT[cur["12unsung"]] ?? ""} ${GROUP_LONG[g].talent}` });
+    daeunSections.push({ heading: `지금 대운 · ${cur.ganzhi} (${cur.startAge}~${cur.endAge}세)`, reality: realityCheck("flow"), body: `${FLOW_LINE[g]} ${STAGE12_TEXT[cur["12unsung"]] ?? ""} ${GROUP_LONG[g].talent}` });
   }
   if (cur) {
     const line = interactionLine(natal, { label: "대운", ganzhi: cur.ganzhi });
@@ -447,7 +451,7 @@ export function buildBook(r: SajuResult, ctx: BookContext): BookPage[] {
   }
   if (sy) {
     const g = groupsOf(sy.tenGodStem, sy.tenGodBranch)[0] ?? dominant;
-    yearSections.push({ heading: `${year}년 · ${sy.ganzhi}`, body: `${FLOW_LINE[g]} ${STAGE12_TEXT[sy.stage12] ?? ""} ${cur ? `${cur.ganzhi} 대운 속의 한 해로 읽어요.` : ""}` });
+    yearSections.push({ heading: `${year}년 · ${sy.ganzhi}`, reality: realityCheck("flow"), body: `${FLOW_LINE[g]} ${STAGE12_TEXT[sy.stage12] ?? ""} ${cur ? `${cur.ganzhi} 대운 속의 한 해로 읽어요.` : ""}` });
   }
   if (syNext) {
     const g = groupsOf(syNext.tenGodStem, syNext.tenGodBranch)[0] ?? dominant;

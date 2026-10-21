@@ -8,9 +8,9 @@ import type { RealityCheck } from "../types";
  * 금액이나 나이처럼 사주로 계산할 수 없는 숫자는 쓰지 않고, 겁주지 않아요.
  */
 
-export type RealityKind = "money" | "career" | "love";
+export type RealityKind = "money" | "career" | "love" | "study" | "health" | "flow";
 
-const COPY: Record<RealityKind, { question: string; below: string; match: string; above: string }> = {
+const COPY: Record<RealityKind, { question: string; below: string; match: string; above: string; labels?: [string, string, string] }> = {
   money: {
     question: "사주가 보여 준 재물의 흐름과 지금 내 모습을 견줘 보면, 어느 쪽에 가까운가요?",
     below:
@@ -38,6 +38,34 @@ const COPY: Record<RealityKind, { question: string; below: string; match: string
     above:
       "와, 사주가 보여 준 흐름보다 더 따뜻한 관계를 만들어 오셨네요! 타고난 인연 위에 직접 가꾼 마음이 얹힌 결과예요. 정말 멋져요. 이 마음을 지키면서 서로에게 고마움을 자주 표현해 보세요.",
   },
+  study: {
+    question: "사주가 보여 준 배움·집중의 흐름과 지금 내 모습을 견줘 보면, 어느 쪽에 가까운가요?",
+    below:
+      "아직 흐름만큼 속도가 나지 않았다면, 그만큼 더 올라갈 여지가 있다는 뜻이에요. 사주는 집중이 잘 붙는 때와 방식을 알려 줄 뿐이고, 한 장을 넘기는 건 지금의 나예요. 오늘은 ‘딱 25분’만 정해서 해 보세요. 이 운을 잡아 봐요!",
+    match:
+      "거봐요, 도리 말이 맞죠? 타고난 배움의 결과 지금 모습이 잘 맞닿아 있어요. 지금의 리듬을 지키면서, 약한 부분 하나만 가볍게 채워 봐요.",
+    above:
+      "와, 사주가 보여 준 흐름보다 훨씬 잘 해내고 계시네요! 타고난 결 위에 직접 쌓은 노력이 얹힌 결과예요. 정말 멋져요. 이 방식을 유지하면서, 배운 걸 누군가에게 설명해 보면 한 단계 더 단단해져요.",
+  },
+  health: {
+    question: "사주가 보여 준 컨디션·마음의 흐름과 요즘 내 모습을 견줘 보면, 어느 쪽에 가까운가요?",
+    labels: ["요즘 좀 지쳐요", "딱 맞아요", "생각보다 가뿐해요"],
+    below:
+      "요즘 지쳐 있다면, 그만큼 쉬어 갈 여지가 있다는 신호로 읽어 봐요. 사주는 에너지가 차오르는 방향을 알려 줄 뿐이고, 돌보는 건 오늘의 작은 습관이에요. 물 한 잔, 5분 산책 중 하나만 해 보세요. 힘든 상태가 길게 이어진다면 전문가와 이야기해 보는 것도 좋아요.",
+    match:
+      "거봐요, 도리 말이 맞죠? 타고난 결과 요즘 모습이 잘 맞닿아 있어요. 지금의 리듬을 지키면서, 나를 챙기는 시간을 조금만 더 늘려 봐요.",
+    above:
+      "와, 사주가 보여 준 흐름보다 훨씬 가뿐하게 지내고 계시네요! 스스로를 잘 돌봐 온 덕분이에요. 정말 멋져요. 지금의 습관을 유지하면서, 쉬는 날도 미리 한 번 챙겨 두세요.",
+  },
+  flow: {
+    question: "사주가 보여 준 이 시기의 흐름과 요즘 내 모습을 견줘 보면, 어느 쪽에 가까운가요?",
+    below:
+      "아직 흐름만큼 풀리지 않았다면, 그만큼 펼쳐질 여지가 남아 있다는 뜻이에요. 사주는 계절의 방향을 알려 줄 뿐이고, 씨앗을 심는 건 지금의 작은 행동이에요. 이번 달에 ‘새로 해 볼 일’ 하나만 정해 보세요. 이 운을 잡아 봐요!",
+    match:
+      "거봐요, 도리 말이 맞죠? 타고난 흐름과 요즘 모습이 잘 맞닿아 있어요. 지금의 걸음을 지키면서 다음 계절을 가볍게 준비해 봐요.",
+    above:
+      "와, 사주가 보여 준 흐름보다 훨씬 알차게 보내고 계시네요! 시기의 힘 위에 직접 쌓은 노력이 얹힌 결과예요. 정말 멋져요. 이 기세를 유지하면서, 한 단계 더 키울 일을 하나만 골라 보세요.",
+  },
 };
 
 export function realityCheck(kind: RealityKind): RealityCheck {
@@ -45,9 +73,9 @@ export function realityCheck(kind: RealityKind): RealityCheck {
   return {
     question: c.question,
     options: [
-      { label: "아직 못 미쳐요", message: c.below },
-      { label: "딱 맞아요", message: c.match },
-      { label: "이미 넘어섰어요", message: c.above },
+      { label: c.labels?.[0] ?? "아직 못 미쳐요", message: c.below },
+      { label: c.labels?.[1] ?? "딱 맞아요", message: c.match },
+      { label: c.labels?.[2] ?? "이미 넘어섰어요", message: c.above },
     ],
   };
 }
