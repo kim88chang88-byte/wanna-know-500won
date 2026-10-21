@@ -145,6 +145,17 @@ const DAY_EXTRA: Record<RelType, string> = {
   원진: "일지가 얽히면 가까운 사이에서도 각자의 공간을 존중할수록 편해져요.",
 };
 
+/** 제목용 쉬운 말. 용어(충·합...)는 제목 맨 앞에 짧게 두고, 뒤에 실제 모습을 풀어 써요. */
+const REL_PLAIN: Record<RelType, string> = {
+  충: "서로 부딪혀요",
+  육합: "서로 끌어당겨요",
+  반합: "한 편으로 뭉쳐요",
+  형: "서로 날이 서기 쉬워요",
+  해: "서운함이 쌓이기 쉬워요",
+  원진: "묘하게 엇갈려요",
+};
+const POS_PLAIN: Record<PosKey, string> = { year: "어린 시절", month: "사회·직업", day: "나·배우자", hour: "꿈·말년" };
+
 const TYPE_ORDER: RelType[] = ["충", "육합", "반합", "형", "해", "원진"];
 
 export interface NatalRelation {
@@ -178,7 +189,7 @@ export function natalRelations(pillars: Partial<Record<PosKey, string>>): NatalR
           branches: `${ba}${bb}`,
           element: rel.element,
           dayInvolved,
-          heading: `${rel.type} · ${POS_LABEL[a]}와 ${POS_LABEL[b]} (${ba}${bb}${rel.element ? ` → ${rel.element}` : ""})`,
+          heading: `${rel.type} · ${POS_PLAIN[a]} 자리와 ${POS_PLAIN[b]} 자리가 ${REL_PLAIN[rel.type]} (${ba}${bb}${rel.element ? ` → ${rel.element}` : ""})`,
           body: `${EFFECT[rel.type](m, rel.element)}${dayInvolved ? ` ${DAY_EXTRA[rel.type]}` : ""}`,
         });
       }
@@ -291,7 +302,7 @@ export function johuSection(dayStem: string, monthBranch: string): BookSection |
   const stemKo = STEMS.find((s) => s.hanja === dayStem)?.hangul ?? "";
   const earthNote = "辰戌丑未".includes(monthBranch) ? " 계절이 바뀌는 길목(토 기운이 강한 달)이라 흙의 안정감과 무게가 함께 작용해요." : "";
   return {
-    heading: "조후 · 태어난 계절의 온도",
+    heading: "태어난 계절의 온도 · 조후",
     body: `${monthBranch}월(${season})에 태어났어요. ${SEASON_TEMP[season]}.${earthNote} 일간 ${dayStem}(${stemKo}, ${EL_KO[me]})는 ${TOWARD_SEASON[rel]} 이 사주는 ${SEASON_NEED[season]}.`,
   };
 }
@@ -535,7 +546,7 @@ export function loveSections(i: LoveInput): { core: BookSection[]; timing: BookS
   const dayRel = natalRelations(i.pillars).filter((r) => r.dayInvolved);
   if (dayRel.length > 0) {
     const r = dayRel[0];
-    core.push({ heading: `배우자 자리의 어울림 · ${POS_LABEL[r.a]}와 ${POS_LABEL[r.b]} ${r.type}`, body: `일지가 ${r.type === "충" ? "부딪히는" : r.type === "육합" || r.type === "반합" ? "어울리는" : "자극받는"} 구조예요. ${DAY_EXTRA[r.type]}` });
+    core.push({ heading: `배우자 자리의 어울림 · ${POS_PLAIN[r.a]} 자리와 ${POS_PLAIN[r.b]} 자리가 ${REL_PLAIN[r.type]} (${r.type})`, body: `일지가 ${r.type === "충" ? "부딪히는" : r.type === "육합" || r.type === "반합" ? "어울리는" : "자극받는"} 구조예요. ${DAY_EXTRA[r.type]}` });
   }
 
   // 시기: 대운·세운
@@ -625,7 +636,7 @@ export function careerSections(i: CareerInput, topic: "money" | "success"): { co
   const monthRel = natalRelations(i.pillars).filter((r) => r.a === "month" || r.b === "month");
   if (monthRel.length > 0) {
     const r = monthRel[0];
-    core.push({ heading: `일·직업 자리의 어울림 · ${POS_LABEL[r.a]}와 ${POS_LABEL[r.b]} ${r.type}`, body: `월주가 ${r.type === "충" ? "부딪히는" : r.type === "육합" || r.type === "반합" ? "어울리는" : "자극받는"} 구조예요. 일과 사회 영역에서 ${r.type === "충" ? "환경 변화나 이동이 잦을 수 있어, 한쪽을 안정시키며 다른 쪽을 움직이는 방식이 잘 맞아요" : r.type === "육합" || r.type === "반합" ? "사람과 환경이 나를 도와주는 방향으로 모이기 쉬워요" : "긴장이 쌓이지 않게 쉬는 구간을 의식적으로 두면 좋아요"}.` });
+    core.push({ heading: `일·직업 자리의 어울림 · ${POS_PLAIN[r.a]} 자리와 ${POS_PLAIN[r.b]} 자리가 ${REL_PLAIN[r.type]} (${r.type})`, body: `월주가 ${r.type === "충" ? "부딪히는" : r.type === "육합" || r.type === "반합" ? "어울리는" : "자극받는"} 구조예요. 일과 사회 영역에서 ${r.type === "충" ? "환경 변화나 이동이 잦을 수 있어, 한쪽을 안정시키며 다른 쪽을 움직이는 방식이 잘 맞아요" : r.type === "육합" || r.type === "반합" ? "사람과 환경이 나를 도와주는 방향으로 모이기 쉬워요" : "긴장이 쌓이지 않게 쉬는 구간을 의식적으로 두면 좋아요"}.` });
   }
 
   const parts: string[] = [];
