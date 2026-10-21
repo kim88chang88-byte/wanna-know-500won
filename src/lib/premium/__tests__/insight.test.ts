@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { comboSections, hiddenGods, hiddenGroupCount, interactionLine, interactions, johuSection, loveSections, mainStemOf, monthSection, natalRelations, yongsinRoleSection, GOD_MONTH_LINE, GOD_PAST_YEAR, PLACE_GROUP } from "../book/insight";
+import { careerSections, comboSections, hiddenGods, hiddenGroupCount, interactionLine, interactions, johuSection, loveSections, mainStemOf, monthSection, natalRelations, yongsinRoleSection, GOD_MONTH_LINE, GOD_PAST_YEAR, PLACE_GROUP } from "../book/insight";
 import { buildLookBack } from "../book/resonance";
 
 // 1988-11-04 16:55 남자: 戊辰 壬戌 癸亥 庚申
@@ -121,5 +121,27 @@ describe("월별·지난해 변주", () => {
     expect(s?.checks?.[0]).not.toBe(s?.checks?.[1]?.replace("2025년(乙巳)", "2024년(甲辰)"));
     expect(s?.checks?.[0]).toContain(GOD_PAST_YEAR["상관"]);
     expect(s?.checks?.[1]).toContain(GOD_PAST_YEAR["식신"]);
+  });
+});
+
+describe("재물·성공 심층", () => {
+  const base = { dayStem: "癸", gender: "남", pillars: P, year: 2026, seyun: "丙午", seyunNext: "丁未", daeunNow: { ganzhi: "丙寅", startAge: 31, endAge: 40 }, daeunNext: null, monthStemGod: "겁재", monthBranchGod: "정관" };
+  it("재물: 재성이 겉으론 0개, 지장간 丁(편재), 대운·세운에서 재성이 들어온다고 풀이", () => {
+    const c = careerSections(base, "money");
+    expect(c.core[0].heading).toContain("재물의 별");
+    expect(c.core[0].body).toContain("丁(편재)");
+    expect(c.timing?.heading).toBe("2026년 흐름 · 재물의 시기");
+    expect(c.timing?.body).toContain("丙午");
+    expect(c.timing?.body).toContain("丙(병)이");
+  });
+  it("성공: 월주 정관을 일·직업 자리로 풀고, 관성이 여러 개임을 말한다", () => {
+    const c = careerSections(base, "success");
+    expect(c.core[0].body).toContain("정관");
+    expect(c.core[1].heading).toContain("일·직업 자리(월주)");
+    expect(c.core[1].body).toContain("안정적인 직장");
+  });
+  it("월주가 충·합에 얽히면 일·직업 자리의 어울림 섹션이 붙는다", () => {
+    const c = careerSections(base, "success");
+    expect(c.core.some((x) => x.heading.startsWith("일·직업 자리의 어울림"))).toBe(true);
   });
 });

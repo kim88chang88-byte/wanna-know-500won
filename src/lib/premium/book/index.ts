@@ -2,6 +2,7 @@ import type { SajuResult } from "ssaju";
 import { STEMS } from "@/lib/saju/constants";
 import { josa } from "../josa";
 import {
+  careerSections,
   comboSections,
   GOD_MONTH_LINE,
   hiddenGods,
@@ -337,6 +338,26 @@ export function buildBook(r: SajuResult, ctx: BookContext): BookPage[] {
     });
     topicSections.push(...lv.core);
     if (lv.timing) topicSections.push(lv.timing);
+  }
+  if (topicKey === "money" || topicKey === "success") {
+    const nxDa = idxOfCurrent(r) >= 0 ? r.daeun.list[idxOfCurrent(r) + 1] : undefined;
+    const cs = careerSections(
+      {
+        dayStem,
+        gender: r.input.gender,
+        pillars: natal,
+        year,
+        seyun: sy?.ganzhi ?? null,
+        seyunNext: syNext?.ganzhi ?? null,
+        daeunNow: cur ? { ganzhi: cur.ganzhi, startAge: cur.startAge, endAge: cur.endAge } : null,
+        daeunNext: nxDa ? { ganzhi: nxDa.ganzhi, startAge: nxDa.startAge } : null,
+        monthStemGod: r.tenGods.month.stem,
+        monthBranchGod: r.tenGods.month.branch,
+      },
+      topicKey,
+    );
+    topicSections.push(...cs.core);
+    if (cs.timing) topicSections.push(cs.timing);
   }
   for (const t of insight.timing) topicSections.push({ heading: t.title, body: t.body });
   for (const sit of TOPIC_SITUATIONS[topicKey]) topicSections.push({ heading: `상황별 가이드 · ${sit.title}`, body: sit.body });

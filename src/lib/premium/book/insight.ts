@@ -571,6 +571,74 @@ export function loveSections(i: LoveInput): { core: BookSection[]; timing: BookS
   return { core, timing };
 }
 
+/* ------------------------------------------------------------------ 재물·성공(직장) 심층용 */
+
+export interface CareerInput extends Omit<LoveInput, "dayBranchGod"> {
+  /** 월주 천간·지지(본기) 십성 */
+  monthStemGod: string | undefined;
+  monthBranchGod: string | undefined;
+}
+
+export function careerSections(i: CareerInput, topic: "money" | "success"): { core: BookSection[]; timing: BookSection | null } {
+  const pg: Group = topic === "money" ? "재성" : "관성";
+  const starName = topic === "money" ? "재성(돈과 성과의 별)" : "관성(직장·책임의 별)";
+  const label = topic === "money" ? "재물" : "직장·성취";
+  const visible: string[] = [];
+  for (const pos of POS_ORDER) {
+    const p = i.pillars[pos];
+    if (!p || p.length < 2) continue;
+    if (pos !== "day") {
+      const g = tenGodOf(i.dayStem, p[0]);
+      if (groupOf(g) === pg) visible.push(g);
+    }
+    const bg = tenGodOf(i.dayStem, mainStemOf(p[1]));
+    if (groupOf(bg) === pg) visible.push(bg);
+  }
+  const hid = hiddenGods(i.dayStem, i.pillars).filter((h) => h.group === pg);
+  const core: BookSection[] = [];
+
+  let star: string;
+  if (visible.length === 0 && hid.length === 0) {
+    star = `원국에 ${starName}이 거의 보이지 않아요. 약점이라기보다, 운에서 이 기운이 들어올 때 존재감이 크게 느껴지는 구조예요. 그때는 ${topic === "money" ? "돈과 성과를 현실로 만들려는 마음이 커져요" : "책임과 평가가 한꺼번에 느껴질 수 있어요"}.`;
+  } else if (visible.length === 0) {
+    const where = hid.slice(0, 2).map((h) => `${POS_LABEL[h.pos]}의 ${h.stem}(${h.god})`).join(", ");
+    star = `겉으로는 ${starName}이 드러나지 않지만 지장간에 ${where}이 숨어 있어요. 평소엔 조용하다가 운에서 이 기운이 들어오면 ${label}에 대한 욕구와 기회가 눈에 띄게 올라와요.`;
+  } else if (visible.length === 1) {
+    star = `원국에 ${starName}이 하나(${visible[0]})로 또렷해요. ${label}에서 기준이 분명하고, 한 가지를 꾸준히 밀어붙일 때 힘이 나요.`;
+  } else {
+    star = `원국에 ${starName}이 여러 개(${visible.slice(0, 3).join("·")}) 있어요. ${topic === "money" ? "돈과 성과를 다루는 감각이 좋지만 신경 쓸 곳이 많아 우선순위 정리가 필요해요" : "책임과 기대가 겹쳐 오기 쉬워서 우선순위를 줄이는 것이 중요해요"}.`;
+  }
+  core.push({ heading: `${label}의 별 · ${pg}`, body: star });
+
+  const mg = groupOf(i.monthBranchGod);
+  if (mg) {
+    const stemPart = i.monthStemGod ? `월간 ${i.monthStemGod}, ` : "";
+    core.push({ heading: `일·직업 자리(월주) · ${stemPart}월지 ${i.monthBranchGod}`, body: PLACE_GROUP.month[mg] });
+  }
+  const monthRel = natalRelations(i.pillars).filter((r) => r.a === "month" || r.b === "month");
+  if (monthRel.length > 0) {
+    const r = monthRel[0];
+    core.push({ heading: `일·직업 자리의 어울림 · ${POS_LABEL[r.a]}와 ${POS_LABEL[r.b]} ${r.type}`, body: `월주가 ${r.type === "충" ? "부딪히는" : r.type === "육합" || r.type === "반합" ? "어울리는" : "자극받는"} 구조예요. 일과 사회 영역에서 ${r.type === "충" ? "환경 변화나 이동이 잦을 수 있어, 한쪽을 안정시키며 다른 쪽을 움직이는 방식이 잘 맞아요" : r.type === "육합" || r.type === "반합" ? "사람과 환경이 나를 도와주는 방향으로 모이기 쉬워요" : "긴장이 쌓이지 않게 쉬는 구간을 의식적으로 두면 좋아요"}.` });
+  }
+
+  const parts: string[] = [];
+  const add = (who: string, gz: string, endText?: string) => {
+    const h = incomingHasPartner(i.dayStem, gz, pg);
+    if (h.stem || h.branch) {
+      const meaning = visible.length > 0 ? `원래 있던 ${label}의 기운이 한층 선명해져요.` : hid.length > 0 ? `숨어 있던 ${label}의 기운이 겉으로 드러나요.` : `원국에 없던 ${label}의 기운이 들어와 존재감이 크게 느껴져요.`;
+      parts.push(`${who} ${gz}에는 ${starName}이 들어와요(${h.gods.join("·")}). ${meaning}${endText ?? ""}`);
+    } else {
+      parts.push(`${who} ${gz}은 ${label}의 별이 직접 들어오는 흐름은 아니에요.`);
+    }
+    const inter = interactionLine(i.pillars, { label: who.replace(/\(.*$/, "").trim(), ganzhi: gz });
+    if (inter) parts.push(`${who.replace(/\(.*$/, "").trim()}이 원국과 만나는 모습: ${inter}`);
+  };
+  if (i.daeunNow) add(`지금 대운(${i.daeunNow.startAge}~${i.daeunNow.endAge}세)`, i.daeunNow.ganzhi);
+  if (i.seyun) add(`${i.year}년 세운`, i.seyun);
+  const timing: BookSection | null = parts.length > 0 ? { heading: `${i.year}년 흐름 · ${label}의 시기`, body: parts.join(" ") } : null;
+  return { core, timing };
+}
+
 /** 이번 달·다음 달 한눈에 */
 export function monthSection(pillars: Partial<Record<PosKey, string>>, months: Array<{ label: string; ganzhi: string; stemGod: string }>): BookSection | null {
   if (months.length === 0) return null;
