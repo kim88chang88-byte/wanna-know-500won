@@ -1,7 +1,9 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { getBrowserStorage, readCounts, recordDraw, type DrawCounts } from "@/lib/drawCounter";
+import { dayKey, getBrowserStorage, readCounts, recordDraw, type DrawCounts } from "@/lib/drawCounter";
+import { readStreak, recordVisit, streakLine } from "@/lib/streak";
+import { FollowupCard } from "./FollowupCard";
 import IntakeModal, { type IntakeTarget } from "./IntakeModal";
 import { LoginModal } from "./Modals";
 import { useAuth } from "./useAuth";
@@ -26,6 +28,7 @@ export default function Landing() {
   const [counts, setCounts] = useState<DrawCounts>({ today: 0, month: 0 });
   // 화면에 보이는 최신 횟수. (상태 업데이터 안에서 저장소에 쓰면 개발 모드에서 두 번 실행되어 2씩 늘어나서 ref 를 씁니다)
   const countsRef = useRef<DrawCounts>(counts);
+  const [streakText, setStreakText] = useState<string | null>(null);
   const timers = useRef<number[]>([]);
 
   const applyCounts = useCallback((next: DrawCounts) => {
@@ -36,6 +39,7 @@ export default function Landing() {
   // 서버가 만든 HTML 과 맞추기 위해 첫 화면은 0 으로 두고, 브라우저에서 저장된 횟수를 읽어 옵니다.
   useEffect(() => {
     applyCounts(readCounts(getBrowserStorage(), new Date()));
+    setStreakText(streakLine(readStreak(getBrowserStorage(), dayKey(new Date()))));
     const pending = timers.current;
     return () => pending.forEach((t) => window.clearTimeout(t));
   }, [applyCounts]);
@@ -90,6 +94,8 @@ export default function Landing() {
   // 로그인 회원이고 서버가 횟수를 세어 줬다면 그 값을 쓰고, 아니면 이 브라우저에서만 세요.
   const completeDraw = useCallback(
     (fromServer?: { today: number; month: number } | null) => {
+      // 오늘을 방문한 날로 기록해서 연속 방문 '물길'을 이어요. (이 기기에서만 세요)
+      setStreakText(streakLine(recordVisit(getBrowserStorage(), dayKey(new Date()))));
       if (fromServer) {
         setServerCounts(fromServer);
         applyCounts(fromServer);
@@ -112,7 +118,8 @@ export default function Landing() {
       <Header onOpenLogin={openLogin} user={user} />
 
       <main className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-5">
-        <HeroSection counts={counts} />
+        <HeroSection counts={counts} streakText={streakText} />
+        <FollowupCard />
         <ShowcaseSection />
         <MachinesSection onSpin={handleSpin} />
         <PremiumSection onSpin={handleSpin} />

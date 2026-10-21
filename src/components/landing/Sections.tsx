@@ -142,7 +142,7 @@ export function Header({ onOpenLogin, user = null }: { onOpenLogin: () => void; 
 
 /* ------------------------------------------------------------------ 히어로 */
 
-export function HeroSection({ counts }: { counts: DrawCounts }) {
+export function HeroSection({ counts, streakText = null }: { counts: DrawCounts; streakText?: string | null }) {
   return (
     <section className="text-left mb-3">
       {/* 뽑기 횟수: 한 줄짜리 작은 알약 (로그인했다면 서버가, 아니라면 이 기기에서 센 값) */}
@@ -164,6 +164,11 @@ export function HeroSection({ counts }: { counts: DrawCounts }) {
           </b>
         </span>
       </div>
+      {streakText && (
+        <p data-testid="streak-line" className="mt-2 text-xs font-semibold text-sky-700">
+          {streakText}
+        </p>
+      )}
     </section>
   );
 }

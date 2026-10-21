@@ -21,6 +21,8 @@ import {
 } from "@/lib/intake";
 import { isCompatFortune } from "@/lib/premium/compat";
 import type { PublicReading } from "@/lib/ai/reading";
+import { dayKey, getBrowserStorage } from "@/lib/drawCounter";
+import { rememberConcern } from "@/lib/followup";
 import { AskChips } from "./AskChips";
 import { CompareCard } from "./CompareCard";
 import { HoursCard } from "./HoursCard";
@@ -342,6 +344,8 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
       setReadingStatus(status);
       if (data.profileSaved) onProfileSaved?.(input);
       setPhase("result");
+      // 지난 고민을 도리가 다시 물어볼 수 있게, 고른 항목 이름만 이 기기에 기억해요. (직접 쓴 글은 저장하지 않아요)
+      if (concern) rememberConcern(getBrowserStorage(), concern.tags, dayKey(new Date()));
       // 풀이(AI 한마디 또는 사주 리포트)를 실제로 받았을 때만 뽑기 횟수로 세요.
       // AI 키가 없는 상태(unavailable)에서도 사주 리포트가 나갔으면 센 것으로 봐요. (서버도 같은 기준으로 기록해요)
       if ((status === "ok" && data.reading) || status === "unavailable") onComplete(data.counts ?? null);
