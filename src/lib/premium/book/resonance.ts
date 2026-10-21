@@ -1,4 +1,5 @@
 import type { Group } from "../topic";
+import { GOD_PAST_YEAR } from "./insight";
 import type { BookSection } from "../types";
 
 /*
@@ -85,6 +86,8 @@ export interface PastYear {
   year: number;
   ganzhi: string;
   group: Group | null;
+  /** 그 해 세운 천간의 십성 (있으면 더 구체적인 문장을 써요) */
+  god?: string;
 }
 
 /** "최근 흐름 되짚어 보기" 섹션. 지난 해가 없으면 null */
@@ -94,7 +97,7 @@ export function buildLookBack(years: PastYear[]): BookSection | null {
   return {
     heading: "최근 흐름 되짚어 보기",
     body: "사주에서는 해마다 중심 주제가 달라요. 이미 지나온 해를 돌아보며, 실제로 떠오르는 일이 있는지 눌러서 확인해 보세요.",
-    checks: rows.map((y) => `${y.year}년(${y.ganzhi}): ${PAST_YEAR_PROMPT[y.group as Group]}`),
+    checks: rows.map((y) => `${y.year}년(${y.ganzhi}): ${(y.god ? GOD_PAST_YEAR[y.god] : undefined) ?? PAST_YEAR_PROMPT[y.group as Group]}`),
   };
 }
 
