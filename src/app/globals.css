@@ -312,3 +312,25 @@ body {
     scroll-behavior: smooth;
   }
 }
+
+/* ── 풀이 로딩 장면 (LoadingScene) ── */
+@keyframes lsBob { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+@keyframes lsPop { 0%,12% { opacity: 0; transform: translateY(8px) scale(.5); } 22%,80% { opacity: 1; transform: translateY(0) scale(1); } 92%,100% { opacity: 0; transform: translateY(-4px) scale(.9); } }
+@keyframes lsTilt { 0%,100% { transform: rotate(-9deg); } 50% { transform: rotate(9deg); } }
+@keyframes lsUntilt { 0%,100% { transform: rotate(9deg); } 50% { transform: rotate(-9deg); } }
+@keyframes lsFlow { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+@keyframes lsWrite { 0%,100% { transform: translate(0,0) rotate(-8deg); } 25% { transform: translate(6px,3px) rotate(4deg); } 50% { transform: translate(-2px,6px) rotate(-6deg); } 75% { transform: translate(8px,8px) rotate(5deg); } }
+@keyframes lsJump { 0%,100% { transform: translateY(0) scale(1,1); } 30% { transform: translateY(-14px) scale(.97,1.04); } 55% { transform: translateY(0) scale(1.04,.96); } }
+@keyframes lsFade { from { opacity: 0; transform: scale(.96); } to { opacity: 1; transform: scale(1); } }
+.ls-fade { animation: lsFade .5s ease-out both; }
+.ls-bob { animation: lsBob 1.8s ease-in-out infinite; }
+.ls-pop { animation: lsPop 3.2s ease-in-out infinite; }
+.ls-tilt { animation: lsTilt 2.4s ease-in-out infinite; transform-origin: 50% 50%; }
+.ls-untilt { animation: lsUntilt 2.4s ease-in-out infinite; transform-origin: 50% 0%; }
+.ls-flow { animation: lsFlow 7s linear infinite; }
+.ls-write { animation: lsWrite 1.6s ease-in-out infinite; }
+.ls-jump { animation: lsJump .7s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) {
+  .ls-bob, .ls-pop, .ls-tilt, .ls-untilt, .ls-flow, .ls-write, .ls-jump { animation: none; }
+  .ls-pop { opacity: 1; }
+}

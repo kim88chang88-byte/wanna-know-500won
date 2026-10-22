@@ -29,6 +29,8 @@ import { HoursCard } from "./HoursCard";
 import { MbtiCard } from "./MbtiCard";
 import { UpsellTeaser } from "./UpsellTeaser";
 import { chipsForFortune, MAX_CONCERN_TAGS, MAX_CONCERN_TEXT, type Concern, type ConcernId } from "@/lib/concerns";
+import { MACHINES } from "./data";
+import { IMAGES } from "./images";
 import LoadingBar from "./LoadingBar";
 import { BIRTH_PLACES } from "@/lib/saju/birthPlace";
 import { profileSummary, profileToForm, sameBirth, type SavedProfile } from "@/lib/profile";
@@ -321,6 +323,7 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
   const [readingStatus, setReadingStatus] = useState<ReadingStatus>("ok");
   const [premiumReport, setPremiumReport] = useState<PremiumReportView | null>(null);
   const [premiumError, setPremiumError] = useState<string | null>(null);
+  const loadingAnimal = IMAGES[MACHINES.find((m) => m.fortune === target.fortune)?.image ?? ""] ?? "/images/animal-otter.webp";
   const [loadDone, setLoadDone] = useState(false);
   const [birthNote, setBirthNote] = useState<string | null>(null);
   const [askInput, setAskInput] = useState<BirthInput | null>(null);
@@ -454,11 +457,7 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
 
       {phase === "loading" && (
         <div role="status" className="py-10 text-center">
-          <div className="text-4xl floating-anim" aria-hidden="true">
-            🫧
-          </div>
-          <p className="mt-3 font-bold text-gray-900">풀이를 만들고 있어요</p>
-          <LoadingBar done={loadDone} />
+          <LoadingBar done={loadDone} animal={loadingAnimal} />
         </div>
       )}
 

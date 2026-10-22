@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import LoadingScene from "./LoadingScene";
 
 /** 풀이를 만드는 동안 보여주는 진행 막대. 서버는 진행률을 알려주지 않아서, 시간이 갈수록 천천히 차오르게 보여줘요. (끝나면 화면이 결과로 바뀌어요) */
 const STAGES: { at: number; text: string }[] = [
@@ -15,7 +16,7 @@ export function progressAt(sec: number): number {
   return Math.min(92, 92 * (1 - Math.exp(-sec / 12)));
 }
 
-export default function LoadingBar({ done = false }: { done?: boolean }) {
+export default function LoadingBar({ done = false, animal = "/images/animal-otter.webp" }: { done?: boolean; animal?: string }) {
   const [pct, setPct] = useState(3);
   useEffect(() => {
     if (done) return; // 끝났으면 시간 진행을 멈추고 100% 로 채워요
@@ -25,8 +26,12 @@ export default function LoadingBar({ done = false }: { done?: boolean }) {
   }, [done]);
   const shown = done ? 100 : pct;
   const stage = done ? { at: 100, text: "다 됐어요! 🎉" } : ([...STAGES].reverse().find((s) => pct >= s.at) ?? STAGES[0]);
+  const stageIndex = done ? 4 : STAGES.indexOf(stage);
   return (
-    <div className="mt-4">
+    <div>
+      <LoadingScene stage={stageIndex} animal={animal} year={new Date().getFullYear()} />
+      <p className="mt-3 font-bold text-gray-900 text-center">풀이를 만들고 있어요</p>
+      <div className="mt-4">
       <div
         role="progressbar"
         aria-label="풀이 진행"
@@ -37,7 +42,8 @@ export default function LoadingBar({ done = false }: { done?: boolean }) {
       >
         <div className={`h-full rounded-full bg-brand-500 ease-out ${done ? "duration-500" : "duration-300"} transition-[width]`} style={{ width: `${shown}%` }} />
       </div>
-      <p className="mt-2 text-xs text-gray-500">{stage.text}</p>
+      <p className="mt-2 text-xs text-gray-500 text-center">{stage.text}</p>
+      </div>
     </div>
   );
 }
