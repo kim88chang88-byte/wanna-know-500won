@@ -10,6 +10,7 @@ import { readCookie, SESSION_COOKIE, verifySessionToken } from "@/lib/auth/sessi
 import { FREE_PER_DAY, isDailyLimitEnforced } from "@/lib/db/config";
 import { createDb, loadDbConfig, type DrawCounts } from "@/lib/db/supabase";
 import { createRateLimiter } from "@/lib/rateLimit";
+import { adjustNote, resolveBirth, type BirthAdjust } from "@/lib/saju/birthPlace";
 import { calculateSaju } from "@/lib/saju/calculate";
 import { SajuInputError } from "@/lib/saju/errors";
 import type { BirthInput, SajuChart } from "@/lib/saju/types";
@@ -71,9 +72,14 @@ export async function POST(request: Request) {
 
   // TODO: 결제 확인(500원)을 통과한 요청만 전체 풀이를 주도록 연결. 지금은 항상 무료 공개 범위만 내려가요.
 
+  // 출생지 보정: 보정한 입력으로 계산하고, 저장용 input 에는 birthPlace 를 넣지 않아요.
+  const resolved = resolveBirth(input as BirthInput);
+  const birthAdjust: BirthAdjust | null = resolved.adjust;
+  const profileInput = { ...(input as BirthInput) };
+  delete profileInput.birthPlace;
   let chart: SajuChart;
   try {
-    chart = calculateSaju(input);
+    chart = calculateSaju(resolved.input);
   } catch (err) {
     if (err instanceof SajuInputError) {
       return NextResponse.json({ error: err.message }, { status: 400 });
@@ -89,7 +95,7 @@ export async function POST(request: Request) {
   if (db && userId && saveProfile === true) {
     try {
       await db.ensureUser(userId, session?.nick);
-      await db.upsertProfile(userId, { ...input, hour: input.hour ?? null, minute: input.hour == null ? null : (input.minute ?? 0), isLeapMonth: input.calendar === "lunar" && input.isLeapMonth === true });
+      await db.upsertProfile(userId, { ...profileInput, hour: input.hour ?? null, minute: input.hour == null ? null : (input.minute ?? 0), isLeapMonth: input.calendar === "lunar" && input.isLeapMonth === true });
       profileSaved = true;
     } catch (err) {
       console.error("upsertProfile failed:", err instanceof Error ? err.message : "unknown");
@@ -145,5 +151,5 @@ export async function POST(request: Request) {
     }
   }
 
-  return NextResponse.json({ chart, reading, readingStatus, counts, profileSaved });
+  return NextResponse.json({ chart, reading, readingStatus, counts, profileSaved, birthAdjust, birthAdjustNote: birthAdjust ? adjustNote(birthAdjust) : null });
 }

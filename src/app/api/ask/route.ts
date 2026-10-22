@@ -6,6 +6,7 @@ import { buildCoreFacts } from "@/lib/ai/coreFacts";
 import { ReadingUnavailableError } from "@/lib/ai/interpret";
 import { createDb, loadDbConfig } from "@/lib/db/supabase";
 import { createRateLimiter } from "@/lib/rateLimit";
+import { resolveBirth } from "@/lib/saju/birthPlace";
 import { calculateSaju } from "@/lib/saju/calculate";
 import { SajuInputError } from "@/lib/saju/errors";
 import type { BirthInput } from "@/lib/saju/types";
@@ -38,7 +39,7 @@ export async function POST(request: Request) {
 
   let chart;
   try {
-    chart = calculateSaju(input);
+    chart = calculateSaju(resolveBirth(input).input);
   } catch (err) {
     if (err instanceof SajuInputError) return NextResponse.json({ error: err.message }, { status: 400 });
     return NextResponse.json({ error: "사주 계산 중 오류가 발생했어요." }, { status: 500 });

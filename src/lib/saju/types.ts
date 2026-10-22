@@ -12,6 +12,8 @@ export interface BirthInput {
   /** 음력 입력일 때 윤달 여부 */
   isLeapMonth?: boolean;
   gender: Gender;
+  /** 출생지(경도 보정용, 선택). 시각을 알 때만 쓰고 저장하지 않아요. */
+  birthPlace?: string;
 }
 
 export interface CalcOptions {

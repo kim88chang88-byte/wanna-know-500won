@@ -1,5 +1,6 @@
 import { calculateSaju } from "ssaju";
 import { STEMS } from "@/lib/saju/constants";
+import { isBirthPlace, resolveBirth } from "@/lib/saju/birthPlace";
 import type { BirthInput } from "@/lib/saju/types";
 import { buildBook } from "./book";
 import { applyLocks } from "./book/lock";
@@ -65,7 +66,7 @@ function parseBirth(raw: unknown, who: string): BirthResult {
   }
   if (raw.calendar !== "solar" && raw.calendar !== "lunar") return { ok: false, error: `${who}양력/음력을 선택해 주세요.` };
   if (raw.gender !== "male" && raw.gender !== "female") return { ok: false, error: `${who}성별을 선택해 주세요.` };
-  return { ok: true, value: { year, month, day, hour, minute, calendar: raw.calendar, isLeapMonth: raw.isLeapMonth === true, gender: raw.gender } };
+  return { ok: true, value: { year, month, day, hour, minute, calendar: raw.calendar, isLeapMonth: raw.isLeapMonth === true, gender: raw.gender, ...(isBirthPlace(raw.birthPlace) ? { birthPlace: raw.birthPlace } : {}) } };
 }
 
 /** 서버 입력 검사. 궁합이면 `partner`(상대방 생년월일시)도 같은 모양으로 받아요. */
@@ -119,7 +120,9 @@ function computeCompat(meResult: BookSource, meHourUnknown: boolean, partner: Bi
  * ssaju 는 순수 계산 라이브러리라 API 키도, 외부 호출도 없어요.
  * 잘못된 날짜(없는 음력 윤달 등)면 ssaju 가 던진 Error 를 그대로 던져요.
  */
-export function buildPremiumReport(input: BirthInput, now: Date = new Date(), level: ReportLevel = "full", topicRaw: unknown = "", lock = false, concern: Concern | null = null, partner: BirthInput | null = null): PremiumReportView {
+export function buildPremiumReport(rawInput: BirthInput, now: Date = new Date(), level: ReportLevel = "full", topicRaw: unknown = "", lock = false, concern: Concern | null = null, partner: BirthInput | null = null): PremiumReportView {
+  // 출생지를 골랐으면 경도만큼 시계 시각을 보정한 입력으로 계산해요. (상대방은 보정하지 않아요)
+  const input: BirthInput = resolveBirth(rawInput).input;
   const hourUnknown = input.hour === null || input.hour === undefined;
   const r = calculateSaju({
     year: input.year,

@@ -29,6 +29,7 @@ import { HoursCard } from "./HoursCard";
 import { MbtiCard } from "./MbtiCard";
 import { UpsellTeaser } from "./UpsellTeaser";
 import { chipsForFortune, MAX_CONCERN_TAGS, MAX_CONCERN_TEXT, type Concern, type ConcernId } from "@/lib/concerns";
+import { BIRTH_PLACES } from "@/lib/saju/birthPlace";
 import { profileSummary, profileToForm, sameBirth, type SavedProfile } from "@/lib/profile";
 import { BRANCHES, STEMS } from "@/lib/saju/constants";
 import type { Pillar, SajuChart } from "@/lib/saju/types";
@@ -151,7 +152,7 @@ function PillarCell({ pillar }: { pillar: Pillar | null }) {
 }
 
 /** 날짜·시간·성별 질문 화면. 내 것과 상대방 것이 같은 화면을 써요. */
-function BirthStepFields({ kind, f, patch }: { kind: "date" | "time" | "gender"; f: BirthFields; patch: (p: Partial<BirthFields>) => void }) {
+function BirthStepFields({ kind, f, patch, withPlace = false }: { kind: "date" | "time" | "gender"; f: BirthFields; patch: (p: Partial<BirthFields>) => void; withPlace?: boolean }) {
   return (
     <>
     {kind === "date" && (
@@ -248,6 +249,27 @@ function BirthStepFields({ kind, f, patch }: { kind: "date" | "time" | "gender";
         >
           태어난 시간은 모르겠어요
         </ChoiceButton>
+        {withPlace && f.timeKnown && (
+          <label className="block text-xs font-semibold text-gray-600">
+            태어난 곳 (선택)
+            <select
+              name="birthPlace"
+              value={f.birthPlace}
+              onChange={(e) => patch({ birthPlace: e.target.value })}
+              className={`${INPUT} mt-1`}
+            >
+              <option value="">고르지 않아요 (시계 시각 그대로)</option>
+              {BIRTH_PLACES.map((p) => (
+                <option key={p.name} value={p.name}>
+                  {p.name}
+                </option>
+              ))}
+            </select>
+            <span className="block mt-1 font-normal text-gray-500 leading-relaxed">
+              우리나라 표준시는 동경 135도 기준이라, 태어난 곳에 따라 실제 해 시각이 달라요. 고르면 그만큼 시간을 보정해서 보고, 이 정보는 저장하지 않아요.
+            </span>
+          </label>
+        )}
       </div>
     )}
 
@@ -284,6 +306,7 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
   const [readingStatus, setReadingStatus] = useState<ReadingStatus>("ok");
   const [premiumReport, setPremiumReport] = useState<PremiumReportView | null>(null);
   const [premiumError, setPremiumError] = useState<string | null>(null);
+  const [birthNote, setBirthNote] = useState<string | null>(null);
   const [askInput, setAskInput] = useState<BirthInput | null>(null);
   const abortRef = useRef<AbortController | null>(null);
 
@@ -331,6 +354,7 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
         readingStatus?: ReadingStatus;
         counts?: { today: number; month: number } | null;
         profileSaved?: boolean;
+        birthAdjustNote?: string | null;
         error?: string;
       } | null;
       if (!res.ok || !data?.chart) throw new Error(data?.error ?? "풀이를 만들지 못했어요. 잠시 뒤에 다시 해볼래요?");
@@ -341,6 +365,7 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
       setPremiumError(p.error);
       setChart(data.chart);
       setAskInput(input);
+      setBirthNote(data.birthAdjustNote ?? null);
       setReading(data.reading ?? null);
       setReadingStatus(status);
       if (data.profileSaved) onProfileSaved?.(input);
@@ -423,6 +448,12 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
             <>
               {/* 1) 인스타 감성 포토카드 + 공유 */}
               <PhotoCard report={premiumReport} aiQuote={reading?.kkotgeoji ?? null} />
+
+              {birthNote && (
+                <p data-testid="birth-adjust-note" className="mt-4 p-3 rounded-2xl bg-brand-50 border border-brand-100 text-xs text-gray-700 leading-relaxed">
+                  {birthNote}
+                </p>
+              )}
 
               {reading?.reason && (
                 <div data-testid="reading-reason" className="mt-4 p-4 rounded-2xl bg-white border border-brand-100 text-sm text-gray-800 leading-relaxed">
@@ -585,7 +616,7 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
             </div>
           )}
 
-          {(step === "date" || step === "time" || step === "gender") && <BirthStepFields kind={step} f={form} patch={update} />}
+          {(step === "date" || step === "time" || step === "gender") && <BirthStepFields kind={step} f={form} patch={update} withPlace />}
           {(step === "pdate" || step === "ptime" || step === "pgender") && (
             <BirthStepFields kind={step === "pdate" ? "date" : step === "ptime" ? "time" : "gender"} f={partner} patch={updatePartner} />
           )}

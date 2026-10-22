@@ -1,4 +1,5 @@
 import { cleanConcernText, MAX_CONCERN_TAGS, MAX_CONCERN_TEXT, type Concern, type ConcernId } from "@/lib/concerns";
+import { isBirthPlace } from "@/lib/saju/birthPlace";
 import type { BirthInput, Gender } from "@/lib/saju/types";
 
 /** 생년월일시 입력 화면(도리 질문 5단계)의 입력값과 검사 규칙입니다. 화면 없이 테스트할 수 있게 따로 뒀어요. */
@@ -15,7 +16,7 @@ export type AnyStepId = StepId | PartnerStepId;
 export const COMPAT_STEPS: readonly AnyStepId[] = ["date", "time", "gender", "pdate", "ptime", "pgender", "concern", "consent"];
 
 /** 한 사람의 생년월일시·성별 입력값 (상대방은 이것만 받아요) */
-export type BirthFields = Pick<IntakeForm, "calendar" | "solarDate" | "lunarYear" | "lunarMonth" | "lunarDay" | "isLeapMonth" | "timeKnown" | "time" | "gender">;
+export type BirthFields = Pick<IntakeForm, "calendar" | "solarDate" | "lunarYear" | "lunarMonth" | "lunarDay" | "isLeapMonth" | "timeKnown" | "time" | "gender" | "birthPlace">;
 
 export interface IntakeForm {
   calendar: "solar" | "lunar";
@@ -30,6 +31,8 @@ export interface IntakeForm {
   timeKnown: boolean;
   /** "HH:MM" */
   time: string;
+  /** 출생지 (선택, 시간을 알 때만 의미 있어요) */
+  birthPlace: string;
   gender: Gender | null;
   /** 요즘 고민 (선택): 추천 버튼 + 직접 적기 */
   concernTags: ConcernId[];
@@ -46,6 +49,7 @@ export const EMPTY_BIRTH: BirthFields = {
   isLeapMonth: false,
   timeKnown: true,
   time: "",
+  birthPlace: "",
   gender: null,
 };
 
@@ -58,6 +62,7 @@ export const EMPTY_FORM: IntakeForm = {
   isLeapMonth: false,
   timeKnown: true,
   time: "",
+  birthPlace: "",
   gender: null,
   concernTags: [],
   concernText: "",
@@ -155,6 +160,7 @@ export function buildBirthFields(f: BirthFields): BirthInput | null {
     calendar: f.calendar,
     isLeapMonth: f.calendar === "lunar" && f.isLeapMonth,
     gender: f.gender,
+    ...(t && isBirthPlace(f.birthPlace) ? { birthPlace: f.birthPlace } : {}),
   };
 }
 

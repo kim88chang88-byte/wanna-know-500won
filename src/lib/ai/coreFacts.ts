@@ -1,5 +1,6 @@
 import { calculateSaju as ssajuCalculate } from "ssaju";
 import { STEMS } from "@/lib/saju/constants";
+import { resolveBirth } from "@/lib/saju/birthPlace";
 import type { BirthInput } from "@/lib/saju/types";
 import { hiddenGods, interactions, natalRelations, POS_LABEL, type PosKey } from "@/lib/premium/book/insight";
 
@@ -140,8 +141,9 @@ export function extractCoreFacts(r: SsajuLike, hourKnown: boolean, now: Date = n
 }
 
 /** 출생 정보로 핵심 사실을 계산해요. 어떤 이유로든 실패하면 null — 이 경우 풀이는 기본 재료만으로 나가요. */
-export function buildCoreFacts(input: BirthInput, now: Date = new Date(), detail = false): CoreFacts | null {
+export function buildCoreFacts(rawInput: BirthInput, now: Date = new Date(), detail = false): CoreFacts | null {
   try {
+    const input: BirthInput = resolveBirth(rawInput).input;
     const hourUnknown = input.hour === null || input.hour === undefined;
     const r = ssajuCalculate({
       year: input.year,
