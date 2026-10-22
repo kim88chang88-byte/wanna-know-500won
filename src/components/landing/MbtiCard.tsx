@@ -66,7 +66,6 @@ export function MbtiCard({ input }: { input: BirthInput }) {
             {ROWS.map(([k, label]) => (
               <p key={k}><span className="font-semibold">{label}</span><br />{out.result[k]}</p>
             ))}
-            <p className="text-[11px] text-gray-500">참고용 재미 풀이예요. 안 맞는 부분은 안 맞는 대로 괜찮아요.</p>
           </div>
         )}
       </div>
