@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { CONCERN_CHIPS, MAX_CONCERN_TAGS, MAX_CONCERN_TEXT, hasConcern, parseConcern } from "../concerns";
+import { CONCERN_CHIPS, chipsForFortune, MAX_CONCERN_TAGS, MAX_CONCERN_TEXT, hasConcern, parseConcern } from "../concerns";
 import { EMPTY_FORM, buildConcern, validateStep, STEPS } from "../intake";
 import { buildPremiumReport, validatePremiumInput } from "../premium/report";
 
@@ -66,5 +66,32 @@ describe("고민이 풀이에 반영", () => {
     const r = buildPremiumReport(BIRTH, new Date("2026-10-18"), "full", "연애운", true, { tags: ["breakup"], text: "" });
     expect(r.locked).toBe(true);
     expect(r.concern?.answers[0].body).not.toMatch(/[●]/);
+  });
+});
+
+describe("풀이 종류에 맞는 고민 항목", () => {
+  const ids = (f: string) => chipsForFortune(f).map((c) => c.id);
+  it("고른 종류와 상관없는 항목은 나오지 않는다", () => {
+    expect(ids("성공운")).toEqual(["job", "workpeople", "career"]);
+    expect(ids("연애운")).toEqual(["crush", "relationship", "breakup"]);
+    expect(ids("재물운")).toContain("money");
+    expect(ids("재물운")).not.toContain("crush");
+    expect(ids("건강운")).not.toContain("job");
+    expect(ids("학업운")).toContain("exam");
+    expect(ids("결혼운")).toContain("marriage");
+  });
+  it("프리미엄 카드도 맞는 항목만 보인다", () => {
+    expect(ids("올해 재물·직장 운 리포트")).toEqual(["money", "job", "workpeople", "career"]);
+    expect(ids("연애 매력 리포트")).not.toContain("job");
+    expect(ids("우리 둘의 궁합 리포트")).toContain("relationship");
+  });
+  it("알 수 없는 이름이면 전체를 보여준다", () => {
+    expect(chipsForFortune("오늘의 운").length).toBe(12);
+  });
+  it("모든 종류의 항목이 실제 목록에 있고 비어 있지 않다", () => {
+    for (const f of ["성공운", "재물운", "연애운", "결혼운", "건강운", "학업운", "재물·직장", "연애 매력", "궁합"]) {
+      expect(chipsForFortune(f).length > 0).toBe(true);
+      expect(chipsForFortune(f).every((c) => CONCERN_CHIPS.includes(c))).toBe(true);
+    }
   });
 });

@@ -27,7 +27,7 @@ import { AskChips } from "./AskChips";
 import { CompareCard } from "./CompareCard";
 import { HoursCard } from "./HoursCard";
 import { MbtiCard } from "./MbtiCard";
-import { CONCERN_CHIPS, MAX_CONCERN_TAGS, MAX_CONCERN_TEXT, type Concern, type ConcernId } from "@/lib/concerns";
+import { chipsForFortune, MAX_CONCERN_TAGS, MAX_CONCERN_TEXT, type Concern, type ConcernId } from "@/lib/concerns";
 import { profileSummary, profileToForm, sameBirth, type SavedProfile } from "@/lib/profile";
 import { BRANCHES, STEMS } from "@/lib/saju/constants";
 import type { Pillar, SajuChart } from "@/lib/saju/types";
@@ -589,7 +589,7 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
                 </span>
               </div>
               <div className="flex flex-wrap gap-1.5" role="group" aria-label="요즘 고민 추천">
-                {CONCERN_CHIPS.map((c) => {
+                {chipsForFortune(target.fortune).map((c) => {
                   const on = form.concernTags.includes(c.id);
                   const full = !on && form.concernTags.length >= MAX_CONCERN_TAGS;
                   return (
