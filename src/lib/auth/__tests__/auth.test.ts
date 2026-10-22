@@ -8,8 +8,8 @@ const now = 1_000_000;
 
 describe("session token", () => {
   it("서명한 세션은 그대로 읽혀요", () => {
-    const t = createSessionToken({ sub: "123", nick: "꽃", exp: now + 100 }, SECRET);
-    expect(verifySessionToken(t, SECRET, now)).toEqual({ sub: "123", nick: "꽃", exp: now + 100 });
+    const t = createSessionToken({ sub: "123", nick: "꽃", exp: now + 100 }, SECRET, now);
+    expect(verifySessionToken(t, SECRET, now, 0)).toEqual({ sub: "123", nick: "꽃", exp: now + 100, iat: now });
   });
   it("만료·변조·다른 비밀키·짧은 비밀키는 거절해요", () => {
     const t = createSessionToken({ sub: "123", exp: now + 100 }, SECRET);

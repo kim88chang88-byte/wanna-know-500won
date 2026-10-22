@@ -1,27 +1,16 @@
 import { NextResponse } from "next/server";
+import { hasEntitlement, ENTITLEMENT_COOKIE } from "@/lib/premium/entitlement";
+import { readCookie, SESSION_COOKIE, verifySessionToken } from "@/lib/auth/session";
 import { isPremiumLocked } from "@/lib/premium/config";
 import { buildPremiumReport, validatePremiumInput } from "@/lib/premium/report";
-import { createRateLimiter } from "@/lib/rateLimit";
+import { enforceLimits, guardOrigin } from "@/lib/guard";
 import { addBookNotes } from "@/lib/ai/bookNotes";
 import { takeAiBudget } from "@/lib/ai/budget";
 import { createDb, loadDbConfig } from "@/lib/db/supabase";
 
-// 계산은 가볍지만, 한 주소(IP)에서 마구 부르지 못하게 1분에 20번까지만 받아요.
-const limiter = createRateLimiter(20, 60_000);
-
-function clientKey(request: Request): string {
-  const forwarded = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim();
-  return forwarded || request.headers.get("x-real-ip") || "unknown";
-}
-
 export async function POST(request: Request) {
-  const limit = limiter.check(clientKey(request));
-  if (!limit.ok) {
-    return NextResponse.json(
-      { code: "rate_limited", error: "요청이 너무 빨라요. 잠시 뒤에 다시 시도해 주세요." },
-      { status: 429, headers: { "Retry-After": String(limit.retryAfterSec) } },
-    );
-  }
+  const denied = guardOrigin(request) ?? (await enforceLimits(request, { name: "premium", windowMs: 60000, ip: 20, user: 40 }, "요청이 너무 빨라요. 잠시 뒤에 다시 시도해 주세요."));
+  if (denied) return denied;
 
   let raw: unknown;
   try {
@@ -33,7 +22,13 @@ export async function POST(request: Request) {
   if (!parsed.ok) return NextResponse.json({ code: "bad_request", error: parsed.error }, { status: 400 });
 
   try {
-    const report = buildPremiumReport(parsed.value, new Date(), parsed.level, parsed.topic, isPremiumLocked(process.env), parsed.concern, parsed.partner);
+    // 잠금이 켜진 상태(결제 오픈)에서는 서버가 확인한 이용권 쿠키가 있는 요청에만 잠금 없는 전체 풀이를 줘요.
+    // 요청 본문의 level 은 "무엇을 보고 싶은지"일 뿐 권한이 아니에요.
+    const cookieHeader = request.headers.get("cookie");
+    const session = verifySessionToken(readCookie(cookieHeader, SESSION_COOKIE), process.env.AUTH_SECRET);
+    const entitled = hasEntitlement(readCookie(cookieHeader, ENTITLEMENT_COOKIE), process.env.AUTH_SECRET, session?.sub ?? null);
+    const lock = isPremiumLocked(process.env) && !entitled;
+    const report = buildPremiumReport(parsed.value, new Date(), parsed.level, parsed.topic, lock, parsed.concern, parsed.partner);
     // 프리미엄(전체) 리포트에는 쪽마다 AI 가 쓴 '도리의 한 줄'을 붙여요. 키가 없거나 한도를 넘거나 실패하면 한 줄만 빠져요.
     if (parsed.level === "full" && report.book.length > 0 && process.env.ANTHROPIC_API_KEY) {
       try {

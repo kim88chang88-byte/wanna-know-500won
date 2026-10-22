@@ -2,21 +2,15 @@ import { NextResponse } from "next/server";
 import { normalizeTopic } from "@/lib/ai/reading";
 import { readCookie, SESSION_COOKIE, verifySessionToken } from "@/lib/auth/session";
 import { createDb, loadDbConfig } from "@/lib/db/supabase";
-import { createRateLimiter } from "@/lib/rateLimit";
+import { enforceLimits, guardOrigin } from "@/lib/guard";
 import { parseReview } from "@/lib/reviews";
 
 export const runtime = "nodejs";
 
-// 한 주소(IP)에서 1시간에 10건까지만 받아요. (스팸 방지. 서버리스라 완벽하진 않아요)
-const limiter = createRateLimiter(10, 60 * 60_000);
-
 /** 사용후기 저장. 로그인하지 않아도 남길 수 있고, 로그인했다면 회원과 연결해서 탈퇴 때 함께 지워요. */
 export async function POST(request: Request) {
-  const key = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || request.headers.get("x-real-ip") || "unknown";
-  const limit = limiter.check(key);
-  if (!limit.ok) {
-    return NextResponse.json({ error: "후기를 너무 자주 남기고 있어요. 잠시 뒤에 다시 해줘요." }, { status: 429, headers: { "Retry-After": String(limit.retryAfterSec) } });
-  }
+  const denied = guardOrigin(request) ?? (await enforceLimits(request, { name: "reviews", windowMs: 3600000, ip: 10, user: 10 }, "후기를 너무 자주 남기고 있어요. 잠시 뒤에 다시 해줘요."));
+  if (denied) return denied;
   let body: unknown;
   try {
     body = await request.json();

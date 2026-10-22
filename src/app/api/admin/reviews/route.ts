@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { guardOrigin } from "@/lib/guard";
 import { isAdmin } from "@/lib/admin/auth";
 import { reviewsToCsv, sinceDayFor } from "@/lib/admin/stats";
 import { readCookie, SESSION_COOKIE, verifySessionToken } from "@/lib/auth/session";
@@ -37,6 +38,8 @@ export async function GET(request: Request) {
 
 /** 후기 숨기기/되살리기 (관리자만). 본문: { id: number, hidden: boolean } */
 export async function POST(request: Request) {
+  const badOrigin = guardOrigin(request);
+  if (badOrigin) return badOrigin;
   const denied = adminOnly(request);
   if (denied) return denied;
   let body: { id?: unknown; hidden?: unknown } | null;

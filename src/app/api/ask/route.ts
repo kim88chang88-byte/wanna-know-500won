@@ -5,7 +5,7 @@ import { takeAiBudget } from "@/lib/ai/budget";
 import { buildCoreFacts } from "@/lib/ai/coreFacts";
 import { ReadingUnavailableError } from "@/lib/ai/interpret";
 import { createDb, loadDbConfig } from "@/lib/db/supabase";
-import { createRateLimiter } from "@/lib/rateLimit";
+import { enforceLimits, guardOrigin } from "@/lib/guard";
 import { resolveBirth } from "@/lib/saju/birthPlace";
 import { calculateSaju } from "@/lib/saju/calculate";
 import { SajuInputError } from "@/lib/saju/errors";
@@ -13,19 +13,9 @@ import type { BirthInput } from "@/lib/saju/types";
 
 export const maxDuration = 60;
 
-// 유료 API 를 쓰니까 한 주소에서 1분에 6번까지만 받아요.
-const limiter = createRateLimiter(6, 60_000);
-
-function clientKey(request: Request): string {
-  const forwarded = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim();
-  return forwarded || request.headers.get("x-real-ip") || "unknown";
-}
-
 export async function POST(request: Request) {
-  const limit = limiter.check(clientKey(request));
-  if (!limit.ok) {
-    return NextResponse.json({ error: "질문이 너무 빨라요. 잠시 뒤에 다시 물어봐 줘요." }, { status: 429, headers: { "Retry-After": String(limit.retryAfterSec) } });
-  }
+  const denied = guardOrigin(request) ?? (await enforceLimits(request, { name: "ask", windowMs: 60000, ip: 6, user: 12 }, "질문이 너무 빨라요. 잠시 뒤에 다시 물어봐 줘요."));
+  if (denied) return denied;
   let body: (BirthInput & { q?: unknown }) | null;
   try {
     body = (await request.json()) as BirthInput & { q?: unknown };

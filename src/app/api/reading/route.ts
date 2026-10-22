@@ -9,7 +9,7 @@ import { ageBand } from "@/lib/profile";
 import { readCookie, SESSION_COOKIE, verifySessionToken } from "@/lib/auth/session";
 import { FREE_PER_DAY, isDailyLimitEnforced } from "@/lib/db/config";
 import { createDb, loadDbConfig, type DrawCounts } from "@/lib/db/supabase";
-import { createRateLimiter } from "@/lib/rateLimit";
+import { enforceLimits, guardOrigin } from "@/lib/guard";
 import { adjustNote, boundaryNote, resolveBirth, type BirthAdjust } from "@/lib/saju/birthPlace";
 import { calculateSaju } from "@/lib/saju/calculate";
 import { SajuInputError } from "@/lib/saju/errors";
@@ -18,24 +18,11 @@ import type { BirthInput, SajuChart } from "@/lib/saju/types";
 // 풀이(AI 호출)는 오래 걸릴 수 있어서 배포 환경(Vercel)의 함수 제한 시간을 늘려 둬요.
 export const maxDuration = 60;
 
-// 풀이는 유료 API 를 쓰기 때문에, 한 주소(IP)에서 1분에 몇 번까지만 받아요. (자세한 한계는 rateLimit.ts 참고)
-const limiter = createRateLimiter(6, 60_000);
-
 type ReadingStatus = "ok" | "unavailable" | "failed";
 
-function clientKey(request: Request): string {
-  const forwarded = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim();
-  return forwarded || request.headers.get("x-real-ip") || "unknown";
-}
-
 export async function POST(request: Request) {
-  const limit = limiter.check(clientKey(request));
-  if (!limit.ok) {
-    return NextResponse.json(
-      { error: "뽑기가 너무 빨라요. 잠시 뒤에 다시 시도해줘요." },
-      { status: 429, headers: { "Retry-After": String(limit.retryAfterSec) } },
-    );
-  }
+  const denied = guardOrigin(request) ?? (await enforceLimits(request, { name: "reading", windowMs: 60000, ip: 6, user: 12 }, "뽑기가 너무 빨라요. 잠시 뒤에 다시 시도해줘요."));
+  if (denied) return denied;
 
   let body: (BirthInput & { topic?: unknown; concern?: unknown; saveProfile?: unknown; shareConcern?: unknown }) | null;
   try {

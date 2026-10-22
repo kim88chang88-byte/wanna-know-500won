@@ -123,3 +123,41 @@ $$;
 
 revoke all on function public.ai_usage_take(date, int) from public, anon, authenticated;
 grant execute on function public.ai_usage_take(date, int) to service_role;
+
+-- ─────────────────────────────────────────────────────────────────────────────
+-- 속도 제한(여러 서버 공용): 일정 시간(창) 안에 같은 키가 몇 번 불렀는지 세요.
+-- 이 파일 전체를 다시 Run 하면 추가돼요. (없으면 서버 메모리 제한만으로 동작해요)
+-- ─────────────────────────────────────────────────────────────────────────────
+create table if not exists public.rate_limits (
+  bucket text primary key,                       -- "이름:대상:창번호"
+  hits int not null default 0,
+  expires_at timestamptz not null
+);
+alter table public.rate_limits enable row level security;
+
+-- 한도 안이면 0 을, 넘었으면 이 창이 끝날 때까지 남은 초를 돌려줘요.
+create or replace function public.rate_limit_take(p_key text, p_window_sec int, p_limit int)
+returns int
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  win bigint := floor(extract(epoch from now()) / p_window_sec);
+  b text := p_key || ':' || win::text;
+  n int;
+  left_sec int := greatest(1, ceil((win + 1) * p_window_sec - extract(epoch from now()))::int);
+begin
+  if random() < 0.02 then
+    delete from public.rate_limits where expires_at < now();   -- 가끔 오래된 줄 정리
+  end if;
+  insert into public.rate_limits as r (bucket, hits, expires_at)
+    values (b, 1, now() + make_interval(secs => p_window_sec * 2))
+  on conflict (bucket) do update set hits = r.hits + 1 where r.hits < p_limit
+  returning hits into n;
+  return case when n is null then left_sec else 0 end;
+end;
+$$;
+
+revoke all on function public.rate_limit_take(text, int, int) from public, anon, authenticated;
+grant execute on function public.rate_limit_take(text, int, int) to service_role;

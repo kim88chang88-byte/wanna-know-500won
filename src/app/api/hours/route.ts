@@ -3,24 +3,15 @@ import { takeAiBudget } from "@/lib/ai/budget";
 import { compareHours, findCandidates, parseRange } from "@/lib/ai/hourRange";
 import { ReadingUnavailableError } from "@/lib/ai/interpret";
 import { createDb, loadDbConfig } from "@/lib/db/supabase";
-import { createRateLimiter } from "@/lib/rateLimit";
+import { enforceLimits, guardOrigin } from "@/lib/guard";
 import { SajuInputError } from "@/lib/saju/errors";
 import type { BirthInput } from "@/lib/saju/types";
 
 export const maxDuration = 60;
 
-const limiter = createRateLimiter(4, 60_000);
-
-function clientKey(request: Request): string {
-  const forwarded = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim();
-  return forwarded || request.headers.get("x-real-ip") || "unknown";
-}
-
 export async function POST(request: Request) {
-  const limit = limiter.check(clientKey(request));
-  if (!limit.ok) {
-    return NextResponse.json({ error: "요청이 너무 빨라요. 잠시 뒤에 다시 해 줘요." }, { status: 429, headers: { "Retry-After": String(limit.retryAfterSec) } });
-  }
+  const denied = guardOrigin(request) ?? (await enforceLimits(request, { name: "hours", windowMs: 60000, ip: 4, user: 8 }, "요청이 너무 빨라요. 잠시 뒤에 다시 해 줘요."));
+  if (denied) return denied;
   let body: (BirthInput & { start?: unknown; end?: unknown }) | null;
   try {
     body = (await request.json()) as BirthInput & { start?: unknown; end?: unknown };

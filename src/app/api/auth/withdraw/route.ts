@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { guardOrigin } from "@/lib/guard";
 import { readCookie, SESSION_COOKIE, verifySessionToken } from "@/lib/auth/session";
 import { createDb, loadDbConfig } from "@/lib/db/supabase";
 
@@ -6,6 +7,8 @@ export const runtime = "nodejs";
 
 /** 회원 탈퇴: 저장된 회원 정보와 뽑기 기록을 지우고 로그인 쿠키를 없애요. (본인 세션이 있을 때만) */
 export async function POST(request: Request) {
+  const denied = guardOrigin(request);
+  if (denied) return denied;
   const session = verifySessionToken(readCookie(request.headers.get("cookie"), SESSION_COOKIE), process.env.AUTH_SECRET);
   if (!session) return NextResponse.json({ error: "로그인이 필요해요." }, { status: 401 });
 

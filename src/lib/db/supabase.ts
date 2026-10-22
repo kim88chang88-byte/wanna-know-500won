@@ -224,6 +224,20 @@ export function createDb(config: DbConfig, fetchImpl: FetchLike = fetch) {
       return (await res.json().catch(() => null)) === true;
     },
 
+    /**
+     * 속도 제한(여러 서버 공용). 한도 안이면 0, 넘었으면 다시 시도할 때까지 남은 초를 돌려줘요.
+     * DB 함수(rate_limit_take) 안에서 한 번에 세서 동시에 불러도 틀어지지 않아요.
+     */
+    async takeRateLimit(key: string, windowSec: number, limit: number): Promise<number> {
+      const res = await call("rpc/rate_limit_take", {
+        method: "POST",
+        headers: headers(),
+        body: JSON.stringify({ p_key: key.slice(0, 200), p_window_sec: windowSec, p_limit: limit }),
+      });
+      const n = await res.json().catch(() => 0);
+      return typeof n === "number" && Number.isFinite(n) ? n : 0;
+    },
+
     /** 저장된 생년월일시를 읽어요. 없으면 null. */
     async getProfile(userId: string): Promise<SavedProfile | null> {
       const res = await call(`profiles?user_id=eq.${safeId(userId)}&select=*&limit=1`, { method: "GET", headers: headers() });
