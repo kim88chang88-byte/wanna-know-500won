@@ -486,14 +486,24 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
               )}
 
               {askInput && <AskChips input={askInput} />}
-              {askInput && <CompareCard input={askInput} />}
-              {askInput && <MbtiCard input={askInput} />}
-              {askInput && <HoursCard input={askInput} />}
 
               {/* 2) 주제별 맞춤 분석 + 사주 리포트 */}
               <div data-testid="premium-result" className="mt-6">
                 <ManseReport report={premiumReport} />
               </div>
+              {askInput && (
+                <details data-testid="more-tools" className="mt-6 rounded-2xl border border-brand-100 bg-brand-50/40 group">
+                  <summary className="cursor-pointer list-none px-4 py-3 flex items-center justify-between text-sm font-bold text-gray-900">
+                    <span>✨ 더 해보기 <span className="font-normal text-xs text-gray-500">고민 비교 · MBTI · 시간 후보</span></span>
+                    <span aria-hidden="true" className="text-gray-400 transition-transform group-open:rotate-180">⌄</span>
+                  </summary>
+                  <div className="px-3 pb-3">
+                    <CompareCard input={askInput} />
+                    <MbtiCard input={askInput} />
+                    <HoursCard input={askInput} />
+                  </div>
+                </details>
+              )}
               {!target.premium && (
                 <UpsellTeaser
                   fortune={target.fortune}
