@@ -6,7 +6,6 @@ import type { AuthUser } from "./useAuth";
 import { FREE_PRICE_LABEL, MACHINES, PREMIUM_CARDS, SAMPLE_CAPSULES } from "./data";
 import { HelpMenuButton, MachineMenuButton } from "./MenuButton";
 import { HERO_IMAGE, IMAGES, LOGO_IMAGE } from "./images";
-import HeroScene from "./HeroScene";
 import SafeImage from "./SafeImage";
 
 export type SpinHandler = (key: string, fortune: string, price: string, premium?: boolean) => void;
@@ -191,7 +190,15 @@ export function ShowcaseSection() {
         <div aria-hidden="true" className="pointer-events-none absolute bottom-12 -left-2 w-6 h-6 rounded-full bg-white/70 border border-sky-200 shadow-sm otter-bubble-aura z-20" style={{ animationDelay: "2.7s" }} />
 
         <div className="grid grid-cols-1 gap-3 sm:gap-4 items-center">
-          <HeroScene src={HERO_IMAGE} alt="수달 도사 도리와 오행 친구들이 말해요: 궁금행? 궁금하면 500원!!" />
+          <div className="relative w-full max-w-3xl mx-auto aspect-[16/9] rounded-2xl overflow-hidden bg-sky-50 flex items-center justify-center border border-sky-100 shadow-sm">
+            <SafeImage
+              src={HERO_IMAGE}
+              alt="수달 도사 도리와 오행 친구들이 말해요: 궁금행? 궁금하면 500원!!"
+              className="w-full h-full object-cover hover:scale-105 transition-transform duration-700"
+              fallback="🦦"
+              fallbackClass="text-8xl"
+            />
+          </div>
 
           <div className="w-full max-w-3xl mx-auto flex flex-col justify-center bg-sky-50/70 p-4 sm:p-5 rounded-2xl border border-sky-200">
             <div className="flex flex-wrap items-center justify-center gap-2.5">
