@@ -74,7 +74,6 @@ export function CompareCard({ input }: { input: BirthInput }) {
               <p className="font-semibold">결정 전에 스스로 물어볼 3가지</p>
               <ol className="mt-1 list-decimal pl-5 space-y-0.5">{result.questions.map((q, i) => <li key={i}>{q}</li>)}</ol>
             </div>
-            <p className="text-[11px] text-gray-500">참고용 재미 풀이예요. 결정은 내가 해요.</p>
           </div>
         )}
       </div>

@@ -77,7 +77,7 @@ export function HoursCard({ input }: { input: BirthInput }) {
             <p><span className="font-semibold">🔒 변하지 않는 핵심</span><br />{result.common}</p>
             <p><span className="font-semibold">🔀 달라지는 부분</span><br />{result.differ}</p>
             <p><span className="font-semibold">🔎 정확히 확인하려면</span><br />{result.howToCheck}</p>
-            <p className="text-[11px] text-gray-500">참고용 재미 풀이예요. 정확한 시간을 알게 되면 처음부터 다시 뽑아 보세요.</p>
+            <p className="text-[11px] text-gray-500">정확한 시간을 알게 되면 처음부터 다시 뽑아 보세요.</p>
           </div>
         )}
       </div>
