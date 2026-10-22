@@ -1,4 +1,4 @@
-import { concernLabel, type ConcernId } from "./concerns";
+import { CONCERN_CHIPS, concernLabel, type ConcernId } from "./concerns";
 import type { StorageLike } from "./drawCounter";
 
 /*
@@ -60,7 +60,7 @@ export function readFollowup(storage: StorageLike | null): Followup | null {
   if (!storage) return null;
   try {
     const v = JSON.parse(storage.getItem(FOLLOWUP_KEY) ?? "null") as Partial<Followup> | null;
-    if (v && typeof v.day === "string" && VALID.test(v.day) && typeof v.tag === "string") {
+    if (v && typeof v.day === "string" && VALID.test(v.day) && typeof v.tag === "string" && CONCERN_CHIPS.some((c) => c.id === v.tag)) {
       return { day: v.day, tag: v.tag as ConcernId, ...(typeof v.answered === "string" && VALID.test(v.answered) ? { answered: v.answered } : {}) };
     }
   } catch {

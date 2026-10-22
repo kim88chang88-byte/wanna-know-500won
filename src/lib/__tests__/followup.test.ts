@@ -42,3 +42,11 @@ describe("고민 후속 체크인", () => {
     expect(readFollowup(st)).toBeNull();
   });
 });
+
+describe("저장된 항목 이름 검사", () => {
+  it("목록에 없는 항목이 저장돼 있으면 없는 것으로 본다 (예전 버전 대비)", () => {
+    const st = mem();
+    st.setItem(FOLLOWUP_KEY, JSON.stringify({ day: "2026-10-10", tag: "nothing" }));
+    expect(readFollowup(st)).toBeNull();
+  });
+});

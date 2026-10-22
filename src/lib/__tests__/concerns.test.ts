@@ -6,9 +6,9 @@ import { buildPremiumReport, validatePremiumInput } from "../premium/report";
 const BIRTH = { year: 1995, month: 3, day: 14, hour: 9, minute: 30, calendar: "solar" as const, isLeapMonth: false, gender: "female" as const };
 
 describe("고민 입력 검사", () => {
-  it("추천 버튼 12개, id 중복 없음", () => {
-    expect(CONCERN_CHIPS.length).toBe(12);
-    expect(new Set(CONCERN_CHIPS.map((c) => c.id)).size).toBe(12);
+  it("추천 버튼 id 중복 없음", () => {
+    expect(CONCERN_CHIPS.length).toBe(42);
+    expect(new Set(CONCERN_CHIPS.map((c) => c.id)).size).toBe(CONCERN_CHIPS.length);
   });
   it("모르는 id·중복·초과는 버리고, 모양이 이상하면 빈 고민", () => {
     expect(parseConcern(null)).toEqual({ tags: [], text: "" });
@@ -71,9 +71,18 @@ describe("고민이 풀이에 반영", () => {
 
 describe("풀이 종류에 맞는 고민 항목", () => {
   const ids = (f: string) => chipsForFortune(f).map((c) => c.id);
+  it("종류마다 6~7개의 항목이 있다 (최대 3개까지 고를 수 있어요)", () => {
+    for (const f of ["성공운", "재물운", "연애운", "결혼운", "건강운", "학업운", "재물·직장", "연애 매력", "궁합"]) {
+      const n = chipsForFortune(f).length;
+      expect(n >= 6 && n <= 7).toBe(true);
+      expect(new Set(ids(f)).size).toBe(n);
+    }
+  });
   it("고른 종류와 상관없는 항목은 나오지 않는다", () => {
-    expect(ids("성공운")).toEqual(["job", "workpeople", "career"]);
-    expect(ids("연애운")).toEqual(["crush", "relationship", "breakup"]);
+    expect(ids("성공운")).toContain("job");
+    expect(ids("성공운")).not.toContain("crush");
+    expect(ids("연애운")).toContain("crush");
+    expect(ids("연애운")).not.toContain("job");
     expect(ids("재물운")).toContain("money");
     expect(ids("재물운")).not.toContain("crush");
     expect(ids("건강운")).not.toContain("job");
@@ -81,12 +90,13 @@ describe("풀이 종류에 맞는 고민 항목", () => {
     expect(ids("결혼운")).toContain("marriage");
   });
   it("프리미엄 카드도 맞는 항목만 보인다", () => {
-    expect(ids("올해 재물·직장 운 리포트")).toEqual(["money", "job", "workpeople", "career"]);
+    expect(ids("올해 재물·직장 운 리포트")).toContain("money");
+    expect(ids("올해 재물·직장 운 리포트")).toContain("job");
     expect(ids("연애 매력 리포트")).not.toContain("job");
     expect(ids("우리 둘의 궁합 리포트")).toContain("relationship");
   });
   it("알 수 없는 이름이면 전체를 보여준다", () => {
-    expect(chipsForFortune("오늘의 운").length).toBe(12);
+    expect(chipsForFortune("오늘의 운").length).toBe(CONCERN_CHIPS.length);
   });
   it("모든 종류의 항목이 실제 목록에 있고 비어 있지 않다", () => {
     for (const f of ["성공운", "재물운", "연애운", "결혼운", "건강운", "학업운", "재물·직장", "연애 매력", "궁합"]) {
