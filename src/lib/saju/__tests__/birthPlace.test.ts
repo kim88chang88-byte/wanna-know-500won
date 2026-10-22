@@ -33,4 +33,15 @@ describe("출생지 경도 보정", () => {
     expect(buildBirthFields({ ...f, timeKnown: false })?.birthPlace).toBeUndefined();
     expect(buildBirthFields({ ...f, birthPlace: "화성" })?.birthPlace).toBeUndefined();
   });
+  it("조자시 선택은 23시대·시간을 알 때만 담아요", () => {
+    const f = { ...EMPTY_BIRTH, solarDate: "1988-11-04", time: "23:30", gender: "male" as const, lateZi: "nextDay" as const };
+    expect(buildBirthFields(f)?.lateZi).toBe("nextDay");
+    expect(buildBirthFields({ ...f, lateZi: "sameDay" })?.lateZi).toBeUndefined();
+    expect(buildBirthFields({ ...f, timeKnown: false })?.lateZi).toBeUndefined();
+  });
+  it("시간을 모르면 조자시도 무시하고 lateZi 를 떼어내요", () => {
+    const a = resolveBirth({ year: 1988, month: 11, day: 4, hour: null, calendar: "solar", gender: "male", lateZi: "nextDay" });
+    expect(a.adjust).toBeNull();
+    expect("lateZi" in a.input).toBe(false);
+  });
 });

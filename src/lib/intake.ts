@@ -16,7 +16,7 @@ export type AnyStepId = StepId | PartnerStepId;
 export const COMPAT_STEPS: readonly AnyStepId[] = ["date", "time", "gender", "pdate", "ptime", "pgender", "concern", "consent"];
 
 /** 한 사람의 생년월일시·성별 입력값 (상대방은 이것만 받아요) */
-export type BirthFields = Pick<IntakeForm, "calendar" | "solarDate" | "lunarYear" | "lunarMonth" | "lunarDay" | "isLeapMonth" | "timeKnown" | "time" | "gender" | "birthPlace">;
+export type BirthFields = Pick<IntakeForm, "calendar" | "solarDate" | "lunarYear" | "lunarMonth" | "lunarDay" | "isLeapMonth" | "timeKnown" | "time" | "gender" | "birthPlace" | "lateZi">;
 
 export interface IntakeForm {
   calendar: "solar" | "lunar";
@@ -33,6 +33,8 @@ export interface IntakeForm {
   time: string;
   /** 출생지 (선택, 시간을 알 때만 의미 있어요) */
   birthPlace: string;
+  /** 23시대 출생일 때 야자시(sameDay) / 조자시(nextDay) */
+  lateZi: "sameDay" | "nextDay";
   gender: Gender | null;
   /** 요즘 고민 (선택): 추천 버튼 + 직접 적기 */
   concernTags: ConcernId[];
@@ -50,6 +52,7 @@ export const EMPTY_BIRTH: BirthFields = {
   timeKnown: true,
   time: "",
   birthPlace: "",
+  lateZi: "sameDay",
   gender: null,
 };
 
@@ -63,6 +66,7 @@ export const EMPTY_FORM: IntakeForm = {
   timeKnown: true,
   time: "",
   birthPlace: "",
+  lateZi: "sameDay",
   gender: null,
   concernTags: [],
   concernText: "",
@@ -161,6 +165,7 @@ export function buildBirthFields(f: BirthFields): BirthInput | null {
     isLeapMonth: f.calendar === "lunar" && f.isLeapMonth,
     gender: f.gender,
     ...(t && isBirthPlace(f.birthPlace) ? { birthPlace: f.birthPlace } : {}),
+    ...(t && f.lateZi === "nextDay" ? { lateZi: "nextDay" as const } : {}),
   };
 }
 

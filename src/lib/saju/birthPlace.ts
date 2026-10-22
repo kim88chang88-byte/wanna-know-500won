@@ -58,35 +58,38 @@ export interface BirthAdjust {
   applied: boolean;
   hourChanged: boolean;
   dayChanged: boolean;
+  /** 조자시(23시부터 다음 날)로 본 경우 */
+  lateZi?: boolean;
   reason?: string;
 }
 
 /**
- * 출생지가 있으면 시계 시각을 보정한 양력 입력으로 바꿔요. 돌려주는 input 에는 birthPlace 가 없어요.
- * 시간을 모르거나 출생지가 없으면 그대로 돌려줘요(adjust 는 null).
+ * 출생지·조자시 선택을 반영한 양력 입력으로 바꿔요. 돌려주는 input 에는 birthPlace/lateZi 가 없어요.
+ * 시간을 모르거나 보정할 게 없으면 그대로 돌려줘요(adjust 는 null).
+ * 보정 때문에 연주·월주(절기 경계)가 바뀌면 보정하지 않고 이유만 알려줘요.
  */
-export function resolveBirth<T extends BirthInput>(input: T): { input: Omit<T, "birthPlace">; adjust: BirthAdjust | null } {
-  const { birthPlace, ...base } = input;
+export function resolveBirth<T extends BirthInput>(input: T): { input: Omit<T, "birthPlace" | "lateZi">; adjust: BirthAdjust | null } {
+  const { birthPlace, lateZi, ...base } = input;
   const timeKnown = base.hour !== undefined && base.hour !== null;
-  if (!birthPlace || !isBirthPlace(birthPlace) || !timeKnown) return { input: base, adjust: null };
+  const placeOk = isBirthPlace(birthPlace);
+  const wantLate = lateZi === "nextDay";
+  if (!timeKnown || (!placeOk && !wantLate)) return { input: base, adjust: null };
   try {
     const chart0 = calculateSaju(base);
     const sd = chart0.solarDate;
-    const minutes = placeOffsetMinutes(birthPlace, sd.year, sd.month, sd.day);
-    if (minutes === null || minutes === 0) return { input: base, adjust: null };
-    const shifted = shiftWallTime({ ...sd, hour: base.hour as number, minute: base.minute ?? 0 }, minutes);
-    const shiftedInput: Omit<T, "birthPlace"> = {
-      ...base,
-      year: shifted.year,
-      month: shifted.month,
-      day: shifted.day,
-      hour: shifted.hour,
-      minute: shifted.minute,
-      calendar: "solar",
-      isLeapMonth: false,
-    };
+    const minutes = placeOk ? (placeOffsetMinutes(birthPlace, sd.year, sd.month, sd.day) ?? 0) : 0;
+    let wall = shiftWallTime({ ...sd, hour: base.hour as number, minute: base.minute ?? 0 }, minutes);
+    let late = false;
+    if (wantLate && wall.hour === 23) {
+      // 조자시: 23시부터 다음 날 자시(00:00)로 봐요. 시주는 같고 일주만 다음 날이 돼요.
+      wall = shiftWallTime(wall, 60 - wall.minute);
+      late = true;
+    }
+    if (minutes === 0 && !late) return { input: base, adjust: null };
+    const parts = [placeOk && minutes !== 0 ? `${birthPlace} ${minutes > 0 ? "+" : "−"}${Math.abs(minutes)}분` : "", late ? "조자시" : ""].filter(Boolean);
+    const label = parts.join(" · ");
+    const shiftedInput = { ...base, year: wall.year, month: wall.month, day: wall.day, hour: wall.hour, minute: wall.minute, calendar: "solar" as const, isLeapMonth: false } as Omit<T, "birthPlace" | "lateZi">;
     const chart1 = calculateSaju(shiftedInput);
-    const label = `${birthPlace} ${minutes > 0 ? "+" : "−"}${Math.abs(minutes)}분`;
     if (!samePillar(chart0.year, chart1.year) || !samePillar(chart0.month, chart1.month)) {
       return {
         input: base,
@@ -95,7 +98,7 @@ export function resolveBirth<T extends BirthInput>(input: T): { input: Omit<T, "
     }
     const hourChanged = !!chart0.hour && !!chart1.hour && !samePillar(chart0.hour, chart1.hour);
     const dayChanged = !samePillar(chart0.day, chart1.day);
-    return { input: shiftedInput, adjust: { label, minutes, applied: true, hourChanged, dayChanged } };
+    return { input: shiftedInput, adjust: { label, minutes, applied: true, hourChanged, dayChanged, lateZi: late || undefined } };
   } catch {
     return { input: base, adjust: null };
   }
@@ -107,4 +110,32 @@ export function adjustNote(a: BirthAdjust): string {
   if (a.dayChanged) return `📍 ${a.label} 보정을 적용했어요. 날짜 기둥(일주)과 시주가 달라졌어요.`;
   if (a.hourChanged) return `📍 ${a.label} 보정을 적용했어요. 시주가 달라졌어요.`;
   return `📍 ${a.label} 보정을 적용했지만 사주 글자는 그대로예요.`;
+}
+
+/**
+ * 절기가 바뀌는 날 근처에 태어났는지 살펴서 안내 문구를 돌려줘요. 아니면 null.
+ * - 시간을 모르면: 그날 안에서 연주/월주가 바뀌는지(uncertainPillars)
+ * - 시간을 알면: 앞뒤 2시간 안에 절기가 바뀌는지
+ */
+export function boundaryNote(input: BirthInput): string | null {
+  try {
+    const { birthPlace: _p, lateZi: _l, ...base } = input;
+    const chart = calculateSaju(base);
+    const timeKnown = base.hour !== undefined && base.hour !== null;
+    if (!timeKnown) {
+      if (chart.uncertainPillars.length === 0) return null;
+      const what = chart.uncertainPillars.includes("year") ? "해(연주)와 달(월주)" : "달(월주)";
+      return `🗓 태어난 날에 절기가 바뀌어서, 시간을 모르면 ${what}이 확정되지 않아요. 시간을 알면 더 정확해져요.`;
+    }
+    const sd = chart.solarDate;
+    const at = shiftWallTime({ ...sd, hour: base.hour as number, minute: base.minute ?? 0 }, 0);
+    const near = [-120, 120].some((d) => {
+      const w = shiftWallTime(at, d);
+      const c = calculateSaju({ ...base, year: w.year, month: w.month, day: w.day, hour: w.hour, minute: w.minute, calendar: "solar", isLeapMonth: false });
+      return !samePillar(c.year, chart.year) || !samePillar(c.month, chart.month);
+    });
+    return near ? "🗓 절기가 바뀌는 시각과 가까워서, 몇 시간 차이로 달(월주)이 달라질 수 있어요. 출생 시각이 정확한지 한 번 확인해 보면 좋아요." : null;
+  } catch {
+    return null;
+  }
 }

@@ -66,7 +66,7 @@ function parseBirth(raw: unknown, who: string): BirthResult {
   }
   if (raw.calendar !== "solar" && raw.calendar !== "lunar") return { ok: false, error: `${who}양력/음력을 선택해 주세요.` };
   if (raw.gender !== "male" && raw.gender !== "female") return { ok: false, error: `${who}성별을 선택해 주세요.` };
-  return { ok: true, value: { year, month, day, hour, minute, calendar: raw.calendar, isLeapMonth: raw.isLeapMonth === true, gender: raw.gender, ...(isBirthPlace(raw.birthPlace) ? { birthPlace: raw.birthPlace } : {}) } };
+  return { ok: true, value: { year, month, day, hour, minute, calendar: raw.calendar, isLeapMonth: raw.isLeapMonth === true, gender: raw.gender, ...(isBirthPlace(raw.birthPlace) ? { birthPlace: raw.birthPlace } : {}), ...(raw.lateZi === "nextDay" ? { lateZi: "nextDay" as const } : {}) } };
 }
 
 /** 서버 입력 검사. 궁합이면 `partner`(상대방 생년월일시)도 같은 모양으로 받아요. */

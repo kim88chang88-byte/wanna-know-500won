@@ -10,7 +10,7 @@ import { readCookie, SESSION_COOKIE, verifySessionToken } from "@/lib/auth/sessi
 import { FREE_PER_DAY, isDailyLimitEnforced } from "@/lib/db/config";
 import { createDb, loadDbConfig, type DrawCounts } from "@/lib/db/supabase";
 import { createRateLimiter } from "@/lib/rateLimit";
-import { adjustNote, resolveBirth, type BirthAdjust } from "@/lib/saju/birthPlace";
+import { adjustNote, boundaryNote, resolveBirth, type BirthAdjust } from "@/lib/saju/birthPlace";
 import { calculateSaju } from "@/lib/saju/calculate";
 import { SajuInputError } from "@/lib/saju/errors";
 import type { BirthInput, SajuChart } from "@/lib/saju/types";
@@ -77,6 +77,7 @@ export async function POST(request: Request) {
   const birthAdjust: BirthAdjust | null = resolved.adjust;
   const profileInput = { ...(input as BirthInput) };
   delete profileInput.birthPlace;
+  delete profileInput.lateZi;
   let chart: SajuChart;
   try {
     chart = calculateSaju(resolved.input);
@@ -151,5 +152,5 @@ export async function POST(request: Request) {
     }
   }
 
-  return NextResponse.json({ chart, reading, readingStatus, counts, profileSaved, birthAdjust, birthAdjustNote: birthAdjust ? adjustNote(birthAdjust) : null });
+  return NextResponse.json({ chart, reading, readingStatus, counts, profileSaved, birthAdjust, birthAdjustNote: birthAdjust ? adjustNote(birthAdjust) : null, boundaryNote: boundaryNote(input as BirthInput) });
 }

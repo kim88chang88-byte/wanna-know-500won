@@ -14,6 +14,8 @@ export interface BirthInput {
   gender: Gender;
   /** 출생지(경도 보정용, 선택). 시각을 알 때만 쓰고 저장하지 않아요. */
   birthPlace?: string;
+  /** 23:00~23:59 출생일 때 조자시(23시부터 다음 날)로 볼지. 생략하면 야자시(당일). */
+  lateZi?: "nextDay";
 }
 
 export interface CalcOptions {

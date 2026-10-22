@@ -249,6 +249,20 @@ function BirthStepFields({ kind, f, patch, withPlace = false }: { kind: "date" |
         >
           태어난 시간은 모르겠어요
         </ChoiceButton>
+        {withPlace && f.timeKnown && (f.time.startsWith("23:") || (f.birthPlace !== "" && f.time.startsWith("00:"))) && (
+          <div className="space-y-1" role="group" aria-label="23시대 출생 날짜 기준">
+            <p className="text-xs font-semibold text-gray-600">밤 11시대는 두 가지 보는 법이 있어요</p>
+            <div className="grid grid-cols-2 gap-2">
+              <ChoiceButton selected={f.lateZi !== "nextDay"} onClick={() => patch({ lateZi: "sameDay" })}>
+                그날로 봐요 (야자시)
+              </ChoiceButton>
+              <ChoiceButton selected={f.lateZi === "nextDay"} onClick={() => patch({ lateZi: "nextDay" })}>
+                다음 날로 봐요 (조자시)
+              </ChoiceButton>
+            </div>
+            <p className="text-xs text-gray-500 leading-relaxed">모르겠으면 그대로 두세요. 날짜 기둥(일주)이 달라질 수 있어요.</p>
+          </div>
+        )}
         {withPlace && f.timeKnown && (
           <label className="block text-xs font-semibold text-gray-600">
             태어난 곳 (선택)
@@ -355,6 +369,7 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
         counts?: { today: number; month: number } | null;
         profileSaved?: boolean;
         birthAdjustNote?: string | null;
+        boundaryNote?: string | null;
         error?: string;
       } | null;
       if (!res.ok || !data?.chart) throw new Error(data?.error ?? "풀이를 만들지 못했어요. 잠시 뒤에 다시 해볼래요?");
@@ -365,7 +380,7 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
       setPremiumError(p.error);
       setChart(data.chart);
       setAskInput(input);
-      setBirthNote(data.birthAdjustNote ?? null);
+      setBirthNote([data.birthAdjustNote, data.boundaryNote].filter(Boolean).join("\n") || null);
       setReading(data.reading ?? null);
       setReadingStatus(status);
       if (data.profileSaved) onProfileSaved?.(input);
@@ -451,7 +466,11 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
 
               {birthNote && (
                 <p data-testid="birth-adjust-note" className="mt-4 p-3 rounded-2xl bg-brand-50 border border-brand-100 text-xs text-gray-700 leading-relaxed">
-                  {birthNote}
+                  {birthNote.split("\n").map((l) => (
+                    <span key={l} className="block">
+                      {l}
+                    </span>
+                  ))}
                 </p>
               )}
 
