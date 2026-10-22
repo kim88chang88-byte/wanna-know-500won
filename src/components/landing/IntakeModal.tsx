@@ -29,6 +29,7 @@ import { HoursCard } from "./HoursCard";
 import { MbtiCard } from "./MbtiCard";
 import { UpsellTeaser } from "./UpsellTeaser";
 import { chipsForFortune, MAX_CONCERN_TAGS, MAX_CONCERN_TEXT, type Concern, type ConcernId } from "@/lib/concerns";
+import LoadingBar from "./LoadingBar";
 import { BIRTH_PLACES } from "@/lib/saju/birthPlace";
 import { profileSummary, profileToForm, sameBirth, type SavedProfile } from "@/lib/profile";
 import { BRANCHES, STEMS } from "@/lib/saju/constants";
@@ -451,9 +452,7 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
             🫧
           </div>
           <p className="mt-3 font-bold text-gray-900">풀이를 만들고 있어요</p>
-          <div className="mt-4 h-1.5 rounded-full bg-brand-100 overflow-hidden" aria-hidden="true">
-            <div className="h-full w-1/2 rounded-full bg-brand-500 animate-pulse" />
-          </div>
+          <LoadingBar />
         </div>
       )}
 
