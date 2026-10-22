@@ -15,14 +15,16 @@ export function progressAt(sec: number): number {
   return Math.min(92, 92 * (1 - Math.exp(-sec / 12)));
 }
 
-export default function LoadingBar() {
+export default function LoadingBar({ done = false }: { done?: boolean }) {
   const [pct, setPct] = useState(3);
   useEffect(() => {
+    if (done) return; // 끝났으면 시간 진행을 멈추고 100% 로 채워요
     const start = Date.now();
     const id = setInterval(() => setPct(Math.max(3, progressAt((Date.now() - start) / 1000))), 250);
     return () => clearInterval(id);
-  }, []);
-  const stage = [...STAGES].reverse().find((s) => pct >= s.at) ?? STAGES[0];
+  }, [done]);
+  const shown = done ? 100 : pct;
+  const stage = done ? { at: 100, text: "다 됐어요! 🎉" } : ([...STAGES].reverse().find((s) => pct >= s.at) ?? STAGES[0]);
   return (
     <div className="mt-4">
       <div
@@ -30,10 +32,10 @@ export default function LoadingBar() {
         aria-label="풀이 진행"
         aria-valuemin={0}
         aria-valuemax={100}
-        aria-valuenow={Math.round(pct)}
+        aria-valuenow={Math.round(shown)}
         className="h-2 rounded-full bg-brand-100 overflow-hidden"
       >
-        <div className="h-full rounded-full bg-brand-500 transition-[width] duration-300 ease-out" style={{ width: `${pct}%` }} />
+        <div className={`h-full rounded-full bg-brand-500 ease-out ${done ? "duration-500" : "duration-300"} transition-[width]`} style={{ width: `${shown}%` }} />
       </div>
       <p className="mt-2 text-xs text-gray-500">{stage.text}</p>
     </div>

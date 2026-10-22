@@ -321,6 +321,7 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
   const [readingStatus, setReadingStatus] = useState<ReadingStatus>("ok");
   const [premiumReport, setPremiumReport] = useState<PremiumReportView | null>(null);
   const [premiumError, setPremiumError] = useState<string | null>(null);
+  const [loadDone, setLoadDone] = useState(false);
   const [birthNote, setBirthNote] = useState<string | null>(null);
   const [askInput, setAskInput] = useState<BirthInput | null>(null);
   const abortRef = useRef<AbortController | null>(null);
@@ -346,6 +347,7 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
     if (!input) return;
     const partnerInput = compat ? buildBirthFields(partner) : null;
     if (compat && !partnerInput) return;
+    setLoadDone(false);
     setPhase("loading");
     setError(null);
     const concern = buildConcern(form);
@@ -385,6 +387,10 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
       setReading(data.reading ?? null);
       setReadingStatus(status);
       if (data.profileSaved) onProfileSaved?.(input);
+      // 막대를 끝까지 채우는 모습을 잠깐 보여주고 결과로 넘어가요.
+      setLoadDone(true);
+      await new Promise((r) => setTimeout(r, 650));
+      if (ctrl.signal.aborted) return;
       setPhase("result");
       // 지난 고민을 도리가 다시 물어볼 수 있게, 고른 항목 이름만 이 기기에 기억해요. (직접 쓴 글은 저장하지 않아요)
       if (concern) rememberConcern(getBrowserStorage(), concern.tags, dayKey(new Date()));
@@ -452,7 +458,7 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
             🫧
           </div>
           <p className="mt-3 font-bold text-gray-900">풀이를 만들고 있어요</p>
-          <LoadingBar />
+          <LoadingBar done={loadDone} />
         </div>
       )}
 
