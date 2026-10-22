@@ -292,7 +292,7 @@ export function MachinesSection({ onSpin }: SpinProps) {
 
 export function PremiumSection({ onSpin }: SpinProps) {
   return (
-    <section className="mb-8 relative z-10">
+    <section id="premium" className="mb-8 relative z-10 scroll-mt-20">
       <div
         className="card-water-glow rounded-[2.5rem] p-4 sm:p-6 bg-[#2a1a5e] border-2 border-brand-300 shadow-[0_12px_36px_rgba(80,40,160,0.35)] relative overflow-hidden"
         style={{ backgroundImage: "url(/images/premium-bg.webp)", backgroundSize: "cover", backgroundPosition: "80% top" }}

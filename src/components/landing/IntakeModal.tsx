@@ -27,6 +27,7 @@ import { AskChips } from "./AskChips";
 import { CompareCard } from "./CompareCard";
 import { HoursCard } from "./HoursCard";
 import { MbtiCard } from "./MbtiCard";
+import { UpsellTeaser } from "./UpsellTeaser";
 import { chipsForFortune, MAX_CONCERN_TAGS, MAX_CONCERN_TEXT, type Concern, type ConcernId } from "@/lib/concerns";
 import { profileSummary, profileToForm, sameBirth, type SavedProfile } from "@/lib/profile";
 import { BRANCHES, STEMS } from "@/lib/saju/constants";
@@ -439,6 +440,15 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
               <div data-testid="premium-result" className="mt-6">
                 <ManseReport report={premiumReport} />
               </div>
+              {!target.premium && (
+                <UpsellTeaser
+                  fortune={target.fortune}
+                  onGo={() => {
+                    onClose();
+                    window.setTimeout(() => document.getElementById("premium")?.scrollIntoView({ behavior: "smooth", block: "start" }), 150);
+                  }}
+                />
+              )}
             </>
           ) : (
             <>
