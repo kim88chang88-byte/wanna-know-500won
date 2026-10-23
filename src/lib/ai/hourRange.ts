@@ -81,10 +81,10 @@ const f = (d: string) => ({ type: "string", description: d });
 export const HOURS_SCHEMA = {
   type: "object",
   properties: {
-    candidates: { type: "array", items: { type: "object", properties: { feel: f("그 시간이라면 어떤 결인지. 1~2문장") }, required: ["feel"], additionalProperties: false } },
-    common: f("후보와 상관없이 변하지 않는 핵심. 1~2문장"),
-    differ: f("후보에 따라 달라지는 부분. 1~2문장"),
-    howToCheck: f("정확한 시간을 확인하는 방법. 1~2문장"),
+    candidates: { type: "array", items: { type: "object", properties: { feel: f("그 시간이라면 어떤 결인지. 1~2문장, 120자 이내") }, required: ["feel"], additionalProperties: false } },
+    common: f("후보와 상관없이 변하지 않는 핵심. 1~2문장, 150자 이내"),
+    differ: f("후보에 따라 달라지는 부분. 1~2문장, 150자 이내"),
+    howToCheck: f("정확한 시간을 확인하는 방법. 1~2문장, 150자 이내"),
   },
   required: ["candidates", "common", "differ", "howToCheck"],
   additionalProperties: false,
@@ -93,7 +93,7 @@ export const HOURS_SCHEMA = {
 export function parseHours(value: unknown, count: number): { feels: string[]; common: string; differ: string; howToCheck: string } | null {
   if (typeof value !== "object" || value === null) return null;
   const o = value as Record<string, unknown>;
-  const t = (v: unknown, max = 300): string | null => (typeof v === "string" && v.trim().length >= 10 && v.trim().length <= max ? v.trim() : null);
+  const t = (v: unknown, max = 500): string | null => (typeof v === "string" && v.trim().length >= 10 && v.trim().length <= max ? v.trim() : null);
   const feels = Array.isArray(o.candidates) ? o.candidates.map((c) => t((c as Record<string, unknown> | null)?.feel)) : [];
   const common = t(o.common);
   const differ = t(o.differ);
@@ -129,7 +129,7 @@ export async function compareHours(o: { base: BirthInput; start: number; end: nu
     user: buildHoursMessage(o.base.gender, cands),
     schema: HOURS_SCHEMA,
     parse: (v) => parseHours(v, cands.length),
-    maxTokens: 1500,
+    maxTokens: 2500,
     apiKey: o.apiKey,
     model: o.model,
     fetchImpl: o.fetchImpl,
