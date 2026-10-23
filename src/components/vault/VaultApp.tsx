@@ -5,6 +5,7 @@ import ManseReport from "@/components/premium/ManseReport";
 import PhotoCard from "@/components/landing/PhotoCard";
 import { ReadingCard } from "@/components/landing/ReadingCard";
 import type { VaultSnapshot } from "@/lib/vault";
+import { summarizeVault } from "@/lib/vaultStats";
 
 interface Row {
   id: string;
@@ -150,6 +151,7 @@ export default function VaultApp() {
   return (
     <div>
       {notice && <p role="alert" className="mb-2 text-xs text-amber-800">{notice}</p>}
+      <VaultSummaryBar items={view.items} />
       <ul data-testid="vault-list" className="space-y-2.5">
         {view.items.map((it) => (
           <li key={it.id}>
@@ -169,6 +171,28 @@ export default function VaultApp() {
         ))}
       </ul>
       <p className="mt-4 text-center text-[11px] text-gray-400">최대 300개까지 보관할 수 있어요.</p>
+    </div>
+  );
+}
+
+/** 모은 풀이를 한눈에. 이번 달에 모은 개수와 주제별 개수를 보여 줘요. (부담 주는 목표 없이 모인 것만 알려 줘요) */
+function VaultSummaryBar({ items }: { items: Row[] }) {
+  const s = summarizeVault(items, new Date());
+  return (
+    <div data-testid="vault-summary" className="mb-3 rounded-2xl border border-brand-100 bg-white px-4 py-3">
+      <p className="text-sm font-bold text-gray-900">
+        {s.month > 0 ? `이번 달 ${s.month}개의 풀이가 모였어요 🌱` : "이번 달엔 아직 새 풀이가 없어요. 천천히 모아 봐요 🌱"}
+        <span className="ml-2 text-[11px] font-medium text-gray-400">지금까지 모두 {s.total}개</span>
+      </p>
+      {s.byTopic.length > 0 && (
+        <p className="mt-1.5 flex flex-wrap gap-1.5">
+          {s.byTopic.map((t) => (
+            <span key={t.name} className="rounded-full bg-brand-50 px-2.5 py-0.5 text-[11px] font-bold text-brand-700">
+              {t.name} {t.n}
+            </span>
+          ))}
+        </p>
+      )}
     </div>
   );
 }

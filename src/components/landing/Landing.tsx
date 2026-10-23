@@ -3,7 +3,9 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { dayKey, getBrowserStorage, readCounts, recordDraw, type DrawCounts } from "@/lib/drawCounter";
 import { readStreak, recordVisit, streakLine } from "@/lib/streak";
+import { DailyLineCard } from "./DailyLineCard";
 import { FollowupCard } from "./FollowupCard";
+import { VaultFollowupCard } from "./VaultFollowupCard";
 import IntakeModal, { type IntakeTarget } from "./IntakeModal";
 import { LoginModal } from "./Modals";
 import { useAuth } from "./useAuth";
@@ -120,6 +122,8 @@ export default function Landing() {
 
       <main className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-5">
         <HeroSection counts={counts} streakText={streakText} />
+        {user && profile && <DailyLineCard onOpened={() => setStreakText(streakLine(recordVisit(getBrowserStorage(), dayKey(new Date()))))} />}
+        {user && <VaultFollowupCard />}
         <FollowupCard />
         <ShowcaseSection />
         <MachinesSection onSpin={handleSpin} />
