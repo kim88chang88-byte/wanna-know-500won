@@ -153,10 +153,11 @@ export interface PublicIndicator {
 }
 
 export interface DetailFolds {
-  today?: string;
-  nature?: string;
-  flow?: string;
-  action?: string;
+  elements?: string;
+  self?: string;
+  praise?: string;
+  lack?: string;
+  improve?: string;
   lucky?: string;
 }
 

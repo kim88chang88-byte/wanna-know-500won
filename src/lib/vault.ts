@@ -61,7 +61,7 @@ function parseCard(raw: unknown): VaultCard | null {
   return { keyword, score, summary, indicators };
 }
 
-const FOLD_KEYS = ["today", "nature", "flow", "action", "lucky"] as const;
+const FOLD_KEYS = ["elements", "self", "praise", "lack", "improve", "lucky"] as const;
 
 function parseFolds(raw: unknown): Record<string, string> | null {
   if (!isRecord(raw)) return null;

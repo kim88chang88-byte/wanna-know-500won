@@ -20,7 +20,7 @@ export interface StoryReading {
   indicators: Array<{ key?: string; label: string; score: number; comment: string | null }>;
   reason?: string;
   story?: string;
-  folds?: { today?: string; nature?: string; flow?: string; action?: string; lucky?: string };
+  folds?: { elements?: string; self?: string; praise?: string; lack?: string; improve?: string; lucky?: string };
 }
 
 const EL_CLASS: Record<Element, string> = {
@@ -106,7 +106,7 @@ export default function StoryReport({
   const concern = report.concern;
   const concernText = concern?.text?.trim() || (concern?.answers.length ? concern.answers.map((a) => a.title).join(" · ") : "");
   const f = reading?.folds ?? {};
-  const shown = reading?.indicators.filter((i) => i.comment) ?? [];
+  const hasFolds = Boolean(f.elements || f.self || f.praise || f.lack || f.improve);
   // 요약하자면: 총운 한 줄 → 도리가 본 이유 → 고민에 대한 답을 라벨 없이 한 흐름으로 이어요.
   const joinFlow = (parts: Array<string | undefined | null>) =>
     parts
@@ -147,79 +147,69 @@ export default function StoryReport({
         </section>
       )}
 
-      {/* 3) 접어 둔 풀이 */}
+      {/* 3) 접어 둔 풀이: 오행 → 나는 누구 → 칭찬 → 아쉬움 → 개선 → 행운 처방 → 원국 → 마지막 한마디 */}
       <section aria-label="자세한 풀이" data-testid="story-folds" className="rounded-2xl border border-brand-100 bg-white px-4">
         <p className="pt-3.5 text-xs text-gray-500">각 제목을 누르면 풀이가 펼쳐져요</p>
-        {(shown.length > 0 || f.today) && (
-          <Fold testId="story-fold-today" label="오늘의 기운" title={f.today ? firstSentence(f.today) : "연애 · 금전 · 마음, 오늘은 이런 흐름이에요"}>
-            {f.today ? (
-              <>
+        {hasFolds ? (
+          <>
+            {f.elements && (
+              <Fold testId="story-fold-elements" label="STEP 1" title="오행으로 보는 사주">
                 <p className="mb-2.5 flex flex-wrap gap-1.5">
-                  {reading?.indicators.map((i) => (
-                    <span key={i.label} className="inline-flex items-center gap-1 rounded-full bg-brand-50 px-2.5 py-1 text-[11px] font-bold text-gray-700">
-                      {i.label} <Stars score={i.score} />
+                  {report.elements.map((e) => (
+                    <span key={e.name} className="rounded-full bg-brand-50 px-2.5 py-1 text-[11px] font-bold text-gray-700">
+                      {e.name} {e.count}
                     </span>
                   ))}
                 </p>
-                {f.today}
-              </>
-            ) : (
-              <ul className="space-y-2.5">
-                {shown.map((i) => (
-                  <li key={i.label} className="rounded-xl bg-brand-50/60 px-3.5 py-2.5">
-                    <p className="flex items-center justify-between text-xs font-bold text-gray-700">
-                      <span>{i.label}</span>
-                      <Stars score={i.score} />
-                    </p>
-                    <p className="mt-1 text-[13.5px] leading-relaxed text-gray-700">{i.comment}</p>
-                  </li>
-                ))}
-              </ul>
+                {f.elements}
+              </Fold>
             )}
-          </Fold>
-        )}
-        {f.nature ? (
-          <Fold testId="story-fold-nature" label={`${t.label} · 타고난 결`} title={firstSentence(f.nature)}>
-            {f.nature}
-          </Fold>
+            {f.self && (
+              <Fold testId="story-fold-self" label="STEP 2" title="나는 어떤 사람인가?">
+                {f.self}
+              </Fold>
+            )}
+            {f.praise && (
+              <Fold testId="story-fold-praise" label="STEP 3" title="이건 정말 칭찬해요 👏">
+                {f.praise}
+              </Fold>
+            )}
+            {f.lack && (
+              <Fold testId="story-fold-lack" label="STEP 4" title="그렇지만 이건 조금 부족해요">
+                {f.lack}
+              </Fold>
+            )}
+            {(f.improve || t.reality || (concern && concern.answers.length > 1)) && (
+              <Fold testId="story-fold-improve" label="STEP 5" title="이렇게 개선해보아요 🌱">
+                {f.improve && <p>{f.improve}</p>}
+                {t.reality && <RealityLight rc={t.reality} />}
+                {concern && concern.answers.length > 1 && (
+                  <ul className="mt-3 space-y-2.5">
+                    {concern.answers.slice(1).map((a) => (
+                      <li key={a.id} className="rounded-xl bg-brand-50/60 px-3.5 py-2.5">
+                        <b className="text-gray-900">{a.emoji} {a.title}</b>
+                        <p className="mt-0.5 text-[13.5px]">{a.body}</p>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </Fold>
+            )}
+          </>
         ) : (
-          t.points.map((pt, n) => (
-            <Fold key={`${n}-${pt.title}`} label={`${t.label} · ${pt.title}`} title={firstSentence(pt.body)}>
-              {pt.body}
-            </Fold>
-          ))
+          <>
+            {t.points.map((pt, n) => (
+              <Fold key={`${n}-${pt.title}`} label={`${t.label} · ${pt.title}`} title={firstSentence(pt.body)}>
+                {pt.body}
+              </Fold>
+            ))}
+            {t.reality && (
+              <Fold testId="story-fold-improve" label="이렇게 개선해보아요" title="지금 내 모습과 견줘 보고, 작은 걸음 하나 정해요">
+                <RealityLight rc={t.reality} />
+              </Fold>
+            )}
+          </>
         )}
-        {f.flow && (
-          <Fold testId="story-fold-flow" label="올해와 지금의 흐름" title={firstSentence(f.flow)}>
-            {f.flow}
-          </Fold>
-        )}
-        {!f.flow && t.timing.length > 0 && (
-          <Fold label="올해와 지금의 흐름" title={firstSentence(t.timing[0].body)}>
-            <ul className="space-y-2.5">
-              {t.timing.map((x) => (
-                <li key={x.title}>
-                  <b className="text-gray-900">{x.title}</b>
-                  <p>{x.body}</p>
-                </li>
-              ))}
-            </ul>
-          </Fold>
-        )}
-        <Fold testId="story-fold-action" label="이 운을 키우는 작은 행동" title="지금 내 모습과 견줘 보고, 작은 걸음 하나 정해요">
-          {f.action && <p>{f.action}</p>}
-          {t.reality && <RealityLight rc={t.reality} />}
-          {concern && concern.answers.length > 1 && (
-            <ul className="mt-3 space-y-2.5">
-              {concern.answers.slice(1).map((a) => (
-                <li key={a.id} className="rounded-xl bg-brand-50/60 px-3.5 py-2.5">
-                  <b className="text-gray-900">{a.emoji} {a.title}</b>
-                  <p className="mt-0.5 text-[13.5px]">{a.body}</p>
-                </li>
-              ))}
-            </ul>
-          )}
-        </Fold>
         <Fold testId="story-fold-lucky" label="행운 처방" title={`${t.lucky.color}과 ${t.lucky.direction} 쪽이 오늘의 행운 포인트예요`}>
           {f.lucky && <p className="mb-3">{f.lucky}</p>}
           <p className="flex items-center gap-2">
