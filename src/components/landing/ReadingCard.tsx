@@ -1,7 +1,7 @@
 import type { PublicReading } from "@/lib/ai/reading";
 
 /** 점수(1~5)를 별 모양으로. 색에만 기대지 않게 숫자도 같이 적어요. */
-function Stars({ score, luxe = false }: { score: number; luxe?: boolean }) {
+export function Stars({ score, luxe = false }: { score: number; luxe?: boolean }) {
   return (
     <span className={`whitespace-nowrap ${luxe ? "text-[#e6c887]" : "text-amber-400"}`} aria-label={`5점 만점에 ${score}점`}>
       {"★".repeat(score)}

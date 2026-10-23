@@ -1,0 +1,218 @@
+"use client";
+
+import type { ReactNode } from "react";
+import ManseReport from "@/components/premium/ManseReport";
+import { RealityLight } from "@/components/premium/RealityLight";
+import type { PremiumReportView } from "@/lib/premium/types";
+import { BRANCHES, STEMS, type Element } from "@/lib/saju/constants";
+import { Stars } from "./ReadingCard";
+import { firstSentence } from "@/lib/storyHelpers";
+
+
+/*
+ * 500원 풀이의 "읽는 순서". 내 정보·고민 → 네 기둥 → 한마디로 → 접어 둔 풀이 → 도리의 쪽지(이어 묻기).
+ * 새로 AI 를 부르지 않고, 이미 받은 풀이(도리의 풀이 카드 + 주제 분석 + 고민 답)를 이야기 순서로 다시 배치해요.
+ */
+
+export interface StoryReading {
+  keyword: string;
+  total: { score: number; summary: string };
+  indicators: Array<{ key?: string; label: string; score: number; comment: string | null }>;
+  reason?: string;
+}
+
+const EL_CLASS: Record<Element, string> = {
+  wood: "bg-emerald-400 text-white",
+  fire: "bg-rose-400 text-white",
+  earth: "bg-amber-300 text-amber-950",
+  metal: "bg-slate-200 text-slate-700",
+  water: "bg-sky-500 text-white",
+};
+
+/** 간지 한 글자의 오행 (천간이면 천간표, 지지면 지지표에서 찾아요) */
+function elementOfChar(ch: string, branch: boolean): Element | null {
+  const hit = branch ? BRANCHES.find((b) => b.hanja === ch) : STEMS.find((s) => s.hanja === ch);
+  return hit ? hit.element : null;
+}
+
+function Pillars({ report }: { report: PremiumReportView }) {
+  // 한국식 만세력 순서: 시 · 일 · 월 · 연
+  const order = ["hour", "day", "month", "year"] as const;
+  const list = order.map((k) => report.pillars.find((p) => p.key === k)).filter((p): p is NonNullable<typeof p> => Boolean(p));
+  return (
+    <div data-testid="story-pillars" className="mt-3 grid grid-cols-4 gap-1.5 overflow-hidden rounded-2xl text-center">
+      {list.map((p) => {
+        const [stem, branch] = p.full ? Array.from(p.full) : [null, null];
+        const se = stem ? elementOfChar(stem, false) : null;
+        const be = branch ? elementOfChar(branch, true) : null;
+        return (
+          <div key={p.key} className="space-y-1.5">
+            <div className="text-[11px] font-bold text-gray-500">{p.label}</div>
+            {p.full ? (
+              <>
+                <div className={`py-2.5 font-serifKr text-2xl font-black leading-none ${se ? EL_CLASS[se] : "bg-gray-100"}`} aria-label={`${p.label} ${p.full}`}>
+                  {stem}
+                  <div className="mt-1 text-[10px] font-bold opacity-80">{p.reading?.[0] ?? ""}</div>
+                </div>
+                <div className={`py-2.5 font-serifKr text-2xl font-black leading-none ${be ? EL_CLASS[be] : "bg-gray-100"}`}>
+                  {branch}
+                  <div className="mt-1 text-[10px] font-bold opacity-80">{p.reading?.[1] ?? ""}</div>
+                </div>
+              </>
+            ) : (
+              <div className="rounded-xl bg-gray-100 py-9 text-xs text-gray-400">시간 미상</div>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function Fold({ label, title, children, testId, defaultOpen = false }: { label: string; title: string; children: ReactNode; testId?: string; defaultOpen?: boolean }) {
+  return (
+    <details data-testid={testId ?? "story-fold"} open={defaultOpen} className="group border-t border-brand-100 first:border-t-0">
+      <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-1 py-3.5">
+        <span className="min-w-0">
+          <span className="block text-[11px] font-bold text-brand-500">{label}</span>
+          <span className="mt-0.5 block text-[15px] font-bold leading-snug text-gray-900 break-keep">{title}</span>
+        </span>
+        <span aria-hidden="true" className="shrink-0 text-gray-400 transition-transform group-open:rotate-180">⌄</span>
+      </summary>
+      <div className="px-1 pb-4 text-[14px] leading-[1.8] text-gray-700">{children}</div>
+    </details>
+  );
+}
+
+export default function StoryReport({
+  report,
+  reading,
+  intro,
+  closing,
+}: {
+  report: PremiumReportView;
+  reading: StoryReading | null;
+  /** 예: "1988.12.29 (양력) 시간 모름 · 남성" */
+  intro: string | null;
+  /** 도리의 쪽지 안에 넣을 '이어 묻기' 칩 */
+  closing?: ReactNode;
+}) {
+  const t = report.topic;
+  const concern = report.concern;
+  const concernText = concern?.text?.trim() || (concern?.answers.length ? concern.answers.map((a) => a.title).join(" · ") : "");
+  const shown = reading?.indicators.filter((i) => i.comment) ?? [];
+  // 한마디로: ①총운 한 줄 ②도리가 본 이유 ③고민에 대한 답(있을 때)
+  const lead = [
+    reading?.total.summary ? { tag: "오늘의 결론", text: reading.total.summary } : null,
+    reading?.reason ? { tag: "도리가 본 이유", text: reading.reason } : null,
+    concern?.answers[0] ? { tag: "내 고민에 대해", text: concern.answers[0].body } : null,
+  ].filter((x): x is { tag: string; text: string } => x !== null);
+
+  return (
+    <div data-testid="story-report" className="mt-5 space-y-5">
+      {/* 1) 내 정보와 고민 */}
+      <section aria-label="내 정보" className="rounded-2xl border border-brand-100 bg-white p-4">
+        {intro && <p data-testid="story-intro" className="text-xs font-semibold text-brand-700">{intro}</p>}
+        {concernText && (
+          <div data-testid="story-concern" className="mt-2.5 rounded-xl bg-brand-50/70 px-3.5 py-2.5">
+            <p className="text-[11px] font-bold text-gray-500">내가 고른 고민</p>
+            <p className="mt-0.5 text-sm leading-relaxed text-gray-800">{concernText}</p>
+          </div>
+        )}
+        <Pillars report={report} />
+        {report.hourUnknown && <p className="mt-2 text-[11px] leading-relaxed text-amber-700">태어난 시간을 몰라 정오(12시) 기준으로 계산했어요. 시주는 비워 뒀어요.</p>}
+      </section>
+
+      {/* 2) 한마디로 */}
+      {lead.length > 0 && (
+        <section data-testid="story-lead" aria-labelledby="story-lead-h" className="rounded-2xl bg-gradient-to-br from-brand-50 via-white to-amber-50/60 border border-brand-100 p-4">
+          <div className="flex items-center justify-between gap-2">
+            <h5 id="story-lead-h" className="font-cute text-lg font-normal text-brand-700">한마디로</h5>
+            {reading && (
+              <span className="flex items-center gap-1.5 text-xs">
+                <Stars score={reading.total.score} />
+                <span className="rounded-full border border-brand-100 bg-white px-2 py-0.5 text-[11px] font-bold text-brand-700">#{reading.keyword}</span>
+              </span>
+            )}
+          </div>
+          <div className="mt-2.5 space-y-3">
+            {lead.map((l) => (
+              <p key={l.tag} className="text-[14.5px] leading-[1.8] text-gray-800">
+                <b className="mr-1.5 rounded-md bg-white/80 px-1.5 py-0.5 text-[11px] font-bold text-brand-600">{l.tag}</b>
+                {l.text}
+              </p>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* 3) 접어 둔 풀이 */}
+      <section aria-label="자세한 풀이" data-testid="story-folds" className="rounded-2xl border border-brand-100 bg-white px-4">
+        <p className="pt-3.5 text-xs text-gray-500">각 제목을 누르면 풀이가 펼쳐져요</p>
+        {shown.length > 0 && (
+          <Fold testId="story-fold-today" label="오늘의 기운" title="연애 · 금전 · 마음, 오늘은 이런 흐름이에요">
+            <ul className="space-y-2.5">
+              {shown.map((i) => (
+                <li key={i.label} className="rounded-xl bg-brand-50/60 px-3.5 py-2.5">
+                  <p className="flex items-center justify-between text-xs font-bold text-gray-700">
+                    <span>{i.label}</span>
+                    <Stars score={i.score} />
+                  </p>
+                  <p className="mt-1 text-[13.5px] leading-relaxed text-gray-700">{i.comment}</p>
+                </li>
+              ))}
+            </ul>
+          </Fold>
+        )}
+        {t.points.map((pt, n) => (
+          <Fold key={`${n}-${pt.title}`} label={`${t.label} · ${pt.title}`} title={firstSentence(pt.body)}>
+            {pt.body}
+          </Fold>
+        ))}
+        {t.timing.length > 0 && (
+          <Fold label="올해와 지금의 흐름" title={firstSentence(t.timing[0].body)}>
+            <ul className="space-y-2.5">
+              {t.timing.map((x) => (
+                <li key={x.title}>
+                  <b className="text-gray-900">{x.title}</b>
+                  <p>{x.body}</p>
+                </li>
+              ))}
+            </ul>
+          </Fold>
+        )}
+        <Fold testId="story-fold-action" label="이 운을 키우는 작은 행동" title="지금 내 모습과 견줘 보고, 작은 걸음 하나 정해요">
+          {t.reality && <RealityLight rc={t.reality} />}
+          {concern && concern.answers.length > 1 && (
+            <ul className="mt-3 space-y-2.5">
+              {concern.answers.slice(1).map((a) => (
+                <li key={a.id} className="rounded-xl bg-brand-50/60 px-3.5 py-2.5">
+                  <b className="text-gray-900">{a.emoji} {a.title}</b>
+                  <p className="mt-0.5 text-[13.5px]">{a.body}</p>
+                </li>
+              ))}
+            </ul>
+          )}
+        </Fold>
+        <Fold testId="story-fold-lucky" label="행운 처방" title={`${t.lucky.color}과 ${t.lucky.direction} 쪽이 오늘의 행운 포인트예요`}>
+          <p className="flex items-center gap-2">
+            <span aria-hidden="true" className="h-4 w-4 shrink-0 rounded-full border border-black/10" style={{ backgroundColor: t.lucky.hex }} />
+            행운 컬러 <b className="text-gray-900">{t.lucky.color}</b> · 행운 방향 <b className="text-gray-900">{t.lucky.direction}</b>
+          </p>
+          <p className="mt-1 text-[13px] text-gray-500">비어 있는 {t.lucky.element} 기운을 가볍게 채워 주는 전통 오행 대응이에요. 소품이나 옷 색으로 기분 전환하듯 써 보세요.</p>
+        </Fold>
+        <Fold testId="story-fold-chart" label="내 사주 원국" title="오행 분포와 신강·신약도 자세히 볼래요">
+          <ManseReport report={report} hideHeadline parts="base" />
+        </Fold>
+      </section>
+
+      {/* 4) 도리의 쪽지 */}
+      <section data-testid="story-note" aria-label="도리의 쪽지" className="relative rounded-2xl border border-amber-200 bg-[#fff9e6] p-4 shadow-sm">
+        <span aria-hidden="true" className="absolute -top-2.5 left-6 h-4 w-16 -rotate-2 rounded-sm bg-amber-200/80" />
+        <p className="text-[11px] font-bold text-amber-700">🦦 도리가 남긴 쪽지</p>
+        <p className="mt-1 text-[14.5px] font-bold leading-relaxed text-gray-900">다 읽었어? 마음에 걸린 부분 있었어? 편하게 물어봐 🫧</p>
+        {closing}
+      </section>
+    </div>
+  );
+}

@@ -33,6 +33,8 @@ import { MACHINES } from "./data";
 import { IMAGES } from "./images";
 import LoadingBar from "./LoadingBar";
 import { ReadingCard } from "./ReadingCard";
+import StoryReport from "./StoryReport";
+import { birthSummary, isStoryReport } from "@/lib/storyHelpers";
 import { VaultSaveBar } from "./VaultSaveBar";
 import { BIRTH_PLACES } from "@/lib/saju/birthPlace";
 import { profileSummary, profileToForm, sameBirth, type SavedProfile } from "@/lib/profile";
@@ -440,6 +442,7 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
 
   // 프리미엄 결과 화면만 미드나잇+골드 톤으로 보여줘요. (입력·로딩 화면은 기존 그대로)
   const luxe = target.premium === true && phase === "result";
+  const storyMode = !luxe && premiumReport ? isStoryReport(premiumReport) : false;
   const header = (
     <div className="text-center mb-4">
       <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold ${luxe ? "border border-[#e6c887]/50 text-[#e6c887]" : "bg-brand-100 text-brand-700"}`}>
@@ -493,17 +496,35 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
                 </p>
               )}
 
-              {/* 2) 오늘 도리의 풀이 → 주제별 맞춤 분석 + 사주 리포트 */}
-              {reading && <ReadingCard reading={reading} luxe={luxe} />}
+              {storyMode ? (
+                <>
+                  {/* 2) 이야기 순서: 내 정보·고민 → 네 기둥 → 한마디로 → 접어 둔 풀이 → 도리의 쪽지 */}
+                  <div data-testid="premium-result">
+                    <StoryReport
+                      report={premiumReport}
+                      reading={reading}
+                      intro={askInput ? birthSummary(askInput) : null}
+                      closing={askInput ? <AskChips input={askInput} luxe={false} /> : undefined}
+                    />
+                  </div>
+                  {/* 3) 간직하고 나누기 */}
+                  <PhotoCard report={premiumReport} aiQuote={reading?.kkotgeoji ?? null} luxe={false} />
+                </>
+              ) : (
+                <>
+                  {/* 2) 오늘 도리의 풀이 → 주제별 맞춤 분석 + 사주 리포트 */}
+                  {reading && <ReadingCard reading={reading} luxe={luxe} />}
 
-              <div data-testid="premium-result" className="mt-6">
-                <ManseReport report={premiumReport} hideHeadline flush={luxe} />
-              </div>
+                  <div data-testid="premium-result" className="mt-6">
+                    <ManseReport report={premiumReport} hideHeadline flush={luxe} />
+                  </div>
 
-              {/* 3) 간직하고 나누기 → 더 물어보기 → 더 해보기 → 프리미엄 안내 */}
-              <PhotoCard report={premiumReport} aiQuote={reading?.kkotgeoji ?? null} luxe={luxe} />
+                  {/* 3) 간직하고 나누기 → 더 물어보기 */}
+                  <PhotoCard report={premiumReport} aiQuote={reading?.kkotgeoji ?? null} luxe={luxe} />
 
-              {askInput && <AskChips input={askInput} luxe={luxe} />}
+                  {askInput && <AskChips input={askInput} luxe={luxe} />}
+                </>
+              )}
 
               {askInput && (
                 <details data-testid="more-tools" className={`mt-6 rounded-2xl border group ${luxe ? "border-[#e6c887]/30 bg-[#fbf6ea]" : "border-brand-100 bg-brand-50/40"}`}>

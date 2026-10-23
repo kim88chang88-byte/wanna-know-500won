@@ -17,7 +17,7 @@ const CARD = "rounded-3xl bg-white border border-brand-100 p-5 sm:p-6 shadow-[0_
 const H2 = "font-serifKr font-bold text-lg text-brand-700 mb-4";
 
 /** hideHeadline: 위에 이미 같은 한 줄 결론을 보여 줄 때 분석 카드 안의 같은 문장을 빼요. */
-export default function ManseReport({ report, hideHeadline = false, flush = false }: { report: PremiumReportView; hideHeadline?: boolean; flush?: boolean }) {
+export default function ManseReport({ report, hideHeadline = false, flush = false, parts = "all" }: { report: PremiumReportView; hideHeadline?: boolean; flush?: boolean; /** "base": 주제 분석 없이 사주 원국·오행·신강신약·운의 흐름만 */ parts?: "all" | "base" }) {
   const max = Math.max(1, ...report.elements.map((e) => e.count));
   // 프리미엄: 10페이지 상세 리포트
   // 궁합이면 10페이지 책도 두 사람 기준 궁합 리포트로 나와요. (요약 카드는 책 1쪽에 들어 있어요)
@@ -25,9 +25,9 @@ export default function ManseReport({ report, hideHeadline = false, flush = fals
 
   return (
     <div data-testid="manse-report" className="space-y-6">
-      {report.compat && <CompatCard compat={report.compat} />}
-      {report.concern && <ConcernCard concern={report.concern} />}
-      <section aria-labelledby="topic-h" data-testid="topic-card" className="rounded-3xl bg-gradient-to-br from-violet-50 via-white to-sky-50 border border-violet-100 p-5 sm:p-6 shadow-[0_8px_30px_rgba(120,100,220,0.10)]">
+      {parts === "all" && report.compat && <CompatCard compat={report.compat} />}
+      {parts === "all" && report.concern && <ConcernCard concern={report.concern} />}
+      {parts === "all" && <section aria-labelledby="topic-h" data-testid="topic-card" className="rounded-3xl bg-gradient-to-br from-violet-50 via-white to-sky-50 border border-violet-100 p-5 sm:p-6 shadow-[0_8px_30px_rgba(120,100,220,0.10)]">
         <h2 id="topic-h" className="font-serifKr font-bold text-lg text-brand-700">
           <span aria-hidden="true">{report.topic.emoji}</span> {report.topic.label} 분석
         </h2>
@@ -61,7 +61,7 @@ export default function ManseReport({ report, hideHeadline = false, flush = fals
         {report.level === "basic" && (
           <p className="mt-4 text-[11px] text-slate-500">올해·대운 흐름과 더 깊은 분석은 프리미엄 리포트에서 볼 수 있어요.</p>
         )}
-      </section>
+      </section>}
 
       <section aria-labelledby="pillars-h" className={CARD}>
         <h2 id="pillars-h" className={H2}>
