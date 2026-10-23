@@ -196,9 +196,23 @@ export function ShowcaseSection() {
             <SafeImage
               src={HERO_IMAGE}
               alt="수달 도사 도리와 오행 친구들이 말해요: 궁금행? 궁금하면 500원!!"
-              className="w-full h-full object-cover hover:scale-105 transition-transform duration-700"
+              className="w-full h-full object-cover"
               fallback="🦦"
               fallbackClass="text-8xl"
+            />
+            {/* 반복 영상: 소리 없이 자동 재생해요. 움직임 줄이기 설정이면 위의 그림만 보여요. */}
+            <video
+              data-testid="hero-video"
+              className="absolute inset-0 h-full w-full object-cover motion-reduce:hidden"
+              src="/images/hero-loop.mp4"
+              poster={HERO_IMAGE}
+              autoPlay
+              muted
+              loop
+              playsInline
+              preload="auto"
+              aria-hidden="true"
+              tabIndex={-1}
             />
           </div>
 
