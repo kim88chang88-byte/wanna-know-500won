@@ -20,6 +20,7 @@ export interface StoryReading {
   indicators: Array<{ key?: string; label: string; score: number; comment: string | null }>;
   reason?: string;
   story?: string;
+  folds?: { today?: string; nature?: string; flow?: string; action?: string; lucky?: string };
 }
 
 const EL_CLASS: Record<Element, string> = {
@@ -80,7 +81,7 @@ function Fold({ label, title, children, testId, defaultOpen = false }: { label: 
         </span>
         <span aria-hidden="true" className="shrink-0 text-gray-400 transition-transform group-open:rotate-180">⌄</span>
       </summary>
-      <div className="px-1 pb-4 text-[14px] leading-[1.8] text-gray-700">{children}</div>
+      <div className="whitespace-pre-line px-1 pb-4 text-[14px] leading-[1.9] text-gray-700 break-keep">{children}</div>
     </details>
   );
 }
@@ -101,6 +102,7 @@ export default function StoryReport({
   const t = report.topic;
   const concern = report.concern;
   const concernText = concern?.text?.trim() || (concern?.answers.length ? concern.answers.map((a) => a.title).join(" · ") : "");
+  const f = reading?.folds ?? {};
   const shown = reading?.indicators.filter((i) => i.comment) ?? [];
   // 요약하자면: 총운 한 줄 → 도리가 본 이유 → 고민에 대한 답을 라벨 없이 한 흐름으로 이어요.
   const joinFlow = (parts: Array<string | undefined | null>) =>
@@ -138,34 +140,58 @@ export default function StoryReport({
               </span>
             )}
           </div>
-          <p className="mt-2.5 text-[14.5px] leading-[1.85] text-gray-800 break-keep">{summary}</p>
+          <p className="mt-2.5 whitespace-pre-line text-[14.5px] leading-[1.9] text-gray-800 break-keep">{summary}</p>
         </section>
       )}
 
       {/* 3) 접어 둔 풀이 */}
       <section aria-label="자세한 풀이" data-testid="story-folds" className="rounded-2xl border border-brand-100 bg-white px-4">
         <p className="pt-3.5 text-xs text-gray-500">각 제목을 누르면 풀이가 펼쳐져요</p>
-        {shown.length > 0 && (
-          <Fold testId="story-fold-today" label="오늘의 기운" title="연애 · 금전 · 마음, 오늘은 이런 흐름이에요">
-            <ul className="space-y-2.5">
-              {shown.map((i) => (
-                <li key={i.label} className="rounded-xl bg-brand-50/60 px-3.5 py-2.5">
-                  <p className="flex items-center justify-between text-xs font-bold text-gray-700">
-                    <span>{i.label}</span>
-                    <Stars score={i.score} />
-                  </p>
-                  <p className="mt-1 text-[13.5px] leading-relaxed text-gray-700">{i.comment}</p>
-                </li>
-              ))}
-            </ul>
+        {(shown.length > 0 || f.today) && (
+          <Fold testId="story-fold-today" label="오늘의 기운" title={f.today ? firstSentence(f.today) : "연애 · 금전 · 마음, 오늘은 이런 흐름이에요"}>
+            {f.today ? (
+              <>
+                <p className="mb-2.5 flex flex-wrap gap-1.5">
+                  {reading?.indicators.map((i) => (
+                    <span key={i.label} className="inline-flex items-center gap-1 rounded-full bg-brand-50 px-2.5 py-1 text-[11px] font-bold text-gray-700">
+                      {i.label} <Stars score={i.score} />
+                    </span>
+                  ))}
+                </p>
+                {f.today}
+              </>
+            ) : (
+              <ul className="space-y-2.5">
+                {shown.map((i) => (
+                  <li key={i.label} className="rounded-xl bg-brand-50/60 px-3.5 py-2.5">
+                    <p className="flex items-center justify-between text-xs font-bold text-gray-700">
+                      <span>{i.label}</span>
+                      <Stars score={i.score} />
+                    </p>
+                    <p className="mt-1 text-[13.5px] leading-relaxed text-gray-700">{i.comment}</p>
+                  </li>
+                ))}
+              </ul>
+            )}
           </Fold>
         )}
-        {t.points.map((pt, n) => (
-          <Fold key={`${n}-${pt.title}`} label={`${t.label} · ${pt.title}`} title={firstSentence(pt.body)}>
-            {pt.body}
+        {f.nature ? (
+          <Fold testId="story-fold-nature" label={`${t.label} · 타고난 결`} title={firstSentence(f.nature)}>
+            {f.nature}
           </Fold>
-        ))}
-        {t.timing.length > 0 && (
+        ) : (
+          t.points.map((pt, n) => (
+            <Fold key={`${n}-${pt.title}`} label={`${t.label} · ${pt.title}`} title={firstSentence(pt.body)}>
+              {pt.body}
+            </Fold>
+          ))
+        )}
+        {f.flow && (
+          <Fold testId="story-fold-flow" label="올해와 지금의 흐름" title={firstSentence(f.flow)}>
+            {f.flow}
+          </Fold>
+        )}
+        {!f.flow && t.timing.length > 0 && (
           <Fold label="올해와 지금의 흐름" title={firstSentence(t.timing[0].body)}>
             <ul className="space-y-2.5">
               {t.timing.map((x) => (
@@ -178,6 +204,7 @@ export default function StoryReport({
           </Fold>
         )}
         <Fold testId="story-fold-action" label="이 운을 키우는 작은 행동" title="지금 내 모습과 견줘 보고, 작은 걸음 하나 정해요">
+          {f.action && <p>{f.action}</p>}
           {t.reality && <RealityLight rc={t.reality} />}
           {concern && concern.answers.length > 1 && (
             <ul className="mt-3 space-y-2.5">
@@ -191,11 +218,12 @@ export default function StoryReport({
           )}
         </Fold>
         <Fold testId="story-fold-lucky" label="행운 처방" title={`${t.lucky.color}과 ${t.lucky.direction} 쪽이 오늘의 행운 포인트예요`}>
+          {f.lucky && <p className="mb-3">{f.lucky}</p>}
           <p className="flex items-center gap-2">
             <span aria-hidden="true" className="h-4 w-4 shrink-0 rounded-full border border-black/10" style={{ backgroundColor: t.lucky.hex }} />
             행운 컬러 <b className="text-gray-900">{t.lucky.color}</b> · 행운 방향 <b className="text-gray-900">{t.lucky.direction}</b>
           </p>
-          <p className="mt-1 text-[13px] text-gray-500">비어 있는 {t.lucky.element} 기운을 가볍게 채워 주는 전통 오행 대응이에요. 소품이나 옷 색으로 기분 전환하듯 써 보세요.</p>
+          {!f.lucky && <p className="mt-1 text-[13px] text-gray-500">비어 있는 {t.lucky.element} 기운을 가볍게 채워 주는 전통 오행 대응이에요. 소품이나 옷 색으로 기분 전환하듯 써 보세요.</p>}
         </Fold>
         <Fold testId="story-fold-chart" label="내 사주 원국" title="오행 분포와 신강·신약도 자세히 볼래요">
           <ManseReport report={report} hideHeadline parts="base" />

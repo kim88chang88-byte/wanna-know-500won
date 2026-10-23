@@ -121,19 +121,3 @@ describe("도리가 본 이유(reason)", () => {
   });
 });
 
-describe("story (요약하자면 문단)", () => {
-  const story = "오늘은 마음이 한결 가벼워지는 흐름이야. 물 기운이 든든하게 받쳐 주고 있어서 서두르지 않아도 일이 따라오거든. 그래서 마음에 걸리던 이야기를 가볍게 꺼내 봐도 좋아. 오늘은 메모장에 한 줄만 적어 보자.";
-  it("알맞은 문단은 살린다", () => {
-    expect(parseReading({ ...good, story })?.story).toBe(story);
-    expect(toPublicReading(parseReading({ ...good, story })!).story).toBe(story);
-  });
-  it("너무 짧거나 없으면 문단만 버리고 풀이는 살린다", () => {
-    const r = parseReading({ ...good, story: "짧아요." });
-    expect(r === null).toBe(false);
-    expect(r?.story).toBeUndefined();
-    expect(parseReading({ ...good })?.story).toBeUndefined();
-  });
-  it("금지 표현이 있으면 풀이 전체를 거른다", () => {
-    expect(parseReading({ ...good, story: story + " 큰 재앙이 올 수도 있어." })).toBeNull();
-  });
-});

@@ -97,8 +97,8 @@ describe("interpretSaju", () => {
     const body = JSON.parse(calls[0].init.body);
     expect(body.model).toBe("claude-haiku-5-5");
     expect(body.output_config.format.type).toBe("json_schema");
-    expect(body.output_config.format.schema.required.length).toBe(8);
-    expect(body.max_tokens).toBe(1800);
+    expect(body.output_config.format.schema.required.length).toBe(7);
+    expect(body.max_tokens).toBe(1500);
     expect(body.system.length > 50).toBe(true);
   });
 

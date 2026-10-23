@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { takeAiBudget } from "@/lib/ai/budget";
 import { buildCoreFacts } from "@/lib/ai/coreFacts";
 import { kstToday } from "@/lib/ai/dailyFacts";
+import { interpretDetail } from "@/lib/ai/detail";
 import { interpretSaju, ReadingUnavailableError } from "@/lib/ai/interpret";
 import { hasEntitlement, ENTITLEMENT_COOKIE } from "@/lib/premium/entitlement";
 import { isPremiumLocked } from "@/lib/premium/config";
@@ -115,11 +116,21 @@ export async function POST(request: Request) {
     // 오늘의 일진과 사주 핵심(신강/신약·용신 등)을 더해 풀이의 근거를 풍부하게 해요. 계산이 실패해도 풀이는 기본 재료로 나가요.
     const now = new Date();
     const extra = { today: kstToday(now), core: buildCoreFacts(input, now) };
-    const full = await interpretSaju(chart, { topic: normalizeTopic(rawTopic), gender: input.gender, concern, extra });
+    const topic = normalizeTopic(rawTopic);
+    // 긴 "요약하자면" 글은 같은 시간에 따로 써요. 한도를 한 번 더 쓰고, 실패해도 풀이는 그대로 나가요.
+    const detailGate = await takeAiBudget(process.env, db);
+    const detailPromise = detailGate === "ok"
+      ? interpretDetail(chart, { topic, gender: input.gender, concern, extra }).catch((err) => {
+          console.error("interpretDetail failed:", err instanceof Error ? err.message : "unknown");
+          return null;
+        })
+      : Promise.resolve(null);
+    const [full, detail] = await Promise.all([interpretSaju(chart, { topic, gender: input.gender, concern, extra }), detailPromise]);
     // 세 지표의 풀이 문장은 베타(잠금 꺼짐)에서는 열어 두고, 결제를 연 뒤(PREMIUM_LOCK)에는 이용권이 있는 요청에만 열어요.
     const cookieHeader = request.headers.get("cookie");
     const entitled = hasEntitlement(readCookie(cookieHeader, ENTITLEMENT_COOKIE), process.env.AUTH_SECRET, session?.sub ?? null);
     reading = toPublicReading(full, "free", !isPremiumLocked(process.env) || entitled);
+    if (detail) reading = { ...reading, story: detail.story, folds: detail.folds };
   } catch (err) {
     if (err instanceof ReadingUnavailableError) {
       readingStatus = "unavailable";

@@ -497,7 +497,7 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
                 <VaultSaveBar
                   luxe={luxe}
                   autoSave={saveVault}
-                  snapshot={{ topic: target.fortune, premium: target.premium === true, report: premiumReport, reading, kkotgeoji: reading?.kkotgeoji ?? null, reason: reading?.reason ?? null, story: reading?.story ?? null, note: birthNote }}
+                  snapshot={{ topic: target.fortune, premium: target.premium === true, report: premiumReport, reading, kkotgeoji: reading?.kkotgeoji ?? null, reason: reading?.reason ?? null, story: reading?.story ?? null, folds: reading?.folds ?? null, note: birthNote }}
                 />
               )}
 

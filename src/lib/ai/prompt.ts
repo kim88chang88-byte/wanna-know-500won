@@ -33,11 +33,6 @@ export const SYSTEM_PROMPT = `너는 "도리"야. 맑은 옹달샘 옆 500원 �
 도리가 본 이유 (reason)
 - 이 풀이가 왜 나왔는지, "사주핵심"에 실제로 있는 근거 한두 가지(원국관계·세운과원국·대운과원국·이번달월운·숨은십성)를 쉬운 말 1~2문장으로 적어. 100자 안팎. 현상 먼저, 용어는 괄호로 짧게. 예: "올해 흐름이 월주 자리와 부딪혀서 일터 쪽 마음이 분주해지기 쉬워(병임충)." 고민이 있으면 그 고민과 이어지는 근거를 골라. 근거가 없으면 빈 문자열. 반말.
 
-요약하자면 (story)
-- 풀이 맨 위에서 읽히는 한 문단이야. 3~4문장, 150~250자, 라벨·제목·이모지 없이 하나의 이야기처럼 이어 써.
-- 흐름: ①지금 흐름 한 줄(총운) → ②왜 그런지 사주 근거를 쉬운 말로 → ③고민이 있으면 그 마음에 닿는 말 → ④오늘 할 수 있는 작은 행동 하나. "그래서", "그런데", "덕분에" 같은 이음말로 문장이 매끄럽게 이어지게.
-- 총운 요약·도리가 본 이유·도리 한마디를 그대로 베끼지 말고 새로 풀어 써. 반말, 부드러운 단정("~일 수 있어"), 무거운 주제·금액·나이 금지.
-
 해석 방향 (도리의 원칙)
 - 사주에서 읽히는 흐름은 숨기거나 부풀리지 말고 그대로 전해. 대신 해석은 늘 긍정적인 방향으로: 흐름이 약한 때는 "채울 여지가 있는 때", 강한 때는 "잡아야 할 때"로 풀어줘. 사주로 계산할 수 없는 금액·나이 같은 숫자는 절대 말하지 마.
 - 사람의 현재 상황이 입력(고민·주제)에 있으면 사주 흐름과 견줘서, 아직 못 미치면 "더 커질 여지가 있으니 이 운을 잡아보자", 맞으면 "거봐, 맞지?", 넘어섰으면 "사주보다 더 잘 살아왔네, 계속 유지·발전해 보자"의 결로 말해.
@@ -70,7 +65,7 @@ export interface ExtraFacts {
   core?: CoreFacts | null;
 }
 
-export function buildUserMessage(chart: SajuChart, topic: ReadingTopic, gender: Gender, concern?: Concern | null, extra: ExtraFacts = {}): string {
+export function buildUserMessage(chart: SajuChart, topic: ReadingTopic, gender: Gender, concern?: Concern | null, extra: ExtraFacts = {}, ask?: string): string {
   const facts = analyzeChart(chart);
   const payload = {
     오늘뽑은캡슐: TOPIC_LABEL[topic],
@@ -98,5 +93,5 @@ export function buildUserMessage(chart: SajuChart, topic: ReadingTopic, gender: 
       : `이번에는 "${TOPIC_LABEL[topic]}" 캡슐을 뽑았으니, 도리 한마디와 총운 요약에서 이 주제를 조금 더 살려줘.`;
 
   const focusConcern = hasConcern(concern) ? "\n사용자가 적은 '요즘 고민'에 공감하며 도리 한마디가 그 고민에 닿게 해줘." : "";
-  return `계산된 사주 정보:\n${JSON.stringify(payload, null, 2)}\n\n${focus}${focusConcern}\n총운, 연애운, 금전운, 마음운, 오늘의 키워드, 도리 한마디, 도리가 본 이유, 요약하자면 문단을 써줘.`;
+  return `계산된 사주 정보:\n${JSON.stringify(payload, null, 2)}\n\n${focus}${focusConcern}\n${ask ?? "총운, 연애운, 금전운, 마음운, 오늘의 키워드, 도리 한마디, 도리가 본 이유를 써줘."}`;
 }

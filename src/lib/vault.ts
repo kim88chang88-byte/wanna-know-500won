@@ -29,6 +29,8 @@ export interface VaultSnapshot {
   reason: string | null;
   /** "요약하자면" 문단 (없으면 null) */
   story?: string | null;
+  /** 접이식 풀이 글 */
+  folds?: Record<string, string> | null;
   /** 출생지·절기 경계 안내 문구 */
   note: string | null;
 }
@@ -59,6 +61,18 @@ function parseCard(raw: unknown): VaultCard | null {
   return { keyword, score, summary, indicators };
 }
 
+const FOLD_KEYS = ["today", "nature", "flow", "action", "lucky"] as const;
+
+function parseFolds(raw: unknown): Record<string, string> | null {
+  if (!isRecord(raw)) return null;
+  const out: Record<string, string> = {};
+  for (const k of FOLD_KEYS) {
+    const t = text(raw[k], 700);
+    if (t) out[k] = t;
+  }
+  return Object.keys(out).length ? out : null;
+}
+
 /** 요청 본문을 검사해 저장할 모양으로 바꿔요. 이상하면 null. (본인 보관함에만 들어가는 값이라 모양만 확인해요) */
 export function parseVaultBody(raw: unknown, now: Date = new Date()): ParsedVault | null {
   if (!isRecord(raw) || !isRecord(raw.report)) return null;
@@ -74,7 +88,8 @@ export function parseVaultBody(raw: unknown, now: Date = new Date()): ParsedVaul
     card,
     kkotgeoji: text(raw.kkotgeoji, 300),
     reason: text(raw.reason, 400),
-    story: text(raw.story, 500),
+    story: text(raw.story, 1000),
+    folds: parseFolds(raw.folds),
     note: text(raw.note, 400),
   };
   const body = JSON.stringify(snapshot);
