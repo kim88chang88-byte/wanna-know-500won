@@ -157,6 +157,7 @@ export default function Landing() {
           onClose={closeIntake}
           onComplete={completeDraw}
           loggedIn={Boolean(user)}
+          nickname={user?.nickname ?? null}
           savedProfile={profile}
           onRequestLogin={() => {
             setIntake(null);

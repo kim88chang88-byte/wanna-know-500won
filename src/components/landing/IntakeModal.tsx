@@ -63,6 +63,8 @@ interface Props {
   onComplete: (serverCounts?: { today: number; month: number } | null) => void;
   /** 로그인한 회원이면 true. 아니면 "로그인하면 생년월일시를 기억해요" 안내를 보여줘요. */
   loggedIn?: boolean;
+  /** 로그인 닉네임. 결과 화면 제목("○○님의 사주 해설")에 써요. */
+  nickname?: string | null;
   /** 로그인한 회원이 전에 저장해 둔 생년월일시. 있으면 질문지를 미리 채우고 고민 단계부터 시작해요. */
   savedProfile?: SavedProfile | null;
   /** 안내 문구의 "로그인하기" 버튼 */
@@ -308,7 +310,7 @@ function BirthStepFields({ kind, f, patch, withPlace = false }: { kind: "date" |
   );
 }
 
-export default function IntakeModal({ target, onClose, onComplete, loggedIn = false, savedProfile = null, onRequestLogin, onProfileSaved }: Props) {
+export default function IntakeModal({ target, onClose, onComplete, loggedIn = false, nickname = null, savedProfile = null, onRequestLogin, onProfileSaved }: Props) {
   // 저장된 생년월일시가 있으면 미리 채우고, 이미 입력한 질문(생년월일·시간·성별)은 건너뛰어 고민 단계에서 시작해요.
   const [form, setForm] = useState<IntakeForm>(() => (savedProfile ? { ...EMPTY_FORM, ...profileToForm(savedProfile) } : EMPTY_FORM));
   // 궁합 리포트면 상대방의 생년월일시·성별을 더 받아요. (상대방 정보는 계산에만 쓰고 저장하지 않아요)
@@ -443,6 +445,17 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
   // 프리미엄 결과 화면만 미드나잇+골드 톤으로 보여줘요. (입력·로딩 화면은 기존 그대로)
   const luxe = target.premium === true && phase === "result";
   const storyMode = !luxe && premiumReport ? isStoryReport(premiumReport) : false;
+  const resultTitle = phase === "result" && chart && premiumReport && (
+    <div data-testid="result-title" className="mb-4 text-center">
+      <h3 id="intake-title" className={`font-cute text-[24px] sm:text-[27px] font-normal leading-tight break-keep ${luxe ? "text-[#fbf3de]" : "text-brand-700"}`}>
+        {nickname?.trim() ? `${nickname.trim()}님의 사주 해설` : "나의 사주 해설"}
+      </h3>
+      {askInput && (
+        <p data-testid="result-title-birth" className={`mt-1.5 text-[13px] font-semibold ${luxe ? "text-[#e6c887]" : "text-gray-600"}`}>{birthSummary(askInput)}</p>
+      )}
+      <div aria-hidden="true" className={`mx-auto mt-3 h-px w-16 ${luxe ? "bg-gradient-to-r from-transparent via-[#e6c887]/70 to-transparent" : "bg-gradient-to-r from-transparent via-brand-300 to-transparent"}`} />
+    </div>
+  );
   const header = (
     <div className="text-center mb-4">
       <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold ${luxe ? "border border-[#e6c887]/50 text-[#e6c887]" : "bg-brand-100 text-brand-700"}`}>
@@ -460,9 +473,11 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
       luxe={luxe}
     >
       <CloseButton onClose={onClose} luxe={luxe} />
-      <h3 id="intake-title" className="sr-only">
-        생년월일시 입력
-      </h3>
+      {resultTitle || (
+        <h3 id="intake-title" className="sr-only">
+          생년월일시 입력
+        </h3>
+      )}
       {header}
 
       {phase === "loading" && (
@@ -503,7 +518,7 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
                     <StoryReport
                       report={premiumReport}
                       reading={reading}
-                      intro={askInput ? birthSummary(askInput) : null}
+                      intro={null}
                       closing={askInput ? <AskChips input={askInput} luxe={false} /> : undefined}
                     />
                   </div>
