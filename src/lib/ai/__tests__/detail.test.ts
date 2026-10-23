@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { DETAIL_SCHEMA, parseDetail } from "../detail";
 
 const long = (s: string, n: number) => s.repeat(n);
-const story = long("오늘은 마음이 포근하게 풀리는 날이라 서두르지 않아도 괜찮아 💕 ", 8);
+const story = long("오늘은 마음이 포근하게 풀리는 날이라 서두르지 않아도 괜찮아 💕 ", 16);
 const fold = long("물 기운이 든든하게 받쳐 주니까 천천히 가도 괜찮아 🫧 ", 8);
 const ok = { story, today: fold, nature: fold, flow: fold, action: fold, lucky: fold };
 
