@@ -15,14 +15,15 @@ interface SpinProps {
   onSpin: SpinHandler;
 }
 
-/** 카드 모서리에 비스듬히 붙는 "도리 강추" 스티커. (카드는 relative 여야 해요) */
+/** 카드 모서리에 비스듬히 붙는 "HOT" 스티커. (카드는 relative 여야 해요) */
 function Sticker({ text, testId }: { text: string; testId: string }) {
   return (
     <div
       data-testid={testId}
-      className="absolute -top-3.5 -right-1.5 sm:-right-2 rotate-[8deg] px-2.5 sm:px-3.5 py-1 sm:py-1.5 rounded-full bg-gradient-to-r from-pink-500 to-fuchsia-500 text-white font-cute font-normal text-xs sm:text-sm shadow-md ring-2 ring-white z-10 whitespace-nowrap pointer-events-none"
+      className="absolute -top-3 -right-2 rotate-[10deg] flex items-center gap-1 px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-lg bg-gradient-to-br from-rose-500 via-red-500 to-orange-400 text-white font-sans font-black italic tracking-wider text-[11px] sm:text-sm shadow-[0_3px_8px_rgba(244,63,94,0.45)] ring-2 ring-white z-10 whitespace-nowrap pointer-events-none"
     >
-      <span aria-hidden="true">🦦 </span>[{text}]
+      <span aria-hidden="true">🔥</span>
+      {text}
     </div>
   );
 }

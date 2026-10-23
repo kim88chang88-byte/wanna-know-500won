@@ -17,9 +17,9 @@ describe("랜딩 카드 데이터", () => {
     expect(new Set(allKeys).size).toBe(allKeys.length);
   });
 
-  it("'도리 강추' 스티커는 성공운·재물운·연애운 카드에만 붙는다", () => {
+  it("'HOT' 스티커는 성공운·재물운·연애운 카드에만 붙는다", () => {
     expect(MACHINES.filter((m) => m.sticker).map((m) => m.fortune)).toEqual(["성공운", "재물운", "연애운"]);
-    expect(MACHINES.filter((m) => m.sticker).every((m) => m.sticker === "도리 강추")).toBe(true);
+    expect(MACHINES.filter((m) => m.sticker).every((m) => m.sticker === "HOT")).toBe(true);
   });
 
   it("BEST 는 연애운 자판기 하나뿐", () => {
@@ -97,9 +97,9 @@ describe("문구 가이드 (BRIEF.md: 뽑기 언어, 겁주거나 신비롭게 �
     for (const c of PREMIUM_CARDS) expect(IMAGES[c.image]).toBe(`/images/premium-scene-${premiumAnimal[c.key]}.webp`);
   });
 
-  it("프리미엄은 궁합이 맨 앞이고 '도리 강추' 스티커는 궁합에만 붙는다", () => {
+  it("프리미엄은 궁합이 맨 앞이고 'HOT' 스티커는 궁합에만 붙는다", () => {
     expect(PREMIUM_CARDS[0].key).toBe("premium-compat");
     expect(PREMIUM_CARDS.filter((c) => c.ribbon).map((c) => c.key)).toEqual(["premium-compat"]);
-    expect(PREMIUM_CARDS[0].ribbon).toBe("도리 강추");
+    expect(PREMIUM_CARDS[0].ribbon).toBe("HOT");
   });
 });
