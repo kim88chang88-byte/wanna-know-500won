@@ -10,7 +10,7 @@ import { firstSentence } from "@/lib/storyHelpers";
 
 
 /*
- * 500원 풀이의 "읽는 순서". 내 정보·고민 → 네 기둥 → 한마디로 → 접어 둔 풀이 → 도리의 쪽지(이어 묻기).
+ * 500원 풀이의 "읽는 순서". 내 정보·고민 → 네 기둥 → 요약하자면 → 접어 둔 풀이 → 도리의 쪽지(이어 묻기).
  * 새로 AI 를 부르지 않고, 이미 받은 풀이(도리의 풀이 카드 + 주제 분석 + 고민 답)를 이야기 순서로 다시 배치해요.
  */
 
@@ -101,12 +101,14 @@ export default function StoryReport({
   const concern = report.concern;
   const concernText = concern?.text?.trim() || (concern?.answers.length ? concern.answers.map((a) => a.title).join(" · ") : "");
   const shown = reading?.indicators.filter((i) => i.comment) ?? [];
-  // 한마디로: ①총운 한 줄 ②도리가 본 이유 ③고민에 대한 답(있을 때)
-  const lead = [
-    reading?.total.summary ? { tag: "오늘의 결론", text: reading.total.summary } : null,
-    reading?.reason ? { tag: "도리가 본 이유", text: reading.reason } : null,
-    concern?.answers[0] ? { tag: "내 고민에 대해", text: concern.answers[0].body } : null,
-  ].filter((x): x is { tag: string; text: string } => x !== null);
+  // 요약하자면: 총운 한 줄 → 도리가 본 이유 → 고민에 대한 답을 라벨 없이 한 흐름으로 이어요.
+  const joinFlow = (parts: Array<string | undefined | null>) =>
+    parts
+      .map((x) => x?.trim())
+      .filter((x): x is string => Boolean(x))
+      .map((x) => (/[.!?…~]$/.test(x) ? x : `${x}.`))
+      .join(" ");
+  const summary = joinFlow([reading?.total.summary, reading?.reason, concern?.answers[0]?.body]);
 
   return (
     <div data-testid="story-report" className="mt-5 space-y-5">
@@ -123,11 +125,11 @@ export default function StoryReport({
         {report.hourUnknown && <p className="mt-2 text-[11px] leading-relaxed text-amber-700">태어난 시간을 몰라 정오(12시) 기준으로 계산했어요. 시주는 비워 뒀어요.</p>}
       </section>
 
-      {/* 2) 한마디로 */}
-      {lead.length > 0 && (
+      {/* 2) 요약하자면 */}
+      {summary && (
         <section data-testid="story-lead" aria-labelledby="story-lead-h" className="rounded-2xl bg-gradient-to-br from-brand-50 via-white to-amber-50/60 border border-brand-100 p-4">
           <div className="flex items-center justify-between gap-2">
-            <h5 id="story-lead-h" className="font-cute text-lg font-normal text-brand-700">한마디로</h5>
+            <h5 id="story-lead-h" className="font-cute text-lg font-normal text-brand-700">요약하자면</h5>
             {reading && (
               <span className="flex items-center gap-1.5 text-xs">
                 <Stars score={reading.total.score} />
@@ -135,14 +137,7 @@ export default function StoryReport({
               </span>
             )}
           </div>
-          <div className="mt-2.5 space-y-3">
-            {lead.map((l) => (
-              <p key={l.tag} className="text-[14.5px] leading-[1.8] text-gray-800">
-                <b className="mr-1.5 rounded-md bg-white/80 px-1.5 py-0.5 text-[11px] font-bold text-brand-600">{l.tag}</b>
-                {l.text}
-              </p>
-            ))}
-          </div>
+          <p className="mt-2.5 text-[14.5px] leading-[1.85] text-gray-800 break-keep">{summary}</p>
         </section>
       )}
 
