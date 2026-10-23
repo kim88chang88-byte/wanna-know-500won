@@ -1,6 +1,7 @@
 "use client";
 
 import { fetchRetry } from "@/lib/fetchRetry";
+import InlineProgress from "./InlineProgress";
 import { useRef, useState } from "react";
 import { ASK_QUESTIONS } from "@/lib/ai/askQuestions";
 import type { BirthInput } from "@/lib/saju/types";
@@ -11,6 +12,7 @@ export function AskChips({ input, luxe = false }: { input: BirthInput; luxe?: bo
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [done, setDone] = useState(false);
   const inflight = useRef(false);
 
   async function ask(id: string) {
@@ -25,10 +27,14 @@ export function AskChips({ input, luxe = false }: { input: BirthInput; luxe?: bo
       if (!res.ok || !data?.answer) throw new Error(data?.error ?? "도리가 잠깐 물놀이하러 갔어요. 다시 눌러 볼래요?");
       const answer = data.answer;
       setAnswers((a) => ({ ...a, [id]: answer }));
+      // 답이 왔으면 막대를 100% 로 채운 뒤 잠깐 보여 주고 답으로 바꿔요.
+      setDone(true);
+      await new Promise((r) => setTimeout(r, 450));
     } catch (e) {
       setError(e instanceof Error ? e.message : "답을 받지 못했어요.");
     } finally {
       inflight.current = false;
+      setDone(false);
       setLoading(null);
     }
   }
@@ -61,7 +67,7 @@ export function AskChips({ input, luxe = false }: { input: BirthInput; luxe?: bo
         ))}
       </div>
       <div role="status" aria-live="polite" className="mt-3">
-        {loading && <p className={`p-4 rounded-2xl border text-sm ${luxe ? "bg-white/[0.04] border-[#e6c887]/25 text-[#e8dfca]/80" : "bg-brand-50/60 border-brand-100 text-gray-600"}`}>도리가 물결을 읽는 중이에요 🫧</p>}
+        {loading && <InlineProgress done={done} luxe={luxe} />}
         {!loading && current && <p data-testid="ask-answer" className={`p-4 rounded-2xl border text-sm leading-relaxed whitespace-pre-line ${luxe ? "bg-white/[0.04] border-[#e6c887]/25 text-[#f5efe0]" : "bg-brand-50/60 border-brand-100 text-gray-800"}`}>{current}</p>}
         {!loading && error && <p className="p-3 rounded-2xl bg-amber-50 border border-amber-200 text-xs text-amber-800">{error}</p>}
       </div>
