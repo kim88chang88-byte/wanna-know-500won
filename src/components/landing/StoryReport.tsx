@@ -6,7 +6,7 @@ import { RealityLight } from "@/components/premium/RealityLight";
 import type { PremiumReportView } from "@/lib/premium/types";
 import { BRANCHES, STEMS, type Element } from "@/lib/saju/constants";
 import { Stars } from "./ReadingCard";
-import { firstSentence, iyeyo, toParagraphs } from "@/lib/storyHelpers";
+import { firstSentence, iyeyo, stripSummaryLead, tidyFold, toParagraphs, trimToLastSentence } from "@/lib/storyHelpers";
 
 
 /*
@@ -116,7 +116,16 @@ export default function StoryReport({
   const t = report.topic;
   const concern = report.concern;
   const concernText = concern?.text?.trim() || (concern?.answers.length ? concern.answers.map((a) => a.title).join(" · ") : "");
-  const f = reading?.folds ?? {};
+  const rawFolds = reading?.folds ?? {};
+  // 이미 저장된 풀이에도 같은 다듬기를 해요. (제목 따라 쓰기, 끊긴 끝 문장)
+  const f = {
+    elements: rawFolds.elements ? tidyFold("elements", rawFolds.elements) : undefined,
+    self: rawFolds.self ? tidyFold("self", rawFolds.self) : undefined,
+    praise: rawFolds.praise ? tidyFold("praise", rawFolds.praise) : undefined,
+    lack: rawFolds.lack ? tidyFold("lack", rawFolds.lack) : undefined,
+    improve: rawFolds.improve ? tidyFold("improve", rawFolds.improve) : undefined,
+    lucky: rawFolds.lucky ? tidyFold("lucky", rawFolds.lucky) : undefined,
+  };
   const hasFolds = Boolean(f.elements || f.self || f.praise || f.lack || f.improve);
   // 요약하자면: 총운 한 줄 → 도리가 본 이유 → 고민에 대한 답을 라벨 없이 한 흐름으로 이어요.
   const joinFlow = (parts: Array<string | undefined | null>) =>
@@ -125,7 +134,7 @@ export default function StoryReport({
       .filter((x): x is string => Boolean(x))
       .map((x) => (/[.!?…~]$/.test(x) ? x : `${x}.`))
       .join(" ");
-  const summary = reading?.story?.trim() || joinFlow([reading?.total.summary, reading?.reason, concern?.answers[0]?.body]);
+  const summary = (reading?.story?.trim() ? trimToLastSentence(stripSummaryLead(reading.story.trim())) : "") || joinFlow([reading?.total.summary, reading?.reason, concern?.answers[0]?.body]);
 
   return (
     <div data-testid="story-report" className="mt-5 space-y-5">

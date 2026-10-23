@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { birthSummary, firstSentence, iyeyo, toParagraphs } from "@/lib/storyHelpers";
+import { birthSummary, firstSentence, iyeyo, stripSummaryLead, stripTitleEcho, tidyFold, toParagraphs, trimToLastSentence } from "@/lib/storyHelpers";
 
 describe("StoryReport helpers", () => {
   it("firstSentence: 첫 문장만 돌려줘요", () => {
@@ -28,5 +28,25 @@ describe("toParagraphs / iyeyo", () => {
   it("받침에 따라 이에요/예요", () => {
     expect(iyeyo("서쪽")).toBe("이에요");
     expect(iyeyo("화이트")).toBe("예요");
+  });
+});
+
+describe("제목 따라 쓰기·끊긴 문장 다듬기", () => {
+  it("맨 앞 제목 반복을 뗀다", () => {
+    expect(tidyFold("lack", "그렇지만 이건 조금 부족해요. 토 기운이 강하고 쇠와 물이 적다 보니 새 방식을 시도하기보다 익숙한 길만 가려는 마음이 생기기 쉬워.")).toBe("토 기운이 강하고 쇠와 물이 적다 보니 새 방식을 시도하기보다 익숙한 길만 가려는 마음이 생기기 쉬워.");
+    expect(stripTitleEcho("이렇게 개선해 보아요. 첫째, 오늘 하루 안에 자료 하나를 골라 두자.", "이렇게 개선해 보아요")).toBe("첫째, 오늘 하루 안에 자료 하나를 골라 두자.");
+    expect(stripTitleEcho("이렇게 개선해보아요. 첫째, 오늘 하루 안에 자료 하나를 골라 두자.", "이렇게 개선해 보아요")).toBe("첫째, 오늘 하루 안에 자료 하나를 골라 두자.");
+  });
+  it("제목이 본문 중간에 나오면 건드리지 않는다", () => {
+    const t = "오늘은 쉬어도 좋아. 그렇지만 이건 조금 부족해요 라는 말은 아니야.";
+    expect(tidyFold("lack", t)).toBe(t);
+  });
+  it("요약 말머리를 뗀다", () => {
+    expect(stripSummaryLead("요약하자면, 너는 흙의 기운이 두툼하게 깔린 사람이야.")).toBe("너는 흙의 기운이 두툼하게 깔린 사람이야.");
+  });
+  it("끊긴 마지막 문장은 버린다", () => {
+    expect(trimToLastSentence("묵직한 사람이야. 그래서 친구들 사이에서도")).toBe("묵직한 사람이야.");
+    expect(trimToLastSentence("응원할게 ✨")).toBe("응원할게 ✨");
+    expect(trimToLastSentence("응원해!")).toBe("응원해!");
   });
 });
