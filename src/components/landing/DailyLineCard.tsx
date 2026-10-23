@@ -65,7 +65,7 @@ export function DailyLineCard({ onOpened }: { onOpened?: () => void }) {
       {daily ? (
         <div role="status">
           <p className="text-xs font-bold text-brand-600">🦦 오늘의 도리 한마디</p>
-          <p data-testid="daily-line-text" className="mt-2 rounded-2xl bg-gradient-to-r from-brand-50 via-white to-amber-50 px-4 py-3.5 font-serifKr text-[19px] font-black leading-snug text-brand-700 sm:text-[22px]">{daily.line}</p>
+          <p data-testid="daily-line-text" className="mt-2 rounded-2xl bg-gradient-to-r from-brand-50 via-white to-amber-50 px-4 py-3.5 font-cute text-[21px] font-normal leading-snug tracking-tight text-brand-700 sm:text-[24px]">{daily.line}</p>
           <p data-testid="daily-ganzhi" className="mt-2 text-[11px] text-gray-500">
             <span className="rounded-full bg-brand-50 px-2 py-0.5 font-bold text-brand-600">오늘 일진</span>
             <span className="ml-1.5 font-semibold">{ganzhiParts(daily.ganzhi).hangul || daily.ganzhi}</span>
