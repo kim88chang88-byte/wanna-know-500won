@@ -1,6 +1,7 @@
 "use client";
 
 import { fetchRetry } from "@/lib/fetchRetry";
+import InlineProgress from "./InlineProgress";
 import { useState } from "react";
 import type { HourResult } from "@/lib/ai/hourRange";
 import type { BirthInput } from "@/lib/saju/types";
@@ -14,6 +15,7 @@ export function HoursCard({ input }: { input: BirthInput }) {
   const [start, setStart] = useState(7);
   const [end, setEnd] = useState(9);
   const [loading, setLoading] = useState(false);
+  const [done, setDone] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<HourResult | null>(null);
 
@@ -27,9 +29,13 @@ export function HoursCard({ input }: { input: BirthInput }) {
       const data = (await res.json().catch(() => null)) as { result?: HourResult; error?: string } | null;
       if (!res.ok || !data?.result) throw new Error(data?.error ?? "도리가 잠깐 물놀이하러 갔어요. 다시 눌러 볼래요?");
       setResult(data.result);
+      // 답이 왔으면 막대를 100% 로 채운 뒤 잠깐 보여 주고 결과로 바꿔요.
+      setDone(true);
+      await new Promise((r) => setTimeout(r, 450));
     } catch (err) {
       setError(err instanceof Error ? err.message : "답을 받지 못했어요.");
     } finally {
+      setDone(false);
       setLoading(false);
     }
   }
@@ -59,8 +65,9 @@ export function HoursCard({ input }: { input: BirthInput }) {
           </div>
           <p className="text-[11px] text-gray-500">4시간 이내로 골라 주세요. 자정을 넘는 범위는 나눠서 따로 봐 주세요.</p>
           <button type="submit" disabled={loading} className="w-full py-2.5 rounded-xl bg-brand-500 text-white text-sm font-bold disabled:opacity-50">
-            {loading ? "도리가 시간대를 비교하는 중이에요 🫧" : "시간대별로 비교하기"}
+            시간대별로 비교하기
           </button>
+          {loading && <InlineProgress label="도리가 시간대를 비교하는 중이에요" done={done} />}
         </form>
       )}
       <div role="status" aria-live="polite">

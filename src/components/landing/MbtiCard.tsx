@@ -1,6 +1,7 @@
 "use client";
 
 import { fetchRetry } from "@/lib/fetchRetry";
+import InlineProgress from "./InlineProgress";
 import { useState } from "react";
 import type { MbtiResult } from "@/lib/ai/mbti";
 import { MBTI_TYPES } from "@/lib/ai/mbti";
@@ -19,6 +20,7 @@ export function MbtiCard({ input }: { input: BirthInput }) {
   const [open, setOpen] = useState(false);
   const [mbti, setMbti] = useState("");
   const [loading, setLoading] = useState(false);
+  const [done, setDone] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [out, setOut] = useState<{ mbti: string; result: MbtiResult } | null>(null);
 
@@ -32,9 +34,13 @@ export function MbtiCard({ input }: { input: BirthInput }) {
       const data = (await res.json().catch(() => null)) as { mbti?: string; result?: MbtiResult; error?: string } | null;
       if (!res.ok || !data?.result) throw new Error(data?.error ?? "도리가 잠깐 물놀이하러 갔어요. 다시 눌러 볼래요?");
       setOut({ mbti: data.mbti ?? mbti, result: data.result });
+      // 답이 왔으면 막대를 100% 로 채운 뒤 잠깐 보여 주고 결과로 바꿔요.
+      setDone(true);
+      await new Promise((r) => setTimeout(r, 450));
     } catch (err) {
       setError(err instanceof Error ? err.message : "답을 받지 못했어요.");
     } finally {
+      setDone(false);
       setLoading(false);
     }
   }
@@ -55,8 +61,9 @@ export function MbtiCard({ input }: { input: BirthInput }) {
             </select>
           </label>
           <button type="submit" disabled={loading || !mbti} className="w-full py-2.5 rounded-xl bg-brand-500 text-white text-sm font-bold disabled:opacity-50">
-            {loading ? "도리가 두 지도를 겹쳐 보는 중이에요 🫧" : "교차해서 보기"}
+            교차해서 보기
           </button>
+          {loading && <InlineProgress label="도리가 두 지도를 겹쳐 보는 중이에요" done={done} />}
         </form>
       )}
       <div role="status" aria-live="polite">
