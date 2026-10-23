@@ -7,7 +7,7 @@ import { useEffect, useRef, useState } from "react";
  * 맨 아래까지 내려오면 사라져요. 스크롤 컨테이너(overflow-y-auto) 안의 마지막 자식으로 넣어 주세요.
  * 화면 아래에 붙어 따라다니고(sticky), 눌러도 아래 내용을 가리지 않도록 클릭은 통과시켜요.
  */
-export default function ScrollHint({ label }: { label: string }) {
+export default function ScrollHint({ label, luxe = false }: { label: string; luxe?: boolean }) {
   const end = useRef<HTMLDivElement>(null);
   const [more, setMore] = useState(false);
 
@@ -28,7 +28,7 @@ export default function ScrollHint({ label }: { label: string }) {
         {more && (
           <span
             data-testid="scroll-hint"
-            className="-translate-y-full inline-flex items-center gap-1 rounded-full bg-brand-600/95 px-3.5 py-1.5 text-[11px] font-bold text-white shadow-lg motion-safe:animate-bounce"
+            className={`-translate-y-full inline-flex items-center gap-1 rounded-full ${luxe ? "bg-[#e6c887] text-[#1b1824]" : "bg-brand-600/95 text-white"} px-3.5 py-1.5 text-[11px] font-bold shadow-lg motion-safe:animate-bounce`}
           >
             <span className="material-symbols-outlined text-[16px] leading-none" aria-hidden="true">
               keyboard_arrow_down

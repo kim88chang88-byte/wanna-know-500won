@@ -18,7 +18,7 @@ export interface VaultSnapshotInput {
 type Status = "idle" | "saving" | "saved" | "full" | "error";
 
 /** 결과 화면의 "내 보관함에 저장" 줄. autoSave 면 결과가 뜰 때 한 번 저장하고, 아니면 버튼을 눌러 저장해요. */
-export function VaultSaveBar({ snapshot, autoSave }: { snapshot: VaultSnapshotInput; autoSave: boolean }) {
+export function VaultSaveBar({ snapshot, autoSave, luxe = false }: { snapshot: VaultSnapshotInput; autoSave: boolean; luxe?: boolean }) {
   const [status, setStatus] = useState<Status>("idle");
   const [message, setMessage] = useState<string | null>(null);
   const tried = useRef(false);
@@ -52,21 +52,21 @@ export function VaultSaveBar({ snapshot, autoSave }: { snapshot: VaultSnapshotIn
   }, []);
 
   return (
-    <div data-testid="vault-save-bar" className="mt-4 flex items-center justify-between gap-2 rounded-2xl border border-brand-100 bg-white px-3.5 py-2.5 text-xs">
-      <span className="text-gray-700 leading-snug">
+    <div data-testid="vault-save-bar" className={`mt-4 flex items-center justify-between gap-2 rounded-2xl border px-3.5 py-2.5 text-xs ${luxe ? "border-[#e6c887]/25 bg-white/[0.03]" : "border-brand-100 bg-white"}`}>
+      <span className={`leading-snug ${luxe ? "text-[#efe7d3]" : "text-gray-700"}`}>
         {status === "saved" && <>📚 내 보관함에 저장했어요. 언제든 다시 볼 수 있어요.</>}
         {status === "saving" && <>📚 보관함에 저장하는 중…</>}
         {status === "idle" && <>📚 이 풀이를 내 보관함에 넣어 둘까요?</>}
-        {(status === "error" || status === "full") && <span className="text-amber-800">{message}</span>}
+        {(status === "error" || status === "full") && <span className={luxe ? "text-[#f6dfa8]" : "text-amber-800"}>{message}</span>}
       </span>
       {status === "saved" ? (
-        <Link href="/vault" className="shrink-0 font-bold text-brand-600 underline underline-offset-2">
+        <Link href="/vault" className={`shrink-0 font-bold underline underline-offset-2 ${luxe ? "text-[#e6c887]" : "text-brand-600"}`}>
           보관함 보기
         </Link>
       ) : (
         status !== "saving" &&
         status !== "full" && (
-          <button type="button" onClick={() => void save()} className="shrink-0 font-bold text-brand-600 underline underline-offset-2">
+          <button type="button" onClick={() => void save()} className={`shrink-0 font-bold underline underline-offset-2 ${luxe ? "text-[#e6c887]" : "text-brand-600"}`}>
             {status === "error" ? "다시 저장" : "저장하기"}
           </button>
         )

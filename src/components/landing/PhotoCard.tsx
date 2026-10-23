@@ -6,6 +6,8 @@ import { drawPhotoCard } from "@/lib/card/drawPhotoCard";
 import { buildPhotoCardData, CARD_H, CARD_SCALE, CARD_W, photoFileName, shareCaption } from "@/lib/card/photoData";
 
 interface Props {
+  /** 프리미엄 결과 화면용 미드나잇+골드 톤 */
+  luxe?: boolean;
   report: PremiumReportView;
   /** AI 풀이가 있으면 도리의 한마디를 카드에 넣어요 */
   aiQuote?: string | null;
@@ -34,7 +36,7 @@ function toBlob(canvas: HTMLCanvasElement): Promise<Blob | null> {
 }
 
 /** 인스타 스토리용 포토카드 + 공유/저장/문구 복사 */
-export default function PhotoCard({ report, aiQuote }: Props) {
+export default function PhotoCard({ report, aiQuote, luxe = false }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -131,17 +133,17 @@ export default function PhotoCard({ report, aiQuote }: Props) {
   }
 
   return (
-    <section data-testid="photo-card" aria-label="공유하기" className="mt-6 rounded-2xl border border-brand-100 bg-white px-4 py-4">
+    <section data-testid="photo-card" aria-label="공유하기" className={`mt-6 rounded-2xl border px-4 py-4 ${luxe ? "border-[#e6c887]/25 bg-white/[0.03]" : "border-brand-100 bg-white"}`}>
       {/* 보이지 않는 캔버스: "이미지로 저장/공유"를 누를 때 쓸 인스타 스토리용 그림을 미리 그려 둬요. */}
       <canvas ref={canvasRef} width={CARD_W * CARD_SCALE} height={CARD_H * CARD_SCALE} aria-hidden="true" className="hidden" />
-      <p className="text-sm font-bold text-gray-900">📸 이 풀이를 간직하거나 나눠 보세요</p>
-      <p className="mt-0.5 text-xs text-gray-500">인스타 스토리용 이미지로 저장하거나 친구에게 보낼 수 있어요.</p>
+      <p className={`text-sm font-bold ${luxe ? "text-[#fbf3de]" : "text-gray-900"}`}>📸 이 풀이를 간직하거나 나눠 보세요</p>
+      <p className={`mt-0.5 text-xs ${luxe ? "text-[#e8dfca]/70" : "text-gray-500"}`}>인스타 스토리용 이미지로 저장하거나 친구에게 보낼 수 있어요.</p>
       <button
         type="button"
         onClick={handleShare}
         disabled={busy}
         data-testid="share-button"
-        className="mt-3 w-full py-3 rounded-full bg-gradient-to-r from-fuchsia-400 via-violet-500 to-brand-500 text-white font-cute font-normal text-sm shadow-md hover:opacity-95 disabled:opacity-50 active:scale-95 transition-transform"
+        className={`mt-3 w-full py-3 rounded-full font-cute font-normal text-sm shadow-md hover:opacity-95 disabled:opacity-50 active:scale-95 transition-transform ${luxe ? "bg-gradient-to-r from-[#f0d9a0] to-[#d3ac62] text-[#1b1824]" : "bg-gradient-to-r from-fuchsia-400 via-violet-500 to-brand-500 text-white"}`}
       >
         인스타·SNS에 공유하기
       </button>
@@ -151,7 +153,7 @@ export default function PhotoCard({ report, aiQuote }: Props) {
           onClick={handleSave}
           disabled={busy}
           data-testid="save-button"
-          className="py-2.5 rounded-full border border-brand-200 text-brand-700 font-cute font-normal text-sm hover:bg-brand-50 disabled:opacity-50"
+          className={`py-2.5 rounded-full border font-cute font-normal text-sm disabled:opacity-50 ${luxe ? "border-[#e6c887]/40 text-[#e6c887] hover:bg-[#e6c887]/10" : "border-brand-200 text-brand-700 hover:bg-brand-50"}`}
         >
           이미지로 저장
         </button>
@@ -159,13 +161,13 @@ export default function PhotoCard({ report, aiQuote }: Props) {
           type="button"
           onClick={handleCopy}
           data-testid="copy-button"
-          className="py-2.5 rounded-full border border-brand-200 text-brand-700 font-cute font-normal text-sm hover:bg-brand-50"
+          className={`py-2.5 rounded-full border font-cute font-normal text-sm ${luxe ? "border-[#e6c887]/40 text-[#e6c887] hover:bg-[#e6c887]/10" : "border-brand-200 text-brand-700 hover:bg-brand-50"}`}
         >
           해시태그 복사
         </button>
       </div>
       {message && (
-        <p role="status" data-testid="share-message" className="mt-2 text-center text-[11px] font-bold text-brand-600">
+        <p role="status" data-testid="share-message" className={`mt-2 text-center text-[11px] font-bold ${luxe ? "text-[#f6dfa8]" : "text-brand-600"}`}>
           {message}
         </p>
       )}
@@ -174,8 +176,41 @@ export default function PhotoCard({ report, aiQuote }: Props) {
 }
 
 /** 풀이 맨 위에 보이는 한 줄 결론. 카드 틀 없이 글자 그대로 크게 보여줘요. (예전 포토카드에 들어가던 글을 그대로 살렸어요) */
-export function ResultHero({ report, aiQuote }: Props) {
+export function ResultHero({ report, aiQuote, luxe = false }: Props) {
   const data = useMemo(() => buildPhotoCardData(report, { date: new Date(), siteLabel: "", aiQuote }), [report, aiQuote]);
+  if (luxe) {
+    return (
+      <div data-testid="result-hero" className="px-1 pt-2 pb-3 text-center">
+        <p className="text-[10px] font-bold tracking-[0.32em] text-[#e6c887]">DORI PREMIUM · {data.topicLabel}</p>
+        <div aria-hidden="true" className="mx-auto mt-3 flex items-center justify-center gap-2 text-[#e6c887]">
+          <span className="h-px w-12 bg-gradient-to-r from-transparent to-[#e6c887]/70" />
+          <span className="text-[10px]">◆</span>
+          <span className="h-px w-12 bg-gradient-to-l from-transparent to-[#e6c887]/70" />
+        </div>
+        <h4 data-testid="result-hero-headline" className="mt-4 font-serifKr text-[22px] sm:text-[25px] font-bold leading-snug text-[#fbf3de] break-keep">
+          {data.headline}
+        </h4>
+        <p data-testid="result-hero-quote" className="mt-3 font-serifKr italic text-[14.5px] leading-relaxed text-[#f3e7c9] break-keep">
+          &ldquo;{data.quote}&rdquo;
+        </p>
+        {data.tags.length > 0 && (
+          <p className="mt-4 flex flex-wrap justify-center gap-1.5">
+            {data.tags.map((t) => (
+              <span key={t} className="rounded-full border border-[#e6c887]/40 px-2.5 py-0.5 text-[11px] font-bold text-[#e6c887]">
+                {t}
+              </span>
+            ))}
+          </p>
+        )}
+        <p className="mt-4 inline-flex items-center gap-2 rounded-full border border-[#e6c887]/25 bg-white/[0.04] px-3.5 py-1.5 text-xs text-[#e8dfca]/80">
+          <span aria-hidden="true" className="h-3 w-3 rounded-full border border-white/30" style={{ backgroundColor: data.lucky.hex }} />
+          행운 컬러 <b className="font-bold text-[#fbf3de]">{data.lucky.color}</b>
+          <span aria-hidden="true" className="text-[#e6c887]/40">|</span>
+          행운 방향 <b className="font-bold text-[#fbf3de]">{data.lucky.direction}</b>
+        </p>
+      </div>
+    );
+  }
   return (
     <div data-testid="result-hero" className="px-1 pt-1 pb-2 text-center">
       <p className="text-xs font-bold tracking-wide text-brand-500">{data.tier === "premium" ? "✨ 프리미엄 · " : ""}{data.topicLabel}</p>

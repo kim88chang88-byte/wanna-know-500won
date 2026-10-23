@@ -17,11 +17,11 @@ const CARD = "rounded-3xl bg-white border border-brand-100 p-5 sm:p-6 shadow-[0_
 const H2 = "font-serifKr font-bold text-lg text-brand-700 mb-4";
 
 /** hideHeadline: 위에 이미 같은 한 줄 결론을 보여 줄 때 분석 카드 안의 같은 문장을 빼요. */
-export default function ManseReport({ report, hideHeadline = false }: { report: PremiumReportView; hideHeadline?: boolean }) {
+export default function ManseReport({ report, hideHeadline = false, flush = false }: { report: PremiumReportView; hideHeadline?: boolean; flush?: boolean }) {
   const max = Math.max(1, ...report.elements.map((e) => e.count));
   // 프리미엄: 10페이지 상세 리포트
   // 궁합이면 10페이지 책도 두 사람 기준 궁합 리포트로 나와요. (요약 카드는 책 1쪽에 들어 있어요)
-  if (report.level === "full" && report.book.length > 0) return <PremiumBook report={report} />;
+  if (report.level === "full" && report.book.length > 0) return <PremiumBook report={report} flush={flush} />;
 
   return (
     <div data-testid="manse-report" className="space-y-6">

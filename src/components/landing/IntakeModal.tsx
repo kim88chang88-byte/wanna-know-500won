@@ -438,9 +438,11 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
     setStepIndex((i) => Math.max(0, i - 1));
   }
 
+  // 프리미엄 결과 화면만 미드나잇+골드 톤으로 보여줘요. (입력·로딩 화면은 기존 그대로)
+  const luxe = target.premium === true && phase === "result";
   const header = (
     <div className="text-center mb-4">
-      <span className="px-2.5 py-0.5 rounded-full bg-brand-100 text-brand-700 text-xs font-bold">
+      <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold ${luxe ? "border border-[#e6c887]/50 text-[#e6c887]" : "bg-brand-100 text-brand-700"}`}>
         {target.fortune} · {target.price}
       </span>
     </div>
@@ -449,11 +451,12 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
   return (
     <ModalShell
       labelId="intake-title"
-      panelClass="max-w-md p-5 sm:p-6 border-2 border-brand-300 max-h-[90vh] overflow-y-auto"
+      panelClass={`max-w-md p-5 sm:p-6 max-h-[90vh] overflow-y-auto ${luxe ? "border border-[#e6c887]/40" : "border-2 border-brand-300"}`}
       onClose={onClose}
       closeOnOverlay={false}
+      luxe={luxe}
     >
-      <CloseButton onClose={onClose} />
+      <CloseButton onClose={onClose} luxe={luxe} />
       <h3 id="intake-title" className="sr-only">
         생년월일시 입력
       </h3>
@@ -470,17 +473,18 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
           {premiumReport ? (
             <>
               {/* 1) 한 줄 결론(카드 틀 없이 글자로) */}
-              <ResultHero report={premiumReport} aiQuote={reading?.kkotgeoji ?? null} />
+              <ResultHero report={premiumReport} aiQuote={reading?.kkotgeoji ?? null} luxe={luxe} />
 
               {loggedIn && (
                 <VaultSaveBar
+                  luxe={luxe}
                   autoSave={saveVault}
                   snapshot={{ topic: target.fortune, premium: target.premium === true, report: premiumReport, reading, kkotgeoji: reading?.kkotgeoji ?? null, reason: reading?.reason ?? null, note: birthNote }}
                 />
               )}
 
               {birthNote && (
-                <p data-testid="birth-adjust-note" className="mt-4 p-3 rounded-2xl bg-brand-50 border border-brand-100 text-xs text-gray-700 leading-relaxed">
+                <p data-testid="birth-adjust-note" className={`mt-4 p-3 rounded-2xl border text-xs leading-relaxed ${luxe ? "bg-white/[0.04] border-[#e6c887]/25 text-[#e8dfca]/80" : "bg-brand-50 border-brand-100 text-gray-700"}`}>
                   {birthNote.split("\n").map((l) => (
                     <span key={l} className="block">
                       {l}
@@ -490,19 +494,19 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
               )}
 
               {/* 2) 오늘 도리의 풀이 → 주제별 맞춤 분석 + 사주 리포트 */}
-              {reading && <ReadingCard reading={reading} />}
+              {reading && <ReadingCard reading={reading} luxe={luxe} />}
 
               <div data-testid="premium-result" className="mt-6">
-                <ManseReport report={premiumReport} hideHeadline />
+                <ManseReport report={premiumReport} hideHeadline flush={luxe} />
               </div>
 
               {/* 3) 간직하고 나누기 → 더 물어보기 → 더 해보기 → 프리미엄 안내 */}
-              <PhotoCard report={premiumReport} aiQuote={reading?.kkotgeoji ?? null} />
+              <PhotoCard report={premiumReport} aiQuote={reading?.kkotgeoji ?? null} luxe={luxe} />
 
-              {askInput && <AskChips input={askInput} />}
+              {askInput && <AskChips input={askInput} luxe={luxe} />}
 
               {askInput && (
-                <details data-testid="more-tools" className="mt-6 rounded-2xl border border-brand-100 bg-brand-50/40 group">
+                <details data-testid="more-tools" className={`mt-6 rounded-2xl border group ${luxe ? "border-[#e6c887]/30 bg-[#fbf6ea]" : "border-brand-100 bg-brand-50/40"}`}>
                   <summary className="cursor-pointer list-none px-4 py-3 flex items-center justify-between text-sm font-bold text-gray-900">
                     <span>✨ 더 해보기 <span className="font-normal text-xs text-gray-500">고민 비교 · MBTI · 시간 후보</span></span>
                     <span aria-hidden="true" className="text-gray-400 transition-transform group-open:rotate-180">⌄</span>
@@ -579,20 +583,26 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
           </details>
           )}
 
-          <ReviewBox topic={target.fortune} premium={target.premium === true} />
+          {luxe ? (
+            <div className="mt-6 rounded-2xl border border-[#e6c887]/30 bg-[#fbf6ea] p-1">
+              <ReviewBox topic={target.fortune} premium={target.premium === true} />
+            </div>
+          ) : (
+            <ReviewBox topic={target.fortune} premium={target.premium === true} />
+          )}
 
           {!loggedIn && (
-            <div data-testid="login-nudge-result" className="mt-4 rounded-2xl bg-amber-50 border border-amber-200 px-4 py-3 text-center">
-              <p className="text-xs font-bold text-amber-900">🫧 {LOGIN_NUDGE}</p>
+            <div data-testid="login-nudge-result" className={`mt-4 rounded-2xl border px-4 py-3 text-center ${luxe ? "bg-white/[0.04] border-[#e6c887]/30" : "bg-amber-50 border-amber-200"}`}>
+              <p className={`text-xs font-bold ${luxe ? "text-[#f3e7c9]" : "text-amber-900"}`}>🫧 {LOGIN_NUDGE}</p>
               {onRequestLogin && (
-                <button type="button" onClick={onRequestLogin} className="mt-1.5 text-[11px] font-bold text-brand-600 underline underline-offset-2">
+                <button type="button" onClick={onRequestLogin} className={`mt-1.5 text-[11px] font-bold underline underline-offset-2 ${luxe ? "text-[#e6c887]" : "text-brand-600"}`}>
                   로그인하러 가기
                 </button>
               )}
             </div>
           )}
 
-          <p className="mt-3 text-center text-[10px] text-gray-400">
+          <p className={`mt-3 text-center text-[10px] ${luxe ? "text-[#e8dfca]/50" : "text-gray-400"}`}>
             * 재미와 위로를 위한 풀이예요. 실제 일을 보장하지 않아요.
           </p>
 
@@ -600,7 +610,7 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
             type="button"
             onClick={onClose}
             data-testid="close-result"
-            className="mt-3 w-full py-2 text-xs font-bold text-gray-400 hover:text-gray-600 transition-colors"
+            className={`mt-3 w-full py-2 text-xs font-bold transition-colors ${luxe ? "text-[#e6c887]/70 hover:text-[#e6c887]" : "text-gray-400 hover:text-gray-600"}`}
           >
             닫기
           </button>
@@ -801,7 +811,7 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
         </form>
       )}
       {/* 창이 길어서 아래에 더 볼 내용이 있을 때만 보이는 안내 */}
-      {phase !== "loading" && <ScrollHint label={phase === "result" ? "아래로 스크롤하면 사주 리포트가 더 있어요" : "아래로 스크롤해 주세요"} />}
+      {phase !== "loading" && <ScrollHint luxe={luxe} label={phase === "result" ? "아래로 스크롤하면 사주 리포트가 더 있어요" : "아래로 스크롤해 주세요"} />}
     </ModalShell>
   );
 }

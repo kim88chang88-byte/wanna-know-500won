@@ -5,9 +5,9 @@ import type { PremiumErrorBody, PremiumReportView } from "@/lib/premium/types";
 import type { BirthInput } from "@/lib/saju/types";
 import ManseReport from "./ManseReport";
 
-const field = "w-full rounded-2xl border border-brand-200 bg-white px-4 py-3 text-base text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-300";
+const field = "w-full rounded-2xl border border-[#e6c887]/30 bg-white/[0.05] px-4 py-3 text-base text-[#fbf3de] [color-scheme:dark] focus:outline-none focus:ring-2 focus:ring-[#e6c887]/50";
 const seg = (active: boolean) =>
-  `flex-1 rounded-full py-2.5 text-sm font-bold border transition-colors ${active ? "bg-brand-500 text-white border-brand-500" : "bg-white text-brand-600 border-brand-200"}`;
+  `flex-1 rounded-full py-2.5 text-sm font-bold border transition-colors ${active ? "bg-[#e6c887] text-[#1b1824] border-[#e6c887]" : "bg-transparent text-[#e6c887] border-[#e6c887]/40"}`;
 
 export default function PremiumReportApp() {
   const [date, setDate] = useState("");
@@ -57,7 +57,7 @@ export default function PremiumReportApp() {
     return (
       <div className="space-y-6">
         <ManseReport report={report} />
-        <button type="button" onClick={() => setReport(null)} className="w-full rounded-full border border-brand-200 bg-white py-3 text-sm font-bold text-brand-600">
+        <button type="button" onClick={() => setReport(null)} className="w-full rounded-full border border-[#e6c887]/40 py-3 text-sm font-bold text-[#e6c887]">
           다시 입력하기
         </button>
       </div>
@@ -65,9 +65,9 @@ export default function PremiumReportApp() {
   }
 
   return (
-    <form onSubmit={onSubmit} noValidate className="space-y-5 rounded-3xl bg-white border border-brand-100 p-5 sm:p-7 shadow-[0_8px_30px_rgba(128,87,224,0.08)]">
+    <form onSubmit={onSubmit} noValidate className="space-y-5 rounded-3xl bg-white/[0.04] border border-[#e6c887]/30 p-5 sm:p-7 shadow-[0_20px_60px_rgba(0,0,0,0.35)]">
       <div>
-        <label htmlFor="birth-date" className="block text-sm font-bold text-slate-700 mb-1.5">
+        <label htmlFor="birth-date" className="block text-sm font-bold text-[#e6c887] mb-1.5">
           생년월일
         </label>
         <input id="birth-date" type="date" min="1900-01-01" max="2100-12-31" value={date} onChange={(e) => setDate(e.target.value)} className={field} />
@@ -80,26 +80,26 @@ export default function PremiumReportApp() {
           </button>
         </div>
         {isLunar && (
-          <label className="mt-2 flex items-center gap-2 text-sm text-slate-600">
-            <input type="checkbox" checked={isLeap} onChange={(e) => setIsLeap(e.target.checked)} className="h-4 w-4 accent-brand-500" />
+          <label className="mt-2 flex items-center gap-2 text-sm text-[#e8dfca]/80">
+            <input type="checkbox" checked={isLeap} onChange={(e) => setIsLeap(e.target.checked)} className="h-4 w-4 accent-[#e6c887]" />
             윤달이에요
           </label>
         )}
       </div>
 
       <div>
-        <label htmlFor="birth-time" className="block text-sm font-bold text-slate-700 mb-1.5">
+        <label htmlFor="birth-time" className="block text-sm font-bold text-[#e6c887] mb-1.5">
           태어난 시간
         </label>
-        <input id="birth-time" type="time" value={time} disabled={timeUnknown} onChange={(e) => setTime(e.target.value)} className={`${field} disabled:bg-slate-100 disabled:text-slate-400`} />
-        <label className="mt-2 flex items-center gap-2 text-sm text-slate-600">
-          <input type="checkbox" checked={timeUnknown} onChange={(e) => setTimeUnknown(e.target.checked)} className="h-4 w-4 accent-brand-500" />
+        <input id="birth-time" type="time" value={time} disabled={timeUnknown} onChange={(e) => setTime(e.target.value)} className={`${field} disabled:opacity-40`} />
+        <label className="mt-2 flex items-center gap-2 text-sm text-[#e8dfca]/80">
+          <input type="checkbox" checked={timeUnknown} onChange={(e) => setTimeUnknown(e.target.checked)} className="h-4 w-4 accent-[#e6c887]" />
           시간을 몰라요
         </label>
       </div>
 
       <div>
-        <span className="block text-sm font-bold text-slate-700 mb-1.5">성별</span>
+        <span className="block text-sm font-bold text-[#e6c887] mb-1.5">성별</span>
         <div className="flex gap-2" role="group" aria-label="성별">
           <button type="button" aria-pressed={isFemale === true} onClick={() => setIsFemale(true)} className={seg(isFemale === true)}>
             여성
@@ -111,12 +111,12 @@ export default function PremiumReportApp() {
       </div>
 
       {error && (
-        <p role="alert" data-testid="form-error" className="rounded-2xl bg-rose-50 border border-rose-200 px-4 py-3 text-sm text-rose-700">
+        <p role="alert" data-testid="form-error" className="rounded-2xl bg-rose-500/10 border border-rose-300/40 px-4 py-3 text-sm text-rose-200">
           {error}
         </p>
       )}
 
-      <button type="submit" disabled={busy} className="w-full rounded-full bg-gradient-to-r from-brand-500 to-indigo-600 py-3.5 font-serifKr font-bold text-white shadow-md disabled:opacity-60 active:scale-95 transition-transform">
+      <button type="submit" disabled={busy} className="w-full rounded-full bg-gradient-to-r from-[#f0d9a0] to-[#d3ac62] py-3.5 font-serifKr font-bold text-[#1b1824] shadow-md disabled:opacity-60 active:scale-95 transition-transform">
         {busy ? "물길을 읽는 중… 🫧" : "내 사주 리포트 보기"}
       </button>
     </form>

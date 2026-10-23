@@ -10,11 +10,13 @@ interface ShellProps {
   onClose: () => void;
   /** false 로 두면 바깥을 눌러도 닫히지 않아요. (입력 중인 내용을 실수로 잃지 않게) */
   closeOnOverlay?: boolean;
+  /** 프리미엄 결과처럼 미드나잇+골드 톤으로 보여줄 때 */
+  luxe?: boolean;
   children: ReactNode;
 }
 
 /** 공통 모달 틀: 배경 클릭 / Esc 로 닫히고, 열릴 때 포커스를 옮겼다가 닫히면 되돌려줍니다. */
-export function ModalShell({ labelId, panelClass, onClose, closeOnOverlay = true, children }: ShellProps) {
+export function ModalShell({ labelId, panelClass, onClose, closeOnOverlay = true, luxe = false, children }: ShellProps) {
   const panelRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -42,7 +44,7 @@ export function ModalShell({ labelId, panelClass, onClose, closeOnOverlay = true
         aria-modal="true"
         aria-labelledby={labelId}
         tabIndex={-1}
-        className={`relative w-full bg-white rounded-3xl shadow-2xl outline-none ${panelClass}`}
+        className={`relative w-full rounded-3xl shadow-2xl outline-none ${luxe ? "bg-gradient-to-b from-[#1d1a28] via-[#171520] to-[#12101a] text-[#f5efe0]" : "bg-white"} ${panelClass}`}
         onClick={(e) => e.stopPropagation()}
       >
         {children}
@@ -51,13 +53,13 @@ export function ModalShell({ labelId, panelClass, onClose, closeOnOverlay = true
   );
 }
 
-export function CloseButton({ onClose }: { onClose: () => void }) {
+export function CloseButton({ onClose, luxe = false }: { onClose: () => void; luxe?: boolean }) {
   return (
     <button
       onClick={onClose}
       type="button"
       aria-label="닫기"
-      className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
+      className={`absolute top-4 right-4 ${luxe ? "text-[#e6c887]/70 hover:text-[#e6c887]" : "text-gray-400 hover:text-gray-600"}`}
     >
       <span className="material-symbols-outlined text-[20px]">close</span>
     </button>

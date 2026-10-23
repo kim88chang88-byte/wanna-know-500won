@@ -310,7 +310,8 @@ function Visual({ page, report }: { page: BookPage; report: PremiumReportView })
   }
 }
 
-export default function PremiumBook({ report }: { report: PremiumReportView }) {
+/** flush: 이미 미드나잇 톤의 틀 안에 들어갈 때 바깥 테두리·배경을 빼고 내용만 보여요. */
+export default function PremiumBook({ report, flush = false }: { report: PremiumReportView; flush?: boolean }) {
   const pages = report.book;
   const [i, setI] = useState(0);
   const [unlockMsg, setUnlockMsg] = useState(false);
@@ -350,7 +351,7 @@ export default function PremiumBook({ report }: { report: PremiumReportView }) {
         if (e.key === "ArrowRight") go(i + 1);
         if (e.key === "ArrowLeft") go(i - 1);
       }}
-      className="rounded-[1.75rem] bg-gradient-to-b from-[#1d1a28] via-[#171520] to-[#12101a] p-5 sm:p-8 shadow-[0_20px_60px_rgba(20,16,34,0.45)] border border-[#e6c887]/30 text-[#f5efe0] scroll-mt-4"
+      className={`text-[#f5efe0] scroll-mt-4 ${flush ? "pt-2" : "rounded-[1.75rem] bg-gradient-to-b from-[#1d1a28] via-[#171520] to-[#12101a] p-5 sm:p-8 shadow-[0_20px_60px_rgba(20,16,34,0.45)] border border-[#e6c887]/30"}`}
     >
       <div className="flex items-center justify-between">
         <span className={`text-[10px] font-bold tracking-[0.3em] ${GOLD}`}>DORI PREMIUM REPORT</span>

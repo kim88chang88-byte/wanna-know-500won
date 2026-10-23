@@ -82,6 +82,7 @@ export default function VaultApp() {
 
   if (detail) {
     const s = detail.snapshot;
+    const luxe = s.premium === true;
     return (
       <div data-testid="vault-detail">
         <button type="button" onClick={() => setDetail(null)} className="text-xs font-bold text-brand-600 underline underline-offset-2">
@@ -90,10 +91,9 @@ export default function VaultApp() {
         <p className="mt-2 text-xs text-gray-500">
           {detail.title} · {day(detail.created_at)}에 저장
         </p>
-        <div className="mt-3">
-          <ResultHero report={s.report} aiQuote={s.kkotgeoji} />
-        </div>
-        {s.note && <p className="mt-4 p-3 rounded-2xl bg-brand-50 border border-brand-100 text-xs text-gray-700 leading-relaxed">{s.note}</p>}
+        <div className={luxe ? "mt-3 rounded-3xl border border-[#e6c887]/40 bg-gradient-to-b from-[#1d1a28] via-[#171520] to-[#12101a] p-5 sm:p-6 text-[#f5efe0] shadow-[0_20px_60px_rgba(20,16,34,0.35)]" : "mt-3"}>
+        <ResultHero report={s.report} aiQuote={s.kkotgeoji} luxe={luxe} />
+        {s.note && <p className={`mt-4 p-3 rounded-2xl border text-xs leading-relaxed ${luxe ? "bg-white/[0.04] border-[#e6c887]/25 text-[#e8dfca]/80" : "bg-brand-50 border-brand-100 text-gray-700"}`}>{s.note}</p>}
         {s.card && (
           <ReadingCard
             reading={{
@@ -102,18 +102,20 @@ export default function VaultApp() {
               indicators: s.card.indicators.map((i, k) => ({ key: (["love", "money", "mind"] as const)[k] ?? "mind", label: i.label, score: i.score, comment: i.comment, locked: false })),
               reason: s.reason ?? undefined,
             }}
+            luxe={luxe}
           />
         )}
         {!s.card && s.reason && (
-          <div className="mt-4 p-4 rounded-2xl bg-white border border-brand-100 text-sm text-gray-800 leading-relaxed">
-            <p className="text-xs font-semibold text-brand-700 mb-1">🔎 도리가 본 이유</p>
+          <div className={`mt-4 p-4 rounded-2xl border text-sm leading-relaxed ${luxe ? "bg-white/[0.03] border-[#e6c887]/25 text-[#efe7d3]" : "bg-white border-brand-100 text-gray-800"}`}>
+            <p className={`text-xs font-semibold mb-1 ${luxe ? "text-[#e6c887]" : "text-brand-700"}`}>🔎 도리가 본 이유</p>
             {s.reason}
           </div>
         )}
         <div className="mt-6">
-          <ManseReport report={s.report} hideHeadline />
+          <ManseReport report={s.report} hideHeadline flush={luxe} />
         </div>
-        <PhotoCard report={s.report} aiQuote={s.kkotgeoji} />
+        <PhotoCard report={s.report} aiQuote={s.kkotgeoji} luxe={luxe} />
+        </div>
         {notice && <p role="alert" className="mt-3 text-xs text-amber-800">{notice}</p>}
         <button type="button" onClick={() => void remove(detail.id)} className="mt-6 text-[11px] text-gray-400 underline underline-offset-2 hover:text-gray-600">
           이 풀이 보관함에서 지우기
