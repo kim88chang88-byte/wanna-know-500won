@@ -20,7 +20,7 @@ function Sticker({ text, testId }: { text: string; testId: string }) {
   return (
     <div
       data-testid={testId}
-      className="absolute -top-3 -right-2 rotate-[10deg] flex items-center gap-1 px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-lg bg-gradient-to-br from-rose-500 via-red-500 to-orange-400 text-white font-sans font-black italic tracking-wider text-[11px] sm:text-sm shadow-[0_3px_8px_rgba(244,63,94,0.45)] ring-2 ring-white z-10 whitespace-nowrap pointer-events-none"
+      className="absolute -top-2.5 -right-2 flex items-center gap-0.5 px-2 sm:px-2.5 py-0.5 rounded-full bg-gradient-to-r from-rose-500 to-orange-400 text-white font-sans font-black tracking-wide text-[11px] sm:text-xs leading-tight shadow-[0_2px_6px_rgba(244,63,94,0.4)] ring-2 ring-white z-10 whitespace-nowrap pointer-events-none"
     >
       <span aria-hidden="true">🔥</span>
       {text}
