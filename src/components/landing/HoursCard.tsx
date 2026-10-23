@@ -1,5 +1,6 @@
 "use client";
 
+import { fetchRetry } from "@/lib/fetchRetry";
 import { useState } from "react";
 import type { HourResult } from "@/lib/ai/hourRange";
 import type { BirthInput } from "@/lib/saju/types";
@@ -22,7 +23,7 @@ export function HoursCard({ input }: { input: BirthInput }) {
     setError(null);
     setLoading(true);
     try {
-      const res = await fetch("/api/hours", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...input, start, end }) });
+      const res = await fetchRetry("/api/hours", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...input, start, end }) });
       const data = (await res.json().catch(() => null)) as { result?: HourResult; error?: string } | null;
       if (!res.ok || !data?.result) throw new Error(data?.error ?? "도리가 잠깐 물놀이하러 갔어요. 다시 눌러 볼래요?");
       setResult(data.result);

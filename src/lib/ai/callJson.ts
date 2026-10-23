@@ -19,6 +19,7 @@ export async function callJson<T>(o: {
   const fetchImpl = o.fetchImpl ?? fetch;
   let last = "알 수 없음";
   for (let i = 0; i < (o.attempts ?? 2); i++) {
+    if (i > 0) await new Promise((r) => setTimeout(r, 700));
     const ctrl = new AbortController();
     const timer = setTimeout(() => ctrl.abort(), o.timeoutMs ?? 25_000);
     try {

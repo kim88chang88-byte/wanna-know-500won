@@ -2,6 +2,7 @@ import { analyzeChart } from "@/lib/saju/analysis";
 import type { Gender, SajuChart } from "@/lib/saju/types";
 import type { CoreFacts } from "./coreFacts";
 import { containsForbidden, isGeneric } from "./reading";
+import { trimToLastSentence } from "@/lib/storyHelpers";
 import { SYSTEM_PROMPT } from "./prompt";
 import type { AskQuestion } from "./askQuestions";
 import { DEFAULT_MODEL, ReadingFailedError, ReadingUnavailableError } from "./interpret";
@@ -25,11 +26,17 @@ export const ASK_SCHEMA = {
 const MIN = 60;
 const MAX = 600;
 
+/** 너무 길게 온 답은 버리지 않고, 600자 안의 마지막 완성 문장까지만 써요. */
+function fitLength(t: string): string {
+  if (t.length <= MAX) return t;
+  return trimToLastSentence(t.slice(0, MAX));
+}
+
 export function parseAnswer(value: unknown): string | null {
   if (typeof value !== "object" || value === null) return null;
   const a = (value as Record<string, unknown>).answer;
   if (typeof a !== "string") return null;
-  const t = a.trim();
+  const t = fitLength(a.trim());
   if (t.length < MIN || t.length > MAX) return null;
   if (isGeneric(t) || containsForbidden(t)) return null;
   return t;
@@ -66,9 +73,11 @@ export async function askDori(o: Opts): Promise<string> {
   const model = o.model ?? process.env.ANTHROPIC_MODEL ?? DEFAULT_MODEL;
   const fetchImpl = o.fetchImpl ?? fetch;
   let last = "알 수 없음";
-  for (let i = 0; i < 2; i++) {
+  // 막히면(과부하·형식 어긋남) 잠깐 쉬고 세 번까지 시도해요. 한 번에 18초, 합쳐서 60초 안에 끝나요.
+  for (let i = 0; i < 3; i++) {
+    if (i > 0) await new Promise((r) => setTimeout(r, 700));
     const ctrl = new AbortController();
-    const timer = setTimeout(() => ctrl.abort(), o.timeoutMs ?? 25_000);
+    const timer = setTimeout(() => ctrl.abort(), o.timeoutMs ?? 18_000);
     try {
       const res = await fetchImpl("https://api.anthropic.com/v1/messages", {
         method: "POST",

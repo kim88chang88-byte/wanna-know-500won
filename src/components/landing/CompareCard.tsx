@@ -1,5 +1,6 @@
 "use client";
 
+import { fetchRetry } from "@/lib/fetchRetry";
 import { useState } from "react";
 import type { CompareResult } from "@/lib/ai/compare";
 import type { BirthInput } from "@/lib/saju/types";
@@ -21,7 +22,7 @@ export function CompareCard({ input }: { input: BirthInput }) {
     setError(null);
     setLoading(true);
     try {
-      const res = await fetch("/api/compare", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...input, a, b }) });
+      const res = await fetchRetry("/api/compare", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...input, a, b }) });
       const data = (await res.json().catch(() => null)) as { result?: CompareResult; error?: string } | null;
       if (!res.ok || !data?.result) throw new Error(data?.error ?? "도리가 잠깐 물놀이하러 갔어요. 다시 눌러 볼래요?");
       setResult(data.result);

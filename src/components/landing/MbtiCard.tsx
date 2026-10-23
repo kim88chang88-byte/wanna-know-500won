@@ -1,5 +1,6 @@
 "use client";
 
+import { fetchRetry } from "@/lib/fetchRetry";
 import { useState } from "react";
 import type { MbtiResult } from "@/lib/ai/mbti";
 import { MBTI_TYPES } from "@/lib/ai/mbti";
@@ -27,7 +28,7 @@ export function MbtiCard({ input }: { input: BirthInput }) {
     setError(null);
     setLoading(true);
     try {
-      const res = await fetch("/api/mbti", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...input, mbti }) });
+      const res = await fetchRetry("/api/mbti", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...input, mbti }) });
       const data = (await res.json().catch(() => null)) as { mbti?: string; result?: MbtiResult; error?: string } | null;
       if (!res.ok || !data?.result) throw new Error(data?.error ?? "도리가 잠깐 물놀이하러 갔어요. 다시 눌러 볼래요?");
       setOut({ mbti: data.mbti ?? mbti, result: data.result });
