@@ -27,6 +27,8 @@ export interface VaultSnapshot {
   /** 도리 한마디/이유 (없으면 null) */
   kkotgeoji: string | null;
   reason: string | null;
+  /** "요약하자면" 문단 (없으면 null) */
+  story?: string | null;
   /** 출생지·절기 경계 안내 문구 */
   note: string | null;
 }
@@ -72,6 +74,7 @@ export function parseVaultBody(raw: unknown, now: Date = new Date()): ParsedVaul
     card,
     kkotgeoji: text(raw.kkotgeoji, 300),
     reason: text(raw.reason, 400),
+    story: text(raw.story, 500),
     note: text(raw.note, 400),
   };
   const body = JSON.stringify(snapshot);

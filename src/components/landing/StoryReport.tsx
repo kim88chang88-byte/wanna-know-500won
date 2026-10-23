@@ -19,6 +19,7 @@ export interface StoryReading {
   total: { score: number; summary: string };
   indicators: Array<{ key?: string; label: string; score: number; comment: string | null }>;
   reason?: string;
+  story?: string;
 }
 
 const EL_CLASS: Record<Element, string> = {
@@ -108,7 +109,7 @@ export default function StoryReport({
       .filter((x): x is string => Boolean(x))
       .map((x) => (/[.!?…~]$/.test(x) ? x : `${x}.`))
       .join(" ");
-  const summary = joinFlow([reading?.total.summary, reading?.reason, concern?.answers[0]?.body]);
+  const summary = reading?.story?.trim() || joinFlow([reading?.total.summary, reading?.reason, concern?.answers[0]?.body]);
 
   return (
     <div data-testid="story-report" className="mt-5 space-y-5">

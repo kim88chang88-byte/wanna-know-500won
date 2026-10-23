@@ -12,6 +12,7 @@ export interface VaultSnapshotInput {
   reading?: unknown;
   kkotgeoji: string | null;
   reason: string | null;
+  story?: string | null;
   note: string | null;
 }
 
