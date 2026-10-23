@@ -8,6 +8,7 @@ import { FREE_PRICE_LABEL, MACHINES, PREMIUM_CARDS, SAMPLE_CAPSULES } from "./da
 import { HelpMenuButton, MachineMenuButton } from "./MenuButton";
 import { HERO_IMAGE, IMAGES, LOGO_IMAGE } from "./images";
 import SafeImage from "./SafeImage";
+import ShareSiteBar from "./ShareSiteBar";
 
 export type SpinHandler = (key: string, fortune: string, price: string, premium?: boolean) => void;
 
@@ -495,6 +496,7 @@ export function Footer() {
           <span aria-hidden="true">🦦</span> {SERVICE_NAME} <span aria-hidden="true">🫧</span>
         </div>
         <p className="text-gray-400">“궁금하면 500원! 퐁당, 오늘의 운을 뽑아봐.”</p>
+        <ShareSiteBar />
         <div className="flex items-center gap-3 text-gray-400 mt-2">
           <Link href="/terms" className="hover:text-brand-500">
             이용약관
