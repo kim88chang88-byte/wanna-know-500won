@@ -16,7 +16,8 @@ const ELEMENT_STYLE: Record<ElementKind, { bar: string; chip: string }> = {
 const CARD = "rounded-3xl bg-white border border-brand-100 p-5 sm:p-6 shadow-[0_8px_30px_rgba(128,87,224,0.08)]";
 const H2 = "font-serifKr font-bold text-lg text-brand-700 mb-4";
 
-export default function ManseReport({ report }: { report: PremiumReportView }) {
+/** hideHeadline: 위에 이미 같은 한 줄 결론을 보여 줄 때 분석 카드 안의 같은 문장을 빼요. */
+export default function ManseReport({ report, hideHeadline = false }: { report: PremiumReportView; hideHeadline?: boolean }) {
   const max = Math.max(1, ...report.elements.map((e) => e.count));
   // 프리미엄: 10페이지 상세 리포트
   // 궁합이면 10페이지 책도 두 사람 기준 궁합 리포트로 나와요. (요약 카드는 책 1쪽에 들어 있어요)
@@ -30,9 +31,11 @@ export default function ManseReport({ report }: { report: PremiumReportView }) {
         <h2 id="topic-h" className="font-serifKr font-bold text-lg text-brand-700">
           <span aria-hidden="true">{report.topic.emoji}</span> {report.topic.label} 분석
         </h2>
-        <p data-testid="topic-headline" className="mt-2 font-serifKr font-bold text-[15px] leading-snug text-slate-800">
-          {report.topic.headline}
-        </p>
+        {!hideHeadline && (
+          <p data-testid="topic-headline" className="mt-2 font-serifKr font-bold text-[15px] leading-snug text-slate-800">
+            {report.topic.headline}
+          </p>
+        )}
         <ul className="mt-4 space-y-3">
           {report.topic.points.map((pt) => (
             <li key={pt.title} data-testid="topic-point" className="rounded-2xl bg-white/80 border border-violet-100 px-4 py-3">

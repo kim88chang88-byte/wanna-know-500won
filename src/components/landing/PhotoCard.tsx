@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { PremiumReportView } from "@/lib/premium/types";
 import { drawPhotoCard } from "@/lib/card/drawPhotoCard";
-import { buildPhotoCardData, CARD_H, CARD_SCALE, CARD_W, photoAltText, photoFileName, shareCaption } from "@/lib/card/photoData";
+import { buildPhotoCardData, CARD_H, CARD_SCALE, CARD_W, photoFileName, shareCaption } from "@/lib/card/photoData";
 
 interface Props {
   report: PremiumReportView;
@@ -131,15 +131,11 @@ export default function PhotoCard({ report, aiQuote }: Props) {
   }
 
   return (
-    <div data-testid="photo-card">
-      <canvas
-        ref={canvasRef}
-        width={CARD_W * CARD_SCALE}
-        height={CARD_H * CARD_SCALE}
-        role="img"
-        aria-label={photoAltText(data)}
-        className="mx-auto block w-full max-w-[300px] aspect-[9/16] rounded-2xl shadow-lg"
-      />
+    <section data-testid="photo-card" aria-label="공유하기" className="mt-6 rounded-2xl border border-brand-100 bg-white px-4 py-4">
+      {/* 보이지 않는 캔버스: "이미지로 저장/공유"를 누를 때 쓸 인스타 스토리용 그림을 미리 그려 둬요. */}
+      <canvas ref={canvasRef} width={CARD_W * CARD_SCALE} height={CARD_H * CARD_SCALE} aria-hidden="true" className="hidden" />
+      <p className="text-sm font-bold text-gray-900">📸 이 풀이를 간직하거나 나눠 보세요</p>
+      <p className="mt-0.5 text-xs text-gray-500">인스타 스토리용 이미지로 저장하거나 친구에게 보낼 수 있어요.</p>
       <button
         type="button"
         onClick={handleShare}
@@ -173,6 +169,37 @@ export default function PhotoCard({ report, aiQuote }: Props) {
           {message}
         </p>
       )}
+    </section>
+  );
+}
+
+/** 풀이 맨 위에 보이는 한 줄 결론. 카드 틀 없이 글자 그대로 크게 보여줘요. (예전 포토카드에 들어가던 글을 그대로 살렸어요) */
+export function ResultHero({ report, aiQuote }: Props) {
+  const data = useMemo(() => buildPhotoCardData(report, { date: new Date(), siteLabel: "", aiQuote }), [report, aiQuote]);
+  return (
+    <div data-testid="result-hero" className="px-1 pt-1 pb-2 text-center">
+      <p className="text-xs font-bold tracking-wide text-brand-500">{data.tier === "premium" ? "✨ 프리미엄 · " : ""}{data.topicLabel}</p>
+      <h4 data-testid="result-hero-headline" className="mt-2 font-cute text-[23px] sm:text-[26px] font-normal leading-snug text-brand-700 break-keep">
+        {data.headline}
+      </h4>
+      <p data-testid="result-hero-quote" className="mt-3 text-[15px] leading-relaxed text-gray-700 break-keep">
+        &ldquo;{data.quote}&rdquo;
+      </p>
+      {data.tags.length > 0 && (
+        <p className="mt-3 flex flex-wrap justify-center gap-1.5">
+          {data.tags.map((t) => (
+            <span key={t} className="rounded-full bg-brand-50 px-2.5 py-0.5 text-[11px] font-bold text-brand-600">
+              {t}
+            </span>
+          ))}
+        </p>
+      )}
+      <p className="mt-3 inline-flex items-center gap-2 rounded-full bg-gray-50 px-3.5 py-1.5 text-xs text-gray-600">
+        <span aria-hidden="true" className="h-3 w-3 rounded-full border border-black/10" style={{ backgroundColor: data.lucky.hex }} />
+        행운 컬러 <b className="font-bold text-gray-800">{data.lucky.color}</b>
+        <span aria-hidden="true" className="text-gray-300">|</span>
+        행운 방향 <b className="font-bold text-gray-800">{data.lucky.direction}</b>
+      </p>
     </div>
   );
 }

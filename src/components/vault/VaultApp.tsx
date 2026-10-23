@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import ManseReport from "@/components/premium/ManseReport";
-import PhotoCard from "@/components/landing/PhotoCard";
+import PhotoCard, { ResultHero } from "@/components/landing/PhotoCard";
 import { ReadingCard } from "@/components/landing/ReadingCard";
 import type { VaultSnapshot } from "@/lib/vault";
 import { summarizeVault } from "@/lib/vaultStats";
@@ -91,7 +91,7 @@ export default function VaultApp() {
           {detail.title} · {day(detail.created_at)}에 저장
         </p>
         <div className="mt-3">
-          <PhotoCard report={s.report} aiQuote={s.kkotgeoji} />
+          <ResultHero report={s.report} aiQuote={s.kkotgeoji} />
         </div>
         {s.note && <p className="mt-4 p-3 rounded-2xl bg-brand-50 border border-brand-100 text-xs text-gray-700 leading-relaxed">{s.note}</p>}
         {s.card && (
@@ -111,8 +111,9 @@ export default function VaultApp() {
           </div>
         )}
         <div className="mt-6">
-          <ManseReport report={s.report} />
+          <ManseReport report={s.report} hideHeadline />
         </div>
+        <PhotoCard report={s.report} aiQuote={s.kkotgeoji} />
         {notice && <p role="alert" className="mt-3 text-xs text-amber-800">{notice}</p>}
         <button type="button" onClick={() => void remove(detail.id)} className="mt-6 text-[11px] text-gray-400 underline underline-offset-2 hover:text-gray-600">
           이 풀이 보관함에서 지우기

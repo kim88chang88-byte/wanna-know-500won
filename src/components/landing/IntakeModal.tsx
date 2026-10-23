@@ -39,7 +39,7 @@ import { profileSummary, profileToForm, sameBirth, type SavedProfile } from "@/l
 import { BRANCHES, STEMS } from "@/lib/saju/constants";
 import type { Pillar, SajuChart } from "@/lib/saju/types";
 import { CloseButton, ModalShell } from "./Modals";
-import PhotoCard from "./PhotoCard";
+import PhotoCard, { ResultHero } from "./PhotoCard";
 import ReviewBox from "./ReviewBox";
 import ScrollHint from "./ScrollHint";
 import ManseReport from "@/components/premium/ManseReport";
@@ -469,8 +469,8 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
         <div data-testid="intake-result">
           {premiumReport ? (
             <>
-              {/* 1) 인스타 감성 포토카드 + 공유 */}
-              <PhotoCard report={premiumReport} aiQuote={reading?.kkotgeoji ?? null} />
+              {/* 1) 한 줄 결론(카드 틀 없이 글자로) */}
+              <ResultHero report={premiumReport} aiQuote={reading?.kkotgeoji ?? null} />
 
               {loggedIn && (
                 <VaultSaveBar
@@ -489,14 +489,18 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
                 </p>
               )}
 
+              {/* 2) 오늘 도리의 풀이 → 주제별 맞춤 분석 + 사주 리포트 */}
               {reading && <ReadingCard reading={reading} />}
+
+              <div data-testid="premium-result" className="mt-6">
+                <ManseReport report={premiumReport} hideHeadline />
+              </div>
+
+              {/* 3) 간직하고 나누기 → 더 물어보기 → 더 해보기 → 프리미엄 안내 */}
+              <PhotoCard report={premiumReport} aiQuote={reading?.kkotgeoji ?? null} />
 
               {askInput && <AskChips input={askInput} />}
 
-              {/* 2) 주제별 맞춤 분석 + 사주 리포트 */}
-              <div data-testid="premium-result" className="mt-6">
-                <ManseReport report={premiumReport} />
-              </div>
               {askInput && (
                 <details data-testid="more-tools" className="mt-6 rounded-2xl border border-brand-100 bg-brand-50/40 group">
                   <summary className="cursor-pointer list-none px-4 py-3 flex items-center justify-between text-sm font-bold text-gray-900">
