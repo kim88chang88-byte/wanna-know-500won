@@ -6,7 +6,7 @@ import type { Concern } from "@/lib/concerns";
 import type { Gender, SajuChart } from "@/lib/saju/types";
 import { callJson } from "./callJson";
 import { buildUserMessage, type ExtraFacts } from "./prompt";
-import { containsForbidden, isGeneric, type DetailFolds, type ReadingTopic } from "./reading";
+import { containsForbidden, isGeneric, TOPIC_LABEL, type DetailFolds, type ReadingTopic } from "./reading";
 
 export interface Detail {
   story: string;
@@ -84,8 +84,21 @@ export function parseDetail(value: unknown): Detail | null {
   return containsForbidden(all) ? null : { story, folds };
 }
 
+/** 주제마다 여섯 글과 요약을 어느 관점으로 쓸지. (일·돈·연애·결혼·건강·공부 모두 같은 구조, 다른 이야기) */
+export const TOPIC_ANGLE: Record<ReadingTopic, string> = {
+  general: "오늘 하루 전반의 기분·관계·돈·마음의 흐름",
+  success: "일과 진로에서 인정받는 방식, 일하는 스타일, 잘 맞는 환경, 성장 포인트",
+  money: "돈을 벌고 모으고 쓰는 습관, 재물이 붙는 방식, 새는 곳과 채우는 법",
+  love: "끌리는 사람과 연애 스타일, 마음을 표현하는 방식, 관계에서 반복되는 패턴",
+  marriage: "결혼과 오래 가는 관계에 대한 생각, 배우자·가정을 대하는 태도, 관계를 지키는 습관",
+  health: "생활 리듬, 에너지를 쓰고 채우는 방식, 마음 컨디션을 돌보는 습관 (질병·병원·약 이야기는 절대 하지 말고 잠·식사·산책 같은 생활 습관만)",
+  study: "공부 스타일, 집중이 잘 되는 때와 방식, 시험·성장 앞에서의 마음가짐",
+};
+
 export function buildDetailMessage(chart: SajuChart, topic: ReadingTopic, gender: Gender, concern: Concern | null | undefined, extra: ExtraFacts): string {
-  return buildUserMessage(chart, topic, gender, concern, extra, "오행(elements)·나(self)·칭찬(praise)·아쉬움(lack)·개선(improve)·행운 처방(lucky) 글을 차례로 쓰고, 마지막에 요약하자면(story)을 시스템 지침대로 매끄럽게 써줘.");
+  const label = TOPIC_LABEL[topic];
+  const lens = `이번 주제는 "${label}"이야. 여섯 글과 요약하자면 모두 이 주제의 관점(${TOPIC_ANGLE[topic]})으로, 오행·일간 근거와 이어서 써줘. 다른 주제 이야기로 새지 마.\n`;
+  return buildUserMessage(chart, topic, gender, concern, extra, lens + "오행(elements)·나(self)·칭찬(praise)·아쉬움(lack)·개선(improve)·행운 처방(lucky) 글을 차례로 쓰고, 마지막에 요약하자면(story)을 시스템 지침대로 매끄럽게 써줘.");
 }
 
 export function interpretDetail(chart: SajuChart, o: { topic: ReadingTopic; gender: Gender; concern?: Concern | null; extra?: ExtraFacts; apiKey?: string; model?: string; fetchImpl?: typeof fetch }): Promise<Detail> {

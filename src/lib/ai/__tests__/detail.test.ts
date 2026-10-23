@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { DETAIL_SCHEMA, parseDetail } from "../detail";
+import { DETAIL_SCHEMA, parseDetail, TOPIC_ANGLE } from "../detail";
+import { TOPIC_LABEL } from "../reading";
 
 const long = (s: string, n: number) => s.repeat(n);
 const story = long("오늘은 마음이 포근하게 풀리는 날이라 서두르지 않아도 괜찮아 💕 ", 16);
@@ -26,5 +27,8 @@ describe("parseDetail", () => {
   it("스키마에 지원하지 않는 키워드가 없다", () => {
     const t = JSON.stringify(DETAIL_SCHEMA);
     for (const k of ["minimum", "maximum", "minLength", "maxLength"]) expect(t.includes(`"${k}"`)).toBe(false);
+  });
+  it("모든 주제에 관점이 있다", () => {
+    for (const k of Object.keys(TOPIC_LABEL)) expect(typeof (TOPIC_ANGLE as Record<string, string>)[k]).toBe("string");
   });
 });
