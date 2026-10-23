@@ -12,6 +12,12 @@ interface Daily {
 
 const KEY = "wanna500:daily:v1";
 
+/** "庚午(경오)" → 한자 "庚午", 한글 "경오" (모양이 다르면 통째로 한자 칸에 보여 줘요) */
+function ganzhiParts(g: string): { hanja: string; hangul: string } {
+  const m = /^(.+?)\((.+)\)$/.exec(g);
+  return m ? { hanja: m[1], hangul: m[2] } : { hanja: g, hangul: "" };
+}
+
 function readOpened(day: string): Daily | null {
   try {
     const v = JSON.parse(getBrowserStorage()?.getItem(KEY) ?? "null") as Partial<Daily> | null;
@@ -58,8 +64,13 @@ export function DailyLineCard({ onOpened }: { onOpened?: () => void }) {
     <section data-testid="daily-line" aria-label="오늘의 도리 한마디" className="mb-4 rounded-2xl border border-brand-200 bg-white/90 px-4 py-3.5 shadow-sm">
       {daily ? (
         <div role="status">
-          <p className="text-xs font-bold text-brand-600">🦦 오늘의 도리 한마디 · 오늘 일진 {daily.ganzhi}</p>
-          <p data-testid="daily-line-text" className="mt-1.5 text-[14px] leading-relaxed text-gray-900">{daily.line}</p>
+          <p className="text-xs font-bold text-brand-600">🦦 오늘의 도리 한마디</p>
+          <div data-testid="daily-ganzhi" className="mt-2 flex items-center gap-3 rounded-2xl border border-brand-200 bg-gradient-to-r from-brand-50 via-white to-amber-50 px-4 py-2.5">
+            <span className="shrink-0 rounded-full bg-brand-500 px-2.5 py-1 text-[11px] font-black tracking-wide text-white">오늘 일진</span>
+            <span className="font-serifKr text-3xl font-black leading-none text-brand-700 sm:text-4xl">{ganzhiParts(daily.ganzhi).hanja}</span>
+            <span className="font-serifKr text-lg font-extrabold text-amber-600">{ganzhiParts(daily.ganzhi).hangul}</span>
+          </div>
+          <p data-testid="daily-line-text" className="mt-3 text-[15px] font-semibold leading-relaxed text-gray-900">{daily.line}</p>
           <p className="mt-2 text-xs font-semibold text-sky-700">{daily.tip}</p>
           <a href="#machines" className="mt-2.5 inline-block rounded-full bg-brand-500 px-3.5 py-1.5 text-xs font-bold text-white">더 궁금하면 쪽지 뽑으러 가기</a>
         </div>
