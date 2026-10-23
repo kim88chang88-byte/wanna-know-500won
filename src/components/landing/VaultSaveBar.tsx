@@ -13,7 +13,7 @@ export interface VaultSnapshotInput {
   kkotgeoji: string | null;
   reason: string | null;
   story?: string | null;
-  folds?: Record<string, string> | null;
+  folds?: object | null;
   note: string | null;
 }
 
