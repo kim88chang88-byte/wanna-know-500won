@@ -91,6 +91,7 @@ export default function StoryReport({
   reading,
   intro,
   closing,
+  lastWord,
 }: {
   report: PremiumReportView;
   reading: StoryReading | null;
@@ -98,6 +99,8 @@ export default function StoryReport({
   intro: string | null;
   /** 도리의 쪽지 안에 넣을 '이어 묻기' 칩 */
   closing?: ReactNode;
+  /** 접이식 맨 아래 "마지막 한마디"에 넣을 내용 (한 줄 결론 + 해시태그 + 행운 컬러) */
+  lastWord?: ReactNode;
 }) {
   const t = report.topic;
   const concern = report.concern;
@@ -228,6 +231,11 @@ export default function StoryReport({
         <Fold testId="story-fold-chart" label="내 사주 원국" title="오행 분포와 신강·신약도 자세히 볼래요">
           <ManseReport report={report} hideHeadline parts="base" />
         </Fold>
+        {lastWord && (
+          <Fold testId="story-fold-last" label="마지막 한마디" title="도리가 마지막으로 전하는 말이에요" defaultOpen>
+            {lastWord}
+          </Fold>
+        )}
       </section>
 
       {/* 4) 도리의 쪽지 */}

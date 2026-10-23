@@ -498,7 +498,7 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
           {premiumReport ? (
             <>
               {/* 1) 한 줄 결론(카드 틀 없이 글자로) */}
-              <ResultHero report={premiumReport} aiQuote={reading?.kkotgeoji ?? null} luxe={luxe} />
+              {!storyMode && <ResultHero report={premiumReport} aiQuote={reading?.kkotgeoji ?? null} luxe={luxe} />}
 
               {loggedIn && (
                 <VaultSaveBar
@@ -526,6 +526,7 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
                       report={premiumReport}
                       reading={reading}
                       intro={null}
+                      lastWord={<ResultHero report={premiumReport} aiQuote={reading?.kkotgeoji ?? null} luxe={false} />}
                       closing={askInput ? <AskChips input={askInput} luxe={false} /> : undefined}
                     />
                   </div>
