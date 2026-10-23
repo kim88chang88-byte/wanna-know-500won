@@ -446,14 +446,21 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
   const luxe = target.premium === true && phase === "result";
   const storyMode = !luxe && premiumReport ? isStoryReport(premiumReport) : false;
   const resultTitle = phase === "result" && chart && premiumReport && (
-    <div data-testid="result-title" className="mb-4 text-center">
-      <h3 id="intake-title" className={`font-cute text-[24px] sm:text-[27px] font-normal leading-tight break-keep ${luxe ? "text-[#fbf3de]" : "text-brand-700"}`}>
+    <div
+      data-testid="result-title"
+      className={`mb-4 rounded-2xl px-4 py-4 text-center ${luxe ? "border border-[#e6c887]/50 bg-gradient-to-b from-[#e6c887]/15 to-transparent" : "border-2 border-brand-300 bg-gradient-to-br from-brand-50 via-white to-amber-50 shadow-[0_6px_20px_rgba(128,87,224,0.12)]"}`}
+    >
+      <h3 id="intake-title" className={`font-cute text-[25px] sm:text-[28px] font-normal leading-tight break-keep ${luxe ? "text-[#fbf3de]" : "text-brand-700"}`}>
         {nickname?.trim() ? `${nickname.trim()}님의 사주 해설` : "나의 사주 해설"}
       </h3>
       {askInput && (
-        <p data-testid="result-title-birth" className={`mt-1.5 text-[13px] font-semibold ${luxe ? "text-[#e6c887]" : "text-gray-600"}`}>{birthSummary(askInput)}</p>
+        <p
+          data-testid="result-title-birth"
+          className={`mx-auto mt-2.5 inline-block rounded-full px-3.5 py-1 text-[14px] font-bold tracking-tight ${luxe ? "border border-[#e6c887]/50 text-[#f6dfa8]" : "bg-white text-brand-700 ring-1 ring-brand-200"}`}
+        >
+          {birthSummary(askInput)}
+        </p>
       )}
-      <div aria-hidden="true" className={`mx-auto mt-3 h-px w-16 ${luxe ? "bg-gradient-to-r from-transparent via-[#e6c887]/70 to-transparent" : "bg-gradient-to-r from-transparent via-brand-300 to-transparent"}`} />
     </div>
   );
   const header = (
