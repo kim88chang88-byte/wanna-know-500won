@@ -32,6 +32,7 @@ import { chipsForFortune, MAX_CONCERN_TAGS, MAX_CONCERN_TEXT, type Concern, type
 import { MACHINES } from "./data";
 import { IMAGES } from "./images";
 import LoadingBar from "./LoadingBar";
+import { ReadingCard } from "./ReadingCard";
 import { VaultSaveBar } from "./VaultSaveBar";
 import { BIRTH_PLACES } from "@/lib/saju/birthPlace";
 import { profileSummary, profileToForm, sameBirth, type SavedProfile } from "@/lib/profile";
@@ -474,7 +475,7 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
               {loggedIn && (
                 <VaultSaveBar
                   autoSave={saveVault}
-                  snapshot={{ topic: target.fortune, premium: target.premium === true, report: premiumReport, kkotgeoji: reading?.kkotgeoji ?? null, reason: reading?.reason ?? null, note: birthNote }}
+                  snapshot={{ topic: target.fortune, premium: target.premium === true, report: premiumReport, reading, kkotgeoji: reading?.kkotgeoji ?? null, reason: reading?.reason ?? null, note: birthNote }}
                 />
               )}
 
@@ -488,12 +489,7 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
                 </p>
               )}
 
-              {reading?.reason && (
-                <div data-testid="reading-reason" className="mt-4 p-4 rounded-2xl bg-white border border-brand-100 text-sm text-gray-800 leading-relaxed">
-                  <p className="text-xs font-semibold text-brand-700 mb-1">🔎 도리가 본 이유</p>
-                  {reading.reason}
-                </div>
-              )}
+              {reading && <ReadingCard reading={reading} />}
 
               {askInput && <AskChips input={askInput} />}
 

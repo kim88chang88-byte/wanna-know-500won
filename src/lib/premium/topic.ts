@@ -1,4 +1,5 @@
 import { josa } from "./josa";
+import { realityCheck, type RealityKind } from "./book/reality";
 import type { SajuResult } from "ssaju";
 import type { ElementView, ReportLevel, TopicInsight, TopicKey } from "./types";
 
@@ -7,6 +8,9 @@ import type { ElementView, ReportLevel, TopicInsight, TopicKey } from "./types";
  * 쉬운 말로 풀어줘요. AI 호출 없이 항상 같은 입력이면 같은 결과가 나와요.
  * 해석은 명리학의 일반적인 관점일 뿐이고, 재미와 참고용이에요. (단정하거나 겁주는 표현은 쓰지 않아요)
  */
+
+/** 주제 → 현실 비교 문구 종류 */
+const REALITY_KIND: Record<TopicKey, RealityKind> = { love: "love", marriage: "love", money: "money", success: "career", health: "health", study: "study", general: "flow" };
 
 export const TOPIC_META: Record<TopicKey, { label: string; emoji: string }> = {
   love: { label: "연애운", emoji: "💘" },
@@ -340,6 +344,7 @@ export function buildTopicInsight(topic: TopicKey, r: SajuResult, ctx: TopicCont
     timing,
     tags,
     quote: QUOTES[topic][dominant],
+    reality: realityCheck(REALITY_KIND[topic]),
     lucky: { element: lowest.name, color: lucky.color, hex: lucky.hex, direction: lucky.direction },
   };
 }

@@ -3,6 +3,8 @@ import { takeAiBudget } from "@/lib/ai/budget";
 import { buildCoreFacts } from "@/lib/ai/coreFacts";
 import { kstToday } from "@/lib/ai/dailyFacts";
 import { interpretSaju, ReadingUnavailableError } from "@/lib/ai/interpret";
+import { hasEntitlement, ENTITLEMENT_COOKIE } from "@/lib/premium/entitlement";
+import { isPremiumLocked } from "@/lib/premium/config";
 import { normalizeTopic, toPublicReading, type PublicReading } from "@/lib/ai/reading";
 import { hasConcern, parseConcern } from "@/lib/concerns";
 import { ageBand } from "@/lib/profile";
@@ -114,7 +116,10 @@ export async function POST(request: Request) {
     const now = new Date();
     const extra = { today: kstToday(now), core: buildCoreFacts(input, now) };
     const full = await interpretSaju(chart, { topic: normalizeTopic(rawTopic), gender: input.gender, concern, extra });
-    reading = toPublicReading(full, "free");
+    // 세 지표의 풀이 문장은 베타(잠금 꺼짐)에서는 열어 두고, 결제를 연 뒤(PREMIUM_LOCK)에는 이용권이 있는 요청에만 열어요.
+    const cookieHeader = request.headers.get("cookie");
+    const entitled = hasEntitlement(readCookie(cookieHeader, ENTITLEMENT_COOKIE), process.env.AUTH_SECRET, session?.sub ?? null);
+    reading = toPublicReading(full, "free", !isPremiumLocked(process.env) || entitled);
   } catch (err) {
     if (err instanceof ReadingUnavailableError) {
       readingStatus = "unavailable";

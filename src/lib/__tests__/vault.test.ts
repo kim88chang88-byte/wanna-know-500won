@@ -35,6 +35,21 @@ describe("내 보관함 입력 검사", () => {
     expect(parseVaultBody({ report: { pillars: [] } }, NOW)).toBeNull();
     expect(parseVaultBody({ report: { ...report, book: ["x".repeat(MAX_VAULT_BYTES)] } }, NOW)).toBeNull();
   });
+  it("도리의 풀이 카드를 간추려 저장하고, 모양이 이상하면 null", () => {
+    const reading = {
+      keyword: "설렘 충전",
+      total: { score: 4, summary: "총운 요약이야" },
+      indicators: [
+        { key: "love", label: "연애운", score: 5, comment: "연애 풀이 문장", locked: false },
+        { key: "money", label: "금전운", score: 3, comment: null, locked: true },
+      ],
+    };
+    const p = parseVaultBody({ topic: "x", report, reading }, NOW);
+    expect(p?.snapshot.card?.keyword).toBe("설렘 충전");
+    expect(p?.snapshot.card?.indicators.length).toBe(1); // 잠긴(문장 없는) 지표는 뺀다
+    expect(parseVaultBody({ topic: "x", report, reading: { keyword: "a" } }, NOW)?.snapshot.card).toBeNull();
+    expect(parseVaultBody({ topic: "x", report }, NOW)?.snapshot.card).toBeNull();
+  });
   it("보관함에서 꺼낸 값 확인", () => {
     expect(asSnapshot({ v: 1, report })).toBeTruthy();
     expect(asSnapshot({ v: 2, report })).toBeNull();

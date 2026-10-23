@@ -54,6 +54,8 @@ export interface TopicInsight {
   tags: string[];
   /** 포토카드 한 줄 문구 */
   quote: string;
+  /** '사주 vs 지금 내 현실' 3갈래 (주제에 맞는 한 가지) */
+  reality?: RealityCheck;
   /** 부족한 오행을 채우는 행운 요소 (전통 오행 대응) */
   lucky: { element: string; color: string; hex: string; direction: string };
 }

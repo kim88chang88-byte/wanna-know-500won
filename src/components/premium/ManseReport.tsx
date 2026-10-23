@@ -1,4 +1,5 @@
 import type { ElementKind, PremiumReportView } from "@/lib/premium/types";
+import { RealityLight } from "./RealityLight";
 import CompatCard from "./CompatCard";
 import ConcernCard from "./ConcernCard";
 import PremiumBook from "./PremiumBook";
@@ -40,6 +41,7 @@ export default function ManseReport({ report }: { report: PremiumReportView }) {
             </li>
           ))}
         </ul>
+        {report.topic.reality && <RealityLight rc={report.topic.reality} />}
         {report.topic.timing.length > 0 && (
           <div data-testid="topic-timing" className="mt-4">
             <div className="text-xs font-bold text-brand-600 mb-2">올해와 지금의 흐름</div>

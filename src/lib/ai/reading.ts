@@ -166,11 +166,11 @@ export interface PublicReading {
  * 무료: 키워드 + 총운 + 도리 한마디 + 세 지표의 점수. 세 지표의 풀이 문장은 서버에서 빼고 보내요.
  * (CSS 블러로만 가리면 개발자 도구로 그대로 보이기 때문에, 잠긴 내용은 응답에 아예 넣지 않습니다.)
  */
-export function toPublicReading(r: Reading, tier: ReadingTier = "free"): PublicReading {
+export function toPublicReading(r: Reading, tier: ReadingTier = "free", open = false): PublicReading {
   const indicators: PublicIndicator[] = [
-    { key: "love", label: "연애운", score: r.love.score, comment: null, locked: true },
-    { key: "money", label: "금전운", score: r.money.score, comment: null, locked: true },
-    { key: "mind", label: "마음운", score: r.mind.score, comment: null, locked: true },
+    { key: "love", label: "연애운", score: r.love.score, comment: open ? r.love.comment : null, locked: !open },
+    { key: "money", label: "금전운", score: r.money.score, comment: open ? r.money.comment : null, locked: !open },
+    { key: "mind", label: "마음운", score: r.mind.score, comment: open ? r.mind.comment : null, locked: !open },
   ];
   return { tier, keyword: r.keyword, total: r.total, kkotgeoji: r.kkotgeoji, ...(r.reason ? { reason: r.reason } : {}), indicators };
 }

@@ -10,11 +10,20 @@ import { normalizeTopic, TOPIC_LABEL } from "@/lib/ai/reading";
 export const MAX_VAULT_ITEMS = 300;
 export const MAX_VAULT_BYTES = 700_000;
 
+export interface VaultCard {
+  keyword: string;
+  score: number;
+  summary: string;
+  indicators: Array<{ label: string; score: number; comment: string }>;
+}
+
 export interface VaultSnapshot {
   v: 1;
   topic: string;
   premium: boolean;
   report: PremiumReportView;
+  /** 도리의 풀이 카드(키워드·총운·세 지표). 없으면 null */
+  card: VaultCard | null;
   /** 도리 한마디/이유 (없으면 null) */
   kkotgeoji: string | null;
   reason: string | null;
@@ -32,17 +41,35 @@ export interface ParsedVault {
 const isRecord = (v: unknown): v is Record<string, unknown> => typeof v === "object" && v !== null && !Array.isArray(v);
 const text = (v: unknown, max: number): string | null => (typeof v === "string" && v.trim() ? v.replace(/[\u0000-\u001f\u007f]+/g, " ").trim().slice(0, max) : null);
 
+const stars = (v: unknown): number | null => (typeof v === "number" && Number.isInteger(v) && v >= 1 && v <= 5 ? v : null);
+
+/** 화면에 보였던 도리의 풀이 카드를 저장용으로 간추려요. 모양이 이상하면 null. */
+function parseCard(raw: unknown): VaultCard | null {
+  if (!isRecord(raw) || !isRecord(raw.total)) return null;
+  const keyword = text(raw.keyword, 40);
+  const summary = text(raw.total.summary, 300);
+  const score = stars(raw.total.score);
+  if (!keyword || !summary || score === null) return null;
+  const indicators = (Array.isArray(raw.indicators) ? raw.indicators : [])
+    .map((i) => (isRecord(i) && stars(i.score) !== null && text(i.label, 20) && text(i.comment, 300) ? { label: text(i.label, 20)!, score: stars(i.score)!, comment: text(i.comment, 300)! } : null))
+    .filter((i): i is NonNullable<typeof i> => i !== null)
+    .slice(0, 3);
+  return { keyword, score, summary, indicators };
+}
+
 /** 요청 본문을 검사해 저장할 모양으로 바꿔요. 이상하면 null. (본인 보관함에만 들어가는 값이라 모양만 확인해요) */
 export function parseVaultBody(raw: unknown, now: Date = new Date()): ParsedVault | null {
   if (!isRecord(raw) || !isRecord(raw.report)) return null;
   const r = raw.report;
   if (!Array.isArray(r.pillars) || r.pillars.length !== 4 || !isRecord(r.strength) || !isRecord(r.topic) || !Array.isArray(r.elements)) return null;
   const topic = normalizeTopic(raw.topic);
+  const card = parseCard(raw.reading);
   const snapshot: VaultSnapshot = {
     v: 1,
     topic,
     premium: raw.premium === true,
     report: r as unknown as PremiumReportView,
+    card,
     kkotgeoji: text(raw.kkotgeoji, 300),
     reason: text(raw.reason, 400),
     note: text(raw.note, 400),

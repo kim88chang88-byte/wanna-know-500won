@@ -8,6 +8,8 @@ export interface VaultSnapshotInput {
   topic: string;
   premium: boolean;
   report: PremiumReportView;
+  /** 도리의 풀이 카드(AI 풀이 전체). 없으면 null */
+  reading?: unknown;
   kkotgeoji: string | null;
   reason: string | null;
   note: string | null;

@@ -90,6 +90,14 @@ describe("toPublicReading (무료 공개 범위)", () => {
   });
 });
 
+describe("toPublicReading (열어 두는 경우: 베타 또는 이용권)", () => {
+  it("open 이면 세 지표의 풀이 문장도 내려보낸다", () => {
+    const pub = toPublicReading(parseReading(good)!, "free", true);
+    expect(pub.indicators.every((i) => !i.locked && typeof i.comment === "string")).toBe(true);
+    expect(pub.indicators[0].comment).toBe(good.love.comment);
+  });
+});
+
 describe("뻔한 풀이 걸러내기", () => {
   it("도리 한마디가 너무 짧거나 뻔한 말뿐이면 null", () => {
     expect(parseReading({ ...good, kkotgeoji: "힘내!" })).toBeNull();

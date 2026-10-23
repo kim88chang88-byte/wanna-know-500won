@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import ManseReport from "@/components/premium/ManseReport";
 import PhotoCard from "@/components/landing/PhotoCard";
+import { ReadingCard } from "@/components/landing/ReadingCard";
 import type { VaultSnapshot } from "@/lib/vault";
 
 interface Row {
@@ -92,7 +93,17 @@ export default function VaultApp() {
           <PhotoCard report={s.report} aiQuote={s.kkotgeoji} />
         </div>
         {s.note && <p className="mt-4 p-3 rounded-2xl bg-brand-50 border border-brand-100 text-xs text-gray-700 leading-relaxed">{s.note}</p>}
-        {s.reason && (
+        {s.card && (
+          <ReadingCard
+            reading={{
+              keyword: s.card.keyword,
+              total: { score: s.card.score, summary: s.card.summary },
+              indicators: s.card.indicators.map((i, k) => ({ key: (["love", "money", "mind"] as const)[k] ?? "mind", label: i.label, score: i.score, comment: i.comment, locked: false })),
+              reason: s.reason ?? undefined,
+            }}
+          />
+        )}
+        {!s.card && s.reason && (
           <div className="mt-4 p-4 rounded-2xl bg-white border border-brand-100 text-sm text-gray-800 leading-relaxed">
             <p className="text-xs font-semibold text-brand-700 mb-1">🔎 도리가 본 이유</p>
             {s.reason}
