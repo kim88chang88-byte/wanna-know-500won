@@ -130,7 +130,7 @@ export async function POST(request: Request) {
     const cookieHeader = request.headers.get("cookie");
     const entitled = hasEntitlement(readCookie(cookieHeader, ENTITLEMENT_COOKIE), process.env.AUTH_SECRET, session?.sub ?? null);
     reading = toPublicReading(full, "free", !isPremiumLocked(process.env) || entitled);
-    if (detail) reading = { ...reading, story: detail.story, folds: detail.folds };
+    if (detail) reading = { ...reading, ...(detail.story ? { story: detail.story } : {}), folds: detail.folds };
   } catch (err) {
     if (err instanceof ReadingUnavailableError) {
       readingStatus = "unavailable";

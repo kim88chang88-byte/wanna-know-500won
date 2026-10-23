@@ -18,8 +18,13 @@ describe("parseDetail", () => {
     expect(d?.folds.lack).toBeUndefined();
     expect(d?.folds.elements).toBe(fold.trim());
   });
-  it("요약 문단이 짧으면 버린다", () => {
-    expect(parseDetail({ ...ok, story: "너무 짧아요" })).toBe(null);
+  it("요약 문단이 짧으면 문단만 비우고 접이식 글은 살린다", () => {
+    const d = parseDetail({ ...ok, story: "너무 짧아요" });
+    expect(d?.story).toBe("");
+    expect(d?.folds.self).toBe(fold.trim());
+  });
+  it("전부 쓸 수 없으면 버린다", () => {
+    expect(parseDetail({ story: "짧음" })).toBe(null);
   });
   it("금지 표현이 있으면 버린다", () => {
     expect(parseDetail({ ...ok, improve: fold + " 큰 재앙이 올 수 있어" })).toBe(null);

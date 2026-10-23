@@ -14,7 +14,7 @@ export interface Detail {
 }
 
 const MAX = { story: 900, fold: 650 } as const;
-const MIN = { story: 300, fold: 120 } as const;
+const MIN = { story: 200, fold: 100 } as const;
 
 const KEYS = ["elements", "self", "praise", "lack", "improve", "lucky"] as const;
 
@@ -22,13 +22,13 @@ const KEYS = ["elements", "self", "praise", "lack", "improve", "lucky"] as const
 export const DETAIL_SCHEMA = {
   type: "object",
   properties: {
-    elements: { type: "string", description: `'오행으로 보는 사주'. 오행 분포(많은·적은 기운)와 일간을 쉬운 비유로 풀어 사주의 큰 그림을 열어 주는 글. 220~350자, 내용이 바뀌는 곳에서 빈 줄(\\n\\n)로 2~3문단. ${MAX.fold}자 이내` },
-    self: { type: "string", description: `'나는 어떤 사람인가?'. 성격·행동 습관·마음 쓰는 방식을 팩트처럼 짚어서 "아, 나 이런 사람이구나" 하고 스스로를 돌아보게 하는 글. 220~350자, 내용이 바뀌는 곳에서 빈 줄(\\n\\n)로 2~3문단. ${MAX.fold}자 이내` },
-    praise: { type: "string", description: `'이건 정말 칭찬해요'. 이 사주의 진짜 강점·재능을 구체적인 장면으로 크게 칭찬하는 글. 220~350자, 내용이 바뀌는 곳에서 빈 줄(\\n\\n)로 2~3문단. ${MAX.fold}자 이내` },
-    lack: { type: "string", description: `'그렇지만 이건 조금 부족해요'. 부족하거나 치우친 부분을 솔직하게 한 번 짚되, 비난이 아니라 "채울 여지가 있는 부분"으로. 220~350자, 내용이 바뀌는 곳에서 빈 줄(\\n\\n)로 2~3문단. ${MAX.fold}자 이내` },
-    improve: { type: "string", description: `'이렇게 개선해보아요'. 앞의 아쉬운 점을 채우는 구체적이고 작은 행동 2~3가지를 이야기로 이어서. 220~350자, 내용이 바뀌는 곳에서 빈 줄(\\n\\n)로 2~3문단. ${MAX.fold}자 이내` },
-    lucky: { type: "string", description: `'행운 처방'. 필요한 오행 기운을 채우는 생활 습관을 이야기로. 구체적인 색·방향 이름은 쓰지 말기. 180~300자, 2문단. ${MAX.fold}자 이내` },
-    story: { type: "string", description: `'요약하자면'. 위 여섯 글(오행→나→칭찬→아쉬움→개선→행운)의 핵심을 한 줄기로 녹인 문단 하나. 450~700자, 내용이 바뀌는 곳에서 빈 줄(\\n\\n)로 3~4문단, 제목 없이. ${MAX.story}자 이내` },
+    elements: { type: "string", description: `'오행으로 보는 사주'. 오행 분포(많은·적은 기운)와 일간을 쉬운 비유로 풀어 사주의 큰 그림을 열어 주는 글. 180~290자, 내용이 바뀌는 곳에서 빈 줄(\\n\\n)로 2~3문단. ${MAX.fold}자 이내` },
+    self: { type: "string", description: `'나는 어떤 사람인가?'. 성격·행동 습관·마음 쓰는 방식을 팩트처럼 짚어서 "아, 나 이런 사람이구나" 하고 스스로를 돌아보게 하는 글. 180~290자, 내용이 바뀌는 곳에서 빈 줄(\\n\\n)로 2~3문단. ${MAX.fold}자 이내` },
+    praise: { type: "string", description: `'이건 정말 칭찬해요'. 이 사주의 진짜 강점·재능을 구체적인 장면으로 크게 칭찬하는 글. 180~290자, 내용이 바뀌는 곳에서 빈 줄(\\n\\n)로 2~3문단. ${MAX.fold}자 이내` },
+    lack: { type: "string", description: `'그렇지만 이건 조금 부족해요'. 부족하거나 치우친 부분을 솔직하게 한 번 짚되, 비난이 아니라 "채울 여지가 있는 부분"으로. 180~290자, 내용이 바뀌는 곳에서 빈 줄(\\n\\n)로 2~3문단. ${MAX.fold}자 이내` },
+    improve: { type: "string", description: `'이렇게 개선해보아요'. 앞의 아쉬운 점을 채우는 구체적이고 작은 행동 2~3가지를 이야기로 이어서. 180~290자, 내용이 바뀌는 곳에서 빈 줄(\\n\\n)로 2~3문단. ${MAX.fold}자 이내` },
+    lucky: { type: "string", description: `'행운 처방'. 필요한 오행 기운을 채우는 생활 습관을 이야기로. 구체적인 색·방향 이름은 쓰지 말기. 150~230자, 2문단. ${MAX.fold}자 이내` },
+    story: { type: "string", description: `'요약하자면'. 위 여섯 글(오행→나→칭찬→아쉬움→개선→행운)의 핵심을 한 줄기로 녹인 문단 하나. 400~600자, 내용이 바뀌는 곳에서 빈 줄(\\n\\n)로 3~4문단, 제목 없이. ${MAX.story}자 이내` },
   },
   required: ["elements", "self", "praise", "lack", "improve", "lucky", "story"],
   additionalProperties: false,
@@ -58,8 +58,8 @@ export const DETAIL_SYSTEM_PROMPT = `너는 "도리"야. 오늘의 운을 쪽지
 4) lack 그렇지만 이건 조금 부족해요: 치우친 기운 때문에 생기기 쉬운 아쉬운 습관 한두 가지를 솔직하게 짚어. 도리가 친구로서 하는 일침처럼 또렷하되 따뜻하게, "그래도 채울 수 있어"로 끝내.
 5) improve 이렇게 개선해보아요: 4번을 채우는 오늘·이번 주 할 수 있는 작은 행동 2~3가지. 주제(고민)와 연결해.
 6) lucky 행운 처방: 필요한 오행 기운을 채우는 생활 습관(색·방향 이름은 쓰지 마).
-7) story 요약하자면: 마지막에 쓰는 글이야. 위 여섯 글을 이미 쓴 상태에서, 오행 큰 그림 → 나의 모습 → 칭찬 → 아쉬움 → 개선 → 응원이 3~4문단(문단마다 2~3문장)에 매끄럽게 녹아든 요약을 써줘. 450~700자. 문장을 그대로 복사하지 말고 다시 풀어서.
-- 길이: 1~5번은 각 220~350자, 6번 180~300자.
+7) story 요약하자면: 마지막에 쓰는 글이야. 위 여섯 글을 이미 쓴 상태에서, 오행 큰 그림 → 나의 모습 → 칭찬 → 아쉬움 → 개선 → 응원이 3~4문단(문단마다 2~3문장)에 매끄럽게 녹아든 요약을 써줘. 400~600자. 문장을 그대로 복사하지 말고 다시 풀어서.
+- 길이: 1~5번은 각 180~290자, 6번 150~230자.
 
 반드시 지정된 JSON 형식으로만 답해.`;
 
@@ -73,13 +73,13 @@ function clean(v: unknown, max: number, min: number): string | null {
 export function parseDetail(value: unknown): Detail | null {
   if (typeof value !== "object" || value === null) return null;
   const o = value as Record<string, unknown>;
-  const story = clean(o.story, MAX.story, MIN.story);
-  if (!story) return null;
+  const story = clean(o.story, MAX.story, MIN.story) ?? "";
   const folds: DetailFolds = {};
   for (const k of KEYS) {
     const t = clean(o[k], MAX.fold, MIN.fold);
     if (t) folds[k] = t;
   }
+  if (!story && Object.keys(folds).length === 0) return null;
   const all = [story, ...Object.values(folds)].join(" ");
   return containsForbidden(all) ? null : { story, folds };
 }
@@ -107,8 +107,8 @@ export function interpretDetail(chart: SajuChart, o: { topic: ReadingTopic; gend
     user: buildDetailMessage(chart, o.topic, o.gender, o.concern, o.extra ?? {}),
     schema: DETAIL_SCHEMA,
     parse: parseDetail,
-    maxTokens: 5500,
-    timeoutMs: 52_000,
+    maxTokens: 8000,
+    timeoutMs: 55_000,
     attempts: 1,
     apiKey: o.apiKey,
     model: o.model,
