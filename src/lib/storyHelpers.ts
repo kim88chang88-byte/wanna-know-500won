@@ -20,3 +20,39 @@ export function firstSentence(s: string): string {
   return (m ? m[0] : s).trim();
 }
 
+
+/**
+ * 긴 글을 문단으로 나눠요. AI 가 빈 줄(\n\n)로 나눠 줬으면 그대로 쓰고,
+ * 한 덩어리로 왔으면 문장 2~3개씩 묶어서 읽기 편하게 끊어요.
+ */
+export function toParagraphs(text: string): string[] {
+  const t = text.replace(/\r/g, "").trim();
+  if (!t) return [];
+  const given = t.split(/\n{2,}/).map((x) => x.replace(/\s*\n\s*/g, " ").trim()).filter(Boolean);
+  if (given.length > 1 || t.length <= 130) return given;
+  const sentences = t.match(/[^.!?…~]+[.!?…~]+(?:\s*[\u{1F300}-\u{1FAFF}\u2600-\u27BF\uFE0F]+)?|[^.!?…~]+$/gu)?.map((x) => x.trim()).filter(Boolean) ?? [t];
+  const out: string[] = [];
+  let cur: string[] = [];
+  let len = 0;
+  for (const sen of sentences) {
+    cur.push(sen);
+    len += sen.length;
+    if (cur.length >= 3 || len >= 110) {
+      out.push(cur.join(" "));
+      cur = [];
+      len = 0;
+    }
+  }
+  if (cur.length) {
+    if (out.length > 0 && cur.join(" ").length < 40) out[out.length - 1] += " " + cur.join(" ");
+    else out.push(cur.join(" "));
+  }
+  return out;
+}
+
+/** 받침 있으면 "이에요", 없으면 "예요" */
+export function iyeyo(word: string): string {
+  const c = word.trim().slice(-1).charCodeAt(0);
+  const batchim = c >= 0xac00 && c <= 0xd7a3 && (c - 0xac00) % 28 !== 0;
+  return batchim ? "이에요" : "예요";
+}

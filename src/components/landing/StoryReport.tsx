@@ -6,7 +6,7 @@ import { RealityLight } from "@/components/premium/RealityLight";
 import type { PremiumReportView } from "@/lib/premium/types";
 import { BRANCHES, STEMS, type Element } from "@/lib/saju/constants";
 import { Stars } from "./ReadingCard";
-import { firstSentence } from "@/lib/storyHelpers";
+import { firstSentence, iyeyo, toParagraphs } from "@/lib/storyHelpers";
 
 
 /*
@@ -71,6 +71,17 @@ function Pillars({ report }: { report: PremiumReportView }) {
   );
 }
 
+/** 긴 글을 문단으로 나눠 보여줘요. (내용이 바뀌는 곳마다 한 줄 띄움) */
+function Paras({ text, className = "" }: { text: string; className?: string }) {
+  return (
+    <div className={`space-y-3.5 ${className}`}>
+      {toParagraphs(text).map((p, i) => (
+        <p key={i}>{p}</p>
+      ))}
+    </div>
+  );
+}
+
 function Fold({ label, title, children, testId, defaultOpen = false }: { label: string; title: string; children: ReactNode; testId?: string; defaultOpen?: boolean }) {
   return (
     <details data-testid={testId ?? "story-fold"} open={defaultOpen} className="group border-t border-brand-100 first:border-t-0">
@@ -127,6 +138,7 @@ export default function StoryReport({
             <p className="mt-0.5 text-sm leading-relaxed text-gray-800">{concernText}</p>
           </div>
         )}
+        <p className="mt-3.5 text-[11px] font-bold text-gray-500">나의 사주 네 기둥</p>
         <Pillars report={report} />
         {report.hourUnknown && <p className="mt-2 text-[11px] leading-relaxed text-amber-700">태어난 시간을 몰라 정오(12시) 기준으로 계산했어요. 시주는 비워 뒀어요.</p>}
       </section>
@@ -143,7 +155,7 @@ export default function StoryReport({
               </span>
             )}
           </div>
-          <p className="mt-2.5 whitespace-pre-line text-[14.5px] leading-[1.9] text-gray-800 break-keep">{summary}</p>
+          <Paras text={summary} className="mt-3 text-[14.5px] leading-[1.9] text-gray-800 break-keep" />
         </section>
       )}
 
@@ -161,27 +173,27 @@ export default function StoryReport({
                     </span>
                   ))}
                 </p>
-                {f.elements}
+                <Paras text={f.elements} />
               </Fold>
             )}
             {f.self && (
               <Fold testId="story-fold-self" label="STEP 2" title="나는 어떤 사람인가?">
-                {f.self}
+                <Paras text={f.self} />
               </Fold>
             )}
             {f.praise && (
               <Fold testId="story-fold-praise" label="STEP 3" title="이건 정말 칭찬해요 👏">
-                {f.praise}
+                <Paras text={f.praise} />
               </Fold>
             )}
             {f.lack && (
               <Fold testId="story-fold-lack" label="STEP 4" title="그렇지만 이건 조금 부족해요">
-                {f.lack}
+                <Paras text={f.lack} />
               </Fold>
             )}
             {(f.improve || t.reality || (concern && concern.answers.length > 1)) && (
               <Fold testId="story-fold-improve" label="STEP 5" title="이렇게 개선해보아요 🌱">
-                {f.improve && <p>{f.improve}</p>}
+                {f.improve && <Paras text={f.improve} />}
                 {t.reality && <RealityLight rc={t.reality} />}
                 {concern && concern.answers.length > 1 && (
                   <ul className="mt-3 space-y-2.5">
@@ -210,15 +222,15 @@ export default function StoryReport({
             )}
           </>
         )}
-        <Fold testId="story-fold-lucky" label="행운 처방" title={`${t.lucky.color}과 ${t.lucky.direction} 쪽이 오늘의 행운 포인트예요`}>
-          {f.lucky && <p className="mb-3">{f.lucky}</p>}
+        <Fold testId="story-fold-lucky" label="행운 처방" title={`행운 컬러는 ${t.lucky.color}, 방향은 ${t.lucky.direction}${iyeyo(t.lucky.direction)}`}>
+          {f.lucky && <Paras text={f.lucky} className="mb-3.5" />}
           <p className="flex items-center gap-2">
             <span aria-hidden="true" className="h-4 w-4 shrink-0 rounded-full border border-black/10" style={{ backgroundColor: t.lucky.hex }} />
             행운 컬러 <b className="text-gray-900">{t.lucky.color}</b> · 행운 방향 <b className="text-gray-900">{t.lucky.direction}</b>
           </p>
           {!f.lucky && <p className="mt-1 text-[13px] text-gray-500">비어 있는 {t.lucky.element} 기운을 가볍게 채워 주는 전통 오행 대응이에요. 소품이나 옷 색으로 기분 전환하듯 써 보세요.</p>}
         </Fold>
-        <Fold testId="story-fold-chart" label="내 사주 원국" title="오행 분포와 신강·신약도 자세히 볼래요">
+        <Fold testId="story-fold-chart" label="내 사주 원국" title="십성·오행 분포·신강신약을 표로 자세히 볼래요">
           <ManseReport report={report} hideHeadline parts="base" />
         </Fold>
         {lastWord && (
@@ -231,8 +243,8 @@ export default function StoryReport({
       {/* 4) 도리의 쪽지 */}
       <section data-testid="story-note" aria-label="도리의 쪽지" className="relative rounded-2xl border border-amber-200 bg-[#fff9e6] p-4 shadow-sm">
         <span aria-hidden="true" className="absolute -top-2.5 left-6 h-4 w-16 -rotate-2 rounded-sm bg-amber-200/80" />
-        <p className="text-[11px] font-bold text-amber-700">🦦 도리가 남긴 쪽지</p>
-        <p className="mt-1 text-[14.5px] font-bold leading-relaxed text-gray-900">다 읽었어? 마음에 걸린 부분 있었어? 편하게 물어봐 🫧</p>
+        <p className="text-[11px] font-bold text-amber-700">🦦 도리의 쪽지 · 더 물어보기</p>
+        <p className="mt-1 text-[14.5px] font-bold leading-relaxed text-gray-900">읽다가 더 궁금한 게 생겼어? 도리한테 편하게 물어봐 🫧</p>
         {closing}
       </section>
     </div>

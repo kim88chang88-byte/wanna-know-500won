@@ -11,6 +11,8 @@ interface Props {
   report: PremiumReportView;
   /** AI 풀이가 있으면 도리의 한마디를 카드에 넣어요 */
   aiQuote?: string | null;
+  /** 행운 컬러·방향 알약을 숨겨요 (같은 내용이 행운 처방에 따로 있을 때) */
+  hideLucky?: boolean;
 }
 
 const FONT_LOAD_TIMEOUT_MS = 1500;
@@ -176,7 +178,7 @@ export default function PhotoCard({ report, aiQuote, luxe = false }: Props) {
 }
 
 /** 풀이 맨 위에 보이는 한 줄 결론. 카드 틀 없이 글자 그대로 크게 보여줘요. (예전 포토카드에 들어가던 글을 그대로 살렸어요) */
-export function ResultHero({ report, aiQuote, luxe = false }: Props) {
+export function ResultHero({ report, aiQuote, luxe = false, hideLucky = false }: Props) {
   const data = useMemo(() => buildPhotoCardData(report, { date: new Date(), siteLabel: "", aiQuote }), [report, aiQuote]);
   if (luxe) {
     return (
@@ -229,12 +231,12 @@ export function ResultHero({ report, aiQuote, luxe = false }: Props) {
           ))}
         </p>
       )}
-      <p className="mt-3 inline-flex items-center gap-2 rounded-full bg-gray-50 px-3.5 py-1.5 text-xs text-gray-600">
+      {!hideLucky && <p className="mt-3 inline-flex items-center gap-2 rounded-full bg-gray-50 px-3.5 py-1.5 text-xs text-gray-600">
         <span aria-hidden="true" className="h-3 w-3 rounded-full border border-black/10" style={{ backgroundColor: data.lucky.hex }} />
         행운 컬러 <b className="font-bold text-gray-800">{data.lucky.color}</b>
         <span aria-hidden="true" className="text-gray-300">|</span>
         행운 방향 <b className="font-bold text-gray-800">{data.lucky.direction}</b>
-      </p>
+      </p>}
     </div>
   );
 }

@@ -526,7 +526,7 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
                       report={premiumReport}
                       reading={reading}
                       intro={null}
-                      lastWord={<ResultHero report={premiumReport} aiQuote={reading?.kkotgeoji ?? null} luxe={false} />}
+                      lastWord={<ResultHero report={premiumReport} aiQuote={reading?.kkotgeoji ?? null} luxe={false} hideLucky />}
                       closing={askInput ? <AskChips input={askInput} luxe={false} /> : undefined}
                     />
                   </div>

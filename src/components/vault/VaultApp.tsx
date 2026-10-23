@@ -97,7 +97,7 @@ export default function VaultApp() {
         {!(!luxe && isStoryReport(s.report)) && <ResultHero report={s.report} aiQuote={s.kkotgeoji} luxe={luxe} />}
         {s.note && <p className={`mt-4 p-3 rounded-2xl border text-xs leading-relaxed ${luxe ? "bg-white/[0.04] border-[#e6c887]/25 text-[#e8dfca]/80" : "bg-brand-50 border-brand-100 text-gray-700"}`}>{s.note}</p>}
         {!luxe && isStoryReport(s.report) ? (
-          <StoryReport report={s.report} intro={null} lastWord={<ResultHero report={s.report} aiQuote={s.kkotgeoji} luxe={false} />} reading={s.card ? { keyword: s.card.keyword, total: { score: s.card.score, summary: s.card.summary }, indicators: s.card.indicators.map((i) => ({ label: i.label, score: i.score, comment: i.comment })), reason: s.reason ?? undefined, story: s.story ?? undefined, folds: s.folds ?? undefined } : null} />
+          <StoryReport report={s.report} intro={null} lastWord={<ResultHero report={s.report} aiQuote={s.kkotgeoji} luxe={false} hideLucky />} reading={s.card ? { keyword: s.card.keyword, total: { score: s.card.score, summary: s.card.summary }, indicators: s.card.indicators.map((i) => ({ label: i.label, score: i.score, comment: i.comment })), reason: s.reason ?? undefined, story: s.story ?? undefined, folds: s.folds ?? undefined } : null} />
         ) : (
           <>
         {s.card && (
