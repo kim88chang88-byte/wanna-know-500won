@@ -3,6 +3,7 @@ import type React from "react";
 import type { DrawCounts } from "@/lib/drawCounter";
 import { SERVICE_NAME } from "@/lib/siteInfo";
 import type { AuthUser } from "./useAuth";
+import { FAQ_ITEMS } from "./faq";
 import { FREE_PRICE_LABEL, MACHINES, PREMIUM_CARDS, SAMPLE_CAPSULES } from "./data";
 import { HelpMenuButton, MachineMenuButton } from "./MenuButton";
 import { HERO_IMAGE, IMAGES, LOGO_IMAGE } from "./images";
@@ -444,6 +445,27 @@ export function TrustSection() {
         </div>
       </div>
       {/* 실제 이용 후기가 쌓이면 이 자리에 보여주세요. (지어낸 후기나 만족도·적중률 수치는 넣지 않아요) */}
+    </section>
+  );
+}
+
+/* ------------------------------------------------------------------ 자주 묻는 질문 */
+
+export function FaqSection() {
+  return (
+    <section id="faq" data-testid="faq-section" className="rounded-[2.5rem] bg-white border border-sky-100 p-4 sm:p-6 mb-4 shadow-sm relative z-10 scroll-mt-20">
+      <h3 className="font-cute text-xl sm:text-2xl font-normal text-gray-900 mb-2 px-1">자주 묻는 질문</h3>
+      <div className="divide-y divide-sky-100">
+        {FAQ_ITEMS.map((f) => (
+          <details key={f.q} className="group py-1">
+            <summary className="cursor-pointer list-none flex items-center justify-between gap-3 px-1 py-3 text-sm font-bold text-gray-900">
+              <span>{f.q}</span>
+              <span aria-hidden="true" className="text-gray-400 transition-transform group-open:rotate-180">⌄</span>
+            </summary>
+            <p className="px-1 pb-3 text-xs sm:text-sm text-slate-600 leading-relaxed">{f.a}</p>
+          </details>
+        ))}
+      </div>
     </section>
   );
 }

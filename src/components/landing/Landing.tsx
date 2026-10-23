@@ -9,6 +9,7 @@ import { LoginModal } from "./Modals";
 import { useAuth } from "./useAuth";
 import BubbleBackground from "./BubbleBackground";
 import {
+  FaqSection,
   Footer,
   Header,
   HeroSection,
@@ -125,6 +126,7 @@ export default function Landing() {
         <PremiumSection onSpin={handleSpin} />
         <SampleSection />
         <TrustSection />
+        <FaqSection />
       </main>
 
       <Footer />
