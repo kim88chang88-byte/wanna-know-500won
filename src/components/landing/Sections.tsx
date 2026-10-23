@@ -278,7 +278,7 @@ export function MachinesSection({ onSpin }: SpinProps) {
               </div>
 
               <h4 className={`font-cute font-normal text-sm sm:text-lg text-center mb-1.5 ${m.titleClass}`}>{m.name}</h4>
-              <p className="text-[11px] sm:text-xs text-slate-500 text-center leading-relaxed sm:min-h-[36px]">{m.desc}</p>
+              <p className="text-xs sm:text-[13px] text-slate-600 text-center leading-relaxed sm:min-h-[40px]">{m.desc}</p>
             </div>
 
           </div>
@@ -351,7 +351,7 @@ export function PremiumSection({ onSpin }: SpinProps) {
             </div>
           ))}
         </div>
-        <p className="relative z-10 mt-6 text-center text-[11px] text-white/70">
+        <p className="relative z-10 mt-6 text-center text-xs leading-relaxed text-white/90">
           * 프리미엄 심층 리포트는 준비 중이에요. 베타 기간에는 결제 없이 체험할 수 있고, 지금 누르면 간단 풀이가 나와요.
         </p>
         <div className="relative z-10 mt-3 text-center">
