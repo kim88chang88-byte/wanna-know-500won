@@ -200,10 +200,9 @@ export default function StoryReport({
                 <Paras text={f.lack} />
               </Fold>
             )}
-            {(f.improve || t.reality || (concern && concern.answers.length > 1)) && (
+            {(f.improve || (concern && concern.answers.length > 1)) && (
               <Fold testId="story-fold-improve" label="STEP 5" title="이렇게 개선해보아요 🌱">
                 {f.improve && <Paras text={f.improve} />}
-                {t.reality && <RealityLight rc={t.reality} />}
                 {concern && concern.answers.length > 1 && (
                   <ul className="mt-3 space-y-2.5">
                     {concern.answers.slice(1).map((a) => (
@@ -224,11 +223,6 @@ export default function StoryReport({
                 {pt.body}
               </Fold>
             ))}
-            {t.reality && (
-              <Fold testId="story-fold-improve" label="이렇게 개선해보아요" title="지금 내 모습과 견줘 보고, 작은 걸음 하나 정해요">
-                <RealityLight rc={t.reality} />
-              </Fold>
-            )}
           </>
         )}
         <Fold testId="story-fold-lucky" label="행운 처방" title={`행운 컬러는 ${t.lucky.color}, 방향은 ${t.lucky.direction}${iyeyo(t.lucky.direction)}`}>
@@ -248,6 +242,9 @@ export default function StoryReport({
           </Fold>
         )}
       </section>
+
+      {/* 현실 견주기: 도리의 쪽지 바로 위 */}
+      {t.reality && <RealityLight rc={t.reality} />}
 
       {/* 4) 도리의 쪽지 */}
       <section data-testid="story-note" aria-label="도리의 쪽지" className="relative rounded-2xl border border-amber-200 bg-[#fff9e6] p-4 shadow-sm">
