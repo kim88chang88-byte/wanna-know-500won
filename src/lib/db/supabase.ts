@@ -18,6 +18,17 @@ export interface DrawCounts {
 
 export class DbError extends Error {}
 
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+export interface VaultListRow {
+  id: string;
+  topic: string;
+  premium: boolean;
+  title: string;
+  summary: string | null;
+  created_at: string;
+}
+
 export interface ReviewRow {
   id: number;
   rating: number;
@@ -152,6 +163,59 @@ export function createDb(config: DbConfig, fetchImpl: FetchLike = fetch) {
           premium: row.premium,
         }),
       });
+    },
+
+    /** 내 보관함에 저장. 같은 결과가 이미 있으면 duplicate: true 로 알려주고 새로 만들지 않아요. */
+    async insertVault(
+      userId: string,
+      row: { topic: string; premium: boolean; title: string; summary: string | null; payload: unknown; payloadHash: string },
+    ): Promise<{ id: string | null; duplicate: boolean }> {
+      const res = await call("vault_items?on_conflict=user_id,payload_hash", {
+        method: "POST",
+        headers: headers({ Prefer: "resolution=ignore-duplicates,return=representation" }),
+        body: JSON.stringify({
+          user_id: safeId(userId),
+          topic: row.topic.slice(0, 40),
+          premium: row.premium,
+          title: row.title.slice(0, 80),
+          summary: row.summary ? row.summary.slice(0, 200) : null,
+          payload: row.payload,
+          payload_hash: row.payloadHash,
+        }),
+      });
+      const rows = (await res.json().catch(() => [])) as Array<{ id?: unknown }>;
+      const id = Array.isArray(rows) && typeof rows[0]?.id === "string" ? rows[0].id : null;
+      return { id, duplicate: id === null };
+    },
+
+    /** 내 보관함 목록 (최신순, 본문 제외) */
+    async listVault(userId: string, limit = 300): Promise<VaultListRow[]> {
+      const res = await call(`vault_items?user_id=eq.${safeId(userId)}&select=id,topic,premium,title,summary,created_at&order=created_at.desc&limit=${Math.min(limit, 500)}`, {
+        method: "GET",
+        headers: headers(),
+      });
+      const rows = (await res.json().catch(() => [])) as VaultListRow[];
+      return Array.isArray(rows) ? rows : [];
+    },
+
+    /** 내 보관함에 있는 개수 */
+    async countVault(userId: string): Promise<number> {
+      const res = await call(`vault_items?user_id=eq.${safeId(userId)}&select=id&limit=1`, { method: "GET", headers: headers({ Prefer: "count=exact" }) });
+      const total = /\/(\d+)$/.exec(res.headers.get("content-range") ?? "");
+      return total ? Number(total[1]) : 0;
+    },
+
+    /** 보관함에서 하나 꺼내기. 내 것이 아니거나 없으면 null. */
+    async getVault(userId: string, id: string): Promise<(VaultListRow & { payload: unknown }) | null> {
+      if (!UUID.test(id)) return null;
+      const res = await call(`vault_items?id=eq.${id}&user_id=eq.${safeId(userId)}&select=id,topic,premium,title,summary,created_at,payload&limit=1`, { method: "GET", headers: headers() });
+      const rows = (await res.json().catch(() => [])) as Array<VaultListRow & { payload: unknown }>;
+      return Array.isArray(rows) && rows[0] ? rows[0] : null;
+    },
+
+    async deleteVault(userId: string, id: string): Promise<void> {
+      if (!UUID.test(id)) throw new DbError("invalid id");
+      await call(`vault_items?id=eq.${id}&user_id=eq.${safeId(userId)}`, { method: "DELETE", headers: headers({ Prefer: "return=minimal" }) });
     },
 
     /** 관리자: 기간 안의 후기 (최신순) */

@@ -161,3 +161,23 @@ $$;
 
 revoke all on function public.rate_limit_take(text, int, int) from public, anon, authenticated;
 grant execute on function public.rate_limit_take(text, int, int) to service_role;
+
+-- ─────────────────────────────────────────────────────────────────────────────
+-- 내 보관함: 로그인한 회원이 본 풀이 결과를 그대로 저장해 두고, 다시 볼 때는 AI 를 부르지 않아요.
+-- 회원을 지우면(탈퇴·카카오 연결 끊기) 함께 지워져요. 같은 결과를 두 번 저장하지 않게 payload_hash 로 걸러요.
+-- 이 파일 전체를 다시 Run 하면 추가돼요. (코드를 배포하기 '전에' Run 하세요)
+-- ─────────────────────────────────────────────────────────────────────────────
+create table if not exists public.vault_items (
+  id uuid primary key default gen_random_uuid(),
+  user_id text not null references public.users(id) on delete cascade,
+  topic text not null default 'general',
+  premium boolean not null default false,
+  title text not null,
+  summary text,
+  payload jsonb not null,
+  payload_hash text not null,
+  created_at timestamptz not null default now(),
+  unique (user_id, payload_hash)
+);
+create index if not exists vault_items_user_idx on public.vault_items (user_id, created_at desc);
+alter table public.vault_items enable row level security;

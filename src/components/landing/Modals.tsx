@@ -129,6 +129,13 @@ export function LoginModal({ onClose, user = null, result = null, onLogout, onWi
               </button>
             </div>
           )}
+          <a
+            href="/vault"
+            data-testid="open-vault"
+            className="w-full py-2.5 px-4 rounded-full bg-brand-50 border border-brand-100 text-brand-700 font-bold text-xs text-center hover:bg-brand-100"
+          >
+            📚 내 보관함 (봤던 풀이 다시 보기)
+          </a>
           <button
             onClick={async () => {
               await onLogout?.();

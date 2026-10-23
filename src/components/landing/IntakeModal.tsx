@@ -32,6 +32,7 @@ import { chipsForFortune, MAX_CONCERN_TAGS, MAX_CONCERN_TEXT, type Concern, type
 import { MACHINES } from "./data";
 import { IMAGES } from "./images";
 import LoadingBar from "./LoadingBar";
+import { VaultSaveBar } from "./VaultSaveBar";
 import { BIRTH_PLACES } from "@/lib/saju/birthPlace";
 import { profileSummary, profileToForm, sameBirth, type SavedProfile } from "@/lib/profile";
 import { BRANCHES, STEMS } from "@/lib/saju/constants";
@@ -316,6 +317,8 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
   // 선택 동의: 둘 다 기본은 꺼짐. (이미 저장해 둔 회원이 정보를 고치는 경우만, 전에 동의한 "기억하기"를 켜 둬요)
   const [saveProfile, setSaveProfile] = useState(savedProfile !== null);
   const [shareConcern, setShareConcern] = useState(false);
+  // 보던 풀이를 내 보관함에 저장 (로그인한 회원이 선택. 기본은 켜 두고, 끌 수 있어요)
+  const [saveVault, setSaveVault] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [phase, setPhase] = useState<"form" | "loading" | "result">("form");
   const [chart, setChart] = useState<SajuChart | null>(null);
@@ -467,6 +470,13 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
             <>
               {/* 1) 인스타 감성 포토카드 + 공유 */}
               <PhotoCard report={premiumReport} aiQuote={reading?.kkotgeoji ?? null} />
+
+              {loggedIn && (
+                <VaultSaveBar
+                  autoSave={saveVault}
+                  snapshot={{ topic: target.fortune, premium: target.premium === true, report: premiumReport, kkotgeoji: reading?.kkotgeoji ?? null, reason: reading?.reason ?? null, note: birthNote }}
+                />
+              )}
 
               {birthNote && (
                 <p data-testid="birth-adjust-note" className="mt-4 p-3 rounded-2xl bg-brand-50 border border-brand-100 text-xs text-gray-700 leading-relaxed">
@@ -743,6 +753,13 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
                 <p data-testid="login-nudge-consent" className="text-[11px] text-amber-800 bg-amber-50 border border-amber-100 rounded-lg px-2.5 py-2 leading-relaxed">
                   🫧 {LOGIN_NUDGE}
                 </p>
+              )}
+
+              {loggedIn && (
+                <label className="flex items-start gap-2 text-xs text-gray-700 leading-relaxed">
+                  <input type="checkbox" name="saveVault" className="mt-0.5" checked={saveVault} onChange={(e) => setSaveVault(e.target.checked)} />
+                  <span>(선택) 본 풀이를 내 보관함에 저장해요. 언제든 다시 볼 수 있고, 다시 볼 때는 추가 비용이 없어요. 보관함에서 지울 수 있고 탈퇴하면 함께 삭제돼요.</span>
+                </label>
               )}
 
               {buildConcern(form) && (
