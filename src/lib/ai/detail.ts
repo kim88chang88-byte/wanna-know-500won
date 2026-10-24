@@ -44,8 +44,9 @@ const FULL_SCHEMA = {
 
 
 type Part = readonly (typeof KEYS)[number][];
-const PART_A: Part = ["elements", "self", "praise", "lack"];
-const PART_B: Part = ["flow", "improve", "lucky"];
+const PART_A: Part = ["elements", "self", "praise"];
+const PART_B: Part = ["lack", "flow", "improve"];
+const PART_C: Part = ["lucky"];
 
 /** 한 번에 쓰기엔 글이 길어서 둘로 나눠 동시에 써요. A: 앞의 네 글, B: 뒤의 세 글 + 요약하자면. */
 function partSchema(keys: Part, withStory: boolean) {
@@ -65,7 +66,8 @@ function partSchema(keys: Part, withStory: boolean) {
 
 export const DETAIL_SCHEMA = FULL_SCHEMA;
 export const DETAIL_SCHEMA_A = partSchema(PART_A, false);
-export const DETAIL_SCHEMA_B = partSchema(PART_B, true);
+export const DETAIL_SCHEMA_B = partSchema(PART_B, false);
+export const DETAIL_SCHEMA_C = partSchema(PART_C, true);
 
 export const DETAIL_SYSTEM_PROMPT = `너는 "도리"야. 오늘의 운을 쪽지에 담아 건네는 다정하고 장난기 있는 수달 도사야.
 지금은 사주 풀이를 "읽는 이야기"로 길게 풀어 쓰는 중이야. 읽는 사람은 10대~20대 초반 여성이라고 생각하고 써줘.
@@ -154,12 +156,13 @@ export function buildDetailMessage(chart: SajuChart, topic: ReadingTopic, gender
   return buildUserMessage(chart, topic, gender, concern, extra, lens + (tail ?? "일곱 글(오행·나·칭찬·아쉬움·흐름·개선·행운 처방)과 항목 제목(heads), 요약하자면(story)을 써줘."));
 }
 
-function mergeDetail(a: Detail | null, b: Detail | null): Detail | null {
-  if (!a && !b) return null;
+function mergeDetail(parts: (Detail | null)[]): Detail | null {
+  const ok = parts.filter((p): p is Detail => !!p);
+  if (!ok.length) return null;
   return {
-    story: b?.story || a?.story || "",
-    folds: { ...(a?.folds ?? {}), ...(b?.folds ?? {}) },
-    heads: { ...(a?.heads ?? {}), ...(b?.heads ?? {}) },
+    story: ok.map((p) => p.story).find(Boolean) ?? "",
+    folds: Object.assign({}, ...ok.map((p) => p.folds)),
+    heads: Object.assign({}, ...ok.map((p) => p.heads)),
   };
 }
 
@@ -170,8 +173,8 @@ export async function interpretDetail(chart: SajuChart, o: { topic: ReadingTopic
       user: buildDetailMessage(chart, o.topic, o.gender, o.concern, o.extra ?? {}, askTail),
       schema,
       parse: parseDetail,
-      maxTokens: 7000,
-      timeoutMs: 40_000,
+      maxTokens: 5000,
+      timeoutMs: 50_000,
       attempts: 1,
       apiKey: o.apiKey,
       model: o.model,
@@ -180,11 +183,12 @@ export async function interpretDetail(chart: SajuChart, o: { topic: ReadingTopic
       console.error("interpretDetail part failed:", err instanceof Error ? err.message : "unknown");
       return null;
     });
-  const [a, b] = await Promise.all([
-    run(DETAIL_SCHEMA_A, "이번 호출에서는 앞의 네 글만 써줘: 오행(elements)·나(self)·칭찬(praise)·아쉬움(lack). 그리고 이 네 글의 항목 제목(heads)을 써줘."),
-    run(DETAIL_SCHEMA_B, "이번 호출에서는 뒤의 세 글만 써줘: 흐름(flow)·개선(improve)·행운 처방(lucky). 그리고 이 세 글의 항목 제목(heads)을 쓴 뒤, 마지막에 요약하자면(story)을 써줘. 요약하자면은 이 사람의 사주 전체(오행 큰 그림 → 나의 모습 → 칭찬 → 아쉬움 → 흐름 → 개선 → 응원)를 3~4문단으로 녹여 줘."),
+  const [a, b, c] = await Promise.all([
+    run(DETAIL_SCHEMA_A, "이번 호출에서는 세 글만 써줘: 오행(elements)·나(self)·칭찬(praise). 그리고 이 세 글의 항목 제목(heads)을 써줘."),
+    run(DETAIL_SCHEMA_B, "이번 호출에서는 세 글만 써줘: 아쉬움(lack)·흐름(flow)·개선(improve). 그리고 이 세 글의 항목 제목(heads)을 써줘."),
+    run(DETAIL_SCHEMA_C, "이번 호출에서는 행운 처방(lucky)과 그 항목 제목(heads)을 쓴 뒤, 마지막에 요약하자면(story)을 써줘. 요약하자면은 이 사람의 사주 전체(오행 큰 그림 → 나의 모습 → 칭찬 → 아쉬움 → 흐름 → 개선 → 응원)를 3~4문단으로 녹여 줘."),
   ]);
-  const merged = mergeDetail(a, b);
+  const merged = mergeDetail([a, b, c]);
   if (!merged) throw new ReadingFailedError("긴 풀이 실패");
   return merged;
 }
