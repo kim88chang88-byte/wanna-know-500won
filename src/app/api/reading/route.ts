@@ -139,7 +139,7 @@ export async function POST(request: Request) {
     const cookieHeader = request.headers.get("cookie");
     const entitled = hasEntitlement(readCookie(cookieHeader, ENTITLEMENT_COOKIE), process.env.AUTH_SECRET, session?.sub ?? null);
     reading = toPublicReading(full, "free", !isPremiumLocked(process.env) || entitled);
-    detailInfo = detailStatus;
+    detailInfo = detail?.warn ? `partial:${detail.warn}` : detailStatus;
     if (detail) reading = { ...reading, ...(detail.story ? { story: detail.story } : {}), folds: detail.folds, heads: detail.heads };
   } catch (err) {
     if (err instanceof ReadingUnavailableError) {

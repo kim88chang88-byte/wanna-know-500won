@@ -15,6 +15,8 @@ export interface Detail {
   folds: DetailFolds;
   /** 접이식 항목마다 그 사람 얘기를 담은 한 줄 제목 */
   heads: DetailFolds;
+  /** 일부 갈래가 실패했을 때의 사유(진단용) */
+  warn?: string;
 }
 
 const MAX = { story: 1000, fold: 800, head: 60 } as const;
@@ -192,6 +194,7 @@ export async function interpretDetail(chart: SajuChart, o: { topic: ReadingTopic
     run(DETAIL_SCHEMA_C, "이번 호출에서는 행운 처방(lucky)과 그 항목 제목(heads)을 쓴 뒤, 마지막에 요약하자면(story)을 써줘. 요약하자면은 이 사람의 사주 전체(오행 큰 그림 → 나의 모습 → 칭찬 → 아쉬움 → 흐름 → 개선 → 응원)를 3~4문단으로 녹여 줘."),
   ]);
   const merged = mergeDetail([a, b, c]);
+  if (merged && errs.length) merged.warn = errs.join(" / ").slice(0, 120);
   if (!merged) throw new ReadingFailedError(`긴 풀이 실패: ${errs.join(" / ").slice(0, 120)}`);
   return merged;
 }
