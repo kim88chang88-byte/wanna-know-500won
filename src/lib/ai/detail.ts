@@ -5,6 +5,7 @@
 import type { Concern } from "@/lib/concerns";
 import type { Gender, SajuChart } from "@/lib/saju/types";
 import { callJson } from "./callJson";
+import { ReadingFailedError } from "./interpret";
 import { stripSummaryLead, tidyFold, trimToLastSentence } from "@/lib/storyHelpers";
 import { buildUserMessage, type ExtraFacts } from "./prompt";
 import { containsForbidden, isGeneric, TOPIC_LABEL, type DetailFolds, type ReadingTopic } from "./reading";
@@ -24,7 +25,7 @@ const KEYS = ["elements", "self", "praise", "lack", "flow", "improve", "lucky"] 
 const headSchema = Object.fromEntries(KEYS.map((k) => [k, { type: "string", description: "이 항목 글을 한 줄로 요약한 제목. 18~32자, 이 사람의 사주 특징이 드러나는 한 문장(예: ~네요 / ~죠 / ~다). 이모지·따옴표 금지" }]));
 
 /** 글자 순서가 곧 쓰는 순서예요. 접이식 글 → 항목 제목 → 마지막에 전체를 녹인 요약(story) 순서로 쓰게 해요. */
-export const DETAIL_SCHEMA = {
+const FULL_SCHEMA = {
   type: "object",
   properties: {
     elements: { type: "string", description: `'오행으로 보는 사주'. 오행 분포(많은·적은 기운)와 일간을 쉬운 비유로 풀어 사주의 큰 그림을 열어 주는 글. 300~380자, 내용이 바뀌는 곳에서 빈 줄(\\n\\n)로 3문단. ${MAX.fold}자 이내` },
@@ -40,6 +41,31 @@ export const DETAIL_SCHEMA = {
   required: [...KEYS, "heads", "story"],
   additionalProperties: false,
 } as const;
+
+
+type Part = readonly (typeof KEYS)[number][];
+const PART_A: Part = ["elements", "self", "praise", "lack"];
+const PART_B: Part = ["flow", "improve", "lucky"];
+
+/** 한 번에 쓰기엔 글이 길어서 둘로 나눠 동시에 써요. A: 앞의 네 글, B: 뒤의 세 글 + 요약하자면. */
+function partSchema(keys: Part, withStory: boolean) {
+  const props = FULL_SCHEMA.properties as unknown as Record<string, unknown>;
+  const headProps = Object.fromEntries(keys.map((k) => [k, (headSchema as Record<string, unknown>)[k]]));
+  return {
+    type: "object",
+    properties: {
+      ...Object.fromEntries(keys.map((k) => [k, props[k]])),
+      heads: { type: "object", properties: headProps, required: [...keys], additionalProperties: false },
+      ...(withStory ? { story: props.story } : {}),
+    },
+    required: [...keys, "heads", ...(withStory ? ["story"] : [])],
+    additionalProperties: false,
+  } as const;
+}
+
+export const DETAIL_SCHEMA = FULL_SCHEMA;
+export const DETAIL_SCHEMA_A = partSchema(PART_A, false);
+export const DETAIL_SCHEMA_B = partSchema(PART_B, true);
 
 export const DETAIL_SYSTEM_PROMPT = `너는 "도리"야. 오늘의 운을 쪽지에 담아 건네는 다정하고 장난기 있는 수달 도사야.
 지금은 사주 풀이를 "읽는 이야기"로 길게 풀어 쓰는 중이야. 읽는 사람은 10대~20대 초반 여성이라고 생각하고 써줘.
@@ -122,23 +148,43 @@ export const TOPIC_ANGLE: Record<ReadingTopic, string> = {
   study: "공부 스타일, 집중이 잘 되는 때와 방식, 시험·성장 앞에서의 마음가짐",
 };
 
-export function buildDetailMessage(chart: SajuChart, topic: ReadingTopic, gender: Gender, concern: Concern | null | undefined, extra: ExtraFacts): string {
+export function buildDetailMessage(chart: SajuChart, topic: ReadingTopic, gender: Gender, concern: Concern | null | undefined, extra: ExtraFacts, tail?: string): string {
   const label = TOPIC_LABEL[topic];
   const lens = `이번 주제는 "${label}"이야. 일곱 글과 요약하자면 모두 이 주제의 관점(${TOPIC_ANGLE[topic]})으로, 오행·일간 근거와 이어서 써줘. 다른 주제 이야기로 새지 마.\n`;
-  return buildUserMessage(chart, topic, gender, concern, extra, lens + "오행(elements)·나(self)·칭찬(praise)·아쉬움(lack)·흐름(flow)·개선(improve)·행운 처방(lucky) 글을 차례로 쓰고, 항목 제목(heads)을 쓴 뒤, 마지막에 요약하자면(story)을 시스템 지침대로 매끄럽게 써줘.");
+  return buildUserMessage(chart, topic, gender, concern, extra, lens + (tail ?? "일곱 글(오행·나·칭찬·아쉬움·흐름·개선·행운 처방)과 항목 제목(heads), 요약하자면(story)을 써줘."));
 }
 
-export function interpretDetail(chart: SajuChart, o: { topic: ReadingTopic; gender: Gender; concern?: Concern | null; extra?: ExtraFacts; apiKey?: string; model?: string; fetchImpl?: typeof fetch }): Promise<Detail> {
-  return callJson({
-    system: DETAIL_SYSTEM_PROMPT,
-    user: buildDetailMessage(chart, o.topic, o.gender, o.concern, o.extra ?? {}),
-    schema: DETAIL_SCHEMA,
-    parse: parseDetail,
-    maxTokens: 12000,
-    timeoutMs: 54_000,
-    attempts: 1,
-    apiKey: o.apiKey,
-    model: o.model,
-    fetchImpl: o.fetchImpl,
-  });
+function mergeDetail(a: Detail | null, b: Detail | null): Detail | null {
+  if (!a && !b) return null;
+  return {
+    story: b?.story || a?.story || "",
+    folds: { ...(a?.folds ?? {}), ...(b?.folds ?? {}) },
+    heads: { ...(a?.heads ?? {}), ...(b?.heads ?? {}) },
+  };
+}
+
+export async function interpretDetail(chart: SajuChart, o: { topic: ReadingTopic; gender: Gender; concern?: Concern | null; extra?: ExtraFacts; apiKey?: string; model?: string; fetchImpl?: typeof fetch }): Promise<Detail> {
+  const run = (schema: object, askTail: string) =>
+    callJson<Detail>({
+      system: DETAIL_SYSTEM_PROMPT,
+      user: buildDetailMessage(chart, o.topic, o.gender, o.concern, o.extra ?? {}, askTail),
+      schema,
+      parse: parseDetail,
+      maxTokens: 7000,
+      timeoutMs: 40_000,
+      attempts: 1,
+      apiKey: o.apiKey,
+      model: o.model,
+      fetchImpl: o.fetchImpl,
+    }).catch((err) => {
+      console.error("interpretDetail part failed:", err instanceof Error ? err.message : "unknown");
+      return null;
+    });
+  const [a, b] = await Promise.all([
+    run(DETAIL_SCHEMA_A, "이번 호출에서는 앞의 네 글만 써줘: 오행(elements)·나(self)·칭찬(praise)·아쉬움(lack). 그리고 이 네 글의 항목 제목(heads)을 써줘."),
+    run(DETAIL_SCHEMA_B, "이번 호출에서는 뒤의 세 글만 써줘: 흐름(flow)·개선(improve)·행운 처방(lucky). 그리고 이 세 글의 항목 제목(heads)을 쓴 뒤, 마지막에 요약하자면(story)을 써줘. 요약하자면은 이 사람의 사주 전체(오행 큰 그림 → 나의 모습 → 칭찬 → 아쉬움 → 흐름 → 개선 → 응원)를 3~4문단으로 녹여 줘."),
+  ]);
+  const merged = mergeDetail(a, b);
+  if (!merged) throw new ReadingFailedError("긴 풀이 실패");
+  return merged;
 }
