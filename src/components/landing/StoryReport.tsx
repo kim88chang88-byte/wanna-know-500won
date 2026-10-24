@@ -101,11 +101,11 @@ function Fold({ label, title, children, testId, defaultOpen = false }: { label: 
       <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-1 py-3.5">
         <span className="min-w-0">
           <span className="block text-[11px] font-bold text-brand-500">{label}</span>
-          <span className="mt-0.5 block text-[15px] font-bold leading-snug text-gray-900 break-keep">{title}</span>
+          <span className="mt-0.5 block text-[16.5px] font-bold leading-snug text-gray-900 break-keep">{title}</span>
         </span>
         <span aria-hidden="true" className="shrink-0 text-gray-400 transition-transform group-open:rotate-180">⌄</span>
       </summary>
-      <div className="whitespace-pre-line px-1 pb-4 text-[14px] leading-[1.9] text-gray-700 break-keep">{children}</div>
+      <div className="whitespace-pre-line px-1 pb-4 text-[16px] leading-[1.85] text-gray-700 break-keep">{children}</div>
     </details>
   );
 }
@@ -179,7 +179,7 @@ export default function StoryReport({
               </span>
             )}
           </div>
-          <Paras text={summary} className="mt-3 text-[14.5px] leading-[1.9] text-gray-800 break-keep" />
+          <Paras text={summary} className="mt-3 text-[16px] leading-[1.85] text-gray-800 break-keep" />
         </section>
       )}
 
