@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { ContactList, H2, LegalPage } from "@/components/legal/Legal";
-import { LEGAL_REVISIONS, OPERATOR } from "@/lib/siteInfo";
+import { LEGAL_REVISIONS } from "@/lib/siteInfo";
 
 export const metadata: Metadata = {
   title: "개인정보처리방침 | 도리 운세 사주",
@@ -179,7 +179,6 @@ export default function PrivacyPage() {
       </p>
 
       <H2>7. 개인정보 보호 문의</H2>
-      <p>운영자: {OPERATOR}</p>
       <p className="mt-1">문의 이메일:</p>
       <ContactList />
       <p className="mt-2">

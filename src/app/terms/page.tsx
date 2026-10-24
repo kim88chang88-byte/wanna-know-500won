@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { ContactList, H2, LegalPage } from "@/components/legal/Legal";
-import { OPERATOR, SERVICE_NAME } from "@/lib/siteInfo";
+import { SERVICE_NAME } from "@/lib/siteInfo";
 
 export const metadata: Metadata = {
   title: `이용약관 | ${SERVICE_NAME}`,
@@ -14,7 +14,7 @@ export default function TermsPage() {
     <LegalPage title="이용약관">
       <H2>제1조 (목적)</H2>
       <p>
-        이 약관은 {OPERATOR}(이하 &ldquo;운영자&rdquo;)가 제공하는 &lsquo;{SERVICE_NAME}&rsquo;(이하 &ldquo;서비스&rdquo;)의 이용
+        이 약관은 서비스 운영자(이하 &ldquo;운영자&rdquo;)가 제공하는 &lsquo;{SERVICE_NAME}&rsquo;(이하 &ldquo;서비스&rdquo;)의 이용
         조건과 운영자·이용자의 권리와 의무를 정합니다.
       </p>
 
@@ -77,7 +77,6 @@ export default function TermsPage() {
       </ul>
 
       <H2>문의</H2>
-      <p>운영자: {OPERATOR}</p>
       <ContactList />
     </LegalPage>
   );
