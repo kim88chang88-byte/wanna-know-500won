@@ -167,6 +167,7 @@ function mergeDetail(parts: (Detail | null)[]): Detail | null {
 }
 
 export async function interpretDetail(chart: SajuChart, o: { topic: ReadingTopic; gender: Gender; concern?: Concern | null; extra?: ExtraFacts; apiKey?: string; model?: string; fetchImpl?: typeof fetch }): Promise<Detail> {
+  const errs: string[] = [];
   const run = (schema: object, askTail: string) =>
     callJson<Detail>({
       system: DETAIL_SYSTEM_PROMPT,
@@ -180,7 +181,9 @@ export async function interpretDetail(chart: SajuChart, o: { topic: ReadingTopic
       model: o.model,
       fetchImpl: o.fetchImpl,
     }).catch((err) => {
-      console.error("interpretDetail part failed:", err instanceof Error ? err.message : "unknown");
+      const msg = err instanceof Error ? err.message : "unknown";
+      errs.push(msg);
+      console.error("interpretDetail part failed:", msg);
       return null;
     });
   const [a, b, c] = await Promise.all([
@@ -189,6 +192,6 @@ export async function interpretDetail(chart: SajuChart, o: { topic: ReadingTopic
     run(DETAIL_SCHEMA_C, "이번 호출에서는 행운 처방(lucky)과 그 항목 제목(heads)을 쓴 뒤, 마지막에 요약하자면(story)을 써줘. 요약하자면은 이 사람의 사주 전체(오행 큰 그림 → 나의 모습 → 칭찬 → 아쉬움 → 흐름 → 개선 → 응원)를 3~4문단으로 녹여 줘."),
   ]);
   const merged = mergeDetail([a, b, c]);
-  if (!merged) throw new ReadingFailedError("긴 풀이 실패");
+  if (!merged) throw new ReadingFailedError(`긴 풀이 실패: ${errs.join(" / ").slice(0, 120)}`);
   return merged;
 }

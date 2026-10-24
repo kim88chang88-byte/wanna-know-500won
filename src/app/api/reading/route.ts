@@ -110,6 +110,7 @@ export async function POST(request: Request) {
   // 풀이가 실패해도 계산된 명식은 돌려줘서, 화면이 완전히 비지 않게 해요.
   let reading: PublicReading | null = null;
   let readingStatus: ReadingStatus = "ok";
+  let detailInfo: string | null = null;
   try {
     // 키가 있을 때만 비용 한도를 확인해요. 한도를 넘었거나 비상 차단 중이면 AI 한마디만 빼고 사주 리포트는 그대로 나가요.
     if (process.env.ANTHROPIC_API_KEY) {
@@ -125,9 +126,11 @@ export async function POST(request: Request) {
     const topic = normalizeTopic(rawTopic);
     // 긴 "요약하자면" 글은 같은 시간에 따로 써요. 한도를 한 번 더 쓰고, 실패해도 풀이는 그대로 나가요.
     const detailGate = await takeAiBudget(process.env, db);
+    let detailStatus = detailGate === "ok" ? "ok" : `skipped:${detailGate}`;
     const detailPromise = detailGate === "ok"
       ? interpretDetail(chart, { topic, gender: input.gender, concern, extra: { ...extra, core: buildCoreFacts(input, now, true), name: callName(session?.nick) } }).catch((err) => {
           console.error("interpretDetail failed:", err instanceof Error ? err.message : "unknown");
+          detailStatus = err instanceof Error ? err.message.slice(0, 160) : "failed";
           return null;
         })
       : Promise.resolve(null);
@@ -136,6 +139,7 @@ export async function POST(request: Request) {
     const cookieHeader = request.headers.get("cookie");
     const entitled = hasEntitlement(readCookie(cookieHeader, ENTITLEMENT_COOKIE), process.env.AUTH_SECRET, session?.sub ?? null);
     reading = toPublicReading(full, "free", !isPremiumLocked(process.env) || entitled);
+    detailInfo = detailStatus;
     if (detail) reading = { ...reading, ...(detail.story ? { story: detail.story } : {}), folds: detail.folds, heads: detail.heads };
   } catch (err) {
     if (err instanceof ReadingUnavailableError) {
@@ -161,5 +165,5 @@ export async function POST(request: Request) {
     }
   }
 
-  return NextResponse.json({ chart, reading, readingStatus, counts, profileSaved, birthAdjust, birthAdjustNote: birthAdjust ? adjustNote(birthAdjust) : null, boundaryNote: boundaryNote(input as BirthInput) });
+  return NextResponse.json({ chart, reading, readingStatus, detailInfo, counts, profileSaved, birthAdjust, birthAdjustNote: birthAdjust ? adjustNote(birthAdjust) : null, boundaryNote: boundaryNote(input as BirthInput) });
 }
