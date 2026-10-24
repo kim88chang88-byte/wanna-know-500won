@@ -63,6 +63,8 @@ export interface ExtraFacts {
   today?: CivilDate;
   /** 신강/신약·용신·대운 등 (ssaju 계산 결과 요약) */
   core?: CoreFacts | null;
+  /** 글 속에서 부를 이름(로그인 닉네임). 없으면 이름 없이 써요. */
+  name?: string | null;
 }
 
 export function buildUserMessage(chart: SajuChart, topic: ReadingTopic, gender: Gender, concern?: Concern | null, extra: ExtraFacts = {}, ask?: string): string {
@@ -80,6 +82,7 @@ export function buildUserMessage(chart: SajuChart, topic: ReadingTopic, gender: 
       수: facts.elementCounts.water,
     },
     ...(extra.core ? { 사주핵심: extra.core } : {}),
+    ...(extra.name ? { 부르는이름: `${extra.name}님` } : {}),
     ...(extra.today ? { 오늘의일진: buildDailyFacts(chart, extra.today) } : {}),
     태어난시간: facts.hourKnown ? "알고 있음" : "모름 (시주 없이 6글자로 본 결과)",
     ...(hasConcern(concern)

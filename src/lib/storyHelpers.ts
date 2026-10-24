@@ -88,6 +88,7 @@ export const FOLD_TITLES = {
   self: "나는 어떤 사람인가?",
   praise: "이건 정말 칭찬해요",
   lack: "그렇지만 이건 조금 부족해요",
+  flow: "올해와 이번 달의 흐름",
   improve: "이렇게 개선해 보아요",
 } as const;
 

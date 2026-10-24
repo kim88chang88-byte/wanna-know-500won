@@ -31,6 +31,8 @@ export interface VaultSnapshot {
   story?: string | null;
   /** 접이식 풀이 글 */
   folds?: Record<string, string> | null;
+  /** 접이식 항목 한 줄 제목 */
+  heads?: Record<string, string> | null;
   /** 출생지·절기 경계 안내 문구 */
   note: string | null;
 }
@@ -61,13 +63,13 @@ function parseCard(raw: unknown): VaultCard | null {
   return { keyword, score, summary, indicators };
 }
 
-const FOLD_KEYS = ["elements", "self", "praise", "lack", "improve", "lucky"] as const;
+const FOLD_KEYS = ["elements", "self", "praise", "lack", "flow", "improve", "lucky"] as const;
 
-function parseFolds(raw: unknown): Record<string, string> | null {
+function parseFolds(raw: unknown, max = 900): Record<string, string> | null {
   if (!isRecord(raw)) return null;
   const out: Record<string, string> = {};
   for (const k of FOLD_KEYS) {
-    const t = text(raw[k], 700);
+    const t = text(raw[k], max);
     if (t) out[k] = t;
   }
   return Object.keys(out).length ? out : null;
@@ -88,8 +90,9 @@ export function parseVaultBody(raw: unknown, now: Date = new Date()): ParsedVaul
     card,
     kkotgeoji: text(raw.kkotgeoji, 300),
     reason: text(raw.reason, 400),
-    story: text(raw.story, 1000),
+    story: text(raw.story, 1200),
     folds: parseFolds(raw.folds),
+    heads: parseFolds(raw.heads, 80),
     note: text(raw.note, 400),
   };
   const body = JSON.stringify(snapshot);

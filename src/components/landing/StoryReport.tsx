@@ -14,13 +14,26 @@ import { firstSentence, iyeyo, stripSummaryLead, tidyFold, toParagraphs, trimToL
  * 새로 AI 를 부르지 않고, 이미 받은 풀이(도리의 풀이 카드 + 주제 분석 + 고민 답)를 이야기 순서로 다시 배치해요.
  */
 
+type FoldKey = "elements" | "self" | "praise" | "lack" | "flow" | "improve";
+
+const STEPS: Array<{ key: FoldKey; name: string }> = [
+  { key: "elements", name: "오행으로 보는 사주" },
+  { key: "self", name: "나는 어떤 사람인가?" },
+  { key: "praise", name: "이건 정말 칭찬해요 👏" },
+  { key: "lack", name: "그렇지만 이건 조금 부족해요" },
+  { key: "flow", name: "올해와 이번 달의 흐름" },
+  { key: "improve", name: "이렇게 개선해보아요 🌱" },
+];
+
 export interface StoryReading {
   keyword: string;
   total: { score: number; summary: string };
   indicators: Array<{ key?: string; label: string; score: number; comment: string | null }>;
   reason?: string;
   story?: string;
-  folds?: { elements?: string; self?: string; praise?: string; lack?: string; improve?: string; lucky?: string };
+  folds?: Partial<Record<FoldKey | "lucky", string>>;
+  /** 항목마다 그 사람 얘기를 담은 한 줄 제목 */
+  heads?: Partial<Record<FoldKey | "lucky", string>>;
 }
 
 const EL_CLASS: Record<Element, string> = {
@@ -123,10 +136,12 @@ export default function StoryReport({
     self: rawFolds.self ? tidyFold("self", rawFolds.self) : undefined,
     praise: rawFolds.praise ? tidyFold("praise", rawFolds.praise) : undefined,
     lack: rawFolds.lack ? tidyFold("lack", rawFolds.lack) : undefined,
+    flow: rawFolds.flow ? tidyFold("flow", rawFolds.flow) : undefined,
     improve: rawFolds.improve ? tidyFold("improve", rawFolds.improve) : undefined,
     lucky: rawFolds.lucky ? tidyFold("lucky", rawFolds.lucky) : undefined,
   };
-  const hasFolds = Boolean(f.elements || f.self || f.praise || f.lack || f.improve);
+  const hasFolds = Boolean(f.elements || f.self || f.praise || f.lack || f.flow || f.improve);
+  const heads = reading?.heads ?? {};
   // 요약하자면: 총운 한 줄 → 도리가 본 이유 → 고민에 대한 답을 라벨 없이 한 흐름으로 이어요.
   const joinFlow = (parts: Array<string | undefined | null>) =>
     parts
@@ -173,37 +188,24 @@ export default function StoryReport({
         <p className="pt-3.5 text-xs text-gray-500">각 제목을 누르면 풀이가 펼쳐져요</p>
         {hasFolds ? (
           <>
-            {f.elements && (
-              <Fold testId="story-fold-elements" label="STEP 1" title="오행으로 보는 사주">
-                <p className="mb-2.5 flex flex-wrap gap-1.5">
-                  {report.elements.map((e) => (
-                    <span key={e.name} className="rounded-full bg-brand-50 px-2.5 py-1 text-[11px] font-bold text-gray-700">
-                      {e.name} {e.count}
-                    </span>
-                  ))}
-                </p>
-                <Paras text={f.elements} />
-              </Fold>
-            )}
-            {f.self && (
-              <Fold testId="story-fold-self" label="STEP 2" title="나는 어떤 사람인가?">
-                <Paras text={f.self} />
-              </Fold>
-            )}
-            {f.praise && (
-              <Fold testId="story-fold-praise" label="STEP 3" title="이건 정말 칭찬해요 👏">
-                <Paras text={f.praise} />
-              </Fold>
-            )}
-            {f.lack && (
-              <Fold testId="story-fold-lack" label="STEP 4" title="그렇지만 이건 조금 부족해요">
-                <Paras text={f.lack} />
-              </Fold>
-            )}
-            {(f.improve || (concern && concern.answers.length > 1)) && (
-              <Fold testId="story-fold-improve" label="STEP 5" title="이렇게 개선해보아요 🌱">
-                {f.improve && <Paras text={f.improve} />}
-                {concern && concern.answers.length > 1 && (
+            {STEPS.filter((st) => f[st.key] || (st.key === "improve" && (concern && concern.answers.length > 1))).map((st, n) => (
+              <Fold
+                key={st.key}
+                testId={`story-fold-${st.key}`}
+                label={heads[st.key] ? `STEP ${n + 1} · ${st.name}` : `STEP ${n + 1}`}
+                title={heads[st.key] || st.name}
+              >
+                {st.key === "elements" && (
+                  <p className="mb-2.5 flex flex-wrap gap-1.5">
+                    {report.elements.map((e) => (
+                      <span key={e.name} className="rounded-full bg-brand-50 px-2.5 py-1 text-[11px] font-bold text-gray-700">
+                        {e.name} {e.count}
+                      </span>
+                    ))}
+                  </p>
+                )}
+                {f[st.key] && <Paras text={f[st.key] as string} />}
+                {st.key === "improve" && concern && concern.answers.length > 1 && (
                   <ul className="mt-3 space-y-2.5">
                     {concern.answers.slice(1).map((a) => (
                       <li key={a.id} className="rounded-xl bg-brand-50/60 px-3.5 py-2.5">
@@ -214,7 +216,7 @@ export default function StoryReport({
                   </ul>
                 )}
               </Fold>
-            )}
+            ))}
           </>
         ) : (
           <>
@@ -223,9 +225,21 @@ export default function StoryReport({
                 {pt.body}
               </Fold>
             ))}
+            {t.timing.length > 0 && (
+              <Fold label="올해와 이번 달의 흐름" title={firstSentence(t.timing[0].body)}>
+                <ul className="space-y-2.5">
+                  {t.timing.map((x) => (
+                    <li key={x.title}>
+                      <b className="text-gray-900">{x.title}</b>
+                      <p>{x.body}</p>
+                    </li>
+                  ))}
+                </ul>
+              </Fold>
+            )}
           </>
         )}
-        <Fold testId="story-fold-lucky" label="행운 처방" title={`행운 컬러는 ${t.lucky.color}, 방향은 ${t.lucky.direction}${iyeyo(t.lucky.direction)}`}>
+        <Fold testId="story-fold-lucky" label="행운 처방" title={heads.lucky || `행운 컬러는 ${t.lucky.color}, 방향은 ${t.lucky.direction}${iyeyo(t.lucky.direction)}`}>
           {f.lucky && <Paras text={f.lucky} className="mb-3.5" />}
           <p className="flex items-center gap-2">
             <span aria-hidden="true" className="h-4 w-4 shrink-0 rounded-full border border-black/10" style={{ backgroundColor: t.lucky.hex }} />

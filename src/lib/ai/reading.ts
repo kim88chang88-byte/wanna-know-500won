@@ -157,6 +157,7 @@ export interface DetailFolds {
   self?: string;
   praise?: string;
   lack?: string;
+  flow?: string;
   improve?: string;
   lucky?: string;
 }
@@ -171,6 +172,8 @@ export interface PublicReading {
   story?: string;
   /** 접이식 풀이를 쭉 이어 쓴 글 (없을 수도 있어요) */
   folds?: DetailFolds;
+  /** 접이식 항목마다 그 사람 얘기를 담은 한 줄 제목 */
+  heads?: DetailFolds;
   indicators: PublicIndicator[];
 }
 

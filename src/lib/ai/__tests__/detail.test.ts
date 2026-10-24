@@ -36,4 +36,11 @@ describe("parseDetail", () => {
   it("모든 주제에 관점이 있다", () => {
     for (const k of Object.keys(TOPIC_LABEL)) expect(typeof (TOPIC_ANGLE as Record<string, string>)[k]).toBe("string");
   });
+  it("항목 제목은 줄바꿈·따옴표를 정리하고 글이 있는 항목만 살린다", () => {
+    const d = parseDetail({ ...ok, flow: fold, heads: { elements: '"단단한 흙 속에 칼날이 빠져 있네요"', self: "짧", praise: "강점이 선명하게 보이는 사람이죠", lack: "", flow: "올해는 준비에 힘을 싣는 해예요", improve: "작은 행동부터 시작해요 오늘", lucky: "물 기운을 채워 주면 좋아요" } });
+    expect(d?.heads.elements).toBe("단단한 흙 속에 칼날이 빠져 있네요");
+    expect(d?.heads.self).toBeUndefined();
+    expect(d?.heads.flow).toBe("올해는 준비에 힘을 싣는 해예요");
+    expect(Object.keys(d?.folds ?? {}).length).toBe(7);
+  });
 });

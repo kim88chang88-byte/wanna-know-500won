@@ -14,6 +14,7 @@ export interface VaultSnapshotInput {
   reason: string | null;
   story?: string | null;
   folds?: object | null;
+  heads?: object | null;
   note: string | null;
 }
 

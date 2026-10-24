@@ -23,6 +23,12 @@ export const maxDuration = 60;
 
 type ReadingStatus = "ok" | "unavailable" | "failed";
 
+/** 글 속에서 부를 이름. 글자·숫자·공백만 남기고 10자까지만 써요. (닉네임은 이용자가 정한 값이라 지시문처럼 쓰이지 않게 걸러요) */
+function callName(nick: string | undefined | null): string | null {
+  const t = (nick ?? "").replace(/[^0-9A-Za-z가-힣 ]/g, "").trim().slice(0, 10);
+  return t || null;
+}
+
 export async function POST(request: Request) {
   const denied = guardOrigin(request) ?? (await enforceLimits(request, { name: "reading", windowMs: 60000, ip: 6, user: 12 }, "뽑기가 너무 빨라요. 잠시 뒤에 다시 시도해줘요."));
   if (denied) return denied;
@@ -120,7 +126,7 @@ export async function POST(request: Request) {
     // 긴 "요약하자면" 글은 같은 시간에 따로 써요. 한도를 한 번 더 쓰고, 실패해도 풀이는 그대로 나가요.
     const detailGate = await takeAiBudget(process.env, db);
     const detailPromise = detailGate === "ok"
-      ? interpretDetail(chart, { topic, gender: input.gender, concern, extra }).catch((err) => {
+      ? interpretDetail(chart, { topic, gender: input.gender, concern, extra: { ...extra, core: buildCoreFacts(input, now, true), name: callName(session?.nick) } }).catch((err) => {
           console.error("interpretDetail failed:", err instanceof Error ? err.message : "unknown");
           return null;
         })
@@ -130,7 +136,7 @@ export async function POST(request: Request) {
     const cookieHeader = request.headers.get("cookie");
     const entitled = hasEntitlement(readCookie(cookieHeader, ENTITLEMENT_COOKIE), process.env.AUTH_SECRET, session?.sub ?? null);
     reading = toPublicReading(full, "free", !isPremiumLocked(process.env) || entitled);
-    if (detail) reading = { ...reading, ...(detail.story ? { story: detail.story } : {}), folds: detail.folds };
+    if (detail) reading = { ...reading, ...(detail.story ? { story: detail.story } : {}), folds: detail.folds, heads: detail.heads };
   } catch (err) {
     if (err instanceof ReadingUnavailableError) {
       readingStatus = "unavailable";
