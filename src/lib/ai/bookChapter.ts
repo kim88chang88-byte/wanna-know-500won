@@ -295,11 +295,15 @@ Object.assign(CHAPTER_SPECS, {
 /** 동시에 보낼 AI 호출 수. 한꺼번에 너무 많이 보내면 429(요청 한도)가 나요. */
 const POOL = 40;
 let active = 0;
+let ramp = 0;
 const waiters: Array<() => void> = [];
 async function slot<T>(fn: () => Promise<T>): Promise<T> {
   if (active >= POOL) await new Promise<void>((r) => waiters.push(r));
   active++;
   try {
+    // 한꺼번에 몰리면 429 가 나서, 호출 시작을 조금씩 어긋나게 해요.
+    const wait = Math.min(ramp++, 40) * 350;
+    if (wait > 0) await new Promise((r) => setTimeout(r, wait));
     return await fn();
   } finally {
     active--;
@@ -386,6 +390,7 @@ async function rewriteOne(pages: BookPage[], page: BookPage, spec: ChapterSpec, 
 export async function rewriteChapters(pages: BookPage[], opts: ChapterOptions = {}): Promise<{ replaced: Record<number, BookSection[]>; note: string }> {
   const targets = pages.filter((p) => CHAPTER_SPECS[p.key] && !p.sections.some((s) => s.locked));
   if (targets.length === 0) return { replaced: {}, note: "skip" };
+  ramp = 0;
   const hardStop = Date.now() + 36_000;
   const outs = await Promise.all(targets.map((p) => rewriteOne(pages, p, CHAPTER_SPECS[p.key], opts, hardStop)));
   const replaced: Record<number, BookSection[]> = {};
