@@ -342,6 +342,64 @@ function Visual({ page, report }: { page: BookPage; report: PremiumReportView })
   }
 }
 
+/** 장별로 어울리는 도리 친구(기존 이미지만 사용) */
+function coverImage(key: string, title: string): string {
+  if (title.startsWith("재물")) return "/images/animal-rabbit-rich.webp";
+  if (title.startsWith("연애") || key.includes("love")) return "/images/animal-panda-couple.webp";
+  if (key === "daeun" || key === "years") return "/images/premium-scene-dragon.webp";
+  if (key === "nature" || key === "elements") return "/images/animal-fox.webp";
+  return "/images/animal-otter.webp";
+}
+
+/** 웹툰 느낌의 장 표지: 도리 컷 + 말풍선 */
+function ChapterCover({ page }: { page: BookPage }) {
+  return (
+    <div data-testid="chapter-cover" className="mb-6 flex items-end gap-3 rounded-2xl border border-[#e6c887]/25 bg-gradient-to-br from-[#26223a] to-[#16131f] p-3">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src={coverImage(page.key, page.title)} alt="" width={84} height={84} className="h-[84px] w-[84px] shrink-0 rounded-xl object-contain" />
+      <div className="relative flex-1 rounded-2xl rounded-bl-sm bg-[#fbf3de] px-3.5 py-2.5 text-[#2a2438]">
+        <p className="text-[11px] font-bold tracking-wide text-[#a07a2c]">도리가 말해요</p>
+        <p className="mt-0.5 text-[13.5px] font-semibold leading-snug">이번 장에서는 ‘{page.title}’을 차분히 살펴볼게요.</p>
+      </div>
+    </div>
+  );
+}
+
+const NEXT_PRODUCTS = [
+  { t: "올해 월별 운세 한눈에", d: "달마다 조심할 일과 기회를 짚어드려요", h: "/" },
+  { t: "궁합이 궁금하다면", d: "둘의 사주를 겹쳐 보는 500원 풀이", h: "/" },
+  { t: "요즘 고민, 한 가지만 콕", d: "500원으로 고민에 맞춘 한 줄 답을 받아요", h: "/" },
+];
+
+/** 장 끝: 다음 장 예고 + 다음 상품 배너 */
+function ChapterEnd({ next, idx }: { next?: BookPage; idx: number }) {
+  const prod = NEXT_PRODUCTS[idx % NEXT_PRODUCTS.length];
+  return (
+    <div className="mt-8 space-y-3">
+      {next && (
+        <div data-testid="next-teaser" className="rounded-2xl border border-dashed border-[#e6c887]/40 px-4 py-3 text-center">
+          <p className="text-[11px] font-bold tracking-widest text-[#e6c887]">NEXT CHAPTER</p>
+          <p className="mt-1 font-serifKr text-[14.5px] text-[#fbf3de]">다음 장에서는 ‘{next.title}’을 알아봐요.</p>
+        </div>
+      )}
+      <a
+        href={prod.h}
+        data-testid="next-product-banner"
+        className="flex items-center gap-3 rounded-2xl bg-gradient-to-r from-[#f0d9a0] to-[#d3ac62] px-4 py-3.5 text-[#1b1824] active:scale-[0.99] transition-transform"
+      >
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/images/animal-otter.webp" alt="" width={44} height={44} className="h-11 w-11 shrink-0 object-contain" />
+        <span className="flex-1">
+          <span className="block text-[10px] font-bold tracking-widest opacity-70">다음 상품</span>
+          <span className="block text-[14px] font-bold leading-tight">{prod.t}</span>
+          <span className="block text-[12px] opacity-80">{prod.d}</span>
+        </span>
+        <span aria-hidden="true" className="text-lg font-bold">›</span>
+      </a>
+    </div>
+  );
+}
+
 /** flush: 이미 미드나잇 톤의 틀 안에 들어갈 때 바깥 테두리·배경을 빼고 내용만 보여요. */
 export default function PremiumBook({ report, flush = false }: { report: PremiumReportView; flush?: boolean }) {
   const pages = report.book;
@@ -452,6 +510,8 @@ export default function PremiumBook({ report, flush = false }: { report: Premium
           </p>
         )}
 
+        <ChapterCover page={page} />
+
         <Visual page={page} report={report} />
 
         <div className="space-y-5">
@@ -491,6 +551,8 @@ export default function PremiumBook({ report, flush = false }: { report: Premium
         )}
 
         {page.evidence && page.evidence.length > 0 && <Evidence rows={page.evidence} />}
+
+        <ChapterEnd next={pages[i + 1]} idx={i} />
       </article>
 
       {lockedHere > 0 && (
