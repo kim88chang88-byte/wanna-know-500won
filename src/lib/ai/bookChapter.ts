@@ -231,25 +231,54 @@ Object.assign(CHAPTER_SPECS, {
   ),
 });
 
+/** 동시에 보낼 AI 호출 수. 한꺼번에 너무 많이 보내면 429(요청 한도)가 나요. */
+const POOL = 12;
+let active = 0;
+const waiters: Array<() => void> = [];
+async function slot<T>(fn: () => Promise<T>): Promise<T> {
+  if (active >= POOL) await new Promise<void>((r) => waiters.push(r));
+  active++;
+  try {
+    return await fn();
+  } finally {
+    active--;
+    waiters.shift()?.();
+  }
+}
+
 async function rewriteOne(pages: BookPage[], page: BookPage, spec: ChapterSpec, opts: ChapterOptions): Promise<{ sections: BookSection[] | null; err: string }> {
   const facts = chapterFacts(pages, page, opts.name ?? null, opts.concern ?? null);
   const model = opts.model ?? process.env.ANTHROPIC_MODEL_PAID ?? DEFAULT_PAID_MODEL;
   const errs: string[] = [];
+  const deadline = Date.now() + 30_000;
   const results = await Promise.all(
     spec.parts.map((part) =>
-      callJson<BookSection[]>({
-        system: CHAPTER_SYSTEM_PROMPT,
-        user: `${facts}\n\n[장 전체 구성 — 소제목별 역할]\n${spec.roles.map(([h, r]) => `- ${h}: ${r}`).join("\n")}\n\n[이번에 쓸 소제목]\n${part.headings.map((h, i) => `${i + 1}. ${h}`).join("\n")}\n${part.tail}`,
-        schema: CHAPTER_SCHEMA,
-        parse: (v) => parseChapter(v, part.headings),
-        maxTokens: 5000,
-        timeoutMs: 50_000,
-        attempts: 1,
-        model,
-        apiKey: opts.apiKey,
-        fetchImpl: opts.fetchImpl,
-      }).catch((e) => {
-        errs.push(e instanceof Error ? e.message : "unknown");
+      slot(async () => {
+        for (let k = 0; k < 2; k++) {
+          try {
+            return await callJson<BookSection[]>({
+              system: CHAPTER_SYSTEM_PROMPT,
+              user: `${facts}\n\n[장 전체 구성 — 소제목별 역할]\n${spec.roles.map(([h, r]) => `- ${h}: ${r}`).join("\n")}\n\n[이번에 쓸 소제목]\n${part.headings.map((h, i) => `${i + 1}. ${h}`).join("\n")}\n${part.tail}`,
+              schema: CHAPTER_SCHEMA,
+              parse: (v) => parseChapter(v, part.headings),
+              maxTokens: 5000,
+              timeoutMs: 45_000,
+              attempts: 1,
+              model,
+              apiKey: opts.apiKey,
+              fetchImpl: opts.fetchImpl,
+            });
+          } catch (e) {
+            const msg = e instanceof Error ? e.message : "unknown";
+            // 요청 한도(429)는 잠깐 쉬었다가 한 번 더 시도해요. 남은 시간이 없으면 포기해요.
+            if (k === 0 && msg.includes("429") && Date.now() < deadline) {
+              await new Promise((r) => setTimeout(r, 3000));
+              continue;
+            }
+            errs.push(msg);
+            return null;
+          }
+        }
         return null;
       }),
     ),
