@@ -5,8 +5,11 @@ import { isPremiumLocked } from "@/lib/premium/config";
 import { buildPremiumReport, validatePremiumInput } from "@/lib/premium/report";
 import { enforceLimits, guardOrigin } from "@/lib/guard";
 import { addBookNotes } from "@/lib/ai/bookNotes";
+import { chapterName, rewriteMoneyChapter } from "@/lib/ai/bookChapter";
 import { takeAiBudget } from "@/lib/ai/budget";
 import { createDb, loadDbConfig } from "@/lib/db/supabase";
+
+export const maxDuration = 60;
 
 export async function POST(request: Request) {
   const denied = guardOrigin(request) ?? (await enforceLimits(request, { name: "premium", windowMs: 60000, ip: 20, user: 40 }, "요청이 너무 빨라요. 잠시 뒤에 다시 시도해 주세요."));
@@ -29,18 +32,44 @@ export async function POST(request: Request) {
     const entitled = hasEntitlement(readCookie(cookieHeader, ENTITLEMENT_COOKIE), process.env.AUTH_SECRET, session?.sub ?? null);
     const lock = isPremiumLocked(process.env) && !entitled;
     const report = buildPremiumReport(parsed.value, new Date(), parsed.level, parsed.topic, lock, parsed.concern, parsed.partner);
-    // 프리미엄(전체) 리포트에는 쪽마다 AI 가 쓴 '도리의 한 줄'을 붙여요. 키가 없거나 한도를 넘거나 실패하면 한 줄만 빠져요.
+    // 프리미엄(전체) 리포트에는 쪽마다 AI 가 쓴 '도리의 한 줄'을 붙이고, 재물운 장은 AI 가 이 사람 이야기로 다시 써요.
+    // 키가 없거나 한도를 넘거나 실패하면 그 부분만 빠지고 기존 풀이가 그대로 나가요.
+    let chapterNote = "skip";
     if (parsed.level === "full" && report.book.length > 0 && process.env.ANTHROPIC_API_KEY) {
-      try {
-        const gate = await takeAiBudget(process.env, (() => { const c = loadDbConfig(process.env); return c ? createDb(c) : null; })());
-        if (gate === "ok") {
-          report.book = await addBookNotes(report.book, { kind: parsed.partner ? "compat" : "personal", concern: parsed.concern });
+      const dbCfg = loadDbConfig(process.env);
+      const db = dbCfg ? createDb(dbCfg) : null;
+      const book0 = report.book;
+      const notesJob = (async () => {
+        try {
+          const gate = await takeAiBudget(process.env, db);
+          if (gate === "ok") return await addBookNotes(book0, { kind: parsed.partner ? "compat" : "personal", concern: parsed.concern });
+        } catch (err) {
+          console.error("book notes failed:", err instanceof Error ? err.message : "unknown");
         }
-      } catch (err) {
-        console.error("book notes failed:", err instanceof Error ? err.message : "unknown");
+        return book0;
+      })();
+      const chapterJob = (async () => {
+        if (parsed.partner) return null;
+        try {
+          const gate = await takeAiBudget(process.env, db);
+          if (gate !== "ok") return null;
+          return await rewriteMoneyChapter(book0, { name: chapterName(session?.nick), concern: parsed.concern });
+        } catch (err) {
+          console.error("book chapter failed:", err instanceof Error ? err.message : "unknown");
+          return null;
+        }
+      })();
+      const [withNotes, chapter] = await Promise.all([notesJob, chapterJob]);
+      report.book = withNotes;
+      if (chapter) {
+        chapterNote = chapter.note;
+        if (chapter.note === "ok") {
+          const money = chapter.pages.find((p) => p.key === "topic");
+          if (money) report.book = report.book.map((p) => (p.no === money.no ? { ...p, sections: money.sections } : p));
+        }
       }
     }
-    return NextResponse.json({ report });
+    return NextResponse.json({ report, chapterNote });
   } catch (err) {
     // 없는 날짜(예: 윤달이 없는 해의 윤달)처럼 계산할 수 없는 입력이에요.
     console.error("premium report failed:", err instanceof Error ? err.message : "unknown");

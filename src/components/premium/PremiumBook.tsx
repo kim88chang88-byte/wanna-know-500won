@@ -23,6 +23,38 @@ const GOLD = "text-[#e6c887]";
 const HAIR = "border-[#e6c887]/25";
 
 /** "나와 비슷해요"를 눌러 확인해 보는 목록. 누른 개수에 따라 한마디가 나와요. (저장하지 않고 화면에서만 써요) */
+/** AI 가 쓴 장은 문단(빈 줄)과 "- " 목록, **굵은 핵심**이 들어 있어요. 일반 문장은 그대로 한 문단이에요. */
+function bold(text: string) {
+  return text.split(/(\*\*[^*]+\*\*)/g).map((t, i) =>
+    t.startsWith("**") && t.endsWith("**") && t.length > 4 ? (
+      <strong key={i} className="font-bold text-[#fbf3de]">{t.slice(2, -2)}</strong>
+    ) : (
+      <span key={i}>{t}</span>
+    ),
+  );
+}
+
+function RichBody({ text }: { text: string }) {
+  const blocks = text.split(/\n{2,}/).map((b) => b.trim()).filter(Boolean);
+  return (
+    <div className="mt-1.5 space-y-3 text-[14px] leading-[1.8] text-[#efe7d3]">
+      {blocks.map((b, i) => {
+        const lines = b.split("\n").map((l) => l.trim()).filter(Boolean);
+        if (lines.length > 0 && lines.every((l) => l.startsWith("- "))) {
+          return (
+            <ul key={i} className="list-disc space-y-1.5 pl-5">
+              {lines.map((l, j) => (
+                <li key={j}>{bold(l.slice(2))}</li>
+              ))}
+            </ul>
+          );
+        }
+        return <p key={i}>{bold(lines.join(" "))}</p>;
+      })}
+    </div>
+  );
+}
+
 function CheckList({ items }: { items: string[] }) {
   const [on, setOn] = useState<boolean[]>(() => items.map(() => false));
   const hit = on.filter(Boolean).length;
@@ -437,7 +469,7 @@ export default function PremiumBook({ report, flush = false }: { report: Premium
                   <span className="sr-only">잠긴 풀이예요. 전체 열기를 누르면 볼 수 있어요.</span>
                 </div>
               ) : (
-                <p className="mt-1.5 text-[14px] leading-[1.8] text-[#efe7d3]">{s.body}</p>
+                <RichBody text={s.body} />
               )}
               {!s.locked && s.checks && s.checks.length > 0 && <CheckList items={s.checks} />}
               {!s.locked && s.reality && <RealityPick rc={s.reality} />}
