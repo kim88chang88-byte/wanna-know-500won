@@ -86,6 +86,12 @@ function brief(p: BookPage, n: number): string {
   return `${p.title} — ${p.lead}\n` + p.sections.filter((s) => !s.locked).map((s) => `· ${s.heading}: ${s.body.slice(0, n)}`).join("\n");
 }
 
+/** 표에 담긴 사실(행운 색·방향, 월별 흐름 등)도 근거로 넘겨요. */
+function tableFacts(p: BookPage): string {
+  const rows = p.tables.flatMap((t) => t.rows.filter((r) => !r.locked).slice(0, 14).map((r) => `· [${t.title}] ${r.label}: ${r.value}${r.note ? ` (${r.note})` : ""}`));
+  return rows.length ? `\n${rows.join("\n")}` : "";
+}
+
 /** 근거 사실: 그 장의 기존 본문 전체 + 주변 쪽 요약(일주·신강약·격국 등) */
 export function chapterFacts(pages: BookPage[], page: BookPage, name: string | null, concern: Concern | null): string {
   const others = pages
@@ -95,7 +101,7 @@ export function chapterFacts(pages: BookPage[], page: BookPage, name: string | n
   const payload = [
     name ? `이름: ${name}님` : "이름: 없음",
     hasConcern(concern) ? `고민: ${[...concern!.tags.map(concernLabel), concern!.text].filter(Boolean).join(" / ")}` : "고민: 없음",
-    `\n[이 장의 근거 사실]\n${brief(page, 700)}`,
+    `\n[이 장의 근거 사실]\n${brief(page, 700)}${tableFacts(page)}`,
     `\n[다른 쪽 요약]\n${others}`,
   ].join("\n");
   return payload;
@@ -231,8 +237,32 @@ Object.assign(CHAPTER_SPECS, {
   ),
 });
 
+Object.assign(CHAPTER_SPECS, {
+  tengods: spec6(
+    ["나의 주력 기운", "사람들과의 관계", "사회에서 보이는 얼굴", "어울리는 분야와 환경"],
+    ["가장 두드러진 십성 묶음이 재능으로 드러나는 모습. 관계 이야기는 다음 소제목에 남겨 둬.", "그 기운이 사람 사이에서 만드는 모습만. 앞 내용을 반복하지 마.", "월주(사회 자리)의 십성으로 본 일터·사회에서의 인상만.", `어울리는 분야와 환경 유형만(직업명 단정 금지). ${NO_INVENT}`],
+  ),
+  "tengods:2": spec6(
+    ["그 밖의 기운들", "비어 있는 기운의 의미", "글자들이 만나 만드는 이야기", "채워 가면 좋은 기운"],
+    ["나머지 십성 묶음 중 실제로 있는 것의 역할만.", "원국에 없는 십성과 지장간에 숨은 힘만. 근거에 없으면 만들지 마.", "근거 사실에 나온 십성 조합의 의미만. 없으면 이 소제목은 짧게 이어 써도 돼.", "채워 가면 좋은 기운과 그 방법의 방향만. 구체 행동은 '이렇게 해보세요'에 남겨 둬."],
+  ),
+  "years:2": spec6(
+    ["달별 흐름의 큰 그림", "힘이 실리는 달", "쉬어 가면 좋은 달", "달마다 쓰는 법"],
+    ["근거 사실의 분기·월 흐름을 한눈에. 달 이름은 '○월경' 형식만 사용.", "근거 사실에 나온 포인트 달과 그 달의 기운만. 없으면 꾸준한 흐름이라고 써.", "속도를 줄이면 좋은 시기를 겁주지 않고 정리하는 이야기만.", "계획·만남·결정을 달에 맞춰 배치하는 방법만. 앞 내용을 반복하지 마."],
+    "월 표기는 절기 기준이라 며칠 차이가 날 수 있다는 점을 한 번만 가볍게 덧붙여 줘.",
+  ),
+  concern: spec6(
+    ["지금 마음에 걸린 이야기", "사주가 말해 주는 이유", "앞으로의 흐름에서 보이는 답", "마음을 가볍게 하는 방법"],
+    ["'고민'이 있으면 그 마음을 먼저 알아주고, 없으면 이 쪽의 주제(근거 사실의 제목)를 이 사람의 요즘 마음으로 풀어 줘.", "근거 사실의 일간·십성·충합 중 이 고민과 이어지는 것만.", "세운·대운과 근거 사실에 나온 시기의 흐름만.", "기분과 생활을 가볍게 하는 방향만. 구체 행동은 '이렇게 해보세요'에 남겨 둬."],
+  ),
+  lucky: spec6(
+    ["나의 행운 요소", "일상에서 쓰는 법", "한 달 실천 계획", "마음에 두면 좋은 것"],
+    ["근거 사실의 행운 색·방향·숫자·아이템 표를 이 사람 이야기로 엮어서.", "색·방향·습관을 일상에서 쓰는 장면만. 앞 내용을 반복하지 마.", "근거 사실의 '한 달 행운 처방전'을 주차별 흐름으로 풀기만. 목록을 그대로 베끼지 마.", "처방을 부담 없이 이어 가는 마음가짐만."],
+  ),
+});
+
 /** 동시에 보낼 AI 호출 수. 한꺼번에 너무 많이 보내면 429(요청 한도)가 나요. */
-const POOL = 12;
+const POOL = 16;
 let active = 0;
 const waiters: Array<() => void> = [];
 async function slot<T>(fn: () => Promise<T>): Promise<T> {
@@ -246,7 +276,7 @@ async function slot<T>(fn: () => Promise<T>): Promise<T> {
   }
 }
 
-async function rewriteOne(pages: BookPage[], page: BookPage, spec: ChapterSpec, opts: ChapterOptions): Promise<{ sections: BookSection[] | null; err: string }> {
+async function rewriteOne(pages: BookPage[], page: BookPage, spec: ChapterSpec, opts: ChapterOptions, hardStop: number): Promise<{ sections: BookSection[] | null; err: string }> {
   const facts = chapterFacts(pages, page, opts.name ?? null, opts.concern ?? null);
   const model = opts.model ?? process.env.ANTHROPIC_MODEL_PAID ?? DEFAULT_PAID_MODEL;
   const errs: string[] = [];
@@ -255,6 +285,11 @@ async function rewriteOne(pages: BookPage[], page: BookPage, spec: ChapterSpec, 
     spec.parts.map((part) =>
       slot(async () => {
         for (let k = 0; k < 2; k++) {
+          // 서버 제한 시간(60초)에 걸리지 않게, 늦게 시작하는 호출은 포기하고 그 장은 원래 쪽을 써요.
+          if (Date.now() > hardStop) {
+            errs.push("deadline");
+            return null;
+          }
           try {
             return await callJson<BookSection[]>({
               system: CHAPTER_SYSTEM_PROMPT,
@@ -262,7 +297,7 @@ async function rewriteOne(pages: BookPage[], page: BookPage, spec: ChapterSpec, 
               schema: CHAPTER_SCHEMA,
               parse: (v) => parseChapter(v, part.headings),
               maxTokens: 5000,
-              timeoutMs: 45_000,
+              timeoutMs: Math.max(8_000, Math.min(45_000, hardStop + 12_000 - Date.now())),
               attempts: 1,
               model,
               apiKey: opts.apiKey,
@@ -295,7 +330,8 @@ async function rewriteOne(pages: BookPage[], page: BookPage, spec: ChapterSpec, 
 export async function rewriteChapters(pages: BookPage[], opts: ChapterOptions = {}): Promise<{ replaced: Record<number, BookSection[]>; note: string }> {
   const targets = pages.filter((p) => CHAPTER_SPECS[p.key] && !p.sections.some((s) => s.locked));
   if (targets.length === 0) return { replaced: {}, note: "skip" };
-  const outs = await Promise.all(targets.map((p) => rewriteOne(pages, p, CHAPTER_SPECS[p.key], opts)));
+  const hardStop = Date.now() + 28_000;
+  const outs = await Promise.all(targets.map((p) => rewriteOne(pages, p, CHAPTER_SPECS[p.key], opts, hardStop)));
   const replaced: Record<number, BookSection[]> = {};
   const notes = targets.map((p, i) => {
     const o = outs[i];
@@ -313,7 +349,7 @@ export async function rewriteChapters(pages: BookPage[], opts: ChapterOptions = 
 export async function rewriteMoneyChapter(pages: BookPage[], opts: ChapterOptions = {}): Promise<{ pages: BookPage[]; note: string }> {
   const page = pages.find(isMoneyChapter);
   if (!page || page.sections.some((s) => s.locked)) return { pages, note: "skip" };
-  const o = await rewriteOne(pages, page, CHAPTER_SPECS["topic:money"] ?? { parts: MONEY_PARTS, roles: MONEY_ROLES }, opts);
+  const o = await rewriteOne(pages, page, CHAPTER_SPECS["topic:money"] ?? { parts: MONEY_PARTS, roles: MONEY_ROLES }, opts, Date.now() + 28_000);
   if (!o.sections) return { pages, note: `fail:${o.err}` };
   return { pages: pages.map((p) => (p.no === page.no ? { ...p, sections: o.sections as BookSection[] } : p)), note: "ok" };
 }
