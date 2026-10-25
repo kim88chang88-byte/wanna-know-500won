@@ -1,5 +1,6 @@
 "use client";
 
+import { fetchRestChapters, mergeChapters } from "@/lib/premium/mergeChapters";
 import { useEffect, useRef, useState } from "react";
 import {
   COMPAT_STEPS,
@@ -118,16 +119,17 @@ function ChoiceButton({
 type ReadingStatus = "ok" | "unavailable" | "failed";
 
 /** 프리미엄 리포트를 받아요. 실패해도 예외 대신 사용자에게 보여 줄 문장을 돌려줘요. */
-async function fetchPremiumReport(input: BirthInput, level: "basic" | "full", topic: string, concern: Concern | null, partner: BirthInput | null, signal: AbortSignal): Promise<{ report: PremiumReportView | null; error: string | null }> {
+async function fetchPremiumReport(input: BirthInput, level: "basic" | "full", topic: string, concern: Concern | null, partner: BirthInput | null, signal: AbortSignal): Promise<{ report: PremiumReportView | null; error: string | null; rest?: unknown }> {
   try {
+    const reqBody = { ...input, level, topic, concern, ...(partner ? { partner } : {}) };
     const res = await fetch("/api/premium", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...input, level, topic, concern, ...(partner ? { partner } : {}) }),
+      body: JSON.stringify(reqBody),
       signal,
     });
-    const data = (await res.json().catch(() => null)) as { report?: PremiumReportView; error?: string } | null;
-    if (res.ok && data?.report) return { report: data.report, error: null };
+    const data = (await res.json().catch(() => null)) as { report?: PremiumReportView; error?: string; pendingChapters?: string[] } | null;
+    if (res.ok && data?.report) return { report: data.report, error: null, rest: data.pendingChapters?.length ? reqBody : undefined };
     return { report: null, error: data?.error ?? "사주 리포트를 불러오지 못했어요. 잠시 뒤에 다시 시도해 주세요." };
   } catch {
     if (signal.aborted) return { report: null, error: null };
@@ -392,6 +394,8 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
       if (ctrl.signal.aborted) return;
       setPremiumReport(p.report);
       setPremiumError(p.error);
+      // 나머지 장은 이어서 받아 와서 끼워 넣어요.
+      if (p.rest) void fetchRestChapters(p.rest, ctrl.signal).then((rep) => { if (!ctrl.signal.aborted) setPremiumReport((prev) => (prev ? mergeChapters(prev, rep ?? undefined) : prev)); });
       setChart(data.chart);
       setAskInput(input);
       setBirthNote([data.birthAdjustNote, data.boundaryNote].filter(Boolean).join("\n") || null);

@@ -138,6 +138,8 @@ export interface ChapterOptions {
   fetchImpl?: typeof fetch;
   /** 호출마다 쓴 토큰(비용 측정용) */
   onUsage?: (u: { input: number; output: number }) => void;
+  /** 이 키의 쪽만 다시 써요(없으면 모두) */
+  keys?: string[];
 }
 
 export interface ChapterSpec {
@@ -389,7 +391,7 @@ async function rewriteOne(pages: BookPage[], page: BookPage, spec: ChapterSpec, 
  * replaced: 쪽 번호 → 새 본문. note 예: "money:ok,love:ok,career:fail(...)"
  */
 export async function rewriteChapters(pages: BookPage[], opts: ChapterOptions = {}): Promise<{ replaced: Record<number, BookSection[]>; note: string }> {
-  const targets = pages.filter((p) => CHAPTER_SPECS[p.key] && !p.sections.some((s) => s.locked));
+  const targets = pages.filter((p) => CHAPTER_SPECS[p.key] && (!opts.keys || opts.keys.includes(p.key)) && !p.sections.some((s) => s.locked));
   if (targets.length === 0) return { replaced: {}, note: "skip" };
   ramp = 0;
   const hardStop = Date.now() + 36_000;
@@ -415,3 +417,7 @@ export async function rewriteMoneyChapter(pages: BookPage[], opts: ChapterOption
   if (!o.sections) return { pages, note: `fail:${o.err}` };
   return { pages: pages.map((p) => (p.no === page.no ? { ...p, sections: o.sections as BookSection[] } : p)), note: "ok" };
 }
+
+/** 한 번에 다 쓰면 AI 요청 한도(429)에 걸려서 두 번에 나눠 써요. 첫 묶음이 먼저 오고, 나머지는 이어서 와요. */
+export const CHAPTER_BATCH_1 = ["preface", "overview", "pillars", "nature", "topic:money", "topic:love", "topic:career", "topic:health", "concern", "lucky"];
+export const CHAPTER_BATCH_2 = ["elements", "tengods", "tengods:2", "stage12", "sinsal", "gui", "geukguk", "daeun", "years", "years:2"];

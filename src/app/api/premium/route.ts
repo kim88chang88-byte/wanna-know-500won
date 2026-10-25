@@ -5,7 +5,7 @@ import { isPremiumLocked } from "@/lib/premium/config";
 import { buildPremiumReport, validatePremiumInput } from "@/lib/premium/report";
 import { enforceLimits, guardOrigin } from "@/lib/guard";
 import { addBookNotes } from "@/lib/ai/bookNotes";
-import { chapterName, rewriteChapters } from "@/lib/ai/bookChapter";
+import { CHAPTER_BATCH_1, CHAPTER_BATCH_2, chapterName, rewriteChapters } from "@/lib/ai/bookChapter";
 import { takeAiBudget } from "@/lib/ai/budget";
 import { createDb, loadDbConfig } from "@/lib/db/supabase";
 
@@ -21,6 +21,8 @@ export async function POST(request: Request) {
   } catch {
     return NextResponse.json({ code: "bad_request", error: "잘못된 요청입니다." }, { status: 400 });
   }
+  // 두 번째 요청: 나머지 장만 AI 로 다시 써서 받아 가요. (장을 두 번에 나눠야 AI 요청 한도에 안 걸려요)
+  const second = typeof raw === "object" && raw !== null && (raw as { chapterBatch?: unknown }).chapterBatch === 2;
   const parsed = validatePremiumInput(raw);
   if (!parsed.ok) return NextResponse.json({ code: "bad_request", error: parsed.error }, { status: 400 });
 
@@ -41,6 +43,7 @@ export async function POST(request: Request) {
       const db = dbCfg ? createDb(dbCfg) : null;
       const book0 = report.book;
       const notesJob = (async () => {
+        if (second) return book0;
         try {
           const gate = await takeAiBudget(process.env, db);
           if (gate === "ok") return await addBookNotes(book0, { kind: parsed.partner ? "compat" : "personal", concern: parsed.concern });
@@ -54,7 +57,7 @@ export async function POST(request: Request) {
         try {
           const gate = await takeAiBudget(process.env, db);
           if (gate !== "ok") return null;
-          return await rewriteChapters(book0, { name: chapterName(session?.nick), concern: parsed.concern, onUsage: (u) => { usage.in += u.input; usage.out += u.output; usage.calls++; } });
+          return await rewriteChapters(book0, { keys: second ? CHAPTER_BATCH_2 : CHAPTER_BATCH_1, name: chapterName(session?.nick), concern: parsed.concern, onUsage: (u) => { usage.in += u.input; usage.out += u.output; usage.calls++; } });
         } catch (err) {
           console.error("book chapter failed:", err instanceof Error ? err.message : "unknown");
           return null;
@@ -68,7 +71,17 @@ export async function POST(request: Request) {
         if (Object.keys(rep).length > 0) report.book = report.book.map((p) => (rep[p.no] ? { ...p, sections: rep[p.no] } : p));
       }
     }
-    return NextResponse.json({ report, chapterNote, chapterUsage: usage });
+    if (second) {
+      // 두 번째 요청은 새로 쓴 장의 본문만 돌려줘요.
+      const replaced: Record<number, unknown> = {};
+      const base = buildPremiumReport(parsed.value, new Date(), parsed.level, parsed.topic, lock, parsed.concern, parsed.partner).book;
+      report.book.forEach((p, i) => {
+        if (CHAPTER_BATCH_2.includes(p.key) && JSON.stringify(p.sections) !== JSON.stringify(base[i]?.sections)) replaced[p.no] = p.sections;
+      });
+      return NextResponse.json({ replaced, chapterNote, chapterUsage: usage });
+    }
+    const pendingChapters = chapterNote !== "skip" && !parsed.partner && parsed.level === "full" && !lock ? CHAPTER_BATCH_2 : [];
+    return NextResponse.json({ report, chapterNote, chapterUsage: usage, pendingChapters });
   } catch (err) {
     // 없는 날짜(예: 윤달이 없는 해의 윤달)처럼 계산할 수 없는 입력이에요.
     console.error("premium report failed:", err instanceof Error ? err.message : "unknown");
