@@ -1,5 +1,19 @@
 import { DEFAULT_MODEL, ReadingFailedError, ReadingUnavailableError } from "./interpret";
 
+/** 실패 응답의 사유를 짧게 뽑아요(키·개인정보는 담기지 않아요). 잔액 부족처럼 운영자가 바로 조치해야 하는 경우는 눈에 띄는 말로 바꿔요. */
+async function apiErrorDetail(res: Response): Promise<string> {
+  let msg = "";
+  try {
+    const j = (await res.json()) as { error?: { message?: string } } | null;
+    msg = j?.error?.message ?? "";
+  } catch {
+    /* 본문이 없거나 JSON 이 아니면 상태 코드만 써요 */
+  }
+  if (/credit balance|billing|purchase credits/i.test(msg)) return `HTTP ${res.status} 크레딧 잔액 부족(Anthropic Billing 확인)`;
+  const short = msg.replace(/\s+/g, " ").slice(0, 80);
+  return short ? `HTTP ${res.status} ${short}` : `HTTP ${res.status}`;
+}
+
 /** 구조화 JSON 답변을 받는 공통 호출. 형식이 어긋나면 한 번 더 시도해요. 키가 없으면 ReadingUnavailableError, 실패하면 ReadingFailedError. */
 export async function callJson<T>(o: {
   system: string;
@@ -38,7 +52,11 @@ export async function callJson<T>(o: {
         signal: ctrl.signal,
       });
       if (res.status === 429 || res.status >= 500) { last = `HTTP ${res.status}`; continue; }
-      if (!res.ok) throw new ReadingFailedError(`HTTP ${res.status}`);
+      if (!res.ok) {
+        const detail = await apiErrorDetail(res);
+        console.error("AI 호출 실패:", detail);
+        throw new ReadingFailedError(detail);
+      }
       const data = (await res.json()) as { stop_reason?: string; usage?: { input_tokens?: number; output_tokens?: number }; content?: Array<{ type: string; text?: string }> };
       o.onUsage?.({ input: data.usage?.input_tokens ?? 0, output: data.usage?.output_tokens ?? 0 });
       if (data.stop_reason === "refusal" || data.stop_reason === "max_tokens") { last = data.stop_reason; continue; }

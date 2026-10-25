@@ -381,7 +381,7 @@ async function rewriteOne(pages: BookPage[], page: BookPage, spec: ChapterSpec, 
       }),
     ),
   );
-  if (results.some((r) => r === null)) return { sections: null, err: errs.join("/").slice(0, 80) };
+  if (results.some((r) => r === null)) return { sections: null, err: [...new Set(errs)].join("/").slice(0, 100) };
   const keep = page.sections.filter((s) => s.reality || (s.checks && s.checks.length > 0));
   return { sections: [...(results.flat() as BookSection[]), ...keep], err: "" };
 }

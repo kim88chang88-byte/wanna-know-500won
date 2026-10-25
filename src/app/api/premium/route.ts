@@ -67,6 +67,7 @@ export async function POST(request: Request) {
       report.book = withNotes;
       if (chapter) {
         chapterNote = chapter.note;
+        if (chapter.note.includes("fail")) console.error("book chapters:", chapter.note.slice(0, 300));
         const rep = chapter.replaced;
         if (Object.keys(rep).length > 0) report.book = report.book.map((p) => (rep[p.no] ? { ...p, sections: rep[p.no] } : p));
       }
