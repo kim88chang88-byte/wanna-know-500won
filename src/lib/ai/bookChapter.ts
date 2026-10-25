@@ -101,7 +101,7 @@ export function chapterFacts(pages: BookPage[], page: BookPage, name: string | n
   const payload = [
     name ? `이름: ${name}님` : "이름: 없음",
     hasConcern(concern) ? `고민: ${[...concern!.tags.map(concernLabel), concern!.text].filter(Boolean).join(" / ")}` : "고민: 없음",
-    `\n[이 장의 근거 사실]\n${brief(page, 700)}${tableFacts(page)}`,
+    `\n[이 장의 근거 사실]\n${brief(page, 480)}${tableFacts(page)}`,
     `\n[다른 쪽 요약]\n${others}`,
   ].join("\n");
   return payload;
@@ -293,7 +293,7 @@ Object.assign(CHAPTER_SPECS, {
 });
 
 /** 동시에 보낼 AI 호출 수. 한꺼번에 너무 많이 보내면 429(요청 한도)가 나요. */
-const POOL = 30;
+const POOL = 20;
 let active = 0;
 const waiters: Array<() => void> = [];
 async function slot<T>(fn: () => Promise<T>): Promise<T> {
@@ -307,13 +307,37 @@ async function slot<T>(fn: () => Promise<T>): Promise<T> {
   }
 }
 
+const ACTION_ONLY = "'이렇게 해보세요'는 문장으로 이어 쓰지 말고, 줄마다 '- '로 시작하는 실천 3가지로 써 줘. '한 줄 마무리'는 1~2문장.";
+
+/** 소제목 6개를 3개씩 두 갈래로 묶어요. 호출 수가 줄어 입력 토큰 비용과 요청 한도(429) 부담이 줄어요. */
+function repack(parts: Part[]): Part[] {
+  const heads = parts.flatMap((p) => p.headings);
+  if (heads.length <= 3) return parts;
+  const extras = [
+    ...new Set(
+      parts
+        .map((p) => p.tail.replace("이번에는 위 두 소제목만 순서대로 써 줘.", "").replace(ACTION_ONLY, "").trim())
+        .filter(Boolean),
+    ),
+  ].join(" ");
+  const cut = Math.ceil(heads.length / 2);
+  const a = heads.slice(0, cut);
+  const b = heads.slice(cut);
+  const base = "이번에는 위 소제목만 순서대로 써 줘.";
+  return [
+    { headings: a, tail: `${base} ${extras}`.trim() },
+    { headings: b, tail: `${base} ${b.includes("이렇게 해보세요") ? ACTION_ONLY : ""} ${extras}`.replace(/\s+/g, " ").trim() },
+  ];
+}
+
 async function rewriteOne(pages: BookPage[], page: BookPage, spec: ChapterSpec, opts: ChapterOptions, hardStop: number): Promise<{ sections: BookSection[] | null; err: string }> {
   const facts = chapterFacts(pages, page, opts.name ?? null, opts.concern ?? null);
   const model = opts.model ?? process.env.ANTHROPIC_MODEL_PAID ?? DEFAULT_PAID_MODEL;
   const errs: string[] = [];
   const deadline = Date.now() + 30_000;
+  const parts = repack(spec.parts);
   const results = await Promise.all(
-    spec.parts.map((part) =>
+    parts.map((part) =>
       slot(async () => {
         for (let k = 0; k < 2; k++) {
           // 서버 제한 시간(60초)에 걸리지 않게, 늦게 시작하는 호출은 포기하고 그 장은 원래 쪽을 써요.
@@ -339,7 +363,7 @@ async function rewriteOne(pages: BookPage[], page: BookPage, spec: ChapterSpec, 
             const msg = e instanceof Error ? e.message : "unknown";
             // 요청 한도(429)는 잠깐 쉬었다가 한 번 더 시도해요. 남은 시간이 없으면 포기해요.
             if (k === 0 && msg.includes("429") && Date.now() < deadline) {
-              await new Promise((r) => setTimeout(r, 3000));
+              await new Promise((r) => setTimeout(r, 5000));
               continue;
             }
             errs.push(msg);
