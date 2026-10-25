@@ -95,8 +95,8 @@ function tableFacts(p: BookPage): string {
 /** 근거 사실: 그 장의 기존 본문 전체 + 주변 쪽 요약(일주·신강약·격국 등) */
 export function chapterFacts(pages: BookPage[], page: BookPage, name: string | null, concern: Concern | null): string {
   const others = pages
-    .filter((p) => p.no !== page.no && ["overview", "nature", "geukguk", "elements", "daeun", "years"].includes(p.key))
-    .map((p) => brief(p, 140))
+    .filter((p) => p.no !== page.no && ["overview", "pillars", "nature", "geukguk", "elements", "daeun", "years"].includes(p.key))
+    .map((p) => brief(p, 90))
     .join("\n\n");
   const payload = [
     name ? `이름: ${name}님` : "이름: 없음",
@@ -263,8 +263,37 @@ Object.assign(CHAPTER_SPECS, {
   ),
 });
 
+Object.assign(CHAPTER_SPECS, {
+  preface: spec6(
+    ["사주팔자란 무엇인가", "나의 여덟 글자", "오행과 일간, 나를 읽는 열쇠", "이 리포트를 읽는 방법"],
+    ["사주팔자를 일상의 말로 쉽게. 이 사람의 이야기는 다음 소제목에서.", "근거 사실의 네 기둥(간지)을 이 사람의 여덟 글자로 짚어 주기만.", "일간과 오행 분포 중 이 사람에게 해당하는 것만 쉽게.", "서문→장→부록 순서의 읽는 법만. 앞 내용을 반복하지 마."],
+    "일상 비유를 한 가지 곁들여 일반인도 이해하게 써 줘.",
+  ),
+  overview: spec6(
+    ["나를 한 문장으로", "강점과 채우면 좋은 기운", "지금 지나는 계절", "올해의 한 줄"],
+    ["일주·신강약·격국으로 본 이 사람의 한 문장 소개.", "강점과 부족한 오행만. 앞 내용을 반복하지 마.", "지금 대운이 뜻하는 계절만(나이 숫자 금지).", "올해 세운의 분위기만."],
+  ),
+  pillars: spec6(
+    ["네 기둥으로 읽는 나의 지도", "일주가 말하는 나의 중심", "월주가 말하는 사회 속 모습", "기둥끼리 만나는 모습"],
+    ["연·월·일·시 기둥의 역할을 이 사람의 간지에 맞춰 한눈에.", "일간·일지(배우자 자리)만. 앞 내용을 반복하지 마.", "월주의 십성으로 본 일터·사회에서의 모습만.", "근거 사실에 나온 합·충·형만. 없으면 안정적인 구조라고 풀어 써."],
+    "시간을 모른다고 적혀 있으면 시주는 풀지 마.",
+  ),
+  geukguk: spec6(
+    ["나의 격국이 말하는 것", "신강·신약과 균형", "나를 돕는 용신", "잘 맞는 성장의 길"],
+    ["근거 사실의 격국이 뜻하는 삶의 틀만.", "신강·신약과 조후(계절) 이야기만.", "용신 오행과 그것이 생활에서 돕는 모습만. 행동은 '이렇게 해보세요'에.", "격국에 맞는 성장 방향만. 앞 내용을 반복하지 마."],
+  ),
+  daeun: spec6(
+    ["10년 단위 흐름 한눈에", "지금 대운", "지난 대운과 다음 대운", "큰 흐름을 지나는 마음가짐"],
+    ["대운 전체의 모양을 한눈에(나이 숫자 대신 '지금·다음').", "근거 사실의 지금 대운과 원국과의 만남만.", "지난·다음 대운의 분위기 차이만.", "계절에 맞게 움직이는 태도만. 행동은 '이렇게 해보세요'에."],
+  ),
+  years: spec6(
+    ["올해의 흐름", "내년의 흐름", "지난해와 앞으로 몇 해", "올해와 내년을 잇는 법"],
+    ["올해 세운과 원국의 만남만. 월별 이야기는 하지 마(다음 쪽 몫).", "내년 세운의 분위기와 올해와의 연결만.", "지난해 돌아보기와 그다음 해 미리보기만 짧게.", "올해 준비한 것을 내년에 잇는 방법의 방향만."],
+  ),
+});
+
 /** 동시에 보낼 AI 호출 수. 한꺼번에 너무 많이 보내면 429(요청 한도)가 나요. */
-const POOL = 21;
+const POOL = 30;
 let active = 0;
 const waiters: Array<() => void> = [];
 async function slot<T>(fn: () => Promise<T>): Promise<T> {
@@ -322,8 +351,8 @@ async function rewriteOne(pages: BookPage[], page: BookPage, spec: ChapterSpec, 
     ),
   );
   if (results.some((r) => r === null)) return { sections: null, err: errs.join("/").slice(0, 80) };
-  const reality = page.sections.filter((s) => s.reality);
-  return { sections: [...(results.flat() as BookSection[]), ...reality], err: "" };
+  const keep = page.sections.filter((s) => s.reality || (s.checks && s.checks.length > 0));
+  return { sections: [...(results.flat() as BookSection[]), ...keep], err: "" };
 }
 
 /**
@@ -333,7 +362,7 @@ async function rewriteOne(pages: BookPage[], page: BookPage, spec: ChapterSpec, 
 export async function rewriteChapters(pages: BookPage[], opts: ChapterOptions = {}): Promise<{ replaced: Record<number, BookSection[]>; note: string }> {
   const targets = pages.filter((p) => CHAPTER_SPECS[p.key] && !p.sections.some((s) => s.locked));
   if (targets.length === 0) return { replaced: {}, note: "skip" };
-  const hardStop = Date.now() + 32_000;
+  const hardStop = Date.now() + 34_000;
   const outs = await Promise.all(targets.map((p) => rewriteOne(pages, p, CHAPTER_SPECS[p.key], opts, hardStop)));
   const replaced: Record<number, BookSection[]> = {};
   const notes = targets.map((p, i) => {
