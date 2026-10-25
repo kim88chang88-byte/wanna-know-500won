@@ -5,7 +5,7 @@ import { isPremiumLocked } from "@/lib/premium/config";
 import { buildPremiumReport, validatePremiumInput } from "@/lib/premium/report";
 import { enforceLimits, guardOrigin } from "@/lib/guard";
 import { addBookNotes } from "@/lib/ai/bookNotes";
-import { chapterName, isMoneyChapter, rewriteMoneyChapter } from "@/lib/ai/bookChapter";
+import { chapterName, rewriteChapters } from "@/lib/ai/bookChapter";
 import { takeAiBudget } from "@/lib/ai/budget";
 import { createDb, loadDbConfig } from "@/lib/db/supabase";
 
@@ -53,7 +53,7 @@ export async function POST(request: Request) {
         try {
           const gate = await takeAiBudget(process.env, db);
           if (gate !== "ok") return null;
-          return await rewriteMoneyChapter(book0, { name: chapterName(session?.nick), concern: parsed.concern });
+          return await rewriteChapters(book0, { name: chapterName(session?.nick), concern: parsed.concern });
         } catch (err) {
           console.error("book chapter failed:", err instanceof Error ? err.message : "unknown");
           return null;
@@ -63,10 +63,8 @@ export async function POST(request: Request) {
       report.book = withNotes;
       if (chapter) {
         chapterNote = chapter.note;
-        if (chapter.note === "ok") {
-          const money = chapter.pages.find(isMoneyChapter);
-          if (money) report.book = report.book.map((p) => (p.no === money.no ? { ...p, sections: money.sections } : p));
-        }
+        const rep = chapter.replaced;
+        if (Object.keys(rep).length > 0) report.book = report.book.map((p) => (rep[p.no] ? { ...p, sections: rep[p.no] } : p));
       }
     }
     return NextResponse.json({ report, chapterNote });

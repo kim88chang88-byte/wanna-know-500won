@@ -77,7 +77,7 @@ export function chapterName(nick: string | null | undefined): string | null {
   return t || null;
 }
 
-/** 이 쪽이 AI 로 다시 쓸 장인지: 지금은 "재물운 심층 분석" 쪽만 */
+/** 이 쪽이 재물운 장인지 */
 export function isMoneyChapter(page: BookPage): boolean {
   return page.key === "topic:money" || (page.key === "topic" && page.title.startsWith("재물운"));
 }
@@ -131,18 +131,73 @@ export interface ChapterOptions {
   fetchImpl?: typeof fetch;
 }
 
-/** 재물운 장을 AI 로 다시 써서 돌려줘요. 어떤 이유로든 한쪽이라도 실패하면 원래 쪽 그대로 돌려줘요. */
-export async function rewriteMoneyChapter(pages: BookPage[], opts: ChapterOptions = {}): Promise<{ pages: BookPage[]; note: string }> {
-  const page = pages.find(isMoneyChapter);
-  if (!page || page.sections.some((s) => s.locked)) return { pages, note: "skip" };
+export interface ChapterSpec {
+  parts: Part[];
+  roles: Array<[string, string]>;
+}
+
+const SHORT_TAIL = "이번에는 위 두 소제목만 순서대로 써 줘.";
+const ACTION_TAIL = "이번에는 위 두 소제목만 순서대로 써 줘. '이렇게 해보세요'는 문장으로 이어 쓰지 말고, 줄마다 '- '로 시작하는 실천 3가지로 써 줘. '한 줄 마무리'는 1~2문장.";
+
+/** 장 키 → 갈래와 역할. 재물·연애·직업·건강 장을 AI 로 다시 써요. */
+export const CHAPTER_SPECS: Record<string, ChapterSpec> = {
+  "topic:money": { parts: MONEY_PARTS, roles: MONEY_ROLES },
+  "topic:love": {
+    parts: [
+      { headings: ["나의 연애 성향", "끌리는 사람과 인연의 모습"], tail: SHORT_TAIL },
+      { headings: ["엇갈리기 쉬운 순간", "올해와 앞으로의 인연 흐름"], tail: SHORT_TAIL },
+      { headings: ["이렇게 해보세요", "한 줄 마무리"], tail: ACTION_TAIL },
+    ],
+    roles: [
+      ["나의 연애 성향", "일간과 일지(배우자 자리)로 본 사랑하는 방식과 표현 스타일. 인연의 모습은 다음 소제목에 남겨 둬."],
+      ["끌리는 사람과 인연의 모습", "배우자 별과 어울리는 사람의 결만. 성향 설명을 반복하지 마."],
+      ["엇갈리기 쉬운 순간", "관계에서 오해나 거리가 생기기 쉬운 패턴과 이유만. 해결 행동은 '이렇게 해보세요'에 남겨 둬."],
+      ["올해와 앞으로의 인연 흐름", "세운·대운과 근거 사실에 나온 인연의 시기만. 앞 소제목 내용을 반복하지 마."],
+      ["이렇게 해보세요", "앞에서 말한 내용을 반복하지 말고, 바로 해볼 수 있는 새 행동 3가지."],
+      ["한 줄 마무리", "이 사람만의 핵심을 담은 1~2문장. 앞 문장을 그대로 반복하지 마."],
+    ],
+  },
+  "topic:career": {
+    parts: [
+      { headings: ["일하는 방식과 강점", "어울리는 일과 환경"], tail: SHORT_TAIL },
+      { headings: ["조심하면 좋은 점", "올해와 앞으로의 흐름"], tail: SHORT_TAIL },
+      { headings: ["이렇게 해보세요", "한 줄 마무리"], tail: ACTION_TAIL },
+    ],
+    roles: [
+      ["일하는 방식과 강점", "일간·신강약·월주 십성으로 본 일하는 스타일과 강점. 어울리는 일은 다음 소제목에 남겨 둬."],
+      ["어울리는 일과 환경", "격국·십성으로 본 어울리는 분야와 환경 유형만(특정 직업명 단정 금지). 강점 설명을 반복하지 마."],
+      ["조심하면 좋은 점", "일에서 지치거나 부딪히기 쉬운 패턴과 이유만. 해결 행동은 '이렇게 해보세요'에 남겨 둬."],
+      ["올해와 앞으로의 흐름", "세운·대운과 근거 사실에 나온 일의 흐름만. 앞 소제목 내용을 반복하지 마."],
+      ["이렇게 해보세요", "앞에서 말한 내용을 반복하지 말고, 바로 해볼 수 있는 새 행동 3가지."],
+      ["한 줄 마무리", "이 사람만의 핵심을 담은 1~2문장. 앞 문장을 그대로 반복하지 마."],
+    ],
+  },
+  "topic:health": {
+    parts: [
+      { headings: ["타고난 체질과 컨디션", "신경 써 주면 좋은 부분"], tail: `${SHORT_TAIL} 의학적 진단이 아니라 생활 컨디션 이야기로만 써 줘.` },
+      { headings: ["맞는 생활 습관", "올해와 앞으로의 컨디션 흐름"], tail: `${SHORT_TAIL} 의학적 진단이 아니라 생활 컨디션 이야기로만 써 줘.` },
+      { headings: ["이렇게 해보세요", "한 줄 마무리"], tail: ACTION_TAIL },
+    ],
+    roles: [
+      ["타고난 체질과 컨디션", "오행 균형과 일간으로 본 타고난 기운의 쏠림과 컨디션 경향. 부위는 다음 소제목에 남겨 둬."],
+      ["신경 써 주면 좋은 부분", "많거나 부족한 오행에서 오는 생활 속 불편(피로·긴장 등)만. 병명·진단 금지."],
+      ["맞는 생활 습관", "식사·수면·운동 같은 생활 리듬만. 앞 소제목을 반복하지 마."],
+      ["올해와 앞으로의 컨디션 흐름", "세운·대운과 근거 사실에 나온 흐름만. 앞 소제목 내용을 반복하지 마."],
+      ["이렇게 해보세요", "앞에서 말한 내용을 반복하지 말고, 바로 해볼 수 있는 새 행동 3가지."],
+      ["한 줄 마무리", "이 사람만의 핵심을 담은 1~2문장. 앞 문장을 그대로 반복하지 마."],
+    ],
+  },
+};
+
+async function rewriteOne(pages: BookPage[], page: BookPage, spec: ChapterSpec, opts: ChapterOptions): Promise<{ sections: BookSection[] | null; err: string }> {
   const facts = chapterFacts(pages, page, opts.name ?? null, opts.concern ?? null);
   const model = opts.model ?? process.env.ANTHROPIC_MODEL_PAID ?? DEFAULT_PAID_MODEL;
   const errs: string[] = [];
   const results = await Promise.all(
-    MONEY_PARTS.map((part) =>
+    spec.parts.map((part) =>
       callJson<BookSection[]>({
         system: CHAPTER_SYSTEM_PROMPT,
-        user: `${facts}\n\n[장 전체 구성 — 소제목별 역할]\n${MONEY_ROLES.map(([h, r]) => `- ${h}: ${r}`).join("\n")}\n\n[이번에 쓸 소제목]\n${part.headings.map((h, i) => `${i + 1}. ${h}`).join("\n")}\n${part.tail}`,
+        user: `${facts}\n\n[장 전체 구성 — 소제목별 역할]\n${spec.roles.map(([h, r]) => `- ${h}: ${r}`).join("\n")}\n\n[이번에 쓸 소제목]\n${part.headings.map((h, i) => `${i + 1}. ${h}`).join("\n")}\n${part.tail}`,
         schema: CHAPTER_SCHEMA,
         parse: (v) => parseChapter(v, part.headings),
         maxTokens: 5000,
@@ -157,10 +212,37 @@ export async function rewriteMoneyChapter(pages: BookPage[], opts: ChapterOption
       }),
     ),
   );
-  if (results.some((r) => r === null)) return { pages, note: `fail:${errs.join("/").slice(0, 100)}` };
-  const ai = results.flat() as BookSection[];
-  // 원래 쪽의 '사주 vs 지금 내 현실' 비교는 그대로 이어 붙여요.
+  if (results.some((r) => r === null)) return { sections: null, err: errs.join("/").slice(0, 80) };
   const reality = page.sections.filter((s) => s.reality);
-  const next = pages.map((p) => (p.no === page.no ? { ...p, sections: [...ai, ...reality] } : p));
-  return { pages: next, note: "ok" };
+  return { sections: [...(results.flat() as BookSection[]), ...reality], err: "" };
+}
+
+/**
+ * 재물·연애·직업·건강 장을 AI 로 다시 써요. 장마다 따로 성공/실패해서, 실패한 장만 원래 쪽 그대로 남아요.
+ * replaced: 쪽 번호 → 새 본문. note 예: "money:ok,love:ok,career:fail(...)"
+ */
+export async function rewriteChapters(pages: BookPage[], opts: ChapterOptions = {}): Promise<{ replaced: Record<number, BookSection[]>; note: string }> {
+  const targets = pages.filter((p) => CHAPTER_SPECS[p.key] && !p.sections.some((s) => s.locked));
+  if (targets.length === 0) return { replaced: {}, note: "skip" };
+  const outs = await Promise.all(targets.map((p) => rewriteOne(pages, p, CHAPTER_SPECS[p.key], opts)));
+  const replaced: Record<number, BookSection[]> = {};
+  const notes = targets.map((p, i) => {
+    const o = outs[i];
+    const tag = p.key.split(":")[1] ?? p.key;
+    if (o.sections) {
+      replaced[p.no] = o.sections;
+      return `${tag}:ok`;
+    }
+    return `${tag}:fail(${o.err})`;
+  });
+  return { replaced, note: notes.join(",") };
+}
+
+/** 재물운 장만 다시 써요. (기존 호출용) */
+export async function rewriteMoneyChapter(pages: BookPage[], opts: ChapterOptions = {}): Promise<{ pages: BookPage[]; note: string }> {
+  const page = pages.find(isMoneyChapter);
+  if (!page || page.sections.some((s) => s.locked)) return { pages, note: "skip" };
+  const o = await rewriteOne(pages, page, CHAPTER_SPECS["topic:money"] ?? { parts: MONEY_PARTS, roles: MONEY_ROLES }, opts);
+  if (!o.sections) return { pages, note: `fail:${o.err}` };
+  return { pages: pages.map((p) => (p.no === page.no ? { ...p, sections: o.sections as BookSection[] } : p)), note: "ok" };
 }
