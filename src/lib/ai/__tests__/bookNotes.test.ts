@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import type { Concern } from "@/lib/concerns";
 import type { BookPage } from "@/lib/premium/types";
 import { addBookNotes, parseNotes, summarizeBook } from "../bookNotes";
 
@@ -75,7 +76,7 @@ describe("맞춤 조언(advice)", () => {
     expect(out.every((p) => p.advice === undefined)).toBe(true);
   });
   it("너무 짧거나 금지 표현이 있으면 버린다", async () => {
-    const c = { tags: ["job"], text: "이직" } as const;
+    const c: Concern = { tags: ["job"], text: "이직" };
     const a = await addBookNotes(pages, { kind: "personal", apiKey: "k", fetchImpl: mk("힘내요"), concern: c });
     const b = await addBookNotes(pages, { kind: "personal", apiKey: "k", fetchImpl: mk(`${advice} 이혼수가 있어요.`), concern: c });
     expect(a[2].advice).toBeUndefined();
