@@ -27,7 +27,7 @@ const HAIR = "border-[#e6c887]/25";
 function bold(text: string) {
   return text.split(/(\*\*[^*]+\*\*)/g).map((t, i) =>
     t.startsWith("**") && t.endsWith("**") && t.length > 4 ? (
-      <strong key={i} className="font-bold text-[#fbf3de]">{t.slice(2, -2)}</strong>
+      <strong key={i} className="font-bold text-[#1d1a30] bg-[linear-gradient(transparent_62%,#f1d98e_62%)]">{t.slice(2, -2)}</strong>
     ) : (
       <span key={i}>{t}</span>
     ),
@@ -37,7 +37,7 @@ function bold(text: string) {
 function RichBody({ text }: { text: string }) {
   const blocks = text.split(/\n{2,}/).map((b) => b.trim()).filter(Boolean);
   return (
-    <div className="mt-1.5 space-y-3 text-[14px] leading-[1.8] text-[#efe7d3]">
+    <div className="mt-1.5 space-y-3 text-[15px] leading-[1.85] text-[#322f47] [word-break:keep-all]">
       {blocks.map((b, i) => {
         const lines = b.split("\n").map((l) => l.trim()).filter(Boolean);
         if (lines.length > 0 && lines.every((l) => l.startsWith("- "))) {
@@ -68,19 +68,19 @@ function CheckList({ items }: { items: string[] }) {
           aria-pressed={on[i]}
           onClick={() => setOn((p) => p.map((v, j) => (j === i ? !v : v)))}
           className={`flex w-full items-start gap-2.5 rounded-xl border px-3.5 py-3 text-left text-[13.5px] leading-relaxed transition-colors ${
-            on[i] ? "border-[#e6c887] bg-[#e6c887]/15 text-[#fbf3de]" : "border-[#e6c887]/25 bg-white/[0.03] text-[#efe7d3] hover:border-[#e6c887]/60"
+            on[i] ? "border-[#b98a2f] bg-[#f1d98e]/50 text-[#1d1a30]" : "border-[#9a93b0]/50 bg-white/60 text-[#322f47] hover:border-[#b98a2f]"
           }`}
         >
           <span
             aria-hidden="true"
-            className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border text-[11px] font-black ${on[i] ? "border-[#e6c887] bg-[#e6c887] text-[#2a1f45]" : "border-[#e6c887]/50 text-transparent"}`}
+            className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border text-[11px] font-black ${on[i] ? "border-[#b98a2f] bg-[#b98a2f] text-white" : "border-[#9a93b0] text-transparent"}`}
           >
             ✓
           </span>
           <span>{t}</span>
         </button>
       ))}
-      <p role="status" data-testid="book-checks-result" className="min-h-[1.25rem] pt-0.5 text-[12.5px] font-bold text-[#f6dfa8]">
+      <p role="status" data-testid="book-checks-result" className="min-h-[1.25rem] pt-0.5 text-[12.5px] font-bold text-[#8a5f12]">
         {touched ? `${items.length}개 중 ${hit}개가 나와 비슷해요. ${checkMessage(hit, items.length)}` : ""}
       </p>
     </div>
@@ -91,9 +91,9 @@ function CheckList({ items }: { items: string[] }) {
 function RealityPick({ rc }: { rc: RealityCheck }) {
   const [pick, setPick] = useState<number | null>(null);
   return (
-    <div data-testid="book-reality" className="mt-4 rounded-xl border border-[#e6c887]/30 bg-white/[0.03] px-4 py-3.5">
-      <p className="text-[13px] font-bold text-[#e6c887]">🔎 지금 내 현실과 견줘 보기</p>
-      <p className="mt-1 text-[13px] leading-relaxed text-[#efe7d3]">{rc.question}</p>
+    <div data-testid="book-reality" className="mt-4 rounded-xl border border-[#9a93b0]/50 bg-white/60 px-4 py-3.5">
+      <p className="text-[13px] font-bold text-[#8a5f12]">🔎 지금 내 현실과 견줘 보기</p>
+      <p className="mt-1 text-[13px] leading-relaxed text-[#322f47]">{rc.question}</p>
       <div className="mt-2.5 flex flex-wrap gap-2">
         {rc.options.map((o, i) => (
           <button
@@ -102,14 +102,14 @@ function RealityPick({ rc }: { rc: RealityCheck }) {
             aria-pressed={pick === i}
             onClick={() => setPick(i)}
             className={`rounded-full border px-3.5 py-1.5 text-[12.5px] font-bold transition-colors ${
-              pick === i ? "border-[#e6c887] bg-[#e6c887] text-[#2a1f45]" : "border-[#e6c887]/40 text-[#efe7d3] hover:border-[#e6c887]"
+              pick === i ? "border-[#b98a2f] bg-[#b98a2f] text-white" : "border-[#9a93b0] text-[#322f47] hover:border-[#b98a2f]"
             }`}
           >
             {o.label}
           </button>
         ))}
       </div>
-      <p role="status" data-testid="book-reality-result" className="min-h-[1.25rem] pt-2.5 text-[13.5px] leading-relaxed text-[#fbf3de]">
+      <p role="status" data-testid="book-reality-result" className="min-h-[1.25rem] pt-2.5 text-[13.5px] leading-relaxed text-[#1d1a30]">
         {pick !== null ? rc.options[pick].message : ""}
       </p>
     </div>
@@ -344,27 +344,75 @@ function Visual({ page, report }: { page: BookPage; report: PremiumReportView })
 
 /** 장별로 어울리는 도리 친구(기존 이미지만 사용) */
 function coverImage(key: string, title: string): string {
-  if (key === "topic:money" || title.startsWith("재물")) return "/images/animal-rabbit-rich.webp";
-  if (key === "topic:love" || title.startsWith("연애")) return "/images/animal-panda-couple.webp";
+  if (key === "topic:money" || title.includes("재물")) return "/images/animal-rabbit-rich.webp";
+  if (key === "topic:love" || title.includes("연애")) return "/images/animal-panda-couple.webp";
   if (key === "topic:career") return "/images/animal-fox-run.webp";
   if (key === "topic:health") return "/images/animal-panda-f.webp";
   const b = key.split(":")[0];
-  if (b === "daeun" || b === "years" || b === "stage12") return "/images/premium-scene-dragon.webp";
+  if (b === "daeun" || b === "years" || b === "stage12") return "/images/animal-dragon.webp";
   if (b === "nature" || b === "elements" || b === "sinsal") return "/images/animal-fox.webp";
-  return "/images/animal-otter.webp";
+  return "/images/animal-rabbit.webp";
 }
 
-/** 웹툰 느낌의 장 표지: 도리 컷 + 말풍선 */
-function ChapterCover({ page }: { page: BookPage }) {
+/** 표지 배경 장면 */
+function sceneImage(key: string, title: string): string {
+  if (key === "topic:money" || title.includes("재물")) return "/images/premium-scene-rabbit.webp";
+  const b = key.split(":")[0];
+  if (b === "daeun" || b === "years" || b === "stage12" || key === "topic:career") return "/images/premium-scene-dragon.webp";
+  return "/images/premium-scene-otter.webp";
+}
+
+/** "제7장 · 재물운" → 작은 글씨 "제 7 장", 큰 제목 "재물운", 부제 */
+function titleParts(title: string): { small: string; main: string; sub: string } {
+  if (!title.includes(" · ")) return { small: "", main: title, sub: "" };
+  const [pre, rest = ""] = title.split(" · ");
+  const small = pre.replace(/제(\d+)장/, "제 $1 장").replace("서문", "서 문").replace("부록", "부 록");
+  const [a, b] = rest.split(" - ");
+  return b ? { small, main: b, sub: a } : { small, main: a, sub: "" };
+}
+
+const BUBBLE =
+  "relative max-w-[78%] rounded-[22px] border-2 border-[#20203a] bg-[#fffdf7] px-4 py-3.5 text-[15px] font-medium leading-[1.55] text-[#26233a] after:absolute after:bottom-3.5 after:h-3.5 after:w-3.5 after:bg-[#fffdf7] after:content-['']";
+
+/** 도리와 친구의 말풍선 한 줄. right 면 오른쪽에 그림이 와요. */
+function BubbleRow({ text, img, right = false }: { text: string; img: string; right?: boolean }) {
   return (
-    <div data-testid="chapter-cover" className="mb-6 flex items-end gap-3 rounded-2xl border border-[#e6c887]/25 bg-gradient-to-br from-[#26223a] to-[#16131f] p-3">
+    <div className={`flex items-end gap-2.5 ${right ? "flex-row-reverse" : ""}`}>
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={coverImage(page.key, page.title)} alt="" width={84} height={84} className="h-[84px] w-[84px] shrink-0 rounded-xl object-contain" />
-      <div className="relative flex-1 rounded-2xl rounded-bl-sm bg-[#fbf3de] px-3.5 py-2.5 text-[#2a2438]">
-        <p className="text-[11px] font-bold tracking-wide text-[#a07a2c]">도리가 말해요</p>
-        <p className="mt-0.5 text-[13.5px] font-semibold leading-snug">이번 장에서는 ‘{page.title}’을 차분히 살펴볼게요.</p>
-      </div>
+      <img src={img} alt="" width={84} height={84} className="h-[84px] w-[84px] shrink-0 object-contain" />
+      <p
+        className={`${BUBBLE} ${
+          right
+            ? "after:-right-[9px] after:rotate-[-135deg] after:border-b-2 after:border-l-2 after:border-[#20203a]"
+            : "after:-left-[9px] after:rotate-45 after:border-b-2 after:border-l-2 after:border-[#20203a]"
+        }`}
+      >
+        {text}
+      </p>
     </div>
+  );
+}
+
+/** 장 표지: 큰 장면 위에 장 제목, 아래에 도리의 한마디 */
+function ChapterCover({ page, avatar }: { page: BookPage; avatar: string }) {
+  const t = titleParts(page.title);
+  return (
+    <section data-testid="chapter-cover" aria-label={`${page.title} 표지`} className="relative flex aspect-[3/4] flex-col justify-between overflow-hidden rounded-[14px] bg-gradient-to-b from-[#0b0e22] to-[#1d2350] px-5 pt-7">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src={sceneImage(page.key, page.title)} alt="" className="absolute inset-0 h-full w-full object-cover opacity-90" />
+      <div className="absolute inset-0 bg-gradient-to-b from-[#0b0e22]/80 via-transparent to-[#0b0e22]/55" />
+      <div className="relative z-[1] text-center">
+        <small className="block text-[13px] tracking-[0.3em] text-[#e6c887]">{t.small}</small>
+        <b className="mt-2 block font-serifKr text-[30px] leading-tight text-[#fbf3de]">{t.main}</b>
+        {t.sub && <span className="mt-1.5 block text-[13px] text-[#e8dfca]">{t.sub}</span>}
+        <i className="mx-auto mt-2.5 block h-px w-24 bg-[#e6c887]/70" />
+      </div>
+      <div className="relative z-[1] flex items-end gap-2.5 pb-5">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={avatar} alt="" width={84} height={84} className="h-[84px] w-[84px] shrink-0 object-contain" />
+        <p className={`${BUBBLE} after:-left-[9px] after:rotate-45 after:border-b-2 after:border-l-2 after:border-[#20203a]`}>이번 장에서는 ‘{t.main}’ 이야기를 함께 살펴볼게요.</p>
+      </div>
+    </section>
   );
 }
 
@@ -374,21 +422,22 @@ const NEXT_PRODUCTS = [
   { t: "요즘 고민, 한 가지만 콕", d: "500원으로 고민에 맞춘 한 줄 답을 받아요", h: "/" },
 ];
 
-/** 장 끝: 다음 장 예고 + 다음 상품 배너 */
+/** 장 끝: 다음 장 예고(말풍선 박스) + 다음 상품 배너 */
 function ChapterEnd({ next, idx }: { next?: BookPage; idx: number }) {
   const prod = NEXT_PRODUCTS[idx % NEXT_PRODUCTS.length];
   return (
-    <div className="mt-8 space-y-3">
+    <div className="mt-9 flex flex-col items-center gap-4">
       {next && (
-        <div data-testid="next-teaser" className="rounded-2xl border border-dashed border-[#e6c887]/40 px-4 py-3 text-center">
-          <p className="text-[11px] font-bold tracking-widest text-[#e6c887]">NEXT CHAPTER</p>
-          <p className="mt-1 font-serifKr text-[14.5px] text-[#fbf3de]">다음 장에서는 ‘{next.title}’을 알아봐요.</p>
+        <div data-testid="next-teaser" className="border-2 border-[#20203a] bg-[#fffdf7] px-[18px] py-3 text-center text-[15px] font-bold leading-[1.5] text-[#26233a] shadow-[4px_4px_0_#b98a2f]">
+          지금까지 살펴봤어요.
+          <br />
+          다음 장에서는 ‘{titleParts(next.title).main}’을 함께 볼게요!
         </div>
       )}
       <a
         href={prod.h}
         data-testid="next-product-banner"
-        className="flex items-center gap-3 rounded-2xl bg-gradient-to-r from-[#f0d9a0] to-[#d3ac62] px-4 py-3.5 text-[#1b1824] active:scale-[0.99] transition-transform"
+        className="flex w-full items-center gap-3 rounded-2xl bg-gradient-to-r from-[#f0d9a0] to-[#d3ac62] px-4 py-3.5 text-[#1b1824] transition-transform active:scale-[0.99]"
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src="/images/animal-otter.webp" alt="" width={44} height={44} className="h-11 w-11 shrink-0 object-contain" />
@@ -435,6 +484,14 @@ export default function PremiumBook({ report, flush = false }: { report: Premium
     </button>
   );
 
+  // 풀이는 종이 카드(2~3개 소제목)로 나누고, 카드 사이에 도리의 말풍선을 넣어요.
+  const perCard = page.sections.length > 6 ? 3 : 2;
+  const groups: BookPage["sections"][] = [];
+  for (let k = 0; k < page.sections.length; k += perCard) groups.push(page.sections.slice(k, k + perCard));
+  const tp = titleParts(page.title);
+  const friend = coverImage(page.key, page.title);
+  const otter = "/images/animal-otter.webp";
+
   return (
     <div
       ref={top}
@@ -444,10 +501,10 @@ export default function PremiumBook({ report, flush = false }: { report: Premium
         if (e.key === "ArrowRight") go(i + 1);
         if (e.key === "ArrowLeft") go(i - 1);
       }}
-      className={`text-[#f5efe0] scroll-mt-4 ${flush ? "pt-2" : "rounded-[1.75rem] bg-gradient-to-b from-[#1d1a28] via-[#171520] to-[#12101a] p-5 sm:p-8 shadow-[0_20px_60px_rgba(20,16,34,0.45)] border border-[#e6c887]/30"}`}
+      className={`mx-auto max-w-[440px] text-[#efe7d3] scroll-mt-4 ${flush ? "pt-2" : "rounded-[1.75rem] bg-[#10142b] p-5 sm:p-6 shadow-[0_20px_60px_rgba(20,16,34,0.45)] border border-[#e6c887]/30"}`}
     >
       <div className="flex items-center justify-between">
-        <span className={`text-[10px] font-bold tracking-[0.3em] ${GOLD}`}>DORI PREMIUM REPORT</span>
+        <span className={`text-[11px] font-bold tracking-[0.18em] ${GOLD}`}>DORI 20쪽 사주서</span>
         <span data-testid="book-counter" className="text-xs tabular-nums text-[#e8dfca]/70">
           {num(page.no)} / {num(pages.length)}
         </span>
@@ -459,7 +516,7 @@ export default function PremiumBook({ report, flush = false }: { report: Premium
         </div>
       )}
 
-      <nav aria-label="리포트 페이지" className="mt-1 flex gap-1">
+      <nav aria-label="리포트 페이지" className="mt-1 flex gap-[3px]">
         {pages.map((p, k) => (
           <button
             key={p.key}
@@ -490,72 +547,74 @@ export default function PremiumBook({ report, flush = false }: { report: Premium
         </div>
       )}
 
-      <article aria-labelledby="book-title" data-testid="book-page" data-page={page.no} className="mt-7">
-        <div className="relative">
-          <span aria-hidden="true" className="absolute -top-3 right-0 font-serifKr font-black text-[5.5rem] leading-none text-[#e6c887]/[0.09] select-none">
-            {num(page.no)}
-          </span>
-          <p className={`text-[10px] font-bold tracking-[0.28em] ${GOLD}`}>{page.subtitle}</p>
-          <h3 id="book-title" className="mt-2 font-serifKr font-bold text-[1.4rem] leading-snug text-[#fbf3de]">
-            {page.title}
-          </h3>
-        </div>
-        <div className="my-4 h-px bg-gradient-to-r from-[#e6c887] via-[#e6c887]/40 to-transparent" />
-        <p data-testid="book-lead" className="mb-6 font-serifKr italic text-[15px] leading-relaxed text-[#f3e7c9]">
-          {page.lead}
-        </p>
+      <article aria-labelledby="book-title" data-testid="book-page" data-page={page.no} className="mt-4 flex flex-col gap-[18px]">
+        <h3 id="book-title" className="sr-only">
+          {page.title}
+        </h3>
+        <ChapterCover page={page} avatar={otter} />
+
+        <BubbleRow text={page.lead} img={friend} right />
 
         {page.note && (
-          <p data-testid="book-note" className="mb-6 -mt-2 rounded-xl border border-[#e6c887]/30 bg-[#e6c887]/[0.07] px-3.5 py-2.5 text-[13px] leading-relaxed text-[#f3e7c9]">
-            <span aria-hidden="true" className="mr-1">🦦</span>
-            <span className={`mr-1.5 font-bold ${GOLD}`}>도리의 한 줄</span>
-            {page.note}
-          </p>
+          <div data-testid="book-note">
+            <BubbleRow text={`도리의 한 줄 · ${page.note}`} img={otter} />
+          </div>
         )}
 
-        <ChapterCover page={page} />
-
-        <Visual page={page} report={report} />
-
-        <div className="space-y-5">
-          {page.sections.map((s, n) => (
-            <section key={`${n}-${s.heading}`} data-testid={s.locked ? "book-section-locked" : "book-section"}>
-              <h4 className={`text-[13px] font-bold ${GOLD}`}>
-                <span aria-hidden="true" className="mr-1.5">{s.locked ? "🔒" : "◆"}</span>
-                {s.heading}
-              </h4>
-              {s.locked ? (
-                <div className="relative mt-1.5">
-                  <p aria-hidden="true" className="select-none text-[14px] leading-[1.8] text-[#efe7d3] blur-[6px]">
-                    {s.body}
-                  </p>
-                  <span className="sr-only">잠긴 풀이예요. 전체 열기를 누르면 볼 수 있어요.</span>
-                </div>
-              ) : (
-                <RichBody text={s.body} />
-              )}
-              {!s.locked && s.checks && s.checks.length > 0 && <CheckList items={s.checks} />}
-              {!s.locked && s.reality && <RealityPick rc={s.reality} />}
-            </section>
-          ))}
+        <div className="rounded-[14px] border border-[#2c3260] bg-[#1a1f40] p-4 empty:hidden">
+          <Visual page={page} report={report} />
         </div>
 
+        {groups.map((g, gi) => (
+          <div key={`${gi}-${g[0]?.heading}`} className="flex flex-col gap-[18px]">
+            {gi > 0 && <BubbleRow text={`이어서 ‘${g[0].heading.replace(/ · .*$/, "")}’ 이야기를 들려드릴게요.`} img={gi % 2 ? friend : otter} right={gi % 2 === 1} />}
+            <div className="rounded-md border-[3px] border-double border-[#2a3260] bg-[#f3ecdc] px-5 pb-[18px] pt-[22px] text-[#26233a] shadow-[0_2px_0_#00000040]">
+              {gi === 0 && (
+                <>
+                  <p className="text-center text-[11px] tracking-[0.3em] text-[#5b5670]">사 주 풀 이</p>
+                  <p className="mb-4 mt-1 text-center font-serifKr text-[20px] font-bold text-[#26233a]">{tp.main}</p>
+                </>
+              )}
+              <div className="space-y-5">
+                {g.map((s, n) => (
+                  <section key={`${n}-${s.heading}`} data-testid={s.locked ? "book-section-locked" : "book-section"}>
+                    <h4 className="border-b border-dotted border-[#9a93b0] pb-1.5 text-[15px] font-bold text-[#26233a]">
+                      <span aria-hidden="true" className="mr-1.5">{s.locked ? "🔒" : ""}</span>
+                      {s.heading}
+                    </h4>
+                    {s.locked ? (
+                      <div className="relative mt-2">
+                        <p aria-hidden="true" className="select-none text-[15px] leading-[1.85] text-[#322f47] blur-[6px]">
+                          {s.body}
+                        </p>
+                        <span className="sr-only">잠긴 풀이예요. 전체 열기를 누르면 볼 수 있어요.</span>
+                      </div>
+                    ) : (
+                      <RichBody text={s.body} />
+                    )}
+                    {!s.locked && s.checks && s.checks.length > 0 && <CheckList items={s.checks} />}
+                    {!s.locked && s.reality && <RealityPick rc={s.reality} />}
+                  </section>
+                ))}
+              </div>
+            </div>
+          </div>
+        ))}
+
         {page.tables.map((t) => (
-          <div key={t.title}>
+          <div key={t.title} className="rounded-[14px] border border-[#2c3260] bg-[#1a1f40] px-4 pb-4">
             <Table t={t} />
           </div>
         ))}
 
         {page.advice && (
-          <div data-testid="book-advice" className="mt-6 rounded-2xl border border-[#e6c887]/40 bg-[#e6c887]/[0.08] px-4 py-4">
+          <div data-testid="book-advice" className="rounded-2xl border border-[#e6c887]/40 bg-[#e6c887]/[0.08] px-4 py-4">
             <p className={`text-[12px] font-bold tracking-wide ${GOLD}`}>🦦 도리의 맞춤 조언</p>
             <p className="mt-1.5 font-serifKr text-[14px] leading-[1.85] text-[#fbf3de]">{page.advice}</p>
           </div>
         )}
 
         {page.evidence && page.evidence.length > 0 && <Evidence rows={page.evidence} />}
-
-        <ChapterEnd next={pages[i + 1]} idx={i} />
       </article>
 
       {lockedHere > 0 && (
@@ -563,6 +622,8 @@ export default function PremiumBook({ report, flush = false }: { report: Premium
           이 페이지에 잠긴 풀이 {lockedHere}개 · 위의 ‘전체 열기’로 볼 수 있어요
         </p>
       )}
+
+      <ChapterEnd next={pages[i + 1]} idx={i} />
 
       <div className="mt-8 flex items-center gap-3">
         <button
@@ -584,7 +645,7 @@ export default function PremiumBook({ report, flush = false }: { report: Premium
           다음 ›
         </button>
       </div>
-      <p className="mt-4 text-center text-[11px] leading-relaxed text-[#e8dfca]/50">명리학의 일반적인 관점으로 풀어 쓴 재미와 참고용 해석이에요.</p>
+      <p className="mt-4 text-center text-[11px] leading-relaxed text-[#8f95c0]">명리학의 일반적인 관점으로 풀어 쓴 재미와 참고용 해석이에요.</p>
     </div>
   );
 }
