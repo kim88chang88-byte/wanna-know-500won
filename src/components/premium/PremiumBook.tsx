@@ -342,25 +342,18 @@ function Visual({ page, report }: { page: BookPage; report: PremiumReportView })
   }
 }
 
-/** 장별로 어울리는 도리 친구(기존 이미지만 사용) */
-function coverImage(key: string, title: string): string {
-  if (key === "topic:money" || title.includes("재물")) return "/images/animal-rabbit-rich.webp";
-  if (key === "topic:love" || title.includes("연애")) return "/images/animal-panda-couple.webp";
-  if (key === "topic:career") return "/images/animal-fox-run.webp";
-  if (key === "topic:health") return "/images/animal-panda-f.webp";
-  const b = key.split(":")[0];
-  if (b === "daeun" || b === "years" || b === "stage12") return "/images/animal-dragon.webp";
-  if (b === "nature" || b === "elements" || b === "sinsal") return "/images/animal-fox.webp";
-  return "/images/animal-rabbit.webp";
+/** 리포트마다 한 동물만 나와요: 재물·직장 = 용, 연애 매력 = 토끼, 그 밖(궁합 등) = 수달 */
+type Mascot = "dragon" | "rabbit" | "otter";
+function mascotOf(report: PremiumReportView): Mascot {
+  if (report.compat) return "otter";
+  const k = report.topic.key;
+  if (k === "money" || k === "success") return "dragon";
+  if (k === "love" || k === "marriage") return "rabbit";
+  return "otter";
 }
-
-/** 표지 배경 장면 */
-function sceneImage(key: string, title: string): string {
-  if (key === "topic:money" || title.includes("재물")) return "/images/premium-scene-rabbit.webp";
-  const b = key.split(":")[0];
-  if (b === "daeun" || b === "years" || b === "stage12" || key === "topic:career") return "/images/premium-scene-dragon.webp";
-  return "/images/premium-scene-otter.webp";
-}
+const MASCOT_EMOJI: Record<Mascot, string> = { dragon: "🐉", rabbit: "🐰", otter: "🦦" };
+const avatarOf = (m: Mascot) => `/images/animal-${m}.webp`;
+const sceneOf = (m: Mascot) => `/images/premium-scene-${m}.webp`;
 
 /** "제7장 · 재물운" → 작은 글씨 "제 7 장", 큰 제목 "재물운", 부제 */
 function titleParts(title: string): { small: string; main: string; sub: string } {
@@ -394,12 +387,12 @@ function BubbleRow({ text, img, right = false }: { text: string; img: string; ri
 }
 
 /** 장 표지: 큰 장면 위에 장 제목, 아래에 도리의 한마디 */
-function ChapterCover({ page, avatar }: { page: BookPage; avatar: string }) {
+function ChapterCover({ page, mascot }: { page: BookPage; mascot: Mascot }) {
   const t = titleParts(page.title);
   return (
     <section data-testid="chapter-cover" aria-label={`${page.title} 표지`} className="relative flex aspect-[3/4] flex-col justify-between overflow-hidden rounded-[14px] bg-gradient-to-b from-[#0b0e22] to-[#1d2350] px-5 pt-7">
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={sceneImage(page.key, page.title)} alt="" className="absolute inset-0 h-full w-full object-cover opacity-90" />
+      <img src={sceneOf(mascot)} alt="" className="absolute inset-0 h-full w-full object-cover opacity-90" />
       <div className="absolute inset-0 bg-gradient-to-b from-[#0b0e22]/80 via-transparent to-[#0b0e22]/55" />
       <div className="relative z-[1] text-center">
         <small className="block text-[13px] tracking-[0.3em] text-[#e6c887]">{t.small}</small>
@@ -409,7 +402,7 @@ function ChapterCover({ page, avatar }: { page: BookPage; avatar: string }) {
       </div>
       <div className="relative z-[1] flex items-end gap-2.5 pb-5">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={avatar} alt="" width={84} height={84} className="h-[84px] w-[84px] shrink-0 object-contain" />
+        <img src={avatarOf(mascot)} alt="" width={84} height={84} className="h-[84px] w-[84px] shrink-0 object-contain" />
         <p className={`${BUBBLE} after:-left-[9px] after:rotate-45 after:border-b-2 after:border-l-2 after:border-[#20203a]`}>이번 장에서는 ‘{t.main}’ 이야기를 함께 살펴볼게요.</p>
       </div>
     </section>
@@ -423,7 +416,7 @@ const NEXT_PRODUCTS = [
 ];
 
 /** 장 끝: 다음 장 예고(말풍선 박스) + 다음 상품 배너 */
-function ChapterEnd({ next, idx }: { next?: BookPage; idx: number }) {
+function ChapterEnd({ next, idx, mascot }: { next?: BookPage; idx: number; mascot: Mascot }) {
   const prod = NEXT_PRODUCTS[idx % NEXT_PRODUCTS.length];
   return (
     <div className="mt-9 flex flex-col items-center gap-4">
@@ -440,7 +433,7 @@ function ChapterEnd({ next, idx }: { next?: BookPage; idx: number }) {
         className="flex w-full items-center gap-3 rounded-2xl bg-gradient-to-r from-[#f0d9a0] to-[#d3ac62] px-4 py-3.5 text-[#1b1824] transition-transform active:scale-[0.99]"
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/images/animal-otter.webp" alt="" width={44} height={44} className="h-11 w-11 shrink-0 object-contain" />
+        <img src={avatarOf(mascot)} alt="" width={44} height={44} className="h-11 w-11 shrink-0 object-contain" />
         <span className="flex-1">
           <span className="block text-[10px] font-bold tracking-widest opacity-70">다음 상품</span>
           <span className="block text-[14px] font-bold leading-tight">{prod.t}</span>
@@ -489,8 +482,8 @@ export default function PremiumBook({ report, flush = false }: { report: Premium
   const groups: BookPage["sections"][] = [];
   for (let k = 0; k < page.sections.length; k += perCard) groups.push(page.sections.slice(k, k + perCard));
   const tp = titleParts(page.title);
-  const friend = coverImage(page.key, page.title);
-  const otter = "/images/animal-otter.webp";
+  const mascot = mascotOf(report);
+  const pic = avatarOf(mascot);
 
   return (
     <div
@@ -551,13 +544,13 @@ export default function PremiumBook({ report, flush = false }: { report: Premium
         <h3 id="book-title" className="sr-only">
           {page.title}
         </h3>
-        <ChapterCover page={page} avatar={otter} />
+        <ChapterCover page={page} mascot={mascot} />
 
-        <BubbleRow text={page.lead} img={friend} right />
+        <BubbleRow text={page.lead} img={pic} right />
 
         {page.note && (
           <div data-testid="book-note">
-            <BubbleRow text={`도리의 한 줄 · ${page.note}`} img={otter} />
+            <BubbleRow text={`도리의 한 줄 · ${page.note}`} img={pic} />
           </div>
         )}
 
@@ -567,7 +560,7 @@ export default function PremiumBook({ report, flush = false }: { report: Premium
 
         {groups.map((g, gi) => (
           <div key={`${gi}-${g[0]?.heading}`} className="flex flex-col gap-[18px]">
-            {gi > 0 && <BubbleRow text={`이어서 ‘${g[0].heading.replace(/ · .*$/, "")}’ 이야기를 들려드릴게요.`} img={gi % 2 ? friend : otter} right={gi % 2 === 1} />}
+            {gi > 0 && <BubbleRow text={`이어서 ‘${g[0].heading.replace(/ · .*$/, "")}’ 이야기를 들려드릴게요.`} img={pic} right={gi % 2 === 1} />}
             <div className="rounded-md border-[3px] border-double border-[#2a3260] bg-[#f3ecdc] px-5 pb-[18px] pt-[22px] text-[#26233a] shadow-[0_2px_0_#00000040]">
               {gi === 0 && (
                 <>
@@ -609,7 +602,7 @@ export default function PremiumBook({ report, flush = false }: { report: Premium
 
         {page.advice && (
           <div data-testid="book-advice" className="rounded-2xl border border-[#e6c887]/40 bg-[#e6c887]/[0.08] px-4 py-4">
-            <p className={`text-[12px] font-bold tracking-wide ${GOLD}`}>🦦 도리의 맞춤 조언</p>
+            <p className={`text-[12px] font-bold tracking-wide ${GOLD}`}>{MASCOT_EMOJI[mascot]} 도리의 맞춤 조언</p>
             <p className="mt-1.5 font-serifKr text-[14px] leading-[1.85] text-[#fbf3de]">{page.advice}</p>
           </div>
         )}
@@ -623,7 +616,7 @@ export default function PremiumBook({ report, flush = false }: { report: Premium
         </p>
       )}
 
-      <ChapterEnd next={pages[i + 1]} idx={i} />
+      <ChapterEnd next={pages[i + 1]} idx={i} mascot={mascot} />
 
       <div className="mt-8 flex items-center gap-3">
         <button
