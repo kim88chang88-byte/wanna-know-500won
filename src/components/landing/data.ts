@@ -170,7 +170,7 @@ export interface PremiumCard {
   divider: string;
 }
 
-/** 2,990원 프리미엄 심층 사주서 3종 */
+/** 9,900원 프리미엄 심층 사주서 3종 */
 export const PREMIUM_CARDS: readonly PremiumCard[] = [
   {
     key: "premium-compat",

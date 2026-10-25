@@ -3,6 +3,7 @@ import { STEMS } from "@/lib/saju/constants";
 import { isBirthPlace, resolveBirth } from "@/lib/saju/birthPlace";
 import type { BirthInput } from "@/lib/saju/types";
 import { buildBook } from "./book";
+import { buildBook20 } from "./book/book20";
 import { applyLocks } from "./book/lock";
 import { CONCERN_CHIPS, hasConcern, parseConcern, type Concern } from "@/lib/concerns";
 import { buildCompat } from "./compat";
@@ -203,6 +204,6 @@ export function buildPremiumReport(rawInput: BirthInput, now: Date = new Date(),
     concern: hasConcern(concern) ? { text: concern.text, answers: buildConcernAnswers(concern, elements, gradeLabel) } : null,
     locked: locking,
     compat: pair ? pair.compat : null,
-    book: pair ? pair.book : full ? (locking ? applyLocks(buildBook(r, { elements, pillars, hourUnknown, topicKey, insight: topic, gradeLabel, now }), r.currentYear) : buildBook(r, { elements, pillars, hourUnknown, topicKey, insight: topic, gradeLabel, now })) : [],
+    book: pair ? pair.book : full ? (locking ? applyLocks(buildBook20(r, { elements, pillars, hourUnknown, topicKey, insight: topic, gradeLabel, now }), r.currentYear) : buildBook20(r, { elements, pillars, hourUnknown, topicKey, insight: topic, gradeLabel, now })) : [],
   };
 }

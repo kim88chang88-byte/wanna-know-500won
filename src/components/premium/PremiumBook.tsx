@@ -6,7 +6,7 @@ import { checkMessage } from "@/lib/premium/book/resonance";
 import type { BookPage, BookRow, BookTable, ElementKind, PremiumReportView, RealityCheck } from "@/lib/premium/types";
 
 /*
- * 프리미엄 10페이지 리포트 리더. 한 번에 한 페이지씩 넘겨 보는 고급스러운 책 형태예요.
+ * 프리미엄 20페이지 리포트 리더. 한 번에 한 페이지씩 넘겨 보는 고급스러운 책 형태예요.
  * 색: 미드나잇 + 샴페인 골드. 글씨는 항상 충분히 밝은 대비를 유지해요.
  */
 
@@ -344,10 +344,13 @@ function Visual({ page, report }: { page: BookPage; report: PremiumReportView })
 
 /** 장별로 어울리는 도리 친구(기존 이미지만 사용) */
 function coverImage(key: string, title: string): string {
-  if (title.startsWith("재물")) return "/images/animal-rabbit-rich.webp";
-  if (title.startsWith("연애") || key.includes("love")) return "/images/animal-panda-couple.webp";
-  if (key === "daeun" || key === "years") return "/images/premium-scene-dragon.webp";
-  if (key === "nature" || key === "elements") return "/images/animal-fox.webp";
+  if (key === "topic:money" || title.startsWith("재물")) return "/images/animal-rabbit-rich.webp";
+  if (key === "topic:love" || title.startsWith("연애")) return "/images/animal-panda-couple.webp";
+  if (key === "topic:career") return "/images/animal-fox-run.webp";
+  if (key === "topic:health") return "/images/animal-panda-f.webp";
+  const b = key.split(":")[0];
+  if (b === "daeun" || b === "years" || b === "stage12") return "/images/premium-scene-dragon.webp";
+  if (b === "nature" || b === "elements" || b === "sinsal") return "/images/animal-fox.webp";
   return "/images/animal-otter.webp";
 }
 
@@ -428,7 +431,7 @@ export default function PremiumBook({ report, flush = false }: { report: Premium
       onClick={() => setUnlockMsg(true)}
       className="mt-3 w-full rounded-full bg-gradient-to-r from-[#f0d9a0] to-[#d3ac62] py-2.5 text-[13px] font-bold text-[#1b1824] active:scale-95 transition-transform"
     >
-      2,990원으로 전체 열기
+      9,900원으로 전체 열기
     </button>
   );
 

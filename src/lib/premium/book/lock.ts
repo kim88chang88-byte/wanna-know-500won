@@ -35,7 +35,7 @@ type SecRule = (s: BookSection, nth: number) => { lock: boolean; heading?: strin
 const startsWithAny = (h: string, list: string[]) => list.some((x) => h.startsWith(x));
 
 function rulesFor(page: BookPage, year: number): { sec: SecRule; row?: (r: BookRow, i: number, rows: BookRow[], title: string) => boolean } {
-  switch (page.key) {
+  switch (page.key.split(":")[0]) {
     case "overview":
       return {
         sec: (s) => ({ lock: s.heading.startsWith(`${year}년`) }),
@@ -90,6 +90,22 @@ function rulesFor(page: BookPage, year: number): { sec: SecRule; row?: (r: BookR
           return cur >= 0 && i > cur;
         },
       };
+    case "stage12": {
+      const idx = page.sections.findIndex((x) => x.heading.includes("(지금)"));
+      return {
+        sec: (s, n) => (idx >= 0 && n > idx ? { lock: true, heading: `${s.heading.split(" · ")[0]} · ●●` } : { lock: false }),
+        row: (r, i, rows) => {
+          const cur = rows.findIndex((x) => x.highlight);
+          return cur >= 0 && i > cur;
+        },
+      };
+    }
+    case "sinsal":
+      return { sec: (s) => ({ lock: ["잘 맞는 사람의 결", "서로 맞춰 가면 좋은 결"].includes(s.heading) }) };
+    case "gui":
+      return { sec: (s) => ({ lock: s.heading === "귀인을 만나는 마음가짐" }) };
+    case "concern":
+      return { sec: (s) => ({ lock: /^\d{4}년 흐름|^지금 대운/.test(s.heading) }) };
     case "lucky":
       return {
         sec: (s) => ({ lock: ["한 달 행운 처방전", "마무리 편지", "잘 맞는 사람의 결", "서로 맞춰 가면 좋은 결"].includes(s.heading) }),

@@ -5,7 +5,7 @@ import { isPremiumLocked } from "@/lib/premium/config";
 import { buildPremiumReport, validatePremiumInput } from "@/lib/premium/report";
 import { enforceLimits, guardOrigin } from "@/lib/guard";
 import { addBookNotes } from "@/lib/ai/bookNotes";
-import { chapterName, rewriteMoneyChapter } from "@/lib/ai/bookChapter";
+import { chapterName, isMoneyChapter, rewriteMoneyChapter } from "@/lib/ai/bookChapter";
 import { takeAiBudget } from "@/lib/ai/budget";
 import { createDb, loadDbConfig } from "@/lib/db/supabase";
 
@@ -64,7 +64,7 @@ export async function POST(request: Request) {
       if (chapter) {
         chapterNote = chapter.note;
         if (chapter.note === "ok") {
-          const money = chapter.pages.find((p) => p.key === "topic");
+          const money = chapter.pages.find(isMoneyChapter);
           if (money) report.book = report.book.map((p) => (p.no === money.no ? { ...p, sections: money.sections } : p));
         }
       }

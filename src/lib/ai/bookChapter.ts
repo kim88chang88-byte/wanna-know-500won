@@ -79,7 +79,7 @@ export function chapterName(nick: string | null | undefined): string | null {
 
 /** 이 쪽이 AI 로 다시 쓸 장인지: 지금은 "재물운 심층 분석" 쪽만 */
 export function isMoneyChapter(page: BookPage): boolean {
-  return page.key === "topic" && page.title.startsWith("재물운");
+  return page.key === "topic:money" || (page.key === "topic" && page.title.startsWith("재물운"));
 }
 
 function brief(p: BookPage, n: number): string {

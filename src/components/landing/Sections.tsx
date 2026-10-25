@@ -321,10 +321,10 @@ export function PremiumSection({ onSpin }: SpinProps) {
             <span className="bg-brand-500 text-white text-[10px] px-2 py-0.5 rounded-full font-sans">SPECIAL</span>
           </div>
           <h3 className="font-cute text-2xl sm:text-3xl font-normal text-white leading-snug drop-shadow-[0_2px_8px_rgba(40,20,90,0.6)]">
-            2,990원 프리미엄 3대 테마 리포트
+            9,900원 프리미엄 3대 테마 리포트
           </h3>
           <p className="text-xs sm:text-sm text-white/85 mt-2 leading-relaxed">
-            간단 풀이로는 아쉬운 날을 위한 <strong>10쪽 분량의 심층 리포트</strong>예요. 흐름과 조언을 차분하게 담았어요.
+            간단 풀이로는 아쉬운 날을 위한 <strong>20쪽 분량의 심층 리포트</strong>예요. 흐름과 조언을 차분하게 담았어요.
           </p>
         </div>
 
@@ -338,14 +338,14 @@ export function PremiumSection({ onSpin }: SpinProps) {
               role="button"
               tabIndex={0}
               aria-label={`${p.title} 보기`}
-              onClick={() => onSpin(p.key, p.fortune, "2,990원", true)}
-              onKeyDown={(e) => activateOnKey(e, () => onSpin(p.key, p.fortune, "2,990원", true))}
+              onClick={() => onSpin(p.key, p.fortune, "9,900원", true)}
+              onKeyDown={(e) => activateOnKey(e, () => onSpin(p.key, p.fortune, "9,900원", true))}
               className={`scroll-mt-24 card-water-glow relative flex flex-col justify-between rounded-3xl p-6 h-full bg-white cursor-pointer select-none hover:shadow-lg transition-shadow group focus:outline-none focus-visible:ring-4 focus-visible:ring-brand-300 ${p.card}`}
             >
               <div>
                 <div className="flex items-center justify-between mb-3">
                   <span className={`text-xs font-bold px-3 py-1 rounded-full ${p.tagClass}`}>{p.tag}</span>
-                  <span className="text-xs text-slate-400">10쪽 리포트</span>
+                  <span className="text-xs text-slate-400">20쪽 리포트</span>
                 </div>
 
                 <div className={`w-full aspect-[16/9] rounded-2xl flex items-center justify-center overflow-hidden mb-3.5 border ${p.imageBox}`}>
@@ -361,7 +361,7 @@ export function PremiumSection({ onSpin }: SpinProps) {
                 <p className="text-xs text-slate-500 text-center leading-relaxed">{p.desc}</p>
               </div>
               <div className={`mt-4 pt-3 border-t flex items-center justify-center ${p.divider}`}>
-                <span className={`text-sm font-extrabold ${p.priceClass}`}>2,990원</span>
+                <span className={`text-sm font-extrabold ${p.priceClass}`}>9,900원</span>
               </div>
             </div>
             </div>
