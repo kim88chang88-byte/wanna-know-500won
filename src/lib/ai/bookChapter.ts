@@ -16,13 +16,11 @@ type Part = { headings: string[]; tail: string };
 
 /** 갈래마다 맡는 소제목. 제목은 고정해서 쪽 모양이 흔들리지 않게 해요. */
 export const MONEY_PARTS: Part[] = [
+  { headings: ["돈을 대하는 기본 자세", "돈이 들어오는 길"], tail: "이번에는 위 두 소제목만 순서대로 써 줘." },
+  { headings: ["새기 쉬운 곳", "올해와 앞으로의 흐름"], tail: "이번에는 위 두 소제목만 순서대로 써 줘." },
   {
-    headings: ["돈을 대하는 기본 자세", "돈이 들어오는 길", "새기 쉬운 곳"],
-    tail: "이번에는 위 세 소제목만 순서대로 써 줘.",
-  },
-  {
-    headings: ["올해와 앞으로의 흐름", "이렇게 해보세요", "한 줄 마무리"],
-    tail: "이번에는 위 세 소제목만 순서대로 써 줘. '이렇게 해보세요'는 문장으로 이어 쓰지 말고, 줄마다 '- '로 시작하는 실천 3가지로 써 줘. '한 줄 마무리'는 1~2문장.",
+    headings: ["이렇게 해보세요", "한 줄 마무리"],
+    tail: "이번에는 위 두 소제목만 순서대로 써 줘. '이렇게 해보세요'는 문장으로 이어 쓰지 말고, 줄마다 '- '로 시작하는 실천 3가지로 써 줘. '한 줄 마무리'는 1~2문장.",
   },
 ];
 
@@ -30,7 +28,7 @@ export const CHAPTER_SYSTEM_PROMPT = `너는 사주 리포트를 쓰는 차분�
 
 말투와 모양
 - 차분하고 단정한 해요체(~해요, ~이에요, ~예요). 반말, 이모지, 감탄사, 귀여운 말투는 쓰지 마. 모든 소제목이 같은 말투여야 해.
-- 소제목마다 2~3문단, 문단은 빈 줄(줄바꿈 두 번)로 나눠. 한 문단은 2~3문장. 소제목 한 개는 250~380자 안팎(실천 항목과 한 줄 마무리는 짧게).
+- 소제목마다 2~3문단, 문단은 빈 줄(줄바꿈 두 번)로 나눠. 한 문단은 2~3문장. 소제목 한 개는 250~330자 안팎(실천 항목과 한 줄 마무리는 짧게).
 - 문단마다 가장 중요한 핵심 한 구절만 **굵게**(별표 두 개로 감싸기) 표시해. 소제목 하나에 굵은 곳은 많아야 두 군데, 문장 전체를 굵게 하지 마.
 - 사주 용어(일간, 정재, 편관, 충 등)는 한 번 짧게 풀어 주고, 곧바로 "그래서 실제로 어떤 모습인지"로 이어 줘. 한자 간지는 꼭 필요할 때만 괄호로.
 
@@ -102,7 +100,7 @@ export function parseChapter(value: unknown, headings: string[]): BookSection[] 
     if (!item || typeof item.body !== "string") return null;
     const body = item.body.replace(/\r/g, "").trim();
     const isShort = headings[i] === "한 줄 마무리" || headings[i] === "이렇게 해보세요";
-    if (body.length < (isShort ? 30 : 150) || body.length > 900) return null;
+    if (body.length < (isShort ? 30 : 150) || body.length > 700) return null;
     if ((body.match(/\*\*/g) ?? []).length % 2 !== 0) return null;
     if (containsForbidden(body) || isGeneric(body)) return null;
     if (/[○◯]{2}/.test(body)) return null;
@@ -136,7 +134,7 @@ export async function rewriteMoneyChapter(pages: BookPage[], opts: ChapterOption
         user: `${facts}\n\n[이번에 쓸 소제목]\n${part.headings.map((h, i) => `${i + 1}. ${h}`).join("\n")}\n${part.tail}`,
         schema: CHAPTER_SCHEMA,
         parse: (v) => parseChapter(v, part.headings),
-        maxTokens: 3500,
+        maxTokens: 5000,
         timeoutMs: 50_000,
         attempts: 1,
         model,
