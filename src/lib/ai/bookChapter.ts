@@ -135,6 +135,8 @@ export interface ChapterOptions {
   apiKey?: string;
   model?: string;
   fetchImpl?: typeof fetch;
+  /** 호출마다 쓴 토큰(비용 측정용) */
+  onUsage?: (u: { input: number; output: number }) => void;
 }
 
 export interface ChapterSpec {
@@ -302,6 +304,7 @@ async function rewriteOne(pages: BookPage[], page: BookPage, spec: ChapterSpec, 
               model,
               apiKey: opts.apiKey,
               fetchImpl: opts.fetchImpl,
+              onUsage: opts.onUsage,
             });
           } catch (e) {
             const msg = e instanceof Error ? e.message : "unknown";

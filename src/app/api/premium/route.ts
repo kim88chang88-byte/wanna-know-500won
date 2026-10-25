@@ -35,6 +35,7 @@ export async function POST(request: Request) {
     // 프리미엄(전체) 리포트에는 쪽마다 AI 가 쓴 '도리의 한 줄'을 붙이고, 재물운 장은 AI 가 이 사람 이야기로 다시 써요.
     // 키가 없거나 한도를 넘거나 실패하면 그 부분만 빠지고 기존 풀이가 그대로 나가요.
     let chapterNote = "skip";
+    const usage = { in: 0, out: 0, calls: 0 };
     if (parsed.level === "full" && report.book.length > 0 && process.env.ANTHROPIC_API_KEY) {
       const dbCfg = loadDbConfig(process.env);
       const db = dbCfg ? createDb(dbCfg) : null;
@@ -53,7 +54,7 @@ export async function POST(request: Request) {
         try {
           const gate = await takeAiBudget(process.env, db);
           if (gate !== "ok") return null;
-          return await rewriteChapters(book0, { name: chapterName(session?.nick), concern: parsed.concern });
+          return await rewriteChapters(book0, { name: chapterName(session?.nick), concern: parsed.concern, onUsage: (u) => { usage.in += u.input; usage.out += u.output; usage.calls++; } });
         } catch (err) {
           console.error("book chapter failed:", err instanceof Error ? err.message : "unknown");
           return null;
@@ -67,7 +68,7 @@ export async function POST(request: Request) {
         if (Object.keys(rep).length > 0) report.book = report.book.map((p) => (rep[p.no] ? { ...p, sections: rep[p.no] } : p));
       }
     }
-    return NextResponse.json({ report, chapterNote });
+    return NextResponse.json({ report, chapterNote, chapterUsage: usage });
   } catch (err) {
     // 없는 날짜(예: 윤달이 없는 해의 윤달)처럼 계산할 수 없는 입력이에요.
     console.error("premium report failed:", err instanceof Error ? err.message : "unknown");

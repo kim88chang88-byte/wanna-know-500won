@@ -12,6 +12,8 @@ export async function callJson<T>(o: {
   fetchImpl?: typeof fetch;
   timeoutMs?: number;
   attempts?: number;
+  /** 호출마다 쓴 토큰 수를 알려 줘요(비용 측정용). */
+  onUsage?: (u: { input: number; output: number }) => void;
 }): Promise<T> {
   const apiKey = o.apiKey ?? process.env.ANTHROPIC_API_KEY;
   if (!apiKey) throw new ReadingUnavailableError();
@@ -37,7 +39,8 @@ export async function callJson<T>(o: {
       });
       if (res.status === 429 || res.status >= 500) { last = `HTTP ${res.status}`; continue; }
       if (!res.ok) throw new ReadingFailedError(`HTTP ${res.status}`);
-      const data = (await res.json()) as { stop_reason?: string; content?: Array<{ type: string; text?: string }> };
+      const data = (await res.json()) as { stop_reason?: string; usage?: { input_tokens?: number; output_tokens?: number }; content?: Array<{ type: string; text?: string }> };
+      o.onUsage?.({ input: data.usage?.input_tokens ?? 0, output: data.usage?.output_tokens ?? 0 });
       if (data.stop_reason === "refusal" || data.stop_reason === "max_tokens") { last = data.stop_reason; continue; }
       const text = data.content?.find((b) => b.type === "text")?.text;
       let json: unknown;
