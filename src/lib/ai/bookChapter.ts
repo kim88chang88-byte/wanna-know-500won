@@ -94,15 +94,16 @@ function tableFacts(p: BookPage): string {
 
 /** 근거 사실: 그 장의 기존 본문 전체 + 주변 쪽 요약(일주·신강약·격국 등) */
 export function chapterFacts(pages: BookPage[], page: BookPage, name: string | null, concern: Concern | null): string {
+  // 다른 쪽은 통째로 보내지 않고, 표에 담긴 핵심 사실(일주·격국·용신·대운·오행·원국)만 보내요. 입력 토큰과 요청 한도 부담이 크게 줄어요.
   const others = pages
-    .filter((p) => p.no !== page.no && ["overview", "pillars", "nature", "geukguk", "elements", "daeun", "years"].includes(p.key))
-    .map((p) => brief(p, 90))
-    .join("\n\n");
+    .filter((p) => p.no !== page.no && ["overview", "pillars", "elements"].includes(p.key))
+    .flatMap((p) => p.tables.flatMap((t) => t.rows.filter((r) => !r.locked).map((r) => `· [${t.title}] ${r.label}: ${r.value}${r.note ? ` (${r.note})` : ""}`)))
+    .join("\n");
   const payload = [
     name ? `이름: ${name}님` : "이름: 없음",
     hasConcern(concern) ? `고민: ${[...concern!.tags.map(concernLabel), concern!.text].filter(Boolean).join(" / ")}` : "고민: 없음",
     `\n[이 장의 근거 사실]\n${brief(page, 480)}${tableFacts(page)}`,
-    `\n[다른 쪽 요약]\n${others}`,
+    `\n[이 사람의 핵심 사실]\n${others}`,
   ].join("\n");
   return payload;
 }
