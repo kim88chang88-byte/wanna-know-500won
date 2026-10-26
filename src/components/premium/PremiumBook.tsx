@@ -452,7 +452,7 @@ export function NextProductBanner({ report }: { report: PremiumReportView }) {
 }
 
 /** flush: 이미 미드나잇 톤의 틀 안에 들어갈 때 바깥 테두리·배경을 빼고 내용만 보여요. */
-export default function PremiumBook({ report, flush = false, finale }: { report: PremiumReportView; flush?: boolean; /** 마지막 쪽 끝에 붙는 마무리(한 줄 결론 등) */ finale?: ReactNode }) {
+export default function PremiumBook({ report, flush = false, finale, previewBlur = false }: { report: PremiumReportView; flush?: boolean; /** 프리미엄 "미리 보기" 화면에서만 true: 2쪽부터 핵심 풀이를 흐리게 가려요 */ previewBlur?: boolean; /** 마지막 쪽 끝에 붙는 마무리(한 줄 결론 등) */ finale?: ReactNode }) {
   const pages = report.book;
   const [i, setI] = useState(0);
   const [unlockMsg, setUnlockMsg] = useState(false);
@@ -468,6 +468,9 @@ export default function PremiumBook({ report, flush = false, finale }: { report:
 
   const page = pages[i];
   if (!page) return null;
+  // 미리 보기: 2쪽부터 본문·표·조언·근거를 흐리게. (제목과 도리의 말풍선은 그대로 둬서 궁금증을 남겨요)
+  const blurred = previewBlur && page.no >= 2;
+  const BLUR = "pointer-events-none select-none blur-[6px]";
   const go = (n: number) => setI(Math.min(pages.length - 1, Math.max(0, n)));
   const num = (n: number) => String(n).padStart(2, "0");
   const lockedTotal = pages.reduce((a, p) => a + p.sections.filter((x) => x.locked).length, 0);
@@ -557,7 +560,7 @@ export default function PremiumBook({ report, flush = false, finale }: { report:
         {/* 손님이 고른 고민에 대한 답은 첫 쪽 위가 아니라, 같은 주제를 다루는 '요즘 고민 맞춤 풀이' 쪽에 둬요. */}
         {page.key === "concern" && report.concern && <ConcernCard concern={report.concern} dark />}
 
-        <div className="rounded-[14px] border border-[#2c3260] bg-[#1a1f40] p-4 empty:hidden">
+        <div className={`rounded-[14px] border border-[#2c3260] bg-[#1a1f40] p-4 empty:hidden ${blurred ? BLUR : ""}`} aria-hidden={blurred ? "true" : undefined}>
           <Visual page={page} report={report} />
         </div>
 
@@ -571,7 +574,7 @@ export default function PremiumBook({ report, flush = false, finale }: { report:
                   <p className="mb-4 mt-1 text-center font-serifKr text-[20px] font-bold text-[#26233a]">{tp.main}</p>
                 </>
               )}
-              <div className="space-y-5">
+              <div className={`space-y-5 ${blurred ? "[&_p]:blur-[6px] [&_li]:blur-[6px] select-none" : ""}`} aria-hidden={blurred ? "true" : undefined}>
                 {g.map((s, n) => (
                   <section key={`${n}-${s.heading}`} data-testid={s.locked ? "book-section-locked" : "book-section"}>
                     <h4 className="border-b border-dotted border-[#9a93b0] pb-1.5 text-[15px] font-bold text-[#26233a]">
@@ -598,19 +601,30 @@ export default function PremiumBook({ report, flush = false, finale }: { report:
         ))}
 
         {page.tables.map((t) => (
-          <div key={t.title} className="rounded-[14px] border border-[#2c3260] bg-[#1a1f40] px-4 pb-4">
+          <div key={t.title} aria-hidden={blurred ? "true" : undefined} className={`rounded-[14px] border border-[#2c3260] bg-[#1a1f40] px-4 pb-4 ${blurred ? BLUR : ""}`}>
             <Table t={t} />
           </div>
         ))}
 
         {page.advice && (
-          <div data-testid="book-advice" className="rounded-2xl border border-[#e6c887]/40 bg-[#e6c887]/[0.08] px-4 py-4">
+          <div data-testid="book-advice" aria-hidden={blurred ? "true" : undefined} className={`rounded-2xl border border-[#e6c887]/40 bg-[#e6c887]/[0.08] px-4 py-4 ${blurred ? BLUR : ""}`}>
             <p className={`text-[12px] font-bold tracking-wide ${GOLD}`}>{MASCOT_EMOJI[mascot]} 도리의 맞춤 조언</p>
             <p className="mt-1.5 font-serifKr text-[14px] leading-[1.85] text-[#fbf3de]">{page.advice}</p>
           </div>
         )}
 
-        {page.evidence && page.evidence.length > 0 && <Evidence rows={page.evidence} />}
+        {page.evidence && page.evidence.length > 0 && (
+          <div aria-hidden={blurred ? "true" : undefined} className={blurred ? BLUR : ""}>
+            <Evidence rows={page.evidence} />
+          </div>
+        )}
+
+        {blurred && (
+          <div data-testid="preview-blur-note" className={`rounded-2xl border ${HAIR} bg-[#e6c887]/[0.06] px-4 py-4 text-center`}>
+            <p className={`text-[13px] font-bold ${GOLD}`}>🔒 핵심 풀이는 흐리게 가려져 있어요</p>
+            <p className="mt-1 text-[12px] leading-relaxed text-[#e8dfca]/80">미리 보기에서는 1쪽만 전부 볼 수 있어요. 내 사주의 진짜 이야기는 프리미엄 사주서에서 확인해 보세요.</p>
+          </div>
+        )}
       </article>
 
       {finale && i === pages.length - 1 && (

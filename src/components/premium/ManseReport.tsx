@@ -18,11 +18,11 @@ const CARD = "rounded-3xl bg-white border border-brand-100 p-5 sm:p-6 shadow-[0_
 const H2 = "font-serifKr font-bold text-lg text-brand-700 mb-4";
 
 /** hideHeadline: 위에 이미 같은 한 줄 결론을 보여 줄 때 분석 카드 안의 같은 문장을 빼요. */
-export default function ManseReport({ report, hideHeadline = false, flush = false, parts = "all", finale }: { report: PremiumReportView; hideHeadline?: boolean; flush?: boolean; /** 프리미엄 책 마지막 쪽 끝에 붙일 마무리 */ finale?: ReactNode; /** "base": 주제 분석 없이 사주 원국·오행·신강신약·운의 흐름만 */ parts?: "all" | "base" }) {
+export default function ManseReport({ report, hideHeadline = false, flush = false, parts = "all", finale, previewBlur = false }: { report: PremiumReportView; hideHeadline?: boolean; flush?: boolean; /** 프리미엄 책 마지막 쪽 끝에 붙일 마무리 */ finale?: ReactNode; /** 프리미엄 미리 보기 화면에서만 true */ previewBlur?: boolean; /** "base": 주제 분석 없이 사주 원국·오행·신강신약·운의 흐름만 */ parts?: "all" | "base" }) {
   const max = Math.max(1, ...report.elements.map((e) => e.count));
   // 프리미엄: 10페이지 상세 리포트
   // 궁합이면 10페이지 책도 두 사람 기준 궁합 리포트로 나와요. (요약 카드는 책 1쪽에 들어 있어요)
-  if (report.level === "full" && report.book.length > 0) return <PremiumBook report={report} flush={flush} finale={finale} />;
+  if (report.level === "full" && report.book.length > 0) return <PremiumBook report={report} flush={flush} finale={finale} previewBlur={previewBlur} />;
 
   return (
     <div data-testid="manse-report" className="space-y-6">

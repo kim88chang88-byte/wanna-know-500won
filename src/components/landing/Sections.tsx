@@ -367,12 +367,9 @@ export function PremiumSection({ onSpin }: SpinProps) {
             </div>
           ))}
         </div>
-        <p className="relative z-10 mt-6 text-center text-xs leading-relaxed text-white/90">
-          * 프리미엄 심층 리포트는 준비 중이에요. 베타 기간에는 결제 없이 체험할 수 있고, 지금 누르면 간단 풀이가 나와요.
-        </p>
-        <div className="relative z-10 mt-3 text-center">
+        <div className="relative z-10 mt-6 text-center">
           <Link href="/premium" data-testid="premium-report-link" className="text-sm font-bold text-pink-200 hover:text-white underline underline-offset-4">
-            사주 원국 리포트 미리 보기 →
+            프리미엄 사주서 미리보기 →
           </Link>
         </div>
       </div>
