@@ -95,6 +95,15 @@ function Paras({ text, className = "" }: { text: string; className?: string }) {
   );
 }
 
+/** AI 풀이를 받지 못한 접이식 칸에 넣는 안내 */
+function PendingNote() {
+  return (
+    <p data-testid="fold-pending" className="mt-3 rounded-xl border border-amber-200 bg-amber-50 px-3.5 py-2.5 text-[14px] font-bold leading-relaxed text-amber-800">
+      풀이를 준비 중이에요, 잠시 뒤에 다시 시도해 주세요
+    </p>
+  );
+}
+
 function Fold({ label, title, children, testId, defaultOpen = false }: { label: string; title: string; children: ReactNode; testId?: string; defaultOpen?: boolean }) {
   return (
     <details data-testid={testId ?? "story-fold"} open={defaultOpen} className="group border-t border-brand-100 first:border-t-0">
@@ -188,7 +197,7 @@ export default function StoryReport({
         <p className="pt-3.5 text-xs text-gray-500">각 제목을 누르면 풀이가 펼쳐져요</p>
         {hasFolds ? (
           <>
-            {STEPS.filter((st) => f[st.key] || (st.key === "improve" && (concern && concern.answers.length > 1))).map((st, n) => (
+            {STEPS.map((st, n) => (
               <Fold
                 key={st.key}
                 testId={`story-fold-${st.key}`}
@@ -204,7 +213,7 @@ export default function StoryReport({
                     ))}
                   </p>
                 )}
-                {f[st.key] && <Paras text={f[st.key] as string} />}
+                {f[st.key] ? <Paras text={f[st.key] as string} /> : <PendingNote />}
                 {st.key === "improve" && concern && concern.answers.length > 1 && (
                   <ul className="mt-3 space-y-2.5">
                     {concern.answers.slice(1).map((a) => (
@@ -223,6 +232,7 @@ export default function StoryReport({
             {t.points.map((pt, n) => (
               <Fold key={`${n}-${pt.title}`} label={`${t.label} · ${pt.title}`} title={firstSentence(pt.body)}>
                 {pt.body}
+                <PendingNote />
               </Fold>
             ))}
             {t.timing.length > 0 && (
@@ -235,6 +245,7 @@ export default function StoryReport({
                     </li>
                   ))}
                 </ul>
+                <PendingNote />
               </Fold>
             )}
           </>
@@ -245,6 +256,7 @@ export default function StoryReport({
             <span aria-hidden="true" className="h-4 w-4 shrink-0 rounded-full border border-black/10" style={{ backgroundColor: t.lucky.hex }} />
             행운 컬러 <b className="text-gray-900">{t.lucky.color}</b> · 행운 방향 <b className="text-gray-900">{t.lucky.direction}</b>
           </p>
+          {!f.lucky && <PendingNote />}
           {!f.lucky && <p className="mt-1 text-[13px] text-gray-500">비어 있는 {t.lucky.element} 기운을 가볍게 채워 주는 전통 오행 대응이에요. 소품이나 옷 색으로 기분 전환하듯 써 보세요.</p>}
         </Fold>
         <Fold testId="story-fold-chart" label="내 사주 원국" title="십성·오행 분포·신강신약을 표로 자세히 볼래요">
