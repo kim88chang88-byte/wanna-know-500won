@@ -1,3 +1,4 @@
+import { hasAiKey } from "@/lib/ai/llm";
 import { NextResponse } from "next/server";
 import { hasEntitlement, ENTITLEMENT_COOKIE } from "@/lib/premium/entitlement";
 import { readCookie, SESSION_COOKIE, verifySessionToken } from "@/lib/auth/session";
@@ -41,7 +42,7 @@ export async function POST(request: Request) {
     // 키가 없거나 한도를 넘거나 실패하면 그 부분만 빠지고 기존 풀이가 그대로 나가요.
     let chapterNote = "skip";
     const usage = { in: 0, out: 0, calls: 0 };
-    if (parsed.level === "full" && report.book.length > 0 && process.env.ANTHROPIC_API_KEY && !aiGated) {
+    if (parsed.level === "full" && report.book.length > 0 && hasAiKey() && !aiGated) {
       const dbCfg = loadDbConfig(process.env);
       const db = dbCfg ? createDb(dbCfg) : null;
       const book0 = report.book;

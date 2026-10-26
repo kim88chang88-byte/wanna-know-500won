@@ -1,3 +1,4 @@
+import { hasAiKey } from "@/lib/ai/llm";
 import { NextResponse } from "next/server";
 import { takeAiBudget } from "@/lib/ai/budget";
 import { buildCoreFacts } from "@/lib/ai/coreFacts";
@@ -34,7 +35,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "사주 계산 중 오류가 발생했어요." }, { status: 500 });
   }
 
-  if (!process.env.ANTHROPIC_API_KEY) return NextResponse.json({ error: "지금은 도리가 답을 준비하지 못했어요." }, { status: 503 });
+  if (!hasAiKey()) return NextResponse.json({ error: "지금은 도리가 답을 준비하지 못했어요." }, { status: 503 });
   try {
     const dbConfig = loadDbConfig(process.env);
     const db = dbConfig ? createDb(dbConfig) : null;

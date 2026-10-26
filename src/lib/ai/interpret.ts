@@ -1,12 +1,15 @@
 import type { Concern } from "@/lib/concerns";
 import type { Gender, SajuChart } from "@/lib/saju/types";
 import { buildUserMessage, SYSTEM_PROMPT, type ExtraFacts } from "./prompt";
+import { callLlm, aiKey, modelFor, DEFAULT_MODEL, PAID_MODEL } from "./llm";
 import { parseReading, READING_SCHEMA, type Reading, type ReadingTopic } from "./reading";
+
+export { DEFAULT_MODEL, PAID_MODEL };
 
 /** API 키가 설정되지 않은 경우 (개발 중에는 정상 상황이에요) */
 export class ReadingUnavailableError extends Error {
   constructor() {
-    super("ANTHROPIC_API_KEY 가 설정되지 않았어요.");
+    super("AI API 키(ANTHROPIC_API_KEY 또는 GEMINI_API_KEY)가 설정되지 않았어요.");
     this.name = "ReadingUnavailableError";
   }
 }
@@ -39,18 +42,7 @@ export interface InterpretOptions {
   maxAttempts?: number;
 }
 
-const API_URL = "https://api.anthropic.com/v1/messages";
-const API_VERSION = "2023-06-01";
-/** 500원 한 건에 맞게 가볍고 싼 모델이 기본값이에요. 품질이 아쉬우면 ANTHROPIC_MODEL 로 바꾸세요. */
-export const DEFAULT_MODEL = "claude-haiku-5-5";
-/** 유료(500원 이상) 풀이 기본 모델 */
-export const PAID_MODEL = "claude-sonnet-5-5";
 const MAX_TOKENS = 1500;
-
-interface ApiResponse {
-  stop_reason?: string;
-  content?: Array<{ type: string; text?: string }>;
-}
 
 type Attempt = { reading: Reading } | { retry: true; reason: string } | { fatal: string };
 
@@ -62,28 +54,14 @@ async function attemptOnce(chart: SajuChart, o: Required<Pick<InterpretOptions, 
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), o.timeoutMs);
   try {
-    const res = await o.fetchImpl(API_URL, {
-      method: "POST",
-      headers: { "content-type": "application/json", "x-api-key": o.apiKey, "anthropic-version": API_VERSION },
-      body: JSON.stringify({
-        model: o.model,
-        max_tokens: MAX_TOKENS,
-        system: SYSTEM_PROMPT,
-        messages: [{ role: "user", content: buildUserMessage(chart, o.topic, o.gender, o.concern, o.extra) }],
-        output_config: { format: { type: "json_schema", schema: READING_SCHEMA } },
-      }),
-      signal: ctrl.signal,
-    });
+    const r = await callLlm({ system: SYSTEM_PROMPT, user: buildUserMessage(chart, o.topic, o.gender, o.concern, o.extra), schema: READING_SCHEMA, maxTokens: MAX_TOKENS, model: o.model, apiKey: o.apiKey, fetchImpl: o.fetchImpl, signal: ctrl.signal });
 
     // 응답 본문은 로그에 남기지 않아요. (키/입력값이 섞여 있을 수 있어서 상태 코드만 씁니다)
-    if (res.status === 429 || res.status >= 500) return { retry: true, reason: `HTTP ${res.status}` };
-    if (!res.ok) return { fatal: `HTTP ${res.status}` };
+    if (r.kind === "retry") return { retry: true, reason: r.reason };
+    if (r.kind === "fatal") return { fatal: r.detail };
+    if (r.kind === "blocked") return { retry: true, reason: r.reason === "refusal" ? "모델이 답변을 거절함" : "답변이 잘림" };
 
-    const data = (await res.json()) as ApiResponse;
-    if (data.stop_reason === "refusal") return { retry: true, reason: "모델이 답변을 거절함" };
-    if (data.stop_reason === "max_tokens") return { retry: true, reason: "답변이 잘림" };
-
-    const text = data.content?.find((b) => b.type === "text")?.text;
+    const text = r.text;
     if (!text) return { retry: true, reason: "텍스트 응답 없음" };
     let json: unknown;
     try {
@@ -106,10 +84,10 @@ async function attemptOnce(chart: SajuChart, o: Required<Pick<InterpretOptions, 
  * - 재시도 후에도 실패하면 ReadingFailedError
  */
 export async function interpretSaju(chart: SajuChart, opts: InterpretOptions): Promise<Reading> {
-  const apiKey = opts.apiKey ?? process.env.ANTHROPIC_API_KEY;
+  const apiKey = opts.apiKey ?? aiKey();
   if (!apiKey) throw new ReadingUnavailableError();
 
-  const model = opts.model ?? (opts.tier === "paid" ? (process.env.ANTHROPIC_MODEL_PAID ?? PAID_MODEL) : (process.env.ANTHROPIC_MODEL ?? DEFAULT_MODEL));
+  const model = opts.model ?? modelFor(opts.tier === "paid" ? "paid" : "free");
   const fetchImpl = opts.fetchImpl ?? fetch;
   const timeoutMs = opts.timeoutMs ?? 25_000;
   const maxAttempts = Math.max(1, opts.maxAttempts ?? 2);

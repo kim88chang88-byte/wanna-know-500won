@@ -1,3 +1,4 @@
+import { hasAiKey } from "@/lib/ai/llm";
 import { NextResponse } from "next/server";
 import { takeAiBudget } from "@/lib/ai/budget";
 import { buildCoreFacts } from "@/lib/ai/coreFacts";
@@ -113,7 +114,7 @@ export async function POST(request: Request) {
   let detailInfo: string | null = null;
   try {
     // 키가 있을 때만 비용 한도를 확인해요. 한도를 넘었거나 비상 차단 중이면 AI 한마디만 빼고 사주 리포트는 그대로 나가요.
-    if (process.env.ANTHROPIC_API_KEY) {
+    if (hasAiKey()) {
       const gate = await takeAiBudget(process.env, db);
       if (gate !== "ok") {
         if (gate === "cap") console.warn("AI daily cap reached");

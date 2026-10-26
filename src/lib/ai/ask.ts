@@ -5,7 +5,8 @@ import { containsForbidden, isGeneric } from "./reading";
 import { trimToLastSentence } from "@/lib/storyHelpers";
 import { SYSTEM_PROMPT } from "./prompt";
 import type { AskQuestion } from "./askQuestions";
-import { DEFAULT_MODEL, ReadingFailedError, ReadingUnavailableError } from "./interpret";
+import { ReadingFailedError, ReadingUnavailableError } from "./interpret";
+import { aiKey, callLlm, modelFor } from "./llm";
 
 export const ASK_SYSTEM_PROMPT = `${SYSTEM_PROMPT}
 
@@ -68,10 +69,9 @@ interface Opts {
 
 /** 칩 질문 하나에 답을 만들어요. 키가 없으면 ReadingUnavailableError, 실패하면 ReadingFailedError. */
 export async function askDori(o: Opts): Promise<string> {
-  const apiKey = o.apiKey ?? process.env.ANTHROPIC_API_KEY;
+  const apiKey = o.apiKey ?? aiKey();
   if (!apiKey) throw new ReadingUnavailableError();
-  const model = o.model ?? process.env.ANTHROPIC_MODEL ?? DEFAULT_MODEL;
-  const fetchImpl = o.fetchImpl ?? fetch;
+  const model = o.model ?? modelFor("free");
   let last = "알 수 없음";
   // 막히면(과부하·형식 어긋남) 잠깐 쉬고 세 번까지 시도해요. 한 번에 18초, 합쳐서 60초 안에 끝나요.
   for (let i = 0; i < 3; i++) {
@@ -79,25 +79,12 @@ export async function askDori(o: Opts): Promise<string> {
     const ctrl = new AbortController();
     const timer = setTimeout(() => ctrl.abort(), o.timeoutMs ?? 18_000);
     try {
-      const res = await fetchImpl("https://api.anthropic.com/v1/messages", {
-        method: "POST",
-        headers: { "content-type": "application/json", "x-api-key": apiKey, "anthropic-version": "2023-06-01" },
-        body: JSON.stringify({
-          model,
-          max_tokens: 1200,
-          system: ASK_SYSTEM_PROMPT,
-          messages: [{ role: "user", content: buildAskMessage(o.chart, o.gender, o.question, o.core) }],
-          output_config: { format: { type: "json_schema", schema: ASK_SCHEMA } },
-        }),
-        signal: ctrl.signal,
-      });
-      if (res.status === 429 || res.status >= 500) { last = `HTTP ${res.status}`; continue; }
-      if (!res.ok) throw new ReadingFailedError(`HTTP ${res.status}`);
-      const data = (await res.json()) as { stop_reason?: string; content?: Array<{ type: string; text?: string }> };
-      if (data.stop_reason === "refusal" || data.stop_reason === "max_tokens") { last = data.stop_reason; continue; }
-      const text = data.content?.find((b) => b.type === "text")?.text;
+      const r = await callLlm({ system: ASK_SYSTEM_PROMPT, user: buildAskMessage(o.chart, o.gender, o.question, o.core), schema: ASK_SCHEMA, maxTokens: 1200, model, apiKey, fetchImpl: o.fetchImpl, signal: ctrl.signal });
+      if (r.kind === "retry") { last = r.reason; continue; }
+      if (r.kind === "fatal") throw new ReadingFailedError(r.detail);
+      if (r.kind === "blocked") { last = r.reason; continue; }
       let json: unknown;
-      try { json = text ? JSON.parse(text) : null; } catch { last = "JSON 해석 실패"; continue; }
+      try { json = r.text ? JSON.parse(r.text) : null; } catch { last = "JSON 해석 실패"; continue; }
       const ans = parseAnswer(json);
       if (ans) return ans;
       last = "형식 또는 금지 표현 검사 실패";

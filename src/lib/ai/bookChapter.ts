@@ -1,7 +1,7 @@
 import { concernLabel, hasConcern, type Concern } from "@/lib/concerns";
 import type { BookPage, BookSection } from "@/lib/premium/types";
 import { callJson } from "./callJson";
-import { DEFAULT_PAID_MODEL } from "./bookNotes";
+import { modelFor } from "./llm";
 import { containsForbidden, isGeneric } from "./reading";
 
 /*
@@ -339,7 +339,7 @@ function repack(parts: Part[]): Part[] {
 
 async function rewriteOne(pages: BookPage[], page: BookPage, spec: ChapterSpec, opts: ChapterOptions, hardStop: number): Promise<{ sections: BookSection[] | null; err: string }> {
   const facts = chapterFacts(pages, page, opts.name ?? null, opts.concern ?? null);
-  const model = opts.model ?? process.env.ANTHROPIC_MODEL_PAID ?? DEFAULT_PAID_MODEL;
+  const model = opts.model ?? modelFor("paid");
   const errs: string[] = [];
   const deadline = Date.now() + 30_000;
   const parts = repack(spec.parts);

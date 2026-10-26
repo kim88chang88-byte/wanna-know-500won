@@ -1,3 +1,4 @@
+import { hasAiKey } from "@/lib/ai/llm";
 import { NextResponse } from "next/server";
 import { takeAiBudget } from "@/lib/ai/budget";
 import { compareHours, findCandidates, parseRange } from "@/lib/ai/hourRange";
@@ -37,7 +38,7 @@ export async function POST(request: Request) {
   try {
     const needsAi = findCandidates(base, range.start, range.end, () => null).length > 1;
     if (needsAi) {
-      if (!process.env.ANTHROPIC_API_KEY) return NextResponse.json({ error: "지금은 도리가 답을 준비하지 못했어요." }, { status: 503 });
+      if (!hasAiKey()) return NextResponse.json({ error: "지금은 도리가 답을 준비하지 못했어요." }, { status: 503 });
       const dbConfig = loadDbConfig(process.env);
       const db = dbConfig ? createDb(dbConfig) : null;
       const gate = await takeAiBudget(process.env, db);

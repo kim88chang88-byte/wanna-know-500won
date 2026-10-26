@@ -1,5 +1,6 @@
 import { concernLabel, hasConcern, type Concern } from "@/lib/concerns";
 import type { BookPage } from "@/lib/premium/types";
+import { aiKey, callLlm, modelFor, PAID_MODEL } from "./llm";
 import { containsForbidden, isGeneric } from "./reading";
 
 /*
@@ -8,10 +9,8 @@ import { containsForbidden, isGeneric } from "./reading";
  * 실패하거나 한도를 넘으면 한 줄만 빠지고 리포트는 그대로 나가요. (잠긴 글은 AI 에게도 넘기지 않아요)
  */
 
-const API_URL = "https://api.anthropic.com/v1/messages";
-const API_VERSION = "2023-06-01";
 /** 유료 리포트는 문장 품질이 중요해서 더 똑똑한 모델이 기본이에요. ANTHROPIC_MODEL_PAID 로 바꿀 수 있어요. */
-export const DEFAULT_PAID_MODEL = "claude-sonnet-5-5";
+export const DEFAULT_PAID_MODEL = PAID_MODEL;
 export const NOTE_MAX = 110;
 export const ADVICE_MIN = 50;
 export const ADVICE_MAX = 460;
@@ -107,35 +106,22 @@ export interface BookNotesOptions {
 
 /** 쪽마다 한 줄을 붙인 새 배열을 돌려줘요. 어떤 이유로든 실패하면 원래 쪽을 그대로 돌려줘요. */
 export async function addBookNotes(pages: BookPage[], opts: BookNotesOptions): Promise<BookPage[]> {
-  const apiKey = opts.apiKey ?? process.env.ANTHROPIC_API_KEY;
+  const apiKey = opts.apiKey ?? aiKey();
   if (!apiKey || pages.length === 0) return pages;
-  const model = opts.model ?? process.env.ANTHROPIC_MODEL_PAID ?? DEFAULT_PAID_MODEL;
-  const fetchImpl = opts.fetchImpl ?? fetch;
+  const model = opts.model ?? modelFor("paid");
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), opts.timeoutMs ?? 30_000);
   try {
-    const res = await fetchImpl(API_URL, {
-      method: "POST",
-      headers: { "content-type": "application/json", "x-api-key": apiKey, "anthropic-version": API_VERSION },
-      body: JSON.stringify({
-        model,
-        max_tokens: MAX_TOKENS,
-        system: NOTES_SYSTEM_PROMPT,
-        messages: [{ role: "user", content: summarizeBook(pages, opts.kind, opts.concern ?? null) }],
-        output_config: { format: { type: "json_schema", schema: NOTES_SCHEMA } },
-      }),
-      signal: ctrl.signal,
-    });
-    if (!res.ok) {
-      console.warn("book notes: HTTP", res.status);
+    const r = await callLlm({ system: NOTES_SYSTEM_PROMPT, user: summarizeBook(pages, opts.kind, opts.concern ?? null), schema: NOTES_SCHEMA, maxTokens: MAX_TOKENS, model, apiKey, fetchImpl: opts.fetchImpl, signal: ctrl.signal });
+    if (r.kind === "retry" || r.kind === "fatal") {
+      console.warn("book notes:", r.kind === "retry" ? r.reason : r.detail);
       return pages;
     }
-    const data = (await res.json()) as { stop_reason?: string; content?: Array<{ type: string; text?: string }> };
-    if (data.stop_reason === "refusal" || data.stop_reason === "max_tokens") {
-      console.warn("book notes: stop_reason", data.stop_reason);
+    if (r.kind === "blocked") {
+      console.warn("book notes: stop_reason", r.reason);
       return pages;
     }
-    const text = data.content?.find((b) => b.type === "text")?.text;
+    const text = r.text;
     if (!text) return pages;
     const json: unknown = JSON.parse(text);
     const notes = parseNotes(json, pages.map((p) => p.no));
