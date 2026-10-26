@@ -4,6 +4,7 @@ import { useState, type FormEvent } from "react";
 import type { PremiumErrorBody, PremiumReportView } from "@/lib/premium/types";
 import type { BirthInput } from "@/lib/saju/types";
 import ManseReport from "./ManseReport";
+import AiNotice from "./AiNotice";
 import { fetchRestChapters, mergeChapters } from "@/lib/premium/mergeChapters";
 
 const field = "w-full rounded-2xl border border-[#e6c887]/30 bg-white/[0.05] px-4 py-3 text-base text-[#fbf3de] [color-scheme:dark] focus:outline-none focus:ring-2 focus:ring-[#e6c887]/50";
@@ -11,6 +12,7 @@ const seg = (active: boolean) =>
   `flex-1 rounded-full py-2.5 text-sm font-bold border transition-colors ${active ? "bg-[#e6c887] text-[#1b1824] border-[#e6c887]" : "bg-transparent text-[#e6c887] border-[#e6c887]/40"}`;
 
 export default function PremiumReportApp() {
+  const [aiNotice, setAiNotice] = useState(false);
   const [date, setDate] = useState("");
   const [time, setTime] = useState("12:00");
   const [timeUnknown, setTimeUnknown] = useState(false);
@@ -47,10 +49,14 @@ export default function PremiumReportApp() {
         return;
       }
       setReport(json.report);
+      setAiNotice((json as { aiNotice?: boolean }).aiNotice === true);
       // 나머지 장은 이어서 받아 와서 끼워 넣어요.
       if ((json as { pendingChapters?: string[] }).pendingChapters?.length) {
         const rest = { ...body, level: "full", topic: "프리미엄 사주 원국 리포트" };
-        void fetchRestChapters(rest).then((rep) => setReport((prev) => (prev ? mergeChapters(prev, rep ?? undefined) : prev)));
+        void fetchRestChapters(rest).then((rep) => {
+          setReport((prev) => (prev ? mergeChapters(prev, rep.replaced ?? undefined) : prev));
+          if (rep.aiNotice) setAiNotice(true);
+        });
       }
     } catch {
       setError("네트워크 연결을 확인하고 다시 시도해 주세요.");
@@ -62,6 +68,7 @@ export default function PremiumReportApp() {
   if (report) {
     return (
       <div className="space-y-6">
+        {aiNotice && <AiNotice dark />}
         <ManseReport report={report} />
         <button type="button" onClick={() => setReport(null)} className="w-full rounded-full border border-[#e6c887]/40 py-3 text-sm font-bold text-[#e6c887]">
           다시 입력하기

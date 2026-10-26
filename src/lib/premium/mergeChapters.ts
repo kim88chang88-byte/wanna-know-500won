@@ -7,7 +7,7 @@ export function mergeChapters(report: PremiumReportView, replaced: Record<string
 }
 
 /** 나머지 장을 이어서 받아요. 실패하면 null (이미 보이는 리포트는 그대로 둬요). */
-export async function fetchRestChapters(body: unknown, signal?: AbortSignal): Promise<Record<string, BookSection[]> | null> {
+export async function fetchRestChapters(body: unknown, signal?: AbortSignal): Promise<{ replaced: Record<string, BookSection[]> | null; aiNotice: boolean }> {
   try {
     const res = await fetch("/api/premium", {
       method: "POST",
@@ -15,10 +15,10 @@ export async function fetchRestChapters(body: unknown, signal?: AbortSignal): Pr
       body: JSON.stringify({ ...(body as object), chapterBatch: 2 }),
       signal,
     });
-    if (!res.ok) return null;
-    const data = (await res.json().catch(() => null)) as { replaced?: Record<string, BookSection[]> } | null;
-    return data?.replaced ?? null;
+    if (!res.ok) return { replaced: null, aiNotice: true };
+    const data = (await res.json().catch(() => null)) as { replaced?: Record<string, BookSection[]>; aiNotice?: boolean } | null;
+    return { replaced: data?.replaced ?? null, aiNotice: data?.aiNotice === true || !data };
   } catch {
-    return null;
+    return { replaced: null, aiNotice: true };
   }
 }

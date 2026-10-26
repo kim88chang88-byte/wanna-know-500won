@@ -1,6 +1,7 @@
 "use client";
 
 import { fetchRestChapters, mergeChapters } from "@/lib/premium/mergeChapters";
+import AiNotice from "@/components/premium/AiNotice";
 import { useEffect, useRef, useState } from "react";
 import {
   COMPAT_STEPS,
@@ -119,7 +120,7 @@ function ChoiceButton({
 type ReadingStatus = "ok" | "unavailable" | "failed";
 
 /** 프리미엄 리포트를 받아요. 실패해도 예외 대신 사용자에게 보여 줄 문장을 돌려줘요. */
-async function fetchPremiumReport(input: BirthInput, level: "basic" | "full", topic: string, concern: Concern | null, partner: BirthInput | null, signal: AbortSignal): Promise<{ report: PremiumReportView | null; error: string | null; rest?: unknown }> {
+async function fetchPremiumReport(input: BirthInput, level: "basic" | "full", topic: string, concern: Concern | null, partner: BirthInput | null, signal: AbortSignal): Promise<{ report: PremiumReportView | null; error: string | null; rest?: unknown; aiNotice?: boolean }> {
   try {
     const reqBody = { ...input, level, topic, concern, ...(partner ? { partner } : {}) };
     const res = await fetch("/api/premium", {
@@ -128,8 +129,8 @@ async function fetchPremiumReport(input: BirthInput, level: "basic" | "full", to
       body: JSON.stringify(reqBody),
       signal,
     });
-    const data = (await res.json().catch(() => null)) as { report?: PremiumReportView; error?: string; pendingChapters?: string[] } | null;
-    if (res.ok && data?.report) return { report: data.report, error: null, rest: data.pendingChapters?.length ? reqBody : undefined };
+    const data = (await res.json().catch(() => null)) as { report?: PremiumReportView; error?: string; pendingChapters?: string[]; aiNotice?: boolean } | null;
+    if (res.ok && data?.report) return { report: data.report, error: null, aiNotice: data.aiNotice === true, rest: data.pendingChapters?.length ? reqBody : undefined };
     return { report: null, error: data?.error ?? "사주 리포트를 불러오지 못했어요. 잠시 뒤에 다시 시도해 주세요." };
   } catch {
     if (signal.aborted) return { report: null, error: null };
@@ -331,6 +332,7 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
   const [chart, setChart] = useState<SajuChart | null>(null);
   const [reading, setReading] = useState<PublicReading | null>(null);
   const [readingStatus, setReadingStatus] = useState<ReadingStatus>("ok");
+  const [aiNotice, setAiNotice] = useState(false);
   const [premiumReport, setPremiumReport] = useState<PremiumReportView | null>(null);
   const [premiumError, setPremiumError] = useState<string | null>(null);
   const loadingAnimal = IMAGES[MACHINES.find((m) => m.fortune === target.fortune)?.image ?? ""] ?? "/images/animal-otter.webp";
@@ -395,12 +397,14 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
       setPremiumReport(p.report);
       setPremiumError(p.error);
       // 나머지 장은 이어서 받아 와서 끼워 넣어요.
-      if (p.rest) void fetchRestChapters(p.rest, ctrl.signal).then((rep) => { if (!ctrl.signal.aborted) setPremiumReport((prev) => (prev ? mergeChapters(prev, rep ?? undefined) : prev)); });
+      if (p.rest) void fetchRestChapters(p.rest, ctrl.signal).then((rep) => { if (ctrl.signal.aborted) return; setPremiumReport((prev) => (prev ? mergeChapters(prev, rep.replaced ?? undefined) : prev)); if (rep.aiNotice) setAiNotice(true); });
       setChart(data.chart);
       setAskInput(input);
       setBirthNote([data.birthAdjustNote, data.boundaryNote].filter(Boolean).join("\n") || null);
       setReading(data.reading ?? null);
       setReadingStatus(status);
+      // 프리미엄은 장 풀이를 못 받았을 때, 500원은 접어 둔 긴 풀이(folds)를 못 받았을 때 안내를 띄워요.
+      setAiNotice(target.premium ? p.aiNotice === true : !data.reading?.folds);
       if (data.profileSaved) onProfileSaved?.(input);
       // 막대를 끝까지 채우는 모습을 잠깐 보여주고 결과로 넘어가요.
       setLoadDone(true);
@@ -521,6 +525,8 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
                   ))}
                 </p>
               )}
+
+              {aiNotice && <AiNotice dark={luxe} />}
 
               {storyMode ? (
                 <>

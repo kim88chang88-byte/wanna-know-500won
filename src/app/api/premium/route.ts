@@ -72,6 +72,8 @@ export async function POST(request: Request) {
         if (Object.keys(rep).length > 0) report.book = report.book.map((p) => (rep[p.no] ? { ...p, sections: rep[p.no] } : p));
       }
     }
+    // 프리미엄(개인) 리포트인데 AI 장 풀이를 하나도 못 받았거나 일부 실패했으면 안내 문구를 띄워요.
+    const aiDown = parsed.level === "full" && !parsed.partner && !lock && (chapterNote === "skip" || chapterNote.includes("fail"));
     if (second) {
       // 두 번째 요청은 새로 쓴 장의 본문만 돌려줘요.
       const replaced: Record<number, unknown> = {};
@@ -79,10 +81,10 @@ export async function POST(request: Request) {
       report.book.forEach((p, i) => {
         if (CHAPTER_BATCH_2.includes(p.key) && JSON.stringify(p.sections) !== JSON.stringify(base[i]?.sections)) replaced[p.no] = p.sections;
       });
-      return NextResponse.json({ replaced, chapterNote, chapterUsage: usage });
+      return NextResponse.json({ replaced, chapterNote, chapterUsage: usage, aiNotice: aiDown });
     }
     const pendingChapters = chapterNote !== "skip" && !parsed.partner && parsed.level === "full" && !lock ? CHAPTER_BATCH_2 : [];
-    return NextResponse.json({ report, chapterNote, chapterUsage: usage, pendingChapters });
+    return NextResponse.json({ report, chapterNote, chapterUsage: usage, pendingChapters, aiNotice: aiDown });
   } catch (err) {
     // 없는 날짜(예: 윤달이 없는 해의 윤달)처럼 계산할 수 없는 입력이에요.
     console.error("premium report failed:", err instanceof Error ? err.message : "unknown");
