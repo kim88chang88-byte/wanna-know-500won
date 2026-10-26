@@ -69,6 +69,6 @@ describe("궁합 계산", () => {
 describe("궁합 화면 문구 판별", () => {
   it("'궁합'이 들어간 문구만 궁합으로 본다", () => {
     expect(isCompatFortune("우리 둘의 궁합 리포트")).toBe(true);
-    expect(isCompatFortune("연애 매력 리포트")).toBe(false);
+    expect(isCompatFortune("연애 결혼 리포트")).toBe(false);
   });
 });

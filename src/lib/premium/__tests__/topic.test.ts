@@ -11,11 +11,11 @@ const FORBIDDEN = ["사망", "죽음", "재앙", "저주", "액운", "파산", "
 describe("resolveTopic", () => {
   it.each([
     ["연애운", "love"],
-    ["연애 매력 리포트", "love"],
+    ["연애 결혼 리포트", "marriage"],
     ["결혼운", "marriage"],
     ["우리 둘의 궁합 리포트", "marriage"],
     ["재물운", "money"],
-    ["올해 재물·직장 운 리포트", "money"],
+    ["올해 성공 재물 리포트", "success"],
     ["성공운", "success"],
     ["건강운", "health"],
     ["학업운", "study"],

@@ -85,8 +85,11 @@ export const CONCERN_CHIPS: readonly ConcernChip[] = [
 const CHIPS_BY_KIND: Array<{ match: string; ids: ConcernId[] }> = [
   // 더 구체적인 이름을 먼저 확인해요. (예: '재물·직장 리포트'가 '재물운'보다 먼저)
   { match: "궁합", ids: ["relationship", "crush", "marriage", "partner", "doubt", "breakup", "friends"] },
-  { match: "연애 매력", ids: ["crush", "meet", "express", "pattern", "doubt", "relationship", "breakup"] },
-  { match: "재물·직장", ids: ["money", "spending", "income", "stable", "job", "career", "promotion"] },
+  { match: "연애 결혼", ids: ["crush", "meet", "relationship", "marriage", "partner", "breakup", "prep"] },
+  { match: "성공 재물", ids: ["job", "career", "promotion", "money", "income", "spending", "stable"] },
+  // (예전 이름도 계속 알아봐요)
+  { match: "연애 매력", ids: ["crush", "meet", "relationship", "marriage", "partner", "breakup", "prep"] },
+  { match: "재물·직장", ids: ["job", "career", "promotion", "money", "income", "spending", "stable"] },
   { match: "성공", ids: ["job", "workpeople", "career", "promotion", "startup", "skill", "jobsearch"] },
   { match: "재물", ids: ["money", "spending", "saving", "income", "stable", "independence", "moneyrel"] },
   { match: "연애", ids: ["crush", "relationship", "breakup", "meet", "express", "pattern", "doubt"] },

@@ -343,7 +343,7 @@ function Visual({ page, report }: { page: BookPage; report: PremiumReportView })
   }
 }
 
-/** 리포트마다 한 동물만 나와요: 재물·직장 = 용, 연애 매력 = 토끼, 그 밖(궁합 등) = 수달 */
+/** 리포트마다 한 동물만 나와요: 성공 재물 = 용, 연애 결혼 = 토끼, 그 밖(궁합 등) = 수달 */
 type Mascot = "dragon" | "rabbit" | "otter";
 function mascotOf(report: PremiumReportView): Mascot {
   if (report.compat) return "otter";

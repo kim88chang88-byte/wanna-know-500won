@@ -14,19 +14,21 @@ const REALITY_KIND: Record<TopicKey, RealityKind> = { love: "love", marriage: "l
 
 export const TOPIC_META: Record<TopicKey, { label: string; emoji: string }> = {
   love: { label: "연애운", emoji: "💘" },
-  marriage: { label: "인연운", emoji: "💍" },
+  marriage: { label: "연애·결혼운", emoji: "💍" },
   money: { label: "재물운", emoji: "🪙" },
-  success: { label: "성공운", emoji: "🌊" },
+  success: { label: "성공·재물운", emoji: "🌊" },
   health: { label: "건강운", emoji: "🌿" },
   study: { label: "학업운", emoji: "📖" },
   general: { label: "오늘의 운", emoji: "🫧" },
 };
 
-/** 화면 문구("연애운", "연애 매력 리포트", "올해 재물·직장 운 리포트", "우리 둘의 궁합 리포트")에서 주제를 골라요. */
+/** 화면 문구("연애운", "연애 결혼 리포트", "올해 성공 재물 리포트", "우리 둘의 궁합 리포트")에서 주제를 골라요. */
 export function resolveTopic(raw: unknown): TopicKey {
   if (typeof raw !== "string") return "general";
   const rules: Array<[TopicKey, string[]]> = [
-    ["marriage", ["결혼", "인연운", "궁합"]],
+    // 프리미엄 "연애 결혼 리포트"는 결혼 쪽 분석(연애 이야기 포함), "성공 재물 리포트"는 성공 쪽 분석(재물 이야기 포함)으로 풀어요.
+    ["success", ["성공 재물", "재물·직장"]],
+    ["marriage", ["결혼", "인연운", "궁합", "연애 매력"]],
     ["love", ["연애"]],
     ["money", ["재물", "금전"]],
     ["success", ["성공", "직장", "커리어"]],
@@ -236,8 +238,19 @@ export function buildTopicInsight(topic: TopicKey, r: SajuResult, ctx: TopicCont
     }
     case "marriage": {
       const n = counts[partner];
-      headline = n >= 2 ? "인연의 별이 또렷해서 만남의 기회가 열려 있는 편이에요" : "서로를 알아 가는 시간이 인연을 단단하게 해 주는 타입이에요";
-      points.push({ title: "배우자 자리의 성향", body: spouseText });
+      headline = n >= 2 ? "인연의 별이 또렷해서 연애와 결혼의 기회가 열려 있는 편이에요" : "서로를 알아 가는 시간이 연애를 결혼으로 단단하게 이어 주는 타입이에요";
+      points.push({ title: "나의 연애 스타일", body: spouseText });
+      points.push({
+        title: "연애에서의 매력",
+        body: dohwa
+          ? "분위기와 눈빛으로 호감을 끄는 매력이 있어요. 첫인상이 오래 기억되는 타입이라, 만남의 문이 자주 열려요."
+          : counts.식상 >= 2
+            ? "말솜씨와 센스로 분위기를 부드럽게 만드는 매력이 있어요. 대화가 이어질수록 마음이 가까워져요."
+            : counts.인성 >= 2
+              ? "상대 이야기를 잘 들어 주는 안정감이 큰 매력이에요. 편안함이 호감으로 이어져요."
+              : `${josa(GROUP_TRAIT[dominant], "이/가")} 매력으로 드러나는 타입이에요. 꾸미지 않은 모습이 가장 큰 호감 포인트예요.`,
+      });
+      points.push({ title: "결혼으로 이어지는 배우자 자리", body: `${spouseText} 연애에서 시작해 결혼까지 이어질 때는 이 성향이 함께 사는 모습의 바탕이 돼요.` });
       points.push({ title: "잘 맞는 유형", body: `${ctx.level === "full" ? "내 사주에서 비어 있는 기운을 채워 주는" : "나와 결이 다른 기운으로 균형을 맞춰 주는"} ${lucky.trait}과 잘 맞는 편이에요.` });
       points.push({
         title: "함께 만드는 가정",
@@ -266,13 +279,17 @@ export function buildTopicInsight(topic: TopicKey, r: SajuResult, ctx: TopicCont
       break;
     }
     case "success": {
-      headline = counts.관성 + counts.인성 >= 3 ? "인정받는 자리를 차근차근 만들어 가는 타입이에요" : counts.식상 >= 2 ? "재능을 드러낼 때 길이 열리는 타입이에요" : "나만의 방식으로 길을 만들어 가는 타입이에요";
+      headline = counts.관성 + counts.인성 >= 3 ? "인정받는 자리를 차근차근 만들고, 그만큼 재물도 쌓아 가는 타입이에요" : counts.식상 >= 2 ? "재능을 드러낼 때 성공의 길과 돈의 길이 함께 열리는 타입이에요" : "나만의 방식으로 성공과 재물의 길을 만들어 가는 타입이에요";
       points.push({
         title: "일하는 스타일",
         body: dominant === "관성" ? "맡은 역할을 책임감 있게 해내는 스타일이에요. 신뢰가 곧 나의 경쟁력이에요." : dominant === "식상" ? "아이디어를 내고 표현하는 일에서 빛나요. 새로운 시도를 즐기는 편이에요." : dominant === "재성" ? "결과와 실속을 중시하는 현실파예요. 목표를 숫자로 정하면 속도가 붙어요." : dominant === "인성" ? "배우고 정리하며 실력을 쌓는 스타일이에요. 전문성이 가장 큰 무기예요." : "주관이 뚜렷하고 독립적으로 일할 때 능률이 올라요.",
       });
       points.push({ title: "잘 맞는 환경", body: counts.관성 >= 2 ? "체계와 역할이 분명한 조직에서 안정적으로 성장해요." : counts.식상 >= 2 ? "자율성과 창의성이 보장되는 환경에서 힘이 나요." : counts.비겁 >= 2 ? "내 결정권이 있는 독립적인 환경이 잘 맞아요." : "배울 점이 많은 사람들과 함께하는 환경이 성장에 좋아요." });
       points.push({ title: "성장 포인트", body: `${josa(GROUP_TRAIT[dominant], "이/가")} 강점이에요. ${lowest.name} 기운(${lucky.color})처럼 비어 있는 부분을 의식적으로 채우면 균형이 좋아져요.` });
+      points.push({
+        title: "재물이 따라오는 길",
+        body: counts.재성 >= 2 ? "성과가 곧 수입으로 이어지는 감각이 살아 있어요. 하는 일의 결과를 숫자로 남겨 두면 더 크게 따라와요." : counts.식상 >= 1 && counts.재성 >= 1 ? "재능과 아이디어가 돈이 되는 구조예요. 잘하는 것을 꾸준히 보여 줄수록 수입도 함께 커져요." : counts.관성 >= 2 ? "자리와 신뢰를 쌓은 만큼 보상이 따라오는 타입이에요. 직함과 연차가 곧 재물의 바탕이 돼요." : "한 번에 크게 버는 것보다 꾸준한 성과가 쌓여 재물이 되는 타입이에요. 작은 수입원을 하나 더 만들어 보세요.",
+      });
       break;
     }
     case "health": {

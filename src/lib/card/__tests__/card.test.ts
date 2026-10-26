@@ -81,7 +81,7 @@ describe("buildPhotoCardData", () => {
 });
 
 describe("프리미엄 포토카드 데이터", () => {
-  const full = buildPremiumReport(input, new Date("2026-10-18T00:00:00+09:00"), "full", "연애 매력 리포트");
+  const full = buildPremiumReport(input, new Date("2026-10-18T00:00:00+09:00"), "full", "연애 결혼 리포트");
   const date = new Date(2026, 9, 18);
   it("일반(basic)은 basic 카드, 프리미엄(full)은 premium 카드", () => {
     expect(buildPhotoCardData(report, { date, siteLabel: "x" }).tier).toBe("basic");
