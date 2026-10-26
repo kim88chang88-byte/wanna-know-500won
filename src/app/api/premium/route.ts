@@ -7,6 +7,7 @@ import { enforceLimits, guardOrigin } from "@/lib/guard";
 import { addBookNotes } from "@/lib/ai/bookNotes";
 import { CHAPTER_BATCH_1, CHAPTER_BATCH_2, chapterName, rewriteChapters } from "@/lib/ai/bookChapter";
 import { takeAiBudget } from "@/lib/ai/budget";
+import { isAdmin } from "@/lib/admin/auth";
 import { createDb, loadDbConfig } from "@/lib/db/supabase";
 
 export const maxDuration = 60;
@@ -33,12 +34,14 @@ export async function POST(request: Request) {
     const session = verifySessionToken(readCookie(cookieHeader, SESSION_COOKIE), process.env.AUTH_SECRET);
     const entitled = hasEntitlement(readCookie(cookieHeader, ENTITLEMENT_COOKIE), process.env.AUTH_SECRET, session?.sub ?? null);
     const lock = isPremiumLocked(process.env) && !entitled;
+    // PREMIUM_AI_GATE=true 이면 AI 장 풀이(비용이 드는 부분)는 이용권이 있거나 관리자(ADMIN_USER_IDS)인 요청에만 줘요. 꺼 두면 지금처럼 모두에게 줘요.
+    const aiGated = process.env.PREMIUM_AI_GATE?.trim().toLowerCase() === "true" && !entitled && !isAdmin(session?.sub, process.env);
     const report = buildPremiumReport(parsed.value, new Date(), parsed.level, parsed.topic, lock, parsed.concern, parsed.partner);
     // 프리미엄(전체) 리포트에는 쪽마다 AI 가 쓴 '도리의 한 줄'을 붙이고, 재물운 장은 AI 가 이 사람 이야기로 다시 써요.
     // 키가 없거나 한도를 넘거나 실패하면 그 부분만 빠지고 기존 풀이가 그대로 나가요.
     let chapterNote = "skip";
     const usage = { in: 0, out: 0, calls: 0 };
-    if (parsed.level === "full" && report.book.length > 0 && process.env.ANTHROPIC_API_KEY) {
+    if (parsed.level === "full" && report.book.length > 0 && process.env.ANTHROPIC_API_KEY && !aiGated) {
       const dbCfg = loadDbConfig(process.env);
       const db = dbCfg ? createDb(dbCfg) : null;
       const book0 = report.book;
@@ -73,7 +76,7 @@ export async function POST(request: Request) {
       }
     }
     // 프리미엄(개인) 리포트인데 AI 장 풀이를 하나도 못 받았거나 일부 실패했으면 안내 문구를 띄워요.
-    const aiDown = parsed.level === "full" && !parsed.partner && !lock && (chapterNote === "skip" || chapterNote.includes("fail"));
+    const aiDown = !aiGated && parsed.level === "full" && !parsed.partner && !lock && (chapterNote === "skip" || chapterNote.includes("fail"));
     if (second) {
       // 두 번째 요청은 새로 쓴 장의 본문만 돌려줘요.
       const replaced: Record<number, unknown> = {};
@@ -84,7 +87,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ replaced, chapterNote, chapterUsage: usage, aiNotice: aiDown });
     }
     const pendingChapters = chapterNote !== "skip" && !parsed.partner && parsed.level === "full" && !lock ? CHAPTER_BATCH_2 : [];
-    return NextResponse.json({ report, chapterNote, chapterUsage: usage, pendingChapters, aiNotice: aiDown });
+    return NextResponse.json({ report, chapterNote, chapterUsage: usage, pendingChapters, aiNotice: aiDown, aiGated: aiGated && parsed.level === "full" && !parsed.partner });
   } catch (err) {
     // 없는 날짜(예: 윤달이 없는 해의 윤달)처럼 계산할 수 없는 입력이에요.
     console.error("premium report failed:", err instanceof Error ? err.message : "unknown");

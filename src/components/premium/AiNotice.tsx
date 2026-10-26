@@ -1,5 +1,5 @@
 /** AI 풀이를 받지 못했을 때 보여 주는 안내. 기본 풀이는 그대로 보이고, 이 문구만 위에 얹어요. */
-export default function AiNotice({ dark = false }: { dark?: boolean }) {
+export default function AiNotice({ dark = false, gated = false }: { dark?: boolean; gated?: boolean }) {
   return (
     <p
       role="status"
@@ -8,7 +8,7 @@ export default function AiNotice({ dark = false }: { dark?: boolean }) {
         dark ? "border-[#e6c887]/40 bg-[#e6c887]/10 text-[#f3e7c9]" : "border-amber-200 bg-amber-50 text-amber-800"
       }`}
     >
-      풀이를 준비 중이에요, 잠시 뒤에 다시 시도해 주세요
+      {gated ? "AI 상세 풀이는 이용권이 있을 때 볼 수 있어요. 지금은 기본 풀이를 보여 드려요" : "풀이를 준비 중이에요, 잠시 뒤에 다시 시도해 주세요"}
     </p>
   );
 }

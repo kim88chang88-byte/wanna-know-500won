@@ -13,6 +13,7 @@ const seg = (active: boolean) =>
 
 export default function PremiumReportApp() {
   const [aiNotice, setAiNotice] = useState(false);
+  const [aiGated, setAiGated] = useState(false);
   const [date, setDate] = useState("");
   const [time, setTime] = useState("12:00");
   const [timeUnknown, setTimeUnknown] = useState(false);
@@ -50,6 +51,7 @@ export default function PremiumReportApp() {
       }
       setReport(json.report);
       setAiNotice((json as { aiNotice?: boolean }).aiNotice === true);
+      setAiGated((json as { aiGated?: boolean }).aiGated === true);
       // 나머지 장은 이어서 받아 와서 끼워 넣어요.
       if ((json as { pendingChapters?: string[] }).pendingChapters?.length) {
         const rest = { ...body, level: "full", topic: "프리미엄 사주 원국 리포트" };
@@ -68,7 +70,7 @@ export default function PremiumReportApp() {
   if (report) {
     return (
       <div className="space-y-6">
-        {aiNotice && <AiNotice dark />}
+        {(aiNotice || aiGated) && <AiNotice dark gated={aiGated} />}
         <ManseReport report={report} />
         <button type="button" onClick={() => setReport(null)} className="w-full rounded-full border border-[#e6c887]/40 py-3 text-sm font-bold text-[#e6c887]">
           다시 입력하기

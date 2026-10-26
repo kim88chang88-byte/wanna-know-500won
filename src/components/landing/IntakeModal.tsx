@@ -120,7 +120,7 @@ function ChoiceButton({
 type ReadingStatus = "ok" | "unavailable" | "failed";
 
 /** 프리미엄 리포트를 받아요. 실패해도 예외 대신 사용자에게 보여 줄 문장을 돌려줘요. */
-async function fetchPremiumReport(input: BirthInput, level: "basic" | "full", topic: string, concern: Concern | null, partner: BirthInput | null, signal: AbortSignal): Promise<{ report: PremiumReportView | null; error: string | null; rest?: unknown; aiNotice?: boolean }> {
+async function fetchPremiumReport(input: BirthInput, level: "basic" | "full", topic: string, concern: Concern | null, partner: BirthInput | null, signal: AbortSignal): Promise<{ report: PremiumReportView | null; error: string | null; rest?: unknown; aiNotice?: boolean; aiGated?: boolean }> {
   try {
     const reqBody = { ...input, level, topic, concern, ...(partner ? { partner } : {}) };
     const res = await fetch("/api/premium", {
@@ -129,8 +129,8 @@ async function fetchPremiumReport(input: BirthInput, level: "basic" | "full", to
       body: JSON.stringify(reqBody),
       signal,
     });
-    const data = (await res.json().catch(() => null)) as { report?: PremiumReportView; error?: string; pendingChapters?: string[]; aiNotice?: boolean } | null;
-    if (res.ok && data?.report) return { report: data.report, error: null, aiNotice: data.aiNotice === true, rest: data.pendingChapters?.length ? reqBody : undefined };
+    const data = (await res.json().catch(() => null)) as { report?: PremiumReportView; error?: string; pendingChapters?: string[]; aiNotice?: boolean; aiGated?: boolean } | null;
+    if (res.ok && data?.report) return { report: data.report, error: null, aiNotice: data.aiNotice === true, aiGated: data.aiGated === true, rest: data.pendingChapters?.length ? reqBody : undefined };
     return { report: null, error: data?.error ?? "사주 리포트를 불러오지 못했어요. 잠시 뒤에 다시 시도해 주세요." };
   } catch {
     if (signal.aborted) return { report: null, error: null };
@@ -333,6 +333,7 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
   const [reading, setReading] = useState<PublicReading | null>(null);
   const [readingStatus, setReadingStatus] = useState<ReadingStatus>("ok");
   const [aiNotice, setAiNotice] = useState(false);
+  const [aiGated, setAiGated] = useState(false);
   const [premiumReport, setPremiumReport] = useState<PremiumReportView | null>(null);
   const [premiumError, setPremiumError] = useState<string | null>(null);
   const loadingAnimal = IMAGES[MACHINES.find((m) => m.fortune === target.fortune)?.image ?? ""] ?? "/images/animal-otter.webp";
@@ -405,6 +406,7 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
       setReadingStatus(status);
       // 프리미엄은 장 풀이를 못 받았을 때, 500원은 접어 둔 긴 풀이(folds)를 못 받았을 때 안내를 띄워요.
       setAiNotice(target.premium ? p.aiNotice === true : !data.reading?.folds);
+      setAiGated(target.premium && p.aiGated === true);
       if (data.profileSaved) onProfileSaved?.(input);
       // 막대를 끝까지 채우는 모습을 잠깐 보여주고 결과로 넘어가요.
       setLoadDone(true);
@@ -526,7 +528,7 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
                 </p>
               )}
 
-              {aiNotice && <AiNotice dark={luxe} />}
+              {(aiNotice || aiGated) && <AiNotice dark={luxe} gated={aiGated} />}
 
               {storyMode ? (
                 <>
