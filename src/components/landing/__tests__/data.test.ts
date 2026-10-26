@@ -17,9 +17,10 @@ describe("랜딩 카드 데이터", () => {
     expect(new Set(allKeys).size).toBe(allKeys.length);
   });
 
-  it("'HOT' 스티커는 성공운·재물운·연애운 카드에만 붙는다", () => {
-    expect(MACHINES.filter((m) => m.sticker).map((m) => m.fortune)).toEqual(["성공운", "재물운", "연애운"]);
-    expect(MACHINES.filter((m) => m.sticker).every((m) => m.sticker === "HOT")).toBe(true);
+  it("'HOT' 스티커는 성공운·재물운·연애운, 'NEW' 스티커는 2027 신년운 카드에만 붙는다", () => {
+    expect(MACHINES.filter((m) => m.sticker === "HOT").map((m) => m.fortune)).toEqual(["성공운", "재물운", "연애운"]);
+    expect(MACHINES.filter((m) => m.sticker === "NEW").map((m) => m.fortune)).toEqual(["2027 신년운"]);
+    expect(MACHINES.filter((m) => m.sticker).length).toBe(4);
   });
 
   it("BEST 는 연애운 자판기 하나뿐", () => {

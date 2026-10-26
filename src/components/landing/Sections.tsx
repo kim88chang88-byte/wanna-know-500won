@@ -18,12 +18,13 @@ interface SpinProps {
 
 /** 카드 모서리에 비스듬히 붙는 "HOT" 스티커. (카드는 relative 여야 해요) */
 function Sticker({ text, testId }: { text: string; testId: string }) {
+  const isNew = text === "NEW";
   return (
     <div
       data-testid={testId}
-      className="absolute -top-2.5 -right-2 flex items-center gap-0.5 px-2 sm:px-2.5 py-0.5 rounded-full bg-gradient-to-r from-rose-500 to-orange-400 text-white font-sans font-black tracking-wide text-[11px] sm:text-xs leading-tight shadow-[0_2px_6px_rgba(244,63,94,0.4)] ring-2 ring-white z-10 whitespace-nowrap pointer-events-none"
+      className={`absolute -top-2.5 -right-2 flex items-center gap-0.5 px-2 sm:px-2.5 py-0.5 rounded-full text-white font-sans font-black tracking-wide text-[11px] sm:text-xs leading-tight ${isNew ? "bg-gradient-to-r from-sky-500 to-indigo-500 shadow-[0_2px_6px_rgba(59,130,246,0.4)]" : "bg-gradient-to-r from-rose-500 to-orange-400 shadow-[0_2px_6px_rgba(244,63,94,0.4)]"} ring-2 ring-white z-10 whitespace-nowrap pointer-events-none`}
     >
-      <span aria-hidden="true">🔥</span>
+      <span aria-hidden="true">{isNew ? "✨" : "🔥"}</span>
       {text}
     </div>
   );

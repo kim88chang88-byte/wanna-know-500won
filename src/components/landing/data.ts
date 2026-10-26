@@ -140,7 +140,7 @@ export const MACHINES: readonly MachineCard[] = [
     desc: "붉은 양의 해, 2027년 한 해의 흐름과 새해에 챙기면 좋은 한마디",
     tag: "매일 첫 1회 무료",
     best: false,
-    sticker: null,
+    sticker: "NEW",
     card: "bg-gradient-to-b from-blue-50/70 via-white to-white border border-blue-200 shadow-sm",
     badgeClass: "bg-blue-100 text-blue-800 border border-blue-200/80",
     tagClass: "text-blue-700 bg-blue-50 border border-blue-200",
