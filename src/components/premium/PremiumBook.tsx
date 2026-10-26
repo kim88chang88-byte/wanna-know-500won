@@ -1,7 +1,7 @@
 "use client";
 
 import ConcernCard from "./ConcernCard";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { checkMessage } from "@/lib/premium/book/resonance";
 import type { BookPage, BookRow, BookTable, ElementKind, PremiumReportView, RealityCheck } from "@/lib/premium/types";
 
@@ -446,7 +446,7 @@ function ChapterEnd({ next, idx, mascot }: { next?: BookPage; idx: number; masco
 }
 
 /** flush: 이미 미드나잇 톤의 틀 안에 들어갈 때 바깥 테두리·배경을 빼고 내용만 보여요. */
-export default function PremiumBook({ report, flush = false }: { report: PremiumReportView; flush?: boolean }) {
+export default function PremiumBook({ report, flush = false, finale }: { report: PremiumReportView; flush?: boolean; /** 마지막 쪽 끝에 붙는 마무리(한 줄 결론 등) */ finale?: ReactNode }) {
   const pages = report.book;
   const [i, setI] = useState(0);
   const [unlockMsg, setUnlockMsg] = useState(false);
@@ -606,6 +606,13 @@ export default function PremiumBook({ report, flush = false }: { report: Premium
 
         {page.evidence && page.evidence.length > 0 && <Evidence rows={page.evidence} />}
       </article>
+
+      {finale && i === pages.length - 1 && (
+        <section data-testid="book-finale" className={`mt-6 rounded-2xl border ${HAIR} bg-[#e6c887]/[0.05] px-3 py-5`}>
+          <p className={`text-center text-[11px] font-bold tracking-[0.2em] ${GOLD}`}>도리의 마지막 한 줄</p>
+          {finale}
+        </section>
+      )}
 
       {lockedHere > 0 && (
         <p data-testid="page-lock-hint" className="mt-6 text-center text-[12px] text-[#e6c887]">

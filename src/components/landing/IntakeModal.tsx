@@ -455,6 +455,7 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
   // 프리미엄 결과 화면만 미드나잇+골드 톤으로 보여줘요. (입력·로딩 화면은 기존 그대로)
   const luxe = target.premium === true && phase === "result";
   const storyMode = !luxe && premiumReport ? isStoryReport(premiumReport) : false;
+  const bookMode = luxe && !!premiumReport && premiumReport.level === "full" && premiumReport.book.length > 0;
   const resultTitle = phase === "result" && chart && premiumReport && (
     <div
       data-testid="result-title"
@@ -508,7 +509,8 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
           {premiumReport ? (
             <>
               {/* 1) 한 줄 결론(카드 틀 없이 글자로) */}
-              {!storyMode && <ResultHero report={premiumReport} aiQuote={reading?.kkotgeoji ?? null} luxe={luxe} />}
+              {/* 프리미엄 책에서는 한 줄 결론을 맨 위가 아니라 20쪽 사주서의 마지막 쪽 끝에 둬요. */}
+              {!storyMode && !bookMode && <ResultHero report={premiumReport} aiQuote={reading?.kkotgeoji ?? null} luxe={luxe} />}
 
               {loggedIn && (
                 <VaultSaveBar
@@ -552,7 +554,7 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
                   {reading && !luxe && <ReadingCard reading={reading} luxe={luxe} />}
 
                   <div data-testid="premium-result" className="mt-6">
-                    <ManseReport report={premiumReport} hideHeadline flush={luxe} />
+                    <ManseReport report={premiumReport} hideHeadline flush={luxe} finale={bookMode ? <ResultHero report={premiumReport} aiQuote={reading?.kkotgeoji ?? null} luxe /> : undefined} />
                   </div>
 
                   {/* 3) 간직하고 나누기 → 더 물어보기 */}
