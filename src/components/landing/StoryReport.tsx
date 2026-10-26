@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
 import ManseReport from "@/components/premium/ManseReport";
 import { RealityLight } from "@/components/premium/RealityLight";
 import type { PremiumReportView } from "@/lib/premium/types";
-import { BRANCHES, STEMS, type Element } from "@/lib/saju/constants";
+import { ELEMENT_BOX, elementOfChar } from "@/lib/elementColor";
 import { Stars } from "./ReadingCard";
 import { firstSentence, iyeyo, splitBold, stripSummaryLead, tidyFold, toParagraphs, trimToLastSentence } from "@/lib/storyHelpers";
 
@@ -36,20 +36,6 @@ export interface StoryReading {
   heads?: Partial<Record<FoldKey | "lucky", string>>;
 }
 
-const EL_CLASS: Record<Element, string> = {
-  wood: "bg-emerald-400 text-white",
-  fire: "bg-rose-400 text-white",
-  earth: "bg-amber-300 text-amber-950",
-  metal: "bg-slate-200 text-slate-700",
-  water: "bg-sky-500 text-white",
-};
-
-/** 간지 한 글자의 오행 (천간이면 천간표, 지지면 지지표에서 찾아요) */
-function elementOfChar(ch: string, branch: boolean): Element | null {
-  const hit = branch ? BRANCHES.find((b) => b.hanja === ch) : STEMS.find((s) => s.hanja === ch);
-  return hit ? hit.element : null;
-}
-
 function Pillars({ report }: { report: PremiumReportView }) {
   // 한국식 만세력 순서: 시 · 일 · 월 · 연
   const order = ["hour", "day", "month", "year"] as const;
@@ -65,11 +51,11 @@ function Pillars({ report }: { report: PremiumReportView }) {
             <div className="text-[11px] font-bold text-gray-500">{p.label}</div>
             {p.full ? (
               <>
-                <div className={`py-2.5 font-serifKr text-2xl font-black leading-none ${se ? EL_CLASS[se] : "bg-gray-100"}`} aria-label={`${p.label} ${p.full}`}>
+                <div className={`py-2.5 font-serifKr text-2xl font-black leading-none ${se ? ELEMENT_BOX[se] : "bg-gray-100"}`} aria-label={`${p.label} ${p.full}`}>
                   {stem}
                   <div className="mt-1 text-[10px] font-bold opacity-80">{p.reading?.[0] ?? ""}</div>
                 </div>
-                <div className={`py-2.5 font-serifKr text-2xl font-black leading-none ${be ? EL_CLASS[be] : "bg-gray-100"}`}>
+                <div className={`py-2.5 font-serifKr text-2xl font-black leading-none ${be ? ELEMENT_BOX[be] : "bg-gray-100"}`}>
                   {branch}
                   <div className="mt-1 text-[10px] font-bold opacity-80">{p.reading?.[1] ?? ""}</div>
                 </div>

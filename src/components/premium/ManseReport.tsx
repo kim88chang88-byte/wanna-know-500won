@@ -4,6 +4,7 @@ import CompatCard from "./CompatCard";
 import ConcernCard from "./ConcernCard";
 import type { ReactNode } from "react";
 import PremiumBook from "./PremiumBook";
+import { ELEMENT_BOX, elementOfChar } from "@/lib/elementColor";
 
 const ELEMENT_STYLE: Record<ElementKind, { bar: string; chip: string }> = {
   wood: { bar: "bg-emerald-500", chip: "bg-emerald-50 text-emerald-700" },
@@ -76,9 +77,9 @@ export default function ManseReport({ report, hideHeadline = false, flush = fals
                 <div className="text-[11px] sm:text-xs font-bold text-brand-500">{p.label}</div>
                 {p.full ? (
                   <>
-                    <div className="font-serifKr font-black text-2xl sm:text-4xl text-brand-700 leading-tight mt-1" aria-label={`${p.label} ${p.full}`}>
-                      <div>{stem}</div>
-                      <div>{branch}</div>
+                    <div className="mt-1.5 space-y-1 px-1.5 font-serifKr font-black text-2xl sm:text-4xl leading-tight" aria-label={`${p.label} ${p.full}`}>
+                      <div className={`rounded-xl py-1 ${ELEMENT_BOX[elementOfChar(stem, false) ?? "earth"]}`}>{stem}</div>
+                      <div className={`rounded-xl py-1 ${ELEMENT_BOX[elementOfChar(branch, true) ?? "earth"]}`}>{branch}</div>
                     </div>
                     <div className="mt-1 text-[11px] text-slate-500">{p.reading}</div>
                     <div className="mt-1.5 text-[10px] sm:text-[11px] text-slate-500 leading-tight">

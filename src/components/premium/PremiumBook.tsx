@@ -5,6 +5,7 @@ import ConcernCard from "./ConcernCard";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { checkMessage } from "@/lib/premium/book/resonance";
 import type { BookPage, BookRow, BookTable, ElementKind, PremiumReportView, RealityCheck } from "@/lib/premium/types";
+import { ELEMENT_BOX, elementOfChar } from "@/lib/elementColor";
 
 /*
  * 프리미엄 20페이지 리포트 리더. 한 번에 한 페이지씩 넘겨 보는 고급스러운 책 형태예요.
@@ -179,9 +180,9 @@ function Visual({ page, report }: { page: BookPage; report: PremiumReportView })
                   <div className={`text-[11px] font-bold ${GOLD}`}>{p.label}</div>
                   {p.full ? (
                     <>
-                      <div className="font-serifKr font-black text-3xl text-[#fbf3de] leading-tight mt-1" aria-label={`${p.label} ${p.full}`}>
-                        <div>{stem}</div>
-                        <div>{branch}</div>
+                      <div className="mt-1.5 space-y-1 px-1.5 font-serifKr font-black text-3xl leading-tight" aria-label={`${p.label} ${p.full}`}>
+                        <div className={`rounded-xl py-1 ${ELEMENT_BOX[elementOfChar(stem, false) ?? "earth"]}`}>{stem}</div>
+                        <div className={`rounded-xl py-1 ${ELEMENT_BOX[elementOfChar(branch, true) ?? "earth"]}`}>{branch}</div>
                       </div>
                       <div className="mt-1 text-[11px] text-[#e8dfca]/70">{p.reading}</div>
                       <div className="mt-1.5 text-[10px] text-[#e8dfca]/60 leading-tight">
