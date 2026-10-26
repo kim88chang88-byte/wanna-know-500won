@@ -12,7 +12,7 @@ export const TOPIC_LABEL: Record<ReadingTopic, string> = {
   love: "연애운",
   marriage: "결혼운",
   health: "건강운",
-  study: "학업운",
+  study: "2027 신년운",
 };
 
 /** "연애운 슬롯", "재물운 자판기" 같은 화면 문구에서 주제를 골라요. 모르면 general. */

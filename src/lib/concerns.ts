@@ -18,7 +18,7 @@ export type ConcernId =
   | "partner" | "family" | "prep" | "single" | "kids"
   // 건강(컨디션·마음)
   | "sleep" | "stress" | "routine" | "loneliness" | "habit"
-  // 학업
+  // 2027 신년운 (id는 기존 값 유지)
   | "studyfocus" | "slump" | "major" | "abroad" | "pace" | "motivation";
 
 export interface ConcernChip {
@@ -41,7 +41,7 @@ export const CONCERN_CHIPS: readonly ConcernChip[] = [
   { id: "money", label: "돈 모으기·재테크 불안", emoji: "🪙", topic: "money" },
   { id: "burnout", label: "번아웃·무기력", emoji: "🔋", topic: "health" },
   { id: "selfesteem", label: "자존감·불안한 마음", emoji: "🫧", topic: "health" },
-  { id: "exam", label: "시험·자격증·공부", emoji: "📖", topic: "study" },
+  { id: "exam", label: "새해 목표·계획 세우기", emoji: "🎍", topic: "study" },
   { id: "friends", label: "친구·가족과의 관계", emoji: "🤝", topic: "general" },
   // ── 재물
   { id: "spending", label: "새는 돈·충동 소비가 고민", emoji: "🧾", topic: "money" },
@@ -73,12 +73,12 @@ export const CONCERN_CHIPS: readonly ConcernChip[] = [
   { id: "loneliness", label: "외로움·공허한 마음", emoji: "🍃", topic: "health" },
   { id: "habit", label: "운동·식습관 바꾸기", emoji: "🥗", topic: "health" },
   // ── 학업
-  { id: "studyfocus", label: "공부 집중이 안 돼요", emoji: "🎯", topic: "study" },
-  { id: "slump", label: "성적이 정체된 느낌", emoji: "📉", topic: "study" },
-  { id: "major", label: "전공·진로 선택 고민", emoji: "🎓", topic: "study" },
-  { id: "abroad", label: "유학·편입·대학원 고민", emoji: "✈️", topic: "study" },
-  { id: "pace", label: "공부와 일·생활 병행이 힘들어요", emoji: "⚖️", topic: "study" },
-  { id: "motivation", label: "의욕이 안 나요", emoji: "🪫", topic: "study" },
+  { id: "studyfocus", label: "올해 꼭 이루고 싶은 목표가 있어요", emoji: "🎯", topic: "study" },
+  { id: "slump", label: "작심삼일이 걱정돼요", emoji: "🔁", topic: "study" },
+  { id: "major", label: "새해엔 일·진로를 바꿔 볼까 해요", emoji: "🧭", topic: "study" },
+  { id: "abroad", label: "이사·이직 등 환경을 바꿀지 고민이에요", emoji: "🚚", topic: "study" },
+  { id: "pace", label: "올해 재물 흐름이 궁금해요", emoji: "💰", topic: "study" },
+  { id: "motivation", label: "올해 인연·관계 흐름이 궁금해요", emoji: "💞", topic: "study" },
 ];
 
 /** 풀이 종류(자판기·프리미엄 카드)마다 보여 줄 고민 항목. 이미 고른 종류와 상관없는 항목은 다시 보여주지 않아요. */
@@ -95,7 +95,7 @@ const CHIPS_BY_KIND: Array<{ match: string; ids: ConcernId[] }> = [
   { match: "연애", ids: ["crush", "relationship", "breakup", "meet", "express", "pattern", "doubt"] },
   { match: "결혼", ids: ["marriage", "partner", "relationship", "family", "prep", "single", "kids"] },
   { match: "건강", ids: ["burnout", "selfesteem", "sleep", "stress", "routine", "loneliness", "habit"] },
-  { match: "학업", ids: ["exam", "studyfocus", "slump", "major", "abroad", "pace", "motivation"] },
+  { match: "신년", ids: ["exam", "studyfocus", "slump", "major", "abroad", "pace", "motivation"] },
 ];
 
 /** 고른 풀이 이름(예: "성공운")에 맞는 고민 항목만 돌려줘요. 알 수 없는 이름이면 전체를 돌려줘요. */

@@ -10,6 +10,9 @@ import type { ElementView, ReportLevel, TopicInsight, TopicKey } from "./types";
  */
 
 /** 주제 → 현실 비교 문구 종류 */
+/** 신년운이 풀어 주는 해 (정미년) */
+export const NEW_YEAR = 2027;
+
 const REALITY_KIND: Record<TopicKey, RealityKind> = { love: "love", marriage: "love", money: "money", success: "career", health: "health", study: "study", general: "flow" };
 
 export const TOPIC_META: Record<TopicKey, { label: string; emoji: string }> = {
@@ -18,7 +21,7 @@ export const TOPIC_META: Record<TopicKey, { label: string; emoji: string }> = {
   money: { label: "재물운", emoji: "🪙" },
   success: { label: "성공·재물운", emoji: "🌊" },
   health: { label: "건강운", emoji: "🌿" },
-  study: { label: "학업운", emoji: "📖" },
+  study: { label: "2027 신년운", emoji: "🎍" },
   general: { label: "오늘의 운", emoji: "🫧" },
 };
 
@@ -33,7 +36,7 @@ export function resolveTopic(raw: unknown): TopicKey {
     ["money", ["재물", "금전"]],
     ["success", ["성공", "직장", "커리어"]],
     ["health", ["건강"]],
-    ["study", ["학업", "공부"]],
+    ["study", ["신년", "2027", "학업", "공부"]],
   ];
   const hit = rules.find(([, words]) => words.some((w) => raw.includes(w)));
   return hit ? hit[0] : "general";
@@ -137,11 +140,11 @@ const QUOTES: Record<TopicKey, Record<Group, string>> = {
     인성: "충분한 휴식이 가장 좋은 충전이에요 ✦",
   },
   study: {
-    비겁: "경쟁보다 어제의 나를 넘어서기 ✦",
-    식상: "배운 걸 말로 풀면 내 것이 돼요 ✦",
-    재성: "작은 목표를 하나씩 체크해 가요 ✦",
-    관성: "정해진 루틴이 합격을 만들어요 ✦",
-    인성: "깊이 이해한 만큼 오래 남아요 ✦",
+    비겁: "올해는 나를 믿고 내 길을 가는 해 ✦",
+    식상: "새해엔 마음껏 표현하고 시도해 봐요 ✦",
+    재성: "작은 성과를 하나씩 쌓아 가는 한 해 ✦",
+    관성: "맡은 자리에서 믿음을 쌓는 새해예요 ✦",
+    인성: "배우고 채우며 단단해지는 한 해 ✦",
   },
   general: {
     비겁: "오늘도 나답게, 당당하게 ✦",
@@ -158,7 +161,7 @@ const KEYWORD: Record<TopicKey, string> = {
   money: "#황금조개",
   success: "#물길트임",
   health: "#맑은샘물",
-  study: "#지혜의연못",
+  study: "#붉은양의해",
   general: "#퐁당운세",
 };
 
@@ -315,13 +318,31 @@ export function buildTopicInsight(topic: TopicKey, r: SajuResult, ctx: TopicCont
       break;
     }
     case "study": {
-      headline = counts.인성 >= 2 ? "깊이 이해하고 오래 기억하는 공부형이에요" : counts.식상 >= 2 ? "배운 걸 말하고 응용할 때 실력이 느는 공부형이에요" : "나만의 루틴을 만들면 속도가 붙는 공부형이에요";
+      // 2027 신년운: 2027년(정미년) 세운을 중심으로 새해 한 해의 흐름을 풀어요.
+      const ny = r.seyun.find((x) => x.year === NEW_YEAR);
+      const nyGroups = ny ? [groupOf(ny.tenGodStem), groupOf(ny.tenGodBranch)].filter((g): g is Group => g !== null) : [];
+      const g: Group = nyGroups[0] ?? dominant;
+      const KEYWORD_OF: Record<Group, string> = {
+        비겁: "나를 믿고 내 길을 가는 독립과 자신감",
+        식상: "마음껏 표현하고 새로 시도하는 용기",
+        재성: "작은 결과를 쌓아 실속을 챙기는 현실감",
+        관성: "맡은 자리에서 신뢰를 쌓는 책임감",
+        인성: "배우고 채우며 단단해지는 시간",
+      };
+      headline = ny ? `${NEW_YEAR}년 ${ny.ganzhi}년, ${josa(GROUP_TRAIT[g], "이/가")} 새해의 중심이 되는 한 해예요` : `${NEW_YEAR}년, 천천히 나다운 리듬을 찾아가는 새해예요`;
       points.push({
-        title: "공부 스타일",
-        body: counts.인성 >= 2 ? "원리를 이해하고 정리해서 외우는 스타일이에요. 요약 노트가 큰 무기가 돼요." : counts.식상 >= 2 ? "설명하고 문제를 풀어 보며 익히는 스타일이에요. 친구에게 가르쳐 주기를 추천해요." : counts.관성 >= 2 ? "계획표와 시간표대로 움직일 때 능률이 올라요. 마감이 있으면 더 집중해요." : "혼자 몰입하는 시간이 길수록 성과가 커요. 방해받지 않는 환경을 만들어 보세요.",
+        title: `${NEW_YEAR}년의 첫인상`,
+        body: `${NEW_YEAR}년은 ${ny ? `${ny.ganzhi}(붉은 양의 해)` : "정미(붉은 양의 해)"}예요. ${FLOW_LINE[g]}`,
       });
-      points.push({ title: "시험·평가 운", body: counts.관성 >= 1 ? "규칙과 기준이 분명한 평가에 강한 편이에요. 출제 경향을 분석하는 전략이 잘 맞아요." : "정해진 틀보다 응용과 실전 연습에서 힘이 나요. 기출 문제를 풀어 보세요." });
-      points.push({ title: "집중력 팁", body: counts.비겁 >= 3 ? "주변 비교에 흔들리기 쉬워요. 어제의 나와 비교하는 기록을 남겨 보세요." : `${lucky.color} 계열 소품이나 ${lucky.direction} 쪽 자리에서 집중이 잘 될 수 있어요. 기분 전환용 작은 장치로 활용해 보세요.` });
+      points.push({ title: "새해의 키워드", body: `올해 내 사주에서 힘을 받는 키워드는 ‘${KEYWORD_OF[g]}’이에요. 무엇을 더 하기보다, 이 키워드에 맞는 일에 마음을 모으면 한 해가 편안해져요.` });
+      points.push({
+        title: "상반기 · 하반기 마음가짐",
+        body: dominant === "관성" || dominant === "인성" ? "상반기에는 계획을 차분히 세우고 기반을 다지고, 하반기에는 쌓아 온 것을 하나씩 결과로 만들어 가는 리듬이 잘 맞아요." : "상반기에는 가볍게 이것저것 시도해 보고, 하반기에는 잘 맞았던 한두 가지에 집중해 마무리하는 리듬이 잘 맞아요.",
+      });
+      points.push({ title: "새해에 채우면 좋은 기운", body: `${lowest.name} 기운(${lucky.color})이 적은 편이라, ${lucky.direction} 쪽 자리나 ${lucky.color} 계열 소품을 새해 다이어리·휴대폰 배경에 가까이 두면 기분 전환에 도움이 돼요.` });
+      if (ctx.level === "full") {
+        points.push({ title: "내 사주와 새해 기운의 만남", body: nyGroups.includes(dominant) ? "내 사주에서 가장 두드러진 기운이 새해에도 이어져서, 익숙한 나의 방식이 올해도 힘이 되는 해예요." : "새해 기운이 내 사주에서 두드러진 기운과 다른 결로 들어와요. 평소 해 보지 않던 방식을 하나 더해 보면 새로운 문이 열려요." });
+      }
       break;
     }
     default: {
@@ -332,9 +353,9 @@ export function buildTopicInsight(topic: TopicKey, r: SajuResult, ctx: TopicCont
   }
 
   if (ctx.level === "full") {
-    const sy = r.seyun.find((s) => s.year === r.currentYear);
+    const sy = r.seyun.find((s) => s.year === (topic === "study" ? NEW_YEAR : r.currentYear));
     const syGroups = sy ? [groupOf(sy.tenGodStem), groupOf(sy.tenGodBranch)].filter((g): g is Group => g !== null) : [];
-    const topicGroup: Group = topic === "love" || topic === "marriage" ? partner : topic === "money" ? "재성" : topic === "success" ? "관성" : topic === "study" ? "인성" : (syGroups[0] ?? dominant);
+    const topicGroup: Group = topic === "love" || topic === "marriage" ? partner : topic === "money" ? "재성" : topic === "success" ? "관성" : topic === "study" ? (syGroups[0] ?? "인성") : (syGroups[0] ?? dominant);
     if (sy) {
       const g = syGroups.includes(topicGroup) ? topicGroup : (syGroups[0] ?? topicGroup);
       const hit = syGroups.includes(topicGroup);

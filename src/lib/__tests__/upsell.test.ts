@@ -10,7 +10,7 @@ describe("500원 풀이 끝 안내", () => {
   });
   it("맞는 상품이 없는 주제는 안내하지 않는다", () => {
     expect(upsellFor("건강운")).toBeNull();
-    expect(upsellFor("학업운")).toBeNull();
+    expect(upsellFor("2027 신년운")).toBeNull();
   });
   it("압박하거나 근거 없이 약속하는 말을 쓰지 않는다", () => {
     for (const f of ["성공운", "연애운"]) {

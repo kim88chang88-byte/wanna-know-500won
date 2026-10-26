@@ -22,7 +22,7 @@ const THEME: Record<TopicKey, { a: string; b: string; accent: string; glyph: str
   money: { a: "#FFF0B8", b: "#FFD9C2", accent: "#F5B63C", glyph: "財" },
   success: { a: "#C9EBFF", b: "#C8F2EA", accent: "#4DB6E8", glyph: "成" },
   health: { a: "#CFF5DF", b: "#CDE7FF", accent: "#52C79A", glyph: "健" },
-  study: { a: "#DCD3FF", b: "#CBDDFF", accent: "#8B7BFF", glyph: "學" },
+  study: { a: "#DCD3FF", b: "#CBDDFF", accent: "#8B7BFF", glyph: "新" },
   general: { a: "#CFE6FF", b: "#E4D8FF", accent: "#6C8FD6", glyph: "運" },
 };
 

@@ -72,7 +72,7 @@ describe("고민이 풀이에 반영", () => {
 describe("풀이 종류에 맞는 고민 항목", () => {
   const ids = (f: string) => chipsForFortune(f).map((c) => c.id);
   it("종류마다 6~7개의 항목이 있다 (최대 3개까지 고를 수 있어요)", () => {
-    for (const f of ["성공운", "재물운", "연애운", "결혼운", "건강운", "학업운", "성공 재물", "연애 결혼", "궁합"]) {
+    for (const f of ["성공운", "재물운", "연애운", "결혼운", "건강운", "2027 신년운", "성공 재물", "연애 결혼", "궁합"]) {
       const n = chipsForFortune(f).length;
       expect(n >= 6 && n <= 7).toBe(true);
       expect(new Set(ids(f)).size).toBe(n);
@@ -86,7 +86,7 @@ describe("풀이 종류에 맞는 고민 항목", () => {
     expect(ids("재물운")).toContain("money");
     expect(ids("재물운")).not.toContain("crush");
     expect(ids("건강운")).not.toContain("job");
-    expect(ids("학업운")).toContain("exam");
+    expect(ids("2027 신년운")).toContain("exam");
     expect(ids("결혼운")).toContain("marriage");
   });
   it("프리미엄 카드도 맞는 항목만 보인다", () => {
@@ -99,7 +99,7 @@ describe("풀이 종류에 맞는 고민 항목", () => {
     expect(chipsForFortune("오늘의 운").length).toBe(CONCERN_CHIPS.length);
   });
   it("모든 종류의 항목이 실제 목록에 있고 비어 있지 않다", () => {
-    for (const f of ["성공운", "재물운", "연애운", "결혼운", "건강운", "학업운", "성공 재물", "연애 결혼", "궁합"]) {
+    for (const f of ["성공운", "재물운", "연애운", "결혼운", "건강운", "2027 신년운", "성공 재물", "연애 결혼", "궁합"]) {
       expect(chipsForFortune(f).length > 0).toBe(true);
       expect(chipsForFortune(f).every((c) => CONCERN_CHIPS.includes(c))).toBe(true);
     }

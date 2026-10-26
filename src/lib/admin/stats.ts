@@ -30,7 +30,7 @@ export interface AdminStats {
   recentTexts: Array<{ day: string; ageBand: string; gender: string; topic: string; tags: string[]; text: string }>;
 }
 
-const TOPIC_LABEL: Record<string, string> = { general: "오늘의 운", love: "연애운", marriage: "결혼운", money: "재물운", success: "성공운", health: "건강운", study: "학업운" };
+const TOPIC_LABEL: Record<string, string> = { general: "오늘의 운", love: "연애운", marriage: "결혼운", money: "재물운", success: "성공운", health: "건강운", study: "2027 신년운" };
 
 /** since 부터 오늘까지 모든 날짜를 만들어요 (KST 기준). */
 export function daysBetween(sinceDay: string, today: string): string[] {

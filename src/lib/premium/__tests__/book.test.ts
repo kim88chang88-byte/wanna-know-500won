@@ -6,7 +6,7 @@ import type { TopicKey } from "../types";
 const NOW = new Date("2026-10-18T00:00:00+09:00");
 const base: BirthInput = { year: 1990, month: 7, day: 13, hour: 8, minute: 30, calendar: "solar", isLeapMonth: false, gender: "female" };
 const FORBIDDEN = ["사망", "죽음", "재앙", "저주", "액운", "파산", "이혼", "불행", "흉운", "큰일 난", "조심하세요"];
-const RAW: Record<TopicKey, string> = { love: "연애운", marriage: "우리 둘의 궁합 리포트", money: "재물운", success: "성공운", health: "건강운", study: "학업운", general: "" };
+const RAW: Record<TopicKey, string> = { love: "연애운", marriage: "우리 둘의 궁합 리포트", money: "재물운", success: "성공운", health: "건강운", study: "2027 신년운", general: "" };
 const KEYS = ["preface", "overview", "pillars", "nature", "elements", "tengods", "tengods:2", "stage12", "sinsal", "gui", "topic:money", "topic:love", "topic:career", "topic:health", "geukguk", "daeun", "years", "years:2", "concern", "lucky"];
 
 describe("프리미엄 20페이지 리포트", () => {

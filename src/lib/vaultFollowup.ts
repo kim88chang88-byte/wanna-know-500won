@@ -29,7 +29,7 @@ const KIND_BY_TOPIC: Record<string, RealityKind> = {
   general: "flow",
 };
 
-const TOPIC_NAME: Record<string, string> = { love: "연애운", marriage: "결혼운", money: "재물운", success: "성공운", health: "건강운", study: "학업운", general: "종합운" };
+const TOPIC_NAME: Record<string, string> = { love: "연애운", marriage: "결혼운", money: "재물운", success: "성공운", health: "건강운", study: "2027 신년운", general: "종합운" };
 
 const dayNum = (d: string): number => {
   const [y, m, dd] = d.split("-").map(Number);

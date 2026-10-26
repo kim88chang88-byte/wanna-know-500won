@@ -18,7 +18,7 @@ describe("resolveTopic", () => {
     ["올해 성공 재물 리포트", "success"],
     ["성공운", "success"],
     ["건강운", "health"],
-    ["학업운", "study"],
+    ["2027 신년운", "study"],
     ["", "general"],
     ["아무거나", "general"],
   ])("%s → %s", (raw, key) => {
@@ -31,7 +31,7 @@ describe("resolveTopic", () => {
 });
 
 const TOPICS: TopicKey[] = ["love", "marriage", "money", "success", "health", "study", "general"];
-const RAW: Record<TopicKey, string> = { love: "연애운", marriage: "결혼운", money: "재물운", success: "성공운", health: "건강운", study: "학업운", general: "" };
+const RAW: Record<TopicKey, string> = { love: "연애운", marriage: "결혼운", money: "재물운", success: "성공운", health: "건강운", study: "2027 신년운", general: "" };
 
 describe("주제별 맞춤 분석", () => {
   const inputs: BirthInput[] = [

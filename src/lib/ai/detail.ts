@@ -162,7 +162,7 @@ export function parseDetail(value: unknown): Detail | null {
   return containsForbidden(all) ? null : { story, folds, heads };
 }
 
-/** 주제마다 여섯 글과 요약을 어느 관점으로 쓸지. (일·돈·연애·결혼·건강·공부 모두 같은 구조, 다른 이야기) */
+/** 주제마다 여섯 글과 요약을 어느 관점으로 쓸지. (일·돈·연애·결혼·건강·신년 모두 같은 구조, 다른 이야기) */
 export const TOPIC_ANGLE: Record<ReadingTopic, string> = {
   general: "오늘 하루 전반의 기분·관계·돈·마음의 흐름",
   success: "일과 진로에서 인정받는 방식, 일하는 스타일, 잘 맞는 환경, 성장 포인트",
@@ -170,7 +170,7 @@ export const TOPIC_ANGLE: Record<ReadingTopic, string> = {
   love: "끌리는 사람과 연애 스타일, 마음을 표현하는 방식, 관계에서 반복되는 패턴",
   marriage: "결혼과 오래 가는 관계에 대한 생각, 배우자·가정을 대하는 태도, 관계를 지키는 습관",
   health: "생활 리듬, 에너지를 쓰고 채우는 방식, 마음 컨디션을 돌보는 습관 (질병·병원·약 이야기는 절대 하지 말고 잠·식사·산책 같은 생활 습관만)",
-  study: "공부 스타일, 집중이 잘 되는 때와 방식, 시험·성장 앞에서의 마음가짐",
+  study: "2027년(정미년, 붉은 양의 해) 한 해의 전체 흐름, 새해에 힘이 붙는 방식, 상반기·하반기 마음가짐, 새해에 채우면 좋은 습관",
 };
 
 export function buildDetailMessage(chart: SajuChart, topic: ReadingTopic, gender: Gender, concern: Concern | null | undefined, extra: ExtraFacts, tail?: string): string {

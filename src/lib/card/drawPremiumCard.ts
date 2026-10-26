@@ -23,7 +23,7 @@ const GLYPH: Record<TopicKey, { glyph: string; en: string }> = {
   money: { glyph: "財", en: "WEALTH" },
   success: { glyph: "成", en: "SUCCESS" },
   health: { glyph: "健", en: "VITALITY" },
-  study: { glyph: "學", en: "WISDOM" },
+  study: { glyph: "新", en: "NEW YEAR" },
   general: { glyph: "運", en: "FORTUNE" },
 };
 

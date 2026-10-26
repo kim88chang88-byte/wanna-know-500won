@@ -2,7 +2,7 @@ import { kstDay } from "@/lib/db/kst";
 
 /** 보관함에 모인 풀이를 세어요. 이번 달(한국 시간) 개수와 주제별 개수, 전체 개수. */
 
-const TOPIC_NAME: Record<string, string> = { love: "연애운", marriage: "결혼운", money: "재물운", success: "성공운", health: "건강운", study: "학업운", general: "종합운" };
+const TOPIC_NAME: Record<string, string> = { love: "연애운", marriage: "결혼운", money: "재물운", success: "성공운", health: "건강운", study: "2027 신년운", general: "종합운" };
 
 export interface VaultSummary {
   total: number;
