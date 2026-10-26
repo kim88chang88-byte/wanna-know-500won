@@ -415,33 +415,39 @@ const NEXT_PRODUCTS = [
   { t: "요즘 고민, 한 가지만 콕", d: "500원으로 고민에 맞춘 한 줄 답을 받아요", h: "/" },
 ];
 
-/** 장 끝: 다음 장 예고(말풍선 박스) + 다음 상품 배너 */
-function ChapterEnd({ next, idx, mascot }: { next?: BookPage; idx: number; mascot: Mascot }) {
-  const prod = NEXT_PRODUCTS[idx % NEXT_PRODUCTS.length];
+/** 장 끝: 다음 장 예고(말풍선 박스). 다음 상품 배너는 결과 맨 끝(별점 후기 위)에 한 번만 보여요. */
+function ChapterEnd({ next }: { next?: BookPage }) {
+  if (!next) return null;
   return (
     <div className="mt-9 flex flex-col items-center gap-4">
-      {next && (
-        <div data-testid="next-teaser" className="border-2 border-[#20203a] bg-[#fffdf7] px-[18px] py-3 text-center text-[15px] font-bold leading-[1.5] text-[#26233a] shadow-[4px_4px_0_#b98a2f]">
-          지금까지 살펴봤어요.
-          <br />
-          다음 장에서는 ‘{titleParts(next.title).main}’을 함께 볼게요!
-        </div>
-      )}
-      <a
-        href={prod.h}
-        data-testid="next-product-banner"
-        className="flex w-full items-center gap-3 rounded-2xl bg-gradient-to-r from-[#f0d9a0] to-[#d3ac62] px-4 py-3.5 text-[#1b1824] transition-transform active:scale-[0.99]"
-      >
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={avatarOf(mascot)} alt="" width={44} height={44} className="h-11 w-11 shrink-0 object-contain" />
-        <span className="flex-1">
-          <span className="block text-[10px] font-bold tracking-widest opacity-70">다음 상품</span>
-          <span className="block text-[14px] font-bold leading-tight">{prod.t}</span>
-          <span className="block text-[12px] opacity-80">{prod.d}</span>
-        </span>
-        <span aria-hidden="true" className="text-lg font-bold">›</span>
-      </a>
+      <div data-testid="next-teaser" className="border-2 border-[#20203a] bg-[#fffdf7] px-[18px] py-3 text-center text-[15px] font-bold leading-[1.5] text-[#26233a] shadow-[4px_4px_0_#b98a2f]">
+        지금까지 살펴봤어요.
+        <br />
+        다음 장에서는 ‘{titleParts(next.title).main}’을 함께 볼게요!
+      </div>
     </div>
+  );
+}
+
+/** 프리미엄 결과 맨 끝, 별점 후기 바로 위에 한 번 나오는 다음 상품 배너. 궁합 리포트에서는 궁합 대신 다른 상품을 보여요. */
+export function NextProductBanner({ report }: { report: PremiumReportView }) {
+  const prod = report.compat ? NEXT_PRODUCTS[0] : NEXT_PRODUCTS[1];
+  const mascot = mascotOf(report);
+  return (
+    <a
+      href={prod.h}
+      data-testid="next-product-banner"
+      className="mt-6 flex w-full items-center gap-3 rounded-2xl bg-gradient-to-r from-[#f0d9a0] to-[#d3ac62] px-4 py-3.5 text-[#1b1824] transition-transform active:scale-[0.99]"
+    >
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src={avatarOf(mascot)} alt="" width={44} height={44} className="h-11 w-11 shrink-0 object-contain" />
+      <span className="flex-1">
+        <span className="block text-[10px] font-bold tracking-widest opacity-70">다음 상품</span>
+        <span className="block text-[14px] font-bold leading-tight">{prod.t}</span>
+        <span className="block text-[12px] opacity-80">{prod.d}</span>
+      </span>
+      <span aria-hidden="true" className="text-lg font-bold">›</span>
+    </a>
   );
 }
 
@@ -620,7 +626,7 @@ export default function PremiumBook({ report, flush = false, finale }: { report:
         </p>
       )}
 
-      <ChapterEnd next={pages[i + 1]} idx={i} mascot={mascot} />
+      <ChapterEnd next={pages[i + 1]} />
 
       <div className="mt-8 flex items-center gap-3">
         <button

@@ -47,6 +47,7 @@ import PhotoCard, { ResultHero } from "./PhotoCard";
 import ReviewBox from "./ReviewBox";
 import ScrollHint from "./ScrollHint";
 import ManseReport from "@/components/premium/ManseReport";
+import { NextProductBanner } from "@/components/premium/PremiumBook";
 import type { PremiumReportView } from "@/lib/premium/types";
 import type { BirthInput } from "@/lib/saju/types";
 
@@ -378,7 +379,7 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
       const res = await fetch("/api/reading", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...input, topic: target.fortune, concern, saveProfile: wantSave, shareConcern: wantShare }),
+        body: JSON.stringify({ ...input, topic: target.fortune, concern, saveProfile: wantSave, shareConcern: wantShare, premium: target.premium === true }),
         signal: ctrl.signal,
       });
       const data = (await res.json().catch(() => null)) as {
@@ -641,6 +642,8 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
             ))}
           </details>
           )}
+
+          {bookMode && premiumReport && <NextProductBanner report={premiumReport} />}
 
           {luxe ? (
             <div className="mt-6 rounded-2xl border border-[#e6c887]/30 bg-[#fbf6ea] p-1">

@@ -34,16 +34,18 @@ export async function POST(request: Request) {
   const denied = guardOrigin(request) ?? (await enforceLimits(request, { name: "reading", windowMs: 60000, ip: 6, user: 12 }, "뽑기가 너무 빨라요. 잠시 뒤에 다시 시도해줘요."));
   if (denied) return denied;
 
-  let body: (BirthInput & { topic?: unknown; concern?: unknown; saveProfile?: unknown; shareConcern?: unknown }) | null;
+  let body: (BirthInput & { topic?: unknown; concern?: unknown; saveProfile?: unknown; shareConcern?: unknown; premium?: unknown }) | null;
   try {
-    body = (await request.json()) as BirthInput & { topic?: unknown; concern?: unknown; saveProfile?: unknown; shareConcern?: unknown };
+    body = (await request.json()) as BirthInput & { topic?: unknown; concern?: unknown; saveProfile?: unknown; shareConcern?: unknown; premium?: unknown };
   } catch {
     return NextResponse.json({ error: "잘못된 요청입니다." }, { status: 400 });
   }
   if (typeof body !== "object" || body === null) {
     return NextResponse.json({ error: "잘못된 요청입니다." }, { status: 400 });
   }
-  const { topic: rawTopic, concern: rawConcern, saveProfile, shareConcern, ...input } = body;
+  const { topic: rawTopic, concern: rawConcern, saveProfile, shareConcern, premium: rawPremium, ...input } = body;
+  // 프리미엄 책은 "긴 풀이"(요약하자면·접이식)를 화면에 쓰지 않아서, 그 호출 4번은 건너뛰어 비용을 아껴요.
+  const skipDetail = rawPremium === true;
   const concern = parseConcern(rawConcern);
 
   // 로그인한 회원이고 DB 가 연결되어 있으면, 뽑기 횟수를 서버에서 세요. (아니면 브라우저 카운터만 써요)
@@ -126,7 +128,7 @@ export async function POST(request: Request) {
     const extra = { today: kstToday(now), core: buildCoreFacts(input, now) };
     const topic = normalizeTopic(rawTopic);
     // 긴 "요약하자면" 글은 같은 시간에 따로 써요. 한도를 한 번 더 쓰고, 실패해도 풀이는 그대로 나가요.
-    const detailGate = await takeAiBudget(process.env, db);
+    const detailGate = skipDetail ? "premium" : await takeAiBudget(process.env, db);
     let detailStatus = detailGate === "ok" ? "ok" : `skipped:${detailGate}`;
     const detailPromise = detailGate === "ok"
       ? interpretDetail(chart, { topic, gender: input.gender, concern, extra: { ...extra, core: buildCoreFacts(input, now, true), name: callName(session?.nick) } }).catch((err) => {
