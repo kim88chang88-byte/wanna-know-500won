@@ -71,7 +71,7 @@ export function stripTitleEcho(text: string, title: string): string {
 /** 끝이 끊긴 문장("그래서 친구들 사이에서도")은 마지막 완성 문장까지만 남겨요. 완성 문장이 없으면 그대로. */
 export function trimToLastSentence(text: string): string {
   const t = text.trim();
-  const tail = "[\\u{1F300}-\\u{1FAFF}\\u2600-\\u27BF\\uFE0F\\s\"'”’)]*";
+  const tail = "[\\u{1F300}-\\u{1FAFF}\\u2600-\\u27BF\\uFE0F\\s\"'”’)*]*";
   if (new RegExp(`[.!?…~]${tail}$`, "u").test(t)) return t;
   const m = new RegExp(`^[\\s\\S]*[.!?…~]${tail}`, "u").exec(t);
   return m ? m[0].trim() : t;
@@ -96,4 +96,51 @@ export const FOLD_TITLES = {
 export function tidyFold(key: keyof typeof FOLD_TITLES | "lucky", text: string): string {
   const base = key === "lucky" ? text : stripTitleEcho(text, FOLD_TITLES[key]);
   return trimToLastSentence(base);
+}
+
+/**
+ * AI 가 핵심 구절을 **이렇게** 감싸 주면 굵게 보여 줘요.
+ * 짝이 안 맞거나 너무 길거나(문장 통째) 너무 많으면 강조를 빼고 일반 글로 둬요.
+ */
+export function normalizeBold(text: string): string {
+  let t = text.replace(/\*{3,}/g, "**");
+  const segs = t.match(/\*\*[^*]+\*\*/g) ?? [];
+  const bad = segs.some((x) => x.length - 4 > 40 || x.length - 4 < 2);
+  const odd = (t.match(/\*\*/g) ?? []).length !== segs.length * 2;
+  if (bad || odd || segs.length > 8) t = t.replace(/\*\*/g, "");
+  return t;
+}
+
+/** 강조 표시(**)를 걷어 낸 순수 글 (공유·미리보기 등 굵게 못 보여 주는 곳용) */
+export function stripBold(text: string): string {
+  return text.replace(/\*\*/g, "");
+}
+
+export interface BoldPart {
+  text: string;
+  bold: boolean;
+}
+
+/** 강조가 하나도 없는 글(예전에 저장된 풀이 등)에는 오행 기운·신강/신약 같은 핵심 말만 가볍게 굵게 해요. */
+const AUTO_BOLD = /([목화토금수] 기운|신강|신약|용신)/g;
+
+/** 문단을 굵은 부분과 일반 부분으로 쪼개요. */
+export function splitBold(text: string): BoldPart[] {
+  const t = normalizeBold(text);
+  const out: BoldPart[] = [];
+  if (t.includes("**")) {
+    t.split("**").forEach((chunk, i) => {
+      if (chunk) out.push({ text: chunk, bold: i % 2 === 1 });
+    });
+    return out;
+  }
+  let last = 0;
+  for (const m of t.matchAll(AUTO_BOLD)) {
+    const at = m.index ?? 0;
+    if (at > last) out.push({ text: t.slice(last, at), bold: false });
+    out.push({ text: m[0], bold: true });
+    last = at + m[0].length;
+  }
+  if (last < t.length) out.push({ text: t.slice(last), bold: false });
+  return out;
 }

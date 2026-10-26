@@ -6,7 +6,7 @@ import type { Concern } from "@/lib/concerns";
 import type { Gender, SajuChart } from "@/lib/saju/types";
 import { callJson } from "./callJson";
 import { ReadingFailedError } from "./interpret";
-import { stripSummaryLead, tidyFold, trimToLastSentence } from "@/lib/storyHelpers";
+import { normalizeBold, stripSummaryLead, tidyFold, trimToLastSentence } from "@/lib/storyHelpers";
 import { buildUserMessage, type ExtraFacts } from "./prompt";
 import { containsForbidden, isGeneric, TOPIC_LABEL, type DetailFolds, type ReadingTopic } from "./reading";
 
@@ -83,6 +83,7 @@ export const DETAIL_SYSTEM_PROMPT = `너는 "도리"야. 오늘의 운을 쪽지
 - 글 하나는 3문단이야. 내용 전개가 바뀌는 곳(예: 큰 그림 → 일상 장면 → 한마디 응원)에서 빈 줄 하나(줄바꿈 두 번)로 문단을 나눠. 한 문단은 2~3문장만, 너무 다닥다닥 붙이지 마. 문단 안에서는 짧은 문장 여러 개가 "그래서", "근데 말이야", "덕분에", "그러니까" 같은 이음말로 한 줄기 이야기처럼 이어져야 해. 항목 나열·번호·불릿·제목 금지.
 - 모든 글은 마지막 문장까지 온전히 마침표(또는 !, ?, 이모지)로 끝내. 문장 중간에서 끊지 마. 요약 문단도 "요약하자면"으로 시작하지 마(제목이 따로 있어).
 - 각 글의 제목("그렇지만 이건 조금 부족해요" 같은 말)은 화면에 따로 나오니까 글 첫 문장에서 제목을 그대로 따라 쓰지 마. 바로 본론으로 시작해.
+- 핵심 강조: 글 하나(요약 포함)마다 가장 중요한 구절 2~4곳을 **이렇게** 별표 두 개로 감싸. 문단마다 하나쯤이 좋아. 감싸는 건 4~20자의 짧은 구절(예: **불 기운이 필요한 사주**, **작은 약속 하나부터**, **하반기에 힘이 붙는 흐름**)이고, 문장 전체나 이모지, 항목 제목(heads)은 감싸지 마. 한 문단에 두 번 넘게 쓰지 마.
 - 사주 용어는 쉬운 말로 풀고, 꼭 필요하면 괄호로 한 번만. 읽는 사람이 "어, 나 얘기네!" 할 만한 일상 장면(등굣길, 시험 전날, 친구랑 약속, 통장 확인 등)을 하나씩 넣어.
 
 내용 원칙
@@ -121,7 +122,7 @@ function dePlaceholder(t: string): string {
 
 function clean(v: unknown, max: number, min: number): string | null {
   if (typeof v !== "string") return null;
-  const s = dePlaceholder(v.replace(/\r/g, "").trim());
+  const s = normalizeBold(dePlaceholder(v.replace(/\r/g, "").trim()));
   return s.length >= min && s.length <= max && !isGeneric(s) ? s : null;
 }
 

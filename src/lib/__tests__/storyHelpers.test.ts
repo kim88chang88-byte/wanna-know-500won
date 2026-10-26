@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { birthSummary, firstSentence, iyeyo, stripSummaryLead, stripTitleEcho, tidyFold, toParagraphs, trimToLastSentence } from "@/lib/storyHelpers";
+import { birthSummary, firstSentence, iyeyo, normalizeBold, splitBold, stripBold, stripSummaryLead, stripTitleEcho, tidyFold, toParagraphs, trimToLastSentence } from "@/lib/storyHelpers";
 
 describe("StoryReport helpers", () => {
   it("firstSentence: 첫 문장만 돌려줘요", () => {
@@ -48,5 +48,28 @@ describe("제목 따라 쓰기·끊긴 문장 다듬기", () => {
     expect(trimToLastSentence("묵직한 사람이야. 그래서 친구들 사이에서도")).toBe("묵직한 사람이야.");
     expect(trimToLastSentence("응원할게 ✨")).toBe("응원할게 ✨");
     expect(trimToLastSentence("응원해!")).toBe("응원해!");
+  });
+});
+
+describe("굵은 글씨 강조", () => {
+  it("**로 감싼 구절을 굵게 쪼갠다", () => {
+    expect(splitBold("오늘은 **작은 약속**이 중요해.")).toEqual([
+      { text: "오늘은 ", bold: false },
+      { text: "작은 약속", bold: true },
+      { text: "이 중요해.", bold: false },
+    ]);
+  });
+  it("짝이 안 맞거나 문장 통째로 감싸면 강조를 뺀다", () => {
+    expect(normalizeBold("앞 **뒤")).toBe("앞 뒤");
+    expect(normalizeBold(`**${"가".repeat(50)}**`)).toBe("가".repeat(50));
+  });
+  it("강조가 없는 옛 글은 오행 기운 같은 핵심 말만 굵게 한다", () => {
+    expect(splitBold("물 기운이 적어요.").filter((x) => x.bold).map((x) => x.text)).toEqual(["물 기운"]);
+  });
+  it("끝이 ** 로 닫혀도 마지막 문장으로 인정한다", () => {
+    expect(trimToLastSentence("좋아. **꼭 기억해!**")).toBe("좋아. **꼭 기억해!**");
+  });
+  it("stripBold 는 표시만 걷어 낸다", () => {
+    expect(stripBold("**핵심**이야")).toBe("핵심이야");
   });
 });

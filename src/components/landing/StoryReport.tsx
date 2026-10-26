@@ -6,7 +6,7 @@ import { RealityLight } from "@/components/premium/RealityLight";
 import type { PremiumReportView } from "@/lib/premium/types";
 import { BRANCHES, STEMS, type Element } from "@/lib/saju/constants";
 import { Stars } from "./ReadingCard";
-import { firstSentence, iyeyo, stripSummaryLead, tidyFold, toParagraphs, trimToLastSentence } from "@/lib/storyHelpers";
+import { firstSentence, iyeyo, splitBold, stripSummaryLead, tidyFold, toParagraphs, trimToLastSentence } from "@/lib/storyHelpers";
 
 
 /*
@@ -89,7 +89,9 @@ function Paras({ text, className = "" }: { text: string; className?: string }) {
   return (
     <div className={`space-y-3.5 ${className}`}>
       {toParagraphs(text).map((p, i) => (
-        <p key={i}>{p}</p>
+        <p key={i}>
+          {splitBold(p).map((x, j) => (x.bold ? <b key={j} className="font-extrabold text-gray-900">{x.text}</b> : <span key={j}>{x.text}</span>))}
+        </p>
       ))}
     </div>
   );
