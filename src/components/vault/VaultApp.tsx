@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import ManseReport from "@/components/premium/ManseReport";
-import PhotoCard, { ResultHero } from "@/components/landing/PhotoCard";
+import { ResultHero } from "@/components/landing/PhotoCard";
 import { ReadingCard } from "@/components/landing/ReadingCard";
 import StoryReport from "@/components/landing/StoryReport";
 import { isStoryReport } from "@/lib/storyHelpers";
@@ -122,7 +122,6 @@ export default function VaultApp() {
         </div>
           </>
         )}
-        <PhotoCard report={s.report} aiQuote={s.kkotgeoji} luxe={luxe} />
         </div>
         {notice && <p role="alert" className="mt-3 text-xs text-amber-800">{notice}</p>}
         <button type="button" onClick={() => void remove(detail.id)} className="mt-6 text-[11px] text-gray-400 underline underline-offset-2 hover:text-gray-600">

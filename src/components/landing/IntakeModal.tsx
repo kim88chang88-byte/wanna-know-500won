@@ -44,7 +44,7 @@ import { MAX_LABEL, MAX_PEOPLE, type SavedPerson } from "@/lib/people";
 import { BRANCHES, STEMS } from "@/lib/saju/constants";
 import type { Pillar, SajuChart } from "@/lib/saju/types";
 import { CloseButton, ModalShell } from "./Modals";
-import PhotoCard, { ResultHero } from "./PhotoCard";
+import { ResultHero } from "./PhotoCard";
 import ReviewBox from "./ReviewBox";
 import ScrollHint from "./ScrollHint";
 import ManseReport from "@/components/premium/ManseReport";
@@ -578,8 +578,6 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
                       closing={askInput ? <AskChips input={askInput} luxe={false} /> : undefined}
                     />
                   </div>
-                  {/* 3) 간직하고 나누기 */}
-                  <PhotoCard report={premiumReport} aiQuote={reading?.kkotgeoji ?? null} luxe={false} />
                 </>
               ) : (
                 <>
@@ -591,9 +589,7 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
                     <ManseReport report={premiumReport} hideHeadline flush={luxe} finale={bookMode ? <ResultHero report={premiumReport} aiQuote={reading?.kkotgeoji ?? null} luxe /> : undefined} />
                   </div>
 
-                  {/* 3) 간직하고 나누기 → 더 물어보기 */}
-                  <PhotoCard report={premiumReport} aiQuote={reading?.kkotgeoji ?? null} luxe={luxe} />
-
+                  {/* 3) 더 물어보기 */}
                   {askInput && <AskChips input={askInput} luxe={luxe} />}
                 </>
               )}
