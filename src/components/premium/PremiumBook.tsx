@@ -503,12 +503,6 @@ export default function PremiumBook({ report, flush = false }: { report: Premium
         </span>
       </div>
 
-      {i === 0 && report.concern && (
-        <div className="mt-3">
-          <ConcernCard concern={report.concern} dark />
-        </div>
-      )}
-
       <nav aria-label="리포트 페이지" className="mt-1 flex gap-[3px]">
         {pages.map((p, k) => (
           <button
@@ -553,6 +547,9 @@ export default function PremiumBook({ report, flush = false }: { report: Premium
             <BubbleRow text={`도리의 한 줄 · ${page.note}`} img={pic} />
           </div>
         )}
+
+        {/* 손님이 고른 고민에 대한 답은 첫 쪽 위가 아니라, 같은 주제를 다루는 '요즘 고민 맞춤 풀이' 쪽에 둬요. */}
+        {page.key === "concern" && report.concern && <ConcernCard concern={report.concern} dark />}
 
         <div className="rounded-[14px] border border-[#2c3260] bg-[#1a1f40] p-4 empty:hidden">
           <Visual page={page} report={report} />

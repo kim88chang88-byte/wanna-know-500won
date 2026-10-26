@@ -548,7 +548,8 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
               ) : (
                 <>
                   {/* 2) 오늘 도리의 풀이 → 주제별 맞춤 분석 + 사주 리포트 */}
-                  {reading && <ReadingCard reading={reading} luxe={luxe} />}
+                  {/* 프리미엄 결과에서는 500원 풀이와 겹치는 "오늘 도리의 풀이"를 빼고 20쪽 사주서로 바로 이어가요. */}
+                  {reading && !luxe && <ReadingCard reading={reading} luxe={luxe} />}
 
                   <div data-testid="premium-result" className="mt-6">
                     <ManseReport report={premiumReport} hideHeadline flush={luxe} />
