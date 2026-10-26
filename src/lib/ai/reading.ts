@@ -72,7 +72,7 @@ export const READING_SCHEMA = {
     love: indicatorSchema("연애운"),
     money: indicatorSchema("금전운"),
     mind: indicatorSchema("마음운"),
-    kkotgeoji: { type: "string", description: "도리의 응원 한마디. 2~3문장, 120자 안팎으로 짧게 (결과지 카드에 들어가야 해요)" },
+    kkotgeoji: { type: "string", description: "도리의 응원 한마디. 2~3문장, 120자 안팎으로 짧게 (결과 화면 맨 위에 크게 보여요)" },
     reason: { type: "string", description: `도리가 본 이유. 이 풀이의 사주 근거(합·충·세운·월운·숨은 기운 중 입력에 실제로 있는 것)를 쉬운 말로 풀어 1~2문장, 100자 안팎. ${MAX.reason}자 이내. 근거가 없으면 빈 문자열` },
   },
   required: ["keyword", "total", "love", "money", "mind", "kkotgeoji", "reason"],

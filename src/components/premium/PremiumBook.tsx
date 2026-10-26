@@ -483,7 +483,7 @@ export default function PremiumBook({ report, flush = false, finale, previewBlur
       onClick={() => setUnlockMsg(true)}
       className="mt-3 w-full rounded-full bg-gradient-to-r from-[#f0d9a0] to-[#d3ac62] py-2.5 text-[13px] font-bold text-[#1b1824] active:scale-95 transition-transform"
     >
-      9,900원으로 전체 열기
+      {previewBlur ? "전체 사주서 열기 (정식 오픈 후 9,900원)" : "9,900원으로 전체 열기"}
     </button>
   );
 
@@ -533,12 +533,20 @@ export default function PremiumBook({ report, flush = false, finale, previewBlur
         <div data-testid="unlock-bar" className={`mt-3 rounded-2xl border ${HAIR} bg-[#e6c887]/[0.07] px-4 py-3`}>
           <p className="text-[12.5px] leading-relaxed text-[#f3e7c9]">
             <span aria-hidden="true">🔒 </span>
-            전체 {pages.length}쪽 중 <b className={GOLD}>{lockedTotal}개 풀이</b>가 잠겨 있어요. 흐리게 보이는 부분이 가장 궁금한 ‘언제’와 ‘어떻게’예요.
+            {previewBlur ? (
+              <>
+                미리보기에서는 전체 {pages.length}쪽 중 <b className={GOLD}>앞 {PREVIEW_OPEN_PAGES - 1}쪽</b>만 볼 수 있어요. {PREVIEW_OPEN_PAGES}쪽부터는 풀이가 가려져 있어요.
+              </>
+            ) : (
+              <>
+                전체 {pages.length}쪽 중 <b className={GOLD}>{lockedTotal}개 풀이</b>가 잠겨 있어요. 흐리게 보이는 부분이 가장 궁금한 ‘언제’와 ‘어떻게’예요.
+              </>
+            )}
           </p>
           {unlock}
           {unlockMsg && (
             <p role="status" data-testid="unlock-message" className="mt-2 text-center text-[11.5px] font-bold text-[#f6dfa8]">
-              결제는 아직 준비 중이에요. 베타 기간에는 과금되지 않아요 🫧
+              지금은 베타 테스트 중이라 결제를 받지 않아요. 정식 오픈하면 여기서 전체 사주서를 열 수 있어요 🫧
             </p>
           )}
         </div>
@@ -635,7 +643,7 @@ export default function PremiumBook({ report, flush = false, finale, previewBlur
         </section>
       )}
 
-      {lockedHere > 0 && (
+      {lockedHere > 0 && !blurred && (
         <p data-testid="page-lock-hint" className="mt-6 text-center text-[12px] text-[#e6c887]">
           이 페이지에 잠긴 풀이 {lockedHere}개 · 위의 ‘전체 열기’로 볼 수 있어요
         </p>

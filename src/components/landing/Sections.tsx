@@ -40,7 +40,7 @@ function activateOnKey(e: React.KeyboardEvent, run: () => void) {
 
 const BETA_NOTICE_TEXT = (
   <>
-    * &apos;{SERVICE_NAME}&apos; 서비스는 현재 <strong>Beta 테스트 버전</strong>으로 과금이 발생하지 않습니다.
+    * &apos;{SERVICE_NAME}&apos;는 지금 <strong>Beta 테스트 중</strong>이라 결제 없이 이용할 수 있어요. (표시된 금액은 정식 오픈 후 기준이에요)
   </>
 );
 
@@ -425,7 +425,7 @@ export function SampleSection() {
 const TRUST_POINTS = [
   { title: "500원", desc: "동전 하나면 충분한 1회", titleClass: "text-amber-600", box: "border-amber-300" },
   { title: "매일 첫 1회 무료", desc: "가벼운 마음으로 오늘의 운 뽑아보기", titleClass: "text-brand-500", box: "border-pink-300" },
-  { title: "결과지 카드", desc: "인스타 스토리용 모바일 결과지", titleClass: "text-indigo-600", box: "border-indigo-300" },
+  { title: "내 보관함", desc: "본 풀이를 저장해 두고 언제든 다시 보기", titleClass: "text-indigo-600", box: "border-indigo-300" },
 ] as const;
 
 export function TrustSection() {
@@ -444,7 +444,7 @@ export function TrustSection() {
           </h3>
           <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
             무거운 분위기도, 예약도 없이 500원 동전 하나로 오늘의 운을 뽑아요. 출퇴근길에 가볍게 뽑아보고,
-            마음에 드는 결과는 인스타 스토리에 남겨보세요.
+            마음에 드는 결과는 내 보관함에 남겨보세요.
           </p>
         </div>
 
