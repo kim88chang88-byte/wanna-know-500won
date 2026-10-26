@@ -40,6 +40,7 @@ function toBlob(canvas: HTMLCanvasElement): Promise<Blob | null> {
 /** 인스타 스토리용 포토카드 + 공유/저장/문구 복사 */
 export default function PhotoCard({ report, aiQuote, luxe = false }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const fileRef = useRef<File | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   // 같은 뽑기 결과로는 날짜가 다시 계산되지 않게 한 번만 정해요.
@@ -58,15 +59,24 @@ export default function PhotoCard({ report, aiQuote, luxe = false }: Props) {
       ctx.clearRect(0, 0, CARD_W, CARD_H);
       drawPhotoCard(ctx, data);
       canvas.dataset.ready = "true";
+      // 눌렀을 때 바로 공유 창을 열 수 있게(모바일 사파리는 누른 직후에만 공유 창을 허용해요) 파일을 미리 만들어 둬요.
+      fileRef.current = null;
+      void toBlob(canvas).then((blob) => {
+        if (!cancelled && blob) fileRef.current = new File([blob], photoFileName(data.topic, createdAt), { type: "image/png" });
+      });
     });
     return () => {
       cancelled = true;
     };
-  }, [data]);
+  }, [data, createdAt]);
 
   async function makeFile(): Promise<File | null> {
+    if (fileRef.current) return fileRef.current;
     const canvas = canvasRef.current;
     if (!canvas) return null;
+    // 그림이 아직 안 그려졌으면(글꼴 받는 중) 잠깐 기다려요. 빈 이미지를 저장하지 않게요.
+    for (let i = 0; i < 30 && canvas.dataset.ready !== "true"; i++) await new Promise((r) => setTimeout(r, 100));
+    if (canvas.dataset.ready !== "true") return null;
     const blob = await toBlob(canvas);
     return blob ? new File([blob], photoFileName(data.topic, createdAt), { type: "image/png" }) : null;
   }
