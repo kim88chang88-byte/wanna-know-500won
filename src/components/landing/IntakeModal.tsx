@@ -406,7 +406,7 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
       setReadingStatus(status);
       // 프리미엄은 장 풀이를 못 받았을 때, 500원은 접어 둔 긴 풀이(folds)를 못 받았을 때 안내를 띄워요.
       setAiNotice(target.premium ? p.aiNotice === true : !data.reading?.folds);
-      setAiGated(target.premium && p.aiGated === true);
+      setAiGated(target.premium === true && p.aiGated === true);
       if (data.profileSaved) onProfileSaved?.(input);
       // 막대를 끝까지 채우는 모습을 잠깐 보여주고 결과로 넘어가요.
       setLoadDone(true);
