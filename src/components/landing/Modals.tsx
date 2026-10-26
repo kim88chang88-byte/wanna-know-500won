@@ -55,15 +55,18 @@ export function ModalShell({ labelId, panelClass, onClose, closeOnOverlay = true
 }
 
 export function CloseButton({ onClose, luxe = false }: { onClose: () => void; luxe?: boolean }) {
+  // 안쪽이 스크롤돼도 닫기 버튼은 모달 오른쪽 위에 붙어 있도록, 높이 0 짜리 sticky 칸 안에 둬요.
   return (
-    <button
-      onClick={onClose}
-      type="button"
-      aria-label="닫기"
-      className={`absolute top-4 right-4 ${luxe ? "text-[#e6c887]/70 hover:text-[#e6c887]" : "text-gray-400 hover:text-gray-600"}`}
-    >
-      <span className="material-symbols-outlined text-[20px]">close</span>
-    </button>
+    <div className="sticky top-0 z-30 h-0">
+      <button
+        onClick={onClose}
+        type="button"
+        aria-label="닫기"
+        className={`absolute -top-1 -right-1 sm:-top-2 sm:-right-2 flex h-8 w-8 items-center justify-center rounded-full backdrop-blur-sm ${luxe ? "bg-[#12101a]/70 text-[#e6c887]/80 hover:text-[#e6c887]" : "bg-white/80 text-gray-400 hover:text-gray-600"}`}
+      >
+        <span className="material-symbols-outlined text-[20px]">close</span>
+      </button>
+    </div>
   );
 }
 
