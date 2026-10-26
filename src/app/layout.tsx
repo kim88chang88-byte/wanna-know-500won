@@ -10,7 +10,7 @@ export const metadata: Metadata = {
   ...(SITE_URL ? { metadataBase: new URL(SITE_URL) } : {}),
   title: TITLE,
   description: DESCRIPTION,
-  openGraph: { title: TITLE, description: DESCRIPTION, type: "website", locale: "ko_KR" },
+  openGraph: { title: TITLE, description: DESCRIPTION, type: "website", locale: "ko_KR", images: [{ url: "/images/hero.jpg", alt: "수달 도사 도리의 운세 자판기" }] },
 };
 
 export const viewport: Viewport = {

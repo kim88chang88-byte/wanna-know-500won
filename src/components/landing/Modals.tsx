@@ -137,7 +137,7 @@ function SavedPeopleBox() {
       </ul>
       {failed && (
         <p role="alert" className="text-[11px] font-bold text-brand-600 mt-1 text-center">
-          지우지 못했어요. 잠시 뒤에 다시 시도해줘요.
+          지우지 못했어요. 잠시 뒤에 다시 시도해 주세요.
         </p>
       )}
     </div>
@@ -159,12 +159,12 @@ export function LoginModal({ onClose, user = null, result = null, onLogout, onWi
           🫧
         </div>
         <h4 id="login-title" className="font-cute font-normal text-lg text-gray-900">
-          {user ? "도리의 사주방" : "도리의 사주방 로그인"}
+          {user ? "내 정보" : "도리 운세 사주 로그인"}
         </h4>
         <p className="text-xs text-gray-500 mt-1 whitespace-pre-line">
           {user
             ? `${user.nickname ? `${user.nickname}님, ` : ""}어서 와요! 로그인되어 있어요.`
-            : "간편 가입하고 매일 첫 1회 무료 뽑기를 챙기세요!\n로그인하시면 도리가 생년월일시를 기억해서 또 다시 입력할 필요가 없어요!"}
+            : "간편 가입하고 매일 첫 1회 무료 뽑기를 챙기세요!\n로그인하시면 도리가 생년월일시를 기억해서 다시 입력할 필요가 없어요!"}
         </p>
       </div>
 
@@ -176,7 +176,7 @@ export function LoginModal({ onClose, user = null, result = null, onLogout, onWi
               <p className="text-xs text-gray-700 mt-1">{profileSummary(profile)}</p>
               {profileError && (
                 <p role="alert" className="text-[11px] font-bold text-brand-600 mt-1">
-                  지우지 못했어요. 잠시 뒤에 다시 시도해줘요.
+                  지우지 못했어요. 잠시 뒤에 다시 시도해 주세요.
                 </p>
               )}
               <button
@@ -231,7 +231,7 @@ export function LoginModal({ onClose, user = null, result = null, onLogout, onWi
               </p>
               {withdrawError && (
                 <p role="alert" className="text-[11px] font-bold text-brand-600 mt-1">
-                  탈퇴 처리에 실패했어요. 잠시 뒤에 다시 시도해줘요.
+                  탈퇴 처리에 실패했어요. 잠시 뒤에 다시 시도해 주세요.
                 </p>
               )}
               <div className="flex gap-2 mt-2">

@@ -19,7 +19,7 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
     await createDb(config).deletePerson(session.sub, id);
   } catch (err) {
     console.error("deletePerson failed:", err instanceof Error ? err.message : "unknown");
-    return NextResponse.json({ error: "지우지 못했어요. 잠시 뒤에 다시 해줘요." }, { status: 502, headers: NO_STORE });
+    return NextResponse.json({ error: "지우지 못했어요. 잠시 뒤에 다시 시도해 주세요." }, { status: 502, headers: NO_STORE });
   }
   return NextResponse.json({ ok: true }, { headers: NO_STORE });
 }

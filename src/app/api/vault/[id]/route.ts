@@ -26,7 +26,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
     return NextResponse.json({ item: { id: row.id, title: row.title, created_at: row.created_at, snapshot } }, { headers: NO_STORE });
   } catch (err) {
     console.error("getVault failed:", err instanceof Error ? err.message : "unknown");
-    return NextResponse.json({ error: "불러오지 못했어요. 잠시 뒤에 다시 해줘요." }, { status: 502, headers: NO_STORE });
+    return NextResponse.json({ error: "불러오지 못했어요. 잠시 뒤에 다시 시도해 주세요." }, { status: 502, headers: NO_STORE });
   }
 }
 
@@ -42,7 +42,7 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
     await createDb(config).deleteVault(session.sub, id);
   } catch (err) {
     console.error("deleteVault failed:", err instanceof Error ? err.message : "unknown");
-    return NextResponse.json({ error: "지우지 못했어요. 잠시 뒤에 다시 해줘요." }, { status: 502, headers: NO_STORE });
+    return NextResponse.json({ error: "지우지 못했어요. 잠시 뒤에 다시 시도해 주세요." }, { status: 502, headers: NO_STORE });
   }
   return NextResponse.json({ ok: true }, { headers: NO_STORE });
 }

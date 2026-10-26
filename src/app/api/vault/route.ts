@@ -22,7 +22,7 @@ export async function GET(request: Request) {
     return NextResponse.json({ items }, { headers: NO_STORE });
   } catch (err) {
     console.error("listVault failed:", err instanceof Error ? err.message : "unknown");
-    return NextResponse.json({ error: "보관함을 불러오지 못했어요. 잠시 뒤에 다시 해줘요." }, { status: 502, headers: NO_STORE });
+    return NextResponse.json({ error: "보관함을 불러오지 못했어요. 잠시 뒤에 다시 시도해 주세요." }, { status: 502, headers: NO_STORE });
   }
 }
 
@@ -68,6 +68,6 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: true, id: out.id, duplicate: out.duplicate }, { headers: NO_STORE });
   } catch (err) {
     console.error("insertVault failed:", err instanceof Error ? err.message : "unknown");
-    return NextResponse.json({ error: "보관함에 저장하지 못했어요. 잠시 뒤에 다시 해줘요." }, { status: 502, headers: NO_STORE });
+    return NextResponse.json({ error: "보관함에 저장하지 못했어요. 잠시 뒤에 다시 시도해 주세요." }, { status: 502, headers: NO_STORE });
   }
 }

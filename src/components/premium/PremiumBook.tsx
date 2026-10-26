@@ -569,9 +569,12 @@ export default function PremiumBook({ report, flush = false, finale, previewBlur
         {/* 손님이 고른 고민에 대한 답은 첫 쪽 위가 아니라, 같은 주제를 다루는 '요즘 고민 맞춤 풀이' 쪽에 둬요. */}
         {page.key === "concern" && report.concern && <ConcernCard concern={report.concern} dark />}
 
-        <div className={`rounded-[14px] border border-[#2c3260] bg-[#1a1f40] p-4 empty:hidden ${blurred ? BLUR : ""}`} aria-hidden={blurred ? "true" : undefined}>
-          <Visual page={page} report={report} />
-        </div>
+        {/* 미리보기에서 가려진 쪽은 계산 값을 서버가 비워 보내서, 그림도 보여주지 않아요. */}
+        {!blurred && (
+          <div className="rounded-[14px] border border-[#2c3260] bg-[#1a1f40] p-4 empty:hidden">
+            <Visual page={page} report={report} />
+          </div>
+        )}
 
         {groups.map((g, gi) => (
           <div key={`${gi}-${g[0]?.heading}`} className="flex flex-col gap-[18px]">

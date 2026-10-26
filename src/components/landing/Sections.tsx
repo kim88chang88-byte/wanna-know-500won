@@ -154,7 +154,7 @@ export function HeroSection({ counts, streakText = null }: { counts: DrawCounts;
           <span className="material-symbols-outlined text-brand-500 text-[16px]">water_drop</span>
           오늘
           <b className="font-bold text-brand-500" data-testid="count-today">
-            {counts.today}회 참여{" "}
+            {counts.today}번 뽑았어요{" "}
             {counts.today === 0 && <span className="font-normal text-sky-600">(무료 1회 잔여 ✦)</span>}
           </b>
         </span>
@@ -163,7 +163,7 @@ export function HeroSection({ counts, streakText = null }: { counts: DrawCounts;
           <span className="material-symbols-outlined text-indigo-600 text-[16px]">auto_awesome</span>
           이번달
           <b className="font-bold text-indigo-800" data-testid="count-month">
-            {counts.month}회 참여 ✧
+            {counts.month}번 뽑았어요 ✧
           </b>
         </span>
       </div>
@@ -219,14 +219,8 @@ export function ShowcaseSection() {
 
           <div className="w-full max-w-3xl mx-auto flex flex-col justify-center bg-sky-50/70 p-4 sm:p-5 rounded-2xl border border-sky-200">
             <div className="flex flex-wrap items-center justify-center gap-2.5">
-              <span className="text-xs font-semibold text-brand-500 flex items-center gap-1">
-                <span className="material-symbols-outlined text-base">verified</span> 매일 첫 1회 무료 체험
-              </span>
-              <span className="text-slate-400" aria-hidden="true">
-                •
-              </span>
               <span className="text-xs font-semibold text-slate-600 flex items-center gap-1">
-                <span className="material-symbols-outlined text-base">favorite</span> 말랑말랑 운세 풀이
+                <span className="material-symbols-outlined text-base">favorite</span> 쉬운 말로 말랑말랑 풀어 드려요
               </span>
             </div>
           </div>
@@ -240,7 +234,7 @@ export function ShowcaseSection() {
           data-testid="scroll-cue"
           className="inline-flex flex-col items-center gap-0.5 rounded-2xl px-4 py-1 text-xs sm:text-sm font-bold text-brand-600 hover:text-brand-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-300"
         >
-          <span>아래로 스크롤해서 운명을 만나봐!!</span>
+          <span>아래로 내려서 오늘의 운을 만나 보세요</span>
           <span className="material-symbols-outlined text-[28px] leading-none motion-safe:animate-bounce" aria-hidden="true">
             keyboard_double_arrow_down
           </span>
@@ -258,7 +252,7 @@ export function MachinesSection({ onSpin }: SpinProps) {
       <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-4">
         <h3 className="sr-only">6대 운세 카드</h3>
         <span className="text-xs font-semibold px-3.5 py-1.5 rounded-full bg-sky-50 text-brand-500 border border-sky-200">
-          아래 운세는 <strong className="underline font-bold">매일 첫 1회는 무료</strong>야!! (이후 500원)
+          아래 운세는 <strong className="underline font-bold">매일 첫 1회는 무료</strong>예요! (이후 500원)
         </span>
       </div>
 

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import CloseLink from "./CloseLink";
 import PremiumReportApp from "@/components/premium/PremiumReportApp";
 import { SERVICE_NAME } from "@/lib/siteInfo";
 
@@ -15,14 +16,7 @@ export default function PremiumPage() {
           <Link href="/" className="font-serifKr font-black text-lg text-[#e6c887]">
             🌙 {SERVICE_NAME}
           </Link>
-          <Link
-            href="/"
-            aria-label="닫고 홈으로 돌아가기"
-            data-testid="premium-close"
-            className="flex h-9 w-9 items-center justify-center rounded-full border border-[#e6c887]/40 text-[#e6c887] hover:bg-[#e6c887]/10 active:scale-95 transition-transform"
-          >
-            <span className="material-symbols-outlined text-[22px]" aria-hidden="true">close</span>
-          </Link>
+          <CloseLink />
         </div>
       </header>
       <main className="max-w-2xl mx-auto px-4 py-8 space-y-6">

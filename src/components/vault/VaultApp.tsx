@@ -48,7 +48,7 @@ export default function VaultApp() {
       if (!res.ok || !data?.items) return setView({ kind: "error", message: data?.error ?? "보관함을 불러오지 못했어요." });
       setView({ kind: "list", items: data.items });
     } catch {
-      setView({ kind: "error", message: "보관함을 불러오지 못했어요. 인터넷 연결을 확인해 줘요." });
+      setView({ kind: "error", message: "보관함을 불러오지 못했어요. 인터넷 연결을 확인해 주세요." });
     }
   }, []);
 
@@ -65,7 +65,7 @@ export default function VaultApp() {
       if (!res.ok || !data?.item) setNotice(data?.error ?? "열지 못했어요.");
       else setDetail(data.item);
     } catch {
-      setNotice("열지 못했어요. 인터넷 연결을 확인해 줘요.");
+      setNotice("열지 못했어요. 인터넷 연결을 확인해 주세요.");
     }
     setOpening(null);
   }
@@ -78,7 +78,7 @@ export default function VaultApp() {
       setDetail(null);
       await load();
     } catch {
-      setNotice("지우지 못했어요. 잠시 뒤에 다시 해줘요.");
+      setNotice("지우지 못했어요. 잠시 뒤에 다시 시도해 주세요.");
     }
   }
 

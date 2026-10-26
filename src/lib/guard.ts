@@ -92,7 +92,7 @@ export interface LimitSpec {
 }
 
 /** 주소 기준 + (로그인했다면) 계정 기준으로 제한을 확인해요. 걸리면 429 응답, 통과면 null. */
-export async function enforceLimits(request: Request, spec: LimitSpec, message = "요청이 너무 빨라요. 잠시 뒤에 다시 시도해줘요."): Promise<NextResponse | null> {
+export async function enforceLimits(request: Request, spec: LimitSpec, message = "요청이 너무 빨라요. 잠시 뒤에 다시 시도해 주세요."): Promise<NextResponse | null> {
   const session = verifySessionToken(readCookie(request.headers.get("cookie"), SESSION_COOKIE), process.env.AUTH_SECRET);
   const ipLimit = session ? spec.ip * (spec.ipLoggedInFactor ?? 3) : spec.ip;
   const checks: Array<Promise<Limit>> = [takeLimit(spec.name, `ip:${clientKey(request)}`, ipLimit, spec.windowMs)];

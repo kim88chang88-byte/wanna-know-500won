@@ -29,6 +29,6 @@ export async function GET(request: Request) {
     return NextResponse.json({ day: kstDay(now), ...result }, { headers: { "Cache-Control": "no-store" } });
   } catch (err) {
     console.error("daily failed:", err instanceof Error ? err.message : "unknown");
-    return NextResponse.json({ error: "오늘의 한마디를 불러오지 못했어요. 잠시 뒤에 다시 해줘요." }, { status: 502 });
+    return NextResponse.json({ error: "오늘의 한마디를 불러오지 못했어요. 잠시 뒤에 다시 시도해 주세요." }, { status: 502 });
   }
 }

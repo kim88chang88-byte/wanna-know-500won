@@ -78,14 +78,14 @@ interface Props {
 }
 
 /** 로그인 안내 문구 (질문지 첫 화면·결과 화면에서 써요) */
-export const LOGIN_NUDGE = "로그인하시면 도리가 생년월일시를 기억해서 또 다시 입력할 필요가 없어요!";
+export const LOGIN_NUDGE = "로그인하시면 도리가 생년월일시를 기억해서 다시 입력할 필요가 없어요!";
 
 const BUBBLE: Record<AnyStepId, string> = {
   date: "먼저, 언제 태어났어? 🫧",
   time: "태어난 시간도 알면 더 또렷하게 볼 수 있어. 몰라도 괜찮아!",
   gender: "성별도 알려줄래?",
   concern: "요즘 마음에 걸리는 게 있어? 골라주면 그 얘기를 더 살려서 풀어줄게 🫧",
-  consent: "풀이를 만들기 전에, 정보 처리만 확인할게.",
+  consent: "풀이를 만들기 전에, 개인정보 처리 동의만 확인할게.",
   pdate: "이번엔 궁합을 볼 상대방이야! 상대방은 언제 태어났어? 💞",
   ptime: "상대방이 태어난 시간도 알면 더 또렷해. 몰라도 괜찮아!",
   pgender: "상대방의 성별도 알려줄래?",
@@ -869,11 +869,7 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
                     </span>
                   </label>
                 )
-              ) : (
-                <p data-testid="login-nudge-consent" className="text-[11px] text-amber-800 bg-amber-50 border border-amber-100 rounded-lg px-2.5 py-2 leading-relaxed">
-                  🫧 {LOGIN_NUDGE}
-                </p>
-              )}
+              ) : null}
 
               {loggedIn && (
                 <label className="flex items-start gap-2 text-xs text-gray-700 leading-relaxed">

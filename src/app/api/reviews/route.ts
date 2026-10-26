@@ -9,7 +9,7 @@ export const runtime = "nodejs";
 
 /** 사용후기 저장. 로그인하지 않아도 남길 수 있고, 로그인했다면 회원과 연결해서 탈퇴 때 함께 지워요. */
 export async function POST(request: Request) {
-  const denied = guardOrigin(request) ?? (await enforceLimits(request, { name: "reviews", windowMs: 3600000, ip: 10, user: 10 }, "후기를 너무 자주 남기고 있어요. 잠시 뒤에 다시 해줘요."));
+  const denied = guardOrigin(request) ?? (await enforceLimits(request, { name: "reviews", windowMs: 3600000, ip: 10, user: 10 }, "후기를 너무 자주 남기고 있어요. 잠시 뒤에 다시 시도해 주세요."));
   if (denied) return denied;
   let body: unknown;
   try {
@@ -31,7 +31,7 @@ export async function POST(request: Request) {
     await db.insertReview({ userId: session?.sub ?? null, review, topic: normalizeTopic(o.topic), premium: o.premium === true });
   } catch (err) {
     console.error("insertReview failed:", err instanceof Error ? err.message : "unknown");
-    return NextResponse.json({ error: "후기를 저장하지 못했어요. 잠시 뒤에 다시 해줘요." }, { status: 502 });
+    return NextResponse.json({ error: "후기를 저장하지 못했어요. 잠시 뒤에 다시 시도해 주세요." }, { status: 502 });
   }
   return NextResponse.json({ ok: true });
 }

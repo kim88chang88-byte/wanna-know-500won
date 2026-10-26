@@ -57,6 +57,6 @@ export async function POST(request: Request) {
     return NextResponse.json({ person: id ? { id, label: parsed.label, birth: parsed.birth } : null }, { headers: NO_STORE });
   } catch (err) {
     console.error("insertPerson failed:", err instanceof Error ? err.message : "unknown");
-    return NextResponse.json({ error: "저장하지 못했어요. 잠시 뒤에 다시 해줘요." }, { status: 502, headers: NO_STORE });
+    return NextResponse.json({ error: "저장하지 못했어요. 잠시 뒤에 다시 시도해 주세요." }, { status: 502, headers: NO_STORE });
   }
 }

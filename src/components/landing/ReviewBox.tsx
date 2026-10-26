@@ -31,7 +31,7 @@ export default function ReviewBox({ topic, premium }: { topic: string; premium: 
       });
       if (!res.ok) {
         const data = (await res.json().catch(() => null)) as { error?: string } | null;
-        throw new Error(data?.error ?? "후기를 저장하지 못했어요. 잠시 뒤에 다시 해줘요.");
+        throw new Error(data?.error ?? "후기를 저장하지 못했어요. 잠시 뒤에 다시 시도해 주세요.");
       }
       setPhase("done");
     } catch (err) {

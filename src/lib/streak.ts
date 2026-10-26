@@ -85,7 +85,7 @@ export function streakLine(s: StreakState): string | null {
   if (s.count === 0) return null;
   if (s.doneToday && (MILESTONES as readonly number[]).includes(s.count)) return MILESTONE_COPY[s.count];
   if (s.resting) return "어제는 쉬어 갔지만 물길은 그대로 이어져 있어요. 오늘 오면 계속 이어져요 💧";
-  if (!s.doneToday) return `오늘 쪽지를 뽑으면 ${s.count + 1}일째가 돼요. 못 오는 날이 있어도 괜찮아요 🫧`;
+  if (!s.doneToday) return `오늘 운세를 뽑으면 ${s.count + 1}일째가 돼요. 못 오는 날이 있어도 괜찮아요 🫧`;
   if (s.count >= 2) return `${s.count}일째 물길을 이어 가는 중이에요. 내일 또 만나요 💧`;
   return null;
 }

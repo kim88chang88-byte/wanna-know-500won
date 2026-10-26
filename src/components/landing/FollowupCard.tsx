@@ -42,7 +42,7 @@ export function FollowupCard() {
         <div role="status" className="mt-2.5">
           <p data-testid="followup-reply" className="text-[13.5px] leading-relaxed text-gray-800">{followupReply(mood)}</p>
           <div className="mt-2.5 flex items-center gap-3 text-xs">
-            <a href="#machines" onClick={close} className="rounded-full bg-brand-500 px-3.5 py-1.5 font-bold text-white">오늘의 쪽지 뽑으러 가기</a>
+            <a href="#machines" onClick={close} className="rounded-full bg-brand-500 px-3.5 py-1.5 font-bold text-white">오늘의 운세 뽑으러 가기</a>
             <button type="button" onClick={close} className="text-gray-500 underline">닫기</button>
           </div>
         </div>

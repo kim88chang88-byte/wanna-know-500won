@@ -42,7 +42,7 @@ export function VaultSaveBar({ snapshot, autoSave, luxe = false }: { snapshot: V
       }
     } catch {
       setStatus("error");
-      setMessage("보관함에 저장하지 못했어요. 인터넷 연결을 확인해 줘요.");
+      setMessage("보관함에 저장하지 못했어요. 인터넷 연결을 확인해 주세요.");
     }
   }
 

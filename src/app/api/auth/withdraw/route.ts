@@ -19,7 +19,7 @@ export async function POST(request: Request) {
     } catch (err) {
       // 지우지 못했다면 쿠키도 그대로 둬서, 다시 시도할 수 있게 해요.
       console.error("deleteUser failed:", err instanceof Error ? err.message : "unknown");
-      return NextResponse.json({ error: "탈퇴 처리에 실패했어요. 잠시 뒤에 다시 시도해줘요." }, { status: 502 });
+      return NextResponse.json({ error: "탈퇴 처리에 실패했어요. 잠시 뒤에 다시 시도해 주세요." }, { status: 502 });
     }
   }
 

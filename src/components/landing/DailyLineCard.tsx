@@ -72,7 +72,7 @@ export function DailyLineCard({ onOpened }: { onOpened?: () => void }) {
             {ganzhiParts(daily.ganzhi).hangul && <span className="ml-1 text-gray-400">({ganzhiParts(daily.ganzhi).hanja})</span>}
           </p>
           <p className="mt-2 text-xs font-semibold text-sky-700">{daily.tip}</p>
-          <a href="#machines" className="mt-2.5 inline-block rounded-full bg-brand-500 px-3.5 py-1.5 text-xs font-bold text-white">더 궁금하면 쪽지 뽑으러 가기</a>
+          <a href="#machines" className="mt-2.5 inline-block rounded-full bg-brand-500 px-3.5 py-1.5 text-xs font-bold text-white">더 궁금하면 운세 뽑으러 가기</a>
         </div>
       ) : (
         <div className="flex items-center justify-between gap-3">
