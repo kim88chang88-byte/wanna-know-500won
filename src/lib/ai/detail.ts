@@ -142,8 +142,15 @@ export function parseDetail(value: unknown): Detail | null {
   const heads: DetailFolds = {};
   const rawHeads = typeof o.heads === "object" && o.heads !== null ? (o.heads as Record<string, unknown>) : {};
   for (const k of KEYS) {
-    const raw = clean(o[k], MAX.fold, MIN.fold);
+    // 모델이 길게 쓰면 버리지 않고 마지막 온전한 문장까지만 살려요. (Gemini 처럼 글자 수를 덜 지키는 모델 대비)
+    let src = o[k];
+    if (typeof src === "string" && src.trim().length > MAX.fold) src = trimToLastSentence(src.trim().slice(0, MAX.fold));
+    const raw = clean(src, MAX.fold, MIN.fold);
     const t = raw ? tidyFold(k, raw) : null;
+    if (o[k] !== undefined && !(t && t.length >= MIN.fold)) {
+      const v = typeof o[k] === "string" ? (o[k] as string) : "";
+      console.warn(`detail fold dropped: ${k} len=${v.length}${raw ? "" : isGeneric(v) ? " generic" : " length"}`);
+    }
     if (t && t.length >= MIN.fold) {
       folds[k] = t;
       const h = cleanHead(rawHeads[k]);
@@ -184,7 +191,19 @@ function mergeDetail(parts: (Detail | null)[]): Detail | null {
 
 export async function interpretDetail(chart: SajuChart, o: { topic: ReadingTopic; gender: Gender; concern?: Concern | null; extra?: ExtraFacts; apiKey?: string; model?: string; fetchImpl?: typeof fetch }): Promise<Detail> {
   const errs: string[] = [];
-  const run = (schema: object, askTail: string) =>
+  const t0 = Date.now();
+  const run = async (schema: object, askTail: string, need: readonly (typeof KEYS)[number][]): Promise<Detail | null> => {
+    const first = await runOnce(schema, askTail);
+    // 일부 글이 검사에서 빠졌으면 한 번 더 받아 빈 칸만 채워요.
+    if (first && need.every((k) => first.folds[k])) return first;
+    // 서버 제한 시간(60초)을 넘기지 않게, 첫 시도가 오래 걸렸으면 다시 받지 않아요.
+    if (Date.now() - t0 > 22_000) return first;
+    const second = await runOnce(schema, askTail);
+    if (!first) return second;
+    if (!second) return first;
+    return { story: first.story || second.story, folds: { ...second.folds, ...first.folds }, heads: { ...second.heads, ...first.heads } };
+  };
+  const runOnce = (schema: object, askTail: string) =>
     callJson<Detail>({
       system: DETAIL_SYSTEM_PROMPT,
       user: buildDetailMessage(chart, o.topic, o.gender, o.concern, o.extra ?? {}, askTail),
@@ -203,10 +222,10 @@ export async function interpretDetail(chart: SajuChart, o: { topic: ReadingTopic
       return null;
     });
   const [a, b, c, d] = await Promise.all([
-    run(DETAIL_SCHEMA_A, "이번 호출에서는 두 글만 써줘: 오행(elements)·나(self). 그리고 이 두 글의 항목 제목(heads)을 써줘."),
-    run(DETAIL_SCHEMA_B, "이번 호출에서는 두 글만 써줘: 칭찬(praise)·아쉬움(lack). 그리고 이 두 글의 항목 제목(heads)을 써줘."),
-    run(DETAIL_SCHEMA_C, "이번 호출에서는 두 글만 써줘: 흐름(flow)·개선(improve). 그리고 이 두 글의 항목 제목(heads)을 써줘."),
-    run(DETAIL_SCHEMA_D, "이번 호출에서는 행운 처방(lucky)과 그 항목 제목(heads)을 쓴 뒤, 마지막에 요약하자면(story)을 써줘. 요약하자면은 이 사람의 사주 전체(오행 큰 그림 → 나의 모습 → 칭찬 → 아쉬움 → 흐름 → 개선 → 응원)를 3~4문단으로 녹여 줘."),
+    run(DETAIL_SCHEMA_A, "이번 호출에서는 두 글만 써줘: 오행(elements)·나(self). 그리고 이 두 글의 항목 제목(heads)을 써줘.", ["elements", "self"]),
+    run(DETAIL_SCHEMA_B, "이번 호출에서는 두 글만 써줘: 칭찬(praise)·아쉬움(lack). 그리고 이 두 글의 항목 제목(heads)을 써줘.", ["praise", "lack"]),
+    run(DETAIL_SCHEMA_C, "이번 호출에서는 두 글만 써줘: 흐름(flow)·개선(improve). 그리고 이 두 글의 항목 제목(heads)을 써줘.", ["flow", "improve"]),
+    run(DETAIL_SCHEMA_D, "이번 호출에서는 행운 처방(lucky)과 그 항목 제목(heads)을 쓴 뒤, 마지막에 요약하자면(story)을 써줘. 요약하자면은 이 사람의 사주 전체(오행 큰 그림 → 나의 모습 → 칭찬 → 아쉬움 → 흐름 → 개선 → 응원)를 3~4문단으로 녹여 줘.", ["lucky"]),
   ]);
   const merged = mergeDetail([a, b, c, d]);
   if (merged && errs.length) merged.warn = errs.join(" / ").slice(0, 120);
