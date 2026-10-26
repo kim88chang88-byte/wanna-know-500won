@@ -1,6 +1,7 @@
 import { CONSENT_VERSION } from "@/lib/siteInfo";
 import type { Concern } from "@/lib/concerns";
 import type { ReviewInput } from "@/lib/reviews";
+import { parsePersonRow, type SavedPerson } from "@/lib/people";
 import { parseProfileRow, type SavedProfile } from "@/lib/profile";
 import { kstDay, kstMonthRange } from "./kst";
 
@@ -329,6 +330,42 @@ export function createDb(config: DbConfig, fetchImpl: FetchLike = fetch) {
           consented_at: now.toISOString(),
         }),
       });
+    },
+
+    /** 기억해 둔 다른 사람 목록 (최신순) */
+    async listPeople(userId: string): Promise<SavedPerson[]> {
+      const res = await call(`saved_people?user_id=eq.${safeId(userId)}&select=*&order=created_at.desc&limit=50`, { method: "GET", headers: headers() });
+      const rows = (await res.json().catch(() => [])) as unknown[];
+      return (Array.isArray(rows) ? rows : []).map(parsePersonRow).filter((p): p is SavedPerson => p !== null);
+    },
+
+    /** 다른 사람 한 명 저장 (동의한 회원만) */
+    async insertPerson(userId: string, label: string, p: SavedProfile, now: Date = new Date()): Promise<string | null> {
+      const res = await call("saved_people", {
+        method: "POST",
+        headers: headers({ Prefer: "return=representation" }),
+        body: JSON.stringify({
+          user_id: safeId(userId),
+          label: label.slice(0, 20),
+          calendar: p.calendar,
+          year: p.year,
+          month: p.month,
+          day: p.day,
+          is_leap: p.calendar === "lunar" && p.isLeapMonth === true,
+          hour: p.hour ?? null,
+          minute: p.hour === null || p.hour === undefined ? null : (p.minute ?? 0),
+          gender: p.gender,
+          consent_version: CONSENT_VERSION,
+          consented_at: now.toISOString(),
+        }),
+      });
+      const rows = (await res.json().catch(() => [])) as Array<{ id?: unknown }>;
+      return Array.isArray(rows) && typeof rows[0]?.id === "string" ? rows[0].id : null;
+    },
+
+    async deletePerson(userId: string, id: string): Promise<void> {
+      if (!UUID.test(id)) throw new DbError("invalid id");
+      await call(`saved_people?id=eq.${id}&user_id=eq.${safeId(userId)}`, { method: "DELETE", headers: headers({ Prefer: "return=minimal" }) });
     },
 
     /** 저장된 생년월일시만 지워요. (회원 정보는 그대로) */

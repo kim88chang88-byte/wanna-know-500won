@@ -1,6 +1,7 @@
 "use client";
 
 import { profileSummary, type SavedProfile } from "@/lib/profile";
+import type { SavedPerson } from "@/lib/people";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { LOGIN_RESULT_MESSAGE, type AuthUser, type LoginResult } from "./useAuth";
 
@@ -79,6 +80,67 @@ interface LoginModalProps {
   onDeleteProfile?: () => Promise<boolean>;
 }
 
+/** 기억해 둔 다른 사람 목록과 지우기 (로그인 창 안에서). 하나도 없거나 기능이 꺼져 있으면 아무것도 안 보여요. */
+function SavedPeopleBox() {
+  const [people, setPeople] = useState<SavedPerson[]>([]);
+  const [busyId, setBusyId] = useState<string | null>(null);
+  const [failed, setFailed] = useState(false);
+
+  useEffect(() => {
+    let alive = true;
+    fetch("/api/people", { cache: "no-store" })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((j: { people?: SavedPerson[] } | null) => {
+        if (alive && j && Array.isArray(j.people)) setPeople(j.people);
+      })
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, []);
+
+  if (people.length === 0) return null;
+  return (
+    <div data-testid="saved-people-box" className="rounded-2xl bg-brand-50 border border-brand-100 p-3">
+      <p className="text-[11px] font-bold text-brand-700 text-center">도리가 기억하고 있는 다른 사람</p>
+      <ul className="mt-1.5 space-y-1">
+        {people.map((p) => (
+          <li key={p.id} className="flex items-center justify-between gap-2 text-xs text-gray-700">
+            <span className="min-w-0 truncate">
+              <b>{p.label}</b> · {profileSummary(p.birth)}
+            </span>
+            <button
+              type="button"
+              data-testid="delete-person"
+              disabled={busyId === p.id}
+              onClick={async () => {
+                setBusyId(p.id);
+                setFailed(false);
+                try {
+                  const res = await fetch(`/api/people/${p.id}`, { method: "DELETE" });
+                  if (res.ok) setPeople((list) => list.filter((x) => x.id !== p.id));
+                  else setFailed(true);
+                } catch {
+                  setFailed(true);
+                }
+                setBusyId(null);
+              }}
+              className="shrink-0 text-[11px] text-gray-500 underline underline-offset-2 hover:text-gray-700 disabled:opacity-50"
+            >
+              {busyId === p.id ? "지우는 중…" : "지우기"}
+            </button>
+          </li>
+        ))}
+      </ul>
+      {failed && (
+        <p role="alert" className="text-[11px] font-bold text-brand-600 mt-1 text-center">
+          지우지 못했어요. 잠시 뒤에 다시 시도해줘요.
+        </p>
+      )}
+    </div>
+  );
+}
+
 export function LoginModal({ onClose, user = null, result = null, onLogout, onWithdraw, profile = null, onDeleteProfile }: LoginModalProps) {
   const [profileBusy, setProfileBusy] = useState(false);
   const [profileError, setProfileError] = useState(false);
@@ -131,6 +193,7 @@ export function LoginModal({ onClose, user = null, result = null, onLogout, onWi
               </button>
             </div>
           )}
+          <SavedPeopleBox />
           <a
             href="/vault"
             data-testid="open-vault"

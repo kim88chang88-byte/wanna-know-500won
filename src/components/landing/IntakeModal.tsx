@@ -40,6 +40,7 @@ import { birthSummary, isStoryReport } from "@/lib/storyHelpers";
 import { VaultSaveBar } from "./VaultSaveBar";
 import { BIRTH_PLACES } from "@/lib/saju/birthPlace";
 import { profileSummary, profileToForm, sameBirth, type SavedProfile } from "@/lib/profile";
+import { MAX_LABEL, MAX_PEOPLE, type SavedPerson } from "@/lib/people";
 import { BRANCHES, STEMS } from "@/lib/saju/constants";
 import type { Pillar, SajuChart } from "@/lib/saju/types";
 import { CloseButton, ModalShell } from "./Modals";
@@ -322,6 +323,11 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
   const steps: readonly AnyStepId[] = compat ? COMPAT_STEPS : STEPS;
   const firstAfterMe = steps.indexOf(compat ? "pdate" : "concern");
   const [partner, setPartner] = useState<BirthFields>(EMPTY_BIRTH);
+  // 기억해 둔 다른 사람 (로그인 회원 + 궁합일 때만 불러와요. 표가 아직 없으면 조용히 빈 목록)
+  const [people, setPeople] = useState<SavedPerson[]>([]);
+  const [savePerson, setSavePerson] = useState(false);
+  const [personLabel, setPersonLabel] = useState("");
+  const [pickedPerson, setPickedPerson] = useState<string | null>(null);
   const [stepIndex, setStepIndex] = useState(() => (savedProfile ? firstAfterMe : 0));
   // 선택 동의: 둘 다 기본은 꺼짐. (이미 저장해 둔 회원이 정보를 고치는 경우만, 전에 동의한 "기억하기"를 켜 둬요)
   const [saveProfile, setSaveProfile] = useState(savedProfile !== null);
@@ -345,6 +351,29 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
 
   // 창이 닫히면 진행 중인 요청도 멈춰요.
   useEffect(() => () => abortRef.current?.abort(), []);
+
+  useEffect(() => {
+    if (!compat || !loggedIn) return;
+    let alive = true;
+    fetch("/api/people", { cache: "no-store" })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((j: { people?: SavedPerson[] } | null) => {
+        if (alive && j && Array.isArray(j.people)) setPeople(j.people);
+      })
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, [compat, loggedIn]);
+
+  /** 기억해 둔 사람을 고르면 상대방 질문을 건너뛰고 고민 단계로 가요. */
+  function pickPerson(p: SavedPerson) {
+    setPartner({ ...EMPTY_BIRTH, ...profileToForm(p.birth) });
+    setPickedPerson(p.id);
+    setSavePerson(false);
+    setError(null);
+    setStepIndex(steps.indexOf("concern"));
+  }
 
   const step = steps[stepIndex];
   const isLast = stepIndex === steps.length - 1;
@@ -370,6 +399,10 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
     const concern = buildConcern(form);
     // 저장된 정보를 그대로 쓰는 경우엔 다시 저장하지 않아요.
     const wantSave = loggedIn && saveProfile && !sameBirth(savedProfile, input);
+    // 상대방을 기억해 두기 (선택 동의. 풀이와 따로 보내고, 실패해도 풀이엔 영향 없어요)
+    if (compat && loggedIn && savePerson && !pickedPerson && partnerInput && personLabel.trim()) {
+      void fetch("/api/people", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ label: personLabel, birth: partnerInput }) }).catch(() => {});
+    }
     const wantShare = shareConcern && concern !== null;
     const ctrl = new AbortController();
     abortRef.current = ctrl;
@@ -732,6 +765,25 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
           )}
 
           {(step === "date" || step === "time" || step === "gender") && <BirthStepFields kind={step} f={form} patch={update} withPlace />}
+          {step === "pdate" && people.length > 0 && (
+            <div data-testid="saved-people" className="mb-3 rounded-xl bg-brand-50 border border-brand-100 px-3 py-2.5">
+              <p className="text-[11px] font-bold text-brand-700 mb-1.5">기억해 둔 사람 (눌러서 바로 불러와요)</p>
+              <div className="flex flex-wrap gap-1.5">
+                {people.map((p) => (
+                  <button
+                    key={p.id}
+                    type="button"
+                    data-testid="saved-person"
+                    onClick={() => pickPerson(p)}
+                    className="rounded-full bg-white border border-brand-200 px-3 py-1.5 text-xs font-bold text-brand-700 hover:bg-brand-100"
+                  >
+                    {p.label}
+                    <span className="ml-1 font-normal text-gray-500">{profileSummary(p.birth).split(" ")[0]}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
           {(step === "pdate" || step === "ptime" || step === "pgender") && (
             <BirthStepFields kind={step === "pdate" ? "date" : step === "ptime" ? "time" : "gender"} f={partner} patch={updatePartner} />
           )}
@@ -798,7 +850,7 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
                   onChange={(e) => update({ consent: e.target.checked })}
                 />
                 <span>
-                  (필수) 사주 계산을 위해 생년월일·성별(선택: 태어난 시간·고민 내용){compat ? "과 상대방의 생년월일·성별(선택: 태어난 시간)" : ""}을 처리하는 것에 동의해요.{compat ? " 상대방 정보는 궁합 계산에만 쓰고 서버에 저장하지 않아요." : ""}{" "}
+                  (필수) 사주 계산을 위해 생년월일·성별(선택: 태어난 시간·고민 내용){compat ? "과 상대방의 생년월일·성별(선택: 태어난 시간)" : ""}을 처리하는 것에 동의해요.{compat ? " 상대방 정보는 궁합 계산에만 쓰고, 아래 선택에 동의하지 않으면 서버에 저장하지 않아요." : ""}{" "}
                   <a href="/privacy" target="_blank" rel="noopener noreferrer" className="text-brand-600 underline">
                     개인정보처리방침 보기
                   </a>
@@ -832,6 +884,29 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
                   <input type="checkbox" name="saveVault" className="mt-0.5" checked={saveVault} onChange={(e) => setSaveVault(e.target.checked)} />
                   <span>(선택) 본 풀이를 내 보관함에 저장해요. 언제든 다시 볼 수 있고, 다시 볼 때는 추가 비용이 없어요. 보관함에서 지울 수 있고 탈퇴하면 함께 삭제돼요.</span>
                 </label>
+              )}
+
+              {compat && loggedIn && !pickedPerson && people.length < MAX_PEOPLE && (
+                <div className="space-y-1.5">
+                  <label className="flex items-start gap-2 text-xs text-gray-700 leading-relaxed">
+                    <input type="checkbox" name="savePerson" className="mt-0.5" checked={savePerson} onChange={(e) => setSavePerson(e.target.checked)} />
+                    <span>
+                      (선택) 이 상대방의 생년월일시·성별을 별명과 함께 기억해 둬요. 다음 궁합 때 다시 입력하지 않아도 돼요. 상대방이 알려도 괜찮다고 한 정보만 저장해 주세요. 로그인 창에서 언제든 지울 수 있고, 탈퇴하면 함께 삭제돼요.
+                    </span>
+                  </label>
+                  {savePerson && (
+                    <input
+                      type="text"
+                      name="personLabel"
+                      data-testid="person-label"
+                      value={personLabel}
+                      maxLength={MAX_LABEL}
+                      onChange={(e) => setPersonLabel(e.target.value)}
+                      placeholder="별명 (예: 내 짝꿍) · 실명은 피해 주세요"
+                      className="w-full rounded-xl border border-brand-200 px-3 py-2 text-xs"
+                    />
+                  )}
+                </div>
               )}
 
               {buildConcern(form) && (

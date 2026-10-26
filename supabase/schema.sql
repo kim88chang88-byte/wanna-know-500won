@@ -181,3 +181,27 @@ create table if not exists public.vault_items (
 );
 create index if not exists vault_items_user_idx on public.vault_items (user_id, created_at desc);
 alter table public.vault_items enable row level security;
+
+-- ─────────────────────────────────────────────────────────────────────────────
+-- 기억해 둔 다른 사람: 로그인한 회원이 "이 사람을 기억해 둘게요"에 동의했을 때만, 궁합 상대 등의
+-- 생년월일시·성별을 별명과 함께 저장해요. (최대 10명, 회원이 지우거나 탈퇴하면 함께 삭제)
+-- 이 파일 전체를 다시 Run 하면 추가돼요. (코드를 배포하기 '전에' Run 하세요. 없으면 이 기능만 조용히 꺼져 있어요)
+-- ─────────────────────────────────────────────────────────────────────────────
+create table if not exists public.saved_people (
+  id uuid primary key default gen_random_uuid(),
+  user_id text not null references public.users(id) on delete cascade,
+  label text not null,                           -- 별명(20자 이내). 실명 대신 쓰도록 안내해요
+  calendar text not null check (calendar in ('solar', 'lunar')),
+  year int not null,
+  month int not null,
+  day int not null,
+  is_leap boolean not null default false,
+  hour int,
+  minute int,
+  gender text not null check (gender in ('female', 'male')),
+  consent_version text,
+  consented_at timestamptz,
+  created_at timestamptz not null default now()
+);
+create index if not exists saved_people_user_idx on public.saved_people (user_id, created_at desc);
+alter table public.saved_people enable row level security;
