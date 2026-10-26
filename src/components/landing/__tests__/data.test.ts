@@ -97,9 +97,9 @@ describe("문구 가이드 (BRIEF.md: 뽑기 언어, 겁주거나 신비롭게 �
     for (const c of PREMIUM_CARDS) expect(IMAGES[c.image]).toBe(`/images/premium-scene-${premiumAnimal[c.key]}.webp`);
   });
 
-  it("프리미엄은 궁합이 맨 앞이고 'HOT' 스티커는 궁합에만 붙는다", () => {
+  it("프리미엄은 궁합이 맨 앞이고 'HOT' 스티커는 궁합과 성공 재물에 붙는다", () => {
     expect(PREMIUM_CARDS[0].key).toBe("premium-compat");
-    expect(PREMIUM_CARDS.filter((c) => c.ribbon).map((c) => c.key)).toEqual(["premium-compat"]);
+    expect(PREMIUM_CARDS.filter((c) => c.ribbon).map((c) => c.key)).toEqual(["premium-compat", "premium-fortune"]);
     expect(PREMIUM_CARDS[0].ribbon).toBe("HOT");
   });
 });

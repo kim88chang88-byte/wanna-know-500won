@@ -217,7 +217,7 @@ export const PREMIUM_CARDS: readonly PremiumCard[] = [
     card: "border border-amber-200 shadow-sm",
     imageBox: "bg-white border-amber-300 ring-2 ring-amber-100 ring-offset-2 ring-offset-white",
     button: "bg-gradient-to-r from-amber-400 to-orange-400 hover:brightness-105",
-    ribbon: null,
+    ribbon: "HOT",
     priceClass: "text-amber-800",
     divider: "border-amber-100",
   },
