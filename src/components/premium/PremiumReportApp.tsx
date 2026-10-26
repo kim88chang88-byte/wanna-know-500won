@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import type { PremiumErrorBody, PremiumReportView } from "@/lib/premium/types";
 import type { BirthInput } from "@/lib/saju/types";
 import ManseReport from "./ManseReport";
@@ -10,6 +10,42 @@ import { fetchRestChapters, mergeChapters } from "@/lib/premium/mergeChapters";
 const field = "w-full rounded-2xl border border-[#e6c887]/30 bg-white/[0.05] px-4 py-3 text-base text-[#fbf3de] [color-scheme:dark] focus:outline-none focus:ring-2 focus:ring-[#e6c887]/50";
 const seg = (active: boolean) =>
   `flex-1 rounded-full py-2.5 text-sm font-bold border transition-colors ${active ? "bg-[#e6c887] text-[#1b1824] border-[#e6c887]" : "bg-transparent text-[#e6c887] border-[#e6c887]/40"}`;
+
+const STAGES = [
+  { at: 0, text: "사주 여덟 글자를 세우고 있어요" },
+  { at: 20, text: "오행의 균형을 살펴보고 있어요" },
+  { at: 40, text: "신강·신약과 용신을 가늠하고 있어요" },
+  { at: 60, text: "올해와 대운의 흐름을 보고 있어요" },
+  { at: 80, text: "도리가 20쪽 풀이를 정리하고 있어요" },
+];
+
+/** 풀이를 만드는 동안의 진행 막대. 서버가 진행률을 주지 않아서, 처음엔 빠르게 뒤로 갈수록 천천히 차올라요. (1분 안팎 걸려요) */
+function PremiumProgress() {
+  const [pct, setPct] = useState(3);
+  const [sec, setSec] = useState(0);
+  useEffect(() => {
+    const start = Date.now();
+    const id = setInterval(() => {
+      const t = (Date.now() - start) / 1000;
+      setSec(t);
+      setPct(Math.max(3, Math.min(94, 94 * (1 - Math.exp(-t / 35)))));
+    }, 300);
+    return () => clearInterval(id);
+  }, []);
+  const stage = [...STAGES].reverse().find((x) => pct >= x.at) ?? STAGES[0];
+  return (
+    <div data-testid="premium-progress" className="mt-4">
+      <div role="progressbar" aria-label="풀이 진행" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(pct)} className="h-2.5 rounded-full bg-white/10 overflow-hidden">
+        <div className="h-full rounded-full bg-gradient-to-r from-[#f0d9a0] to-[#d3ac62] transition-[width] duration-300 ease-out" style={{ width: `${pct}%` }} />
+      </div>
+      <p className="mt-2 text-center text-xs text-[#e8dfca]/80">
+        {stage.text} · {Math.round(pct)}%
+      </p>
+      <p className="mt-1 text-center text-[11px] text-[#e8dfca]/50">20쪽 풀이라 1분 정도 걸려요. 창을 닫지 말고 잠깐만 기다려 줘요 🫧</p>
+      <span className="sr-only">{Math.floor(sec)}초 경과</span>
+    </div>
+  );
+}
 
 export default function PremiumReportApp() {
   const [aiNotice, setAiNotice] = useState(false);
@@ -134,6 +170,7 @@ export default function PremiumReportApp() {
       <button type="submit" disabled={busy} className="w-full rounded-full bg-gradient-to-r from-[#f0d9a0] to-[#d3ac62] py-3.5 font-serifKr font-bold text-[#1b1824] shadow-md disabled:opacity-60 active:scale-95 transition-transform">
         {busy ? "물길을 읽는 중… 🫧" : "내 사주 리포트 보기"}
       </button>
+      {busy && <PremiumProgress />}
     </form>
   );
 }
