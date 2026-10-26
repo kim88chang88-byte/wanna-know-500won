@@ -25,6 +25,17 @@ const STEPS: Array<{ key: FoldKey; name: string }> = [
   { key: "improve", name: "이렇게 개선해보아요 🌱" },
 ];
 
+/** 형광펜 색: 주제별 동물 그림에 맞춰요. (용 노랑 · 토끼 분홍 · 남자 팬더 연보라 · 여자 팬더 장미 · 여우 주황 · 수달 하늘색) */
+const MARK: Record<string, string> = {
+  success: "rgba(253,224,71,0.75)",
+  money: "rgba(249,168,212,0.7)",
+  love: "rgba(196,181,253,0.75)",
+  marriage: "rgba(251,146,160,0.6)",
+  health: "rgba(253,186,116,0.7)",
+  study: "rgba(125,211,252,0.7)",
+  general: "rgba(196,181,253,0.75)",
+};
+
 export interface StoryReading {
   keyword: string;
   total: { score: number; summary: string };
@@ -71,12 +82,22 @@ function Pillars({ report }: { report: PremiumReportView }) {
 }
 
 /** 긴 글을 문단으로 나눠 보여줘요. (내용이 바뀌는 곳마다 한 줄 띄움) */
-function Paras({ text, className = "" }: { text: string; className?: string }) {
+function Paras({ text, className = "", mark }: { text: string; className?: string; mark: string }) {
   return (
     <div className={`space-y-3.5 ${className}`}>
       {toParagraphs(text).map((p, i) => (
         <p key={i}>
-          {splitBold(p).map((x, j) => (x.bold ? <b key={j} className="font-extrabold text-gray-900">{x.text}</b> : <span key={j}>{x.text}</span>))}
+          {splitBold(p).map((x, j) => (x.bold ? (
+            <mark
+              key={j}
+              className="rounded-sm px-0.5 text-gray-900 [box-decoration-break:clone] [-webkit-box-decoration-break:clone]"
+              style={{ background: `linear-gradient(transparent 38%, ${mark} 38%, ${mark} 92%, transparent 92%)` }}
+            >
+              {x.text}
+            </mark>
+          ) : (
+            <span key={j}>{x.text}</span>
+          )))}
         </p>
       ))}
     </div>
@@ -124,6 +145,7 @@ export default function StoryReport({
   lastWord?: ReactNode;
 }) {
   const t = report.topic;
+  const mark = MARK[t.key] ?? MARK.general;
   const concern = report.concern;
   const concernText = concern?.text?.trim() || (concern?.answers.length ? concern.answers.map((a) => a.title).join(" · ") : "");
   const rawFolds = reading?.folds ?? {};
@@ -176,7 +198,7 @@ export default function StoryReport({
               </span>
             )}
           </div>
-          <Paras text={summary} className="mt-3 text-[16px] leading-[1.85] text-gray-800 break-keep" />
+          <Paras mark={mark} text={summary} className="mt-3 text-[16px] leading-[1.85] text-gray-800 break-keep" />
         </section>
       )}
 
@@ -201,7 +223,7 @@ export default function StoryReport({
                     ))}
                   </p>
                 )}
-                {f[st.key] ? <Paras text={f[st.key] as string} /> : <PendingNote />}
+                {f[st.key] ? <Paras mark={mark} text={f[st.key] as string} /> : <PendingNote />}
                 {st.key === "improve" && concern && concern.answers.length > 1 && (
                   <ul className="mt-3 space-y-2.5">
                     {concern.answers.slice(1).map((a) => (
@@ -239,7 +261,7 @@ export default function StoryReport({
           </>
         )}
         <Fold testId="story-fold-lucky" label="행운 처방" title={heads.lucky || `행운 컬러는 ${t.lucky.color}, 방향은 ${t.lucky.direction}${iyeyo(t.lucky.direction)}`}>
-          {f.lucky && <Paras text={f.lucky} className="mb-3.5" />}
+          {f.lucky && <Paras mark={mark} text={f.lucky} className="mb-3.5" />}
           <p className="flex items-center gap-2">
             <span aria-hidden="true" className="h-4 w-4 shrink-0 rounded-full border border-black/10" style={{ backgroundColor: t.lucky.hex }} />
             행운 컬러 <b className="text-gray-900">{t.lucky.color}</b> · 행운 방향 <b className="text-gray-900">{t.lucky.direction}</b>
