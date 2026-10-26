@@ -41,7 +41,7 @@ function PremiumProgress() {
       <p className="mt-2 text-center text-xs text-[#e8dfca]/80">
         {stage.text} · {Math.round(pct)}%
       </p>
-      <p className="mt-1 text-center text-[11px] text-[#e8dfca]/50">20쪽 풀이라 1분 정도 걸려요. 창을 닫지 말고 잠깐만 기다려 줘요 🫧</p>
+      <p className="mt-1 text-center text-[11px] text-[#e8dfca]/50">미리보기를 만드는 중이에요. 잠깐만 기다려 줘요 🫧</p>
       <span className="sr-only">{Math.floor(sec)}초 경과</span>
     </div>
   );
@@ -79,7 +79,7 @@ export default function PremiumReportApp() {
     };
     setBusy(true);
     try {
-      const res = await fetch("/api/premium", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ ...body, level: "full", topic: "프리미엄 사주 원국 리포트" }) });
+      const res = await fetch("/api/premium", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ ...body, level: "full", preview: true, topic: "프리미엄 사주 원국 리포트" }) });
       const json = (await res.json()) as { report?: PremiumReportView } & Partial<PremiumErrorBody>;
       if (!res.ok || !json.report) {
         setError(json.error ?? "리포트를 만들지 못했어요. 잠시 뒤에 다시 시도해 주세요.");

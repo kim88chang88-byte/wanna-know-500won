@@ -9,6 +9,8 @@ import { addBookNotes } from "@/lib/ai/bookNotes";
 import { CHAPTER_BATCH_1, CHAPTER_BATCH_2, chapterName, rewriteChapters } from "@/lib/ai/bookChapter";
 import { takeAiBudget } from "@/lib/ai/budget";
 import { isAdmin } from "@/lib/admin/auth";
+import { previewBlank } from "@/lib/premium/book/lock";
+import { PREVIEW_OPEN_PAGES } from "@/lib/premium/config";
 import { createDb, loadDbConfig } from "@/lib/db/supabase";
 
 export const maxDuration = 60;
@@ -25,8 +27,12 @@ export async function POST(request: Request) {
   }
   // 두 번째 요청: 나머지 장만 AI 로 다시 써서 받아 가요. (장을 두 번에 나눠야 AI 요청 한도에 안 걸려요)
   const second = typeof raw === "object" && raw !== null && (raw as { chapterBatch?: unknown }).chapterBatch === 2;
+  // 미리 보기 요청: 앞 몇 쪽만 풀이하고 나머지는 서버에서 비워서 내려보내요. (이 값은 내용을 줄이기만 하므로 요청자가 정해도 안전해요)
+  const preview = typeof raw === "object" && raw !== null && (raw as { preview?: unknown }).preview === true;
   const parsed = validatePremiumInput(raw);
   if (!parsed.ok) return NextResponse.json({ code: "bad_request", error: parsed.error }, { status: 400 });
+
+  if (preview && second) return NextResponse.json({ replaced: {}, chapterNote: "preview", chapterUsage: { in: 0, out: 0, calls: 0 }, aiNotice: false });
 
   try {
     // 잠금이 켜진 상태(결제 오픈)에서는 서버가 확인한 이용권 쿠키가 있는 요청에만 잠금 없는 전체 풀이를 줘요.
@@ -46,11 +52,18 @@ export async function POST(request: Request) {
       const dbCfg = loadDbConfig(process.env);
       const db = dbCfg ? createDb(dbCfg) : null;
       const book0 = report.book;
+      // 미리 보기는 열려 있는 쪽만 AI 로 써요. (가려질 쪽에는 AI 비용을 쓰지 않아요)
+      const openKeys = new Set(book0.filter((p) => p.no < PREVIEW_OPEN_PAGES).map((p) => p.key));
       const notesJob = (async () => {
         if (second) return book0;
         try {
           const gate = await takeAiBudget(process.env, db);
-          if (gate === "ok") return await addBookNotes(book0, { kind: parsed.partner ? "compat" : "personal", concern: parsed.concern });
+          if (gate === "ok") {
+            if (!preview) return await addBookNotes(book0, { kind: parsed.partner ? "compat" : "personal", concern: parsed.concern });
+            const head = book0.filter((p) => p.no < PREVIEW_OPEN_PAGES);
+            const done = await addBookNotes(head, { kind: parsed.partner ? "compat" : "personal", concern: parsed.concern });
+            return book0.map((p) => done.find((d) => d.no === p.no) ?? p);
+          }
         } catch (err) {
           console.error("book notes failed:", err instanceof Error ? err.message : "unknown");
         }
@@ -61,7 +74,7 @@ export async function POST(request: Request) {
         try {
           const gate = await takeAiBudget(process.env, db);
           if (gate !== "ok") return null;
-          return await rewriteChapters(book0, { keys: second ? CHAPTER_BATCH_2 : CHAPTER_BATCH_1, name: chapterName(session?.nick), concern: parsed.concern, onUsage: (u) => { usage.in += u.input; usage.out += u.output; usage.calls++; } });
+          return await rewriteChapters(book0, { keys: (second ? CHAPTER_BATCH_2 : CHAPTER_BATCH_1).filter((k) => !preview || openKeys.has(k)), name: chapterName(session?.nick), concern: parsed.concern, onUsage: (u) => { usage.in += u.input; usage.out += u.output; usage.calls++; } });
         } catch (err) {
           console.error("book chapter failed:", err instanceof Error ? err.message : "unknown");
           return null;
@@ -76,6 +89,16 @@ export async function POST(request: Request) {
         if (Object.keys(rep).length > 0) report.book = report.book.map((p) => (rep[p.no] ? { ...p, sections: rep[p.no] } : p));
       }
     }
+    if (preview && parsed.level === "full") {
+      report.book = previewBlank(report.book, PREVIEW_OPEN_PAGES);
+      // 가려진 쪽의 그림·표에 쓰이는 계산 값도 함께 비워요.
+      report.yongsin = [];
+      report.gilsin = [];
+      report.hyungsin = [];
+      report.summary = "";
+      report.daeun = null;
+      report.concern = null;
+    }
     // 프리미엄(개인) 리포트인데 AI 장 풀이를 하나도 못 받았거나 일부 실패했으면 안내 문구를 띄워요.
     const aiDown = !aiGated && parsed.level === "full" && !parsed.partner && !lock && (chapterNote === "skip" || chapterNote.includes("fail"));
     if (second) {
@@ -87,7 +110,7 @@ export async function POST(request: Request) {
       });
       return NextResponse.json({ replaced, chapterNote, chapterUsage: usage, aiNotice: aiDown });
     }
-    const pendingChapters = chapterNote !== "skip" && !parsed.partner && parsed.level === "full" && !lock ? CHAPTER_BATCH_2 : [];
+    const pendingChapters = !preview && chapterNote !== "skip" && !parsed.partner && parsed.level === "full" && !lock ? CHAPTER_BATCH_2 : [];
     return NextResponse.json({ report, chapterNote, chapterUsage: usage, pendingChapters, aiNotice: aiDown, aiGated: aiGated && parsed.level === "full" && !parsed.partner });
   } catch (err) {
     // 없는 날짜(예: 윤달이 없는 해의 윤달)처럼 계산할 수 없는 입력이에요.

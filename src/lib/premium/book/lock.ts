@@ -137,3 +137,18 @@ export function applyLocks(pages: BookPage[], year: number): BookPage[] {
 export function countLocked(pages: BookPage[]): number {
   return pages.reduce((a, p) => a + p.sections.filter((s) => s.locked).length, 0);
 }
+
+/** 처음 쪽 수만 보여 주는 "미리 보기": fromNo 쪽부터는 서버에서 풀이를 비워서(같은 길이의 의미 없는 글자) 내려보내요. 제목·한 줄 소개만 남겨요. */
+export function previewBlank(pages: BookPage[], fromNo: number): BookPage[] {
+  return pages.map((p) => {
+    if (p.no < fromNo) return p;
+    return {
+      ...p,
+      note: undefined,
+      advice: undefined,
+      evidence: undefined,
+      sections: p.sections.map((s) => lockSection(s)),
+      tables: p.tables.map((t) => ({ ...t, rows: t.rows.map(lockRow) })),
+    };
+  });
+}

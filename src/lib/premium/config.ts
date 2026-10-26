@@ -5,3 +5,6 @@
 export function isPremiumLocked(env: Record<string, string | undefined>): boolean {
   return env.PREMIUM_LOCK?.trim().toLowerCase() === "true";
 }
+
+/** 프리미엄 "미리 보기"에서 이 쪽 번호부터는 서버가 풀이를 비워서 내려보내요. (1~4쪽만 열려 있어요) */
+export const PREVIEW_OPEN_PAGES = 5;

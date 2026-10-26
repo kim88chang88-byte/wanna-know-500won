@@ -1,5 +1,6 @@
 "use client";
 
+import { PREVIEW_OPEN_PAGES } from "@/lib/premium/config";
 import ConcernCard from "./ConcernCard";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { checkMessage } from "@/lib/premium/book/resonance";
@@ -452,7 +453,7 @@ export function NextProductBanner({ report }: { report: PremiumReportView }) {
 }
 
 /** flush: 이미 미드나잇 톤의 틀 안에 들어갈 때 바깥 테두리·배경을 빼고 내용만 보여요. */
-export default function PremiumBook({ report, flush = false, finale, previewBlur = false }: { report: PremiumReportView; flush?: boolean; /** 프리미엄 "미리 보기" 화면에서만 true: 2쪽부터 핵심 풀이를 흐리게 가려요 */ previewBlur?: boolean; /** 마지막 쪽 끝에 붙는 마무리(한 줄 결론 등) */ finale?: ReactNode }) {
+export default function PremiumBook({ report, flush = false, finale, previewBlur = false }: { report: PremiumReportView; flush?: boolean; /** 프리미엄 "미리 보기" 화면에서만 true: 5쪽부터 핵심 풀이를 흐리게 가려요 */ previewBlur?: boolean; /** 마지막 쪽 끝에 붙는 마무리(한 줄 결론 등) */ finale?: ReactNode }) {
   const pages = report.book;
   const [i, setI] = useState(0);
   const [unlockMsg, setUnlockMsg] = useState(false);
@@ -468,8 +469,8 @@ export default function PremiumBook({ report, flush = false, finale, previewBlur
 
   const page = pages[i];
   if (!page) return null;
-  // 미리 보기: 2쪽부터 본문·표·조언·근거를 흐리게. (제목과 도리의 말풍선은 그대로 둬서 궁금증을 남겨요)
-  const blurred = previewBlur && page.no >= 2;
+  // 미리 보기: 5쪽부터(서버도 같은 쪽부터 비워서 보내요) 본문·표·조언·근거를 흐리게. (제목과 도리의 말풍선은 그대로 둬서 궁금증을 남겨요)
+  const blurred = previewBlur && page.no >= PREVIEW_OPEN_PAGES;
   const BLUR = "pointer-events-none select-none blur-[6px]";
   const go = (n: number) => setI(Math.min(pages.length - 1, Math.max(0, n)));
   const num = (n: number) => String(n).padStart(2, "0");
@@ -622,7 +623,7 @@ export default function PremiumBook({ report, flush = false, finale, previewBlur
         {blurred && (
           <div data-testid="preview-blur-note" className={`rounded-2xl border ${HAIR} bg-[#e6c887]/[0.06] px-4 py-4 text-center`}>
             <p className={`text-[13px] font-bold ${GOLD}`}>🔒 핵심 풀이는 흐리게 가려져 있어요</p>
-            <p className="mt-1 text-[12px] leading-relaxed text-[#e8dfca]/80">미리 보기에서는 1쪽만 전부 볼 수 있어요. 내 사주의 진짜 이야기는 프리미엄 사주서에서 확인해 보세요.</p>
+            <p className="mt-1 text-[12px] leading-relaxed text-[#e8dfca]/80">미리 보기에서는 1~4쪽만 전부 볼 수 있어요. 내 사주의 진짜 이야기는 프리미엄 사주서에서 확인해 보세요.</p>
           </div>
         )}
       </article>
