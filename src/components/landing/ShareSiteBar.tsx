@@ -42,20 +42,25 @@ export default function ShareSiteBar() {
     setMessage(null);
   }
 
-  const btn = "inline-flex items-center justify-center gap-1.5 rounded-full px-4 py-2 text-xs font-bold shadow-sm transition-transform active:scale-95 hover:opacity-95";
+  // 각 서비스의 공식 로고 파일을 그대로 써요. (색·모양을 바꾸지 않아요)
+  const btn = "inline-flex h-11 w-11 items-center justify-center rounded-full transition-transform active:scale-90 hover:opacity-90";
+  const logo = "h-11 w-11 select-none";
 
   return (
     <div data-testid="share-site" className="mt-3 w-full max-w-sm">
       <p className="font-cute text-sm font-normal text-brand-600">친구에게도 도리를 알려 줄래? 🫧</p>
-      <div className="mt-2 flex flex-wrap items-center justify-center gap-2">
-        <button type="button" data-testid="share-instagram" onClick={() => void viaShareSheet("인스타그램")} className={`${btn} bg-gradient-to-r from-fuchsia-500 via-pink-500 to-amber-400 text-white`}>
-          인스타그램
+      <div className="mt-2 flex flex-wrap items-center justify-center gap-4">
+        <button type="button" data-testid="share-instagram" aria-label="인스타그램으로 알리기" title="인스타그램" onClick={() => void viaShareSheet("인스타그램")} className={btn}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/images/share/instagram.png" alt="" width={44} height={44} className={logo} draggable={false} />
         </button>
-        <button type="button" data-testid="share-facebook" onClick={facebook} className={`${btn} bg-[#1877f2] text-white`}>
-          페이스북
+        <button type="button" data-testid="share-facebook" aria-label="페이스북으로 알리기" title="페이스북" onClick={facebook} className={btn}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/images/share/facebook.png" alt="" width={44} height={44} className={logo} draggable={false} />
         </button>
-        <button type="button" data-testid="share-kakao" onClick={() => void viaShareSheet("카카오톡")} className={`${btn} bg-[#fee500] text-[#3c1e1e]`}>
-          카카오톡
+        <button type="button" data-testid="share-kakao" aria-label="카카오톡으로 알리기" title="카카오톡" onClick={() => void viaShareSheet("카카오톡")} className={btn}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/images/share/kakaotalk.png" alt="" width={44} height={44} className={logo} draggable={false} />
         </button>
       </div>
       {message && (
