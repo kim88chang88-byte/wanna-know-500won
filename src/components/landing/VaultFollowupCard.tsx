@@ -1,5 +1,6 @@
 "use client";
 
+import DoriIcon from "./DoriIcon";
 import { useEffect, useState } from "react";
 import { getBrowserStorage } from "@/lib/drawCounter";
 import { followupPrompt, markAnswered, pickVaultFollowup, readAnswered, type FollowupPick } from "@/lib/vaultFollowup";
@@ -35,7 +36,7 @@ export function VaultFollowupCard() {
 
   return (
     <section data-testid="vault-followup" aria-label="지난 풀이 안부" className="mb-4 rounded-2xl border border-amber-200 bg-amber-50/70 px-4 py-3.5 shadow-sm">
-      <p className="text-sm font-bold text-gray-900">🦦 {title}</p>
+      <p className="text-sm font-bold text-gray-900"><DoriIcon />{title}</p>
       <p className="mt-1 text-[13px] leading-relaxed text-slate-700">{check.question}</p>
       <div className="mt-2.5 flex flex-wrap gap-2">
         {check.options.map((o, i) => (

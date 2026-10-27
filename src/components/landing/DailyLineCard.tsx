@@ -1,5 +1,6 @@
 "use client";
 
+import DoriIcon from "./DoriIcon";
 import { useEffect, useState } from "react";
 import { dayKey, getBrowserStorage } from "@/lib/drawCounter";
 
@@ -64,7 +65,7 @@ export function DailyLineCard({ onOpened }: { onOpened?: () => void }) {
     <section data-testid="daily-line" aria-label="오늘의 도리 한마디" className="mb-4 rounded-2xl border border-brand-200 bg-white/90 px-4 py-3.5 shadow-sm">
       {daily ? (
         <div role="status">
-          <p className="text-xs font-bold text-brand-600">🦦 오늘의 도리 한마디</p>
+          <p className="text-xs font-bold text-brand-600"><DoriIcon />오늘의 도리 한마디</p>
           <p data-testid="daily-line-text" className="mt-2 rounded-2xl bg-gradient-to-r from-brand-50 via-white to-amber-50 px-4 py-3.5 font-cute text-[18px] font-normal leading-snug tracking-tight text-brand-700 sm:text-[21px]">{daily.line}</p>
           <p data-testid="daily-ganzhi" className="mt-2 text-[11px] text-gray-500">
             <span className="rounded-full bg-brand-50 px-2 py-0.5 font-bold text-brand-600">오늘 일진</span>
@@ -76,7 +77,7 @@ export function DailyLineCard({ onOpened }: { onOpened?: () => void }) {
         </div>
       ) : (
         <div className="flex items-center justify-between gap-3">
-          <p className="text-sm font-bold text-gray-900">🦦 오늘의 도리 한마디가 도착했어요</p>
+          <p className="text-sm font-bold text-gray-900"><DoriIcon />오늘의 도리 한마디가 도착했어요</p>
           <button
             type="button"
             data-testid="daily-line-open"
@@ -84,7 +85,7 @@ export function DailyLineCard({ onOpened }: { onOpened?: () => void }) {
             disabled={state === "loading"}
             className="shrink-0 rounded-full bg-brand-500 px-3.5 py-1.5 text-xs font-bold text-white disabled:opacity-60"
           >
-            {state === "loading" ? "여는 중…" : "열어 보기"}
+            {state === "loading" ? "여는 중…" : "지금 바로 열기"}
           </button>
         </div>
       )}

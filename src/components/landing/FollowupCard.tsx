@@ -1,5 +1,6 @@
 "use client";
 
+import DoriIcon from "./DoriIcon";
 import { useEffect, useState } from "react";
 import { dayKey, getBrowserStorage } from "@/lib/drawCounter";
 import { answerFollowup, dueFollowup, followupQuestion, followupReply, forgetFollowup, MOODS, readFollowup, type Followup, type Mood } from "@/lib/followup";
@@ -29,7 +30,7 @@ export function FollowupCard() {
 
   return (
     <section data-testid="followup-card" aria-label="도리의 안부 인사" className="mb-4 rounded-2xl border border-brand-200 bg-white/90 px-4 py-3.5 shadow-sm">
-      <p className="text-sm font-bold text-gray-900">🦦 {followupQuestion(f.tag)}</p>
+      <p className="text-sm font-bold text-gray-900"><DoriIcon />{followupQuestion(f.tag)}</p>
       {mood === null ? (
         <div className="mt-2.5 flex flex-wrap gap-2">
           {MOODS.map((m) => (
