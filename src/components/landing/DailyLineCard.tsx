@@ -83,9 +83,9 @@ export function DailyLineCard({ onOpened }: { onOpened?: () => void }) {
             data-testid="daily-line-open"
             onClick={() => void open()}
             disabled={state === "loading"}
-            className="shrink-0 rounded-full bg-brand-500 px-3.5 py-1.5 text-xs font-bold text-white disabled:opacity-60"
+            className="shrink-0 rounded-full bg-brand-500 px-4 py-1.5 text-center text-xs font-bold leading-tight text-white disabled:opacity-60"
           >
-            {state === "loading" ? "여는 중…" : "지금 바로 열기"}
+            {state === "loading" ? "여는 중…" : <>지금 바로<br />열어보기</>}
           </button>
         </div>
       )}

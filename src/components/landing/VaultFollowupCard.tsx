@@ -61,9 +61,6 @@ export function VaultFollowupCard() {
           </div>
         </div>
       )}
-      {chosen === null && (
-        <button type="button" onClick={() => { markAnswered(getBrowserStorage(), pick.id); setHidden(true); }} className="mt-2 text-[11px] text-gray-400 underline">이 풀이는 괜찮아요</button>
-      )}
     </section>
   );
 }
