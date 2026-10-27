@@ -218,13 +218,12 @@ export function ShowcaseSection() {
             />
           </div>
 
-          <div className="w-full max-w-3xl mx-auto flex flex-col justify-center bg-sky-50/70 p-4 sm:p-5 rounded-2xl border border-sky-200">
-            <div className="flex flex-wrap items-center justify-center gap-2.5">
-              <span className="text-xs font-semibold text-slate-600 flex items-center gap-1">
-                <span className="material-symbols-outlined text-base">favorite</span> 쉬운 말로 말랑말랑 풀어 드려요
-              </span>
-            </div>
-          </div>
+          {/* 버튼처럼 보이지 않게, 테두리·배경 없이 그림 아래 설명 글처럼만 보여줘요 */}
+          <p className="mx-auto max-w-3xl px-2 text-center text-[13px] leading-relaxed text-slate-500 break-keep">
+            <span aria-hidden="true" className="mr-1.5 text-brand-300">✦</span>
+            어려운 사주 용어 없이, 쉬운 말로 말랑말랑 풀어 드려요
+            <span aria-hidden="true" className="ml-1.5 text-brand-300">✦</span>
+          </p>
         </div>
       </div>
 
