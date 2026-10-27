@@ -88,7 +88,7 @@ export function DailyLineCard({ onOpened }: { onOpened?: () => void }) {
           </button>
         </div>
       )}
-      {state === "error" && <p role="alert" className="mt-2 text-xs text-amber-800">지금은 열지 못했어요. 잠시 뒤에 다시 눌러 줘요.</p>}
+      {state === "error" && <p role="alert" className="mt-2 text-xs text-amber-800">지금은 열지 못했어요. 잠시 뒤에 다시 눌러 주세요.</p>}
     </section>
   );
 }

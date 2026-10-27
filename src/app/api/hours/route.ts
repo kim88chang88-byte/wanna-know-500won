@@ -11,7 +11,7 @@ import type { BirthInput } from "@/lib/saju/types";
 export const maxDuration = 60;
 
 export async function POST(request: Request) {
-  const denied = guardOrigin(request) ?? (await enforceLimits(request, { name: "hours", windowMs: 60000, ip: 4, user: 8 }, "요청이 너무 빨라요. 잠시 뒤에 다시 해 줘요."));
+  const denied = guardOrigin(request) ?? (await enforceLimits(request, { name: "hours", windowMs: 60000, ip: 4, user: 8 }, "요청이 너무 빨라요. 잠시 뒤에 다시 해 주세요."));
   if (denied) return denied;
   let body: (BirthInput & { start?: unknown; end?: unknown }) | null;
   try {
@@ -47,7 +47,7 @@ export async function POST(request: Request) {
     const result = await compareHours({ base, start: range.start, end: range.end });
     return NextResponse.json({ result });
   } catch (err) {
-    if (err instanceof ReadingUnavailableError) return NextResponse.json({ error: "오늘은 도리가 많이 답해서 잠깐 쉬고 있어요. 내일 다시 물어봐 줘요 🫧" }, { status: 503 });
+    if (err instanceof ReadingUnavailableError) return NextResponse.json({ error: "오늘은 도리가 많이 답해서 잠깐 쉬고 있어요. 내일 다시 물어봐 주세요 🫧" }, { status: 503 });
     console.error("compareHours failed:", err instanceof Error ? err.message : "unknown");
     return NextResponse.json({ error: "도리가 잠깐 물놀이하러 갔어요. 다시 눌러 볼래요?" }, { status: 502 });
   }

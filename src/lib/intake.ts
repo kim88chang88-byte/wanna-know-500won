@@ -103,7 +103,7 @@ export function validateStep(step: StepId, f: IntakeForm): string | null {
     case "date": {
       if (f.calendar === "solar") {
         const p = parseSolar(f.solarDate);
-        if (!p) return "생년월일을 골라줘요.";
+        if (!p) return "생년월일을 골라 주세요.";
         if (p.y < MIN_YEAR || p.y > MAX_YEAR) return `${MIN_YEAR}년부터 ${MAX_YEAR}년까지만 볼 수 있어요.`;
         if (!isRealSolarDate(p.y, p.m, p.d)) return "없는 날짜예요. 다시 확인해 주세요.";
         return null;
@@ -111,7 +111,7 @@ export function validateStep(step: StepId, f: IntakeForm): string | null {
       const y = toInt(f.lunarYear);
       const m = toInt(f.lunarMonth);
       const d = toInt(f.lunarDay);
-      if (y === null || m === null || d === null) return "음력 연·월·일을 모두 숫자로 적어줘요.";
+      if (y === null || m === null || d === null) return "음력 연·월·일을 모두 숫자로 적어 주세요.";
       if (y < MIN_YEAR || y > MAX_YEAR) return `${MIN_YEAR}년부터 ${MAX_YEAR}년까지만 볼 수 있어요.`;
       if (m < 1 || m > 12) return "음력 월은 1~12 사이예요.";
       if (d < 1 || d > 30) return "음력 일은 1~30 사이예요.";
@@ -119,9 +119,9 @@ export function validateStep(step: StepId, f: IntakeForm): string | null {
     }
     case "time":
       if (!f.timeKnown) return null;
-      return parseTime(f.time) ? null : "태어난 시간을 골라줘요. 모르면 '모르겠어요'를 눌러도 돼요.";
+      return parseTime(f.time) ? null : "태어난 시간을 골라 주세요. 모르면 '모르겠어요'를 눌러도 돼요.";
     case "gender":
-      return f.gender ? null : "성별을 골라줘요.";
+      return f.gender ? null : "성별을 골라 주세요.";
     case "concern":
       if (f.concernTags.length > MAX_CONCERN_TAGS) return `고민 버튼은 ${MAX_CONCERN_TAGS}개까지 고를 수 있어요.`;
       if (f.concernText.length > MAX_CONCERN_TEXT) return `고민은 ${MAX_CONCERN_TEXT}자까지 적을 수 있어요.`;

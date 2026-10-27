@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import LoginButtons from "@/components/landing/LoginButtons";
 import ManseReport from "@/components/premium/ManseReport";
 import { ResultHero } from "@/components/landing/PhotoCard";
 import { ReadingCard } from "@/components/landing/ReadingCard";
@@ -39,6 +40,7 @@ export default function VaultApp() {
   const [detail, setDetail] = useState<Detail | null>(null);
   const [opening, setOpening] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
   const load = useCallback(async () => {
     try {
@@ -63,7 +65,7 @@ export default function VaultApp() {
       const res = await fetch(`/api/vault/${id}`, { cache: "no-store" });
       const data = (await res.json().catch(() => null)) as { item?: Detail; error?: string } | null;
       if (!res.ok || !data?.item) setNotice(data?.error ?? "열지 못했어요.");
-      else setDetail(data.item);
+      else { setConfirmDelete(false); setDetail(data.item); }
     } catch {
       setNotice("열지 못했어요. 인터넷 연결을 확인해 주세요.");
     }
@@ -71,10 +73,10 @@ export default function VaultApp() {
   }
 
   async function remove(id: string) {
-    if (!window.confirm("이 풀이를 보관함에서 지울까요? 지우면 되돌릴 수 없어요.")) return;
     try {
       const res = await fetch(`/api/vault/${id}`, { method: "DELETE" });
       if (!res.ok) throw new Error();
+      setConfirmDelete(false);
       setDetail(null);
       await load();
     } catch {
@@ -124,9 +126,20 @@ export default function VaultApp() {
         )}
         </div>
         {notice && <p role="alert" className="mt-3 text-xs text-amber-800">{notice}</p>}
-        <button type="button" onClick={() => void remove(detail.id)} className="mt-6 text-[11px] text-gray-400 underline underline-offset-2 hover:text-gray-600">
-          이 풀이 보관함에서 지우기
-        </button>
+        {!confirmDelete ? (
+          <button type="button" onClick={() => setConfirmDelete(true)} className="mt-6 text-[11px] text-gray-400 underline underline-offset-2 hover:text-gray-600">
+            이 풀이 보관함에서 지우기
+          </button>
+        ) : (
+          <div role="group" aria-label="풀이 삭제 확인" className="mt-6 rounded-2xl border border-sky-200 bg-sky-50 p-3 text-center">
+            <p className="text-xs font-bold text-gray-800">이 풀이를 보관함에서 지울까요?</p>
+            <p className="mt-1 text-[11px] leading-relaxed text-gray-600">지우면 되돌릴 수 없어요.</p>
+            <div className="mt-2.5 flex justify-center gap-2 text-xs font-bold">
+              <button type="button" onClick={() => setConfirmDelete(false)} className="rounded-full border border-gray-300 bg-white px-4 py-1.5 text-gray-700">취소</button>
+              <button type="button" onClick={() => void remove(detail.id)} className="rounded-full bg-rose-500 px-4 py-1.5 text-white">지우기</button>
+            </div>
+          </div>
+        )}
       </div>
     );
   }
@@ -137,11 +150,7 @@ export default function VaultApp() {
       <div data-testid="vault-login" className="rounded-2xl border border-brand-100 bg-white p-5 text-center">
         <p className="text-sm font-bold text-gray-900">로그인하면 보관함을 볼 수 있어요</p>
         <p className="mt-1 text-xs text-gray-500">로그인한 상태로 본 풀이만 보관함에 저장돼요.</p>
-        <div className="mt-3 flex flex-wrap justify-center gap-2 text-xs font-bold">
-          <a href="/api/auth/kakao" className="px-4 py-2 rounded-full bg-yellow-300 text-gray-900">카카오</a>
-          <a href="/api/auth/naver" className="px-4 py-2 rounded-full bg-green-500 text-white">네이버</a>
-          <a href="/api/auth/google" className="px-4 py-2 rounded-full bg-white border border-gray-300 text-gray-700">구글</a>
-        </div>
+        <LoginButtons className="mx-auto mt-3 flex max-w-xs flex-col gap-2.5" />
       </div>
     );
   if (view.kind === "error") return <p role="alert" className="rounded-2xl bg-amber-50 border border-amber-200 p-4 text-sm text-amber-800">{view.message}</p>;

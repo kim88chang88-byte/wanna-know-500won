@@ -12,7 +12,7 @@ export const runtime = "nodejs";
 
 /** 오늘의 도리 한마디. 저장된 생년월일시가 있는 로그인 회원만 받아요. AI 를 부르지 않아서 비용이 들지 않아요. */
 export async function GET(request: Request) {
-  const denied = await enforceLimits(request, { name: "daily", windowMs: 60000, ip: 30, user: 30 }, "잠시 뒤에 다시 열어 줘요.");
+  const denied = await enforceLimits(request, { name: "daily", windowMs: 60000, ip: 30, user: 30 }, "잠시 뒤에 다시 열어 주세요.");
   if (denied) return denied;
 
   const session = verifySessionToken(readCookie(request.headers.get("cookie"), SESSION_COOKIE), process.env.AUTH_SECRET);

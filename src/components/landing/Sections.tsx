@@ -156,7 +156,7 @@ export function HeroSection({ counts, streakText = null }: { counts: DrawCounts;
           오늘
           <b className="font-bold text-brand-500" data-testid="count-today">
             {counts.today}번 뽑았어요{" "}
-            {counts.today === 0 && <span className="font-normal text-sky-600">(무료 1회 잔여 ✦)</span>}
+            {counts.today === 0 && <span className="font-normal text-sky-600">(무료 1회 남음 ✦)</span>}
           </b>
         </span>
         <span aria-hidden="true" className="h-3 w-px bg-brand-200" />

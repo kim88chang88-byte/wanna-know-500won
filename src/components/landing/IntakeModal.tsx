@@ -78,7 +78,7 @@ interface Props {
 }
 
 /** 로그인 안내 문구 (질문지 첫 화면·결과 화면에서 써요) */
-export const LOGIN_NUDGE = "로그인하시면 도리가 생년월일시를 기억해서 다시 입력할 필요가 없어요!";
+export const LOGIN_NUDGE = "로그인하면 도리가 생년월일시를 기억해서 다시 입력할 필요가 없어요!";
 
 const BUBBLE: Record<AnyStepId, string> = {
   date: "먼저, 언제 태어났어? 🫧",
@@ -830,7 +830,7 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
                 </div>
               </div>
               <p className="text-[11px] text-gray-400 leading-relaxed">
-                병원·약·투자 종목 같은 건 풀이에 쓰지 않아요. 개인정보(이름·연락처 등)는 적지 말아줘요.
+                병원·약·투자 종목 같은 건 풀이에 쓰지 않아요. 개인정보(이름·연락처 등)는 적지 말아 주세요.
               </p>
             </div>
           )}
@@ -859,7 +859,7 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
               {loggedIn ? (
                 savedProfile && sameBirth(savedProfile, buildBirthInput({ ...form, consent: true })) ? (
                   <p data-testid="profile-kept" className="text-[11px] text-gray-500 leading-relaxed">
-                    기억해 둔 생년월일시로 풀어요. 지우고 싶으면 로그인 창의 &lsquo;기억한 정보 지우기&rsquo;를 눌러줘요.
+                    기억해 둔 생년월일시로 풀어요. 지우고 싶으면 로그인 창의 &lsquo;기억한 정보 지우기&rsquo;를 눌러 주세요.
                   </p>
                 ) : (
                   <label className="flex items-start gap-2 text-xs text-gray-700 leading-relaxed">

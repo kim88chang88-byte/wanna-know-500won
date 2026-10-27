@@ -1,5 +1,6 @@
 "use client";
 
+import LoginButtons from "./LoginButtons";
 import { profileSummary, type SavedProfile } from "@/lib/profile";
 import type { SavedPerson } from "@/lib/people";
 import { useEffect, useRef, useState, type ReactNode } from "react";
@@ -164,137 +165,12 @@ export function LoginModal({ onClose, user = null, result = null, onLogout, onWi
         <p className="text-xs text-gray-500 mt-1 whitespace-pre-line">
           {user
             ? `${user.nickname ? `${user.nickname}님, ` : ""}어서 와요! 로그인되어 있어요.`
-            : "간편 가입하고 매일 첫 1회 무료 뽑기를 챙기세요!\n로그인하시면 도리가 생년월일시를 기억해서 다시 입력할 필요가 없어요!"}
+            : "간편 가입하고 매일 첫 1회 무료 뽑기를 챙기세요!\n로그인하면 도리가 생년월일시를 기억해서 다시 입력할 필요가 없어요!"}
         </p>
       </div>
 
       {user ? (
-        <div className="flex flex-col gap-2.5 mb-4">
-          {profile && onDeleteProfile && (
-            <div data-testid="saved-profile-box" className="rounded-2xl bg-brand-50 border border-brand-100 p-3 text-center">
-              <p className="text-[11px] font-bold text-brand-700">도리가 기억하고 있는 정보</p>
-              <p className="text-xs text-gray-700 mt-1">{profileSummary(profile)}</p>
-              {profileError && (
-                <p role="alert" className="text-[11px] font-bold text-brand-600 mt-1">
-                  지우지 못했어요. 잠시 뒤에 다시 시도해 주세요.
-                </p>
-              )}
-              <button
-                type="button"
-                data-testid="delete-profile"
-                disabled={profileBusy}
-                onClick={async () => {
-                  setProfileBusy(true);
-                  setProfileError(false);
-                  const done = await onDeleteProfile();
-                  setProfileBusy(false);
-                  if (!done) setProfileError(true);
-                }}
-                className="mt-1.5 text-[11px] text-gray-500 underline underline-offset-2 hover:text-gray-700 disabled:opacity-50"
-              >
-                {profileBusy ? "지우는 중…" : "기억한 정보 지우기"}
-              </button>
-            </div>
-          )}
-          <SavedPeopleBox />
-          <a
-            href="/vault"
-            data-testid="open-vault"
-            className="w-full py-2.5 px-4 rounded-full bg-brand-50 border border-brand-100 text-brand-700 font-bold text-xs text-center hover:bg-brand-100"
-          >
-            📚 내 보관함 (봤던 풀이 다시 보기)
-          </a>
-          <button
-            onClick={async () => {
-              await onLogout?.();
-              onClose();
-            }}
-            type="button"
-            className="w-full py-2.5 px-4 rounded-full bg-gray-100 text-gray-700 font-bold text-xs hover:bg-gray-200"
-          >
-            로그아웃
-          </button>
-          {onWithdraw && !confirmWithdraw && (
-            <button
-              onClick={() => setConfirmWithdraw(true)}
-              type="button"
-              className="text-[11px] text-gray-400 underline underline-offset-2 hover:text-gray-600"
-            >
-              회원 탈퇴
-            </button>
-          )}
-          {onWithdraw && confirmWithdraw && (
-            <div role="group" aria-label="회원 탈퇴 확인" className="rounded-2xl bg-sky-50 border border-sky-200 p-3 text-center">
-              <p className="text-xs font-bold text-gray-800">정말 탈퇴할까요?</p>
-              <p className="text-[11px] text-gray-600 mt-1">
-                저장된 회원 정보(회원번호·닉네임), 뽑기 기록, 기억해 둔 생년월일시, 동의해서 남긴 고민 통계, 로그인해서 남긴 후기가 모두 삭제되고 되돌릴 수 없어요.
-              </p>
-              {withdrawError && (
-                <p role="alert" className="text-[11px] font-bold text-brand-600 mt-1">
-                  탈퇴 처리에 실패했어요. 잠시 뒤에 다시 시도해 주세요.
-                </p>
-              )}
-              <div className="flex gap-2 mt-2">
-                <button
-                  type="button"
-                  disabled={withdrawing}
-                  onClick={() => {
-                    setConfirmWithdraw(false);
-                    setWithdrawError(false);
-                  }}
-                  className="flex-1 py-2 rounded-full bg-white border border-gray-200 text-xs font-bold text-gray-700"
-                >
-                  취소
-                </button>
-                <button
-                  type="button"
-                  disabled={withdrawing}
-                  onClick={async () => {
-                    setWithdrawing(true);
-                    setWithdrawError(false);
-                    const ok = await onWithdraw();
-                    setWithdrawing(false);
-                    if (ok) onClose();
-                    else setWithdrawError(true);
-                  }}
-                  className="flex-1 py-2 rounded-full bg-brand-600 text-white text-xs font-bold disabled:opacity-60"
-                >
-                  {withdrawing ? "처리 중…" : "탈퇴하기"}
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
-      ) : (
-        <div className="flex flex-col gap-2.5 mb-4">
-          {/* 카카오 로그인은 서버 주소로 이동해서 진행해요 (카카오 로그인 화면 → 다시 이 서비스로) */}
-          <a
-            href="/api/auth/kakao"
-            className="w-full py-2.5 px-4 rounded-full bg-[#FEE500] text-[#191919] font-bold text-xs flex items-center justify-center gap-2 shadow-sm"
-          >
-            <span>카카오 3초 간편 로그인</span>
-          </a>
-          <a
-            href="/api/auth/google"
-            data-testid="google-login"
-            className="w-full py-2.5 px-4 rounded-full bg-white text-[#3c4043] border border-gray-300 font-bold text-xs flex items-center justify-center gap-2 shadow-sm"
-          >
-            <svg width="14" height="14" viewBox="0 0 48 48" aria-hidden="true">
-              <path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.6l6.8-6.8C35.8 2.4 30.3 0 24 0 14.6 0 6.5 5.4 2.6 13.2l7.9 6.1C12.4 13.6 17.7 9.5 24 9.5z"/>
-              <path fill="#4285F4" d="M46.5 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.7c-.6 3-2.3 5.5-4.8 7.2l7.5 5.8c4.4-4.1 7.1-10.1 7.1-17.5z"/>
-              <path fill="#FBBC05" d="M10.5 28.7a14.5 14.5 0 0 1 0-9.4l-7.9-6.1a24 24 0 0 0 0 21.6l7.9-6.1z"/>
-              <path fill="#34A853" d="M24 48c6.5 0 11.9-2.1 15.9-5.8l-7.5-5.8c-2.1 1.4-4.8 2.3-8.4 2.3-6.3 0-11.6-4.1-13.5-9.8l-7.9 6.1C6.5 42.6 14.6 48 24 48z"/>
-            </svg>
-            <span>Google로 로그인</span>
-          </a>
-          <a
-            href="/api/auth/naver"
-            data-testid="naver-login"
-            className="w-full py-2.5 px-4 rounded-full bg-[#03C75A] text-white font-bold text-xs flex items-center justify-center gap-2 shadow-sm"
-          >
-            <span>네이버 로그인</span>
-          </a>
-        </div>
+        <LoginButtons className="flex flex-col gap-2.5 mb-4" />
       )}
 
       {result && (
@@ -309,7 +185,7 @@ export function LoginModal({ onClose, user = null, result = null, onLogout, onWi
         </p>
       )}
       <div className="text-center text-[10px] text-gray-400 mt-3">
-        * 현재 Beta 테스트 버전으로 별도 결제 없이 무료 체험이 가능합니다.
+        * 지금은 베타 테스트 중이라 별도 결제 없이 무료로 체험할 수 있어요.
       </div>
     </ModalShell>
   );

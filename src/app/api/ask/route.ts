@@ -15,7 +15,7 @@ import type { BirthInput } from "@/lib/saju/types";
 export const maxDuration = 60;
 
 export async function POST(request: Request) {
-  const denied = guardOrigin(request) ?? (await enforceLimits(request, { name: "ask", windowMs: 60000, ip: 6, user: 12 }, "질문이 너무 빨라요. 잠시 뒤에 다시 물어봐 줘요."));
+  const denied = guardOrigin(request) ?? (await enforceLimits(request, { name: "ask", windowMs: 60000, ip: 6, user: 12 }, "질문이 너무 빨라요. 잠시 뒤에 다시 물어봐 주세요."));
   if (denied) return denied;
   let body: (BirthInput & { q?: unknown }) | null;
   try {
@@ -46,7 +46,7 @@ export async function POST(request: Request) {
     const answer = await askDori({ chart, gender: input.gender, question, core });
     return NextResponse.json({ id: question.id, answer });
   } catch (err) {
-    if (err instanceof ReadingUnavailableError) return NextResponse.json({ error: "오늘은 도리가 많이 답해서 잠깐 쉬고 있어요. 내일 다시 물어봐 줘요 🫧" }, { status: 503 });
+    if (err instanceof ReadingUnavailableError) return NextResponse.json({ error: "오늘은 도리가 많이 답해서 잠깐 쉬고 있어요. 내일 다시 물어봐 주세요 🫧" }, { status: 503 });
     console.error("askDori failed:", err instanceof Error ? err.message : "unknown");
     return NextResponse.json({ error: "도리가 잠깐 물놀이하러 갔어요. 다시 눌러 볼래요?" }, { status: 502 });
   }

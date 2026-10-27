@@ -18,7 +18,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "잘못된 요청입니다." }, { status: 400 });
   }
   const review = parseReview(body);
-  if (!review) return NextResponse.json({ error: "별점을 골라줘요." }, { status: 400 });
+  if (!review) return NextResponse.json({ error: "별점을 골라 주세요." }, { status: 400 });
 
   const dbConfig = loadDbConfig(process.env);
   if (!dbConfig) return NextResponse.json({ error: "지금은 후기를 받을 수 없어요." }, { status: 503 });

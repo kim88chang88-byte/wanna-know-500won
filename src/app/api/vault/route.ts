@@ -54,7 +54,7 @@ export async function POST(request: Request) {
   const db = createDb(config);
   try {
     if ((await db.countVault(session.sub)) >= MAX_VAULT_ITEMS) {
-      return NextResponse.json({ error: `보관함이 가득 찼어요. (최대 ${MAX_VAULT_ITEMS}개) 안 보는 것을 지우고 다시 저장해 줘요.`, code: "full" }, { status: 409, headers: NO_STORE });
+      return NextResponse.json({ error: `보관함이 가득 찼어요. (최대 ${MAX_VAULT_ITEMS}개) 안 보는 것을 지우고 다시 저장해 주세요.`, code: "full" }, { status: 409, headers: NO_STORE });
     }
     await db.ensureUser(session.sub, session.nick);
     const out = await db.insertVault(session.sub, {

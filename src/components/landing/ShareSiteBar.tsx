@@ -48,7 +48,7 @@ export default function ShareSiteBar() {
 
   return (
     <div data-testid="share-site" className="mt-3 w-full max-w-sm">
-      <p className="font-cute text-sm font-normal text-brand-600">친구에게도 도리를 알려 줄래? 🫧</p>
+      <p className="font-cute text-sm font-normal text-brand-600">친구에게도 도리를 알려 주세요 🫧</p>
       <div className="mt-2 flex flex-wrap items-center justify-center gap-4">
         <button type="button" data-testid="share-instagram" aria-label="인스타그램으로 알리기" title="인스타그램" onClick={() => void viaShareSheet("인스타그램")} className={btn}>
           {/* eslint-disable-next-line @next/next/no-img-element */}

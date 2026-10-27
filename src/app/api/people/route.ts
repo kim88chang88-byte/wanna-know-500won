@@ -50,7 +50,7 @@ export async function POST(request: Request) {
     const dup = existing.find((p) => samePerson(p, parsed.birth));
     if (dup) return NextResponse.json({ person: dup, duplicate: true }, { headers: NO_STORE });
     if (existing.length >= MAX_PEOPLE) {
-      return NextResponse.json({ error: `기억해 둔 사람이 가득 찼어요. (최대 ${MAX_PEOPLE}명) 안 쓰는 사람을 지우고 다시 저장해 줘요.`, code: "full" }, { status: 409, headers: NO_STORE });
+      return NextResponse.json({ error: `기억해 둔 사람이 가득 찼어요. (최대 ${MAX_PEOPLE}명) 안 쓰는 사람을 지우고 다시 저장해 주세요.`, code: "full" }, { status: 409, headers: NO_STORE });
     }
     await db.ensureUser(session.sub, session.nick);
     const id = await db.insertPerson(session.sub, parsed.label, parsed.birth);

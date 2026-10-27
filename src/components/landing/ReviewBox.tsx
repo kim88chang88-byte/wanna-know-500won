@@ -80,7 +80,7 @@ export default function ReviewBox({ topic, premium }: { topic: string; premium: 
         ))}
       </div>
       <p data-testid="star-label" className="mt-1 h-4 text-center text-[11px] font-bold text-brand-600">
-        {rating > 0 ? LABELS[rating] : "별을 눌러 알려줘요"}
+        {rating > 0 ? LABELS[rating] : "별을 눌러 알려 주세요"}
       </p>
 
       {rating > 0 && (
@@ -122,7 +122,7 @@ export default function ReviewBox({ topic, premium }: { topic: string; premium: 
               className="w-full rounded-xl border border-brand-200 bg-white px-3 py-2 text-sm text-gray-800 resize-none focus:outline-none focus:ring-2 focus:ring-brand-300"
             />
             <p className="mt-1 text-[10px] text-gray-400">
-              {text.length}/{MAX_REVIEW_TEXT} · 이름·연락처 같은 개인정보는 적지 말아줘요. 후기는 서비스 개선에만 써요.
+              {text.length}/{MAX_REVIEW_TEXT} · 이름·연락처 같은 개인정보는 적지 말아 주세요. 후기는 서비스 개선에만 써요.
             </p>
           </div>
           {error && (
