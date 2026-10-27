@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { readingFirst } from "@/lib/hanjaReading";
 
 interface Teaser {
   line: string;
@@ -44,7 +45,7 @@ export default function BirthdayTeaser({ onPick }: { onPick?: () => void }) {
     <section data-testid="birthday-teaser" className="mb-6 rounded-3xl border border-brand-200/70 bg-white/85 p-4 sm:p-5 shadow-sm">
       {result ? (
         <div className="text-center">
-          <p className="text-xs font-bold text-brand-500">오늘의 도리 한마디 · {result.ganzhi}</p>
+          <p className="text-xs font-bold text-brand-500">오늘의 도리 한마디 · {readingFirst(result.ganzhi)}</p>
           <p className="mt-2 text-sm sm:text-base text-slate-700 leading-relaxed">{result.line}</p>
           <p className="mt-2 text-xs text-sky-700 font-medium">🫧 {result.tip}</p>
           <button

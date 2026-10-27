@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { hasEntitlement, ENTITLEMENT_COOKIE } from "@/lib/premium/entitlement";
 import { readCookie, SESSION_COOKIE, verifySessionToken } from "@/lib/auth/session";
 import { isPremiumLocked } from "@/lib/premium/config";
+import { readingFirstDeep } from "@/lib/hanjaReading";
 import { buildPremiumReport, validatePremiumInput } from "@/lib/premium/report";
 import { enforceLimits, guardOrigin } from "@/lib/guard";
 import { addBookNotes } from "@/lib/ai/bookNotes";
@@ -14,6 +15,9 @@ import { PREVIEW_OPEN_PAGES } from "@/lib/premium/config";
 import { createDb, loadDbConfig } from "@/lib/db/supabase";
 
 export const maxDuration = 60;
+
+/** 기둥 글자처럼 한자 그대로 그려야 하는 칸은 바꾸지 않아요. */
+const KEEP_HANJA: ReadonlySet<string> = new Set(["pillars", "dayPillar", "full"]);
 
 export async function POST(request: Request) {
   const denied = guardOrigin(request) ?? (await enforceLimits(request, { name: "premium", windowMs: 60000, ip: 20, user: 40 }, "요청이 너무 빨라요. 잠시 뒤에 다시 시도해 주세요."));
@@ -108,10 +112,10 @@ export async function POST(request: Request) {
       report.book.forEach((p, i) => {
         if (CHAPTER_BATCH_2.includes(p.key) && JSON.stringify(p.sections) !== JSON.stringify(base[i]?.sections)) replaced[p.no] = p.sections;
       });
-      return NextResponse.json({ replaced, chapterNote, chapterUsage: usage, aiNotice: aiDown });
+      return NextResponse.json(readingFirstDeep({ replaced, chapterNote, chapterUsage: usage, aiNotice: aiDown }, KEEP_HANJA));
     }
     const pendingChapters = !preview && chapterNote !== "skip" && !parsed.partner && parsed.level === "full" && !lock ? CHAPTER_BATCH_2 : [];
-    return NextResponse.json({ report, chapterNote, chapterUsage: usage, pendingChapters, aiNotice: aiDown, aiGated: aiGated && parsed.level === "full" && !parsed.partner });
+    return NextResponse.json(readingFirstDeep({ report, chapterNote, chapterUsage: usage, pendingChapters, aiNotice: aiDown, aiGated: aiGated && parsed.level === "full" && !parsed.partner }, KEEP_HANJA));
   } catch (err) {
     // 없는 날짜(예: 윤달이 없는 해의 윤달)처럼 계산할 수 없는 입력이에요.
     console.error("premium report failed:", err instanceof Error ? err.message : "unknown");

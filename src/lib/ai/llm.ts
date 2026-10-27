@@ -6,6 +6,8 @@
  * 호출하는 쪽은 "시스템 글 + 사용자 글 + JSON 스키마"만 넘기면 되고, 결과는 같은 모양으로 돌려받아요.
  */
 
+import { readingFirst } from "@/lib/hanjaReading";
+
 export type Provider = "anthropic" | "gemini";
 export type Tier = "free" | "paid";
 
@@ -145,6 +147,8 @@ async function callGemini(r: LlmRequest): Promise<LlmResult> {
 }
 
 /** 제공자에 맞는 호출을 해서 같은 모양의 결과로 돌려줘요. 네트워크 오류·시간 초과는 던지니 호출하는 쪽 try/catch 로 받으세요. */
-export function callLlm(r: LlmRequest, env: Env = process.env): Promise<LlmResult> {
-  return activeProvider(env) === "gemini" ? callGemini(r) : callAnthropic(r);
+export async function callLlm(r: LlmRequest, env: Env = process.env): Promise<LlmResult> {
+  const res = await (activeProvider(env) === "gemini" ? callGemini(r) : callAnthropic(r));
+  // 풀이 속 한자는 모두 "음(한자)" 모양으로 맞춰서 돌려줘요. (예: 병오(丙午))
+  return res.kind === "ok" && res.text ? { ...res, text: readingFirst(res.text) } : res;
 }
