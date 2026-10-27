@@ -180,7 +180,7 @@ export function HeroSection({ counts, streakText = null, stamps = [] }: { counts
         <div data-testid="week-stamps" className="mt-1.5 flex items-center gap-1" aria-label="최근 7일 방문 도장">
           {stamps.map((d, i) => (
             <span key={d.day} title={d.day} className={d.today && d.done ? "drop-shadow-[0_0_4px_rgba(232,53,46,0.35)]" : ""}>
-              <DoriStamp done={d.done} today={d.today} tilt={[-6, 4, -3, 7, -5, 3, -4][i % 7]} />
+              <DoriStamp done={d.done} today={d.today} label={"日月火水木金土"[new Date(`${d.day}T00:00:00Z`).getUTCDay()]} tilt={[-6, 4, -3, 7, -5, 3, -4][i % 7]} />
             </span>
           ))}
           <span className="text-[10px] text-gray-400 ml-1">이번 주 도장</span>

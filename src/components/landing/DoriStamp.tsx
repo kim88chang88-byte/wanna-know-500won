@@ -1,13 +1,17 @@
 import { useId } from "react";
 
 /** 도리 얼굴이 찍힌 빨간 도장. done 이 아니면 흐린 빈 칸이에요. */
-export default function DoriStamp({ done, today, tilt = 0 }: { done: boolean; today?: boolean; tilt?: number }) {
+export default function DoriStamp({ done, today, tilt = 0, label }: { done: boolean; today?: boolean; tilt?: number; label?: string }) {
   const id = useId().replace(/:/g, "");
   if (!done) {
     return (
       <svg viewBox="0 0 100 100" className="h-8 w-8 shrink-0" aria-hidden="true">
         <circle cx="50" cy="50" r="42" fill="none" stroke="#d9cdf3" strokeWidth="4" strokeDasharray="6 7" strokeLinecap="round" />
-        {today && <circle cx="50" cy="50" r="6" fill="#d9cdf3" />}
+        {label && (
+          <text x="50" y="50" textAnchor="middle" dominantBaseline="central" fontSize="40" fontWeight="700" fill={today ? "#8057e0" : "#b7a3e8"} style={{ fontFamily: "serif" }}>
+            {label}
+          </text>
+        )}
       </svg>
     );
   }
