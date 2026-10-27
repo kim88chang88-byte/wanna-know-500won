@@ -27,7 +27,16 @@ export function VaultFollowupCard() {
     };
   }, []);
 
-  if (!pick || hidden) return null;
+  if (!pick) return null;
+  // 닫은 뒤에는 작은 글자만 남겨서, 누르면 같은 카드가 다시 열려요. (답을 고른 상태는 그대로 보여요)
+  if (hidden)
+    return (
+      <div className="mb-4 text-center">
+        <button type="button" data-testid="vault-followup-reopen" onClick={() => setHidden(false)} className="text-[11px] text-gray-400 underline underline-offset-2 hover:text-gray-600">
+          도리의 안부 다시 보기
+        </button>
+      </div>
+    );
   const { title, check } = followupPrompt(pick);
   const choose = (i: number) => {
     setChosen(i);
