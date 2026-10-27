@@ -391,21 +391,29 @@ export function SampleSection() {
         </span>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-        {SAMPLE_CAPSULES.map((s) => (
-          <div
-            key={s.key}
-            className={`card-water-glow rounded-3xl p-6 bg-white border shadow-sm hover:shadow-md transition-all ${s.border}`}
-          >
-            <div className="flex items-center justify-between mb-4">
-              <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold ${s.tagClass}`}>{s.tag}</span>
-              <span className="text-xs text-slate-400">예시</span>
+      {/* 예시 카드가 왼쪽에서 오른쪽으로 천천히 흘러가요. 같은 줄을 두 번 이어 붙여 끊김 없이 반복하고, 마우스를 올리면 멈춰요.
+          움직임 줄이기 설정이면 움직이지 않고 옆으로 밀어서 볼 수 있어요. */}
+      <div data-testid="sample-marquee" className="sample-marquee overflow-hidden py-2">
+        <div className="sample-marquee-track flex w-max">
+          {[0, 1].map((dup) => (
+            <div key={dup} className="flex shrink-0" aria-hidden={dup === 1 ? true : undefined}>
+              {SAMPLE_CAPSULES.map((s) => (
+                <div
+                  key={s.key}
+                  className={`card-water-glow mr-5 w-[280px] shrink-0 rounded-3xl border bg-white p-6 shadow-sm sm:w-[340px] ${s.border}`}
+                >
+                  <div className="flex items-center justify-between mb-4">
+                    <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold ${s.tagClass}`}>{s.tag}</span>
+                    <span className="text-xs text-slate-400">예시</span>
+                  </div>
+                  <p className="text-sm text-slate-800 leading-relaxed">
+                    {s.parts.map((p, i) => (p.strong ? <strong key={i}>{p.text}</strong> : <span key={i}>{p.text}</span>))}
+                  </p>
+                </div>
+              ))}
             </div>
-            <p className="text-sm text-slate-800 leading-relaxed">
-              {s.parts.map((p, i) => (p.strong ? <strong key={i}>{p.text}</strong> : <span key={i}>{p.text}</span>))}
-            </p>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
       <p className="mt-3 text-center text-[11px] text-slate-400">
         * 예시 문구예요. 실제 이용자의 기록이 아니며, 실제 풀이는 입력한 정보에 따라 달라져요.

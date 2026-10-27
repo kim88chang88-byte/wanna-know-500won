@@ -334,3 +334,13 @@ body {
   .ls-bob, .ls-pop, .ls-tilt, .ls-untilt, .ls-flow, .ls-write, .ls-jump { animation: none; }
   .ls-pop { opacity: 1; }
 }
+
+/* "이런 운세 풀이가 나와요": 카드가 왼쪽에서 오른쪽으로 일정한 속도로 흘러가며 반복돼요 */
+@keyframes sampleFlow { from { transform: translateX(-50%); } to { transform: translateX(0); } }
+.sample-marquee { -webkit-mask-image: linear-gradient(90deg, transparent, #000 4%, #000 96%, transparent); mask-image: linear-gradient(90deg, transparent, #000 4%, #000 96%, transparent); }
+.sample-marquee-track { animation: sampleFlow 45s linear infinite; will-change: transform; }
+.sample-marquee:hover .sample-marquee-track, .sample-marquee:focus-within .sample-marquee-track { animation-play-state: paused; }
+@media (prefers-reduced-motion: reduce) {
+  .sample-marquee { overflow-x: auto !important; }
+  .sample-marquee-track { animation: none !important; }
+}
