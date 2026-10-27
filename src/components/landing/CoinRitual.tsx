@@ -5,7 +5,8 @@ export default function CoinRitual() {
   return (
     <div className="coin-ritual" aria-hidden="true" data-testid="coin-ritual">
       <div className="coin-ritual-slot" />
-      <div className="coin-ritual-coin">500</div>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src="/images/coin-500.webp" alt="" width={96} height={96} className="coin-ritual-coin" />
       <p className="coin-ritual-text">도리가 운세를 꺼내는 중… 🫧</p>
     </div>
   );
