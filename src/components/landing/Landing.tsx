@@ -26,7 +26,7 @@ import {
 } from "./Sections";
 
 const MODAL_DELAY_MS = 150;
-const RITUAL_MS = 1000;
+const RITUAL_MS = 2000;
 const LAST_KEY = "wanna500:last:v1";
 
 export default function Landing() {
