@@ -1,73 +1,64 @@
 "use client";
 
-import { useState } from "react";
-import { SERVICE_NAME } from "@/lib/siteInfo";
+import { useEffect, useRef, useState } from "react";
 
-const TEXT = "궁금하면 500원! 퐁당, 오늘의 운을 뽑아봐 🦦";
-
-async function copy(url: string): Promise<boolean> {
+/** 주소를 클립보드에 넣어요. 최신 방식이 막혀 있으면(http 주소·일부 앱 안 브라우저) 예전 방식으로 한 번 더 해 봐요. */
+async function copyText(text: string): Promise<boolean> {
   try {
-    await navigator.clipboard.writeText(`${SERVICE_NAME} ${url}`);
+    await navigator.clipboard.writeText(text);
     return true;
   } catch {
-    return false;
+    try {
+      const el = document.createElement("textarea");
+      el.value = text;
+      el.setAttribute("readonly", "");
+      el.style.position = "fixed";
+      el.style.opacity = "0";
+      document.body.appendChild(el);
+      el.select();
+      const ok = document.execCommand("copy");
+      document.body.removeChild(el);
+      return ok;
+    } catch {
+      return false;
+    }
   }
 }
 
-/** 랜딩 하단: 도리 운세 사주를 인스타그램·페이스북·카카오톡으로 알리는 버튼 */
+/** 랜딩 하단: 도리 운세 사주 주소를 복사해서 친구에게 붙여넣어 보내게 하는 버튼 */
 export default function ShareSiteBar() {
-  const [message, setMessage] = useState<string | null>(null);
-  const siteUrl = () => window.location.origin;
+  const [state, setState] = useState<"idle" | "copied" | "failed">("idle");
+  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // 인스타그램·카카오톡은 웹 공유 주소가 없어서, 폰에서는 공유 창(앱 목록)을 열고 PC에서는 링크를 복사해 줘요.
-  async function viaShareSheet(app: "인스타그램" | "카카오톡") {
-    const url = siteUrl();
-    if (typeof navigator.share === "function") {
-      try {
-        await navigator.share({ title: SERVICE_NAME, text: TEXT, url });
-        setMessage(null);
-        return;
-      } catch (err) {
-        if (err instanceof DOMException && err.name === "AbortError") return;
-      }
-    }
-    const ok = await copy(url);
-    setMessage(ok ? `링크를 복사했어요. ${app}에 붙여넣기 해 주세요 🫧` : `링크를 복사하지 못했어요. 주소창의 주소를 ${app}에 붙여넣어 주세요.`);
+  useEffect(() => () => {
+    if (timer.current) clearTimeout(timer.current);
+  }, []);
+
+  async function onCopy() {
+    const ok = await copyText(window.location.origin);
+    setState(ok ? "copied" : "failed");
+    if (timer.current) clearTimeout(timer.current);
+    if (ok) timer.current = setTimeout(() => setState("idle"), 3000);
   }
-
-  function facebook() {
-    const u = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(siteUrl())}`;
-    const w = window.open(u, "_blank", "noopener,noreferrer,width=600,height=640");
-    if (!w) window.location.href = u;
-    setMessage(null);
-  }
-
-  // 각 서비스의 공식 로고 파일을 그대로 써요. (색·모양을 바꾸지 않아요)
-  const btn = "inline-flex h-11 w-11 items-center justify-center rounded-full transition-transform active:scale-90 hover:opacity-90";
-  const logo = "h-11 w-11 select-none";
 
   return (
     <div data-testid="share-site" className="mt-3 w-full max-w-sm">
       <p className="font-cute text-sm font-normal text-brand-600">친구에게도 도리를 알려 주세요 🫧</p>
-      <div className="mt-2 flex flex-wrap items-center justify-center gap-4">
-        <button type="button" data-testid="share-instagram" aria-label="인스타그램으로 알리기" title="인스타그램" onClick={() => void viaShareSheet("인스타그램")} className={btn}>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/images/share/instagram.png" alt="" width={44} height={44} className={logo} draggable={false} />
-        </button>
-        <button type="button" data-testid="share-facebook" aria-label="페이스북으로 알리기" title="페이스북" onClick={facebook} className={btn}>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/images/share/facebook.png" alt="" width={44} height={44} className={logo} draggable={false} />
-        </button>
-        <button type="button" data-testid="share-kakao" aria-label="카카오톡으로 알리기" title="카카오톡" onClick={() => void viaShareSheet("카카오톡")} className={btn}>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/images/share/kakaotalk.png" alt="" width={44} height={44} className={logo} draggable={false} />
-        </button>
-      </div>
-      {message && (
-        <p role="status" data-testid="share-site-message" className="mt-2 text-[11px] font-bold text-brand-600">
-          {message}
-        </p>
-      )}
+      <button
+        type="button"
+        data-testid="share-copy"
+        onClick={() => void onCopy()}
+        className={`mt-2.5 inline-flex items-center justify-center gap-1.5 rounded-full border px-5 py-2.5 text-sm font-bold shadow-sm transition-colors active:scale-95 ${
+          state === "copied" ? "border-emerald-300 bg-emerald-50 text-emerald-700" : "border-brand-200 bg-white text-brand-600 hover:bg-brand-50"
+        }`}
+      >
+        <span aria-hidden="true">{state === "copied" ? "✓" : "🔗"}</span>
+        {state === "copied" ? "링크를 복사했어요" : "도리 운세 사주 링크 복사"}
+      </button>
+      <p role="status" data-testid="share-site-message" className="mt-2 min-h-[1rem] text-[11px] font-bold text-brand-600">
+        {state === "copied" && "친구에게 붙여넣어 보내 주세요 🫧"}
+        {state === "failed" && `복사하지 못했어요. 주소창의 주소를 직접 복사해 주세요.`}
+      </p>
     </div>
   );
 }
