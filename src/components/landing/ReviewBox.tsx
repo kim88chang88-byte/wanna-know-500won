@@ -12,6 +12,7 @@ export default function ReviewBox({ topic, premium }: { topic: string; premium: 
   const [rating, setRating] = useState(0);
   const [reasons, setReasons] = useState<ReviewReasonId[]>([]);
   const [text, setText] = useState("");
+  const [publicOk, setPublicOk] = useState(false);
   const [phase, setPhase] = useState<Phase>("idle");
   const [error, setError] = useState<string | null>(null);
 
@@ -27,7 +28,7 @@ export default function ReviewBox({ topic, premium }: { topic: string; premium: 
       const res = await fetch("/api/reviews", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ rating, text, reasons: rating <= LOW_RATING ? reasons : [], topic, premium }),
+        body: JSON.stringify({ rating, text, reasons: rating <= LOW_RATING ? reasons : [], topic, premium, publicOk: publicOk && text.trim().length > 0 }),
       });
       if (!res.ok) {
         const data = (await res.json().catch(() => null)) as { error?: string } | null;
@@ -122,9 +123,15 @@ export default function ReviewBox({ topic, premium }: { topic: string; premium: 
               className="w-full rounded-xl border border-brand-200 bg-white px-3 py-2 text-sm text-gray-800 resize-none focus:outline-none focus:ring-2 focus:ring-brand-300"
             />
             <p className="mt-1 text-[10px] text-gray-400">
-              {text.length}/{MAX_REVIEW_TEXT} · 이름·연락처 같은 개인정보는 적지 말아 주세요. 후기는 서비스 개선에만 써요.
+              {text.length}/{MAX_REVIEW_TEXT} · 이름·연락처 같은 개인정보는 적지 말아 주세요. 후기는 서비스 개선에 써요.
             </p>
           </div>
+          {text.trim().length > 0 && (
+            <label className="flex items-start gap-2 rounded-xl bg-brand-50/60 px-3 py-2 text-[11px] leading-relaxed text-gray-700">
+              <input type="checkbox" data-testid="review-public" checked={publicOk} onChange={(e) => setPublicOk(e.target.checked)} className="mt-0.5 h-3.5 w-3.5 shrink-0 accent-brand-600" />
+              <span>(선택) 이 한 줄 후기를 메인 화면에 이름 없이 보여 줘도 좋아요. 별점과 글, 뽑은 운세 종류만 공개돼요.</span>
+            </label>
+          )}
           {error && (
             <p role="alert" className="text-[11px] font-bold text-red-600">
               {error}

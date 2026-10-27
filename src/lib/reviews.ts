@@ -19,6 +19,8 @@ export interface ReviewInput {
   rating: number;
   text: string;
   reasons: ReviewReasonId[];
+  /** 이름 없이 메인 화면에 보여 줘도 좋다고 직접 고른 경우만 true (한 줄 후기가 있을 때만 의미가 있어요) */
+  publicOk?: boolean;
 }
 
 const REASON_IDS = new Set<string>(REVIEW_REASONS.map((r) => r.id));
@@ -47,5 +49,6 @@ export function parseReview(raw: unknown): ReviewInput | null {
     }
   }
   const text = typeof o.text === "string" ? cleanReviewText(o.text) : "";
-  return { rating, text, reasons };
+  const publicOk = o.publicOk === true && text.length > 0;
+  return { rating, text, reasons, ...(publicOk ? { publicOk: true } : {}) };
 }

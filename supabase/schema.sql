@@ -205,3 +205,10 @@ create table if not exists public.saved_people (
 );
 create index if not exists saved_people_user_idx on public.saved_people (user_id, created_at desc);
 alter table public.saved_people enable row level security;
+
+-- ─────────────────────────────────────────────────────────────────────────────
+-- 후기 공개 동의: 이용자가 "메인 화면에 이름 없이 보여 줘도 좋아요"를 직접 고른 후기만 공개해요.
+-- 이 파일 전체를 다시 Run 하면 추가돼요. (코드를 배포하기 '전에' Run 하세요. 기존 후기는 모두 비공개(false)로 남아요)
+-- ─────────────────────────────────────────────────────────────────────────────
+alter table public.reviews add column if not exists public_ok boolean not null default false;
+create index if not exists reviews_public_idx on public.reviews (id) where public_ok and not hidden;

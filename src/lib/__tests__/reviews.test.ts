@@ -51,4 +51,10 @@ describe("후기 집계", () => {
     expect(csv).toContain("'=1+1");
     expect(csv.trim().split("\r\n")).toHaveLength(2);
   });
+
+  it("공개 동의는 한 줄 후기가 있을 때만 true 로 남는다", () => {
+    expect(parseReview({ rating: 5, text: "좋아요", publicOk: true })?.publicOk).toBe(true);
+    expect(parseReview({ rating: 5, text: "", publicOk: true })?.publicOk).toBeUndefined();
+    expect(parseReview({ rating: 5, text: "좋아요", publicOk: "yes" })?.publicOk).toBeUndefined();
+  });
 });

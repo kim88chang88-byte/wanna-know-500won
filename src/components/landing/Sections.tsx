@@ -4,10 +4,11 @@ import type { DrawCounts } from "@/lib/drawCounter";
 import { SERVICE_NAME } from "@/lib/siteInfo";
 import type { AuthUser } from "./useAuth";
 import { FAQ_ITEMS } from "./faq";
-import { FREE_PRICE_LABEL, MACHINES, PREMIUM_CARDS, SAMPLE_CAPSULES } from "./data";
+import { FREE_PRICE_LABEL, MACHINES, PREMIUM_CARDS } from "./data";
 import { HelpMenuButton, MachineMenuButton } from "./MenuButton";
 import { HERO_IMAGE, IMAGES, LOGO_IMAGE } from "./images";
 import SafeImage from "./SafeImage";
+import ReviewsSection from "./ReviewsSection";
 import ShareSiteBar from "./ShareSiteBar";
 
 export type SpinHandler = (key: string, fortune: string, price: string, premium?: boolean) => void;
@@ -375,52 +376,7 @@ export function PremiumSection({ onSpin }: SpinProps) {
 /* ------------------------------------------------------------------ 풀이 예시 */
 
 export function SampleSection() {
-  return (
-    <section className="mb-8 relative z-10">
-      <div className="flex items-center justify-between mb-3">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-2xl bg-sky-100 flex items-center justify-center text-brand-500">
-            <span className="material-symbols-outlined text-[22px]">bubble_chart</span>
-          </div>
-          <div>
-            <h3 className="font-cute text-xl sm:text-2xl font-normal text-gray-900">이런 운세 풀이가 나와요</h3>
-            <p className="text-xs text-slate-500">수달 도사 '도리'가 건네는 한마디, 이런 느낌이에요</p>
-          </div>
-        </div>
-        <span className="hidden sm:inline-flex text-xs font-semibold px-3 py-1.5 rounded-full bg-sky-50 text-brand-500 border border-sky-200">
-          예시 문구
-        </span>
-      </div>
-
-      {/* 예시 카드가 왼쪽에서 오른쪽으로 천천히 흘러가요. 같은 줄을 두 번 이어 붙여 끊김 없이 반복하고, 마우스를 올리면 멈춰요.
-          움직임 줄이기 설정이면 움직이지 않고 옆으로 밀어서 볼 수 있어요. */}
-      <div data-testid="sample-marquee" className="sample-marquee overflow-hidden py-2">
-        <div className="sample-marquee-track flex w-max">
-          {[0, 1].map((dup) => (
-            <div key={dup} className="flex shrink-0" aria-hidden={dup === 1 ? true : undefined}>
-              {SAMPLE_CAPSULES.map((s) => (
-                <div
-                  key={s.key}
-                  className={`card-water-glow mr-5 w-[280px] shrink-0 rounded-3xl border bg-white p-6 shadow-sm sm:w-[340px] ${s.border}`}
-                >
-                  <div className="flex items-center justify-between mb-4">
-                    <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold ${s.tagClass}`}>{s.tag}</span>
-                    <span className="text-xs text-slate-400">예시</span>
-                  </div>
-                  <p className="text-sm text-slate-800 leading-relaxed">
-                    {s.parts.map((p, i) => (p.strong ? <strong key={i}>{p.text}</strong> : <span key={i}>{p.text}</span>))}
-                  </p>
-                </div>
-              ))}
-            </div>
-          ))}
-        </div>
-      </div>
-      <p className="mt-3 text-center text-[11px] text-slate-400">
-        * 예시 문구예요. 실제 이용자의 기록이 아니며, 실제 풀이는 입력한 정보에 따라 달라져요.
-      </p>
-    </section>
-  );
+  return <ReviewsSection />;
 }
 
 /* ------------------------------------------------------------------ 소개 (후기 자리) */
