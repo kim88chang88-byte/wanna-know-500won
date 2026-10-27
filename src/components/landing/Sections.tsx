@@ -9,6 +9,7 @@ import { FREE_PRICE_LABEL, MACHINES, PREMIUM_CARDS } from "./data";
 import { HelpMenuButton, MachineMenuButton } from "./MenuButton";
 import { HERO_IMAGE, IMAGES, LOGO_IMAGE } from "./images";
 import SafeImage from "./SafeImage";
+import DoriStamp from "./DoriStamp";
 import ReviewsSection from "./ReviewsSection";
 import ShareSiteBar from "./ShareSiteBar";
 
@@ -176,14 +177,10 @@ export function HeroSection({ counts, streakText = null, stamps = [] }: { counts
         </p>
       )}
       {stamps.some((d) => d.done) && (
-        <div data-testid="week-stamps" className="mt-1.5 flex items-center gap-1.5" aria-label="최근 7일 방문 도장">
-          {stamps.map((d) => (
-            <span
-              key={d.day}
-              title={d.day}
-              className={`h-4 w-4 rounded-full border text-[9px] leading-[14px] text-center ${d.done ? "bg-sky-400 border-sky-400 text-white" : "bg-white/70 border-brand-200 text-transparent"} ${d.today ? "ring-2 ring-brand-300" : ""}`}
-            >
-              {d.done ? "✓" : "·"}
+        <div data-testid="week-stamps" className="mt-1.5 flex items-center gap-1" aria-label="최근 7일 방문 도장">
+          {stamps.map((d, i) => (
+            <span key={d.day} title={d.day} className={d.today && d.done ? "drop-shadow-[0_0_4px_rgba(232,53,46,0.35)]" : ""}>
+              <DoriStamp done={d.done} today={d.today} tilt={[-6, 4, -3, 7, -5, 3, -4][i % 7]} />
             </span>
           ))}
           <span className="text-[10px] text-gray-400 ml-1">이번 주 도장</span>
