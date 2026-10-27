@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type React from "react";
 import type { DrawCounts } from "@/lib/drawCounter";
+import type { WeekStamp } from "@/lib/streak";
 import { SERVICE_NAME } from "@/lib/siteInfo";
 import type { AuthUser } from "./useAuth";
 import { FAQ_ITEMS } from "./faq";
@@ -147,7 +148,7 @@ export function Header({ onOpenLogin, user = null }: { onOpenLogin: () => void; 
 
 /* ------------------------------------------------------------------ 히어로 */
 
-export function HeroSection({ counts, streakText = null }: { counts: DrawCounts; streakText?: string | null }) {
+export function HeroSection({ counts, streakText = null, stamps = [] }: { counts: DrawCounts; streakText?: string | null; stamps?: WeekStamp[] }) {
   return (
     <section className="text-left mb-3">
       {/* 뽑기 횟수: 한 줄짜리 작은 알약 (로그인했다면 서버가, 아니라면 이 기기에서 센 값) */}
@@ -173,6 +174,20 @@ export function HeroSection({ counts, streakText = null }: { counts: DrawCounts;
         <p data-testid="streak-line" className="mt-2 text-xs font-semibold text-sky-700">
           {streakText}
         </p>
+      )}
+      {stamps.some((d) => d.done) && (
+        <div data-testid="week-stamps" className="mt-1.5 flex items-center gap-1.5" aria-label="최근 7일 방문 도장">
+          {stamps.map((d) => (
+            <span
+              key={d.day}
+              title={d.day}
+              className={`h-4 w-4 rounded-full border text-[9px] leading-[14px] text-center ${d.done ? "bg-sky-400 border-sky-400 text-white" : "bg-white/70 border-brand-200 text-transparent"} ${d.today ? "ring-2 ring-brand-300" : ""}`}
+            >
+              {d.done ? "✓" : "·"}
+            </span>
+          ))}
+          <span className="text-[10px] text-gray-400 ml-1">이번 주 도장</span>
+        </div>
       )}
     </section>
   );
@@ -250,7 +265,7 @@ export function ShowcaseSection() {
 
 /* ------------------------------------------------------------------ 6대 운명의 자판기 */
 
-export function MachinesSection({ onSpin }: SpinProps) {
+export function MachinesSection({ onSpin, lastKey = null }: SpinProps & { lastKey?: string | null }) {
   return (
     <section id="machines" className="mb-8 relative z-10 scroll-mt-20">
       <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-4">
@@ -264,6 +279,11 @@ export function MachinesSection({ onSpin }: SpinProps) {
         {MACHINES.map((m) => (
           <div key={m.key} className="relative h-full transition-transform hover:-translate-y-1.5 active:scale-[0.98]">
             {m.sticker && <Sticker text={m.sticker} testId="machine-sticker" />}
+            {lastKey === m.key && (
+              <span data-testid="last-drawn" className="absolute -top-2 left-3 z-10 rounded-full bg-white border border-sky-300 px-2 py-0.5 text-[10px] font-bold text-sky-700 shadow-sm">
+                지난번에 뽑았어요
+              </span>
+            )}
           <div
             id={m.key}
             data-testid="machine-card"

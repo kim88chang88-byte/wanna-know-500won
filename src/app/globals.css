@@ -344,3 +344,14 @@ body {
   .sample-marquee { overflow-x: auto !important; }
   .sample-marquee-track { animation: none !important; }
 }
+
+/* 동전 뽑기 연출 */
+@media (prefers-reduced-motion: no-preference) {
+  .coin-ritual { position: fixed; inset: 0; z-index: 70; display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(40, 20, 90, 0.35); backdrop-filter: blur(3px); animation: ritualFade 1.1s ease both; pointer-events: all; }
+  .coin-ritual-slot { position: absolute; top: 50%; width: 96px; height: 10px; border-radius: 9999px; background: #2a1a5e; box-shadow: 0 0 0 4px rgba(255,255,255,0.35); transform: translateY(40px); }
+  .coin-ritual-coin { width: 64px; height: 64px; border-radius: 9999px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 15px; color: #7a5200; background: radial-gradient(circle at 30% 30%, #fff3b0, #f5c542 70%); box-shadow: 0 4px 14px rgba(0,0,0,0.25); animation: coinDrop 0.8s cubic-bezier(.5,0,.8,.6) both; }
+  .coin-ritual-text { margin-top: 96px; color: #fff; font-weight: 700; font-size: 14px; animation: ritualText 1.1s ease both; }
+}
+@keyframes coinDrop { 0% { transform: translateY(-40vh) rotateY(0); opacity: 0; } 20% { opacity: 1; } 85% { transform: translateY(40px) rotateY(900deg); opacity: 1; } 100% { transform: translateY(60px) rotateY(1080deg) scale(0.6); opacity: 0; } }
+@keyframes ritualFade { 0% { opacity: 0; } 15% { opacity: 1; } 85% { opacity: 1; } 100% { opacity: 0; } }
+@keyframes ritualText { 0%, 55% { opacity: 0; } 70%, 100% { opacity: 1; } }

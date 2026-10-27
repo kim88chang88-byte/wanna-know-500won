@@ -118,3 +118,21 @@ export function recordVisit(storage: StorageLike | null, today: string): StreakS
   }
   return computeStreak(kept, today);
 }
+
+export interface WeekStamp {
+  day: string;
+  done: boolean;
+  today: boolean;
+}
+
+/** 오늘까지 최근 7일의 방문 도장. 못 온 날은 빈 칸일 뿐 어떤 표시도 하지 않아요. */
+export function weekStamps(storage: StorageLike | null, today: string): WeekStamp[] {
+  const visited = new Set(read(storage));
+  const t = dayNum(today);
+  const out: WeekStamp[] = [];
+  for (let i = 6; i >= 0; i--) {
+    const day = new Date((t - i) * 86_400_000).toISOString().slice(0, 10);
+    out.push({ day, done: visited.has(day), today: i === 0 });
+  }
+  return out;
+}

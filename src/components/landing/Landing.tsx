@@ -1,9 +1,11 @@
 "use client";
 
 import StickyDrawCta from "./StickyDrawCta";
+import BirthdayTeaser from "./BirthdayTeaser";
+import CoinRitual from "./CoinRitual";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { dayKey, getBrowserStorage, readCounts, recordDraw, type DrawCounts } from "@/lib/drawCounter";
-import { readStreak, recordVisit, streakLine } from "@/lib/streak";
+import { readStreak, recordVisit, streakLine, weekStamps, type WeekStamp } from "@/lib/streak";
 import { DailyLineCard } from "./DailyLineCard";
 import { FollowupCard } from "./FollowupCard";
 import { VaultFollowupCard } from "./VaultFollowupCard";
@@ -24,6 +26,8 @@ import {
 } from "./Sections";
 
 const MODAL_DELAY_MS = 150;
+const RITUAL_MS = 1000;
+const LAST_KEY = "wanna500:last:v1";
 
 export default function Landing() {
   const { user, profile, setProfile, deleteProfile, serverCounts, setServerCounts, result: loginResult, clearResult, justLoggedIn, clearWelcome, logout, withdraw } = useAuth();
@@ -34,6 +38,10 @@ export default function Landing() {
   const countsRef = useRef<DrawCounts>(counts);
   const [streakText, setStreakText] = useState<string | null>(null);
   const timers = useRef<number[]>([]);
+  const [ritual, setRitual] = useState(false);
+  const [stamps, setStamps] = useState<WeekStamp[]>([]);
+  const [lastKey, setLastKey] = useState<string | null>(null);
+  const spinKey = useRef<string | null>(null);
 
   const applyCounts = useCallback((next: DrawCounts) => {
     countsRef.current = next;
@@ -44,13 +52,32 @@ export default function Landing() {
   useEffect(() => {
     applyCounts(readCounts(getBrowserStorage(), new Date()));
     setStreakText(streakLine(readStreak(getBrowserStorage(), dayKey(new Date()))));
+    setStamps(weekStamps(getBrowserStorage(), dayKey(new Date())));
+    try {
+      setLastKey(getBrowserStorage()?.getItem(LAST_KEY) ?? null);
+    } catch {
+      /* 읽기 실패는 무시 */
+    }
     const pending = timers.current;
     return () => pending.forEach((t) => window.clearTimeout(t));
   }, [applyCounts]);
 
   const handleSpin = useCallback(
-    (_key: string, fortune: string, price: string, premium?: boolean) => {
-      timers.current.push(window.setTimeout(() => setIntake({ fortune, price, premium: premium === true }), MODAL_DELAY_MS));
+    (key: string, fortune: string, price: string, premium?: boolean) => {
+      spinKey.current = key;
+      const open = () => setIntake({ fortune, price, premium: premium === true });
+      const calm = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+      if (calm) {
+        timers.current.push(window.setTimeout(open, MODAL_DELAY_MS));
+        return;
+      }
+      setRitual(true);
+      timers.current.push(
+        window.setTimeout(() => {
+          setRitual(false);
+          open();
+        }, RITUAL_MS),
+      );
     },
     [],
   );
@@ -100,6 +127,15 @@ export default function Landing() {
     (fromServer?: { today: number; month: number } | null) => {
       // 오늘을 방문한 날로 기록해서 연속 방문 '물길'을 이어요. (이 기기에서만 세요)
       setStreakText(streakLine(recordVisit(getBrowserStorage(), dayKey(new Date()))));
+      setStamps(weekStamps(getBrowserStorage(), dayKey(new Date())));
+      if (spinKey.current) {
+        setLastKey(spinKey.current);
+        try {
+          getBrowserStorage()?.setItem(LAST_KEY, spinKey.current);
+        } catch {
+          /* 저장 실패는 무시 */
+        }
+      }
       if (fromServer) {
         setServerCounts(fromServer);
         applyCounts(fromServer);
@@ -122,13 +158,14 @@ export default function Landing() {
       <Header onOpenLogin={openLogin} user={user} />
 
       <main className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-5 pb-20 sm:pb-24">
-        <HeroSection counts={counts} streakText={streakText} />
+        <HeroSection counts={counts} streakText={streakText} stamps={stamps} />
         <ShowcaseSection />
+        {!user && <BirthdayTeaser onPick={() => document.getElementById("machines")?.scrollIntoView({ behavior: "smooth" })} />}
         {/* 도리의 소식 카드들은 첫 화면의 "뽑으러 가기" 버튼 아래로 옮겼어요. (첫 화면에서 눌러야 할 것이 하나만 보이게) */}
         {user && profile && <DailyLineCard onOpened={() => setStreakText(streakLine(recordVisit(getBrowserStorage(), dayKey(new Date()))))} />}
         {user && <VaultFollowupCard />}
         <FollowupCard />
-        <MachinesSection onSpin={handleSpin} />
+        <MachinesSection onSpin={handleSpin} lastKey={lastKey} />
         <PremiumSection onSpin={handleSpin} />
         <SampleSection />
         <TrustSection />
@@ -137,7 +174,8 @@ export default function Landing() {
 
       <Footer />
 
-      <StickyDrawCta hidden={Boolean(intake) || loginOpen} />
+      {ritual && <CoinRitual />}
+      <StickyDrawCta hidden={Boolean(intake) || loginOpen || ritual} />
 
       {justLoggedIn && user && (
         <div
