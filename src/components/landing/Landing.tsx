@@ -1,5 +1,6 @@
 "use client";
 
+import StickyDrawCta from "./StickyDrawCta";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { dayKey, getBrowserStorage, readCounts, recordDraw, type DrawCounts } from "@/lib/drawCounter";
 import { readStreak, recordVisit, streakLine } from "@/lib/streak";
@@ -120,12 +121,13 @@ export default function Landing() {
       <BubbleBackground />
       <Header onOpenLogin={openLogin} user={user} />
 
-      <main className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-5">
+      <main className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-5 pb-20 sm:pb-24">
         <HeroSection counts={counts} streakText={streakText} />
+        <ShowcaseSection />
+        {/* 도리의 소식 카드들은 첫 화면의 "뽑으러 가기" 버튼 아래로 옮겼어요. (첫 화면에서 눌러야 할 것이 하나만 보이게) */}
         {user && profile && <DailyLineCard onOpened={() => setStreakText(streakLine(recordVisit(getBrowserStorage(), dayKey(new Date()))))} />}
         {user && <VaultFollowupCard />}
         <FollowupCard />
-        <ShowcaseSection />
         <MachinesSection onSpin={handleSpin} />
         <PremiumSection onSpin={handleSpin} />
         <SampleSection />
@@ -134,6 +136,8 @@ export default function Landing() {
       </main>
 
       <Footer />
+
+      <StickyDrawCta hidden={Boolean(intake) || loginOpen} />
 
       {justLoggedIn && user && (
         <div

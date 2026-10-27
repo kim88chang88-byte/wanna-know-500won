@@ -228,18 +228,21 @@ export function ShowcaseSection() {
         </div>
       </div>
 
-      <div className="relative z-10 mt-2 text-center">
-        {/* 소개 카드 바로 아래, 자판기 바로 위: "이제 아래 자판기를 골라보세요" 안내 */}
+      <div className="relative z-10 mt-3 text-center">
+        {/* 첫 화면에서 눌러야 할 것은 이 버튼 하나예요. 누르면 아래 운세 카드 고르는 곳으로 내려가요. */}
         <a
           href="#machines"
+          id="hero-cta"
           data-testid="scroll-cue"
-          className="inline-flex flex-col items-center gap-0.5 rounded-2xl px-4 py-1 text-xs sm:text-sm font-bold text-brand-600 hover:text-brand-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-300"
+          className="inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-brand-500 to-fuchsia-500 px-7 py-3.5 text-[15px] font-bold text-white shadow-lg shadow-brand-500/30 transition-transform hover:brightness-105 active:scale-95 focus:outline-none focus-visible:ring-4 focus-visible:ring-brand-300 sm:text-base"
         >
-          <span>아래로 내려서 오늘의 운을 만나 보세요</span>
-          <span className="material-symbols-outlined text-[28px] leading-none motion-safe:animate-bounce" aria-hidden="true">
-            keyboard_double_arrow_down
+          <span aria-hidden="true">🪙</span>
+          <span>오늘의 운 뽑으러 가기</span>
+          <span className="material-symbols-outlined text-[22px] leading-none motion-safe:animate-bounce" aria-hidden="true">
+            arrow_downward
           </span>
         </a>
+        <p className="mt-2 text-[11px] text-slate-500">가입 없이도 볼 수 있어요 · 매일 첫 1회 무료</p>
       </div>
     </section>
   );
