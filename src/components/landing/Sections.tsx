@@ -44,7 +44,7 @@ function activateOnKey(e: React.KeyboardEvent, run: () => void) {
 
 const BETA_NOTICE_TEXT = (
   <>
-    * &apos;{SERVICE_NAME}&apos;는 지금 <strong>Beta 테스트 중</strong>이라 결제 없이 이용할 수 있어요. (표시된 금액은 정식 오픈 후 기준이에요)
+    * &apos;{SERVICE_NAME}&apos;는 지금 <strong>Beta 테스트 중</strong>이라 결제 없이 이용할 수 있어요.<br />(표시된 금액은 정식 오픈 후 기준이에요)
   </>
 );
 
