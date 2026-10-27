@@ -318,7 +318,8 @@ export function PremiumSection({ onSpin }: SpinProps) {
             9,900원 프리미엄 3대 테마 리포트
           </h3>
           <p className="text-xs sm:text-sm text-white/85 mt-2 leading-relaxed">
-            간단 풀이로는 아쉬운 날을 위한 <strong>20쪽 분량의 심층 리포트</strong>예요. 흐름과 조언을 차분하게 담았어요.
+            간단 풀이로는 아쉬운 날을 위한 <strong>20쪽 분량의 심층 리포트</strong>예요.<br />
+            흐름과 조언을 차분하게 담았어요.
           </p>
         </div>
 
