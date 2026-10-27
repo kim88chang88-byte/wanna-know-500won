@@ -45,6 +45,8 @@ import { BRANCHES, STEMS } from "@/lib/saju/constants";
 import type { Pillar, SajuChart } from "@/lib/saju/types";
 import { CloseButton, ModalShell } from "./Modals";
 import { ResultHero } from "./PhotoCard";
+import ResultShareCard from "./ResultShareCard";
+import ResultBurst from "./ResultBurst";
 import ReviewBox from "./ReviewBox";
 import ScrollHint from "./ScrollHint";
 import ManseReport from "@/components/premium/ManseReport";
@@ -539,7 +541,8 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
       )}
 
       {phase === "result" && chart && (
-        <div data-testid="intake-result">
+        <div data-testid="intake-result" className="result-reveal relative">
+          <ResultBurst luxe={luxe} />
           {premiumReport ? (
             <>
               {/* 1) 한 줄 결론(카드 틀 없이 글자로) */}
@@ -574,7 +577,7 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
                       report={premiumReport}
                       reading={reading}
                       intro={null}
-                      lastWord={<ResultHero report={premiumReport} aiQuote={reading?.kkotgeoji ?? null} luxe={false} hideLucky />}
+                      lastWord={<><ResultHero report={premiumReport} aiQuote={reading?.kkotgeoji ?? null} luxe={false} hideLucky /><ResultShareCard report={premiumReport} aiQuote={reading?.kkotgeoji ?? null} /></>}
                       closing={askInput ? <AskChips input={askInput} luxe={false} /> : undefined}
                     />
                   </div>
@@ -586,7 +589,7 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
                   {reading && !luxe && <ReadingCard reading={reading} luxe={luxe} />}
 
                   <div data-testid="premium-result" className="mt-6">
-                    <ManseReport report={premiumReport} hideHeadline flush={luxe} finale={bookMode ? <ResultHero report={premiumReport} aiQuote={reading?.kkotgeoji ?? null} luxe /> : undefined} />
+                    <ManseReport report={premiumReport} hideHeadline flush={luxe} finale={bookMode ? <><ResultHero report={premiumReport} aiQuote={reading?.kkotgeoji ?? null} luxe /><ResultShareCard report={premiumReport} aiQuote={reading?.kkotgeoji ?? null} /></> : undefined} />
                   </div>
 
                   {/* 3) 더 물어보기 */}

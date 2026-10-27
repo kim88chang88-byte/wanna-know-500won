@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import type { PremiumReportView } from "@/lib/premium/types";
 import { buildPhotoCardData } from "@/lib/card/photoData";
 
@@ -17,9 +17,26 @@ interface Props {
 /** 풀이 맨 위에 보이는 한 줄 결론. 카드 틀 없이 글자 그대로 크게 보여줘요. (예전 포토카드에 들어가던 글을 그대로 살렸어요) */
 export function ResultHero({ report, aiQuote, luxe = false, hideLucky = false }: Props) {
   const data = useMemo(() => buildPhotoCardData(report, { date: new Date(), siteLabel: "", aiQuote }), [report, aiQuote]);
+  // 한 줄 결론은 화면에 들어올 때 부드럽게 떠오르며 나타나요. (움직임 줄이기 설정이면 처음부터 보여요)
+  const rootRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const el = rootRef.current;
+    if (!el || typeof IntersectionObserver === "undefined") return;
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((e) => e.isIntersecting)) {
+          el.classList.add("reveal-shown");
+          io.disconnect();
+        }
+      },
+      { threshold: 0.25 },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
   if (luxe) {
     return (
-      <div data-testid="result-hero" className="px-1 pt-2 pb-3 text-center">
+      <div ref={rootRef} data-testid="result-hero" className="reveal-hidden px-1 pt-2 pb-3 text-center">
         <p className="text-[10px] font-bold tracking-[0.32em] text-[#e6c887]">DORI PREMIUM · {data.topicLabel}</p>
         <div aria-hidden="true" className="mx-auto mt-3 flex items-center justify-center gap-2 text-[#e6c887]">
           <span className="h-px w-12 bg-gradient-to-r from-transparent to-[#e6c887]/70" />
@@ -51,7 +68,7 @@ export function ResultHero({ report, aiQuote, luxe = false, hideLucky = false }:
     );
   }
   return (
-    <div data-testid="result-hero" className="px-1 pt-1 pb-2 text-center">
+    <div ref={rootRef} data-testid="result-hero" className="reveal-hidden px-1 pt-1 pb-2 text-center">
       <p className="text-xs font-bold tracking-wide text-brand-500">{data.tier === "premium" ? "✨ 프리미엄 · " : ""}{data.topicLabel}</p>
       <h4 data-testid="result-hero-headline" className="mt-2 font-cute text-[23px] sm:text-[26px] font-normal leading-snug text-brand-700 break-keep">
         {data.headline}

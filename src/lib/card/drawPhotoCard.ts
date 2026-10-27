@@ -108,7 +108,8 @@ function fitLines(ctx: CanvasRenderingContext2D, text: string, family: string, w
   );
 }
 
-export function drawPhotoCard(ctx: CanvasRenderingContext2D, d: PhotoCardData): void {
+/** art: 사진 칸에 넣을 동물 그림(선택). 없으면 큰 한자 워터마크만 보여요. */
+export function drawPhotoCard(ctx: CanvasRenderingContext2D, d: PhotoCardData, art?: CanvasImageSource | null, artSize?: { w: number; h: number } | null): void {
   if (d.tier === "premium" && d.luxe) return drawPremiumCard(ctx, d);
   const W = CARD_W;
   const H = CARD_H;
@@ -189,6 +190,12 @@ export function drawPhotoCard(ctx: CanvasRenderingContext2D, d: PhotoCardData): 
   ctx.textAlign = "center";
   ctx.fillText(th.glyph, phX + phW / 2, phY + phH / 2 + 58);
   ctx.textAlign = "left";
+  if (art && artSize && artSize.w > 0 && artSize.h > 0) {
+    const scale = Math.min((phW * 0.92) / artSize.w, (phH * 0.9) / artSize.h);
+    const aw = artSize.w * scale;
+    const ah = artSize.h * scale;
+    ctx.drawImage(art, phX + (phW - aw) / 2, phY + phH - ah - 4, aw, ah);
+  }
   // 물방울 + 반짝이
   const r2 = rng(23);
   for (let i = 0; i < 9; i++) bubble(ctx, phX + 12 + r2() * (phW - 24), phY + 14 + r2() * (phH - 28), 4 + r2() * 11, 0.55 + r2() * 0.4);

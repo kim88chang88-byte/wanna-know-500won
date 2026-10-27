@@ -1,0 +1,127 @@
+"use client";
+
+import { useEffect, useMemo, useRef, useState } from "react";
+import type { PremiumReportView, TopicKey } from "@/lib/premium/types";
+import { drawPhotoCard } from "@/lib/card/drawPhotoCard";
+import { buildPhotoCardData, CARD_H, CARD_SCALE, CARD_W, photoAltText, photoFileName, shareCaption } from "@/lib/card/photoData";
+import { IMAGES } from "./images";
+
+const ART: Partial<Record<TopicKey, string>> = {
+  love: "machineLove",
+  marriage: "machineMarriage",
+  money: "machineMoney",
+  success: "machineSuccess",
+  health: "machineHealth",
+  study: "machineStudy",
+};
+
+function loadArt(topic: TopicKey): Promise<HTMLImageElement | null> {
+  const src = ART[topic] ? IMAGES[ART[topic]!] : null;
+  if (!src) return Promise.resolve(null);
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = () => resolve(null);
+    img.src = src;
+  });
+}
+
+/** 결과를 인스타 스토리 크기(1080×1920) 카드 한 장으로 만들어 저장·공유해요. 서버로 보내지 않고 이 기기에서만 그려요. */
+export default function ResultShareCard({ report, aiQuote }: { report: PremiumReportView; aiQuote?: string | null }) {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [state, setState] = useState<"idle" | "busy" | "done" | "error">("idle");
+  const [ready, setReady] = useState(false);
+  const data = useMemo(
+    () => buildPhotoCardData(report, { date: new Date(), siteLabel: typeof window === "undefined" ? "" : window.location.host, aiQuote }),
+    [report, aiQuote],
+  );
+
+  // 미리보기와 저장용 그림은 같은 함수로 그려요.
+  async function render(canvas: HTMLCanvasElement) {
+    const art = await loadArt(data.topic);
+    canvas.width = CARD_W * CARD_SCALE;
+    canvas.height = CARD_H * CARD_SCALE;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) throw new Error("no-canvas");
+    try {
+      await document.fonts?.ready;
+    } catch {
+      /* 글꼴 준비를 기다리지 못해도 기본 글꼴로 그려요 */
+    }
+    ctx.setTransform(CARD_SCALE, 0, 0, CARD_SCALE, 0, 0);
+    drawPhotoCard(ctx, data, art, art ? { w: art.naturalWidth, h: art.naturalHeight } : null);
+  }
+
+  useEffect(() => {
+    const c = canvasRef.current;
+    if (!c) return;
+    let alive = true;
+    render(c)
+      .then(() => alive && setReady(true))
+      .catch(() => alive && setReady(false));
+    return () => {
+      alive = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data]);
+
+  async function save() {
+    const c = canvasRef.current;
+    if (!c || !ready) return;
+    setState("busy");
+    try {
+      const blob = await new Promise<Blob | null>((r) => c.toBlob(r, "image/png"));
+      if (!blob) throw new Error("blob");
+      const name = photoFileName(data.topic, new Date());
+      const file = new File([blob], name, { type: "image/png" });
+      const nav = navigator as Navigator & { canShare?: (d: ShareData) => boolean };
+      if (nav.canShare?.({ files: [file] })) {
+        try {
+          await nav.share({ files: [file], text: shareCaption(data, window.location.origin) });
+          setState("done");
+          return;
+        } catch (e) {
+          if (e instanceof DOMException && e.name === "AbortError") {
+            setState("idle");
+            return;
+          }
+          /* 공유 창이 안 열리면 저장으로 넘어가요 */
+        }
+      }
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = name;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.setTimeout(() => URL.revokeObjectURL(url), 4000);
+      setState("done");
+    } catch {
+      setState("error");
+    }
+  }
+
+  return (
+    <div data-testid="result-share-card" className="mt-5 text-center">
+      <canvas
+        ref={canvasRef}
+        role="img"
+        aria-label={photoAltText(data)}
+        className={`mx-auto w-44 rounded-2xl shadow-[0_10px_30px_rgba(128,87,224,0.25)] transition-opacity duration-500 ${ready ? "opacity-100" : "opacity-0"}`}
+        style={{ aspectRatio: `${CARD_W} / ${CARD_H}`, height: "auto" }}
+      />
+      <button
+        type="button"
+        onClick={save}
+        disabled={!ready || state === "busy"}
+        className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-brand-500 to-fuchsia-500 px-5 py-2 text-sm font-bold text-white shadow disabled:opacity-50 active:scale-95"
+      >
+        {state === "busy" ? "카드 만드는 중…" : "✨ 결과 카드 저장·공유하기"}
+      </button>
+      <p role="status" className="mt-1.5 text-[11px] text-gray-500">
+        {state === "done" ? "카드를 만들었어요. 친구에게 자랑해 보세요 🫧" : state === "error" ? "지금은 카드를 만들 수 없어요. 잠시 뒤에 다시 눌러 주세요." : "인스타 스토리 크기로 저장돼요 · 이 기기에서만 만들어요"}
+      </p>
+    </div>
+  );
+}
