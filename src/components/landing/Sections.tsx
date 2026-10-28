@@ -10,6 +10,7 @@ import { HelpMenuButton, MachineMenuButton } from "./MenuButton";
 import { HERO_IMAGE, IMAGES, LOGO_IMAGE } from "./images";
 import SafeImage from "./SafeImage";
 import AutoMarquee from "./AutoMarquee";
+import DoriIcon from "./DoriIcon";
 import DoriStamp from "./DoriStamp";
 import ReviewsSection from "./ReviewsSection";
 import ShareSiteBar from "./ShareSiteBar";
@@ -480,7 +481,7 @@ export function Footer() {
     <footer className="relative z-10 bg-white border-t border-brand-100 pt-5 pb-24 sm:pb-8 text-center text-xs text-gray-500">
       <div className="max-w-7xl mx-auto px-4 flex flex-col items-center gap-2">
         <div className="flex items-center gap-1.5 text-brand-500 font-cute font-normal">
-          <span aria-hidden="true">🦦</span> {SERVICE_NAME} <span aria-hidden="true">🫧</span>
+          <DoriIcon className="!mr-0" /> {SERVICE_NAME} <span aria-hidden="true">🫧</span>
         </div>
         <p className="text-gray-400">“궁금하면 500원! 퐁당, 오늘의 운을 뽑아봐.”</p>
         <ShareSiteBar />
