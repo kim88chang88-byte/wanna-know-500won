@@ -122,7 +122,7 @@ export interface BoldPart {
 }
 
 /** 강조가 하나도 없는 글(예전에 저장된 풀이 등)에는 오행 기운·신강/신약 같은 핵심 말만 가볍게 굵게 해요. */
-const AUTO_BOLD = /([목화토금수] 기운|신강|신약|용신)/g;
+const AUTO_BOLD = /((?:목|화|토|금|수|물|불|땅|나무) 기운|신강|신약|용신)/g;
 
 /** 문단을 굵은 부분과 일반 부분으로 쪼개요. */
 export function splitBold(text: string): BoldPart[] {

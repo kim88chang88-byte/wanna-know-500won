@@ -92,7 +92,7 @@ describe("문구 가이드 (BRIEF.md: 뽑기 언어, 겁주거나 신비롭게 �
   });
 
   it("일반 자판기는 동물 그림(성공운 용, 재물운 토끼, 연애운 남자 팬더, 결혼운 여자 팬더, 건강운 여우, 학업운 수달)을 쓰고, 프리미엄은 일반과 구분되는 전용 배경 일러스트(premium-scene-*.webp)을 쓴다", () => {
-    const animal: Record<string, string> = { 성공운: "dragon", 재물운: "rabbit", 연애운: "panda-m", 결혼운: "panda-f", 건강운: "fox", "2027 신년운": "otter" };
+    const animal: Record<string, string> = { 성공운: "dragon", 재물운: "rabbit-rich", 연애운: "panda-couple", 결혼운: "panda-wedding", 건강운: "fox-run", "2027 신년운": "otter-newyear" };
     for (const m of MACHINES) expect(IMAGES[m.image]).toBe(`/images/animal-${animal[m.fortune]}.webp`);
     const premiumAnimal: Record<string, string> = { "premium-compat": "otter", "premium-dohwa": "rabbit", "premium-fortune": "dragon" };
     for (const c of PREMIUM_CARDS) expect(IMAGES[c.image]).toBe(`/images/premium-scene-${premiumAnimal[c.key]}.webp`);

@@ -125,7 +125,8 @@ describe("프리미엄 20페이지 리포트", () => {
       expect(locked.hyungsin).toEqual([]);
       expect(locked.summary).toBe("");
       expect(locked.topic.timing).toEqual([]);
-      const j = JSON.stringify(locked);
+      // 본문(book)에는 열린 풀이가 '丙(병)이' 같은 말로 용신 글자를 자연스럽게 언급할 수 있어서, 용신 칸 자체가 새지 않는지를 봐요.
+      const j = JSON.stringify({ ...locked, book: [] });
       for (const y of open.yongsin) expect(j.includes(y)).toBe(false);
     });
 
