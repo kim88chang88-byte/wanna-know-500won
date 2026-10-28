@@ -90,6 +90,10 @@ export function streakLine(s: StreakState): string | null {
   return null;
 }
 
+export function readVisitDays(storage: StorageLike | null): string[] {
+  return read(storage);
+}
+
 function read(storage: StorageLike | null): string[] {
   if (!storage) return [];
   try {

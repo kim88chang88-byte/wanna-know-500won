@@ -5,7 +5,9 @@ import BirthdayTeaser from "./BirthdayTeaser";
 import CoinRitual from "./CoinRitual";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { dayKey, getBrowserStorage, readCounts, recordDraw, type DrawCounts } from "@/lib/drawCounter";
-import { readStreak, recordVisit, streakLine, weekStamps, type WeekStamp } from "@/lib/streak";
+import { readStreak, readVisitDays, recordVisit, streakLine, weekStamps, type WeekStamp } from "@/lib/streak";
+import { currentRun, grantTickets, readTickets, spendTicket, STREAK_FOR_TICKET } from "@/lib/stampReward";
+import { FREE_PER_DAY } from "@/lib/db/config";
 import { DailyLineCard } from "./DailyLineCard";
 import { FollowupCard } from "./FollowupCard";
 import { VaultFollowupCard } from "./VaultFollowupCard";
@@ -40,6 +42,18 @@ export default function Landing() {
   const timers = useRef<number[]>([]);
   const [ritual, setRitual] = useState(false);
   const [stamps, setStamps] = useState<WeekStamp[]>([]);
+  const [tickets, setTickets] = useState(0);
+  const [runLength, setRunLength] = useState(0);
+  const bonusRef = useRef(false);
+  // 도장 연속 3일이면 보너스 뽑기를 지급하고, 안내에 쓸 값을 새로 읽어요.
+  const syncReward = useCallback(() => {
+    const st = getBrowserStorage();
+    const today = dayKey(new Date());
+    const days = readVisitDays(st);
+    const g = grantTickets(st, days, today);
+    setTickets(g.balance);
+    setRunLength(currentRun(days, today).length);
+  }, []);
   const [lastKey, setLastKey] = useState<string | null>(null);
   const spinKey = useRef<string | null>(null);
 
@@ -53,6 +67,7 @@ export default function Landing() {
     applyCounts(readCounts(getBrowserStorage(), new Date()));
     setStreakText(streakLine(readStreak(getBrowserStorage(), dayKey(new Date()))));
     setStamps(weekStamps(getBrowserStorage(), dayKey(new Date())));
+    syncReward();
     try {
       setLastKey(getBrowserStorage()?.getItem(LAST_KEY) ?? null);
     } catch {
@@ -60,12 +75,15 @@ export default function Landing() {
     }
     const pending = timers.current;
     return () => pending.forEach((t) => window.clearTimeout(t));
-  }, [applyCounts]);
+  }, [applyCounts, syncReward]);
 
   const handleSpin = useCallback(
     (key: string, fortune: string, price: string, premium?: boolean) => {
       spinKey.current = key;
-      const open = () => setIntake({ fortune, price, premium: premium === true });
+      // 오늘 무료 뽑기를 이미 썼고 보너스 뽑기가 있으면, 보너스로 한 번 더 뽑아요.
+      const bonus = countsRef.current.today >= FREE_PER_DAY && readTickets(getBrowserStorage()) > 0;
+      bonusRef.current = bonus;
+      const open = () => setIntake({ fortune, price, premium: premium === true, bonus });
       const calm = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
       if (calm) {
         timers.current.push(window.setTimeout(open, MODAL_DELAY_MS));
@@ -128,6 +146,11 @@ export default function Landing() {
       // 오늘을 방문한 날로 기록해서 연속 방문 '물길'을 이어요. (이 기기에서만 세요)
       setStreakText(streakLine(recordVisit(getBrowserStorage(), dayKey(new Date()))));
       setStamps(weekStamps(getBrowserStorage(), dayKey(new Date())));
+      if (bonusRef.current) {
+        spendTicket(getBrowserStorage());
+        bonusRef.current = false;
+      }
+      syncReward();
       if (spinKey.current) {
         setLastKey(spinKey.current);
         try {
@@ -143,7 +166,7 @@ export default function Landing() {
       }
       applyCounts(recordDraw(getBrowserStorage(), new Date(), countsRef.current));
     },
-    [applyCounts, setServerCounts],
+    [applyCounts, setServerCounts, syncReward],
   );
 
   // 로그인 직후엔 서버가 센 횟수를, 로그아웃·탈퇴 후엔 이 브라우저의 횟수를 보여줘요.
@@ -158,11 +181,15 @@ export default function Landing() {
       <Header onOpenLogin={openLogin} user={user} />
 
       <main className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-5 pb-20 sm:pb-24">
-        <HeroSection counts={counts} streakText={streakText} stamps={stamps} />
+        <HeroSection counts={counts} streakText={streakText} stamps={stamps} tickets={tickets} runLength={runLength} />
         <ShowcaseSection />
         {!user && <BirthdayTeaser onPick={() => document.getElementById("machines")?.scrollIntoView({ behavior: "smooth" })} />}
         {/* 도리의 소식 카드들은 첫 화면의 "뽑으러 가기" 버튼 아래로 옮겼어요. (첫 화면에서 눌러야 할 것이 하나만 보이게) */}
-        {user && profile && <DailyLineCard onOpened={() => setStreakText(streakLine(recordVisit(getBrowserStorage(), dayKey(new Date()))))} />}
+        {user && profile && <DailyLineCard onOpened={() => {
+          setStreakText(streakLine(recordVisit(getBrowserStorage(), dayKey(new Date()))));
+          setStamps(weekStamps(getBrowserStorage(), dayKey(new Date())));
+          syncReward();
+        }} />}
         {user && <VaultFollowupCard />}
         <FollowupCard />
         <MachinesSection onSpin={handleSpin} lastKey={lastKey} />

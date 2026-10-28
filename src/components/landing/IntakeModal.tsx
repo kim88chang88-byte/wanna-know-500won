@@ -60,6 +60,8 @@ export interface IntakeTarget {
   price: string;
   /** 프리미엄 자판기에서 열었으면 true. 사주 리포트(원국·오행·신강신약·대운)를 함께 보여줘요. */
   premium?: boolean;
+  /** 연속 도장으로 받은 보너스 뽑기를 쓰는 중이면 true */
+  bonus?: boolean;
 }
 
 interface Props {
@@ -414,7 +416,7 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
       const res = await fetch("/api/reading", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...input, topic: target.fortune, concern, saveProfile: wantSave, shareConcern: wantShare, premium: target.premium === true }),
+        body: JSON.stringify({ ...input, topic: target.fortune, concern, saveProfile: wantSave, shareConcern: wantShare, premium: target.premium === true, bonus: target.bonus === true }),
         signal: ctrl.signal,
       });
       const data = (await res.json().catch(() => null)) as {

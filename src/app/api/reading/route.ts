@@ -43,7 +43,7 @@ export async function POST(request: Request) {
   if (typeof body !== "object" || body === null) {
     return NextResponse.json({ error: "잘못된 요청입니다." }, { status: 400 });
   }
-  const { topic: rawTopic, concern: rawConcern, saveProfile, shareConcern, premium: rawPremium, ...input } = body;
+  const { topic: rawTopic, concern: rawConcern, saveProfile, shareConcern, premium: rawPremium, bonus: rawBonus, ...input } = body;
   // 프리미엄 책은 "긴 풀이"(요약하자면·접이식)를 화면에 쓰지 않아서, 그 호출 4번은 건너뛰어 비용을 아껴요.
   const skipDetail = rawPremium === true;
   const concern = parseConcern(rawConcern);
@@ -61,7 +61,7 @@ export async function POST(request: Request) {
       // DB 가 잠깐 안 되어도 서비스는 계속돼요. (횟수 제한만 건너뛰어요)
       console.error("getCounts failed:", err instanceof Error ? err.message : "unknown");
     }
-    if (counts && isDailyLimitEnforced(process.env) && counts.today >= FREE_PER_DAY) {
+    if (counts && isDailyLimitEnforced(process.env) && counts.today >= FREE_PER_DAY + (rawBonus === true ? 1 : 0)) {
       return NextResponse.json(
         { error: "오늘의 무료 뽑기는 이미 사용했어요. 결제는 아직 준비 중이에요. 내일 다시 만나요 🫧", code: "free_used", counts },
         { status: 402 },
