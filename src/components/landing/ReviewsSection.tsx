@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { SAMPLE_CAPSULES } from "./data";
+import AutoMarquee from "./AutoMarquee";
 
 interface PublicReview {
   id: number;
@@ -96,15 +97,9 @@ export default function ReviewsSection() {
 
       {/* 카드를 왼쪽에서 오른쪽으로 흘려요. 같은 줄을 두 번 이어 붙여 끊김 없이 반복하고, 마우스를 올리면 멈춰요.
           움직임 줄이기 설정이면 움직이지 않고 옆으로 밀어서 볼 수 있어요. */}
-      <div data-testid="sample-marquee" className="sample-marquee overflow-hidden py-2">
-        <div className="sample-marquee-track flex w-max">
-          {[0, 1].map((dup) => (
-            <div key={dup} className="flex shrink-0" aria-hidden={dup === 1 ? true : undefined}>
-              {cards}
-            </div>
-          ))}
-        </div>
-      </div>
+      <AutoMarquee testId="sample-marquee" speed={48} className="py-2">
+        {() => <>{cards}</>}
+      </AutoMarquee>
       <p className="mt-3 text-center text-[11px] text-slate-400">
         {real
           ? "* 이용자가 직접 공개에 동의한 후기만 이름 없이 보여 드려요. 풀이는 사람마다 달라질 수 있어요."

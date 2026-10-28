@@ -9,6 +9,7 @@ import { FREE_PRICE_LABEL, MACHINES, PREMIUM_CARDS } from "./data";
 import { HelpMenuButton, MachineMenuButton } from "./MenuButton";
 import { HERO_IMAGE, IMAGES, LOGO_IMAGE } from "./images";
 import SafeImage from "./SafeImage";
+import AutoMarquee from "./AutoMarquee";
 import DoriStamp from "./DoriStamp";
 import ReviewsSection from "./ReviewsSection";
 import ShareSiteBar from "./ShareSiteBar";
@@ -272,12 +273,10 @@ export function MachinesSection({ onSpin, lastKey = null }: SpinProps & { lastKe
         </span>
       </div>
 
-      {/* 여섯 장을 왼쪽에서 오른쪽으로 천천히 흘려요. 같은 줄을 두 번 이어 붙여 끊김 없이 반복하고, 마우스를 올리면 멈춰요.
-          두 번째 줄은 화면 읽기·키보드 이동에서는 빼요. 움직임 줄이기 설정이면 움직이지 않고 옆으로 밀어서 볼 수 있어요. */}
-      <div data-testid="machine-marquee" className="machine-marquee sample-marquee overflow-hidden pt-4 pb-3">
-        <div className="machine-marquee-track flex w-max">
-          {[0, 1].map((dup) => (
-            <div key={dup} className={`flex shrink-0 items-stretch ${dup === 1 ? "machine-dup" : ""}`} aria-hidden={dup === 1 ? true : undefined}>
+      {/* 여섯 장이 왼쪽에서 오른쪽으로 천천히 흘러요. 손가락·트랙패드·마우스로 직접 넘겨 볼 수도 있어요. (AutoMarquee) */}
+      <AutoMarquee testId="machine-marquee" speed={48} className="pt-4 pb-3">
+        {(dup) => (
+          <>
               {MACHINES.map((m) => (
                 <div key={m.key} className="relative mr-4 sm:mr-6 w-[230px] sm:w-[300px] shrink-0 transition-transform hover:-translate-y-1.5 active:scale-[0.98]">
                   {m.sticker && <Sticker text={m.sticker} testId={dup === 0 ? "machine-sticker" : undefined} />}
@@ -319,10 +318,9 @@ export function MachinesSection({ onSpin, lastKey = null }: SpinProps & { lastKe
                   </div>
                 </div>
               ))}
-            </div>
-          ))}
-        </div>
-      </div>
+          </>
+        )}
+      </AutoMarquee>
     </section>
   );
 }
@@ -351,15 +349,18 @@ export function PremiumSection({ onSpin }: SpinProps) {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-6xl mx-auto relative z-10">
+        <div className="relative z-10 -mx-4 sm:-mx-6">
+        <AutoMarquee testId="premium-marquee" speed={48} className="px-4 sm:px-6 pt-4 pb-3">
+          {(dup) => (
+            <>
           {PREMIUM_CARDS.map((p) => (
-            <div key={p.key} className="relative h-full transition-transform hover:-translate-y-1 active:scale-[0.98]">
-            {p.ribbon && <Sticker text={p.ribbon} testId="premium-sticker" />}
+            <div key={p.key} className="relative mr-4 sm:mr-6 w-[290px] sm:w-[340px] shrink-0 transition-transform hover:-translate-y-1 active:scale-[0.98]">
+            {p.ribbon && <Sticker text={p.ribbon} testId={dup === 0 ? "premium-sticker" : undefined} />}
             <div
-              id={p.key}
-              data-testid="premium-card"
+              id={dup === 0 ? p.key : undefined}
+              data-testid={dup === 0 ? "premium-card" : undefined}
               role="button"
-              tabIndex={0}
+              tabIndex={dup === 0 ? 0 : -1}
               aria-label={`${p.title} 보기`}
               onClick={() => onSpin(p.key, p.fortune, "9,900원", true)}
               onKeyDown={(e) => activateOnKey(e, () => onSpin(p.key, p.fortune, "9,900원", true))}
@@ -389,6 +390,9 @@ export function PremiumSection({ onSpin }: SpinProps) {
             </div>
             </div>
           ))}
+            </>
+          )}
+        </AutoMarquee>
         </div>
         <div className="relative z-10 mt-6 text-center">
           <Link href="/premium" data-testid="premium-report-link" className="text-sm font-bold text-pink-200 hover:text-white underline underline-offset-4">

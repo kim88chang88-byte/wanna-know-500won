@@ -375,3 +375,8 @@ body {
   .machine-marquee-track { animation: none !important; }
   .machine-dup { display: none !important; }
 }
+
+/* 가로로 넘기는 줄의 스크롤바는 숨겨요 (손가락·트랙패드·마우스로 밀어서 넘겨요) */
+.no-scrollbar { scrollbar-width: none; -ms-overflow-style: none; }
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar img { -webkit-user-drag: none; user-drag: none; }
