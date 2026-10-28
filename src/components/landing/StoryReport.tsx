@@ -21,7 +21,7 @@ const STEPS: Array<{ key: FoldKey; name: string }> = [
   { key: "elements", name: "오행으로 보는 사주" },
   { key: "self", name: "나는 어떤 사람인가?" },
   { key: "praise", name: "이건 정말 칭찬해요 👏" },
-  { key: "lack", name: "그렇지만 이건 조금 부족해요" },
+  { key: "lack", name: "그렇지만 이건 조금 아쉬워요" },
   { key: "improve", name: "이렇게 개선해보아요 🌱" },
   { key: "flow", name: "올해와 이번 달의 흐름" },
 ];

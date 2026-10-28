@@ -59,7 +59,7 @@ export function iyeyo(word: string): string {
 
 const escapeRe = (c: string) => c.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
-/** 글 맨 앞에 화면 제목을 그대로 따라 쓴 경우("그렇지만 이건 조금 부족해요. …")만 떼어 내요. */
+/** 글 맨 앞에 화면 제목을 그대로 따라 쓴 경우("그렇지만 이건 조금 아쉬워요. …")만 떼어 내요. */
 export function stripTitleEcho(text: string, title: string): string {
   const chars = Array.from(title.replace(/[\s?!.~]/g, ""));
   if (chars.length === 0) return text;
@@ -87,7 +87,7 @@ export const FOLD_TITLES = {
   elements: "오행으로 보는 사주",
   self: "나는 어떤 사람인가?",
   praise: "이건 정말 칭찬해요",
-  lack: "그렇지만 이건 조금 부족해요",
+  lack: "그렇지만 이건 조금 아쉬워요",
   flow: "올해와 이번 달의 흐름",
   improve: "이렇게 개선해 보아요",
 } as const;
