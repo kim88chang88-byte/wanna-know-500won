@@ -22,8 +22,8 @@ const STEPS: Array<{ key: FoldKey; name: string }> = [
   { key: "self", name: "나는 어떤 사람인가?" },
   { key: "praise", name: "이건 정말 칭찬해요 👏" },
   { key: "lack", name: "그렇지만 이건 조금 부족해요" },
-  { key: "flow", name: "올해와 이번 달의 흐름" },
   { key: "improve", name: "이렇게 개선해보아요 🌱" },
+  { key: "flow", name: "올해와 이번 달의 흐름" },
 ];
 
 /** 형광펜 색: 주제별 동물 그림에 맞춰요. (용 노랑 · 토끼 분홍 · 남자 팬더 연보라 · 여자 팬더 장미 · 여우 주황 · 수달 하늘색) */
