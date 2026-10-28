@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { chapterName, isMoneyChapter, parseChapter } from "../bookChapter";
+import { CHAPTER_BATCHES, CHAPTER_SPECS, chapterName, isMoneyChapter, parseChapter } from "../bookChapter";
 import type { BookPage } from "@/lib/premium/types";
 
 const H = ["돈을 대하는 기본 자세", "돈이 들어오는 길", "새기 쉬운 곳"];
@@ -36,5 +36,36 @@ describe("helpers", () => {
     const base = { no: 7, key: "topic", title: "재물운 심층 분석", subtitle: "", lead: "", sections: [], tables: [] } as BookPage;
     expect(isMoneyChapter(base)).toBe(true);
     expect(isMoneyChapter({ ...base, title: "연애운 심층 분석" })).toBe(false);
+  });
+});
+
+describe("장 구성", () => {
+  it("모든 AI 장은 네 묶음 중 정확히 한 곳에만 들어 있어요", () => {
+    const all = CHAPTER_BATCHES.flat();
+    expect(new Set(all).size).toBe(all.length);
+    expect(all.sort()).toEqual(Object.keys(CHAPTER_SPECS).sort());
+  });
+  it("묶음 하나는 호출이 너무 많아지지 않게 소제목 40개 이내예요", () => {
+    for (const b of CHAPTER_BATCHES) {
+      const heads = b.reduce((n, k) => n + CHAPTER_SPECS[k].parts.flatMap((p) => p.headings).length, 0);
+      expect(heads).toBeLessThanOrEqual(40);
+    }
+  });
+  it("모든 장은 '이렇게 해보세요', '한 줄 마무리'로 끝나고 소제목마다 역할이 있어요", () => {
+    for (const [k, spec] of Object.entries(CHAPTER_SPECS)) {
+      const heads = spec.parts.flatMap((p) => p.headings);
+      expect(heads.slice(-2), k).toEqual(["이렇게 해보세요", "한 줄 마무리"]);
+      expect(spec.roles.map(([h]) => h), k).toEqual(heads);
+    }
+  });
+  it("주제 장(재물·연애·직업·건강)은 8개 소제목이에요", () => {
+    for (const k of ["topic:money", "topic:love", "topic:career", "topic:health"]) {
+      expect(CHAPTER_SPECS[k].parts.flatMap((p) => p.headings)).toHaveLength(8);
+    }
+  });
+  it("문장이 길어진 본문(1000자 안팎)도 받아요", () => {
+    const body = ("꾸준히 쌓이는 수입과 **기준이 분명한 편**이에요. ").repeat(30).trim();
+    expect(body.length).toBeLessThanOrEqual(1100);
+    expect(parseChapter({ sections: [{ heading: "a", body }] }, ["a"])).not.toBeNull();
   });
 });

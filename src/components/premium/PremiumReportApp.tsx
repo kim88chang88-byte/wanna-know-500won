@@ -91,8 +91,7 @@ export default function PremiumReportApp() {
       // 나머지 장은 이어서 받아 와서 끼워 넣어요.
       if ((json as { pendingChapters?: string[] }).pendingChapters?.length) {
         const rest = { ...body, level: "full", topic: "프리미엄 사주 원국 리포트" };
-        void fetchRestChapters(rest).then((rep) => {
-          setReport((prev) => (prev ? mergeChapters(prev, rep.replaced ?? undefined) : prev));
+        void fetchRestChapters(rest, undefined, (part) => setReport((prev) => (prev ? mergeChapters(prev, part) : prev))).then((rep) => {
           if (rep.aiNotice) setAiNotice(true);
         });
       }

@@ -436,7 +436,7 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
       setPremiumReport(p.report);
       setPremiumError(p.error);
       // 나머지 장은 이어서 받아 와서 끼워 넣어요.
-      if (p.rest) void fetchRestChapters(p.rest, ctrl.signal).then((rep) => { if (ctrl.signal.aborted) return; setPremiumReport((prev) => (prev ? mergeChapters(prev, rep.replaced ?? undefined) : prev)); if (rep.aiNotice) setAiNotice(true); });
+      if (p.rest) void fetchRestChapters(p.rest, ctrl.signal, (part) => { if (ctrl.signal.aborted) return; setPremiumReport((prev) => (prev ? mergeChapters(prev, part) : prev)); }).then((rep) => { if (ctrl.signal.aborted) return; if (rep.aiNotice) setAiNotice(true); });
       setChart(data.chart);
       setAskInput(input);
       setBirthNote([data.birthAdjustNote, data.boundaryNote].filter(Boolean).join("\n") || null);

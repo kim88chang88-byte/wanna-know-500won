@@ -7,7 +7,7 @@ import { readingFirstDeep } from "@/lib/hanjaReading";
 import { buildPremiumReport, validatePremiumInput } from "@/lib/premium/report";
 import { enforceLimits, guardOrigin } from "@/lib/guard";
 import { addBookNotes } from "@/lib/ai/bookNotes";
-import { CHAPTER_BATCH_1, CHAPTER_BATCH_2, chapterName, rewriteChapters } from "@/lib/ai/bookChapter";
+import { CHAPTER_BATCH_2, CHAPTER_BATCHES, chapterName, rewriteChapters } from "@/lib/ai/bookChapter";
 import { takeAiBudget } from "@/lib/ai/budget";
 import { isAdmin } from "@/lib/admin/auth";
 import { previewBlank } from "@/lib/premium/book/lock";
@@ -30,7 +30,11 @@ export async function POST(request: Request) {
     return NextResponse.json({ code: "bad_request", error: "잘못된 요청입니다." }, { status: 400 });
   }
   // 두 번째 요청: 나머지 장만 AI 로 다시 써서 받아 가요. (장을 두 번에 나눠야 AI 요청 한도에 안 걸려요)
-  const second = typeof raw === "object" && raw !== null && (raw as { chapterBatch?: unknown }).chapterBatch === 2;
+  // chapterBatch: 2~4 이면 그 묶음의 장만 써서 받아 가요. (1은 첫 요청이라 따로 지정하지 않아요)
+  const batchRaw = typeof raw === "object" && raw !== null ? (raw as { chapterBatch?: unknown }).chapterBatch : undefined;
+  const batchNo = typeof batchRaw === "number" && Number.isInteger(batchRaw) && batchRaw >= 2 && batchRaw <= CHAPTER_BATCHES.length ? batchRaw : 1;
+  const second = batchNo >= 2;
+  const batchKeys = CHAPTER_BATCHES[batchNo - 1];
   // 미리 보기 요청: 앞 몇 쪽만 풀이하고 나머지는 서버에서 비워서 내려보내요. (이 값은 내용을 줄이기만 하므로 요청자가 정해도 안전해요)
   const preview = typeof raw === "object" && raw !== null && (raw as { preview?: unknown }).preview === true;
   const parsed = validatePremiumInput(raw);
@@ -78,7 +82,7 @@ export async function POST(request: Request) {
         try {
           const gate = await takeAiBudget(process.env, db);
           if (gate !== "ok") return null;
-          return await rewriteChapters(book0, { keys: (second ? CHAPTER_BATCH_2 : CHAPTER_BATCH_1).filter((k) => !preview || openKeys.has(k)), name: chapterName(session?.nick), concern: parsed.concern, onUsage: (u) => { usage.in += u.input; usage.out += u.output; usage.calls++; } });
+          return await rewriteChapters(book0, { keys: batchKeys.filter((k) => !preview || openKeys.has(k)), name: chapterName(session?.nick), concern: parsed.concern, onUsage: (u) => { usage.in += u.input; usage.out += u.output; usage.calls++; } });
         } catch (err) {
           console.error("book chapter failed:", err instanceof Error ? err.message : "unknown");
           return null;
@@ -110,7 +114,7 @@ export async function POST(request: Request) {
       const replaced: Record<number, unknown> = {};
       const base = buildPremiumReport(parsed.value, new Date(), parsed.level, parsed.topic, lock, parsed.concern, parsed.partner).book;
       report.book.forEach((p, i) => {
-        if (CHAPTER_BATCH_2.includes(p.key) && JSON.stringify(p.sections) !== JSON.stringify(base[i]?.sections)) replaced[p.no] = p.sections;
+        if (batchKeys.includes(p.key) && JSON.stringify(p.sections) !== JSON.stringify(base[i]?.sections)) replaced[p.no] = p.sections;
       });
       return NextResponse.json(readingFirstDeep({ replaced, chapterNote, chapterUsage: usage, aiNotice: aiDown }, KEEP_HANJA));
     }
