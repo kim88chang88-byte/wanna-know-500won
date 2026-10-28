@@ -20,7 +20,7 @@ interface SpinProps {
 }
 
 /** 카드 모서리에 비스듬히 붙는 "HOT" 스티커. (카드는 relative 여야 해요) */
-function Sticker({ text, testId }: { text: string; testId: string }) {
+function Sticker({ text, testId }: { text: string; testId?: string }) {
   const isNew = text === "NEW";
   return (
     <div
@@ -272,49 +272,56 @@ export function MachinesSection({ onSpin, lastKey = null }: SpinProps & { lastKe
         </span>
       </div>
 
-      <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6 max-w-7xl mx-auto items-stretch">
-        {MACHINES.map((m) => (
-          <div key={m.key} className="relative h-full transition-transform hover:-translate-y-1.5 active:scale-[0.98]">
-            {m.sticker && <Sticker text={m.sticker} testId="machine-sticker" />}
-            {lastKey === m.key && (
-              <span data-testid="last-drawn" className="absolute -top-2 left-3 z-10 rounded-full bg-white border border-sky-300 px-2 py-0.5 text-[10px] font-bold text-sky-700 shadow-sm">
-                지난번에 뽑았어요
-              </span>
-            )}
-          <div
-            id={m.key}
-            data-testid="machine-card"
-            role="button"
-            tabIndex={0}
-            aria-label={`${m.name} 운세 보기`}
-            onClick={() => onSpin(m.key, m.fortune, FREE_PRICE_LABEL)}
-            onKeyDown={(e) => activateOnKey(e, () => onSpin(m.key, m.fortune, FREE_PRICE_LABEL))}
-            className={`scroll-mt-24 card-water-glow relative flex flex-col justify-between rounded-3xl p-3 sm:p-6 h-full cursor-pointer select-none hover:shadow-xl transition-shadow group focus:outline-none focus-visible:ring-4 focus-visible:ring-brand-300 ${m.card}`}
-          >
-            <div>
-              <div className="flex flex-wrap items-center justify-between gap-1 mb-2.5 sm:mb-3.5">
-                <span className={`text-[10px] sm:text-xs font-bold px-2 sm:px-3 py-1 rounded-full flex items-center gap-1 ${m.badgeClass}`}>
-                  <span aria-hidden="true">{m.emoji}</span> {m.badge}
-                </span>
-                <span className={`text-[10px] sm:text-xs font-bold px-2 sm:px-2.5 py-0.5 rounded-full ${m.tagClass}`}>{m.tag}</span>
-              </div>
+      {/* 여섯 장을 왼쪽에서 오른쪽으로 천천히 흘려요. 같은 줄을 두 번 이어 붙여 끊김 없이 반복하고, 마우스를 올리면 멈춰요.
+          두 번째 줄은 화면 읽기·키보드 이동에서는 빼요. 움직임 줄이기 설정이면 움직이지 않고 옆으로 밀어서 볼 수 있어요. */}
+      <div data-testid="machine-marquee" className="machine-marquee sample-marquee overflow-hidden pt-4 pb-3">
+        <div className="machine-marquee-track flex w-max">
+          {[0, 1].map((dup) => (
+            <div key={dup} className={`flex shrink-0 items-stretch ${dup === 1 ? "machine-dup" : ""}`} aria-hidden={dup === 1 ? true : undefined}>
+              {MACHINES.map((m) => (
+                <div key={m.key} className="relative mr-4 sm:mr-6 w-[230px] sm:w-[300px] shrink-0 transition-transform hover:-translate-y-1.5 active:scale-[0.98]">
+                  {m.sticker && <Sticker text={m.sticker} testId={dup === 0 ? "machine-sticker" : undefined} />}
+                  {lastKey === m.key && (
+                    <span data-testid={dup === 0 ? "last-drawn" : undefined} className="absolute -top-2 left-3 z-10 rounded-full bg-white border border-sky-300 px-2 py-0.5 text-[10px] font-bold text-sky-700 shadow-sm">
+                      지난번에 뽑았어요
+                    </span>
+                  )}
+                  <div
+                    id={dup === 0 ? m.key : undefined}
+                    data-testid={dup === 0 ? "machine-card" : undefined}
+                    role="button"
+                    tabIndex={dup === 0 ? 0 : -1}
+                    aria-label={`${m.name} 운세 보기`}
+                    onClick={() => onSpin(m.key, m.fortune, FREE_PRICE_LABEL)}
+                    onKeyDown={(e) => activateOnKey(e, () => onSpin(m.key, m.fortune, FREE_PRICE_LABEL))}
+                    className={`scroll-mt-24 card-water-glow relative flex flex-col justify-between rounded-3xl p-3 sm:p-6 h-full cursor-pointer select-none hover:shadow-xl transition-shadow group focus:outline-none focus-visible:ring-4 focus-visible:ring-brand-300 ${m.card}`}
+                  >
+                    <div>
+                      <div className="flex flex-wrap items-center justify-between gap-1 mb-2.5 sm:mb-3.5">
+                        <span className={`text-[10px] sm:text-xs font-bold px-2 sm:px-3 py-1 rounded-full flex items-center gap-1 ${m.badgeClass}`}>
+                          <span aria-hidden="true">{m.emoji}</span> {m.badge}
+                        </span>
+                        <span className={`text-[10px] sm:text-xs font-bold px-2 sm:px-2.5 py-0.5 rounded-full ${m.tagClass}`}>{m.tag}</span>
+                      </div>
 
-              <div className={`w-full h-32 sm:h-56 rounded-2xl p-2 sm:p-2.5 flex items-center justify-center overflow-hidden mb-3 sm:mb-4 border ${m.imageBox}`}>
-                <SafeImage
-                  src={IMAGES[m.image]}
-                  alt={m.name}
-                  className="h-full w-auto max-w-full object-contain group-hover:scale-105 transition-transform duration-500"
-                  fallback={m.emoji}
-                />
-              </div>
+                      <div className={`w-full h-32 sm:h-56 rounded-2xl p-2 sm:p-2.5 flex items-center justify-center overflow-hidden mb-3 sm:mb-4 border ${m.imageBox}`}>
+                        <SafeImage
+                          src={IMAGES[m.image]}
+                          alt={dup === 0 ? m.name : ""}
+                          className="h-full w-auto max-w-full object-contain group-hover:scale-105 transition-transform duration-500"
+                          fallback={m.emoji}
+                        />
+                      </div>
 
-              <h4 className={`font-cute font-normal text-sm sm:text-lg text-center mb-1.5 ${m.titleClass}`}>{m.name}</h4>
-              <p className="text-xs sm:text-[13px] text-slate-600 text-center leading-relaxed sm:min-h-[40px]">{m.desc}</p>
+                      <h4 className={`font-cute font-normal text-sm sm:text-lg text-center mb-1.5 ${m.titleClass}`}>{m.name}</h4>
+                      <p className="text-xs sm:text-[13px] text-slate-600 text-center leading-relaxed sm:min-h-[40px]">{m.desc}</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
-
-          </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
     </section>
   );
