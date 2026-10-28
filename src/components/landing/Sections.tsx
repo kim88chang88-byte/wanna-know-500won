@@ -477,7 +477,7 @@ export function FaqSection() {
 
 export function Footer() {
   return (
-    <footer className="relative z-10 bg-white border-t border-brand-100 py-5 text-center text-xs text-gray-500">
+    <footer className="relative z-10 bg-white border-t border-brand-100 pt-5 pb-24 sm:pb-8 text-center text-xs text-gray-500">
       <div className="max-w-7xl mx-auto px-4 flex flex-col items-center gap-2">
         <div className="flex items-center gap-1.5 text-brand-500 font-cute font-normal">
           <span aria-hidden="true">🦦</span> {SERVICE_NAME} <span aria-hidden="true">🫧</span>
