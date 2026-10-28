@@ -4,7 +4,7 @@ import CompatCard from "./CompatCard";
 import ConcernCard from "./ConcernCard";
 import type { ReactNode } from "react";
 import PremiumBook from "./PremiumBook";
-import { ELEMENT_BOX, elementOfChar } from "@/lib/elementColor";
+import { ELEMENT_BOX, elementOfChar, elName } from "@/lib/elementColor";
 
 const ELEMENT_STYLE: Record<ElementKind, { bar: string; chip: string }> = {
   wood: { bar: "bg-emerald-500", chip: "bg-emerald-50 text-emerald-700" },
@@ -103,8 +103,8 @@ export default function ManseReport({ report, hideHeadline = false, flush = fals
         <ul className="space-y-3">
           {report.elements.map((e) => (
             <li key={e.name} data-testid="element-row" className="flex items-center gap-3">
-              <span className={`w-12 shrink-0 text-center text-xs font-bold rounded-full py-1 ${ELEMENT_STYLE[e.kind].chip}`}>{e.name}</span>
-              <div className="flex-1 h-3 rounded-full bg-slate-100 overflow-hidden" role="img" aria-label={`${e.name} ${e.count}`}>
+              <span className={`w-12 shrink-0 text-center text-xs font-bold rounded-full py-1 ${ELEMENT_STYLE[e.kind].chip}`}>{elName(e.name)}</span>
+              <div className="flex-1 h-3 rounded-full bg-slate-100 overflow-hidden" role="img" aria-label={`${elName(e.name)} ${e.count}`}>
                 <div className={`h-full rounded-full ${ELEMENT_STYLE[e.kind].bar}`} style={{ width: `${(e.count / max) * 100}%` }} />
               </div>
               <span className="w-8 text-right text-sm font-bold text-slate-700 tabular-nums">{e.count}</span>

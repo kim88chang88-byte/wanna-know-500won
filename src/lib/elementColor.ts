@@ -15,3 +15,8 @@ export function elementOfChar(ch: string | null | undefined, branch: boolean): E
   const hit = branch ? BRANCHES.find((b) => b.hanja === ch) : STEMS.find((s) => s.hanja === ch);
   return hit ? hit.element : null;
 }
+
+/** 화면에 보이는 오행 이름. 금은 쉬운 말로 "쇠"라고 불러요. (계산용 이름은 그대로 "금") */
+export function elName(name: string): string {
+  return name === "금" ? "쇠" : name;
+}

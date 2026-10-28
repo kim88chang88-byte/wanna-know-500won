@@ -17,11 +17,20 @@ describe("readingFirst: 음 먼저, 괄호 안에 한자", () => {
     expect(readingFirst("2024년(甲辰)에는")).toBe("2024년 갑진(甲辰)에는");
   });
   it("이미 음(한자) 모양이면 그대로, 여러 번 돌려도 같다", () => {
-    for (const t of ["목(木)과 금(金)", "병오(丙午)는", "정(丁, 편재)과 무술(戊戌, 정관)", "일간 갑(甲, 큰 나무)"]) {
+    for (const t of ["목(木)과 쇠(金)", "병오(丙午)는", "정(丁, 편재)과 무술(戊戌, 정관)", "일간 갑(甲, 큰 나무)"]) {
       expect(readingFirst(t)).toBe(t);
     }
     const once = readingFirst("丙(병)이 午戌반합");
     expect(readingFirst(once)).toBe(once);
+  });
+  it("오행의 금(金)은 쇠로 부른다", () => {
+    expect(readingFirst("금(金) 기운이 강해요")).toBe("쇠(金) 기운이 강해요");
+    expect(readingFirst("金 기운")).toBe("쇠(金) 기운");
+    expect(readingFirst("용신은 금·목·화예요")).toBe("용신은 쇠·목·화예요");
+    expect(readingFirst("금 기운이 적어요")).toBe("쇠 기운이 적어요");
+  });
+  it("금요일·금전·지금 같은 다른 말은 그대로 둔다", () => {
+    for (const t of ["금요일에 만나요", "금전운이 좋아요", "지금 시작해요", "금방 돼요"]) expect(readingFirst(t)).toBe(t);
   });
   it("읽는 법을 모르는 한자는 그대로 둔다", () => {
     expect(readingFirst("龍 한 마리")).toBe("龍 한 마리");

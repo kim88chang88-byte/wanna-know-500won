@@ -6,7 +6,7 @@ import { BRANCHES, STEMS } from "@/lib/saju/constants";
  */
 
 const EXTRA: Record<string, string> = {
-  木: "목", 火: "화", 土: "토", 金: "금", 水: "수",
+  木: "목", 火: "화", 土: "토", 金: "쇠", 水: "수",
   四: "사", 柱: "주", 八: "팔", 字: "자", 年: "년", 月: "월", 日: "일", 時: "시",
   干: "간", 支: "지", 沖: "충", 合: "합", 刑: "형", 破: "파", 害: "해", 運: "운",
 };
@@ -35,6 +35,18 @@ const PATTERN = new RegExp(
 
 /** 글 속 한자를 모두 "음(한자)" 모양으로 바꿔요. 읽는 법을 모르는 한자는 그대로 둬요. */
 export function readingFirst(text: string): string {
+  return friendlyMetal(hanjaToReadingFirst(friendlyMetal(text)));
+}
+
+/** 오행의 금(金)은 쉬운 말로 "쇠"라고 불러요. (금요일·금전 같은 다른 말은 건드리지 않아요) */
+export function friendlyMetal(text: string): string {
+  return text
+    .replace(/금\(金\)/g, "쇠(金)")
+    .replace(/(?<![가-힣])금(?=\s?(?:기운|오행|에너지|의 기운)|[·,]\s?[목화토수쇠])/g, "쇠")
+    .replace(/(?<=[목화토수쇠][·,]\s?)금(?![가-힣])/g, "쇠");
+}
+
+function hanjaToReadingFirst(text: string): string {
   if (!/[\u4e00-\u9fff]/.test(text)) return text;
   return text.replace(PATTERN, (m, h1?: string, k1?: string, k2?: string, h2?: string, h3?: string, h4?: string) => {
     if (h1 && k1) {

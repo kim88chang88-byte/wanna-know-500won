@@ -5,7 +5,7 @@ import ConcernCard from "./ConcernCard";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { checkMessage } from "@/lib/premium/book/resonance";
 import type { BookPage, BookRow, BookTable, ElementKind, PremiumReportView, RealityCheck } from "@/lib/premium/types";
-import { ELEMENT_BOX, elementOfChar } from "@/lib/elementColor";
+import { ELEMENT_BOX, elementOfChar, elName } from "@/lib/elementColor";
 
 /*
  * 프리미엄 20페이지 리포트 리더. 한 번에 한 페이지씩 넘겨 보는 고급스러운 책 형태예요.
@@ -253,8 +253,8 @@ function Visual({ page, report }: { page: BookPage; report: PremiumReportView })
               const top = Math.max(1, ...report.compat!.me.elements.map((x) => x.count), ...report.compat!.partner.elements.map((x) => x.count));
               return (
                 <li key={e.name} data-testid="compat-element-row" className="flex items-center gap-3">
-                  <span className={`w-10 shrink-0 text-center text-xs font-bold rounded-full py-1 border ${HAIR} ${GOLD}`}>{e.name}</span>
-                  <div className="flex-1 space-y-1" role="img" aria-label={`${e.name} 나 ${e.count} 상대 ${o}`}>
+                  <span className={`w-10 shrink-0 text-center text-xs font-bold rounded-full py-1 border ${HAIR} ${GOLD}`}>{elName(e.name)}</span>
+                  <div className="flex-1 space-y-1" role="img" aria-label={`${elName(e.name)} 나 ${e.count} 상대 ${o}`}>
                     <div className="h-2 rounded-full bg-white/10 overflow-hidden">
                       <div className="h-full rounded-full bg-[#e6c887]" style={{ width: `${(e.count / top) * 100}%` }} />
                     </div>
@@ -283,8 +283,8 @@ function Visual({ page, report }: { page: BookPage; report: PremiumReportView })
         <ul className="mb-6 space-y-3">
           {report.elements.map((e) => (
             <li key={e.name} data-testid="element-row" className="flex items-center gap-3">
-              <span className={`w-10 shrink-0 text-center text-xs font-bold rounded-full py-1 border ${HAIR} ${GOLD}`}>{e.name}</span>
-              <div className="flex-1 h-2.5 rounded-full bg-white/10 overflow-hidden" role="img" aria-label={`${e.name} ${e.count}`}>
+              <span className={`w-10 shrink-0 text-center text-xs font-bold rounded-full py-1 border ${HAIR} ${GOLD}`}>{elName(e.name)}</span>
+              <div className="flex-1 h-2.5 rounded-full bg-white/10 overflow-hidden" role="img" aria-label={`${elName(e.name)} ${e.count}`}>
                 <div className={`h-full rounded-full ${BAR[e.kind]}`} style={{ width: `${(e.count / max) * 100}%` }} />
               </div>
               <span className="w-6 text-right text-sm font-bold text-[#f5efe0] tabular-nums">{e.count}</span>

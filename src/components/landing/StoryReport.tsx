@@ -52,7 +52,7 @@ const EL_LABEL: Record<Element, { name: string; icon: string }> = {
   wood: { name: "나무", icon: "🌳" },
   fire: { name: "불", icon: "🔥" },
   earth: { name: "땅", icon: "⛰️" },
-  metal: { name: "금", icon: "🪙" },
+  metal: { name: "쇠", icon: "🪙" },
   water: { name: "물", icon: "💧" },
 };
 const EL_ORDER: Element[] = ["wood", "fire", "earth", "metal", "water"];
