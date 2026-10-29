@@ -30,6 +30,8 @@ function weightsFor(kind: ChartKind, female: boolean): { w: Weights; focus: Grou
     : { w: { 재성: 26, 식상: 5, 관성: 2, 인성: 0, 비겁: -8 }, focus: "재성" };
 }
 
+const ASSET_CAPTION = "10년 단위 대운마다 재물 기운이 얼마나 힘을 받는지를 바탕으로, 20세부터 쌓여 가는 자산을 가상으로 그려 본 재미 시나리오예요. 금액은 사주 흐름의 높낮이를 비율로 바꾼 참고 값이고, 실제 수입·재산이나 투자 결과를 예측하는 것이 아니에요.";
+
 const TEXT: Record<ChartKind, { title: string; caption: string; peak1: string; peak2: string; now: string }> = {
   money: {
     title: "나이별 재물 기운 흐름",
@@ -54,6 +56,36 @@ const TEXT: Record<ChartKind, { title: string; caption: string; peak1: string; p
   },
 };
 
+/** 만원 단위를 "5,000만원", "3.2억", "12억"처럼 읽기 쉽게 */
+export function formatWon(man: number): string {
+  if (man < 10_000) return `${(Math.round(man / 100) * 100).toLocaleString("ko-KR")}만원`;
+  const e = man / 10_000;
+  return `${e < 10 ? e.toFixed(1).replace(/\.0$/, "") : Math.round(e)}억`;
+}
+
+const ASSET_FROM = 20;
+const ASSET_TO = 80;
+
+/**
+ * 재물 흐름을 "가상 누적 자산"으로 바꿔 보여 줘요. 재미로 보는 시나리오예요.
+ * 20세부터 80세까지, 대운마다 기운 지수가 높을수록 더 많이 쌓인다고 보고, 전체 규모는 평균 지수로 정해요(약 3억~25억).
+ */
+function applyAssets(points: BookChartPoint[]): void {
+  const w = points.map((p) => {
+    const years = Math.max(0, Math.min(p.endAge, ASSET_TO) - Math.max(p.age, ASSET_FROM) + 1);
+    return years * Math.pow(p.value / 50, 1.5);
+  });
+  const total = w.reduce((a, b) => a + b, 0);
+  if (total <= 0) return;
+  const avg = points.reduce((a, p) => a + p.value, 0) / points.length;
+  const scale = clamp(40_000 + ((avg - 40) / 55) * 210_000, 30_000, 250_000);
+  let cum = 0;
+  points.forEach((p, i) => {
+    cum += w[i];
+    p.amount = Math.round(((cum / total) * scale) / 100) * 100;
+  });
+}
+
 export function buildLifeChart(r: SajuResult, kind: ChartKind): BookChart | null {
   const list = r.daeun.list;
   if (!list || list.length < 3) return null;
@@ -77,12 +109,22 @@ export function buildLifeChart(r: SajuResult, kind: ChartKind): BookChart | null
   points[first.i].peak = 1;
   if (second) points[second.i].peak = 2;
   const t = TEXT[kind];
+  const asset = kind === "money";
+  if (asset) applyAssets(points);
+  const hasAsset = asset && points.some((p) => (p.amount ?? 0) > 0);
   const range = (p: BookChartPoint) => `${p.age}~${p.endAge}세 (${p.ganzhi} 대운)`;
-  const callouts = [{ label: t.peak1, text: range(points[first.i]) }];
-  if (second) callouts.push({ label: t.peak2, text: range(points[second.i]) });
+  const gain = (i: number) => (points[i].amount ?? 0) - (i > 0 ? (points[i - 1].amount ?? 0) : 0);
+  const peakText = (i: number) => (hasAsset ? `${range(points[i])} · 이 시기에 약 ${formatWon(gain(i))} 늘어요` : range(points[i]));
+  const callouts = [{ label: t.peak1, text: peakText(first.i) }];
+  if (second) callouts.push({ label: t.peak2, text: peakText(second.i) });
   const curP = points.find((p) => p.current);
-  if (curP) callouts.push({ label: t.now, text: `${range(curP)} · 지수 ${curP.value}` });
-  return { title: t.title, caption: t.caption, points, callouts };
+  if (curP) callouts.push({ label: t.now, text: hasAsset ? `${range(curP)} · 이 시기가 끝날 때 약 ${formatWon(curP.amount ?? 0)}` : `${range(curP)} · 지수 ${curP.value}` });
+  const lastP = points[points.length - 1];
+  if (hasAsset && lastP.endAge >= ASSET_TO) {
+    const at80 = points.find((p) => p.endAge >= ASSET_TO) ?? lastP;
+    callouts.push({ label: "80세 무렵", text: `약 ${formatWon(at80.amount ?? 0)}` });
+  }
+  return { mode: hasAsset ? "asset" : "index", title: hasAsset ? "나이별 재물 흐름과 예상 자산" : t.title, caption: hasAsset ? ASSET_CAPTION : t.caption, points, callouts };
 }
 
 /** 잠금 상태: 현재 대운 이후 칸과 풀이 문구는 가려요. */
@@ -90,7 +132,7 @@ export function lockChart(chart: BookChart): BookChart {
   const ci = chart.points.findIndex((p) => p.current);
   return {
     ...chart,
-    points: chart.points.map((p, i) => (ci >= 0 && i > ci ? { age: p.age, endAge: p.endAge, ganzhi: "●●", value: 0, locked: true } : p)),
+    points: chart.points.map((p, i) => (ci >= 0 && i > ci ? { age: p.age, endAge: p.endAge, ganzhi: "●●", value: 0, amount: 0, locked: true } : p)),
     callouts: chart.callouts.filter((c) => c.label === TEXT.money.now || c.label === TEXT.love.now || c.label === TEXT.career.now),
   };
 }

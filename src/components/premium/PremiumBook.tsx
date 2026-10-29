@@ -6,6 +6,7 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import { checkMessage } from "@/lib/premium/book/resonance";
 import type { BookChart, BookPage, BookRow, BookTable, ElementKind, PremiumReportView, RealityCheck } from "@/lib/premium/types";
 import { ELEMENT_BOX, elementOfChar, elName } from "@/lib/elementColor";
+import { formatWon } from "@/lib/premium/book/charts";
 
 /*
  * 프리미엄 20페이지 리포트 리더. 한 번에 한 페이지씩 넘겨 보는 고급스러운 책 형태예요.
@@ -175,9 +176,13 @@ function LifeChart({ chart }: { chart: BookChart }) {
   const bottom = 34;
   const n = chart.points.length;
   const x = (i: number) => padX + (i * (W - padX * 2)) / Math.max(1, n - 1);
-  const y = (v: number) => top + (1 - v / 100) * (H - top - bottom);
+  const asset = chart.mode === "asset";
+  const val = (p: BookChart["points"][number]) => (asset ? (p.amount ?? 0) : p.value);
+  const maxV = asset ? Math.max(1, ...chart.points.map((p) => p.amount ?? 0)) : 100;
+  const y = (v: number) => top + (1 - v / maxV) * (H - top - bottom);
   const open = chart.points.map((p, i) => ({ p, i })).filter((q) => !q.p.locked);
-  const line = open.map((q, k) => `${k === 0 ? "M" : "L"}${x(q.i).toFixed(1)} ${y(q.p.value).toFixed(1)}`).join(" ");
+  const lastOpen = open.length ? open[open.length - 1].i : -1;
+  const line = open.map((q, k) => `${k === 0 ? "M" : "L"}${x(q.i).toFixed(1)} ${y(val(q.p)).toFixed(1)}`).join(" ");
   const last = open[open.length - 1];
   const area = open.length > 1 ? `${line} L${x(last.i).toFixed(1)} ${(H - bottom).toFixed(1)} L${x(open[0].i).toFixed(1)} ${(H - bottom).toFixed(1)} Z` : "";
   return (
@@ -191,7 +196,7 @@ function LifeChart({ chart }: { chart: BookChart }) {
           </linearGradient>
         </defs>
         {[25, 50, 75].map((g) => (
-          <line key={g} x1={padX} x2={W - padX} y1={y(g)} y2={y(g)} stroke="#ffffff" strokeOpacity="0.1" strokeDasharray="3 4" />
+          <line key={g} x1={padX} x2={W - padX} y1={y((g / 100) * maxV)} y2={y((g / 100) * maxV)} stroke="#ffffff" strokeOpacity="0.1" strokeDasharray="3 4" />
         ))}
         {area && <path d={area} fill="url(#lifeArea)" />}
         {line && <path d={line} fill="none" stroke="#e6c887" strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" />}
@@ -204,19 +209,22 @@ function LifeChart({ chart }: { chart: BookChart }) {
               </>
             ) : (
               <>
-                <circle cx={x(i)} cy={y(p.value)} r={p.current ? 5.5 : p.peak ? 5 : 3.2} fill={p.peak === 1 ? "#f6dfa8" : p.current ? "#ffffff" : "#e6c887"} stroke={p.current ? "#e6c887" : "none"} strokeWidth="2" />
+                <circle cx={x(i)} cy={y(val(p))} r={p.current ? 5.5 : p.peak ? 5 : 3.2} fill={p.peak === 1 ? "#f6dfa8" : p.current ? "#ffffff" : "#e6c887"} stroke={p.current ? "#e6c887" : "none"} strokeWidth="2" />
                 {p.current && (
-                  <text x={x(i)} y={y(p.value) - 10} textAnchor="middle" fontSize="10" fontWeight="700" fill="#ffffff">지금</text>
+                  <text x={x(i)} y={y(val(p)) - 10} textAnchor="middle" fontSize="10" fontWeight="700" fill="#ffffff">지금</text>
                 )}
                 {p.peak && !p.current && (
-                  <text x={x(i)} y={y(p.value) - 9} textAnchor="middle" fontSize="10" fontWeight="700" fill="#f6dfa8">{p.peak === 1 ? "★" : "☆"}</text>
+                  <text x={x(i)} y={y(val(p)) - 9} textAnchor="middle" fontSize="10" fontWeight="700" fill="#f6dfa8">{p.peak === 1 ? "★" : "☆"}</text>
+                )}
+                {asset && (p.current || p.peak === 1 || i === lastOpen) && (
+                  <text x={Math.min(Math.max(x(i), 26), W - 26)} y={y(val(p)) + (p.current || p.peak ? 17 : -9)} textAnchor="middle" fontSize="9.5" fontWeight="700" fill="#f3e7c9">{formatWon(p.amount ?? 0)}</text>
                 )}
               </>
             )}
             <text x={x(i)} y={H - 16} textAnchor="middle" fontSize="9.5" fill="#e8dfca" fillOpacity="0.85">{p.age}</text>
           </g>
         ))}
-        <text x={W - padX} y={H - 3} textAnchor="end" fontSize="9" fill="#e8dfca" fillOpacity="0.6">나이(세, 대운 시작 기준)</text>
+        <text x={W - padX} y={H - 3} textAnchor="end" fontSize="9" fill="#e8dfca" fillOpacity="0.6">{asset ? "나이(세, 대운 시작 기준) · 세로: 가상 누적 자산" : "나이(세, 대운 시작 기준)"}</text>
       </svg>
       <ul className="mt-2 space-y-1">
         {chart.callouts.map((c) => (

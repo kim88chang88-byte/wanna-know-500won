@@ -97,6 +97,8 @@ export interface BookChartPoint {
   ganzhi: string;
   /** 0~100 상대 지수 (실제 금액·확률이 아니에요) */
   value: number;
+  /** 재물 그래프에서만: 이 시기가 끝날 때의 가상 누적 자산(만원). 재미로 보는 시나리오이고 실제 재산 예측이 아니에요. */
+  amount?: number;
   current?: boolean;
   /** 가장 힘이 실리는 시기 순위(1, 2) */
   peak?: 1 | 2;
@@ -104,6 +106,8 @@ export interface BookChartPoint {
 }
 /** 나이별 재물·인연·일 흐름 그래프 */
 export interface BookChart {
+  /** "asset" 이면 세로축이 가상 누적 자산(만원), 아니면 0~100 지수 */
+  mode?: "index" | "asset";
   title: string;
   caption: string;
   points: BookChartPoint[];
