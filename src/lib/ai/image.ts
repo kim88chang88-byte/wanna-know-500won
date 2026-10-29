@@ -26,16 +26,42 @@ export function isElement5(v: string | null | undefined): v is Element5 {
   return v === "wood" || v === "fire" || v === "earth" || v === "metal" || v === "water";
 }
 
-export function spousePrompt(partner: "male" | "female", element: Element5): string {
+/** 결과 이미지 속 인물의 연령대(영어 표현). 규칙은 docs/PARTNER_IMAGE.md 에 있어요. */
+export type PartnerAge = "late 20s" | "mid 30s" | "early 40s";
+
+/**
+ * 이용자의 성별·만 나이로 결과 이미지 속 인물의 연령대를 정해요. (docs/PARTNER_IMAGE.md)
+ * 미성년자(만 19세 미만)에게는 이미지를 만들지 않아요(null). 인물 이미지는 항상 성인이에요.
+ */
+export function partnerAgeFor(userGender: "male" | "female", userAge: number): PartnerAge | null {
+  if (!Number.isFinite(userAge) || userAge < 20) return null;
+  if (userGender === "male") {
+    if (userAge < 50) return "late 20s";
+    if (userAge < 60) return "mid 30s";
+    return "early 40s";
+  }
+  if (userAge < 30) return "late 20s";
+  if (userAge < 40) return "mid 30s";
+  return "early 40s";
+}
+
+/** 생년월일(양력)과 기준일로 만 나이를 구해요. */
+export function ageOn(birth: { year: number; month: number; day: number }, now: Date): number {
+  let age = now.getFullYear() - birth.year;
+  if (now.getMonth() + 1 < birth.month || (now.getMonth() + 1 === birth.month && now.getDate() < birth.day)) age--;
+  return age;
+}
+
+export function spousePrompt(partner: "male" | "female", element: Element5, age: PartnerAge = "late 20s"): string {
   const look = LOOK[element];
   const base =
     partner === "female"
-      ? `A photorealistic portrait photo of a beautiful young Korean woman in her late 20s, black long hair tied back with a few loose strands, a warm natural smile, wearing a ${look.hanbok} with delicate hair ornaments, outdoors in soft golden-hour sunlight with creamy bokeh background, shot on an 85mm lens, shallow depth of field.`
-      : `A photorealistic close-up portrait photo of a handsome young Korean man in his late 20s, black side-swept hair, clean fair skin, calm slightly shy expression, wearing a ${look.suit} with a white shirt, soft indoor window light, shot on a 50mm lens, shallow depth of field.`;
+      ? `A photorealistic portrait photo of a beautiful Korean woman in her ${age}, black long hair tied back with a few loose strands, a warm natural smile, wearing a ${look.hanbok} with delicate hair ornaments, outdoors in soft golden-hour sunlight with creamy bokeh background, shot on an 85mm lens, shallow depth of field.`
+      : `A photorealistic close-up portrait photo of a handsome Korean man in his ${age}, black side-swept hair, clean skin, calm slightly shy expression, wearing a ${look.suit} with a white shirt, soft indoor window light, shot on a 50mm lens, shallow depth of field.`;
   return [
     base,
     `Mood: ${look.mood}.`,
-    "Natural skin texture, realistic eyes, 3:4 vertical framing.",
+    "Natural skin texture, realistic eyes, 3:4 vertical framing. The person is clearly an adult.",
     "An entirely fictional person who does not resemble any real person or celebrity. No text, no letters, no logo, no watermark, no captions.",
   ].join(" ");
 }
