@@ -3,6 +3,7 @@ import { buildTopicInsight } from "../topic";
 import type { BookPage, BookRow, BookSection, TopicKey } from "../types";
 import { buildBook, type BookContext } from "./index";
 import { STAGE12_TEXT } from "./dict";
+import { buildLifeChart, type ChartKind } from "./charts";
 
 /*
  * 프리미엄 20쪽 리포트. 기존 규칙 기반 10쪽 빌더(buildBook)의 내용을 장 구성에 맞게 다시 묶어요.
@@ -65,9 +66,11 @@ function pageBy(pages: BookPage[], key: string): BookPage {
 export function buildBook20(r: SajuResult, ctx: BookContext): BookPage[] {
   const base = buildBook(r, ctx);
   const get = (k: string) => fixRefs(pageBy(base, k));
-  const topicPage = (k: TopicKey): BookPage => {
+  const topicPage = (k: TopicKey, chartKind?: ChartKind): BookPage => {
     const insight = buildTopicInsight(k, r, { elements: ctx.elements, hourUnknown: ctx.hourUnknown, level: "full" });
-    return fixRefs(pageBy(buildBook(r, { ...ctx, topicKey: k, insight }), "topic"));
+    const page = fixRefs(pageBy(buildBook(r, { ...ctx, topicKey: k, insight }), "topic"));
+    const chart = chartKind ? buildLifeChart(r, chartKind) : null;
+    return chart ? { ...page, chart } : page;
   };
 
   const overview = get("overview");
@@ -139,9 +142,9 @@ export function buildBook20(r: SajuResult, ctx: BookContext): BookPage[] {
       tables: [],
     },
     { key: "gui", title: "제6장 · 나를 도와주는 귀인들 - 귀인 분석", subtitle: "CHAPTER 6", lead: "내가 힘들 때 곁에서 힘이 되어 줄 기운을 찾아봐요.", sections: guiBase, tables: [] },
-    { ...topicPage("money"), key: "topic:money", title: "제7장 · 재물운", subtitle: "CHAPTER 7" },
-    { ...topicPage("love"), key: "topic:love", title: "제8장 · 연애 & 결혼운", subtitle: "CHAPTER 8" },
-    { ...topicPage("success"), key: "topic:career", title: "제9장 · 직업운", subtitle: "CHAPTER 9" },
+    { ...topicPage("money", "money"), key: "topic:money", title: "제7장 · 재물운", subtitle: "CHAPTER 7" },
+    { ...topicPage("love", "love"), key: "topic:love", title: "제8장 · 연애 & 결혼운", subtitle: "CHAPTER 8" },
+    { ...topicPage("success", "career"), key: "topic:career", title: "제9장 · 직업운", subtitle: "CHAPTER 9" },
     { ...topicPage("health"), key: "topic:health", title: "제10장 · 건강운", subtitle: "CHAPTER 10" },
     { ...geukguk, title: "부록 · 격국과 용신", subtitle: "APPENDIX 1" },
     { ...daeun, title: "부록 · 대운 — 10년 단위의 큰 흐름", subtitle: "APPENDIX 2" },

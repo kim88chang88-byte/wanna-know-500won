@@ -1,4 +1,5 @@
 import type { BookPage, BookRow, BookSection } from "../types";
+import { lockChart } from "./charts";
 
 /*
  * 궁금증을 남기는 잠금. 페이지마다 앞부분(핵심 진단)은 열어 두고, '구체적인 처방·흐름·타이밍' 풀이를 잠가요.
@@ -124,6 +125,7 @@ export function applyLocks(pages: BookPage[], year: number): BookPage[] {
     const rules = rulesFor(p, year);
     return {
       ...p,
+      ...(p.chart ? { chart: lockChart(p.chart) } : {}),
       sections: p.sections.map((s, n) => {
         const r = rules.sec(s, n);
         return r.lock ? lockSection(s, r.heading) : s;
@@ -150,6 +152,7 @@ export function previewBlank(pages: BookPage[], fromNo: number): BookPage[] {
       note: undefined,
       advice: undefined,
       evidence: undefined,
+      chart: undefined,
       sections: p.sections.map((s) => lockSection(s)),
       tables: p.tables.map((t) => ({ ...t, rows: t.rows.map(lockRow) })),
     };

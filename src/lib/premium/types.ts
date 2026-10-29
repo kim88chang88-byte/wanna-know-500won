@@ -87,6 +87,28 @@ export interface BookTable {
   title: string;
   rows: BookRow[];
 }
+/** 나이(대운)별 기운 흐름 그래프의 한 점 */
+export interface BookChartPoint {
+  /** 시작 나이 (예: 29) */
+  age: number;
+  /** 구간 끝 나이 */
+  endAge: number;
+  /** 대운 간지 */
+  ganzhi: string;
+  /** 0~100 상대 지수 (실제 금액·확률이 아니에요) */
+  value: number;
+  current?: boolean;
+  /** 가장 힘이 실리는 시기 순위(1, 2) */
+  peak?: 1 | 2;
+  locked?: boolean;
+}
+/** 나이별 재물·인연·일 흐름 그래프 */
+export interface BookChart {
+  title: string;
+  caption: string;
+  points: BookChartPoint[];
+  callouts: Array<{ label: string; text: string }>;
+}
 /** 프리미엄 리포트의 한 페이지 */
 export interface BookPage {
   no: number;
@@ -103,6 +125,8 @@ export interface BookPage {
   evidence?: BookRow[];
   sections: BookSection[];
   tables: BookTable[];
+  /** 나이별 기운 흐름 그래프 (재물·연애·직업 장) */
+  chart?: BookChart;
 }
 
 /** basic: 일반 자판기(원국·오행·신강신약) / full: 프리미엄(격국·용신·대운·세운 포함) */

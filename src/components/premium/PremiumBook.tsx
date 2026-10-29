@@ -4,7 +4,7 @@ import { PREVIEW_OPEN_PAGES } from "@/lib/premium/config";
 import ConcernCard from "./ConcernCard";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { checkMessage } from "@/lib/premium/book/resonance";
-import type { BookPage, BookRow, BookTable, ElementKind, PremiumReportView, RealityCheck } from "@/lib/premium/types";
+import type { BookChart, BookPage, BookRow, BookTable, ElementKind, PremiumReportView, RealityCheck } from "@/lib/premium/types";
 import { ELEMENT_BOX, elementOfChar, elName } from "@/lib/elementColor";
 
 /*
@@ -166,7 +166,72 @@ function Table({ t }: { t: BookTable }) {
   );
 }
 
+/** 나이(대운)별 기운 흐름 그래프. 점이 높을수록 그 시기에 그 기운이 힘을 받아요. (상대 지수) */
+function LifeChart({ chart }: { chart: BookChart }) {
+  const W = 320;
+  const H = 176;
+  const padX = 14;
+  const top = 26;
+  const bottom = 34;
+  const n = chart.points.length;
+  const x = (i: number) => padX + (i * (W - padX * 2)) / Math.max(1, n - 1);
+  const y = (v: number) => top + (1 - v / 100) * (H - top - bottom);
+  const open = chart.points.map((p, i) => ({ p, i })).filter((q) => !q.p.locked);
+  const line = open.map((q, k) => `${k === 0 ? "M" : "L"}${x(q.i).toFixed(1)} ${y(q.p.value).toFixed(1)}`).join(" ");
+  const last = open[open.length - 1];
+  const area = open.length > 1 ? `${line} L${x(last.i).toFixed(1)} ${(H - bottom).toFixed(1)} L${x(open[0].i).toFixed(1)} ${(H - bottom).toFixed(1)} Z` : "";
+  return (
+    <div data-testid="life-chart">
+      <p className={`text-[12px] font-bold tracking-[0.12em] ${GOLD}`}>{chart.title}</p>
+      <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={chart.title} className="mt-2 w-full">
+        <defs>
+          <linearGradient id="lifeArea" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#e6c887" stopOpacity="0.45" />
+            <stop offset="100%" stopColor="#e6c887" stopOpacity="0" />
+          </linearGradient>
+        </defs>
+        {[25, 50, 75].map((g) => (
+          <line key={g} x1={padX} x2={W - padX} y1={y(g)} y2={y(g)} stroke="#ffffff" strokeOpacity="0.1" strokeDasharray="3 4" />
+        ))}
+        {area && <path d={area} fill="url(#lifeArea)" />}
+        {line && <path d={line} fill="none" stroke="#e6c887" strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" />}
+        {chart.points.map((p, i) => (
+          <g key={i}>
+            {p.locked ? (
+              <>
+                <circle cx={x(i)} cy={y(40)} r="4" fill="none" stroke="#ffffff" strokeOpacity="0.35" strokeDasharray="2 2" />
+                <text x={x(i)} y={y(40) - 8} textAnchor="middle" fontSize="9" fill="#ffffff" fillOpacity="0.5">🔒</text>
+              </>
+            ) : (
+              <>
+                <circle cx={x(i)} cy={y(p.value)} r={p.current ? 5.5 : p.peak ? 5 : 3.2} fill={p.peak === 1 ? "#f6dfa8" : p.current ? "#ffffff" : "#e6c887"} stroke={p.current ? "#e6c887" : "none"} strokeWidth="2" />
+                {p.current && (
+                  <text x={x(i)} y={y(p.value) - 10} textAnchor="middle" fontSize="10" fontWeight="700" fill="#ffffff">지금</text>
+                )}
+                {p.peak && !p.current && (
+                  <text x={x(i)} y={y(p.value) - 9} textAnchor="middle" fontSize="10" fontWeight="700" fill="#f6dfa8">{p.peak === 1 ? "★" : "☆"}</text>
+                )}
+              </>
+            )}
+            <text x={x(i)} y={H - 16} textAnchor="middle" fontSize="9.5" fill="#e8dfca" fillOpacity="0.85">{p.age}</text>
+          </g>
+        ))}
+        <text x={W - padX} y={H - 3} textAnchor="end" fontSize="9" fill="#e8dfca" fillOpacity="0.6">나이(세, 대운 시작 기준)</text>
+      </svg>
+      <ul className="mt-2 space-y-1">
+        {chart.callouts.map((c) => (
+          <li key={c.label} className="text-[12.5px] leading-relaxed text-[#f5efe0]">
+            <span className={`font-bold ${GOLD}`}>{c.label}</span> · {c.text}
+          </li>
+        ))}
+      </ul>
+      <p className="mt-2 text-[11px] leading-relaxed text-[#e8dfca]/60">{chart.caption}</p>
+    </div>
+  );
+}
+
 function Visual({ page, report }: { page: BookPage; report: PremiumReportView }) {
+  if (page.chart) return <LifeChart chart={page.chart} />;
   const max = Math.max(1, ...report.elements.map((e) => e.count));
   switch (page.key) {
     case "pillars":
