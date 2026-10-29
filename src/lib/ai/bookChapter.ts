@@ -158,7 +158,7 @@ export function parseChapterWhy(value: unknown, headings: string[]): { sections:
     if (/[○◯]{2}/.test(body)) return { sections: null, why: `자리표시(${tag})` };
     // 굵은 글씨가 본문의 대부분이면 강조가 아니라서 버려요.
     const boldLen = (body.match(/\*\*[^*]+\*\*/g) ?? []).reduce((n, m) => n + m.length - 4, 0);
-    if (boldLen / body.length > CHAPTER_MAX_BOLD_RATIO) return { sections: null, why: `굵은글씨 과다(${tag})` };
+    if (!isShort && boldLen / body.length > CHAPTER_MAX_BOLD_RATIO) return { sections: null, why: `굵은글씨 과다(${tag})` };
     out.push({ heading: headings[i], body });
   }
   return { sections: out, why: "" };
