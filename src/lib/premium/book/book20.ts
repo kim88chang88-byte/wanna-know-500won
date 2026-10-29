@@ -115,7 +115,7 @@ export function buildBook20(r: SajuResult, ctx: BookContext): BookPage[] {
     { heading: CONCERN_TOP_BRIDGE, body: `이 결론은 갑자기 나온 말이 아니라, 타고난 사주 구조에서 나온 거예요. 그래서 먼저 사주팔자가 무엇인지, 내 여덟 글자는 어떻게 생겼는지, 어떤 기질로 어떤 흐름을 지나는지를 차근차근 설명해 드릴게요. 원리를 알고 나면 이 결론이 훨씬 또렷하게 와닿을 거예요. 그리고 맨 뒤 19쪽에서는 이 고민에 대한 더 길고 자세한 답을 다시 이어서 드릴게요.` },
   ];
   const seq: Array<{ key: string; title: string; subtitle: string; lead: string; sections: BookSection[]; tables: BookPage["tables"]; extra?: Partial<BookPage> }> = [
-    { key: "concernTop", title: "먼저 결론부터 · 나의 핵심 답", subtitle: "OPENING", lead: ctx.insight.headline, sections: concernTopSections, tables: [] },
+    { key: "concernTop", title: "먼저 결론부터 · 당신의 고민에 대한 해답", subtitle: "OPENING", lead: ctx.insight.headline, sections: concernTopSections, tables: [] },
     { key: "preface", title: "서문 · 사주팔자, 쉽게 알아보기", subtitle: "PREFACE · 01", lead: "여덟 글자가 말해 주는 것, 일상의 말로 풀어 드려요.", sections: PREFACE, tables: [] },
     { ...overview, title: "서문 · 나의 사주 한눈에 보기", subtitle: "PREFACE · 02", sections: [...overview.sections, ...PREFACE2], tables: overview.tables, extra: { evidence: overview.evidence } },
     { ...pillars, title: "제1장 · 나의 사주팔자", subtitle: "CHAPTER 1", tables: pillars.tables },
