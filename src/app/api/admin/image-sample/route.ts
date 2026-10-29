@@ -41,7 +41,7 @@ export async function GET(request: Request) {
   const usd = estimateCostUsd(r.usage);
   const krw = Math.round(usd * (Number(process.env.USD_KRW) || DEFAULT_USD_KRW));
   return page(`
-    <h2>상상 속 인연 일러스트 (표본)</h2>
+    <h2>상상 속 인연 이미지 (표본)</h2>
     <img alt="생성된 일러스트" src="data:${esc(r.mime)};base64,${r.base64}">
     <table>
       <tr><td>모델</td><td>${esc(r.model)}</td></tr>
@@ -50,7 +50,7 @@ export async function GET(request: Request) {
       <tr><td>어림 비용</td><td><b>약 $${usd.toFixed(3)} (약 ${krw.toLocaleString("ko-KR")}원)</b></td></tr>
     </table>
     <p style="font-size:12px;color:#666">어림 단가: 이미지 출력 100만 토큰당 $60, 입력 $0.5 (실제 청구는 Google AI Studio 요금표 기준)</p>
-    <p style="font-size:12px;color:#666">가상의 일러스트예요. 실제 사람이 아니에요.</p>
+    <p style="font-size:12px;color:#666">AI가 만든 가상의 인물이에요. 실제 사람이 아니에요.</p>
     <p><code>${esc(prompt)}</code></p>
     <p><a href="?partner=${partner === "male" ? "female" : "male"}&el=${el}">${partner === "male" ? "여성" : "남성"}으로 다시</a> · <a href="?partner=${partner}&el=fire">불</a> · <a href="?partner=${partner}&el=wood">나무</a> · <a href="?partner=${partner}&el=earth">땅</a> · <a href="?partner=${partner}&el=metal">쇠</a> · <a href="?partner=${partner}&el=water">물</a></p>
   `);

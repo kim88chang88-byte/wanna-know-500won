@@ -8,10 +8,12 @@ const okBody = {
 const resp = (status: number, body: unknown) => new Response(JSON.stringify(body), { status });
 
 describe("이미지 생성", () => {
-  it("프롬프트에 성별·분위기가 들어가고 실제 사람이 아니라고 적는다", () => {
+  it("프롬프트에 성별·분위기가 들어가고 가상의 인물이라고 적는다", () => {
     const p = spousePrompt("female", "water");
     expect(p).toMatch(/woman/);
-    expect(p).toMatch(/not a real person/);
+    expect(p).toMatch(/entirely fictional person/);
+    expect(p).toMatch(/photorealistic/);
+    expect(p).toMatch(/no watermark/);
     expect(spousePrompt("male", "fire")).toMatch(/man/);
   });
   it("토큰으로 어림 비용을 계산한다", () => {

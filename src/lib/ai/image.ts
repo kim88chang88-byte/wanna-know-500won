@@ -1,6 +1,6 @@
 /*
- * Gemini 이미지 생성 (표본용). "사주로 그려 보는 상상 속 인연" 일러스트 한 장을 만들고, 쓴 토큰으로 비용을 어림해요.
- * 실제 사람 사진이 아니라 가상의 웹툰풍 일러스트예요.
+ * Gemini 이미지 생성 (표본용). "사주로 그려 보는 상상 속 인연" 이미지 한 장을 만들고, 쓴 토큰으로 비용을 어림해요.
+ * 실제 사람이 아닌 가상의 인물 사진풍 이미지예요.
  */
 
 /** 모델 이름은 바뀔 수 있어서, 환경변수(GEMINI_IMAGE_MODEL)가 있으면 그것부터, 없으면 아래 순서로 시도해요. */
@@ -13,12 +13,13 @@ export const DEFAULT_USD_KRW = 1400;
 
 export type Element5 = "wood" | "fire" | "earth" | "metal" | "water";
 
-const LOOK: Record<Element5, string> = {
-  wood: "tall and slender, gently straight eyebrows, warm kind eyes, fresh youthful aura, soft green accents in clothing",
-  fire: "bright expressive eyes, lively warm smile, charismatic presence, warm orange and soft red tones",
-  earth: "calm steady expression, soft rounded face, reliable gentle gaze, warm earthy yellow and brown tones",
-  metal: "clean sharp features, neat refined look, composed cool expression, white and silver tones",
-  water: "deep calm eyes, soft mysterious mood, smooth dark hair, navy and soft blue tones",
+/** 오행별 인상(얼굴 분위기)과 옷 색 */
+const LOOK: Record<Element5, { mood: string; hanbok: string; suit: string }> = {
+  wood: { mood: "fresh youthful aura, gentle straight eyebrows, warm kind eyes", hanbok: "soft jade-green and ivory hanbok", suit: "dark forest-green-gray suit with a deep green striped tie" },
+  fire: { mood: "bright lively smile, expressive sparkling eyes, charismatic warmth", hanbok: "vivid crimson red hanbok with white trim", suit: "charcoal suit with a deep burgundy tie" },
+  earth: { mood: "calm steady gaze, soft rounded face, reliable gentle expression", hanbok: "warm ochre-yellow and cream hanbok", suit: "warm camel-beige suit with a brown tie" },
+  metal: { mood: "clean refined features, composed elegant expression, neat polished look", hanbok: "pearl white and silver-gray hanbok", suit: "light gray suit with a silver-blue tie" },
+  water: { mood: "deep calm eyes, soft mysterious mood, quiet intelligent charm", hanbok: "deep navy and soft sky-blue hanbok", suit: "dark navy-gray suit with a navy striped tie" },
 };
 
 export function isElement5(v: string | null | undefined): v is Element5 {
@@ -26,12 +27,16 @@ export function isElement5(v: string | null | undefined): v is Element5 {
 }
 
 export function spousePrompt(partner: "male" | "female", element: Element5): string {
-  const who = partner === "male" ? "a handsome Korean man" : "a beautiful Korean woman";
+  const look = LOOK[element];
+  const base =
+    partner === "female"
+      ? `A photorealistic portrait photo of a beautiful young Korean woman in her late 20s, black long hair tied back with a few loose strands, a warm natural smile, wearing a ${look.hanbok} with delicate hair ornaments, outdoors in soft golden-hour sunlight with creamy bokeh background, shot on an 85mm lens, shallow depth of field.`
+      : `A photorealistic close-up portrait photo of a handsome young Korean man in his late 20s, black side-swept hair, clean fair skin, calm slightly shy expression, wearing a ${look.suit} with a white shirt, soft indoor window light, shot on a 50mm lens, shallow depth of field.`;
   return [
-    `A soft Korean webtoon-style illustration portrait of ${who}, an entirely fictional adult in their early 30s.`,
-    `Appearance and mood: ${LOOK[element]}.`,
-    "Head-and-shoulders composition, gentle friendly expression, delicate watercolor texture, clean plain pastel background.",
-    "No text, no letters, no watermark, not a photograph, not a real person.",
+    base,
+    `Mood: ${look.mood}.`,
+    "Natural skin texture, realistic eyes, 3:4 vertical framing.",
+    "An entirely fictional person who does not resemble any real person or celebrity. No text, no letters, no logo, no watermark, no captions.",
   ].join(" ");
 }
 
