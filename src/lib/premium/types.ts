@@ -180,6 +180,8 @@ export interface PremiumReportView {
   compat: CompatView | null;
   /** 연애·결혼운 쪽에 붙는 상상 속 인연 이미지(AI). 글과 따로 받아서 끼워 넣어요. 없으면 안 보여요 */
   partnerImage?: PartnerImageView | null;
+  /** 글 속에서 부르는 이름(로그인 닉네임). 없으면 null/생략 */
+  viewerName?: string | null;
 }
 
 export interface PartnerImageView {

@@ -440,7 +440,8 @@ function titleParts(title: string): { small: string; main: string; sub: string }
 }
 
 /** 맨 앞 "먼저 결론부터" 쪽의 도리 말풍선(고정 문구) */
-export const OPENING_BUBBLE = "도리사주는 다른 사주 서비스와는 다르게 빙빙 돌려 말하지 않고 핵심 결론부터 먼저 말씀드리는 차별점이 있어요. 자, 그럼 지금부터 당신의 고민을 어떻게 해결하면 좋을지 그 해답을 알아볼까요?";
+export const openingBubble = (name?: string | null) => `안녕하세요, ${name ? `${name}님, ` : ""}너무 반가워요! ${OPENING_BODY}`;
+const OPENING_BODY = "도리사주는 다른 사주 서비스와는 다르게 빙빙 돌려 말하지 않고 핵심 결론부터 먼저 말씀드리는 차별점이 있어요. 자, 그럼 지금부터 당신의 고민을 어떻게 해결하면 좋을지 그 해답을 알아볼까요?";
 
 const BUBBLE =
   "relative max-w-[78%] rounded-[22px] border-2 border-[#20203a] bg-[#fffdf7] px-4 py-3.5 text-[15px] font-medium leading-[1.55] text-[#26233a] after:absolute after:bottom-3.5 after:h-3.5 after:w-3.5 after:bg-[#fffdf7] after:content-['']";
@@ -632,7 +633,7 @@ export default function PremiumBook({ report, flush = false, finale, previewBlur
 
         {/* 도리 한 마리에 말풍선 하나: AI 한 줄이 있으면 그것을, 없으면 쪽 첫 문장을 보여요. */}
         <div data-testid={page.key === "concernTop" ? "book-opening" : page.note ? "book-note" : "book-lead"}>
-          <BubbleRow text={page.key === "concernTop" ? OPENING_BUBBLE : page.note ? `도리의 한 줄 · ${page.note}` : page.lead} img={pic} />
+          <BubbleRow text={page.key === "concernTop" ? openingBubble(report.viewerName) : page.note ? `도리의 한 줄 · ${page.note}` : page.lead} img={pic} />
         </div>
 
         {/* 손님이 고른 고민에 대한 답은 첫 쪽 위가 아니라, 같은 주제를 다루는 '요즘 고민 맞춤 풀이' 쪽에 둬요. */}

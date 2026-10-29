@@ -54,6 +54,7 @@ export async function POST(request: Request) {
     const report = buildPremiumReport(parsed.value, new Date(), parsed.level, parsed.topic, lock, parsed.concern, parsed.partner);
     // 프리미엄(전체) 리포트에는 쪽마다 AI 가 쓴 '도리의 한 줄'을 붙이고, 재물운 장은 AI 가 이 사람 이야기로 다시 써요.
     // 키가 없거나 한도를 넘거나 실패하면 그 부분만 빠지고 기존 풀이가 그대로 나가요.
+    report.viewerName = chapterName(session?.nick);
     let chapterNote = "skip";
     const usage = { in: 0, out: 0, calls: 0 };
     if (parsed.level === "full" && report.book.length > 0 && hasAiKey() && !aiGated) {
@@ -67,9 +68,9 @@ export async function POST(request: Request) {
         try {
           const gate = await takeAiBudget(process.env, db);
           if (gate === "ok") {
-            if (!preview) return await addBookNotes(book0, { kind: parsed.partner ? "compat" : "personal", concern: parsed.concern });
+            if (!preview) return await addBookNotes(book0, { kind: parsed.partner ? "compat" : "personal", concern: parsed.concern, name: chapterName(session?.nick) });
             const head = book0.filter((p) => p.no < PREVIEW_OPEN_PAGES);
-            const done = await addBookNotes(head, { kind: parsed.partner ? "compat" : "personal", concern: parsed.concern });
+            const done = await addBookNotes(head, { kind: parsed.partner ? "compat" : "personal", concern: parsed.concern, name: chapterName(session?.nick) });
             return book0.map((p) => done.find((d) => d.no === p.no) ?? p);
           }
         } catch (err) {
