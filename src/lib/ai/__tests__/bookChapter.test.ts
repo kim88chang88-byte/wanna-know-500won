@@ -58,9 +58,9 @@ describe("장 구성", () => {
       expect(spec.roles.map(([h]) => h), k).toEqual(heads);
     }
   });
-  it("주제 장(재물·연애·직업·건강)은 8개 소제목이에요", () => {
+  it("주제 장(재물·연애·직업·건강)은 10개 소제목이에요", () => {
     for (const k of ["topic:money", "topic:love", "topic:career", "topic:health"]) {
-      expect(CHAPTER_SPECS[k].parts.flatMap((p) => p.headings)).toHaveLength(8);
+      expect(CHAPTER_SPECS[k].parts.flatMap((p) => p.headings)).toHaveLength(10);
     }
   });
   it("문장이 길어진 본문(1000자 안팎)도 받아요", () => {
