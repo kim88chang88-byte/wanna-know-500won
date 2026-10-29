@@ -80,7 +80,7 @@ describe("고민 결론 쪽과 합친 십성 장", () => {
     expect(CHAPTER_SPECS.concern.parts.flatMap((p) => p.headings)).toHaveLength(10);
   });
   it("'먼저 결론부터'는 조금 짧아도 받아요", () => {
-    const body = "결론부터 말씀드리면 **지금은 서두르지 않는 쪽**이 맞아요. 일간이 단단해서 한번 정하면 오래 가는 구조라서요. 이번 달에는 후보를 두 개로 줄여 보세요. 그러면 선택이 훨씬 쉬워져요.";
+    const body = "결론부터 말씀드리면 **지금은 서두르지 않는 쪽**이 맞아요. 일간이 단단해서 한번 정하면 오래 가는 구조라서요. 이번 달에는 후보를 두 개로 줄여 보세요. 그러면 선택이 훨씬 쉬워져요. 다음 달 초에는 두 후보를 직접 만나 보고, 마음이 더 편한 쪽을 고르면 후회가 적어요.";
     expect(body.length).toBeGreaterThan(120);
     expect(parseChapter({ sections: [{ heading: "먼저 결론부터", body }] }, ["먼저 결론부터"])).not.toBeNull();
   });
