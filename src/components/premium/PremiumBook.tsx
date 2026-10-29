@@ -465,7 +465,7 @@ function BubbleRow({ text, img, right = false }: { text: string; img: string; ri
 function ChapterCover({ page, mascot }: { page: BookPage; mascot: Mascot }) {
   const t = titleParts(page.title);
   return (
-    <section data-testid="chapter-cover" aria-label={`${page.title} 표지`} className="relative flex aspect-[3/4] flex-col justify-between overflow-hidden rounded-[14px] bg-gradient-to-b from-[#0b0e22] to-[#1d2350] px-5 pt-7">
+    <section data-testid="chapter-cover" aria-label={`${page.title} 표지`} className="relative flex aspect-[3/4] flex-col justify-start overflow-hidden rounded-[14px] bg-gradient-to-b from-[#0b0e22] to-[#1d2350] px-5 pt-7">
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img src={sceneOf(mascot)} alt="" className="absolute inset-0 h-full w-full object-cover opacity-90" />
       <div className="absolute inset-0 bg-gradient-to-b from-[#0b0e22]/80 via-transparent to-[#0b0e22]/55" />
@@ -474,11 +474,6 @@ function ChapterCover({ page, mascot }: { page: BookPage; mascot: Mascot }) {
         <b className="mt-2 block font-serifKr text-[30px] leading-tight text-[#fbf3de]">{t.main}</b>
         {t.sub && <span className="mt-1.5 block text-[13px] text-[#e8dfca]">{t.sub}</span>}
         <i className="mx-auto mt-2.5 block h-px w-24 bg-[#e6c887]/70" />
-      </div>
-      <div className="relative z-[1] flex items-end gap-2.5 pb-5">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={avatarOf(mascot)} alt="" width={84} height={84} className="h-[84px] w-[84px] shrink-0 object-contain" />
-        <p className={`${BUBBLE} after:-left-[9px] after:rotate-45 after:border-b-2 after:border-l-2 after:border-[#20203a]`}>이번 장에서는 ‘{t.main}’ 이야기를 함께 살펴볼게요.</p>
       </div>
     </section>
   );
@@ -632,13 +627,10 @@ export default function PremiumBook({ report, flush = false, finale, previewBlur
         </h3>
         <ChapterCover page={page} mascot={mascot} />
 
-        <BubbleRow text={page.lead} img={pic} right />
-
-        {page.note && (
-          <div data-testid="book-note">
-            <BubbleRow text={`도리의 한 줄 · ${page.note}`} img={pic} />
-          </div>
-        )}
+        {/* 도리 한 마리에 말풍선 하나: AI 한 줄이 있으면 그것을, 없으면 쪽 첫 문장을 보여요. */}
+        <div data-testid={page.note ? "book-note" : "book-lead"}>
+          <BubbleRow text={page.note ? `도리의 한 줄 · ${page.note}` : page.lead} img={pic} />
+        </div>
 
         {/* 손님이 고른 고민에 대한 답은 첫 쪽 위가 아니라, 같은 주제를 다루는 '요즘 고민 맞춤 풀이' 쪽에 둬요. */}
         {page.key === "concern" && report.concern && <ConcernCard concern={report.concern} dark />}
