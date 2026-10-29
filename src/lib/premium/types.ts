@@ -183,9 +183,14 @@ export interface PremiumReportView {
 }
 
 export interface PartnerImageView {
-  src: string;
+  /** 이미지 주소. 이미지를 못 만들었으면 null (프로필만 보여요) */
+  src: string | null;
   notice: string;
   alt: string;
+  /** "<닉네임> 님의 미래 운명의 짝" */
+  title: string;
+  /** 직업·외모·성격·특징 */
+  profile: Array<{ label: string; tags: string[] }>;
 }
 
 /** 두 사람 궁합 결과 (궁합 리포트에서만 채워져요) */

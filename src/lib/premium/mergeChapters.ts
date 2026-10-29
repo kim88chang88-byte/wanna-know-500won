@@ -45,14 +45,24 @@ export async function fetchRestChapters(
   return { replaced: Object.keys(all).length > 0 ? all : null, aiNotice };
 }
 
-/** 연애·결혼운 쪽에 붙일 상상 속 인연 이미지를 받아요. 만 20세 미만·실패·잠금이면 null (풀이는 그대로 나가요). */
+/** 연애·결혼운 쪽에 붙일 "운명의 짝" 이미지와 프로필을 받아요. 만 20세 미만·잠금이면 null, 이미지만 실패하면 프로필만 와요. (풀이는 그대로 나가요) */
 export async function fetchPartnerImage(body: unknown, signal?: AbortSignal): Promise<PartnerImageView | null> {
   try {
     const res = await fetch("/api/premium/partner-image", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body), signal });
     if (!res.ok) return null;
-    const data = (await res.json().catch(() => null)) as { image?: PartnerImageView | null } | null;
-    const img = data?.image;
-    return img && typeof img.src === "string" && img.src.startsWith("data:image/") ? { src: img.src, notice: img.notice, alt: img.alt } : null;
+    const data = (await res.json().catch(() => null)) as {
+      image?: { src?: string; notice?: string; alt?: string } | null;
+      profile?: Array<{ label?: unknown; tags?: unknown }>;
+      title?: unknown;
+    } | null;
+    if (!data || typeof data.title !== "string" || !Array.isArray(data.profile)) return null;
+    const profile = data.profile
+      .filter((r): r is { label: string; tags: string[] } => typeof r.label === "string" && Array.isArray(r.tags) && r.tags.every((t) => typeof t === "string"))
+      .map((r) => ({ label: r.label, tags: r.tags.slice(0, 4) }));
+    const img = data.image;
+    const src = img && typeof img.src === "string" && img.src.startsWith("data:image/") ? img.src : null;
+    if (!src && profile.length === 0) return null;
+    return { src, notice: img?.notice ?? "AI가 만든 가상의 인물, 참고용 상상도", alt: data.title, title: data.title, profile };
   } catch {
     return null;
   }

@@ -651,11 +651,30 @@ export default function PremiumBook({ report, flush = false, finale, previewBlur
         )}
 
         {page.key === "topic:love" && !blurred && report.partnerImage && (
-          <figure data-testid="partner-image" className="mx-auto w-full max-w-[300px] rounded-[14px] border border-[#2c3260] bg-[#1a1f40] p-3 text-center">
-            <p className={`mb-2 text-[12px] font-bold tracking-[0.12em] ${GOLD}`}>사주로 그려 본 상상 속 인연</p>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={report.partnerImage.src} alt={report.partnerImage.alt} className="w-full rounded-[10px]" />
-            <figcaption className="mt-2 text-[11px] leading-relaxed text-[#e8dfca]/60">{report.partnerImage.notice}</figcaption>
+          <figure data-testid="partner-image" className="mx-auto w-full max-w-[340px] rounded-[14px] border border-[#2c3260] bg-[#1a1f40] p-4 text-center">
+            <p className={`mb-3 text-[14px] font-bold tracking-[0.04em] ${GOLD}`}>{report.partnerImage.title}</p>
+            {report.partnerImage.src && (
+              <>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={report.partnerImage.src} alt={report.partnerImage.alt} className="w-full rounded-[10px]" />
+                <figcaption className="mt-2 text-[11px] leading-relaxed text-[#e8dfca]/60">{report.partnerImage.notice}</figcaption>
+              </>
+            )}
+            <dl data-testid="partner-profile" className="mt-4 space-y-3 text-left">
+              {report.partnerImage.profile.map((row) => (
+                <div key={row.label}>
+                  <dt className="text-[13px] font-bold text-[#f3ecdc]">{row.label}</dt>
+                  <dd className="mt-1.5 flex flex-wrap gap-1.5">
+                    {row.tags.map((t) => (
+                      <span key={t} className="rounded-full border border-[#e6c887]/60 bg-[#e6c887]/10 px-3 py-1 text-[13px] font-semibold text-[#f3ecdc]">
+                        {t}
+                      </span>
+                    ))}
+                  </dd>
+                </div>
+              ))}
+            </dl>
+            <p className="mt-3 text-[11px] text-[#e8dfca]/50">사주로 가볍게 그려 본 재미용 상상이에요.</p>
           </figure>
         )}
 
