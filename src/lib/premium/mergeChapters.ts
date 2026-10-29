@@ -1,6 +1,12 @@
 import type { BookSection, PartnerImageView, PremiumReportView } from "./types";
 
 /** 두 번째 요청으로 받은 새 본문을 쪽 번호에 맞춰 리포트에 끼워 넣어요. */
+/** 1쪽(먼저 결론부터)의 결론 글. 뒤 묶음의 19쪽 풀이가 같은 방향으로 쓰이게 넘겨 줘요. */
+export function conclusionOf(report: PremiumReportView | null | undefined): string | undefined {
+  const body = report?.book.find((p) => p.key === "concernTop")?.sections.find((x) => x.heading === "먼저 결론부터")?.body;
+  return body ? body.slice(0, 1400) : undefined;
+}
+
 export function mergeChapters(report: PremiumReportView, replaced: Record<string, BookSection[]> | undefined): PremiumReportView {
   if (!replaced || Object.keys(replaced).length === 0) return report;
   return { ...report, book: report.book.map((p) => (replaced[String(p.no)] ? { ...p, sections: replaced[String(p.no)] } : p)) };

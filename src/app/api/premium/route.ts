@@ -36,6 +36,8 @@ export async function POST(request: Request) {
   const second = batchNo >= 2;
   const batchKeys = CHAPTER_BATCHES[batchNo - 1];
   // 미리 보기 요청: 앞 몇 쪽만 풀이하고 나머지는 서버에서 비워서 내려보내요. (이 값은 내용을 줄이기만 하므로 요청자가 정해도 안전해요)
+  const conclusionRaw = typeof raw === "object" && raw !== null ? (raw as { conclusion?: unknown }).conclusion : undefined;
+  const conclusion = typeof conclusionRaw === "string" && conclusionRaw.trim() ? conclusionRaw.trim().slice(0, 1400) : null;
   const preview = typeof raw === "object" && raw !== null && (raw as { preview?: unknown }).preview === true;
   const parsed = validatePremiumInput(raw);
   if (!parsed.ok) return NextResponse.json({ code: "bad_request", error: parsed.error }, { status: 400 });
@@ -83,7 +85,7 @@ export async function POST(request: Request) {
         try {
           const gate = await takeAiBudget(process.env, db);
           if (gate !== "ok") return null;
-          return await rewriteChapters(book0, { keys: batchKeys.filter((k) => !preview || openKeys.has(k)), name: chapterName(session?.nick), concern: parsed.concern, onUsage: (u) => { usage.in += u.input; usage.out += u.output; usage.calls++; } });
+          return await rewriteChapters(book0, { keys: batchKeys.filter((k) => !preview || openKeys.has(k)), name: chapterName(session?.nick), concern: parsed.concern, conclusion, onUsage: (u) => { usage.in += u.input; usage.out += u.output; usage.calls++; } });
         } catch (err) {
           console.error("book chapter failed:", err instanceof Error ? err.message : "unknown");
           return null;
