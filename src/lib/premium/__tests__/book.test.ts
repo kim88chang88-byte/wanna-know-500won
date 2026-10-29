@@ -151,4 +151,15 @@ describe("프리미엄 20페이지 리포트", () => {
       expect(r.locked).toBe(false);
     });
   });
+
+  it("장 앞 '~이란?' 쉬운 설명이 붙고 금지 표현이 없다", () => {
+    const r = buildPremiumReport(base, NOW, "full", RAW.love);
+    const withEx = r.book.filter((p) => p.explainer);
+    expect(withEx.map((p) => p.key)).toEqual(["pillars", "elements", "tengods", "stage12", "sinsal", "gui", "geukguk", "daeun", "years", "years:2"]);
+    for (const p of withEx) {
+      const t = `${p.explainer!.title} ${p.explainer!.body}`;
+      expect(p.explainer!.body.length, p.key).toBeGreaterThan(80);
+      for (const w of FORBIDDEN) expect(t.includes(w), `${p.key}:${w}`).toBe(false);
+    }
+  });
 });

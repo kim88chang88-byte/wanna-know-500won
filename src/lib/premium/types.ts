@@ -131,6 +131,8 @@ export interface BookPage {
   tables: BookTable[];
   /** 나이별 기운 흐름 그래프 (재물·연애·직업 장) */
   chart?: BookChart;
+  /** 장 앞에 붙는 "~이란?" 쉬운 설명 (모두에게 같은 풀이 상식이라 AI 를 쓰지 않아요) */
+  explainer?: { title: string; body: string };
 }
 
 /** basic: 일반 자판기(원국·오행·신강신약) / full: 프리미엄(격국·용신·대운·세운 포함) */

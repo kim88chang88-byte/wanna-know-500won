@@ -674,6 +674,13 @@ export default function PremiumBook({ report, flush = false, finale, previewBlur
           </figure>
         )}
 
+        {page.explainer && !blurred && (
+          <aside data-testid="book-explainer" className="rounded-[14px] border border-[#e6c887]/40 bg-[#e6c887]/[0.07] px-4 py-3.5">
+            <p className={`text-[12px] font-bold tracking-[0.12em] ${GOLD}`}>쉬운 설명 · {page.explainer.title}</p>
+            <p className="mt-2 text-[14px] leading-[1.7] text-[#f3ecdc]">{page.explainer.body}</p>
+          </aside>
+        )}
+
         {groups.map((g, gi) => (
           <div key={`${gi}-${g[0]?.heading}`} className="flex flex-col gap-[18px]">
             {gi > 0 && <BubbleRow text={`이어서 ‘${g[0].heading.replace(/ · .*$/, "")}’ 이야기를 들려드릴게요.`} img={pic} right={gi % 2 === 1} />}
