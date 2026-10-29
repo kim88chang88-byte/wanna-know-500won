@@ -104,6 +104,9 @@ function rulesFor(page: BookPage, year: number): { sec: SecRule; row?: (r: BookR
       return { sec: (s) => ({ lock: ["잘 맞는 사람의 결", "서로 맞춰 가면 좋은 결"].includes(s.heading) }) };
     case "gui":
       return { sec: (s) => ({ lock: s.heading === "귀인을 만나는 마음가짐" }) };
+    case "concernTop":
+      // 결론 한 줄과 첫 근거는 열어 두고, 나머지 근거는 궁금증을 남겨요. (원리 설명으로 이어 주는 말은 그대로 보여요)
+      return { sec: (s, n) => ({ lock: n >= 2 && s.heading !== "이제 차근차근 풀어 드릴게요" }) };
     case "concern":
       return { sec: (s) => ({ lock: /^\d{4}년 흐름|^지금 대운/.test(s.heading) }) };
     case "lucky":

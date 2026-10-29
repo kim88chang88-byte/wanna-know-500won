@@ -51,10 +51,10 @@ describe("장 구성", () => {
       expect(heads).toBeLessThanOrEqual(40);
     }
   });
-  it("모든 장은 '이렇게 해보세요', '한 줄 마무리'로 끝나고 소제목마다 역할이 있어요", () => {
+  it("모든 장은 마무리 소제목 두 개로 끝나고 소제목마다 역할이 있어요", () => {
     for (const [k, spec] of Object.entries(CHAPTER_SPECS)) {
       const heads = spec.parts.flatMap((p) => p.headings);
-      expect(heads.slice(-2), k).toEqual(["이렇게 해보세요", "한 줄 마무리"]);
+      expect(heads.slice(-2), k).toEqual(k === "concernTop" ? ["가장 먼저 해볼 일", "이제 차근차근 풀어 드릴게요"] : ["이렇게 해보세요", "한 줄 마무리"]);
       expect(spec.roles.map(([h]) => h), k).toEqual(heads);
     }
   });
@@ -67,5 +67,21 @@ describe("장 구성", () => {
     const body = ("꾸준히 쌓이는 수입과 **기준이 분명한 편**이에요. ").repeat(30).trim();
     expect(body.length).toBeLessThanOrEqual(1100);
     expect(parseChapter({ sections: [{ heading: "a", body }] }, ["a"])).not.toBeNull();
+  });
+});
+
+describe("고민 결론 쪽과 합친 십성 장", () => {
+  it("맨 앞 쪽은 첫 묶음의 첫 장이고, 십성은 한 장으로 합쳐졌어요", () => {
+    expect(CHAPTER_BATCHES[0][0]).toBe("concernTop");
+    expect(CHAPTER_SPECS["tengods:2"]).toBeUndefined();
+    expect(CHAPTER_SPECS.tengods.parts.flatMap((p) => p.headings)).toHaveLength(8);
+  });
+  it("고민 자세한 답은 10개 소제목으로 길게 써요", () => {
+    expect(CHAPTER_SPECS.concern.parts.flatMap((p) => p.headings)).toHaveLength(10);
+  });
+  it("'먼저 결론부터'는 조금 짧아도 받아요", () => {
+    const body = "결론부터 말씀드리면 **지금은 서두르지 않는 쪽**이 맞아요. 일간이 단단해서 한번 정하면 오래 가는 구조라서요. 이번 달에는 후보를 두 개로 줄여 보세요. 그러면 선택이 훨씬 쉬워져요.";
+    expect(body.length).toBeGreaterThan(120);
+    expect(parseChapter({ sections: [{ heading: "먼저 결론부터", body }] }, ["먼저 결론부터"])).not.toBeNull();
   });
 });

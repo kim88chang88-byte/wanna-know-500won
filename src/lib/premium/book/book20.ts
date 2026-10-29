@@ -6,19 +6,24 @@ import { STAGE12_TEXT } from "./dict";
 
 /*
  * 프리미엄 20쪽 리포트. 기존 규칙 기반 10쪽 빌더(buildBook)의 내용을 장 구성에 맞게 다시 묶어요.
- * 서문 2 · 1장 1 · 2장 2 · 3장 2 · 4~6장 각 1 · 7~10장 각 1 · 부록 6
+ * 맨 앞 결론 1 · 서문 2 · 1장 1 · 2장 2 · 3장 1 · 4~6장 각 1 · 7~10장 각 1 · 부록 6
+ * 맨 앞 쪽은 이용자가 가장 궁금해하는 고민의 "결론"을 먼저 보여 주고, 그 이유를 알려면 사주 원리를 이해해야 한다며 서문으로 이어 가요.
+ * 자세한 고민 답은 맨 뒤 부록에 있어요.
  */
 
 const PAGE_FIX: Array<[RegExp, string]> = [
   [/8쪽/g, "16쪽"],
   [/9쪽/g, "17쪽"],
-  [/4쪽의 오행 균형 팁/g, "5쪽의 오행 균형 팁"],
+  [/4쪽의 오행 균형 팁/g, "6쪽의 오행 균형 팁"],
 ];
 
 function fixRefs(p: BookPage): BookPage {
   const fix = (t: string) => PAGE_FIX.reduce((a, [re, to]) => a.replace(re, to), t);
   return { ...p, lead: fix(p.lead), sections: p.sections.map((s) => ({ ...s, body: fix(s.body) })) };
 }
+
+/** 맨 앞 쪽에서 사주 원리 설명으로 이어 주는 소제목. (잠금 규칙에서도 이 이름을 써요) */
+export const CONCERN_TOP_BRIDGE = "이제 차근차근 풀어 드릴게요";
 
 function half<T>(list: T[]): [T[], T[]] {
   const n = Math.ceil(list.length / 2);
@@ -35,7 +40,7 @@ const PREFACE: BookSection[] = [
 const PREFACE2: BookSection[] = [
   { heading: "십성: 나와 세상의 관계", body: "일간(나)을 기준으로 다른 글자들이 나와 어떤 관계인지 열 가지로 나눈 것이 십성이에요. 나와 같은 편(비겁), 내가 표현하는 것(식상), 내가 얻는 것(재성), 나를 다스리는 것(관성), 나를 돕는 것(인성) 다섯 묶음으로 보면 쉬워요." },
   { heading: "대운과 세운: 시간의 흐름", body: "대운은 10년 단위로 바뀌는 큰 계절, 세운은 매년 바뀌는 한 해의 날씨, 월운은 달마다의 분위기예요. 타고난 지도(원국)는 그대로이지만, 어느 계절을 지나는지에 따라 같은 사람도 다른 모습으로 살아가요." },
-  { heading: "이 리포트는 이렇게 읽어 주세요", body: "먼저 서문과 1~3장에서 나의 타고난 모습을 보고, 4~6장에서 운과 기운의 흐름을 살펴요. 7~10장은 재물·연애·직업·건강을 하나씩 깊이 풀고, 부록에서 큰 흐름과 올해·내년의 달별 흐름, 요즘 고민, 행운 처방을 정리해요. 재미와 참고용으로 편하게 읽어 주세요." },
+  { heading: "이 리포트는 이렇게 읽어 주세요", body: "맨 앞 1쪽의 결론이 왜 그렇게 나왔는지 서문과 1~3장에서 나의 타고난 모습부터 차근차근 보고, 4~6장에서 운과 기운의 흐름을 살펴요. 7~10장은 재물·연애·직업·건강을 하나씩 깊이 풀고, 부록에서 큰 흐름과 올해·내년의 달별 흐름, 요즘 고민에 대한 길고 자세한 답, 행운 처방을 정리해요. 재미와 참고용으로 편하게 읽어 주세요." },
 ];
 
 function stageTimeline(r: SajuResult): { sections: BookSection[]; rows: BookRow[] } {
@@ -78,11 +83,10 @@ export function buildBook20(r: SajuResult, ctx: BookContext): BookPage[] {
   // 읽는 법 문장은 20쪽 구성에 맞게 바꿔요.
   overview.sections = overview.sections.map((s) =>
     s.heading === "이 리포트 읽는 법"
-      ? { ...s, body: `사주는 ‘정해진 결과’가 아니라 ‘타고난 날씨와 지도’에 가까워요. 20쪽에 걸쳐 타고난 모습(1~3장), 운의 흐름(4~6장), 재물·연애·직업·건강(7~10장), 그리고 부록을 차례로 풀어 드려요.${ctx.hourUnknown ? " 태어난 시간을 몰라 시주(네 번째 기둥)를 빼고 계산해서, 신강·신약과 용신은 달라질 수 있어요." : ""}` }
+      ? { ...s, body: `사주는 ‘정해진 결과’가 아니라 ‘타고난 날씨와 지도’에 가까워요. 20쪽에 걸쳐 먼저 가장 궁금한 점의 결론(1쪽)을 드리고, 이어서 타고난 모습(1~3장), 운의 흐름(4~6장), 재물·연애·직업·건강(7~10장), 그리고 부록을 차례로 풀어 드려요.${ctx.hourUnknown ? " 태어난 시간을 몰라 시주(네 번째 기둥)를 빼고 계산해서, 신강·신약과 용신은 달라질 수 있어요." : ""}` }
       : s,
   );
 
-  const [tgA, tgB] = half(tengods.sections);
   const [yrA, yrB] = half(years.sections);
 
   // 신살과 귀인 나누기
@@ -100,14 +104,21 @@ export function buildBook20(r: SajuResult, ctx: BookContext): BookPage[] {
   const stage = stageTimeline(r);
   const cur = r.daeun.current;
 
+  // 맨 앞 "먼저 결론부터" 쪽의 기본(규칙 기반) 본문. AI 가 쓰면 이 쪽 전체가 이 사람의 고민에 맞춘 글로 바뀌어요.
+  const topPoints = ctx.insight.points.slice(0, 2).map((x) => ({ heading: x.title, body: x.body }));
+  const concernTopSections: BookSection[] = [
+    { heading: "한 줄 결론", body: `${ctx.insight.headline}.` },
+    ...topPoints,
+    { heading: CONCERN_TOP_BRIDGE, body: `이 결론은 갑자기 나온 말이 아니라, 타고난 사주 구조에서 나온 거예요. 그래서 먼저 사주팔자가 무엇인지, 내 여덟 글자는 어떻게 생겼는지, 어떤 기질로 어떤 흐름을 지나는지를 차근차근 설명해 드릴게요. 원리를 알고 나면 이 결론이 훨씬 또렷하게 와닿을 거예요. 그리고 맨 뒤 19쪽에서는 이 고민에 대한 더 길고 자세한 답을 다시 이어서 드릴게요.` },
+  ];
   const seq: Array<{ key: string; title: string; subtitle: string; lead: string; sections: BookSection[]; tables: BookPage["tables"]; extra?: Partial<BookPage> }> = [
+    { key: "concernTop", title: "먼저 결론부터 · 나의 핵심 답", subtitle: "OPENING", lead: ctx.insight.headline, sections: concernTopSections, tables: [] },
     { key: "preface", title: "서문 · 사주팔자, 쉽게 알아보기", subtitle: "PREFACE · 01", lead: "여덟 글자가 말해 주는 것, 일상의 말로 풀어 드려요.", sections: PREFACE, tables: [] },
     { ...overview, title: "서문 · 나의 사주 한눈에 보기", subtitle: "PREFACE · 02", sections: [...overview.sections, ...PREFACE2], tables: overview.tables, extra: { evidence: overview.evidence } },
     { ...pillars, title: "제1장 · 나의 사주팔자", subtitle: "CHAPTER 1", tables: pillars.tables },
     { ...nature, title: "제2장 · 나는 어떤 사람인가? - 일주 분석", subtitle: "CHAPTER 2-1", tables: [] },
     { ...elements, title: "제2장 · 나는 어떤 사람인가? - 오행 분석", subtitle: "CHAPTER 2-2", tables: elements.tables },
-    { ...tengods, key: "tengods", title: "제3장 · 내가 세상을 살아가는 방법 - 십성 분석", subtitle: "CHAPTER 3-1", sections: tgA, tables: tengods.tables },
-    { ...tengods, key: "tengods:2", title: "제3장 · 내가 세상을 살아가는 방법 - 십성 분석", subtitle: "CHAPTER 3-2", lead: "이어서 다른 기운들과 채워 갈 부분을 살펴봐요.", sections: tgB, tables: [] },
+    { ...tengods, key: "tengods", title: "제3장 · 내가 세상을 살아가는 방법 - 십성 분석", subtitle: "CHAPTER 3", sections: tengods.sections, tables: tengods.tables },
     {
       key: "stage12",
       title: "제4장 · 나의 운, 이렇게 흘러간다 - 십이운성 분석",

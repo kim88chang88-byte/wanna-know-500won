@@ -7,7 +7,7 @@ const NOW = new Date("2026-10-18T00:00:00+09:00");
 const base: BirthInput = { year: 1990, month: 7, day: 13, hour: 8, minute: 30, calendar: "solar", isLeapMonth: false, gender: "female" };
 const FORBIDDEN = ["사망", "죽음", "재앙", "저주", "액운", "파산", "이혼", "불행", "흉운", "큰일 난", "조심하세요"];
 const RAW: Record<TopicKey, string> = { love: "연애운", marriage: "우리 둘의 궁합 리포트", money: "재물운", success: "성공운", health: "건강운", study: "2027 신년운", general: "" };
-const KEYS = ["preface", "overview", "pillars", "nature", "elements", "tengods", "tengods:2", "stage12", "sinsal", "gui", "topic:money", "topic:love", "topic:career", "topic:health", "geukguk", "daeun", "years", "years:2", "concern", "lucky"];
+const KEYS = ["concernTop", "preface", "overview", "pillars", "nature", "elements", "tengods", "stage12", "sinsal", "gui", "topic:money", "topic:love", "topic:career", "topic:health", "geukguk", "daeun", "years", "years:2", "concern", "lucky"];
 
 describe("프리미엄 20페이지 리포트", () => {
   const inputs: BirthInput[] = [
@@ -69,9 +69,9 @@ describe("프리미엄 20페이지 리포트", () => {
 
   it("시간을 모르면 시주를 풀이하지 않고 안내한다", () => {
     const r = buildPremiumReport({ ...base, hour: null, minute: null }, NOW, "full", RAW.love);
-    const all = JSON.stringify(r.book[2]);
+    const all = JSON.stringify(r.book[3]);
     expect(all.includes("시주는 비워 두었어요")).toBe(true);
-    expect(r.book[2].tables[0].rows[3].value).toBe("시간 미상");
+    expect(r.book[3].tables[0].rows[3].value).toBe("시간 미상");
   });
 
   it("주제에 따라 19쪽 고민 맞춤 풀이가 달라지고, 같은 입력이면 같은 결과다", () => {
