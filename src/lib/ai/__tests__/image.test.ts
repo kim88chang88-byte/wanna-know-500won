@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { ageOn, estimateCostUsd, generateImage, partnerAgeFor, spousePrompt, usageOf } from "../image";
+import { AI_IMAGE_NOTICE, ageOn, estimateCostUsd, generateImage, partnerAgeFor, spousePrompt, usageOf } from "../image";
 
 const okBody = {
   candidates: [{ finishReason: "STOP", content: { parts: [{ inlineData: { mimeType: "image/png", data: "QUJD" } }] } }],
@@ -62,5 +62,27 @@ describe("결과 이미지 연령 규칙", () => {
   it("만 나이는 생일 전에는 한 살 적다", () => {
     expect(ageOn({ year: 1990, month: 12, day: 25 }, new Date(2026, 9, 30))).toBe(35);
     expect(ageOn({ year: 1990, month: 10, day: 30 }, new Date(2026, 9, 30))).toBe(36);
+  });
+});
+
+describe("복장과 안내 문구", () => {
+  it("같은 seed 는 같은 복장, seed 가 다르면 복장이 달라진다", () => {
+    expect(spousePrompt("female", "water", "late 20s", 2)).toBe(spousePrompt("female", "water", "late 20s", 2));
+    const set = new Set([0, 1, 2, 3, 4, 5].map((v) => spousePrompt("male", "fire", "late 20s", v)));
+    expect(set.size).toBe(6);
+  });
+  it("복장에 오행 색이 들어가고, 한복·정장 같은 복장이 목록에 있다", () => {
+    const all = [0, 1, 2, 3, 4, 5].map((v) => spousePrompt("female", "water", "late 20s", v)).join("\n");
+    expect(all).toMatch(/navy/);
+    expect(all).toMatch(/hanbok/);
+    expect(all).toMatch(/jeans/);
+    expect(["0", "1", "2", "3", "4", "5"].map((v) => spousePrompt("male", "earth", "mid 30s", Number(v))).join("\n")).toMatch(/suit/);
+  });
+  it("음수·큰 seed 도 오류 없이 복장을 고른다", () => {
+    expect(spousePrompt("male", "metal", "early 40s", -3)).toMatch(/Korean man/);
+    expect(spousePrompt("female", "wood", "early 40s", 999)).toMatch(/Korean woman/);
+  });
+  it("안내 문구가 정해진 문장이다", () => {
+    expect(AI_IMAGE_NOTICE).toBe("AI가 만든 가상의 인물, 참고용 상상도");
   });
 });

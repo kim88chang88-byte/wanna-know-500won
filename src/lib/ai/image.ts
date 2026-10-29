@@ -13,13 +13,43 @@ export const DEFAULT_USD_KRW = 1400;
 
 export type Element5 = "wood" | "fire" | "earth" | "metal" | "water";
 
-/** 오행별 인상(얼굴 분위기)과 옷 색 */
-const LOOK: Record<Element5, { mood: string; hanbok: string; suit: string }> = {
-  wood: { mood: "fresh youthful aura, gentle straight eyebrows, warm kind eyes", hanbok: "soft jade-green and ivory hanbok", suit: "dark forest-green-gray suit with a deep green striped tie" },
-  fire: { mood: "bright lively smile, expressive sparkling eyes, charismatic warmth", hanbok: "vivid crimson red hanbok with white trim", suit: "charcoal suit with a deep burgundy tie" },
-  earth: { mood: "calm steady gaze, soft rounded face, reliable gentle expression", hanbok: "warm ochre-yellow and cream hanbok", suit: "warm camel-beige suit with a brown tie" },
-  metal: { mood: "clean refined features, composed elegant expression, neat polished look", hanbok: "pearl white and silver-gray hanbok", suit: "light gray suit with a silver-blue tie" },
-  water: { mood: "deep calm eyes, soft mysterious mood, quiet intelligent charm", hanbok: "deep navy and soft sky-blue hanbok", suit: "dark navy-gray suit with a navy striped tie" },
+/** 이미지 화면에 꼭 붙이는 안내 문구 */
+export const AI_IMAGE_NOTICE = "AI가 만든 가상의 인물, 참고용 상상도";
+
+/** 오행별 인상(얼굴 분위기)과 포인트 색 */
+const LOOK: Record<Element5, { mood: string; color: string }> = {
+  wood: { mood: "fresh youthful aura, gentle straight eyebrows, warm kind eyes", color: "soft green" },
+  fire: { mood: "bright lively smile, expressive sparkling eyes, charismatic warmth", color: "warm coral red" },
+  earth: { mood: "calm steady gaze, soft rounded face, reliable gentle expression", color: "warm ochre-yellow and beige" },
+  metal: { mood: "clean refined features, composed elegant expression, neat polished look", color: "white and silver-gray" },
+  water: { mood: "deep calm eyes, soft mysterious mood, quiet intelligent charm", color: "navy and soft sky-blue" },
+};
+
+interface Outfit {
+  /** 입은 옷(색은 {c} 자리에 오행 색이 들어가요) */
+  wear: string;
+  /** 장소·빛 */
+  scene: string;
+}
+
+/** 복장은 자유롭게 어울리는 것으로. 같은 사람이면 같은 복장이 나오도록 seed 로 골라요. */
+const OUTFITS: Record<"male" | "female", Outfit[]> = {
+  female: [
+    { wear: "an elegant {c} one-piece dress", scene: "a sunny cafe terrace with soft daylight and creamy bokeh" },
+    { wear: "a polished office look: a {c} blouse with a tailored jacket and slacks", scene: "a bright modern office by a large window" },
+    { wear: "a plain white T-shirt, blue jeans and a light {c} cardigan", scene: "a green park in soft afternoon sunlight with creamy bokeh" },
+    { wear: "a graceful modern hanbok in {c} tones with delicate hair ornaments", scene: "a traditional palace garden in soft golden-hour sunlight with creamy bokeh" },
+    { wear: "a cozy {c} knit sweater with a denim jacket", scene: "a quiet tree-lined street in warm autumn light" },
+    { wear: "a stylish {c} tracksuit set", scene: "a riverside walking path on a fresh morning" },
+  ],
+  male: [
+    { wear: "a tailored suit in {c} tones with a white shirt and a tie", scene: "soft indoor window light" },
+    { wear: "business casual: an open-collar shirt with a {c} knit and chinos", scene: "a bright modern cafe with soft window light" },
+    { wear: "a plain white T-shirt and blue jeans with a {c} jacket", scene: "a sunny street with creamy bokeh" },
+    { wear: "a clean {c} athletic zip-up jacket and sportswear", scene: "a riverside park on a fresh morning" },
+    { wear: "a {c} casual knit sweater over a collared shirt", scene: "a warm bookstore with soft light" },
+    { wear: "a casual {c} shirt jacket with a white tee", scene: "a quiet tree-lined street in warm autumn light" },
+  ],
 };
 
 export function isElement5(v: string | null | undefined): v is Element5 {
@@ -52,16 +82,19 @@ export function ageOn(birth: { year: number; month: number; day: number }, now: 
   return age;
 }
 
-export function spousePrompt(partner: "male" | "female", element: Element5, age: PartnerAge = "late 20s"): string {
+export function spousePrompt(partner: "male" | "female", element: Element5, age: PartnerAge = "late 20s", seed = 0): string {
   const look = LOOK[element];
-  const base =
+  const list = OUTFITS[partner];
+  const o = list[((Math.floor(seed) % list.length) + list.length) % list.length];
+  const wear = o.wear.replace("{c}", look.color);
+  const person =
     partner === "female"
-      ? `A photorealistic portrait photo of a beautiful Korean woman in her ${age}, black long hair tied back with a few loose strands, a warm natural smile, wearing a ${look.hanbok} with delicate hair ornaments, outdoors in soft golden-hour sunlight with creamy bokeh background, shot on an 85mm lens, shallow depth of field.`
-      : `A photorealistic close-up portrait photo of a handsome Korean man in his ${age}, black side-swept hair, clean skin, calm slightly shy expression, wearing a ${look.suit} with a white shirt, soft indoor window light, shot on a 50mm lens, shallow depth of field.`;
+      ? `a beautiful Korean woman in her ${age}, natural hair, a warm natural smile`
+      : `a handsome Korean man in his ${age}, neat black hair, a calm friendly expression`;
   return [
-    base,
+    `A photorealistic portrait photo of ${person}, wearing ${wear}, in ${o.scene}.`,
     `Mood: ${look.mood}.`,
-    "Natural skin texture, realistic eyes, 3:4 vertical framing. The person is clearly an adult.",
+    "Natural skin texture, realistic eyes, shallow depth of field, 3:4 vertical framing. The person is clearly an adult.",
     "An entirely fictional person who does not resemble any real person or celebrity. No text, no letters, no logo, no watermark, no captions.",
   ].join(" ");
 }

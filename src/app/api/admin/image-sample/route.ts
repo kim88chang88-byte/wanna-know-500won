@@ -1,6 +1,6 @@
 import { adminIds, isAdmin } from "@/lib/admin/auth";
 import { readCookie, SESSION_COOKIE, verifySessionToken } from "@/lib/auth/session";
-import { DEFAULT_USD_KRW, estimateCostUsd, generateImage, isElement5, partnerAgeFor, spousePrompt } from "@/lib/ai/image";
+import { DEFAULT_USD_KRW, estimateCostUsd, generateImage, isElement5, partnerAgeFor, spousePrompt, AI_IMAGE_NOTICE } from "@/lib/ai/image";
 import { createRateLimiter } from "@/lib/rateLimit";
 
 export const runtime = "nodejs";
@@ -16,6 +16,7 @@ const page = (body: string, status = 200) =>
 /**
  * 관리자 전용 표본: 제미나이로 "사주로 그려 보는 상상 속 인연" 일러스트 한 장을 만들고 쓴 토큰과 어림 비용을 보여 줘요.
  * 예) /api/admin/image-sample?partner=female&el=water   (partner: male|female, el: wood|fire|earth|metal|water)
+ * 복장은 &v=0~5 로 고르고, 없으면 무작위예요. (여성: 원피스·오피스룩·흰티 청바지·한복·니트·트레이닝복 / 남성: 정장·비즈니스 캐주얼·흰티 청바지·운동복·니트·셔츠 재킷)
  * 연령 규칙 확인: &user=male&userAge=55  → 이용자 성별·만 나이로 상대 성별(이성)과 연령대를 정해요. (docs/PARTNER_IMAGE.md)
  * 서버의 GEMINI_API_KEY 를 써요. (키는 화면·응답에 나오지 않아요)
  */
@@ -43,7 +44,9 @@ export async function GET(request: Request) {
   }
   const elRaw = sp.get("el");
   const el = isElement5(elRaw) ? elRaw : "water";
-  const prompt = spousePrompt(partner, el, age);
+  const vRaw = Number(sp.get("v"));
+  const seed = Number.isFinite(vRaw) && sp.get("v") !== null ? vRaw : Math.floor(Math.random() * 6);
+  const prompt = spousePrompt(partner, el, age, seed);
   const r = await generateImage(prompt, apiKey, { model: process.env.GEMINI_IMAGE_MODEL?.trim() || undefined });
   if (!r.ok) return page(`<h2>이미지를 만들지 못했어요</h2><p>${esc(r.error)}</p><p>모델 이름이 다르다면 환경변수 GEMINI_IMAGE_MODEL 에 Google AI Studio 의 이미지 모델 이름을 넣어 주세요.</p>`, 502);
 
@@ -59,8 +62,8 @@ export async function GET(request: Request) {
       <tr><td>어림 비용</td><td><b>약 $${usd.toFixed(3)} (약 ${krw.toLocaleString("ko-KR")}원)</b></td></tr>
     </table>
     <p style="font-size:12px;color:#666">어림 단가: 이미지 출력 100만 토큰당 $60, 입력 $0.5 (실제 청구는 Google AI Studio 요금표 기준)</p>
-    <p style="font-size:12px;color:#666">AI가 만든 가상의 인물이에요. 실제 사람이 아니에요.</p>
+    <p style="font-size:13px;color:#444;text-align:center">${esc(AI_IMAGE_NOTICE)}</p>
     <p><code>${esc(prompt)}</code></p>
-    <p><a href="?partner=${partner === "male" ? "female" : "male"}&el=${el}">${partner === "male" ? "여성" : "남성"}으로 다시</a> · <a href="?partner=${partner}&el=fire">불</a> · <a href="?partner=${partner}&el=wood">나무</a> · <a href="?partner=${partner}&el=earth">땅</a> · <a href="?partner=${partner}&el=metal">쇠</a> · <a href="?partner=${partner}&el=water">물</a></p>
+    <p><a href="?partner=${partner}&el=${el}">다른 복장으로</a> · <a href="?partner=${partner === "male" ? "female" : "male"}&el=${el}">${partner === "male" ? "여성" : "남성"}으로 다시</a> · <a href="?partner=${partner}&el=fire">불</a> · <a href="?partner=${partner}&el=wood">나무</a> · <a href="?partner=${partner}&el=earth">땅</a> · <a href="?partner=${partner}&el=metal">쇠</a> · <a href="?partner=${partner}&el=water">물</a></p>
   `);
 }
