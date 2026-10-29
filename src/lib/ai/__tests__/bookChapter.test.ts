@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { CHAPTER_BATCHES, CHAPTER_SPECS, chapterName, isMoneyChapter, parseChapter } from "../bookChapter";
+import { CHAPTER_BATCHES, CHAPTER_SPECS, chapterName, isMoneyChapter, parseChapter, parseChapterWhy } from "../bookChapter";
 import type { BookPage } from "@/lib/premium/types";
 
 const H = ["돈을 대하는 기본 자세", "돈이 들어오는 길", "새기 쉬운 곳"];
@@ -83,5 +83,27 @@ describe("고민 결론 쪽과 합친 십성 장", () => {
     const body = "결론부터 말씀드리면 **지금은 서두르지 않는 쪽**이 맞아요. 일간이 단단해서 한번 정하면 오래 가는 구조라서요. 이번 달에는 후보를 두 개로 줄여 보세요. 그러면 선택이 훨씬 쉬워져요. 다음 달 초에는 두 후보를 직접 만나 보고, 마음이 더 편한 쪽을 고르면 후회가 적어요.";
     expect(body.length).toBeGreaterThan(120);
     expect(parseChapter({ sections: [{ heading: "먼저 결론부터", body }] }, ["먼저 결론부터"])).not.toBeNull();
+  });
+});
+
+describe("형식 검사 이유와 부드러운 말 바꾸기", () => {
+  const H1 = ["돈을 대하는 기본 자세"];
+  const body = (t: string) => ({ sections: [{ heading: H1[0], body: (t + " ").repeat(14).trim() }] });
+  it("'조심하세요'는 버리지 않고 '신경 써 보세요'로 바꿔 받아요", () => {
+    const r = parseChapterWhy(body("지출을 조심하세요. **기준이 분명한 편**이에요."), H1);
+    expect(r.sections?.[0].body).toContain("신경 써 보세요");
+    expect(r.sections?.[0].body).not.toContain("조심하세요");
+  });
+  it("금지어는 이유와 함께 버려요", () => {
+    const r = parseChapterWhy(body("이혼 이야기가 나올 수 있어요."), H1);
+    expect(r.sections).toBeNull();
+    expect(r.why).toContain("금지어(이혼)");
+  });
+  it("너무 짧거나 너무 길면 이유에 길이가 적혀요", () => {
+    expect(parseChapterWhy({ sections: [{ heading: "a", body: "짧아요" }] }, H1).why).toMatch(/^짧음/);
+    expect(parseChapterWhy({ sections: [{ heading: "a", body: "가".repeat(1600) }] }, H1).why).toMatch(/^김\(.*:1600\)/);
+  });
+  it("1500자 이하의 긴 본문은 받아요", () => {
+    expect(parseChapterWhy({ sections: [{ heading: "a", body: "가나다라 ".repeat(260).trim() }] }, H1).sections).not.toBeNull();
   });
 });
