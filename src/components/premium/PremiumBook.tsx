@@ -650,6 +650,15 @@ export default function PremiumBook({ report, flush = false, finale, previewBlur
           </div>
         )}
 
+        {page.key === "topic:love" && !blurred && report.partnerImage && (
+          <figure data-testid="partner-image" className="mx-auto w-full max-w-[300px] rounded-[14px] border border-[#2c3260] bg-[#1a1f40] p-3 text-center">
+            <p className={`mb-2 text-[12px] font-bold tracking-[0.12em] ${GOLD}`}>사주로 그려 본 상상 속 인연</p>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={report.partnerImage.src} alt={report.partnerImage.alt} className="w-full rounded-[10px]" />
+            <figcaption className="mt-2 text-[11px] leading-relaxed text-[#e8dfca]/60">{report.partnerImage.notice}</figcaption>
+          </figure>
+        )}
+
         {groups.map((g, gi) => (
           <div key={`${gi}-${g[0]?.heading}`} className="flex flex-col gap-[18px]">
             {gi > 0 && <BubbleRow text={`이어서 ‘${g[0].heading.replace(/ · .*$/, "")}’ 이야기를 들려드릴게요.`} img={pic} right={gi % 2 === 1} />}

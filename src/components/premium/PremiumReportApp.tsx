@@ -5,7 +5,7 @@ import type { PremiumErrorBody, PremiumReportView } from "@/lib/premium/types";
 import type { BirthInput } from "@/lib/saju/types";
 import ManseReport from "./ManseReport";
 import AiNotice from "./AiNotice";
-import { fetchRestChapters, mergeChapters } from "@/lib/premium/mergeChapters";
+import { fetchPartnerImage, fetchRestChapters, mergeChapters } from "@/lib/premium/mergeChapters";
 
 const field = "w-full rounded-2xl border border-[#e6c887]/30 bg-white/[0.05] px-4 py-3 text-base text-[#fbf3de] [color-scheme:dark] focus:outline-none focus:ring-2 focus:ring-[#e6c887]/50";
 const seg = (active: boolean) =>
@@ -91,6 +91,7 @@ export default function PremiumReportApp() {
       // 나머지 장은 이어서 받아 와서 끼워 넣어요.
       if ((json as { pendingChapters?: string[] }).pendingChapters?.length) {
         const rest = { ...body, level: "full", topic: "프리미엄 사주 원국 리포트" };
+        void fetchPartnerImage(rest).then((img) => { if (img) setReport((prev) => (prev ? { ...prev, partnerImage: img } : prev)); });
         void fetchRestChapters(rest, undefined, (part) => setReport((prev) => (prev ? mergeChapters(prev, part) : prev))).then((rep) => {
           if (rep.aiNotice) setAiNotice(true);
         });

@@ -1,4 +1,4 @@
-import type { BookSection, PremiumReportView } from "./types";
+import type { BookSection, PartnerImageView, PremiumReportView } from "./types";
 
 /** 두 번째 요청으로 받은 새 본문을 쪽 번호에 맞춰 리포트에 끼워 넣어요. */
 export function mergeChapters(report: PremiumReportView, replaced: Record<string, BookSection[]> | undefined): PremiumReportView {
@@ -43,4 +43,17 @@ export async function fetchRestChapters(
     }
   }
   return { replaced: Object.keys(all).length > 0 ? all : null, aiNotice };
+}
+
+/** 연애·결혼운 쪽에 붙일 상상 속 인연 이미지를 받아요. 만 20세 미만·실패·잠금이면 null (풀이는 그대로 나가요). */
+export async function fetchPartnerImage(body: unknown, signal?: AbortSignal): Promise<PartnerImageView | null> {
+  try {
+    const res = await fetch("/api/premium/partner-image", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body), signal });
+    if (!res.ok) return null;
+    const data = (await res.json().catch(() => null)) as { image?: PartnerImageView | null } | null;
+    const img = data?.image;
+    return img && typeof img.src === "string" && img.src.startsWith("data:image/") ? { src: img.src, notice: img.notice, alt: img.alt } : null;
+  } catch {
+    return null;
+  }
 }

@@ -178,6 +178,14 @@ export interface PremiumReportView {
   book: BookPage[];
   /** 궁합 리포트에서 상대방 정보를 받았을 때만 채워져요. 아니면 null */
   compat: CompatView | null;
+  /** 연애·결혼운 쪽에 붙는 상상 속 인연 이미지(AI). 글과 따로 받아서 끼워 넣어요. 없으면 안 보여요 */
+  partnerImage?: PartnerImageView | null;
+}
+
+export interface PartnerImageView {
+  src: string;
+  notice: string;
+  alt: string;
 }
 
 /** 두 사람 궁합 결과 (궁합 리포트에서만 채워져요) */
