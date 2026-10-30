@@ -21,6 +21,7 @@ AI(Anthropic)를 부르는 곳은 `/api/reading` 한 곳뿐이에요. (프리미
 ## 3) 비상 차단 스위치
 - Vercel > Settings > Environment Variables 에 `AI_DISABLED` = `true` 추가 → **Redeploy**.
 - 바로 AI 호출이 멈추고 사주 리포트만 나가요. 다시 켜려면 값을 지우고 Redeploy.
+- Redeploy 버튼에서 재인증(인증 앱·패스키)이 막히면, `main`에 새 커밋을 올려도 새 배포가 만들어져 같은 환경변수가 적용돼요.
 - 더 급하면 Anthropic 콘솔에서 해당 API 키를 삭제하세요. (즉시 막혀요)
 
 ## 점검 체크리스트 (키를 켜기 전)
