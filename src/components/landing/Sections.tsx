@@ -220,13 +220,6 @@ export function ShowcaseSection() {
               tabIndex={-1}
             />
           </div>
-
-          {/* 버튼처럼 보이지 않게, 테두리·배경 없이 그림 아래 설명 글처럼만 보여줘요 */}
-          <p className="mx-auto max-w-3xl px-2 text-center text-[13px] leading-relaxed text-slate-500 break-keep">
-            <span aria-hidden="true" className="mr-1.5 text-brand-300">✦</span>
-            어려운 사주 용어 없이, 쉬운 말로 말랑말랑 풀어 드려요
-            <span aria-hidden="true" className="ml-1.5 text-brand-300">✦</span>
-          </p>
         </div>
       </div>
 
@@ -244,7 +237,6 @@ export function ShowcaseSection() {
             arrow_downward
           </span>
         </a>
-        <p className="mt-2 text-[11px] text-slate-500">가입 없이도 볼 수 있어요 · 매일 첫 1회 무료</p>
       </div>
     </section>
   );
