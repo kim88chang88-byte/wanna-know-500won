@@ -94,11 +94,7 @@ export default function BirthdayTeaser() {
             </button>
           </div>
           {state === "error" && <p role="alert" className="text-xs text-rose-600">{error}</p>}
-          <p className="text-center text-[11px] leading-relaxed text-gray-400">
-            가입 없이 숫자만 적어도 돼요 (예: 20000101)
-            <br />
-            생년월일은 계산에만 쓰고 저장하지 않아요
-          </p>
+          <p className="text-center text-[11px] leading-relaxed text-gray-400">생년월일은 사주풀이 계산에만 쓰고 저장하지 않아요!</p>
         </form>
       )}
     </section>
