@@ -20,3 +20,12 @@ export function elementOfChar(ch: string | null | undefined, branch: boolean): E
 export function elName(name: string): string {
   return name === "금" ? "쇠" : name;
 }
+
+/** 박스 모서리에 붙이는 쉬운 말 이름과 그림. 금은 "쇠"예요. */
+export const EL_LABEL: Record<Element, { name: string; icon: string }> = {
+  wood: { name: "나무", icon: "🌳" },
+  fire: { name: "불", icon: "🔥" },
+  earth: { name: "땅", icon: "⛰️" },
+  metal: { name: "쇠", icon: "🪙" },
+  water: { name: "물", icon: "💧" },
+};

@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
 import ManseReport from "@/components/premium/ManseReport";
 import { RealityLight } from "@/components/premium/RealityLight";
 import type { PremiumReportView } from "@/lib/premium/types";
-import { ELEMENT_BOX, elementOfChar } from "@/lib/elementColor";
+import { ELEMENT_BOX, EL_LABEL, elementOfChar } from "@/lib/elementColor";
 import type { Element } from "@/lib/saju/constants";
 import { Stars } from "./ReadingCard";
 import { firstSentence, iyeyo, splitBold, stripSummaryLead, tidyFold, toParagraphs, trimToLastSentence } from "@/lib/storyHelpers";
@@ -48,13 +48,6 @@ export interface StoryReading {
   heads?: Partial<Record<FoldKey | "lucky", string>>;
 }
 
-const EL_LABEL: Record<Element, { name: string; icon: string }> = {
-  wood: { name: "나무", icon: "🌳" },
-  fire: { name: "불", icon: "🔥" },
-  earth: { name: "땅", icon: "⛰️" },
-  metal: { name: "쇠", icon: "🪙" },
-  water: { name: "물", icon: "💧" },
-};
 const EL_ORDER: Element[] = ["wood", "fire", "earth", "metal", "water"];
 /** 기둥 이름 아래에 붙이는 쉬운 뜻 */
 const PILLAR_HINT: Record<string, string> = { hour: "태어난 시", day: "나", month: "태어난 달", year: "태어난 해" };
