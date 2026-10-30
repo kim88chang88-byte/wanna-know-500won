@@ -5,7 +5,7 @@ import BirthdayTeaser from "./BirthdayTeaser";
 import CoinRitual from "./CoinRitual";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { dayKey, getBrowserStorage, readCounts, recordDraw, type DrawCounts } from "@/lib/drawCounter";
-import { readStreak, readVisitDays, recordVisit, streakLine } from "@/lib/streak";
+import { readVisitDays, recordVisit } from "@/lib/streak";
 import { grantTickets, readTickets, spendTicket, STREAK_FOR_TICKET } from "@/lib/stampReward";
 import { FREE_PER_DAY } from "@/lib/db/config";
 import { DailyLineCard } from "./DailyLineCard";
@@ -38,7 +38,6 @@ export default function Landing() {
   const [counts, setCounts] = useState<DrawCounts>({ today: 0, month: 0 });
   // 화면에 보이는 최신 횟수. (상태 업데이터 안에서 저장소에 쓰면 개발 모드에서 두 번 실행되어 2씩 늘어나서 ref 를 씁니다)
   const countsRef = useRef<DrawCounts>(counts);
-  const [streakText, setStreakText] = useState<string | null>(null);
   const timers = useRef<number[]>([]);
   const [ritual, setRitual] = useState(false);
   const [tickets, setTickets] = useState(0);
@@ -62,7 +61,6 @@ export default function Landing() {
   // 서버가 만든 HTML 과 맞추기 위해 첫 화면은 0 으로 두고, 브라우저에서 저장된 횟수를 읽어 옵니다.
   useEffect(() => {
     applyCounts(readCounts(getBrowserStorage(), new Date()));
-    setStreakText(streakLine(readStreak(getBrowserStorage(), dayKey(new Date()))));
     syncReward();
     try {
       setLastKey(getBrowserStorage()?.getItem(LAST_KEY) ?? null);
@@ -140,7 +138,7 @@ export default function Landing() {
   const completeDraw = useCallback(
     (fromServer?: { today: number; month: number } | null) => {
       // 오늘을 방문한 날로 기록해서 연속 방문 '물길'을 이어요. (이 기기에서만 세요)
-      setStreakText(streakLine(recordVisit(getBrowserStorage(), dayKey(new Date()))));
+      recordVisit(getBrowserStorage(), dayKey(new Date()));
       if (bonusRef.current) {
         spendTicket(getBrowserStorage());
         bonusRef.current = false;
@@ -176,12 +174,12 @@ export default function Landing() {
       <Header onOpenLogin={openLogin} user={user} />
 
       <main className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-5 pb-20 sm:pb-24">
-        <HeroSection counts={counts} streakText={streakText} tickets={tickets} />
+        <HeroSection counts={counts} tickets={tickets} />
         <ShowcaseSection />
         {!user && <BirthdayTeaser onPick={() => document.getElementById("machines")?.scrollIntoView({ behavior: "smooth" })} />}
         {/* 도리의 소식 카드들은 첫 화면의 "뽑으러 가기" 버튼 아래로 옮겼어요. (첫 화면에서 눌러야 할 것이 하나만 보이게) */}
         {user && profile && <DailyLineCard onOpened={() => {
-          setStreakText(streakLine(recordVisit(getBrowserStorage(), dayKey(new Date()))));
+          recordVisit(getBrowserStorage(), dayKey(new Date()));
           syncReward();
         }} />}
         {user && <VaultFollowupCard />}
