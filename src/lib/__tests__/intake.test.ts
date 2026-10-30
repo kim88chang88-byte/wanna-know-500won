@@ -91,15 +91,12 @@ describe("상대방(궁합) 입력", () => {
 
 describe("한 화면 입력(생년월일·성별·시간)", () => {
   const base = { ...EMPTY_FORM, consent: true };
-  it("날짜·시간 글자를 숫자만으로도 모양에 맞춰 줘요", async () => {
-    const { formatDateInput, formatTimeInput } = await import("../intake");
+  it("날짜 글자를 숫자만으로도 모양에 맞춰 줘요", async () => {
+    const { formatDateInput } = await import("../intake");
     expect(formatDateInput("19881229")).toBe("1988-12-29");
     expect(formatDateInput("1988-1")).toBe("1988-1");
     expect(formatDateInput("198812")).toBe("1988-12");
     expect(formatDateInput("1988-12-29-99")).toBe("1988-12-29");
-    expect(formatTimeInput("0930")).toBe("09:30");
-    expect(formatTimeInput("9")).toBe("9");
-    expect(formatTimeInput("09:30")).toBe("09:30");
   });
   it("음력은 연·월·일로 나눠 담고, 덜 적었으면 비워요", async () => {
     const { dateTextToFields } = await import("../intake");
@@ -115,19 +112,23 @@ describe("한 화면 입력(생년월일·성별·시간)", () => {
     expect(validateStep("birth", { ...ok, time: "09:30" })).toBeNull();
     expect(validateStep("birth", { ...ok, timeKnown: false })).toBeNull();
   });
-  it("정확한 시간을 모르면 시간대를 골라야 하고, 고르면 그 시간대 가운데 시각으로 계산해요", async () => {
+  it("시진을 고르면 그 시진 가운데 시각으로 계산해요", async () => {
     const { TIME_BLOCKS } = await import("../intake");
-    const f = { ...base, solarDate: "1988-12-29", gender: "female" as const, timeApprox: true };
-    expect(validateStep("birth", f)).toMatch(/시간대/);
+    const f = { ...base, solarDate: "1988-12-29", gender: "female" as const };
     const oh = TIME_BLOCKS.find((b) => b.label === "오시")!;
     const done = { ...f, time: oh.time };
     expect(validateStep("birth", done)).toBeNull();
     expect(buildBirthInput(done)).toMatchObject({ year: 1988, month: 12, day: 29, hour: 12, minute: 0, gender: "female" });
   });
-  it("시간대 12개는 자시부터 해시까지 두 시간씩 이어져요", async () => {
-    const { TIME_BLOCKS } = await import("../intake");
-    expect(TIME_BLOCKS).toHaveLength(12);
-    expect(TIME_BLOCKS.map((b) => b.time)).toEqual(["00:00", "02:00", "04:00", "06:00", "08:00", "10:00", "12:00", "14:00", "16:00", "18:00", "20:00", "22:00"]);
+  it("시진은 13칸(자시는 자정 전·후로 나뉨)이고 blockOfTime 이 알맞은 칸을 찾아요", async () => {
+    const { TIME_BLOCKS, blockOfTime } = await import("../intake");
+    expect(TIME_BLOCKS).toHaveLength(13);
+    expect(TIME_BLOCKS.map((b) => b.time)).toEqual(["23:30", "00:30", "02:00", "04:00", "06:00", "08:00", "10:00", "12:00", "14:00", "16:00", "18:00", "20:00", "22:00"]);
+    expect(blockOfTime("09:30")).toBe("10:00");
+    expect(blockOfTime("12:00")).toBe("12:00");
+    expect(blockOfTime("23:10")).toBe("23:30");
+    expect(blockOfTime("00:10")).toBe("00:30");
+    expect(blockOfTime("")).toBe("");
   });
   it("저장된 정보가 없을 때의 단계는 생년월일 한 화면 + 고민 + 동의", async () => {
     const { COMBINED_STEPS } = await import("../intake");

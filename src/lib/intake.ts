@@ -42,8 +42,6 @@ export interface IntakeForm {
   /** 23시대 출생일 때 야자시(sameDay) / 조자시(nextDay) */
   lateZi: "sameDay" | "nextDay";
   gender: Gender | null;
-  /** 시간은 아는데 정확한 분까지는 모를 때 true: 시간대(2시간 단위)만 골라요 (한 화면 입력에서만 써요) */
-  timeApprox?: boolean;
   /** 요즘 고민 (선택): 추천 버튼 + 직접 적기 */
   concernTags: ConcernId[];
   concernText: string;
@@ -127,7 +125,7 @@ export function validateStep(step: StepId, f: IntakeForm): string | null {
     }
     case "time":
       if (!f.timeKnown) return null;
-      return parseTime(f.time) ? null : "태어난 시간을 골라 주세요. 모르면 '모르겠어요'를 눌러도 돼요.";
+      return parseTime(f.time) ? null : "태어난 시간을 골라 주세요. 모르면 '태어난 시간 모름'을 체크해 주세요.";
     case "gender":
       return f.gender ? null : "성별을 골라 주세요.";
     case "birth": {
@@ -135,7 +133,6 @@ export function validateStep(step: StepId, f: IntakeForm): string | null {
       if (d) return d;
       const g = validateStep("gender", f);
       if (g) return g;
-      if (f.timeKnown && f.timeApprox && !parseTime(f.time)) return "대략 어느 시간대에 태어났는지 골라 주세요.";
       return validateStep("time", f);
     }
     case "concern":
@@ -205,15 +202,10 @@ export function formatDateInput(raw: string): string {
   return `${d.slice(0, 4)}-${d.slice(4, 6)}-${d.slice(6)}`;
 }
 
-/** 숫자만 뽑아서 "09:30" 모양으로 맞춰 줘요. */
-export function formatTimeInput(raw: string): string {
-  const d = raw.replace(/\D/g, "").slice(0, 4);
-  return d.length <= 2 ? d : `${d.slice(0, 2)}:${d.slice(2)}`;
-}
-
-/** 정확한 시간을 모를 때 고르는 시간대(옛 시진, 2시간 단위). time 은 그 시간대 한가운데 시각이에요. */
+/** 태어난 시간을 고르는 시진(2시간 단위). time 은 그 시진 한가운데 시각이에요. 자시는 자정 전·후를 나눠요. */
 export const TIME_BLOCKS: ReadonlyArray<{ label: string; range: string; time: string }> = [
-  { label: "자시", range: "밤 11시~새벽 1시", time: "00:00" },
+  { label: "자시", range: "밤 11시~12시", time: "23:30" },
+  { label: "자시", range: "0시~새벽 1시", time: "00:30" },
   { label: "축시", range: "새벽 1시~3시", time: "02:00" },
   { label: "인시", range: "새벽 3시~5시", time: "04:00" },
   { label: "묘시", range: "새벽 5시~7시", time: "06:00" },
@@ -226,6 +218,21 @@ export const TIME_BLOCKS: ReadonlyArray<{ label: string; range: string; time: st
   { label: "술시", range: "저녁 7시~9시", time: "20:00" },
   { label: "해시", range: "밤 9시~11시", time: "22:00" },
 ];
+
+/** "HH:MM" 이 속한 시진의 대표 시각(select 값)을 돌려줘요. 시간이 없거나 잘못되면 "". */
+export function blockOfTime(time: string): string {
+  const t = parseTime(time);
+  if (!t) return "";
+  const m = t.hour * 60 + t.minute;
+  for (const b of TIME_BLOCKS) {
+    const [h, mi] = b.time.split(":").map(Number);
+    const c = h * 60 + mi;
+    const half = b.label === "자시" ? 30 : 60;
+    const d = Math.min(Math.abs(m - c), 1440 - Math.abs(m - c));
+    if (d <= half) return b.time;
+  }
+  return "";
+}
 
 /** 양력/음력에 맞춰 "1988-12-29" 글을 폼 값으로 바꿔요. 음력은 연·월·일로 나눠 담고, 덜 적었으면 비워요. */
 export function dateTextToFields(text: string, calendar: "solar" | "lunar"): Pick<IntakeForm, "calendar" | "solarDate" | "lunarYear" | "lunarMonth" | "lunarDay"> {

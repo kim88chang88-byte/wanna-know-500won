@@ -1,5 +1,6 @@
 "use client";
 
+import BirthTimeSelect from "@/components/BirthTimeSelect";
 import { conclusionOf, fetchPartnerImage, fetchRestChapters, mergeChapters } from "@/lib/premium/mergeChapters";
 import AiNotice from "@/components/premium/AiNotice";
 import { useEffect, useRef, useState } from "react";
@@ -16,10 +17,8 @@ import {
   validatePartnerStep,
   validateStep,
   COMBINED_STEPS,
-  TIME_BLOCKS,
   dateTextToFields,
   formatDateInput,
-  formatTimeInput,
   type AnyStepId,
   type BirthFields,
   type IntakeForm,
@@ -43,7 +42,6 @@ import { ReadingCard } from "./ReadingCard";
 import StoryReport from "./StoryReport";
 import { birthSummary, isStoryReport } from "@/lib/storyHelpers";
 import { VaultSaveBar } from "./VaultSaveBar";
-import { BIRTH_PLACES } from "@/lib/saju/birthPlace";
 import { profileSummary, profileToForm, sameBirth, type SavedProfile } from "@/lib/profile";
 import { MAX_LABEL, MAX_PEOPLE, type SavedPerson } from "@/lib/people";
 import { BRANCHES, STEMS } from "@/lib/saju/constants";
@@ -175,51 +173,6 @@ function PillarCell({ pillar }: { pillar: Pillar | null }) {
   );
 }
 
-/** 밤 11시대 출생(야자시·조자시)과 태어난 곳 보정. 정확한 시간을 적었을 때만 보여요. */
-function TimeExtras({ f, patch }: { f: BirthFields; patch: (p: Partial<BirthFields>) => void }) {
-  if (!f.timeKnown) return null;
-  const showLateZi = f.time.startsWith("23:") || (f.birthPlace !== "" && f.time.startsWith("00:"));
-  return (
-    <>
-      {showLateZi && (
-          <div className="space-y-1" role="group" aria-label="23시대 출생 날짜 기준">
-            <p className="text-xs font-semibold text-gray-600">밤 11시대는 두 가지 보는 법이 있어요</p>
-            <div className="grid grid-cols-2 gap-2">
-              <ChoiceButton selected={f.lateZi !== "nextDay"} onClick={() => patch({ lateZi: "sameDay" })}>
-                그날로 봐요 (야자시)
-              </ChoiceButton>
-              <ChoiceButton selected={f.lateZi === "nextDay"} onClick={() => patch({ lateZi: "nextDay" })}>
-                다음 날로 봐요 (조자시)
-              </ChoiceButton>
-            </div>
-            <p className="text-xs text-gray-500 leading-relaxed">모르겠으면 그대로 두세요. 날짜 기둥(일주)이 달라질 수 있어요.</p>
-          </div>
-        )}
-        {f.timeKnown && (
-          <label className="block text-xs font-semibold text-gray-600">
-            태어난 곳 (선택)
-            <select
-              name="birthPlace"
-              value={f.birthPlace}
-              onChange={(e) => patch({ birthPlace: e.target.value })}
-              className={`${INPUT} mt-1`}
-            >
-              <option value="">고르지 않아요 (시계 시각 그대로)</option>
-              {BIRTH_PLACES.map((p) => (
-                <option key={p.name} value={p.name}>
-                  {p.name}
-                </option>
-              ))}
-            </select>
-            <span className="block mt-1 font-normal text-gray-500 leading-relaxed">
-              우리나라 표준시는 동경 135도 기준이라, 태어난 곳에 따라 실제 해 시각이 달라요. 고르면 그만큼 시간을 보정해서 보고, 이 정보는 저장하지 않아요.
-            </span>
-          </label>
-        )}
-    </>
-  );
-}
-
 const PILL = "rounded-full border px-5 py-2.5 text-sm font-bold transition-colors";
 
 function Pill({ selected, onClick, children, testId }: { selected: boolean; onClick: () => void; children: React.ReactNode; testId?: string }) {
@@ -237,7 +190,6 @@ function FieldTitle({ children }: { children: React.ReactNode }) {
 /** 처음 쓰는 분(비회원·저장된 정보가 없는 회원)용: 생년월일·성별·태어난 시간을 한 화면에서 직접 적어요. */
 function CombinedBirthFields({ f, patch }: { f: IntakeForm; patch: (p: Partial<IntakeForm>) => void }) {
   const [dateText, setDateText] = useState(() => (f.calendar === "solar" ? f.solarDate : f.lunarYear && f.lunarMonth && f.lunarDay ? `${f.lunarYear.padStart(4, "0")}-${f.lunarMonth.padStart(2, "0")}-${f.lunarDay.padStart(2, "0")}` : ""));
-  const exact = !f.timeApprox;
   function onDate(raw: string) {
     const t = formatDateInput(raw);
     setDateText(t);
@@ -294,72 +246,20 @@ function CombinedBirthFields({ f, patch }: { f: IntakeForm; patch: (p: Partial<I
       <hr className="border-gray-200" />
 
       <div className="space-y-3">
-        <FieldTitle>태어난 시간을 아시나요?</FieldTitle>
-        <div className="flex gap-2" role="group" aria-label="태어난 시간을 아는지">
-          <Pill selected={f.timeKnown} onClick={() => patch({ timeKnown: true })} testId="time-known-yes">
-            예
-          </Pill>
-          <Pill selected={!f.timeKnown} onClick={() => patch({ timeKnown: false, time: "", timeApprox: false })} testId="time-known-no">
-            아니오
-          </Pill>
-        </div>
+        <FieldTitle>태어난 시간</FieldTitle>
+        <BirthTimeSelect
+          time={f.time}
+          known={f.timeKnown}
+          onChange={(n) => patch({ time: n.time, timeKnown: n.known })}
+          selectClassName={INPUT}
+        />
       </div>
-
-      {f.timeKnown && (
-        <div className="space-y-3">
-          <FieldTitle>정확한 시간을 아시나요?</FieldTitle>
-          <div className="flex gap-2" role="group" aria-label="정확한 시간을 아는지">
-            <Pill selected={exact} onClick={() => patch({ timeApprox: false, time: "" })} testId="time-exact-yes">
-              예
-            </Pill>
-            <Pill selected={!exact} onClick={() => patch({ timeApprox: true, time: "" })} testId="time-exact-no">
-              아니오
-            </Pill>
-          </div>
-          {exact ? (
-            <>
-              <input
-                type="text"
-                inputMode="numeric"
-                autoComplete="off"
-                name="birthTime"
-                aria-label="태어난 시간"
-                placeholder="예: 09:30"
-                maxLength={5}
-                value={f.time}
-                onChange={(e) => patch({ time: formatTimeInput(e.target.value) })}
-                className={INPUT}
-              />
-              <p className="text-[11px] text-gray-500">24시간 기준이에요. 오후 3시 20분이면 15:20 (숫자만 적어도 돼요)</p>
-              <TimeExtras f={f} patch={patch} />
-            </>
-          ) : (
-            <div data-testid="time-blocks">
-              <p className="mb-2 text-[11px] text-gray-500">대략 어느 시간대인지 골라 주세요.</p>
-              <div className="grid grid-cols-2 gap-2">
-                {TIME_BLOCKS.map((b) => (
-                  <button
-                    key={b.label}
-                    type="button"
-                    aria-pressed={f.time === b.time}
-                    onClick={() => patch({ time: b.time })}
-                    className={`rounded-xl border px-3 py-2 text-left text-xs font-bold transition-colors ${f.time === b.time ? CHOICE_ON : CHOICE_OFF}`}
-                  >
-                    {b.label}
-                    <span className="block font-normal opacity-80">{b.range}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-      )}
     </div>
   );
 }
 
 /** 날짜·시간·성별 질문 화면. 내 것과 상대방 것이 같은 화면을 써요. */
-function BirthStepFields({ kind, f, patch, withPlace = false }: { kind: "date" | "time" | "gender"; f: BirthFields; patch: (p: Partial<BirthFields>) => void; withPlace?: boolean }) {
+function BirthStepFields({ kind, f, patch }: { kind: "date" | "time" | "gender"; f: BirthFields; patch: (p: Partial<BirthFields>) => void }) {
   return (
     <>
     {kind === "date" && (
@@ -437,27 +337,12 @@ function BirthStepFields({ kind, f, patch, withPlace = false }: { kind: "date" |
     )}
 
     {kind === "time" && (
-      <div className="space-y-3">
-        <label className="block text-xs font-semibold text-gray-600">
-          태어난 시간
-          <input
-            type="time"
-            name="time"
-            value={f.time}
-            disabled={!f.timeKnown}
-            onChange={(e) => patch({ time: e.target.value })}
-            className={`${INPUT} mt-1 disabled:opacity-40`}
-          />
-        </label>
-        <ChoiceButton
-          selected={!f.timeKnown}
-          onClick={() => patch({ timeKnown: !f.timeKnown })}
-          className="w-full"
-        >
-          태어난 시간은 모르겠어요
-        </ChoiceButton>
-        {withPlace && <TimeExtras f={f} patch={patch} />}
-      </div>
+      <BirthTimeSelect
+        time={f.time}
+        known={f.timeKnown}
+        onChange={(n) => patch({ time: n.time, timeKnown: n.known })}
+        selectClassName={INPUT}
+      />
     )}
 
     {kind === "gender" && (
@@ -924,7 +809,7 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
           )}
 
           {step === "birth" && <CombinedBirthFields f={form} patch={update} />}
-          {(step === "date" || step === "time" || step === "gender") && <BirthStepFields kind={step} f={form} patch={update} withPlace />}
+          {(step === "date" || step === "time" || step === "gender") && <BirthStepFields kind={step} f={form} patch={update} />}
           {step === "pdate" && people.length > 0 && (
             <div data-testid="saved-people" className="mb-3 rounded-xl bg-brand-50 border border-brand-100 px-3 py-2.5">
               <p className="text-[11px] font-bold text-brand-700 mb-1.5">기억해 둔 사람 (눌러서 바로 불러와요)</p>

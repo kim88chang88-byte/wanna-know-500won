@@ -3,6 +3,7 @@
 import { useEffect, useState, type FormEvent } from "react";
 import type { PremiumErrorBody, PremiumReportView } from "@/lib/premium/types";
 import type { BirthInput } from "@/lib/saju/types";
+import BirthTimeSelect from "@/components/BirthTimeSelect";
 import ManseReport from "./ManseReport";
 import AiNotice from "./AiNotice";
 import { conclusionOf, fetchPartnerImage, fetchRestChapters, mergeChapters } from "@/lib/premium/mergeChapters";
@@ -51,7 +52,7 @@ export default function PremiumReportApp() {
   const [aiNotice, setAiNotice] = useState(false);
   const [aiGated, setAiGated] = useState(false);
   const [date, setDate] = useState("");
-  const [time, setTime] = useState("12:00");
+  const [time, setTime] = useState("");
   const [timeUnknown, setTimeUnknown] = useState(false);
   const [isFemale, setIsFemale] = useState<boolean | null>(null);
   const [isLunar, setIsLunar] = useState(false);
@@ -66,6 +67,7 @@ export default function PremiumReportApp() {
     const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(date);
     if (!m) return setError("생년월일을 입력해 주세요.");
     if (isFemale === null) return setError("성별을 선택해 주세요.");
+    if (!timeUnknown && !time) return setError("태어난 시간을 고르거나 '태어난 시간 모름'을 체크해 주세요.");
     const [hh, mm] = time.split(":").map(Number);
     const body: BirthInput = {
       year: Number(m[1]),
@@ -139,14 +141,18 @@ export default function PremiumReportApp() {
       </div>
 
       <div>
-        <label htmlFor="birth-time" className="block text-sm font-bold text-[#e6c887] mb-1.5">
-          태어난 시간
-        </label>
-        <input id="birth-time" type="time" value={time} disabled={timeUnknown} onChange={(e) => setTime(e.target.value)} className={`${field} disabled:opacity-40`} />
-        <label className="mt-2 flex items-center gap-2 text-sm text-[#e8dfca]/80">
-          <input type="checkbox" checked={timeUnknown} onChange={(e) => setTimeUnknown(e.target.checked)} className="h-4 w-4 accent-[#e6c887]" />
-          시간을 몰라요
-        </label>
+        <BirthTimeSelect
+          time={time}
+          known={!timeUnknown}
+          onChange={(n) => {
+            setTime(n.time);
+            setTimeUnknown(!n.known);
+          }}
+          selectClassName={field}
+          labelClassName="text-sm font-bold text-[#e6c887]"
+          noteClassName="text-xs text-[#e8dfca]/60"
+          checkClassName="text-sm text-[#e8dfca]/80"
+        />
       </div>
 
       <div>

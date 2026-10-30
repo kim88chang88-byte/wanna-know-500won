@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import BirthTimeSelect from "@/components/BirthTimeSelect";
 import { BRANCHES, STEMS } from "@/lib/saju/constants";
 import type { BirthInput, Pillar, SajuChart } from "@/lib/saju/types";
 
@@ -73,6 +74,8 @@ export default function BirthForm() {
   const [chart, setChart] = useState<SajuChart | null>(null);
   const [reading, setReading] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [birthTime, setBirthTime] = useState("");
+  const [timeKnown, setTimeKnown] = useState(true);
   const [calendar, setCalendar] = useState<"solar" | "lunar">("solar");
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -88,7 +91,7 @@ export default function BirthForm() {
       calendar === "lunar"
         ? [Number(form.get("ly")), Number(form.get("lm")), Number(form.get("ld"))]
         : String(form.get("date")).split("-").map(Number);
-    const time = String(form.get("time") ?? "");
+    const time = timeKnown ? birthTime : "";
     const [hour, minute] = time ? time.split(":").map(Number) : [undefined, undefined];
 
     const input: BirthInput = {
@@ -155,10 +158,18 @@ export default function BirthForm() {
             </label>
           </>
         )}
-        <label>
-          태어난 시간 (모르면 비워두세요)
-          <input type="time" name="time" />
-        </label>
+        <BirthTimeSelect
+          time={birthTime}
+          known={timeKnown}
+          onChange={(n) => {
+            setBirthTime(n.time);
+            setTimeKnown(n.known);
+          }}
+          selectClassName=""
+          labelClassName=""
+          noteClassName="hint"
+          checkClassName="check"
+        />
         <label>
           성별
           <select name="gender" defaultValue="male">
