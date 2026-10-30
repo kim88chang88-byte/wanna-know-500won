@@ -83,14 +83,14 @@ function Pillars({ report }: { report: PremiumReportView }) {
           const se = stem ? elementOfChar(stem, false) : null;
           const be = branch ? elementOfChar(branch, true) : null;
           const cell = (ch: string | null, el: Element | null, reading: string | undefined, label: string) => (
-            <div className={`flex flex-col items-center gap-0.5 py-2.5 ${el ? ELEMENT_BOX[el] : "bg-gray-100"}`} aria-label={label}>
-              <span className="font-serifKr text-2xl font-black leading-none">{ch}</span>
-              <span className="text-[10px] font-bold opacity-85">{reading ?? ""}</span>
+            <div className={`relative flex flex-col items-center gap-0.5 pb-2.5 pt-6 ${el ? ELEMENT_BOX[el] : "bg-gray-100"}`} aria-label={label}>
               {el && (
-                <span className="mt-0.5 rounded-full bg-black/10 px-1.5 py-px text-[10px] font-bold">
+                <span data-testid="element-chip" className="absolute right-1 top-1 rounded-full bg-black/10 px-1.5 py-px text-[10px] font-bold leading-tight">
                   {EL_LABEL[el].icon} {EL_LABEL[el].name}
                 </span>
               )}
+              <span className="font-serifKr text-2xl font-black leading-none">{ch}</span>
+              <span className="text-[10px] font-bold opacity-85">{reading ?? ""}</span>
             </div>
           );
           return (
