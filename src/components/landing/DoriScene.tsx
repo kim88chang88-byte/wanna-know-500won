@@ -5,6 +5,11 @@
  */
 export default function DoriScene({ line, tip }: { line: string; tip: string }) {
   const long = line.length > 42;
+  // "오늘의 작은 실천: 내 속도대로…" → "오늘의 작은 실천:" 다음에서 줄을 바꿔요
+  const cleanTip = tip.replace(/^🫧\s*/, "");
+  const m = /^([^:：]{1,20}[:：])\s*(.+)$/s.exec(cleanTip);
+  const tipHead = m ? m[1] : cleanTip;
+  const tipRest = m ? m[2] : "";
   return (
     <div
       data-testid="dori-scene"
@@ -17,12 +22,18 @@ export default function DoriScene({ line, tip }: { line: string; tip: string }) 
         className="absolute flex flex-col justify-center border border-white/80 bg-[#efeaf4] shadow-[0_6px_20px_rgba(120,100,170,0.18)]"
         style={{ left: "50.4%", top: "10.2%", width: "46.8%", height: "83%", borderRadius: "3.4cqw", padding: "2.4cqw 2.8cqw", gap: "1.6cqw" }}
       >
-        <p data-testid="dori-scene-line" className="text-left font-medium text-slate-700" style={{ fontSize: long ? "2.5cqw" : "3cqw", lineHeight: 1.4, wordBreak: "keep-all" }}>
-          {line}
+        <p data-testid="dori-scene-line" className="text-left font-bold text-slate-800" style={{ fontSize: long ? "2.5cqw" : "3cqw", lineHeight: 1.4, wordBreak: "keep-all" }}>
+          “{line}”
         </p>
         <div aria-hidden="true" className="h-px w-full bg-slate-300/70" />
         <p data-testid="dori-scene-tip" className="rounded-[1.6cqw] bg-[#e3dcf0] text-left font-medium text-[#5b2a4a]" style={{ fontSize: "2.1cqw", lineHeight: 1.4, padding: "1.3cqw 1.8cqw", wordBreak: "keep-all" }}>
-          🫧 {tip.replace(/^🫧\s*/, "")}
+          🫧 {tipHead}
+          {tipRest && (
+            <>
+              <br />
+              {tipRest}
+            </>
+          )}
         </p>
       </div>
     </div>

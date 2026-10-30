@@ -41,13 +41,22 @@ export function ganzhiMeaning(ganzhi: string, short = false): string | null {
   return `오늘 하루의 기운 이름이에요. ${s}(${stem})${withBatchim(s) ? "과" : "와"} ${b}(${branch})의 기운이 만나는 날이래요.`;
 }
 
-/** "戊寅" → "오늘은 무인(戊寅)일이고, 큰 산(戊)과 호랑이(寅)의 기운이 만나는 날이란 뜻이에요". 모르는 글자면 null */
-export function ganzhiSentence(ganzhi: string): string | null {
-  const m = ganzhiMeaning(ganzhi, true);
-  if (!m) return null;
+/** 오늘의 일진 문장을 조각으로 돌려줘요. hl 이 true 인 조각(일진·그림 두 가지)은 형광펜으로 강조해요. 모르는 글자면 null */
+export function ganzhiSentenceParts(ganzhi: string): Array<{ text: string; hl: boolean }> | null {
   const [stem, branch] = ganzhi.match(/[\u4e00-\u9fff]/g) ?? [];
-  const reading = readingFirst(`${stem}${branch}`);
-  return `오늘은 ${reading}일이고, ${m.replace("만나는 날이래요", "만나는 날이란 뜻이에요")}`;
+  const s = STEM_IMAGE[stem ?? ""];
+  const b = BRANCH_ANIMAL[branch ?? ""];
+  if (!s || !b) return null;
+  const j = withBatchim(s) ? "과" : "와";
+  return [
+    { text: "오늘은 ", hl: false },
+    { text: `${readingFirst(`${stem}${branch}`)}일`, hl: true },
+    { text: "이고, ", hl: false },
+    { text: `${s}(${stem})`, hl: true },
+    { text: `${j} `, hl: false },
+    { text: `${b}(${branch})`, hl: true },
+    { text: "의 기운이 만나는 날이란 뜻이에요", hl: false },
+  ];
 }
 
 /** 마지막 글자에 받침이 있으면 true (과/와 고르기) */

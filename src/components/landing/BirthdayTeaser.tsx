@@ -5,7 +5,7 @@ import { formatDateInput } from "@/lib/intake";
 import DoriScene from "./DoriScene";
 import DoriIcon from "./DoriIcon";
 import FitText from "./FitText";
-import { ganzhiSentence } from "@/lib/ganzhiMeaning";
+import { ganzhiSentenceParts } from "@/lib/ganzhiMeaning";
 
 interface Teaser {
   line: string;
@@ -50,9 +50,17 @@ export default function BirthdayTeaser() {
       {result ? (
         <div className="text-center">
           <p className="text-xs font-bold text-brand-500">오늘의 도리 한마디</p>
-          {ganzhiSentence(result.ganzhi) && (
+          {ganzhiSentenceParts(result.ganzhi) && (
             <FitText maxPx={13} minPx={9} className="mt-1.5 text-center font-semibold text-slate-600">
-              {ganzhiSentence(result.ganzhi)}
+              {ganzhiSentenceParts(result.ganzhi)!.map((p, i) =>
+                p.hl ? (
+                  <mark key={i} className="rounded-sm bg-transparent px-0.5 font-bold text-slate-900" style={{ backgroundImage: "linear-gradient(transparent 50%, #fde047 50%)" }}>
+                    {p.text}
+                  </mark>
+                ) : (
+                  <span key={i}>{p.text}</span>
+                ),
+              )}
             </FitText>
           )}
           <div className="mt-3">
