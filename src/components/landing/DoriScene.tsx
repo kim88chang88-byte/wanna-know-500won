@@ -40,7 +40,7 @@ export default function DoriScene({ line, tip }: { line: string; tip: string }) 
         <p data-testid="dori-scene-line" className="text-left font-bold text-slate-800" style={{ fontSize: long ? "3.1cqw" : "3.8cqw", lineHeight: 1.4, wordBreak: "keep-all" }}>
           “{line}”
         </p>
-        <p data-testid="dori-scene-tip" className="border border-white/80 bg-white/60 text-left font-medium text-[#5b2a4a]" style={{ fontSize: "2.2cqw", lineHeight: 1.4, padding: "1.5cqw 2.4cqw", borderRadius: "2.6cqw", wordBreak: "keep-all" }}>
+        <p data-testid="dori-scene-tip" className="border border-white/80 bg-white/60 text-left font-bold text-[#5b2a4a]" style={{ fontSize: "2.9cqw", lineHeight: 1.4, padding: "1.8cqw 2.6cqw", borderRadius: "2.8cqw", wordBreak: "keep-all" }}>
           🫧 {tipHead}
           {tipRest && (
             <>
