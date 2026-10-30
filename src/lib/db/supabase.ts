@@ -322,6 +322,20 @@ export function createDb(config: DbConfig, fetchImpl: FetchLike = fetch) {
       return typeof n === "number" && Number.isFinite(n) ? n : 0;
     },
 
+    /** 오늘 방문을 기록하고(vid 는 이미 해시된 값), 오늘·누적 방문자 수를 돌려줘요. DB 함수(visit_hit) 안에서 한 번에 처리해요. */
+    async recordVisit(day: string, vid: string): Promise<{ today: number; total: number } | null> {
+      const res = await call("rpc/visit_hit", {
+        method: "POST",
+        headers: headers(),
+        body: JSON.stringify({ p_day: day, p_vid: vid }),
+      });
+      const rows = (await res.json().catch(() => null)) as Array<{ today?: unknown; total?: unknown }> | { today?: unknown; total?: unknown } | null;
+      const row = Array.isArray(rows) ? rows[0] : rows;
+      const today = Number(row?.today);
+      const total = Number(row?.total);
+      return Number.isFinite(today) && Number.isFinite(total) ? { today, total } : null;
+    },
+
     /** 저장된 생년월일시를 읽어요. 없으면 null. */
     async getProfile(userId: string): Promise<SavedProfile | null> {
       const res = await call(`profiles?user_id=eq.${safeId(userId)}&select=*&limit=1`, { method: "GET", headers: headers() });

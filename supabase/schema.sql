@@ -212,3 +212,40 @@ alter table public.saved_people enable row level security;
 -- ─────────────────────────────────────────────────────────────────────────────
 alter table public.reviews add column if not exists public_ok boolean not null default false;
 create index if not exists reviews_public_idx on public.reviews (id) where public_ok and not hidden;
+
+-- ─────────────────────────────────────────────────────────────────────────────
+-- 방문자 수(랜딩 "Today / Total"): 브라우저가 만든 무작위 ID 를 서버에서 한 번 더 해시해서 세요.
+-- 이름·연락처·IP 는 저장하지 않아요. 이 파일 전체를 다시 Run 하면 추가돼요. (없으면 방문자 수 표시가 숨겨져요)
+-- ─────────────────────────────────────────────────────────────────────────────
+create table if not exists public.visitors (
+  vid text primary key,                          -- 해시된 방문자 ID
+  first_day date not null
+);
+create table if not exists public.visit_days (
+  day date not null,                             -- 한국 시간(KST) 기준 날짜
+  vid text not null,
+  primary key (day, vid)
+);
+alter table public.visitors enable row level security;
+alter table public.visit_days enable row level security;
+
+-- p_vid 가 있으면 오늘 방문으로 기록하고, 오늘 방문자 수와 누적 방문자 수를 돌려줘요.
+create or replace function public.visit_hit(p_day date, p_vid text)
+returns table (today int, total int)
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if p_vid is not null and length(p_vid) between 8 and 128 then
+    insert into public.visitors (vid, first_day) values (p_vid, p_day) on conflict do nothing;
+    insert into public.visit_days (day, vid) values (p_day, p_vid) on conflict do nothing;
+  end if;
+  return query
+    select (select count(*)::int from public.visit_days where day = p_day),
+           (select count(*)::int from public.visitors);
+end;
+$$;
+
+revoke all on function public.visit_hit(date, text) from public, anon, authenticated;
+grant execute on function public.visit_hit(date, text) to service_role;

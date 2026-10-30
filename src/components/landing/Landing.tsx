@@ -30,6 +30,7 @@ import {
 const MODAL_DELAY_MS = 150;
 const RITUAL_MS = 2000;
 const LAST_KEY = "wanna500:last:v1";
+const VISITOR_KEY = "wanna500:vid:v1";
 
 export default function Landing() {
   const { user, profile, setProfile, deleteProfile, serverCounts, setServerCounts, result: loginResult, clearResult, justLoggedIn, clearWelcome, logout, withdraw } = useAuth();
@@ -41,6 +42,7 @@ export default function Landing() {
   const timers = useRef<number[]>([]);
   const [ritual, setRitual] = useState(false);
   const [tickets, setTickets] = useState(0);
+  const [visitors, setVisitors] = useState<{ today: number; total: number } | null>(null);
   const bonusRef = useRef(false);
   // 도장 연속 3일이면 보너스 뽑기를 지급하고, 안내에 쓸 값을 새로 읽어요.
   const syncReward = useCallback(() => {
@@ -62,6 +64,26 @@ export default function Landing() {
   useEffect(() => {
     applyCounts(readCounts(getBrowserStorage(), new Date()));
     syncReward();
+    // 방문자 수: 이 브라우저의 무작위 ID(이름·연락처 아님)를 보내 오늘·누적 방문자를 세요. 실패하면 숫자를 숨겨요.
+    void (async () => {
+      try {
+        const st = getBrowserStorage();
+        let vid = st?.getItem(VISITOR_KEY) ?? "";
+        if (!/^[A-Za-z0-9-]{16,64}$/.test(vid)) {
+          vid = crypto.randomUUID();
+          try {
+            st?.setItem(VISITOR_KEY, vid);
+          } catch {
+            // 저장이 막혀 있으면 이번 방문만 센 값으로 보여줘요
+          }
+        }
+        const res = await fetch("/api/visit", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ vid }) });
+        const d = (await res.json().catch(() => null)) as { today?: number; total?: number } | null;
+        if (res.ok && typeof d?.today === "number" && typeof d?.total === "number") setVisitors({ today: d.today, total: d.total });
+      } catch {
+        // 숫자를 못 받으면 그냥 숨겨요
+      }
+    })();
     try {
       setLastKey(getBrowserStorage()?.getItem(LAST_KEY) ?? null);
     } catch {
@@ -174,7 +196,7 @@ export default function Landing() {
       <Header onOpenLogin={openLogin} user={user} />
 
       <main className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-5 pb-20 sm:pb-24">
-        <HeroSection counts={counts} tickets={tickets} />
+        <HeroSection visitors={visitors} tickets={tickets} />
         <ShowcaseSection />
         {!user && <BirthdayTeaser />}
         {/* 도리의 소식 카드들은 첫 화면의 "뽑으러 가기" 버튼 아래로 옮겼어요. (첫 화면에서 눌러야 할 것이 하나만 보이게) */}

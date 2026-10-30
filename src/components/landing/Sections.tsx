@@ -1,6 +1,5 @@
 import Link from "next/link";
 import type React from "react";
-import type { DrawCounts } from "@/lib/drawCounter";
 import { SERVICE_NAME } from "@/lib/siteInfo";
 import type { AuthUser } from "./useAuth";
 import { FAQ_ITEMS } from "./faq";
@@ -149,28 +148,21 @@ export function Header({ onOpenLogin, user = null }: { onOpenLogin: () => void; 
 
 /* ------------------------------------------------------------------ 히어로 */
 
-export function HeroSection({ counts, tickets = 0 }: { counts: DrawCounts; tickets?: number }) {
+export function HeroSection({ visitors = null, tickets = 0 }: { visitors?: { today: number; total: number } | null; tickets?: number }) {
   return (
     <section className="text-left mb-3">
-      {/* 뽑기 횟수: 한 줄짜리 작은 알약 (로그인했다면 서버가, 아니라면 이 기기에서 센 값) */}
-      <div className="inline-flex flex-wrap items-center justify-start gap-x-3 gap-y-1 rounded-full bg-white/80 border border-brand-100 px-4 py-1.5 text-xs shadow-sm">
-        <span className="inline-flex items-center gap-1 text-gray-500">
-          <span className="material-symbols-outlined text-brand-500 text-[16px]">water_drop</span>
-          오늘
-          <b className="font-bold text-brand-500" data-testid="count-today">
-            {counts.today}번 뽑았어요{" "}
-            {counts.today === 0 && <span className="font-normal text-sky-600">(무료 1회 남음 ✦)</span>}
-          </b>
-        </span>
-        <span aria-hidden="true" className="h-3 w-px bg-brand-200" />
-        <span className="inline-flex items-center gap-1 text-gray-500">
-          <span className="material-symbols-outlined text-indigo-600 text-[16px]">auto_awesome</span>
-          이번달
-          <b className="font-bold text-indigo-800" data-testid="count-month">
-            {counts.month}번 뽑았어요 ✧
-          </b>
-        </span>
-      </div>
+      {/* 방문자 수: 서버가 센 값이 있을 때만 보여요 */}
+      {visitors && (
+        <div data-testid="visitors" className="inline-flex items-center gap-2 rounded-full bg-white/80 border border-brand-100 px-4 py-1.5 text-xs text-gray-500 shadow-sm">
+          <span>
+            <b className="font-bold text-brand-500">Today</b>: <span data-testid="visitors-today">{visitors.today.toLocaleString("ko-KR")}</span>명
+          </span>
+          <span aria-hidden="true" className="h-3 w-px bg-brand-200" />
+          <span>
+            <b className="font-bold text-indigo-800">Total</b>: <span data-testid="visitors-total">{visitors.total.toLocaleString("ko-KR")}</span>명
+          </span>
+        </div>
+      )}
       {tickets > 0 && (
         <p data-testid="ticket-badge" className="mt-2 text-[11px] font-bold text-rose-600">
           🎟 보너스 뽑기 {tickets}장 보유 중 · 오늘 무료 뽑기를 다 쓴 뒤 뽑으면 자동으로 써요
