@@ -7,8 +7,14 @@ import type { BirthInput, Gender } from "@/lib/saju/types";
 export const MIN_YEAR = 1900;
 export const MAX_YEAR = 2100;
 
-export type StepId = "date" | "time" | "gender" | "concern" | "consent";
+export type StepId = "date" | "time" | "gender" | "birth" | "concern" | "consent";
 export const STEPS: readonly StepId[] = ["date", "time", "gender", "concern", "consent"];
+
+/**
+ * 저장된 정보가 없는 이용자(비회원·처음 쓰는 회원)용 입력 순서: 생년월일·성별·태어난 시간을 한 화면에 모아 직접 적어요.
+ * (저장된 정보가 있는 회원과 궁합은 기존 질문 순서를 그대로 써요)
+ */
+export const COMBINED_STEPS: readonly StepId[] = ["birth", "concern", "consent"];
 
 /** 궁합 리포트에서 상대방 생년월일시를 받는 단계 (내 성별 다음, 고민 앞) */
 export type PartnerStepId = "pdate" | "ptime" | "pgender";
@@ -36,6 +42,8 @@ export interface IntakeForm {
   /** 23시대 출생일 때 야자시(sameDay) / 조자시(nextDay) */
   lateZi: "sameDay" | "nextDay";
   gender: Gender | null;
+  /** 시간은 아는데 정확한 분까지는 모를 때 true: 시간대(2시간 단위)만 골라요 (한 화면 입력에서만 써요) */
+  timeApprox?: boolean;
   /** 요즘 고민 (선택): 추천 버튼 + 직접 적기 */
   concernTags: ConcernId[];
   concernText: string;
@@ -103,7 +111,7 @@ export function validateStep(step: StepId, f: IntakeForm): string | null {
     case "date": {
       if (f.calendar === "solar") {
         const p = parseSolar(f.solarDate);
-        if (!p) return "생년월일을 골라 주세요.";
+        if (!p) return "생년월일을 입력해 주세요. (예: 1988-12-29)";
         if (p.y < MIN_YEAR || p.y > MAX_YEAR) return `${MIN_YEAR}년부터 ${MAX_YEAR}년까지만 볼 수 있어요.`;
         if (!isRealSolarDate(p.y, p.m, p.d)) return "없는 날짜예요. 다시 확인해 주세요.";
         return null;
@@ -122,6 +130,14 @@ export function validateStep(step: StepId, f: IntakeForm): string | null {
       return parseTime(f.time) ? null : "태어난 시간을 골라 주세요. 모르면 '모르겠어요'를 눌러도 돼요.";
     case "gender":
       return f.gender ? null : "성별을 골라 주세요.";
+    case "birth": {
+      const d = validateStep("date", f);
+      if (d) return d;
+      const g = validateStep("gender", f);
+      if (g) return g;
+      if (f.timeKnown && f.timeApprox && !parseTime(f.time)) return "대략 어느 시간대에 태어났는지 골라 주세요.";
+      return validateStep("time", f);
+    }
     case "concern":
       if (f.concernTags.length > MAX_CONCERN_TAGS) return `고민 버튼은 ${MAX_CONCERN_TAGS}개까지 고를 수 있어요.`;
       if (f.concernText.length > MAX_CONCERN_TEXT) return `고민은 ${MAX_CONCERN_TEXT}자까지 적을 수 있어요.`;
@@ -179,4 +195,43 @@ export function buildBirthInput(f: IntakeForm): BirthInput | null {
 export function buildConcern(f: IntakeForm): Concern | null {
   const c: Concern = { tags: f.concernTags.slice(0, MAX_CONCERN_TAGS), text: cleanConcernText(f.concernText) };
   return c.tags.length > 0 || c.text.length > 0 ? c : null;
+}
+
+/** 숫자만 뽑아서 "1988-12-29" 모양으로 맞춰 줘요. (붙여넣기·숫자만 입력도 받아요) */
+export function formatDateInput(raw: string): string {
+  const d = raw.replace(/\D/g, "").slice(0, 8);
+  if (d.length <= 4) return d;
+  if (d.length <= 6) return `${d.slice(0, 4)}-${d.slice(4)}`;
+  return `${d.slice(0, 4)}-${d.slice(4, 6)}-${d.slice(6)}`;
+}
+
+/** 숫자만 뽑아서 "09:30" 모양으로 맞춰 줘요. */
+export function formatTimeInput(raw: string): string {
+  const d = raw.replace(/\D/g, "").slice(0, 4);
+  return d.length <= 2 ? d : `${d.slice(0, 2)}:${d.slice(2)}`;
+}
+
+/** 정확한 시간을 모를 때 고르는 시간대(옛 시진, 2시간 단위). time 은 그 시간대 한가운데 시각이에요. */
+export const TIME_BLOCKS: ReadonlyArray<{ label: string; range: string; time: string }> = [
+  { label: "자시", range: "밤 11시~새벽 1시", time: "00:00" },
+  { label: "축시", range: "새벽 1시~3시", time: "02:00" },
+  { label: "인시", range: "새벽 3시~5시", time: "04:00" },
+  { label: "묘시", range: "새벽 5시~7시", time: "06:00" },
+  { label: "진시", range: "아침 7시~9시", time: "08:00" },
+  { label: "사시", range: "오전 9시~11시", time: "10:00" },
+  { label: "오시", range: "낮 11시~1시", time: "12:00" },
+  { label: "미시", range: "오후 1시~3시", time: "14:00" },
+  { label: "신시", range: "오후 3시~5시", time: "16:00" },
+  { label: "유시", range: "저녁 5시~7시", time: "18:00" },
+  { label: "술시", range: "저녁 7시~9시", time: "20:00" },
+  { label: "해시", range: "밤 9시~11시", time: "22:00" },
+];
+
+/** 양력/음력에 맞춰 "1988-12-29" 글을 폼 값으로 바꿔요. 음력은 연·월·일로 나눠 담고, 덜 적었으면 비워요. */
+export function dateTextToFields(text: string, calendar: "solar" | "lunar"): Pick<IntakeForm, "calendar" | "solarDate" | "lunarYear" | "lunarMonth" | "lunarDay"> {
+  if (calendar === "solar") return { calendar, solarDate: text, lunarYear: "", lunarMonth: "", lunarDay: "" };
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(text);
+  return m
+    ? { calendar, solarDate: "", lunarYear: m[1], lunarMonth: String(Number(m[2])), lunarDay: String(Number(m[3])) }
+    : { calendar, solarDate: "", lunarYear: "", lunarMonth: "", lunarDay: "" };
 }

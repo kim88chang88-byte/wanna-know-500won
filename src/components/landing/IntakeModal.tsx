@@ -15,6 +15,11 @@ import {
   buildConcern,
   validatePartnerStep,
   validateStep,
+  COMBINED_STEPS,
+  TIME_BLOCKS,
+  dateTextToFields,
+  formatDateInput,
+  formatTimeInput,
   type AnyStepId,
   type BirthFields,
   type IntakeForm,
@@ -85,6 +90,7 @@ interface Props {
 export const LOGIN_NUDGE = "로그인하면 도리가 생년월일시를 기억해서 다시 입력할 필요가 없어요!";
 
 const BUBBLE: Record<AnyStepId, string> = {
+  birth: "먼저 생년월일, 성별, 태어난 시간을 알려줄래? 몰라도 괜찮아! 🫧",
   date: "먼저, 언제 태어났어? 🫧",
   time: "태어난 시간도 알면 더 또렷하게 볼 수 있어. 몰라도 괜찮아!",
   gender: "성별도 알려줄래?",
@@ -166,6 +172,189 @@ function PillarCell({ pillar }: { pillar: Pillar | null }) {
         <small className="block text-[11px] text-gray-500 font-sans">{branch?.hangul}</small>
       </div>
     </td>
+  );
+}
+
+/** 밤 11시대 출생(야자시·조자시)과 태어난 곳 보정. 정확한 시간을 적었을 때만 보여요. */
+function TimeExtras({ f, patch }: { f: BirthFields; patch: (p: Partial<BirthFields>) => void }) {
+  if (!f.timeKnown) return null;
+  const showLateZi = f.time.startsWith("23:") || (f.birthPlace !== "" && f.time.startsWith("00:"));
+  return (
+    <>
+      {showLateZi && (
+          <div className="space-y-1" role="group" aria-label="23시대 출생 날짜 기준">
+            <p className="text-xs font-semibold text-gray-600">밤 11시대는 두 가지 보는 법이 있어요</p>
+            <div className="grid grid-cols-2 gap-2">
+              <ChoiceButton selected={f.lateZi !== "nextDay"} onClick={() => patch({ lateZi: "sameDay" })}>
+                그날로 봐요 (야자시)
+              </ChoiceButton>
+              <ChoiceButton selected={f.lateZi === "nextDay"} onClick={() => patch({ lateZi: "nextDay" })}>
+                다음 날로 봐요 (조자시)
+              </ChoiceButton>
+            </div>
+            <p className="text-xs text-gray-500 leading-relaxed">모르겠으면 그대로 두세요. 날짜 기둥(일주)이 달라질 수 있어요.</p>
+          </div>
+        )}
+        {f.timeKnown && (
+          <label className="block text-xs font-semibold text-gray-600">
+            태어난 곳 (선택)
+            <select
+              name="birthPlace"
+              value={f.birthPlace}
+              onChange={(e) => patch({ birthPlace: e.target.value })}
+              className={`${INPUT} mt-1`}
+            >
+              <option value="">고르지 않아요 (시계 시각 그대로)</option>
+              {BIRTH_PLACES.map((p) => (
+                <option key={p.name} value={p.name}>
+                  {p.name}
+                </option>
+              ))}
+            </select>
+            <span className="block mt-1 font-normal text-gray-500 leading-relaxed">
+              우리나라 표준시는 동경 135도 기준이라, 태어난 곳에 따라 실제 해 시각이 달라요. 고르면 그만큼 시간을 보정해서 보고, 이 정보는 저장하지 않아요.
+            </span>
+          </label>
+        )}
+    </>
+  );
+}
+
+const PILL = "rounded-full border px-5 py-2.5 text-sm font-bold transition-colors";
+
+function Pill({ selected, onClick, children, testId }: { selected: boolean; onClick: () => void; children: React.ReactNode; testId?: string }) {
+  return (
+    <button type="button" data-testid={testId} onClick={onClick} aria-pressed={selected} className={`${PILL} ${selected ? CHOICE_ON : CHOICE_OFF}`}>
+      {children}
+    </button>
+  );
+}
+
+function FieldTitle({ children }: { children: React.ReactNode }) {
+  return <p className="rounded-xl bg-gray-50 px-4 py-3 text-sm font-bold text-gray-800">{children}</p>;
+}
+
+/** 처음 쓰는 분(비회원·저장된 정보가 없는 회원)용: 생년월일·성별·태어난 시간을 한 화면에서 직접 적어요. */
+function CombinedBirthFields({ f, patch }: { f: IntakeForm; patch: (p: Partial<IntakeForm>) => void }) {
+  const [dateText, setDateText] = useState(() => (f.calendar === "solar" ? f.solarDate : f.lunarYear && f.lunarMonth && f.lunarDay ? `${f.lunarYear.padStart(4, "0")}-${f.lunarMonth.padStart(2, "0")}-${f.lunarDay.padStart(2, "0")}` : ""));
+  const exact = !f.timeApprox;
+  function onDate(raw: string) {
+    const t = formatDateInput(raw);
+    setDateText(t);
+    patch(dateTextToFields(t, f.calendar));
+  }
+  function onCalendar(c: "solar" | "lunar") {
+    patch(dateTextToFields(dateText, c));
+  }
+  return (
+    <div className="space-y-5" data-testid="combined-birth">
+      <div className="space-y-3">
+        <FieldTitle>생년월일</FieldTitle>
+        <div className="flex gap-2" role="group" aria-label="양력 또는 음력">
+          <Pill selected={f.calendar === "solar"} onClick={() => onCalendar("solar")} testId="cal-solar">
+            양력
+          </Pill>
+          <Pill selected={f.calendar === "lunar"} onClick={() => onCalendar("lunar")} testId="cal-lunar">
+            음력
+          </Pill>
+        </div>
+        <input
+          type="text"
+          inputMode="numeric"
+          autoComplete="off"
+          name="birthDate"
+          aria-label="생년월일"
+          placeholder="예: 1988-12-29"
+          maxLength={10}
+          value={dateText}
+          onChange={(e) => onDate(e.target.value)}
+          className={INPUT}
+        />
+        <p className="text-[11px] text-gray-500">숫자만 적어도 돼요. (예: 19881229)</p>
+        {f.calendar === "lunar" && (
+          <label className="flex items-center gap-2 text-xs text-gray-600">
+            <input type="checkbox" checked={f.isLeapMonth} onChange={(e) => patch({ isLeapMonth: e.target.checked })} />
+            윤달이에요
+          </label>
+        )}
+      </div>
+
+      <div className="space-y-3">
+        <FieldTitle>성별</FieldTitle>
+        <div className="flex gap-2" role="group" aria-label="성별">
+          <Pill selected={f.gender === "female"} onClick={() => patch({ gender: "female" })} testId="gender-female">
+            여자
+          </Pill>
+          <Pill selected={f.gender === "male"} onClick={() => patch({ gender: "male" })} testId="gender-male">
+            남자
+          </Pill>
+        </div>
+      </div>
+
+      <hr className="border-gray-200" />
+
+      <div className="space-y-3">
+        <FieldTitle>태어난 시간을 아시나요?</FieldTitle>
+        <div className="flex gap-2" role="group" aria-label="태어난 시간을 아는지">
+          <Pill selected={f.timeKnown} onClick={() => patch({ timeKnown: true })} testId="time-known-yes">
+            예
+          </Pill>
+          <Pill selected={!f.timeKnown} onClick={() => patch({ timeKnown: false, time: "", timeApprox: false })} testId="time-known-no">
+            아니오
+          </Pill>
+        </div>
+      </div>
+
+      {f.timeKnown && (
+        <div className="space-y-3">
+          <FieldTitle>정확한 시간을 아시나요?</FieldTitle>
+          <div className="flex gap-2" role="group" aria-label="정확한 시간을 아는지">
+            <Pill selected={exact} onClick={() => patch({ timeApprox: false, time: "" })} testId="time-exact-yes">
+              예
+            </Pill>
+            <Pill selected={!exact} onClick={() => patch({ timeApprox: true, time: "" })} testId="time-exact-no">
+              아니오
+            </Pill>
+          </div>
+          {exact ? (
+            <>
+              <input
+                type="text"
+                inputMode="numeric"
+                autoComplete="off"
+                name="birthTime"
+                aria-label="태어난 시간"
+                placeholder="예: 09:30"
+                maxLength={5}
+                value={f.time}
+                onChange={(e) => patch({ time: formatTimeInput(e.target.value) })}
+                className={INPUT}
+              />
+              <p className="text-[11px] text-gray-500">24시간 기준이에요. 오후 3시 20분이면 15:20 (숫자만 적어도 돼요)</p>
+              <TimeExtras f={f} patch={patch} />
+            </>
+          ) : (
+            <div data-testid="time-blocks">
+              <p className="mb-2 text-[11px] text-gray-500">대략 어느 시간대인지 골라 주세요.</p>
+              <div className="grid grid-cols-2 gap-2">
+                {TIME_BLOCKS.map((b) => (
+                  <button
+                    key={b.label}
+                    type="button"
+                    aria-pressed={f.time === b.time}
+                    onClick={() => patch({ time: b.time })}
+                    className={`rounded-xl border px-3 py-2 text-left text-xs font-bold transition-colors ${f.time === b.time ? CHOICE_ON : CHOICE_OFF}`}
+                  >
+                    {b.label}
+                    <span className="block font-normal opacity-80">{b.range}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -267,41 +456,7 @@ function BirthStepFields({ kind, f, patch, withPlace = false }: { kind: "date" |
         >
           태어난 시간은 모르겠어요
         </ChoiceButton>
-        {withPlace && f.timeKnown && (f.time.startsWith("23:") || (f.birthPlace !== "" && f.time.startsWith("00:"))) && (
-          <div className="space-y-1" role="group" aria-label="23시대 출생 날짜 기준">
-            <p className="text-xs font-semibold text-gray-600">밤 11시대는 두 가지 보는 법이 있어요</p>
-            <div className="grid grid-cols-2 gap-2">
-              <ChoiceButton selected={f.lateZi !== "nextDay"} onClick={() => patch({ lateZi: "sameDay" })}>
-                그날로 봐요 (야자시)
-              </ChoiceButton>
-              <ChoiceButton selected={f.lateZi === "nextDay"} onClick={() => patch({ lateZi: "nextDay" })}>
-                다음 날로 봐요 (조자시)
-              </ChoiceButton>
-            </div>
-            <p className="text-xs text-gray-500 leading-relaxed">모르겠으면 그대로 두세요. 날짜 기둥(일주)이 달라질 수 있어요.</p>
-          </div>
-        )}
-        {withPlace && f.timeKnown && (
-          <label className="block text-xs font-semibold text-gray-600">
-            태어난 곳 (선택)
-            <select
-              name="birthPlace"
-              value={f.birthPlace}
-              onChange={(e) => patch({ birthPlace: e.target.value })}
-              className={`${INPUT} mt-1`}
-            >
-              <option value="">고르지 않아요 (시계 시각 그대로)</option>
-              {BIRTH_PLACES.map((p) => (
-                <option key={p.name} value={p.name}>
-                  {p.name}
-                </option>
-              ))}
-            </select>
-            <span className="block mt-1 font-normal text-gray-500 leading-relaxed">
-              우리나라 표준시는 동경 135도 기준이라, 태어난 곳에 따라 실제 해 시각이 달라요. 고르면 그만큼 시간을 보정해서 보고, 이 정보는 저장하지 않아요.
-            </span>
-          </label>
-        )}
+        {withPlace && <TimeExtras f={f} patch={patch} />}
       </div>
     )}
 
@@ -324,7 +479,9 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
   const [form, setForm] = useState<IntakeForm>(() => (savedProfile ? { ...EMPTY_FORM, ...profileToForm(savedProfile) } : EMPTY_FORM));
   // 궁합 리포트면 상대방의 생년월일시·성별을 더 받아요. (상대방 정보는 계산에만 쓰고 저장하지 않아요)
   const compat = target.premium === true && isCompatFortune(target.fortune);
-  const steps: readonly AnyStepId[] = compat ? COMPAT_STEPS : STEPS;
+  // 저장된 정보가 없는 분(비회원·처음 쓰는 회원)은 생년월일·성별·시간을 한 화면에서 적어요.
+  const combined = !compat && !savedProfile;
+  const steps: readonly AnyStepId[] = compat ? COMPAT_STEPS : combined ? COMBINED_STEPS : STEPS;
   const firstAfterMe = steps.indexOf(compat ? "pdate" : "concern");
   const [partner, setPartner] = useState<BirthFields>(EMPTY_BIRTH);
   // 기억해 둔 다른 사람 (로그인 회원 + 궁합일 때만 불러와요. 표가 아직 없으면 조용히 빈 목록)
@@ -755,7 +912,7 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
             </div>
           )}
 
-          {step === "date" && !loggedIn && (
+          {(step === "date" || step === "birth") && !loggedIn && (
             <div data-testid="login-nudge" className="mb-3 rounded-xl bg-amber-50 border border-amber-200 px-3 py-2.5 text-center">
               <p className="text-[12px] font-bold text-amber-900 leading-snug">🫧 {LOGIN_NUDGE}</p>
               {onRequestLogin && (
@@ -766,6 +923,7 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
             </div>
           )}
 
+          {step === "birth" && <CombinedBirthFields f={form} patch={update} />}
           {(step === "date" || step === "time" || step === "gender") && <BirthStepFields kind={step} f={form} patch={update} withPlace />}
           {step === "pdate" && people.length > 0 && (
             <div data-testid="saved-people" className="mb-3 rounded-xl bg-brand-50 border border-brand-100 px-3 py-2.5">
