@@ -5,7 +5,7 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 interface Props {
   /** 한 벌(copy)을 그리는 함수. dup 은 몇 번째 복사본인지 (0 이 진짜, 나머지는 끊김 없는 반복용 복사본) */
   children: (dup: number) => ReactNode;
-  /** 초당 흐르는 거리(px). 왼쪽에서 오른쪽으로 흘러요 */
+  /** 초당 흐르는 거리(px). 오른쪽에서 왼쪽으로 흘러요 */
   speed?: number;
   testId?: string;
   className?: string;
@@ -14,7 +14,7 @@ interface Props {
 const IDLE_MS = 1800;
 
 /**
- * 카드 줄을 왼쪽에서 오른쪽으로 천천히 흘려 보내면서, 손가락·트랙패드·마우스 드래그로 직접 넘겨 볼 수도 있어요.
+ * 카드 줄을 오른쪽에서 왼쪽으로 천천히 흘려 보내면서, 손가락·트랙패드·마우스 드래그로 직접 넘겨 볼 수도 있어요.
  * 직접 만지는 동안에는 멈추고, 손을 떼고 잠시 뒤에 다시 흘러가요. 마우스를 올려 두면 멈춰요.
  * 움직임 줄이기 설정이면 흐르지 않고 직접 밀어서만 볼 수 있어요.
  */
@@ -80,7 +80,7 @@ export default function AutoMarquee({ children, speed = 48, testId, className = 
       last = now;
       const idle = now - lastIdle > IDLE_MS;
       if (!hovering && !dragging && idle && !document.hidden) {
-        pos = wrap(pos - speed * dt); // 내용이 오른쪽으로 흐르려면 스크롤 위치는 줄어들어요
+        pos = wrap(pos + speed * dt); // 내용이 왼쪽으로 흐르려면 스크롤 위치는 늘어나요
         el.scrollLeft = pos;
       }
       raf = requestAnimationFrame(frame);
