@@ -283,10 +283,6 @@ export function MachinesSection({ onSpin, lastKey = null }: SpinProps & { lastKe
                 <h4 className={`mb-1 font-cute text-base font-normal ${m.titleClass}`}>{m.name}</h4>
                 <p className="line-clamp-2 min-h-[2.6rem] text-xs leading-relaxed text-slate-600">{m.desc}</p>
               </div>
-
-              <span className="relative mt-auto block rounded-xl bg-gray-100 py-2.5 text-center text-xs font-bold text-brand-600 transition-colors group-hover:bg-brand-100">
-                {m.name} 열기
-              </span>
             </div>
           </div>
         ))}

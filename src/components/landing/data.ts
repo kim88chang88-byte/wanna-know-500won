@@ -44,7 +44,7 @@ export const MACHINES: readonly MachineCard[] = [
     badge: "성공운",
     name: "성공운",
     fortune: "성공운",
-    desc: "승진, 이직, 시험 합격까지 거침없이 뚫어주는 성취의 물길",
+    desc: "승진·이직·합격을 뚫는 물길",
     tag: "매일 첫 1회 무료",
     best: false,
     sticker: "HOT",
