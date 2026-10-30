@@ -1,7 +1,6 @@
 import Link from "next/link";
 import type React from "react";
 import type { DrawCounts } from "@/lib/drawCounter";
-import type { WeekStamp } from "@/lib/streak";
 import { SERVICE_NAME } from "@/lib/siteInfo";
 import type { AuthUser } from "./useAuth";
 import { FAQ_ITEMS } from "./faq";
@@ -11,7 +10,6 @@ import { HERO_IMAGE, IMAGES, LOGO_IMAGE } from "./images";
 import SafeImage from "./SafeImage";
 import AutoMarquee from "./AutoMarquee";
 import DoriIcon from "./DoriIcon";
-import DoriStamp from "./DoriStamp";
 import ReviewsSection from "./ReviewsSection";
 import ShareSiteBar from "./ShareSiteBar";
 
@@ -151,8 +149,7 @@ export function Header({ onOpenLogin, user = null }: { onOpenLogin: () => void; 
 
 /* ------------------------------------------------------------------ 히어로 */
 
-export function HeroSection({ counts, streakText = null, stamps = [], tickets = 0, runLength = 0 }: { counts: DrawCounts; streakText?: string | null; stamps?: WeekStamp[]; tickets?: number; runLength?: number }) {
-  const toNext = 3 - (runLength % 3 || (runLength > 0 ? 3 : 0));
+export function HeroSection({ counts, streakText = null, tickets = 0 }: { counts: DrawCounts; streakText?: string | null; tickets?: number }) {
   return (
     <section className="text-left mb-3">
       {/* 뽑기 횟수: 한 줄짜리 작은 알약 (로그인했다면 서버가, 아니라면 이 기기에서 센 값) */}
@@ -179,30 +176,11 @@ export function HeroSection({ counts, streakText = null, stamps = [], tickets = 
           {streakText}
         </p>
       )}
-      {stamps.some((d) => d.done) && (
-        <div data-testid="week-stamps" className="mt-1.5 flex items-center gap-1" aria-label="최근 7일 방문 도장">
-          {stamps.map((d, i) => (
-            <span key={d.day} title={d.day} className={d.today && d.done ? "drop-shadow-[0_0_4px_rgba(232,53,46,0.35)]" : ""}>
-              <DoriStamp done={d.done} today={d.today} label={"日月火水木金土"[new Date(`${d.day}T00:00:00Z`).getUTCDay()]} tilt={[-6, 4, -3, 7, -5, 3, -4][i % 7]} />
-            </span>
-          ))}
-          <span className="text-[10px] text-gray-400 ml-1">이번 주 도장</span>
-        </div>
+      {tickets > 0 && (
+        <p data-testid="ticket-badge" className="mt-2 text-[11px] font-bold text-rose-600">
+          🎟 보너스 뽑기 {tickets}장 보유 중 · 오늘 무료 뽑기를 다 쓴 뒤 뽑으면 자동으로 써요
+        </p>
       )}
-      <div data-testid="stamp-reward" className="mt-2 rounded-2xl border border-rose-100 bg-rose-50/70 px-3 py-2 text-[11px] leading-relaxed text-gray-600">
-        <b className="text-rose-600">🎁 도장 3개 연속 보너스</b> · 도장을 <b>3일 연속</b>으로 찍으면 500원 무료 뽑기 <b>1장</b>을 선물해요. (6일, 9일…마다 한 장씩!)
-        {runLength > 0 && (
-          <span className="block mt-0.5 text-rose-500 font-semibold">
-            {toNext === 3 ? "3일 연속을 채워 보너스 한 장을 받았어요 ✨" : `지금 ${runLength}일 연속! ${toNext}일만 더 이어가면 보너스 뽑기가 와요`}
-          </span>
-        )}
-        {tickets > 0 && (
-          <span data-testid="ticket-badge" className="block mt-0.5 font-bold text-rose-600">
-            🎟 보너스 뽑기 {tickets}장 보유 중 · 오늘 무료 뽑기를 다 쓴 뒤 뽑으면 자동으로 써요
-          </span>
-        )}
-        <span className="block mt-0.5 text-[10px] text-gray-400">하루라도 쉬면 연속이 끊겨요. 이 기기에서만 세요.</span>
-      </div>
     </section>
   );
 }
