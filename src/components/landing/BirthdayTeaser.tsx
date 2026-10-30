@@ -23,7 +23,7 @@ export default function BirthdayTeaser() {
     const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
     if (!m) {
       setState("error");
-      setError("생년월일을 입력해 주세요. (예: 1988-12-29)");
+      setError("생년월일을 입력해 주세요. (예: 2000-01-01)");
       return;
     }
     setState("loading");
@@ -63,7 +63,7 @@ export default function BirthdayTeaser() {
               inputMode="numeric"
               autoComplete="off"
               aria-label="생년월일 (양력)"
-              placeholder="예: 1988-12-29"
+              placeholder="예: 2000-01-01"
               maxLength={10}
               value={value}
               onChange={(e) => setValue(formatDateInput(e.target.value))}
@@ -79,7 +79,7 @@ export default function BirthdayTeaser() {
           </div>
           {state === "error" && <p role="alert" className="text-xs text-rose-600">{error}</p>}
           <p className="text-center text-[11px] leading-relaxed text-gray-400">
-            숫자만 적어도 돼요 (예: 19881229) · 가입 없이 볼 수 있어요
+            가입 없이 숫자만 적어도 돼요 (예: 20000101)
             <br />
             양력 기준 · 생년월일은 계산에만 쓰고 저장하지 않아요
           </p>

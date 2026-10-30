@@ -109,7 +109,7 @@ export function validateStep(step: StepId, f: IntakeForm): string | null {
     case "date": {
       if (f.calendar === "solar") {
         const p = parseSolar(f.solarDate);
-        if (!p) return "생년월일을 입력해 주세요. (예: 1988-12-29)";
+        if (!p) return "생년월일을 입력해 주세요. (예: 2000-01-01)";
         if (p.y < MIN_YEAR || p.y > MAX_YEAR) return `${MIN_YEAR}년부터 ${MAX_YEAR}년까지만 볼 수 있어요.`;
         if (!isRealSolarDate(p.y, p.m, p.d)) return "없는 날짜예요. 다시 확인해 주세요.";
         return null;

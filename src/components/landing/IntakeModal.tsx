@@ -216,13 +216,13 @@ function CombinedBirthFields({ f, patch }: { f: IntakeForm; patch: (p: Partial<I
           autoComplete="off"
           name="birthDate"
           aria-label="생년월일"
-          placeholder="예: 1988-12-29"
+          placeholder="예: 2000-01-01"
           maxLength={10}
           value={dateText}
           onChange={(e) => onDate(e.target.value)}
           className={INPUT}
         />
-        <p className="text-[11px] text-gray-500">숫자만 적어도 돼요. (예: 19881229)</p>
+        <p className="text-[11px] text-gray-500">숫자만 적어도 돼요. (예: 20000101)</p>
         {f.calendar === "lunar" && (
           <label className="flex items-center gap-2 text-xs text-gray-600">
             <input type="checkbox" checked={f.isLeapMonth} onChange={(e) => patch({ isLeapMonth: e.target.checked })} />
