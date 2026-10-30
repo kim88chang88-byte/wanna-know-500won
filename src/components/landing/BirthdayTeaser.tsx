@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { formatDateInput } from "@/lib/intake";
+import DoriIcon from "./DoriIcon";
 import { readingFirst } from "@/lib/hanjaReading";
 
 interface Teaser {
@@ -62,7 +63,7 @@ export default function BirthdayTeaser({ onPick }: { onPick?: () => void }) {
         </div>
       ) : (
         <form onSubmit={submit} className="flex flex-col items-center gap-2">
-          <p className="text-sm font-bold text-slate-700">생일만 알려주면 오늘의 도리 한마디를 바로 보여줄게요 🦦</p>
+          <p className="text-sm font-bold text-slate-700">생일만 알려주면 오늘의 도리 한마디를 바로 보여줄게요 <DoriIcon className="!mr-0 ml-1" /></p>
           <div className="flex w-full max-w-sm gap-2">
             <input
               type="text"
@@ -84,7 +85,11 @@ export default function BirthdayTeaser({ onPick }: { onPick?: () => void }) {
             </button>
           </div>
           {state === "error" && <p role="alert" className="text-xs text-rose-600">{error}</p>}
-          <p className="text-[11px] text-gray-400">숫자만 적어도 돼요 (예: 19881229) · 가입 없이 볼 수 있어요 · 양력 기준 · 생년월일은 계산에만 쓰고 저장하지 않아요</p>
+          <p className="text-center text-[11px] leading-relaxed text-gray-400">
+            숫자만 적어도 돼요 (예: 19881229) · 가입 없이 볼 수 있어요
+            <br />
+            양력 기준 · 생년월일은 계산에만 쓰고 저장하지 않아요
+          </p>
         </form>
       )}
     </section>
