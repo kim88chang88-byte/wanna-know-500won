@@ -65,7 +65,7 @@ export function DailyLineCard({ onOpened }: { onOpened?: () => void }) {
   }
 
   return (
-    <section data-testid="daily-line" aria-label="오늘의 도리 한마디" className="mb-4 rounded-2xl border border-brand-200 bg-white/90 px-4 py-3.5 shadow-sm">
+    <section id="daily-today" data-testid="daily-line" aria-label="오늘의 도리 한마디" className="mb-4 rounded-2xl border border-brand-200 bg-white/90 px-4 py-3.5 shadow-sm">
       {daily ? (
         <div role="status">
           <p className="text-xs font-bold text-brand-600"><DoriIcon />오늘의 도리 한마디</p>

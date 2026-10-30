@@ -2,6 +2,7 @@
 
 import StickyDrawCta from "./StickyDrawCta";
 import BirthdayTeaser from "./BirthdayTeaser";
+import BottomTabs from "./BottomTabs";
 import CoinRitual from "./CoinRitual";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { dayKey, getBrowserStorage, readCounts, recordDraw, type DrawCounts } from "@/lib/drawCounter";
@@ -214,6 +215,8 @@ export default function Landing() {
       </main>
 
       <Footer />
+      <div aria-hidden="true" className="h-16 lg:hidden" />
+      <BottomTabs />
 
       {ritual && <CoinRitual />}
       <StickyDrawCta hidden={Boolean(intake) || loginOpen || ritual} />

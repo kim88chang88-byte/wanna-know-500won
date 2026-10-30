@@ -7,7 +7,6 @@ import { FREE_PRICE_LABEL, MACHINES, PREMIUM_CARDS } from "./data";
 import { HelpMenuButton, MachineMenuButton } from "./MenuButton";
 import { HERO_IMAGE, IMAGES, LOGO_IMAGE } from "./images";
 import SafeImage from "./SafeImage";
-import AutoMarquee from "./AutoMarquee";
 import DoriIcon from "./DoriIcon";
 import ReviewsSection from "./ReviewsSection";
 import ShareSiteBar from "./ShareSiteBar";
@@ -229,61 +228,69 @@ export function ShowcaseSection() {
 export function MachinesSection({ onSpin, lastKey = null }: SpinProps & { lastKey?: string | null }) {
   return (
     <section id="machines" className="mb-8 relative z-10 scroll-mt-20">
-      <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-4">
-        <h3 className="sr-only">6대 운세 카드</h3>
-        <span className="text-xs font-semibold px-3.5 py-1.5 rounded-full bg-sky-50 text-brand-500 border border-sky-200">
-          아래 운세는 <strong className="underline font-bold">매일 첫 1회는 무료</strong>예요! (이후 500원)
-        </span>
+      <div className="flex items-end justify-between gap-2 px-1 mb-2">
+        <div>
+          <div className="flex items-center gap-1 text-brand-600">
+            <span className="material-symbols-outlined text-[16px]" aria-hidden="true">wb_sunny</span>
+            <span className="text-[11px] font-bold uppercase tracking-wider">Daily Special</span>
+          </div>
+          <h3 className="text-base sm:text-lg font-bold text-gray-900">매일 첫 1회 무료 운세</h3>
+        </div>
+        <span className="shrink-0 rounded-full bg-gray-100 px-2.5 py-0.5 text-[11px] text-gray-500">이후 500원</span>
       </div>
 
-      {/* 여섯 장이 왼쪽에서 오른쪽으로 천천히 흘러요. 손가락·트랙패드·마우스로 직접 넘겨 볼 수도 있어요. (AutoMarquee) */}
-      <AutoMarquee testId="machine-marquee" speed={48} className="pt-4 pb-3">
-        {(dup) => (
-          <>
-              {MACHINES.map((m) => (
-                <div key={m.key} className="relative mr-4 sm:mr-6 w-[230px] sm:w-[300px] shrink-0 transition-transform hover:-translate-y-1.5 active:scale-[0.98]">
-                  {m.sticker && <Sticker text={m.sticker} testId={dup === 0 ? "machine-sticker" : undefined} />}
-                  {lastKey === m.key && (
-                    <span data-testid={dup === 0 ? "last-drawn" : undefined} className="absolute -top-2 left-3 z-10 rounded-full bg-white border border-sky-300 px-2 py-0.5 text-[10px] font-bold text-sky-700 shadow-sm">
-                      지난번에 뽑았어요
-                    </span>
-                  )}
-                  <div
-                    id={dup === 0 ? m.key : undefined}
-                    data-testid={dup === 0 ? "machine-card" : undefined}
-                    role="button"
-                    tabIndex={dup === 0 ? 0 : -1}
-                    aria-label={`${m.name} 운세 보기`}
-                    onClick={() => onSpin(m.key, m.fortune, FREE_PRICE_LABEL)}
-                    onKeyDown={(e) => activateOnKey(e, () => onSpin(m.key, m.fortune, FREE_PRICE_LABEL))}
-                    className={`scroll-mt-24 card-water-glow relative flex flex-col justify-between rounded-3xl p-3 sm:p-6 h-full cursor-pointer select-none hover:shadow-xl transition-shadow group focus:outline-none focus-visible:ring-4 focus-visible:ring-brand-300 ${m.card}`}
-                  >
-                    <div>
-                      <div className="flex flex-wrap items-center justify-between gap-1 mb-2.5 sm:mb-3.5">
-                        <span className={`text-[10px] sm:text-xs font-bold px-2 sm:px-3 py-1 rounded-full flex items-center gap-1 ${m.badgeClass}`}>
-                          <span aria-hidden="true">{m.emoji}</span> {m.badge}
-                        </span>
-                        <span className={`text-[10px] sm:text-xs font-bold px-2 sm:px-2.5 py-0.5 rounded-full ${m.tagClass}`}>{m.tag}</span>
-                      </div>
+      {/* 옆으로 밀어서 넘기는 카드예요. (큰 화면에서는 한눈에 펼쳐져요) */}
+      <div
+        data-testid="machine-scroller"
+        className="-mx-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-4 pt-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:-mx-6 sm:px-6 lg:mx-0 lg:grid lg:grid-cols-3 lg:gap-4 lg:overflow-visible lg:px-0 xl:grid-cols-6"
+      >
+        {MACHINES.map((m) => (
+          <div key={m.key} className="relative w-[210px] shrink-0 snap-start sm:w-[230px] lg:w-auto">
+            {m.sticker && <Sticker text={m.sticker} testId="machine-sticker" />}
+            {lastKey === m.key && (
+              <span data-testid="last-drawn" className="absolute -top-2 left-3 z-10 rounded-full bg-white border border-sky-300 px-2 py-0.5 text-[10px] font-bold text-sky-700 shadow-sm">
+                지난번에 뽑았어요
+              </span>
+            )}
+            <div
+              id={m.key}
+              data-testid="machine-card"
+              role="button"
+              tabIndex={0}
+              aria-label={`${m.name} 운세 보기`}
+              onClick={() => onSpin(m.key, m.fortune, FREE_PRICE_LABEL)}
+              onKeyDown={(e) => activateOnKey(e, () => onSpin(m.key, m.fortune, FREE_PRICE_LABEL))}
+              className={`scroll-mt-24 relative flex h-full cursor-pointer select-none flex-col gap-2.5 overflow-hidden rounded-3xl p-3 transition-shadow hover:shadow-lg group focus:outline-none focus-visible:ring-4 focus-visible:ring-brand-300 ${m.card}`}
+            >
+              <span aria-hidden="true" className={`pointer-events-none absolute -right-8 -top-8 h-24 w-24 rounded-full opacity-50 blur-xl ${m.blob}`} />
+              <div className="relative flex items-center justify-between gap-1">
+                <span className={`flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-bold ${m.badgeClass}`}>
+                  <span aria-hidden="true">{m.emoji}</span> {m.badge}
+                </span>
+                <span className="rounded-full bg-brand-100 px-2 py-0.5 text-[10px] font-bold text-brand-700">1회 무료</span>
+              </div>
 
-                      <div className={`w-full h-32 sm:h-56 rounded-2xl p-2 sm:p-2.5 flex items-center justify-center overflow-hidden mb-3 sm:mb-4 border ${m.imageBox}`}>
-                        <SafeImage
-                          src={IMAGES[m.image]}
-                          alt={dup === 0 ? m.name : ""}
-                          className="h-full w-auto max-w-full object-contain group-hover:scale-105 transition-transform duration-500"
-                          fallback={m.emoji}
-                        />
-                      </div>
+              <div className={`relative flex aspect-[4/3] w-full items-center justify-center overflow-hidden rounded-2xl border p-1.5 ${m.imageBox}`}>
+                <SafeImage
+                  src={IMAGES[m.image]}
+                  alt={m.name}
+                  className="h-full w-auto max-w-full object-contain transition-transform duration-500 group-hover:scale-105"
+                  fallback={m.emoji}
+                />
+              </div>
 
-                      <h4 className={`font-cute font-normal text-sm sm:text-lg text-center mb-1.5 ${m.titleClass}`}>{m.name}</h4>
-                      <p className="text-xs sm:text-[13px] text-slate-600 text-center leading-relaxed sm:min-h-[40px]">{m.desc}</p>
-                    </div>
-                  </div>
-                </div>
-              ))}
-          </>
-        )}
-      </AutoMarquee>
+              <div className="relative">
+                <h4 className={`mb-1 font-cute text-base font-normal ${m.titleClass}`}>{m.name}</h4>
+                <p className="line-clamp-2 min-h-[2.6rem] text-xs leading-relaxed text-slate-600">{m.desc}</p>
+              </div>
+
+              <span className="relative mt-auto block rounded-xl bg-gray-100 py-2.5 text-center text-xs font-bold text-brand-600 transition-colors group-hover:bg-brand-100">
+                {m.name} 열기
+              </span>
+            </div>
+          </div>
+        ))}
+      </div>
     </section>
   );
 }

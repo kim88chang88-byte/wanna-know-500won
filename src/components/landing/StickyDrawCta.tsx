@@ -36,7 +36,7 @@ export default function StickyDrawCta({ hidden = false }: { hidden?: boolean }) 
     <a
       href="#machines"
       data-testid="sticky-cta"
-      className="fixed bottom-4 left-1/2 z-40 inline-flex -translate-x-1/2 items-center gap-2 rounded-full bg-gradient-to-r from-brand-500 to-fuchsia-500 px-6 py-3 text-sm font-bold text-white shadow-xl shadow-brand-500/40 active:scale-95 focus:outline-none focus-visible:ring-4 focus-visible:ring-brand-300"
+      className="fixed bottom-[4.75rem] left-1/2 lg:bottom-4 z-40 inline-flex -translate-x-1/2 items-center gap-2 rounded-full bg-gradient-to-r from-brand-500 to-fuchsia-500 px-6 py-3 text-sm font-bold text-white shadow-xl shadow-brand-500/40 active:scale-95 focus:outline-none focus-visible:ring-4 focus-visible:ring-brand-300"
     >
       <span aria-hidden="true">🪙</span>
       오늘의 운 뽑으러 가기

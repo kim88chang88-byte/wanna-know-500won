@@ -46,7 +46,7 @@ export default function BirthdayTeaser() {
   }
 
   return (
-    <section data-testid="birthday-teaser" className="mb-6 rounded-3xl border border-brand-200/70 bg-white/85 p-4 sm:p-5 shadow-sm">
+    <section id="daily-try" data-testid="birthday-teaser" className="mb-6 rounded-3xl border border-brand-200/70 bg-white/85 p-4 sm:p-5 shadow-sm">
       {result ? (
         <div className="text-center">
           <p className="text-left text-xs font-bold text-brand-500">오늘의 도리 한마디</p>
@@ -74,27 +74,32 @@ export default function BirthdayTeaser() {
         <form onSubmit={submit} className="flex flex-col items-center gap-2">
           <p className="text-sm font-bold text-slate-700">생일만 알려주면 오늘의 도리 한마디를 바로 보여줄게요 <DoriIcon className="!mr-0 ml-1" /></p>
           <div className="flex w-full max-w-sm gap-2">
-            <input
-              type="text"
-              inputMode="numeric"
-              autoComplete="off"
-              aria-label="생년월일 (양력)"
-              placeholder="예: 2000-01-01"
-              maxLength={10}
-              value={value}
-              onChange={(e) => setValue(formatDateInput(e.target.value))}
-              className="min-w-0 flex-1 rounded-xl border border-brand-200 bg-white px-3 py-2 text-sm"
-            />
+            <div className="relative min-w-0 flex-1">
+              <span aria-hidden="true" className="material-symbols-outlined pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-[20px] text-brand-500">
+                calendar_today
+              </span>
+              <input
+                type="text"
+                inputMode="numeric"
+                autoComplete="off"
+                aria-label="생년월일 (양력)"
+                placeholder="예: 2000-01-01"
+                maxLength={10}
+                value={value}
+                onChange={(e) => setValue(formatDateInput(e.target.value))}
+                className="h-[52px] w-full rounded-2xl border-2 border-transparent bg-gray-100 pl-11 pr-3 text-[15px] text-gray-900 placeholder:text-gray-400 transition-colors focus:border-brand-300 focus:bg-white focus:outline-none"
+              />
+            </div>
             <button
               type="submit"
               disabled={state === "loading"}
-              className="shrink-0 rounded-xl bg-brand-500 px-4 py-2 text-sm font-bold text-white disabled:opacity-60 active:scale-95"
+              className="h-[52px] shrink-0 rounded-2xl bg-brand-500 px-5 text-[15px] font-bold text-white shadow-md transition active:scale-95 disabled:opacity-60"
             >
               {state === "loading" ? "여는 중…" : "보기"}
             </button>
           </div>
           {state === "error" && <p role="alert" className="text-xs text-rose-600">{error}</p>}
-          <p className="text-center text-[11px] leading-relaxed text-gray-400">생년월일은 사주풀이 계산에만 쓰고 저장하지 않아요!</p>
+          <p className="flex items-center justify-center gap-1 text-center text-[11px] leading-relaxed text-gray-400"><span aria-hidden="true" className="material-symbols-outlined text-[14px]">lock</span>생년월일은 사주풀이 계산에만 쓰고 저장하지 않아요!</p>
         </form>
       )}
     </section>

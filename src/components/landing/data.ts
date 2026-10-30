@@ -31,6 +31,8 @@ export interface MachineCard {
   imageBox: string;
   titleClass: string;
   divider: string;
+  /** 카드 모서리의 은은한 색 번짐 */
+  blob: string;
 }
 
 /** 6대 운명의 자판기 */
@@ -53,6 +55,7 @@ export const MACHINES: readonly MachineCard[] = [
     imageBox: "bg-gradient-to-b from-amber-50/80 to-orange-50/40 border-amber-100",
     titleClass: "text-gray-900",
     divider: "border-amber-100",
+    blob: "bg-amber-200",
   },
   {
     key: "machine-money",
@@ -72,6 +75,7 @@ export const MACHINES: readonly MachineCard[] = [
     imageBox: "bg-gradient-to-b from-pink-50/80 to-rose-50/40 border-pink-100",
     titleClass: "text-gray-900",
     divider: "border-pink-100",
+    blob: "bg-pink-200",
   },
   {
     key: "machine-love",
@@ -91,6 +95,7 @@ export const MACHINES: readonly MachineCard[] = [
     imageBox: "bg-gradient-to-b from-brand-50 to-fuchsia-50/50 border-brand-200",
     titleClass: "text-brand-600",
     divider: "border-brand-200",
+    blob: "bg-brand-200",
   },
   {
     key: "machine-marriage",
@@ -110,6 +115,7 @@ export const MACHINES: readonly MachineCard[] = [
     imageBox: "bg-gradient-to-b from-fuchsia-50/80 to-pink-50/40 border-fuchsia-100",
     titleClass: "text-gray-900",
     divider: "border-fuchsia-100",
+    blob: "bg-fuchsia-200",
   },
   {
     key: "machine-health",
@@ -129,6 +135,7 @@ export const MACHINES: readonly MachineCard[] = [
     imageBox: "bg-gradient-to-b from-emerald-50/80 to-teal-50/40 border-emerald-100",
     titleClass: "text-gray-900",
     divider: "border-emerald-100",
+    blob: "bg-emerald-200",
   },
   {
     key: "machine-study",
@@ -148,6 +155,7 @@ export const MACHINES: readonly MachineCard[] = [
     imageBox: "bg-gradient-to-b from-blue-50/80 to-indigo-50/40 border-blue-100",
     titleClass: "text-gray-900",
     divider: "border-blue-100",
+    blob: "bg-blue-200",
   },
 ];
 
