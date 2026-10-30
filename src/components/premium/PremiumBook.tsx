@@ -2,6 +2,7 @@
 
 import { PREVIEW_OPEN_PAGES } from "@/lib/premium/config";
 import ConcernCard from "./ConcernCard";
+import { josa } from "@/lib/premium/josa";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { checkMessage } from "@/lib/premium/book/resonance";
 import type { BookChart, BookPage, BookRow, BookTable, ElementKind, PremiumReportView, RealityCheck } from "@/lib/premium/types";
@@ -490,14 +491,16 @@ const NEXT_PRODUCTS = [
 ];
 
 /** 장 끝: 다음 장 예고(말풍선 박스). 다음 상품 배너는 결과 맨 끝(별점 후기 위)에 한 번만 보여요. */
-function ChapterEnd({ next }: { next?: BookPage }) {
+function ChapterEnd({ cur, next }: { cur: BookPage; next?: BookPage }) {
   if (!next) return null;
+  const here = titleParts(cur.title).main;
+  const there = titleParts(next.title).main;
   return (
     <div className="mt-9 flex flex-col items-center gap-4">
       <div data-testid="next-teaser" className="border-2 border-[#20203a] bg-[#fffdf7] px-[18px] py-3 text-center text-[15px] font-bold leading-[1.5] text-[#26233a] shadow-[4px_4px_0_#b98a2f]">
-        지금까지 살펴봤어요.
+        지금까지 ‘{here}’{josa(here, "을/를").slice(here.length)} 살펴봤어요.
         <br />
-        다음 장에서는 ‘{titleParts(next.title).main}’을 함께 볼게요!
+        다음 장에서는 ‘{there}’{josa(there, "을/를").slice(there.length)} 함께 볼게요!
       </div>
     </div>
   );
@@ -757,7 +760,7 @@ export default function PremiumBook({ report, flush = false, finale, previewBlur
         </p>
       )}
 
-      <ChapterEnd next={pages[i + 1]} />
+      <ChapterEnd cur={page} next={pages[i + 1]} />
 
       <div className="mt-8 flex items-center gap-3">
         <button

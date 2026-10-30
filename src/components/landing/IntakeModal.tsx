@@ -577,7 +577,7 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
           생년월일시 입력
         </h3>
       )}
-      {header}
+      {!luxe && header}
 
       {phase === "loading" && (
         <div role="status" className="py-10 text-center">
