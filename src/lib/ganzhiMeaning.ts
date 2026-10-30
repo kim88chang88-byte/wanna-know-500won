@@ -28,11 +28,14 @@ const BRANCH_ANIMAL: Record<string, string> = {
 };
 
 /** "戊寅" → "큰 산(戊)과 호랑이(寅)의 기운이 만나는 날이에요". 모르는 글자면 null */
-export function ganzhiMeaning(ganzhi: string): string | null {
-  const [stem, branch] = Array.from(ganzhi);
+export function ganzhiMeaning(ganzhi: string, short = false): string | null {
+  // "戊寅" 도 "무인(戊寅)" 도 받아요: 한자 두 글자만 뽑아 써요.
+  const [stem, branch] = ganzhi.match(/[\u4e00-\u9fff]/g) ?? [];
   const s = STEM_IMAGE[stem ?? ""];
   const b = BRANCH_ANIMAL[branch ?? ""];
   if (!s || !b) return null;
+  const j = withBatchim(s) ? "과" : "와";
+  if (short) return `${s}(${stem})${j} ${b}(${branch})의 기운이 만나는 날이래요`;
   return `오늘 하루의 기운 이름이에요. ${s}(${stem})${withBatchim(s) ? "과" : "와"} ${b}(${branch})의 기운이 만나는 날이래요.`;
 }
 
