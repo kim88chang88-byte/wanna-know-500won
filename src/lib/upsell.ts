@@ -13,13 +13,13 @@ export interface Upsell {
 export function upsellFor(fortune: string): Upsell | null {
   if (fortune.includes("성공") || fortune.includes("재물")) {
     return {
-      title: "올해 성공 재물 리포트",
+      title: "프리미엄 종합 사주",
       hooks: ["움직이기 좋은 달이 언제인지, 월별 12개월 흐름", "앞으로 10년, 대운이 어떻게 바뀌는지", "성공의 길과 돈이 모이는 자리를 내 사주로 더 자세히"],
     };
   }
   if (fortune.includes("연애") || fortune.includes("결혼")) {
     return {
-      title: "연애 결혼 리포트",
+      title: "프리미엄 종합 사주",
       hooks: ["인연이 들어오기 쉬운 시기가 언제인지", "배우자 자리로 보는 결혼 인연의 결", "인연을 부르는 작은 습관 처방"],
     };
   }

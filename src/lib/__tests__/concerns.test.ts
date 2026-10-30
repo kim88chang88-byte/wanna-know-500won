@@ -94,6 +94,8 @@ describe("풀이 종류에 맞는 고민 항목", () => {
     expect(ids("올해 성공 재물 리포트")).toContain("job");
     expect(ids("연애 결혼 리포트")).not.toContain("job");
     expect(ids("우리 둘의 궁합 리포트")).toContain("relationship");
+    expect(ids("프리미엄 종합 사주")).toEqual(expect.arrayContaining(["job", "money", "relationship", "marriage"]));
+    expect(ids("프리미엄 종합 사주")).toHaveLength(7);
   });
   it("알 수 없는 이름이면 전체를 보여준다", () => {
     expect(chipsForFortune("오늘의 운").length).toBe(CONCERN_CHIPS.length);

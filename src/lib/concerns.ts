@@ -84,6 +84,7 @@ export const CONCERN_CHIPS: readonly ConcernChip[] = [
 /** 풀이 종류(자판기·프리미엄 카드)마다 보여 줄 고민 항목. 이미 고른 종류와 상관없는 항목은 다시 보여주지 않아요. */
 const CHIPS_BY_KIND: Array<{ match: string; ids: ConcernId[] }> = [
   // 더 구체적인 이름을 먼저 확인해요. (예: '재물·직장 리포트'가 '재물운'보다 먼저)
+  { match: "종합", ids: ["job", "career", "money", "relationship", "marriage", "stress", "burnout"] },
   { match: "궁합", ids: ["relationship", "crush", "marriage", "partner", "doubt", "breakup", "friends"] },
   { match: "연애 결혼", ids: ["crush", "meet", "relationship", "marriage", "partner", "breakup", "prep"] },
   { match: "성공 재물", ids: ["job", "career", "promotion", "money", "income", "spending", "stable"] },

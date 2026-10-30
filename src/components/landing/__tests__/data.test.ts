@@ -8,9 +8,9 @@ import { IMAGES } from "../images";
 const allKeys = [...MACHINES.map((m) => m.key), ...PREMIUM_CARDS.map((p) => p.key)];
 
 describe("랜딩 카드 데이터", () => {
-  it('"6대" 문구와 개수가 맞는다 (자판기 6, 프리미엄 3)', () => {
+  it('"6대" 문구와 개수가 맞는다 (자판기 6, 프리미엄 종합 사주 1)', () => {
     expect(MACHINES).toHaveLength(6);
-    expect(PREMIUM_CARDS).toHaveLength(3);
+    expect(PREMIUM_CARDS).toHaveLength(1);
   });
 
   it("모든 카드의 key 가 서로 다르다", () => {
@@ -91,16 +91,15 @@ describe("문구 가이드 (BRIEF.md: 뽑기 언어, 겁주거나 신비롭게 �
     expect(text).not.toMatch(/(?<!매일 )첫 ?1회 ?무료/);
   });
 
-  it("일반 자판기는 동물 그림(성공운 용, 재물운 토끼, 연애운 남자 팬더, 결혼운 여자 팬더, 건강운 여우, 학업운 수달)을 쓰고, 프리미엄은 일반과 구분되는 전용 배경 일러스트(premium-scene-*.webp)을 쓴다", () => {
+  it("일반 자판기는 동물 그림(성공운 용, 재물운 토끼, 연애운 남자 팬더, 결혼운 여자 팬더, 건강운 여우, 학업운 수달)을 쓰고, 프리미엄은 일반과 구분되는 전용 배경 일러스트(premium-main.webp)을 쓴다", () => {
     const animal: Record<string, string> = { 성공운: "dragon", 재물운: "rabbit-rich", 연애운: "panda-couple", 결혼운: "panda-wedding", 건강운: "fox-run", "2027 신년운": "otter-newyear" };
     for (const m of MACHINES) expect(IMAGES[m.image]).toBe(`/images/animal-${animal[m.fortune]}.webp`);
-    const premiumAnimal: Record<string, string> = { "premium-compat": "otter", "premium-dohwa": "rabbit", "premium-fortune": "dragon" };
-    for (const c of PREMIUM_CARDS) expect(IMAGES[c.image]).toBe(`/images/premium-scene-${premiumAnimal[c.key]}.webp`);
+    for (const c of PREMIUM_CARDS) expect(IMAGES[c.image]).toBe("/images/premium-main.webp");
   });
 
-  it("프리미엄은 궁합이 맨 앞이고 'HOT' 스티커는 궁합과 성공 재물에 붙는다", () => {
-    expect(PREMIUM_CARDS[0].key).toBe("premium-compat");
-    expect(PREMIUM_CARDS.filter((c) => c.ribbon).map((c) => c.key)).toEqual(["premium-compat", "premium-fortune"]);
-    expect(PREMIUM_CARDS[0].ribbon).toBe("HOT");
+  it("프리미엄은 '프리미엄 종합 사주' 하나만 있다", () => {
+    expect(PREMIUM_CARDS.map((c) => c.key)).toEqual(["premium-all"]);
+    expect(PREMIUM_CARDS[0].title).toBe("프리미엄 종합 사주");
+    expect(PREMIUM_CARDS[0].fortune).toBe("프리미엄 종합 사주");
   });
 });

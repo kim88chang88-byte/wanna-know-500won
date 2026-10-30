@@ -357,7 +357,7 @@ export function PremiumSection({ onSpin }: SpinProps) {
             <span className="bg-brand-500 text-white text-[10px] px-2 py-0.5 rounded-full font-sans">SPECIAL</span>
           </div>
           <h3 className="font-cute text-2xl sm:text-3xl font-normal text-white leading-snug drop-shadow-[0_2px_8px_rgba(40,20,90,0.6)]">
-            9,900원 프리미엄 3대 테마 리포트
+            9,900원 프리미엄 종합 사주
           </h3>
           <p className="text-xs sm:text-sm text-white/85 mt-2 leading-relaxed">
             간단 풀이로는 아쉬운 날을 위한 <strong>20쪽 분량의 심층 리포트</strong>예요.<br />
@@ -365,18 +365,15 @@ export function PremiumSection({ onSpin }: SpinProps) {
           </p>
         </div>
 
-        <div className="relative z-10 -mx-4 sm:-mx-6">
-        <AutoMarquee testId="premium-marquee" speed={48} className="px-4 sm:px-6 pt-4 pb-3">
-          {(dup) => (
-            <>
+        <div className="relative z-10 pt-4 pb-3">
           {PREMIUM_CARDS.map((p) => (
-            <div key={p.key} className="relative mr-4 sm:mr-6 w-[290px] sm:w-[340px] shrink-0 transition-transform hover:-translate-y-1 active:scale-[0.98]">
-            {p.ribbon && <Sticker text={p.ribbon} testId={dup === 0 ? "premium-sticker" : undefined} />}
+            <div key={p.key} className="relative mx-auto w-full max-w-[360px] transition-transform hover:-translate-y-1 active:scale-[0.98]">
+            {p.ribbon && <Sticker text={p.ribbon} testId={"premium-sticker"} />}
             <div
-              id={dup === 0 ? p.key : undefined}
-              data-testid={dup === 0 ? "premium-card" : undefined}
+              id={p.key}
+              data-testid={"premium-card"}
               role="button"
-              tabIndex={dup === 0 ? 0 : -1}
+              tabIndex={0}
               aria-label={`${p.title} 보기`}
               onClick={() => onSpin(p.key, p.fortune, "9,900원", true)}
               onKeyDown={(e) => activateOnKey(e, () => onSpin(p.key, p.fortune, "9,900원", true))}
@@ -406,13 +403,10 @@ export function PremiumSection({ onSpin }: SpinProps) {
             </div>
             </div>
           ))}
-            </>
-          )}
-        </AutoMarquee>
         </div>
         <div className="relative z-10 mt-6 text-center">
           <Link href="/premium" data-testid="premium-report-link" className="text-sm font-bold text-pink-200 hover:text-white underline underline-offset-4">
-            프리미엄 사주서 미리보기 →
+            프리미엄 종합 사주 미리보기 →
           </Link>
         </div>
       </div>

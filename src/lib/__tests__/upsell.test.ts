@@ -2,11 +2,11 @@ import { describe, expect, it } from "vitest";
 import { upsellFor } from "../upsell";
 
 describe("500원 풀이 끝 안내", () => {
-  it("성공·재물은 성공 재물 리포트, 연애·결혼은 연애 결혼 리포트로 이어진다", () => {
-    expect(upsellFor("성공운")?.title).toContain("성공 재물");
-    expect(upsellFor("재물운")?.title).toContain("성공 재물");
-    expect(upsellFor("연애운")?.title).toContain("연애 결혼");
-    expect(upsellFor("결혼운")?.title).toContain("연애 결혼");
+  it("성공·재물·연애·결혼은 프리미엄 종합 사주로 이어진다", () => {
+    expect(upsellFor("성공운")?.title).toContain("프리미엄 종합 사주");
+    expect(upsellFor("재물운")?.title).toContain("프리미엄 종합 사주");
+    expect(upsellFor("연애운")?.title).toContain("프리미엄 종합 사주");
+    expect(upsellFor("결혼운")?.title).toContain("프리미엄 종합 사주");
   });
   it("맞는 상품이 없는 주제는 안내하지 않는다", () => {
     expect(upsellFor("건강운")).toBeNull();
