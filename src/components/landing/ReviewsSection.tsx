@@ -86,8 +86,8 @@ export default function ReviewsSection() {
             <span className="material-symbols-outlined text-[22px]">{real ? "chat_bubble" : "bubble_chart"}</span>
           </div>
           <div>
-            <h3 className="font-cute text-xl font-normal text-gray-900 sm:text-2xl">{real ? "이용자 후기" : "이런 운세 풀이가 나와요"}</h3>
-            <p className="text-xs text-slate-500">{real ? "도리 운세 사주를 써 본 분들이 직접 남긴 후기예요" : "수달 도사 '도리'가 건네는 한마디, 이런 느낌이에요"}</p>
+            <h3 className="font-cute text-xl font-normal text-gray-900 sm:text-2xl">{real ? "도리를 만난 분들의 이야기" : "이런 운세 풀이가 나와요"}</h3>
+            <p className="text-xs text-slate-500">{real ? "실제로 사주를 확인한 이용자들의 솔직 후기에요" : "수달 도사 '도리'가 건네는 한마디, 이런 느낌이에요"}</p>
           </div>
         </div>
         {!real && (
