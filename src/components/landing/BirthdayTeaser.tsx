@@ -12,7 +12,7 @@ interface Teaser {
 }
 
 /** 가입 없이 생년월일만 넣으면 바로 보이는 '오늘의 도리 한마디'. 입력값은 저장하지 않아요. */
-export default function BirthdayTeaser({ onPick }: { onPick?: () => void }) {
+export default function BirthdayTeaser() {
   const [value, setValue] = useState("");
   const [state, setState] = useState<"idle" | "loading" | "error">("idle");
   const [error, setError] = useState("");
@@ -50,13 +50,6 @@ export default function BirthdayTeaser({ onPick }: { onPick?: () => void }) {
           <p className="text-xs font-bold text-brand-500">오늘의 도리 한마디 · {readingFirst(result.ganzhi)}</p>
           <p className="mt-2 text-sm sm:text-base text-slate-700 leading-relaxed">{result.line}</p>
           <p className="mt-2 text-xs text-sky-700 font-medium">🫧 {result.tip}</p>
-          <button
-            type="button"
-            onClick={onPick}
-            className="mt-3 inline-flex items-center rounded-full bg-gradient-to-r from-brand-500 to-fuchsia-500 px-5 py-2 text-sm font-bold text-white shadow active:scale-95"
-          >
-            더 자세한 운세 뽑으러 가기
-          </button>
           <button type="button" onClick={() => setResult(null)} className="mt-2 block mx-auto text-[11px] text-gray-400 underline">
             다른 생일로 보기
           </button>
