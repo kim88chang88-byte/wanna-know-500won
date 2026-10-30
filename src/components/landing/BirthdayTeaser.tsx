@@ -2,7 +2,9 @@
 
 import { useState } from "react";
 import { formatDateInput } from "@/lib/intake";
+import SafeImage from "./SafeImage";
 import DoriIcon from "./DoriIcon";
+import { ganzhiMeaning } from "@/lib/ganzhiMeaning";
 import { readingFirst } from "@/lib/hanjaReading";
 
 interface Teaser {
@@ -47,10 +49,24 @@ export default function BirthdayTeaser() {
     <section data-testid="birthday-teaser" className="mb-6 rounded-3xl border border-brand-200/70 bg-white/85 p-4 sm:p-5 shadow-sm">
       {result ? (
         <div className="text-center">
-          <p className="text-xs font-bold text-brand-500">오늘의 도리 한마디 · {readingFirst(result.ganzhi)}</p>
-          <p className="mt-2 text-sm sm:text-base text-slate-700 leading-relaxed">{result.line}</p>
-          <p className="mt-2 text-xs text-sky-700 font-medium">🫧 {result.tip}</p>
-          <button type="button" onClick={() => setResult(null)} className="mt-2 block mx-auto text-[11px] text-gray-400 underline">
+          <p className="text-xs font-bold text-brand-500">오늘의 도리 한마디</p>
+          <p className="mt-1 text-sm font-bold text-slate-800">{readingFirst(result.ganzhi)}일</p>
+          {ganzhiMeaning(result.ganzhi) && <p className="mt-0.5 text-[11px] leading-relaxed text-gray-500">{ganzhiMeaning(result.ganzhi)}</p>}
+          {/* 웹툰처럼: 도리가 말풍선으로 말해 줘요 */}
+          <div className="mt-4 flex items-start gap-2 text-left">
+            <SafeImage src="/images/dori-icon.webp" alt="도리" className="h-14 w-14 shrink-0 object-contain" fallback="🦦" fallbackClass="text-4xl" />
+            <div className="min-w-0 flex-1 space-y-2">
+              <div className="relative rounded-2xl border-2 border-slate-800 bg-white px-3.5 py-2.5 text-sm font-semibold leading-relaxed text-slate-800 shadow-[2px_2px_0_0_rgba(30,41,59,0.9)]">
+                <span aria-hidden="true" className="absolute -left-[9px] top-4 h-3.5 w-3.5 rotate-45 border-b-2 border-l-2 border-slate-800 bg-white" />
+                {result.line}
+              </div>
+              <div className="relative rounded-2xl border-2 border-slate-800 bg-sky-50 px-3.5 py-2 text-xs font-semibold leading-relaxed text-sky-900 shadow-[2px_2px_0_0_rgba(30,41,59,0.9)]">
+                <span aria-hidden="true" className="absolute -left-[9px] top-3 h-3.5 w-3.5 rotate-45 border-b-2 border-l-2 border-slate-800 bg-sky-50" />
+                🫧 {result.tip}
+              </div>
+            </div>
+          </div>
+          <button type="button" onClick={() => setResult(null)} className="mt-3 block mx-auto text-[11px] text-gray-400 underline">
             다른 생일로 보기
           </button>
         </div>
