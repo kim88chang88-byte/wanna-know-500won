@@ -71,12 +71,14 @@ export function DailyLineCard({ onOpened }: { onOpened?: () => void }) {
           <div className="mt-2 rounded-2xl bg-gradient-to-r from-brand-50 via-white to-amber-50 px-4 py-3.5">
             <FitText data-testid="daily-line-text" maxPx={16} minPx={10} className="font-cute font-normal leading-snug tracking-tight text-brand-700">{daily.line}</FitText>
           </div>
-          <p data-testid="daily-ganzhi" className="mt-2 text-[11px] text-gray-500">
-            <span className="rounded-full bg-brand-50 px-2 py-0.5 font-bold text-brand-600">오늘 일진</span>
-            <span className="ml-1.5 font-semibold">{ganzhiParts(daily.ganzhi).hangul || daily.ganzhi}</span>
-            {ganzhiParts(daily.ganzhi).hangul && <span className="ml-1 text-gray-400">({ganzhiParts(daily.ganzhi).hanja})</span>}
-          </p>
-          {ganzhiMeaning(daily.ganzhi, true) && <p className="mt-1 text-[11px] text-gray-500">{ganzhiMeaning(daily.ganzhi, true)}</p>}
+          <div data-testid="daily-ganzhi" className="mt-2 flex items-center gap-1.5">
+            <span className="shrink-0 rounded-full bg-brand-50 px-2 py-0.5 text-[11px] font-bold text-brand-600">오늘 일진</span>
+            <FitText maxPx={11} minPx={8} className="min-w-0 flex-1 text-gray-500">
+              <span className="font-semibold">{ganzhiParts(daily.ganzhi).hangul || daily.ganzhi}</span>
+              {ganzhiParts(daily.ganzhi).hangul && <span className="ml-0.5 text-gray-400">({ganzhiParts(daily.ganzhi).hanja})</span>}
+              {ganzhiMeaning(daily.ganzhi, true) && <span> · {ganzhiMeaning(daily.ganzhi, true)}</span>}
+            </FitText>
+          </div>
           <p className="mt-2 text-xs font-semibold text-sky-700">{daily.tip}</p>
         </div>
       ) : (
