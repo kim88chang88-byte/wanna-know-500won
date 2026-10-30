@@ -1,4 +1,5 @@
 import Link from "next/link";
+import BrandLink from "@/components/landing/BrandLink";
 import VaultApp from "@/components/vault/VaultApp";
 import { SERVICE_NAME } from "@/lib/siteInfo";
 
@@ -13,9 +14,7 @@ export default function VaultPage() {
     <div className="min-h-screen bg-[#FBF7FF]">
       <header className="border-b border-brand-100 bg-white/90">
         <div className="max-w-2xl mx-auto px-4 py-3.5 flex items-center justify-between">
-          <Link href="/" className="font-serifKr font-black text-lg text-brand-600">
-            🌙 {SERVICE_NAME}
-          </Link>
+          <BrandLink heading={false} />
           <Link href="/" className="text-xs font-bold text-gray-500 hover:text-gray-700">
             처음으로
           </Link>

@@ -27,9 +27,10 @@ interface Detail {
 
 type View = { kind: "loading" } | { kind: "login" } | { kind: "error"; message: string } | { kind: "list"; items: Row[] };
 
+/** 저장한 날짜와 시간. 예: 2026년 10월 31일 오후 2:05 */
 function day(iso: string): string {
   try {
-    return new Intl.DateTimeFormat("ko-KR", { timeZone: "Asia/Seoul", year: "numeric", month: "long", day: "numeric" }).format(new Date(iso));
+    return new Intl.DateTimeFormat("ko-KR", { timeZone: "Asia/Seoul", year: "numeric", month: "long", day: "numeric", hour: "numeric", minute: "2-digit", hour12: true }).format(new Date(iso));
   } catch {
     return "";
   }
@@ -180,9 +181,9 @@ export default function VaultApp() {
               disabled={opening === it.id}
               className="w-full text-left rounded-2xl border border-brand-100 bg-white p-4 hover:border-brand-300 transition-colors disabled:opacity-60"
             >
-              <span className="flex items-center justify-between gap-2">
+              <span className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-0.5">
                 <span className="text-sm font-bold text-gray-900">{it.title}</span>
-                <span className="text-[11px] text-gray-400 shrink-0">{day(it.created_at)}</span>
+                <span className="text-[11px] text-gray-400">{day(it.created_at)}</span>
               </span>
               {it.summary && <span className="mt-1 block text-xs text-gray-600 leading-relaxed line-clamp-2">{it.summary}</span>}
             </button>

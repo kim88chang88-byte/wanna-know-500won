@@ -7,6 +7,7 @@ import { FREE_PRICE_LABEL, MACHINES, PREMIUM_CARDS } from "./data";
 import { HelpMenuButton, MachineMenuButton } from "./MenuButton";
 import { HERO_IMAGE, IMAGES, LOGO_IMAGE } from "./images";
 import SafeImage from "./SafeImage";
+import BrandLink from "./BrandLink";
 import DoriIcon from "./DoriIcon";
 import ReviewsSection from "./ReviewsSection";
 import ShareSiteBar from "./ShareSiteBar";
@@ -54,26 +55,7 @@ export function Header({ onOpenLogin, user = null }: { onOpenLogin: () => void; 
         <div className="max-w-[34rem] lg:max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-3.5 flex items-center justify-between gap-2 sm:gap-3">
           {/* 왼쪽 위: 로고 + Beta 스티커 */}
           <div className="flex flex-col items-start gap-1 min-w-0">
-            <Link href="/" aria-label={`${SERVICE_NAME} 홈으로`} data-testid="home-link" className="flex items-center gap-2 sm:gap-2.5">
-              <div className="relative w-9 h-9 sm:w-11 sm:h-11 rounded-full overflow-hidden border-2 border-brand-500/40 shadow-sm shrink-0 bg-sky-50 flex items-center justify-center">
-                <SafeImage
-                  src={LOGO_IMAGE}
-                  alt="도리 운세 사주 로고"
-                  className="w-full h-full object-cover"
-                  fallback="🦦"
-                  fallbackClass="text-2xl"
-                />
-              </div>
-              <h1 className="font-cute font-normal text-[19px] min-[400px]:text-[22px] sm:text-[30px] leading-none whitespace-nowrap tracking-normal bg-gradient-to-r from-brand-500 via-fuchsia-500 to-pink-500 bg-clip-text text-transparent inline-flex items-center gap-1.5">
-                &apos;도리&apos;운세사주
-                <span
-                  data-testid="beta-sticker"
-                  className="-rotate-6 rounded-md border border-amber-300 bg-amber-100 px-1.5 py-0.5 font-sans text-[9px] font-extrabold uppercase leading-none tracking-wide text-amber-700 shadow-[1px_1px_0_0_rgba(217,119,6,0.35)] sm:text-[11px]"
-                >
-                  Beta
-                </span>
-              </h1>
-            </Link>
+            <BrandLink />
           </div>
 
           {/* 오른쪽 위: 로그인 전에는 "로그인" 버튼, 로그인 후에는 닉네임(마이페이지) + "?" 안내 메뉴 + 햄버거(자판기) 메뉴. 둘 다 같은 창(로그인/내 정보)을 열어요 */}
@@ -212,7 +194,8 @@ export function ShowcaseSection() {
           data-testid="scroll-cue"
           className="inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-brand-500 to-fuchsia-500 px-7 py-3.5 text-[15px] font-bold text-white shadow-lg shadow-brand-500/30 transition-transform hover:brightness-105 active:scale-95 focus:outline-none focus-visible:ring-4 focus-visible:ring-brand-300 sm:text-base"
         >
-          <span aria-hidden="true">🪙</span>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/images/coin-500.webp" alt="" width={28} height={28} className="h-7 w-7 shrink-0 object-contain drop-shadow" aria-hidden="true" />
           <span>오늘의 운 뽑으러 가기</span>
           <span className="material-symbols-outlined text-[22px] leading-none motion-safe:animate-bounce" aria-hidden="true">
             arrow_downward

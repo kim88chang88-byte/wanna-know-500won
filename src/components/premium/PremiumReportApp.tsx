@@ -4,6 +4,7 @@ import { useEffect, useState, type FormEvent } from "react";
 import type { PremiumErrorBody, PremiumReportView } from "@/lib/premium/types";
 import type { BirthInput } from "@/lib/saju/types";
 import BirthTimeSelect from "@/components/BirthTimeSelect";
+import { formatDateInput } from "@/lib/intake";
 import ManseReport from "./ManseReport";
 import AiNotice from "./AiNotice";
 import { conclusionOf, fetchPartnerImage, fetchRestChapters, mergeChapters } from "@/lib/premium/mergeChapters";
@@ -123,7 +124,19 @@ export default function PremiumReportApp() {
         <label htmlFor="birth-date" className="block text-sm font-bold text-[#e6c887] mb-1.5">
           생년월일
         </label>
-        <input id="birth-date" type="date" min="1900-01-01" max="2100-12-31" value={date} onChange={(e) => setDate(e.target.value)} className={field} />
+        <input
+          id="birth-date"
+          type="text"
+          inputMode="numeric"
+          autoComplete="off"
+          name="birthDate"
+          placeholder="예: 2000-01-01"
+          maxLength={10}
+          value={date}
+          onChange={(e) => setDate(formatDateInput(e.target.value))}
+          className={`${field} placeholder:text-[#fbf3de]/40`}
+        />
+        <p className="mt-1.5 text-xs text-[#e8dfca]/60">숫자만 적어도 돼요. (예: 20000101)</p>
         <div className="mt-2 flex gap-2" role="group" aria-label="음양력">
           <button type="button" aria-pressed={!isLunar} onClick={() => setIsLunar(false)} className={seg(!isLunar)}>
             양력
@@ -141,6 +154,18 @@ export default function PremiumReportApp() {
       </div>
 
       <div>
+        <span className="block text-sm font-bold text-[#e6c887] mb-1.5">성별</span>
+        <div className="flex gap-2" role="group" aria-label="성별">
+          <button type="button" aria-pressed={isFemale === true} onClick={() => setIsFemale(true)} className={seg(isFemale === true)}>
+            여자
+          </button>
+          <button type="button" aria-pressed={isFemale === false} onClick={() => setIsFemale(false)} className={seg(isFemale === false)}>
+            남자
+          </button>
+        </div>
+      </div>
+
+      <div>
         <BirthTimeSelect
           time={time}
           known={!timeUnknown}
@@ -153,18 +178,6 @@ export default function PremiumReportApp() {
           noteClassName="text-xs text-[#e8dfca]/60"
           checkClassName="text-sm text-[#e8dfca]/80"
         />
-      </div>
-
-      <div>
-        <span className="block text-sm font-bold text-[#e6c887] mb-1.5">성별</span>
-        <div className="flex gap-2" role="group" aria-label="성별">
-          <button type="button" aria-pressed={isFemale === true} onClick={() => setIsFemale(true)} className={seg(isFemale === true)}>
-            여성
-          </button>
-          <button type="button" aria-pressed={isFemale === false} onClick={() => setIsFemale(false)} className={seg(isFemale === false)}>
-            남성
-          </button>
-        </div>
       </div>
 
       {error && (

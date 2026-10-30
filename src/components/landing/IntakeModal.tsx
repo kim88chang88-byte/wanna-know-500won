@@ -8,8 +8,6 @@ import {
   COMPAT_STEPS,
   EMPTY_BIRTH,
   EMPTY_FORM,
-  MAX_YEAR,
-  MIN_YEAR,
   STEPS,
   buildBirthFields,
   buildBirthInput,
@@ -277,12 +275,14 @@ function BirthStepFields({ kind, f, patch }: { kind: "date" | "time" | "gender";
           <label className="block text-xs font-semibold text-gray-600">
             생년월일
             <input
-              type="date"
+              type="text"
+              inputMode="numeric"
+              autoComplete="off"
               name="date"
+              placeholder="예: 2000-01-01"
+              maxLength={10}
               value={f.solarDate}
-              min={`${MIN_YEAR}-01-01`}
-              max={`${MAX_YEAR}-12-31`}
-              onChange={(e) => patch({ solarDate: e.target.value })}
+              onChange={(e) => patch({ solarDate: formatDateInput(e.target.value) })}
               className={`${INPUT} mt-1`}
             />
           </label>
