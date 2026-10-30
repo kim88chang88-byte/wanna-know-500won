@@ -50,12 +50,12 @@ export function ganzhiSentenceParts(ganzhi: string): Array<{ text: string; hl: b
   const j = withBatchim(s) ? "과" : "와";
   return [
     { text: "오늘은 ", hl: false },
-    { text: `${readingFirst(`${stem}${branch}`)}일`, hl: true },
-    { text: "이고, ", hl: false },
     { text: `${s}(${stem})`, hl: true },
     { text: `${j} `, hl: false },
     { text: `${b}(${branch})`, hl: true },
-    { text: "의 기운이 만나는 날이란 뜻이에요", hl: false },
+    { text: "의 기운이 만나는 ", hl: false },
+    { text: `${readingFirst(`${stem}${branch}`)}일`, hl: true },
+    { text: "이에요.", hl: false },
   ];
 }
 

@@ -49,9 +49,9 @@ export default function BirthdayTeaser() {
     <section data-testid="birthday-teaser" className="mb-6 rounded-3xl border border-brand-200/70 bg-white/85 p-4 sm:p-5 shadow-sm">
       {result ? (
         <div className="text-center">
-          <p className="text-xs font-bold text-brand-500">오늘의 도리 한마디</p>
+          <p className="text-left text-xs font-bold text-brand-500">오늘의 도리 한마디</p>
           {ganzhiSentenceParts(result.ganzhi) && (
-            <FitText maxPx={13} minPx={9} className="mt-1.5 text-center font-semibold text-slate-600">
+            <FitText maxPx={13} minPx={9} className="mt-1.5 text-left font-semibold text-slate-600">
               {ganzhiSentenceParts(result.ganzhi)!.map((p, i) =>
                 p.hl ? (
                   <mark key={i} className="rounded-sm bg-transparent px-0.5 font-bold text-slate-900" style={{ backgroundImage: "linear-gradient(transparent 50%, #fde047 50%)" }}>
