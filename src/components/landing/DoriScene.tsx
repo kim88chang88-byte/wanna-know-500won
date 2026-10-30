@@ -19,18 +19,24 @@ export default function DoriScene({ line, tip }: { line: string; tip: string }) 
       aria-label={`도리가 말해요: ${line} ${tip}`}
     >
       <div
-        className="absolute flex flex-col justify-center border border-white/70 shadow-[0_6px_18px_rgba(150,130,190,0.22)]"
+        className="absolute flex flex-col border border-white/70 shadow-[0_6px_18px_rgba(150,130,190,0.22)]"
         style={{
-          left: "39.2%",
-          top: "9.4%",
-          width: "60.6%",
-          height: "86.8%",
-          borderRadius: "5.5cqw",
-          padding: "3cqw 3.6cqw",
-          gap: "2.4cqw",
+          left: "40%",
+          top: "50%",
+          transform: "translateY(-50%)",
+          width: "58.5%",
+          borderRadius: "5cqw",
+          padding: "2.8cqw 3.4cqw",
+          gap: "2cqw",
           background: "linear-gradient(120deg, #fbf3f0 0%, #f4eaef 42%, #e7e5f5 100%)",
         }}
       >
+        {/* 도리를 향한 말풍선 꼬리 */}
+        <span
+          aria-hidden="true"
+          className="absolute border-b border-l border-white/70"
+          style={{ left: "-1.7cqw", top: "calc(50% - 1.7cqw)", width: "3.4cqw", height: "3.4cqw", transform: "rotate(45deg)", background: "#f8eef0" }}
+        />
         <p data-testid="dori-scene-line" className="text-left font-bold text-slate-800" style={{ fontSize: long ? "3.1cqw" : "3.8cqw", lineHeight: 1.4, wordBreak: "keep-all" }}>
           “{line}”
         </p>
