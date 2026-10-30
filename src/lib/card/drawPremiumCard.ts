@@ -1,3 +1,4 @@
+import { qrModules, drawQr, inviteLine } from "./invite";
 import { CARD_H, CARD_W, type PhotoCardData } from "./photoData";
 import { fitText } from "./text";
 import type { TopicKey } from "@/lib/premium/types";
@@ -365,14 +366,37 @@ export function drawPremiumCard(ctx: CanvasRenderingContext2D, d: PhotoCardData)
   ctx.fillText(`행운 컬러 ${d.lucky.color}  ·  방향 ${d.lucky.direction}`, cx - 62, ly);
   ctx.textAlign = "center";
 
-  ctx.fillStyle = goldGrad(ctx, cx - 50, 0, cx + 50, 0);
-  setFont(ctx, 800, 11.5, SERIF);
-  spaced(ctx, 2);
-  ctx.fillText("도리 운세 사주", cx, H - 36);
-  spaced(ctx, 0);
-  ctx.fillStyle = IVORY_DIM;
-  setFont(ctx, 500, 8, SANS);
-  ctx.fillText(`${d.siteLabel}  ·  ${d.dateLabel}`, cx, H - 25);
+  const mods = qrModules(d.shareUrl);
+  if (mods) {
+    // 왼쪽: 브랜드와 초대 문구, 오른쪽: QR
+    const size = 34;
+    const pad = 3;
+    const qx = W - 40 - size - pad * 2;
+    const qy2 = H - 32 - size - pad * 2;
+    drawQr(ctx, mods, qx, qy2, size, pad, 7);
+    ctx.textAlign = "left";
+    ctx.fillStyle = goldGrad(ctx, 40, 0, 170, 0);
+    setFont(ctx, 800, 11.5, SERIF);
+    spaced(ctx, 1.5);
+    ctx.fillText("도리 운세 사주", 40, H - 60);
+    spaced(ctx, 0);
+    ctx.fillStyle = IVORY;
+    setFont(ctx, 600, 9.5, SERIF);
+    ctx.fillText(inviteLine(d) + " QR로 무료 확인", 40, H - 46);
+    ctx.fillStyle = IVORY_DIM;
+    setFont(ctx, 500, 8, SANS);
+    ctx.fillText(`${d.siteLabel}  ·  ${d.dateLabel}`, 40, H - 33);
+    ctx.textAlign = "center";
+  } else {
+    ctx.fillStyle = goldGrad(ctx, cx - 50, 0, cx + 50, 0);
+    setFont(ctx, 800, 11.5, SERIF);
+    spaced(ctx, 2);
+    ctx.fillText("도리 운세 사주", cx, H - 36);
+    spaced(ctx, 0);
+    ctx.fillStyle = IVORY_DIM;
+    setFont(ctx, 500, 8, SANS);
+    ctx.fillText(`${d.siteLabel}  ·  ${d.dateLabel}`, cx, H - 25);
+  }
 
   ctx.restore();
 }

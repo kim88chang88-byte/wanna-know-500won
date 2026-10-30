@@ -30,6 +30,8 @@ export interface PhotoCardData {
   dateLabel: string;
   /** 카드 아래에 작게 넣는 주소 (예: wanna-know-500won.vercel.app) */
   siteLabel: string;
+  /** 카드의 QR이 가리키는 주소 (비어 있으면 QR을 넣지 않아요) */
+  shareUrl: string;
 }
 
 export function formatDate(d: Date): string {
@@ -48,7 +50,7 @@ export function clipQuote(s: string, max = MAX_QUOTE): string {
   return (end >= max * 0.5 ? cut.slice(0, end + 1) : cut.trimEnd() + "…").trim();
 }
 
-export function buildPhotoCardData(report: PremiumReportView, opts: { date: Date; siteLabel: string; aiQuote?: string | null }): PhotoCardData {
+export function buildPhotoCardData(report: PremiumReportView, opts: { date: Date; siteLabel: string; shareUrl?: string; aiQuote?: string | null }): PhotoCardData {
   const t = report.topic;
   const ai = opts.aiQuote ? clipQuote(opts.aiQuote) : "";
   const premium = report.level === "full" && report.book.length > 0;
@@ -70,6 +72,7 @@ export function buildPhotoCardData(report: PremiumReportView, opts: { date: Date
     lucky: { color: t.lucky.color, hex: t.lucky.hex, direction: t.lucky.direction },
     dateLabel: formatDate(opts.date),
     siteLabel: opts.siteLabel,
+    shareUrl: opts.shareUrl ?? "",
   };
 }
 
@@ -80,7 +83,7 @@ export function photoAltText(c: PhotoCardData): string {
 
 /** SNS에 같이 올릴 문구(해시태그 포함) */
 export function shareCaption(c: PhotoCardData, url: string): string {
-  return `${c.topicLabel} · ${c.headline}\n“${c.quote}”\n${c.tags.join(" ")} #도리운세사주 ${c.tier === "premium" ? "#프리미엄사주" : "#오늘의운세"}\n${url}`;
+  return `${c.topicLabel} · ${c.headline}\n“${c.quote}”\n${c.tags.join(" ")} #도리운세사주 ${c.tier === "premium" ? "#프리미엄사주" : "#오늘의운세"}\n\n너도 무료로 볼 수 있어요 👉 ${url}`;
 }
 
 /** 파일 이름은 영문으로 해요. 일부 브라우저/환경에서 한글 이름이 "download" 로 바뀌는 경우가 있어서요. */

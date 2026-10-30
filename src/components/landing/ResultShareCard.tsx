@@ -31,8 +31,10 @@ export default function ResultShareCard({ report, aiQuote }: { report: PremiumRe
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [state, setState] = useState<"idle" | "busy" | "done" | "error">("idle");
   const [ready, setReady] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const [linkMsg, setLinkMsg] = useState("");
   const data = useMemo(
-    () => buildPhotoCardData(report, { date: new Date(), siteLabel: typeof window === "undefined" ? "" : window.location.host, aiQuote }),
+    () => buildPhotoCardData(report, { date: new Date(), siteLabel: typeof window === "undefined" ? "" : window.location.host, shareUrl: typeof window === "undefined" ? "" : window.location.origin, aiQuote }),
     [report, aiQuote],
   );
 
@@ -65,10 +67,42 @@ export default function ResultShareCard({ report, aiQuote }: { report: PremiumRe
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data]);
 
+  /** 문구와 링크를 클립보드에 넣어요. 이미지만 올려도 붙여넣기로 링크를 같이 보낼 수 있어요. */
+  async function copyCaption(): Promise<boolean> {
+    try {
+      await navigator.clipboard.writeText(shareCaption(data, window.location.origin));
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  async function shareLink() {
+    const url = window.location.origin;
+    const text = `${data.topicLabel} 결과가 신기해서 공유해! 너도 무료로 볼 수 있어 👉`;
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: "도리 운세 사주", text, url });
+        setLinkMsg("");
+        return;
+      }
+    } catch (e) {
+      if (e instanceof DOMException && e.name === "AbortError") return;
+    }
+    try {
+      await navigator.clipboard.writeText(`${text} ${url}`);
+      setLinkMsg("링크를 복사했어요. 친구에게 붙여넣어 보내 주세요 🫧");
+    } catch {
+      setLinkMsg(url);
+    }
+  }
+
   async function save() {
     const c = canvasRef.current;
     if (!c || !ready) return;
     setState("busy");
+    // 클릭 직후에 복사해야 브라우저가 허락해요. 결과는 기다리지 않아요.
+    void copyCaption().then(setCopied);
     try {
       const blob = await new Promise<Blob | null>((r) => c.toBlob(r, "image/png"));
       if (!blob) throw new Error("blob");
@@ -120,8 +154,21 @@ export default function ResultShareCard({ report, aiQuote }: { report: PremiumRe
         {state === "busy" ? "카드 만드는 중…" : "✨ 결과 카드 저장·공유하기"}
       </button>
       <p role="status" className="mt-1.5 text-[11px] text-gray-500">
-        {state === "done" ? "카드를 만들었어요. 친구에게 자랑해 보세요 🫧" : state === "error" ? "지금은 카드를 만들 수 없어요. 잠시 뒤에 다시 눌러 주세요." : "인스타 스토리 크기로 저장돼요 · 이 기기에서만 만들어요"}
+        {state === "done" ? (copied ? "카드를 만들었어요. 링크도 복사했으니 올릴 때 붙여넣기만 하세요 🫧" : "카드를 만들었어요. 친구에게 자랑해 보세요 🫧") : state === "error" ? "지금은 카드를 만들 수 없어요. 잠시 뒤에 다시 눌러 주세요." : "인스타 스토리 크기로 저장돼요 · 이 기기에서만 만들어요"}
       </p>
+      <button
+        type="button"
+        data-testid="share-link-button"
+        onClick={shareLink}
+        className="mt-2 inline-flex items-center gap-1.5 rounded-full border border-brand-200 bg-white px-4 py-1.5 text-xs font-bold text-brand-600 active:scale-95"
+      >
+        🔗 친구에게 링크 보내기
+      </button>
+      {linkMsg && (
+        <p role="status" className="mt-1.5 text-[11px] text-gray-500">
+          {linkMsg}
+        </p>
+      )}
     </div>
   );
 }

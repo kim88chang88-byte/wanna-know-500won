@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { buildPremiumReport } from "@/lib/premium/report";
 import type { BirthInput } from "@/lib/saju/types";
+import { qrModules, inviteLine } from "../invite";
 import { buildPhotoCardData, clipQuote, formatDate, photoAltText, photoFileName, shareCaption } from "../photoData";
 import { fitText, wrapText } from "../text";
 
@@ -116,5 +117,26 @@ describe("파일 이름/날짜", () => {
   it("월·일을 두 자리로 맞춘다", () => {
     expect(formatDate(new Date(2026, 0, 5))).toBe("2026.01.05");
     expect(photoFileName("love", new Date(2026, 9, 18))).toBe("dori-photocard-love-20261018.png");
+  });
+});
+
+describe("친구 초대(QR)", () => {
+  const date = new Date(2026, 9, 18);
+  it("주소로 정사각형 QR 표를 만들고, 주소가 없으면 만들지 않는다", () => {
+    const m = qrModules("https://example.vercel.app");
+    expect(m).not.toBeNull();
+    expect(m!.length).toBeGreaterThanOrEqual(21);
+    expect(m!.every((row) => row.length === m!.length)).toBe(true);
+    expect(qrModules("")).toBeNull();
+  });
+  it("공유 문구에 친구 초대 문장과 주소가 같이 들어간다", () => {
+    const d = buildPhotoCardData(report, { date, siteLabel: "x", shareUrl: "https://example.vercel.app" });
+    expect(d.shareUrl).toBe("https://example.vercel.app");
+    expect(shareCaption(d, "https://example.vercel.app")).toContain("너도 무료로 볼 수 있어요");
+    expect(buildPhotoCardData(report, { date, siteLabel: "x" }).shareUrl).toBe("");
+  });
+  it("신년운은 한 해를 묻는 문구를 쓴다", () => {
+    expect(inviteLine({ topic: "study", topicLabel: "2027 신년운" })).toContain("2027");
+    expect(inviteLine({ topic: "love", topicLabel: "연애운" })).toContain("운세");
   });
 });

@@ -1,6 +1,7 @@
 import { CARD_H, CARD_W, type PhotoCardData } from "./photoData";
 import { drawPremiumCard } from "./drawPremiumCard";
 import { fitText } from "./text";
+import { drawInviteRow } from "./invite";
 import type { TopicKey } from "@/lib/premium/types";
 
 /*
@@ -265,7 +266,7 @@ export function drawPhotoCard(ctx: CanvasRenderingContext2D, d: PhotoCardData, a
   ctx.restore(); // 폴라로이드 끝
 
   /* ---------- 행운 컬러 ---------- */
-  const ly = 98 + cardH + 40;
+  const ly = 98 + cardH + (d.shareUrl ? 26 : 40);
   ctx.save();
   ctx.fillStyle = d.lucky.hex;
   ctx.strokeStyle = "#FFFFFF";
@@ -284,16 +285,18 @@ export function drawPhotoCard(ctx: CanvasRenderingContext2D, d: PhotoCardData, a
   setFont(ctx, 500, 9.5, SANS);
   ctx.fillText(`행운 방향 ${d.lucky.direction}`, cx - 54, ly + 9);
 
-  /* ---------- 브랜드 ---------- */
+  /* ---------- 친구 초대(QR) / 브랜드 ---------- */
   ctx.textAlign = "center";
-  ctx.fillStyle = INK;
-  setFont(ctx, 800, 12, SERIF);
-  ctx.fillText("도리 운세 사주", cx, H - 28);
-  ctx.fillStyle = MUTED;
-  setFont(ctx, 500, 8.5, SANS);
-  ctx.fillText(d.siteLabel, cx, H - 14);
-  bubble(ctx, cx - 62, H - 32, 4.5, 0.9);
-  bubble(ctx, cx + 62, H - 32, 3.5, 0.9);
+  if (!drawInviteRow(ctx, d, cx, H - 62, { ink: INK, muted: MUTED, accent: "#7C4DDE" })) {
+    ctx.fillStyle = INK;
+    setFont(ctx, 800, 12, SERIF);
+    ctx.fillText("도리 운세 사주", cx, H - 28);
+    ctx.fillStyle = MUTED;
+    setFont(ctx, 500, 8.5, SANS);
+    ctx.fillText(d.siteLabel, cx, H - 14);
+    bubble(ctx, cx - 62, H - 32, 4.5, 0.9);
+    bubble(ctx, cx + 62, H - 32, 3.5, 0.9);
+  }
   ctx.textAlign = "left";
 
   ctx.restore();
