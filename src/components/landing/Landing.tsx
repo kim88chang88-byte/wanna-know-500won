@@ -196,7 +196,7 @@ export default function Landing() {
       <BubbleBackground />
       <Header onOpenLogin={openLogin} user={user} />
 
-      <main className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-5 pb-20 sm:pb-24">
+      <main className="relative z-10 max-w-[34rem] lg:max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-5 pb-20 sm:pb-24">
         <HeroSection visitors={visitors} tickets={tickets} />
         <ShowcaseSection />
         {!user && <BirthdayTeaser />}

@@ -59,9 +59,9 @@ export default function BottomTabs() {
     <nav
       data-testid="bottom-tabs"
       aria-label="하단 메뉴"
-      className="fixed inset-x-0 bottom-0 z-30 border-t border-brand-100 bg-white/90 pb-[env(safe-area-inset-bottom,0px)] shadow-[0_-2px_16px_rgba(108,92,231,0.08)] backdrop-blur-xl lg:hidden"
+      className="fixed inset-x-0 bottom-0 z-30 mx-auto w-full max-w-[34rem] rounded-t-2xl border-x border-t border-brand-100 bg-white/90 pb-[env(safe-area-inset-bottom,0px)] shadow-[0_-2px_16px_rgba(108,92,231,0.08)] backdrop-blur-xl lg:hidden"
     >
-      <div className="mx-auto flex max-w-xl items-center justify-around px-1">
+      <div className="mx-auto flex items-center justify-around px-1">
         <button type="button" className={tab("home")} aria-current={active === "home" ? "page" : undefined} onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}>
           <span className={icon} aria-hidden="true">auto_awesome</span>홈
         </button>
