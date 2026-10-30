@@ -110,7 +110,7 @@ function fitLines(ctx: CanvasRenderingContext2D, text: string, family: string, w
 }
 
 /** art: 사진 칸에 넣을 동물 그림(선택). 없으면 큰 한자 워터마크만 보여요. */
-export function drawPhotoCard(ctx: CanvasRenderingContext2D, d: PhotoCardData, art?: CanvasImageSource | null, artSize?: { w: number; h: number } | null): void {
+export function drawPhotoCard(ctx: CanvasRenderingContext2D, d: PhotoCardData, art?: CanvasImageSource | null, artSize?: { w: number; h: number } | null, logo?: CanvasImageSource | null): void {
   if (d.tier === "premium" && d.luxe) return drawPremiumCard(ctx, d);
   const W = CARD_W;
   const H = CARD_H;
@@ -141,10 +141,33 @@ export function drawPhotoCard(ctx: CanvasRenderingContext2D, d: PhotoCardData, a
   }
 
   /* ---------- 머리글 ---------- */
+  // 왼쪽 위: 도리 로고 + 한글 이름
+  let nameX = 28;
+  const logoOk = typeof HTMLImageElement !== "undefined" && logo instanceof HTMLImageElement ? logo.complete && logo.naturalWidth > 0 : Boolean(logo);
+  if (logo && logoOk) {
+    const r = 12;
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(28 + r, 35, r, 0, Math.PI * 2);
+    ctx.closePath();
+    ctx.clip();
+    ctx.fillStyle = "#FFFFFF";
+    ctx.fillRect(28, 35 - r, r * 2, r * 2);
+    ctx.drawImage(logo, 28, 35 - r, r * 2, r * 2);
+    ctx.restore();
+    ctx.strokeStyle = "rgba(255,255,255,0.9)";
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.arc(28 + r, 35, r, 0, Math.PI * 2);
+    ctx.stroke();
+    nameX = 28 + r * 2 + 8;
+  }
+  ctx.fillStyle = INK;
+  setFont(ctx, 800, 13, SERIF);
+  ctx.fillText("도리운세사주", nameX, 40);
   ctx.fillStyle = MUTED;
   setFont(ctx, 700, 9.5, SANS);
   spaced(ctx, 2.2);
-  ctx.fillText("DORI  ·  CAPSULE", 28, 40);
   ctx.textAlign = "right";
   ctx.fillText(d.dateLabel, W - 28, 40);
   ctx.textAlign = "left";

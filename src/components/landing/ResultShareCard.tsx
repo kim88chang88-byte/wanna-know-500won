@@ -6,6 +6,9 @@ import { drawPhotoCard } from "@/lib/card/drawPhotoCard";
 import { buildPhotoCardData, CARD_H, CARD_SCALE, CARD_W, photoAltText, photoFileName, shareCaption } from "@/lib/card/photoData";
 import { IMAGES } from "./images";
 
+/** 같은 사이트 안의 도리 로고. 다른 사이트 그림은 저장용 캔버스를 막아서 쓰지 않아요. */
+const CARD_LOGO = "/images/dori-icon.webp";
+
 const ART: Partial<Record<TopicKey, string>> = {
   love: "machineLove",
   marriage: "machineMarriage",
@@ -15,8 +18,7 @@ const ART: Partial<Record<TopicKey, string>> = {
   study: "machineStudy",
 };
 
-function loadArt(topic: TopicKey): Promise<HTMLImageElement | null> {
-  const src = ART[topic] ? IMAGES[ART[topic]!] : null;
+function loadImage(src: string | null | undefined): Promise<HTMLImageElement | null> {
   if (!src) return Promise.resolve(null);
   return new Promise((resolve) => {
     const img = new Image();
@@ -24,6 +26,10 @@ function loadArt(topic: TopicKey): Promise<HTMLImageElement | null> {
     img.onerror = () => resolve(null);
     img.src = src;
   });
+}
+
+function loadArt(topic: TopicKey): Promise<HTMLImageElement | null> {
+  return loadImage(ART[topic] ? IMAGES[ART[topic]!] : null);
 }
 
 /** 결과를 인스타 스토리 크기(1080×1920) 카드 한 장으로 만들어 저장·공유해요. 서버로 보내지 않고 이 기기에서만 그려요. */
@@ -40,7 +46,7 @@ export default function ResultShareCard({ report, aiQuote }: { report: PremiumRe
 
   // 미리보기와 저장용 그림은 같은 함수로 그려요.
   async function render(canvas: HTMLCanvasElement) {
-    const art = await loadArt(data.topic);
+    const [art, logo] = await Promise.all([loadArt(data.topic), loadImage(CARD_LOGO)]);
     canvas.width = CARD_W * CARD_SCALE;
     canvas.height = CARD_H * CARD_SCALE;
     const ctx = canvas.getContext("2d");
@@ -51,7 +57,7 @@ export default function ResultShareCard({ report, aiQuote }: { report: PremiumRe
       /* 글꼴 준비를 기다리지 못해도 기본 글꼴로 그려요 */
     }
     ctx.setTransform(CARD_SCALE, 0, 0, CARD_SCALE, 0, 0);
-    drawPhotoCard(ctx, data, art, art ? { w: art.naturalWidth, h: art.naturalHeight } : null);
+    drawPhotoCard(ctx, data, art, art ? { w: art.naturalWidth, h: art.naturalHeight } : null, logo);
   }
 
   useEffect(() => {
