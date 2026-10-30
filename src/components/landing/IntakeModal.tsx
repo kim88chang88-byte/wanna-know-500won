@@ -88,7 +88,7 @@ interface Props {
 export const LOGIN_NUDGE = "로그인하면 도리가 생년월일시를 기억해서 다시 입력할 필요가 없어요!";
 
 const BUBBLE: Record<AnyStepId, string> = {
-  birth: "먼저 생년월일, 성별, 태어난 시간을 알려줄래? 몰라도 괜찮아! 🫧",
+  birth: "먼저 생년월일, 성별, 태어난 시간을 알려줄래? (시간은 몰라도 괜찮아!) 🫧",
   date: "먼저, 언제 태어났어? 🫧",
   time: "태어난 시간도 알면 더 또렷하게 볼 수 있어. 몰라도 괜찮아!",
   gender: "성별도 알려줄래?",
