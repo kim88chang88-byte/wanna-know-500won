@@ -1,6 +1,7 @@
 "use client";
 
 import DoriIcon from "./DoriIcon";
+import DoriScene from "./DoriScene";
 import FitText from "./FitText";
 import { ganzhiMeaning } from "@/lib/ganzhiMeaning";
 import { useEffect, useState } from "react";
@@ -68,8 +69,8 @@ export function DailyLineCard({ onOpened }: { onOpened?: () => void }) {
       {daily ? (
         <div role="status">
           <p className="text-xs font-bold text-brand-600"><DoriIcon />오늘의 도리 한마디</p>
-          <div className="mt-2 rounded-2xl bg-gradient-to-r from-brand-50 via-white to-amber-50 px-4 py-3.5">
-            <FitText data-testid="daily-line-text" maxPx={16} minPx={10} className="font-cute font-normal leading-snug tracking-tight text-brand-700">{daily.line}</FitText>
+          <div className="mt-2">
+            <DoriScene line={daily.line} tip={daily.tip} />
           </div>
           <div data-testid="daily-ganzhi" className="mt-2 flex items-center gap-1.5">
             <span className="shrink-0 rounded-full bg-brand-50 px-2 py-0.5 text-[11px] font-bold text-brand-600">오늘 일진</span>
@@ -79,7 +80,6 @@ export function DailyLineCard({ onOpened }: { onOpened?: () => void }) {
               {ganzhiMeaning(daily.ganzhi, true) && <span> · {ganzhiMeaning(daily.ganzhi, true)}</span>}
             </FitText>
           </div>
-          <p className="mt-2 text-xs font-semibold text-sky-700">{daily.tip}</p>
         </div>
       ) : (
         <div className="flex items-center justify-between gap-3">
