@@ -4,8 +4,8 @@ import { useState } from "react";
 import { formatDateInput } from "@/lib/intake";
 import DoriScene from "./DoriScene";
 import DoriIcon from "./DoriIcon";
-import { ganzhiMeaning } from "@/lib/ganzhiMeaning";
-import { readingFirst } from "@/lib/hanjaReading";
+import FitText from "./FitText";
+import { ganzhiSentence } from "@/lib/ganzhiMeaning";
 
 interface Teaser {
   line: string;
@@ -50,8 +50,11 @@ export default function BirthdayTeaser() {
       {result ? (
         <div className="text-center">
           <p className="text-xs font-bold text-brand-500">오늘의 도리 한마디</p>
-          <p className="mt-1 text-sm font-bold text-slate-800">{readingFirst(result.ganzhi)}일</p>
-          {ganzhiMeaning(result.ganzhi) && <p className="mt-0.5 text-[11px] leading-relaxed text-gray-500">{ganzhiMeaning(result.ganzhi)}</p>}
+          {ganzhiSentence(result.ganzhi) && (
+            <FitText maxPx={13} minPx={9} className="mt-1.5 text-center font-semibold text-slate-600">
+              {ganzhiSentence(result.ganzhi)}
+            </FitText>
+          )}
           <div className="mt-3">
             <DoriScene line={result.line} tip={result.tip} />
           </div>

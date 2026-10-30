@@ -1,3 +1,5 @@
+import { readingFirst } from "@/lib/hanjaReading";
+
 /** 천간·지지 한 글자의 쉬운 뜻. 오늘의 일진(예: 戊寅)이 무슨 뜻인지 한 줄로 풀어 줄 때 써요. */
 const STEM_IMAGE: Record<string, string> = {
   甲: "큰 나무",
@@ -37,6 +39,15 @@ export function ganzhiMeaning(ganzhi: string, short = false): string | null {
   const j = withBatchim(s) ? "과" : "와";
   if (short) return `${s}(${stem})${j} ${b}(${branch})의 기운이 만나는 날이래요`;
   return `오늘 하루의 기운 이름이에요. ${s}(${stem})${withBatchim(s) ? "과" : "와"} ${b}(${branch})의 기운이 만나는 날이래요.`;
+}
+
+/** "戊寅" → "오늘은 무인(戊寅)일이고, 큰 산(戊)과 호랑이(寅)의 기운이 만나는 날이란 뜻이에요". 모르는 글자면 null */
+export function ganzhiSentence(ganzhi: string): string | null {
+  const m = ganzhiMeaning(ganzhi, true);
+  if (!m) return null;
+  const [stem, branch] = ganzhi.match(/[\u4e00-\u9fff]/g) ?? [];
+  const reading = readingFirst(`${stem}${branch}`);
+  return `오늘은 ${reading}일이고, ${m.replace("만나는 날이래요", "만나는 날이란 뜻이에요")}`;
 }
 
 /** 마지막 글자에 받침이 있으면 true (과/와 고르기) */
