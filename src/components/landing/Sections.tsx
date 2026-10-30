@@ -41,12 +41,6 @@ function activateOnKey(e: React.KeyboardEvent, run: () => void) {
   }
 }
 
-const BETA_NOTICE_TEXT = (
-  <>
-    * &apos;{SERVICE_NAME}&apos;는 지금 <strong>Beta 테스트 중</strong>이라 결제 없이 이용할 수 있어요.<br />(표시된 금액은 정식 오픈 후 기준이에요)
-  </>
-);
-
 /* ------------------------------------------------------------------ 헤더 */
 
 /** 닉네임의 첫 글자. 이모지처럼 글자 하나가 두 칸을 차지하는 문자도 깨지지 않게 Array.from 으로 나눠요. */
@@ -59,7 +53,7 @@ export function Header({ onOpenLogin, user = null }: { onOpenLogin: () => void; 
     <>
       <header className="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-brand-100 shadow-[0_2px_15px_rgba(128,87,224,0.06)]">
         <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-3.5 flex items-center justify-between gap-2 sm:gap-3">
-          {/* 왼쪽 위: 로고 + 베타 안내 (좁은 화면에서는 아래 띠로 따로 보여줘요) */}
+          {/* 왼쪽 위: 로고 + Beta 스티커 */}
           <div className="flex flex-col items-start gap-1 min-w-0">
             <Link href="/" aria-label={`${SERVICE_NAME} 홈으로`} data-testid="home-link" className="flex items-center gap-2 sm:gap-2.5">
               <div className="relative w-9 h-9 sm:w-11 sm:h-11 rounded-full overflow-hidden border-2 border-brand-500/40 shadow-sm shrink-0 bg-sky-50 flex items-center justify-center">
@@ -73,15 +67,14 @@ export function Header({ onOpenLogin, user = null }: { onOpenLogin: () => void; 
               </div>
               <h1 className="font-cute font-normal text-[19px] min-[400px]:text-[22px] sm:text-[30px] leading-none whitespace-nowrap tracking-normal bg-gradient-to-r from-brand-500 via-fuchsia-500 to-pink-500 bg-clip-text text-transparent inline-flex items-center gap-1.5">
                 &apos;도리&apos;운세사주
-                <span className="hidden sm:inline text-xs text-amber-600 font-sans font-bold px-2 py-0.5 rounded-full bg-amber-50 border border-amber-200/80">
-                  ✨ 퐁당
+                <span
+                  data-testid="beta-sticker"
+                  className="-rotate-6 rounded-md border border-amber-300 bg-amber-100 px-1.5 py-0.5 font-sans text-[9px] font-extrabold uppercase leading-none tracking-wide text-amber-700 shadow-[1px_1px_0_0_rgba(217,119,6,0.35)] sm:text-[11px]"
+                >
+                  Beta
                 </span>
               </h1>
             </Link>
-            <div className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-sky-50 border border-sky-200 text-brand-500 text-[11px] font-medium">
-              <span className="w-1.5 h-1.5 rounded-full bg-sky-500 animate-ping" aria-hidden="true" />
-              <span>{BETA_NOTICE_TEXT}</span>
-            </div>
           </div>
 
           {/* 오른쪽 위: 로그인 전에는 "로그인" 버튼, 로그인 후에는 닉네임(마이페이지) + "?" 안내 메뉴 + 햄버거(자판기) 메뉴. 둘 다 같은 창(로그인/내 정보)을 열어요 */}
@@ -139,9 +132,6 @@ export function Header({ onOpenLogin, user = null }: { onOpenLogin: () => void; 
         </div>
       </header>
 
-      <div className="sm:hidden bg-sky-50 border-b border-sky-200 px-4 py-1.5 text-center text-[11px] font-medium text-brand-500">
-        {BETA_NOTICE_TEXT}
-      </div>
     </>
   );
 }
