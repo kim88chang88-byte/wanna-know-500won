@@ -42,6 +42,7 @@ export default function Landing() {
   const countsRef = useRef<DrawCounts>(counts);
   const timers = useRef<number[]>([]);
   const [ritual, setRitual] = useState(false);
+  const [ritualBill, setRitualBill] = useState(false);
   const [tickets, setTickets] = useState(0);
   const [visitors, setVisitors] = useState<{ today: number; total: number } | null>(null);
   const bonusRef = useRef(false);
@@ -106,6 +107,8 @@ export default function Landing() {
         timers.current.push(window.setTimeout(open, MODAL_DELAY_MS));
         return;
       }
+      // 1,000원 카드(둘의 궁합)는 동전 대신 지폐가 들어가요.
+      setRitualBill(price.startsWith("1,000"));
       setRitual(true);
       timers.current.push(
         window.setTimeout(() => {
@@ -218,7 +221,7 @@ export default function Landing() {
       <div aria-hidden="true" className="h-16 lg:hidden" />
       <BottomTabs />
 
-      {ritual && <CoinRitual />}
+      {ritual && <CoinRitual bill={ritualBill} />}
       <StickyDrawCta hidden={Boolean(intake) || loginOpen || ritual} />
 
       {justLoggedIn && user && (
