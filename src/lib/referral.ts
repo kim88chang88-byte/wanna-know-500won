@@ -7,7 +7,9 @@ export const REF_KEY = "wanna500:ref:v1";
 export const MYCODE_KEY = "wanna500:mycode:v1";
 const CODE = /^[A-Z0-9]{6,12}$/;
 
-type Store = Pick<Storage, "getItem" | "setItem" | "removeItem"> | null;
+import type { StorageLike } from "./drawCounter";
+
+type Store = StorageLike | null;
 
 /** 입력·주소에서 읽은 값을 코드 모양으로 다듬어요. 아니면 null. */
 export function cleanRefCode(raw: unknown): string | null {
@@ -41,7 +43,7 @@ export function readRef(st: Store): string | null {
 }
 export function clearRef(st: Store) {
   try {
-    st?.removeItem(REF_KEY);
+    st?.setItem(REF_KEY, ""); // 저장소 규격에 삭제가 없어서 빈 값으로 덮어써요 (읽을 때 코드 모양이 아니면 없는 걸로 봐요)
   } catch {
     // 무시
   }
