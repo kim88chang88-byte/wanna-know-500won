@@ -54,6 +54,7 @@ export async function POST(request: Request) {
   const db = dbConfig ? createDb(dbConfig) : null;
   const userId = session && db ? session.sub : null;
   let counts: DrawCounts | null = null;
+  let useCoin = false;
   if (userId && db) {
     try {
       counts = await db.getCounts(userId);
@@ -62,10 +63,20 @@ export async function POST(request: Request) {
       console.error("getCounts failed:", err instanceof Error ? err.message : "unknown");
     }
     if (counts && isDailyLimitEnforced(process.env) && counts.today >= FREE_PER_DAY + (rawBonus === true ? 1 : 0)) {
-      return NextResponse.json(
-        { error: "오늘의 무료 뽑기는 이미 사용했어요. 결제는 아직 준비 중이에요. 내일 다시 만나요 🫧", code: "free_used", counts },
-        { status: 402 },
-      );
+      // 오늘 무료를 다 썼어도, 서버에 뽑기 코인(로그인 선물 등)이 있으면 한 장 써서 뽑아요. 풀이가 실제로 나간 뒤에 차감해요.
+      let coins = 0;
+      try {
+        coins = await db.getCoins(userId);
+      } catch {
+        // 코인 기능이 아직 꺼져 있거나 DB 가 잠깐 안 되면 기존 안내로 돌아가요.
+      }
+      if (coins < 1) {
+        return NextResponse.json(
+          { error: "오늘의 무료 뽑기는 이미 사용했어요. 결제는 아직 준비 중이에요. 내일 다시 만나요 🫧", code: "free_used", counts },
+          { status: 402 },
+        );
+      }
+      useCoin = true;
     }
   }
 
@@ -159,6 +170,13 @@ export async function POST(request: Request) {
   // AI 호출이 일시적으로 실패한 요청(failed)은 세지 않아요.
   const countable = readingStatus === "unavailable" || (readingStatus === "ok" && reading !== null);
   if (userId && db && countable) {
+    if (useCoin) {
+      try {
+        await db.spendCoin(userId);
+      } catch (err) {
+        console.error("spendCoin failed:", err instanceof Error ? err.message : "unknown");
+      }
+    }
     try {
       await db.ensureUser(userId, session?.nick);
       await db.recordDraw(userId, normalizeTopic(rawTopic));

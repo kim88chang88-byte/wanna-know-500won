@@ -44,6 +44,20 @@ export default function Landing() {
   const [ritual, setRitual] = useState(false);
   const [ritualBill, setRitualBill] = useState(false);
   const [tickets, setTickets] = useState(0);
+  // 서버에 쌓인 뽑기 코인(로그인 선물 등)과, 방금 선물을 받았는지
+  const [coins, setCoins] = useState(0);
+  const [gift, setGift] = useState(false);
+  const refreshCoins = useCallback(async () => {
+    try {
+      const res = await fetch("/api/coins", { method: "POST" });
+      if (!res.ok) return;
+      const d = (await res.json()) as { balance?: unknown; granted?: unknown };
+      setCoins(typeof d.balance === "number" && d.balance > 0 ? d.balance : 0);
+      if (d.granted === true) setGift(true);
+    } catch {
+      // 코인 확인이 안 돼도 뽑기는 그대로 돼요
+    }
+  }, []);
   const [visitors, setVisitors] = useState<{ today: number; total: number } | null>(null);
   const bonusRef = useRef(false);
   // 도장 연속 3일이면 보너스 뽑기를 지급하고, 안내에 쓸 값을 새로 읽어요.
@@ -120,6 +134,21 @@ export default function Landing() {
     [],
   );
 
+  // 로그인한 상태면 코인을 확인하고, 처음이면 로그인 선물을 받아요. (로그아웃하면 0장)
+  const loggedIn = Boolean(user);
+  useEffect(() => {
+    if (loggedIn) void refreshCoins();
+    else {
+      setCoins(0);
+      setGift(false);
+    }
+  }, [loggedIn, refreshCoins]);
+  useEffect(() => {
+    if (!gift) return;
+    const t = window.setTimeout(() => setGift(false), 6000);
+    return () => window.clearTimeout(t);
+  }, [gift]);
+
   // 로그인 직후 환영 안내는 4초 뒤 사라져요.
   useEffect(() => {
     if (!justLoggedIn) return;
@@ -170,6 +199,8 @@ export default function Landing() {
         bonusRef.current = false;
       }
       syncReward();
+      // 서버가 코인을 썼을 수 있어서 남은 장수를 다시 읽어요.
+      if (loggedIn) void refreshCoins();
       if (spinKey.current) {
         setLastKey(spinKey.current);
         try {
@@ -185,7 +216,7 @@ export default function Landing() {
       }
       applyCounts(recordDraw(getBrowserStorage(), new Date(), countsRef.current));
     },
-    [applyCounts, setServerCounts, syncReward],
+    [applyCounts, setServerCounts, syncReward, loggedIn, refreshCoins],
   );
 
   // 로그인 직후엔 서버가 센 횟수를, 로그아웃·탈퇴 후엔 이 브라우저의 횟수를 보여줘요.
@@ -200,7 +231,7 @@ export default function Landing() {
       <Header onOpenLogin={openLogin} user={user} />
 
       <main className="relative z-10 max-w-[34rem] lg:max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-5 pb-20 sm:pb-24">
-        <HeroSection visitors={visitors} tickets={tickets} />
+        <HeroSection visitors={visitors} tickets={tickets + coins} />
         <ShowcaseSection />
         {!user && <BirthdayTeaser />}
         {/* 도리의 소식 카드들은 첫 화면의 "뽑으러 가기" 버튼 아래로 옮겼어요. (첫 화면에서 눌러야 할 것이 하나만 보이게) */}
@@ -224,16 +255,18 @@ export default function Landing() {
       {ritual && <CoinRitual bill={ritualBill} />}
       <StickyDrawCta hidden={Boolean(intake) || loginOpen || ritual} />
 
-      {justLoggedIn && user && (
+      {((justLoggedIn && user) || gift) && (
         <div
           role="status"
           data-testid="welcome-toast"
           className="fixed left-1/2 -translate-x-1/2 top-20 z-[60] w-[calc(100%-2rem)] max-w-sm rounded-2xl bg-emerald-600 text-white shadow-xl px-4 py-3 text-sm font-bold flex items-center justify-between gap-3"
         >
           <span>
-            🫧 {user.nickname ? `${user.nickname}님, ` : ""}로그인됐어요! 매일 첫 1회는 무료예요.
+            {gift
+              ? `🎁 ${user?.nickname ? `${user.nickname}님, ` : ""}로그인 선물로 500원 무료 뽑기 1회가 도착했어요!`
+              : `🫧 ${user?.nickname ? `${user.nickname}님, ` : ""}로그인됐어요! 매일 첫 1회는 무료예요.`}
           </span>
-          <button type="button" onClick={clearWelcome} aria-label="알림 닫기" className="shrink-0 text-white/80 hover:text-white">
+          <button type="button" onClick={() => { clearWelcome(); setGift(false); }} aria-label="알림 닫기" className="shrink-0 text-white/80 hover:text-white">
             <span className="material-symbols-outlined text-[18px]">close</span>
           </button>
         </div>

@@ -164,6 +164,31 @@ describe("createDb", () => {
     expect(threw).toBe(true);
   });
 
+  it("grantCoin: rpc 로 지급하고, 새로 지급됐는지와 잔액을 돌려줘요", async () => {
+    const r = recorder(() => new Response(JSON.stringify([{ out_granted: true, out_balance: 1 }]), { status: 200 }));
+    const out = await createDb(cfg, r.f).grantCoin("4242", "login_bonus", "v1", 1);
+    expect(out).toEqual({ granted: true, balance: 1 });
+    expect(r.calls[0].url).toBe("https://x.supabase.co/rest/v1/rpc/coin_grant");
+    expect(JSON.parse(String(r.calls[0].init?.body))).toEqual({ p_user: "4242", p_kind: "login_bonus", p_ref: "v1", p_amount: 1 });
+    const again = recorder(() => new Response(JSON.stringify([{ out_granted: false, out_balance: 1 }]), { status: 200 }));
+    expect((await createDb(cfg, again.f).grantCoin("4242", "login_bonus", "v1", 1)).granted).toBe(false);
+  });
+
+  it("getCoins: 행이 없으면 0, spendCoin: 잔액 없으면 -1", async () => {
+    expect(await createDb(cfg, recorder(() => new Response("[]", { status: 200 })).f).getCoins("4242")).toBe(0);
+    expect(await createDb(cfg, recorder(() => new Response('[{"balance":2}]', { status: 200 })).f).getCoins("4242")).toBe(2);
+    const r = recorder(() => new Response("-1", { status: 200 }));
+    expect(await createDb(cfg, r.f).spendCoin("4242")).toBe(-1);
+    expect(r.calls[0].url).toBe("https://x.supabase.co/rest/v1/rpc/coin_spend");
+    expect(await createDb(cfg, recorder(() => new Response("0", { status: 200 })).f).spendCoin("4242")).toBe(0);
+  });
+
+  it("코인 함수는 안전하지 않은 사용자 id 를 거절해요", async () => {
+    const db = createDb(cfg, recorder(() => new Response("[]", { status: 200 })).f);
+    await expect(db.getCoins("a/b?x")).rejects.toThrow();
+    await expect(db.spendCoin("a b")).rejects.toThrow();
+  });
+
   it("getProfile: 행이 없으면 null", async () => {
     const r = recorder(() => new Response("[]", { status: 200 }));
     expect(await createDb(cfg, r.f).getProfile("4242")).toBeNull();

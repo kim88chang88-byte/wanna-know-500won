@@ -249,3 +249,76 @@ $$;
 
 revoke all on function public.visit_hit(date, text) from public, anon, authenticated;
 grant execute on function public.visit_hit(date, text) to service_role;
+
+-- ─────────────────────────────────────────────────────────────────────────────
+-- 뽑기 코인(500원 무료 뽑기 1회권): 로그인 선물·추천·후기 보상을 한 곳에서 관리해요.
+-- 이 파일 전체를 다시 Run 하면 추가돼요. (없으면 코인 기능만 꺼진 채로 서비스는 그대로 동작해요)
+-- 지급은 (user_id, kind, ref) 가 같으면 한 번만 되어서, 새로고침·재시도로 두 번 받지 않아요.
+-- ─────────────────────────────────────────────────────────────────────────────
+create table if not exists public.user_coins (
+  user_id text primary key references public.users(id) on delete cascade,
+  balance int not null default 0 check (balance >= 0),
+  updated_at timestamptz not null default now()
+);
+create table if not exists public.coin_log (
+  id bigint generated always as identity primary key,
+  user_id text not null references public.users(id) on delete cascade,
+  kind text not null,              -- login_bonus / spend / (이후) referral, review
+  ref text not null,               -- 같은 지급을 구분하는 값
+  delta int not null,              -- +지급 / -사용
+  created_at timestamptz not null default now()
+);
+create unique index if not exists coin_log_grant_once on public.coin_log (user_id, kind, ref) where delta > 0;
+alter table public.user_coins enable row level security;
+alter table public.coin_log enable row level security;
+
+-- 지급: 같은 (kind, ref) 는 한 번만. 새로 지급했으면 out_granted = true.
+create or replace function public.coin_grant(p_user text, p_kind text, p_ref text, p_amount int)
+returns table (out_granted boolean, out_balance int)
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  ins int;
+  bal int;
+begin
+  if p_amount < 1 or p_amount > 10 then
+    raise exception 'bad amount';
+  end if;
+  insert into public.coin_log (user_id, kind, ref, delta) values (p_user, p_kind, p_ref, p_amount) on conflict do nothing;
+  get diagnostics ins = row_count;
+  if ins > 0 then
+    insert into public.user_coins (user_id, balance) values (p_user, p_amount)
+      on conflict (user_id) do update set balance = public.user_coins.balance + p_amount, updated_at = now();
+  end if;
+  select c.balance into bal from public.user_coins c where c.user_id = p_user;
+  return query select ins > 0, coalesce(bal, 0);
+end;
+$$;
+
+-- 사용: 1장 쓰고 남은 장수를 돌려줘요. 잔액이 없으면 -1.
+create or replace function public.coin_spend(p_user text)
+returns int
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  bal int;
+begin
+  update public.user_coins set balance = balance - 1, updated_at = now()
+    where user_id = p_user and balance >= 1
+    returning balance into bal;
+  if bal is null then
+    return -1;
+  end if;
+  insert into public.coin_log (user_id, kind, ref, delta) values (p_user, 'spend', clock_timestamp()::text, -1);
+  return bal;
+end;
+$$;
+
+revoke all on function public.coin_grant(text, text, text, int) from public, anon, authenticated;
+grant execute on function public.coin_grant(text, text, text, int) to service_role;
+revoke all on function public.coin_spend(text) from public, anon, authenticated;
+grant execute on function public.coin_spend(text) to service_role;

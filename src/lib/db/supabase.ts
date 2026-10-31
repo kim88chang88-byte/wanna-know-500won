@@ -273,6 +273,34 @@ export function createDb(config: DbConfig, fetchImpl: FetchLike = fetch) {
       });
     },
 
+    /** 남은 뽑기 코인 장수 (없으면 0) */
+    async getCoins(userId: string): Promise<number> {
+      const res = await call(`user_coins?user_id=eq.${safeId(userId)}&select=balance&limit=1`, { method: "GET", headers: headers() });
+      const rows = (await res.json().catch(() => [])) as Array<{ balance?: unknown }>;
+      const n = Number(Array.isArray(rows) ? rows[0]?.balance : 0);
+      return Number.isInteger(n) && n > 0 ? n : 0;
+    },
+
+    /** 코인 지급. 같은 (kind, ref) 는 한 번만 들어가요. 새로 지급됐으면 granted = true. DB 함수(coin_grant) 안에서 한 번에 처리해요. */
+    async grantCoin(userId: string, kind: string, ref: string, amount = 1): Promise<{ granted: boolean; balance: number }> {
+      const res = await call("rpc/coin_grant", {
+        method: "POST",
+        headers: headers(),
+        body: JSON.stringify({ p_user: safeId(userId), p_kind: kind.slice(0, 40), p_ref: ref.slice(0, 80), p_amount: amount }),
+      });
+      const rows = (await res.json().catch(() => null)) as Array<{ out_granted?: unknown; out_balance?: unknown }> | { out_granted?: unknown; out_balance?: unknown } | null;
+      const row = Array.isArray(rows) ? rows[0] : rows;
+      const balance = Number(row?.out_balance);
+      return { granted: row?.out_granted === true, balance: Number.isInteger(balance) && balance > 0 ? balance : 0 };
+    },
+
+    /** 코인 1장 사용. 남은 장수를 돌려주고, 잔액이 없으면 -1 이에요. */
+    async spendCoin(userId: string): Promise<number> {
+      const res = await call("rpc/coin_spend", { method: "POST", headers: headers(), body: JSON.stringify({ p_user: safeId(userId) }) });
+      const n = await res.json().catch(() => -1);
+      return typeof n === "number" && Number.isInteger(n) ? n : -1;
+    },
+
     /** 오늘(한국 시간)·이번 달 뽑기 횟수 */
     async getCounts(userId: string, now: Date = new Date()): Promise<DrawCounts> {
       const id = safeId(userId);
