@@ -448,3 +448,34 @@ revoke all on function public.referral_redeem(text, text) from public, anon, aut
 grant execute on function public.referral_redeem(text, text) to service_role;
 revoke all on function public.referral_complete(text) from public, anon, authenticated;
 grant execute on function public.referral_complete(text) to service_role;
+
+-- ─────────────────────────────────────────────────────────────────────────────
+-- 후기 보상: 같은 종류(kind)의 지급을 한 달(한국 시간)에 p_cap 번까지만 해 줘요.
+-- 결과: out_reason = ok(지급) / cap(이번 달 한도) / dup(이미 받은 후기)
+-- 코인 테이블·coin_grant 가 먼저 있어야 해요. 이 부분만 따로 Run 해도 안전해요.
+-- ─────────────────────────────────────────────────────────────────────────────
+create or replace function public.coin_grant_capped(p_user text, p_kind text, p_ref text, p_amount int, p_cap int)
+returns table (out_granted boolean, out_balance int, out_reason text)
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  cnt int;
+  month_start timestamptz;
+  r record;
+begin
+  month_start := date_trunc('month', now() at time zone 'Asia/Seoul') at time zone 'Asia/Seoul';
+  select count(*) into cnt from public.coin_log
+    where user_id = p_user and kind = p_kind and delta > 0 and created_at >= month_start;
+  if cnt >= p_cap then
+    return query select false, coalesce((select c.balance from public.user_coins c where c.user_id = p_user), 0), 'cap'::text;
+    return;
+  end if;
+  select * into r from public.coin_grant(p_user, p_kind, p_ref, p_amount);
+  return query select r.out_granted, r.out_balance, (case when r.out_granted then 'ok' else 'dup' end)::text;
+end;
+$$;
+
+revoke all on function public.coin_grant_capped(text, text, text, int, int) from public, anon, authenticated;
+grant execute on function public.coin_grant_capped(text, text, text, int, int) to service_role;

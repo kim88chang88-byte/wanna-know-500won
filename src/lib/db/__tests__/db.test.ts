@@ -174,6 +174,15 @@ describe("createDb", () => {
     expect((await createDb(cfg, again.f).grantCoin("4242", "login_bonus", "v1", 1)).granted).toBe(false);
   });
 
+  it("grantCoinCapped: 월 한도를 함께 보내고 지급 결과(ok/cap/dup)를 돌려줘요", async () => {
+    const r = recorder(() => new Response(JSON.stringify([{ out_granted: true, out_balance: 2, out_reason: "ok" }]), { status: 200 }));
+    expect(await createDb(cfg, r.f).grantCoinCapped("4242", "review", "abcd", 2)).toEqual({ granted: true, balance: 2, reason: "ok" });
+    expect(r.calls[0].url).toBe("https://x.supabase.co/rest/v1/rpc/coin_grant_capped");
+    expect(JSON.parse(String(r.calls[0].init?.body))).toEqual({ p_user: "4242", p_kind: "review", p_ref: "abcd", p_amount: 1, p_cap: 2 });
+    const cap = recorder(() => new Response(JSON.stringify([{ out_granted: false, out_balance: 1, out_reason: "cap" }]), { status: 200 }));
+    expect((await createDb(cfg, cap.f).grantCoinCapped("4242", "review", "abcd", 2)).reason).toBe("cap");
+  });
+
   it("getCoins: 행이 없으면 0, spendCoin: 잔액 없으면 -1", async () => {
     expect(await createDb(cfg, recorder(() => new Response("[]", { status: 200 })).f).getCoins("4242")).toBe(0);
     expect(await createDb(cfg, recorder(() => new Response('[{"balance":2}]', { status: 200 })).f).getCoins("4242")).toBe(2);

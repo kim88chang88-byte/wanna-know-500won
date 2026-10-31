@@ -779,10 +779,10 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
 
           {luxe ? (
             <div className="mt-6 rounded-2xl border border-[#e6c887]/30 bg-[#fbf6ea] p-1">
-              <ReviewBox topic={target.fortune} premium={target.premium === true} />
+              <ReviewBox topic={target.fortune} premium={target.premium === true} loggedIn={loggedIn} />
             </div>
           ) : (
-            <ReviewBox topic={target.fortune} premium={target.premium === true} />
+            <ReviewBox topic={target.fortune} premium={target.premium === true} loggedIn={loggedIn} />
           )}
 
           {!loggedIn && (

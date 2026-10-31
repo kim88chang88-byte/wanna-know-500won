@@ -294,6 +294,19 @@ export function createDb(config: DbConfig, fetchImpl: FetchLike = fetch) {
       return { granted: row?.out_granted === true, balance: Number.isInteger(balance) && balance > 0 ? balance : 0 };
     },
 
+    /** 한 달에 cap 번까지만 지급하는 코인 지급. reason: ok / cap / dup */
+    async grantCoinCapped(userId: string, kind: string, ref: string, cap: number, amount = 1): Promise<{ granted: boolean; balance: number; reason: string }> {
+      const res = await call("rpc/coin_grant_capped", {
+        method: "POST",
+        headers: headers(),
+        body: JSON.stringify({ p_user: safeId(userId), p_kind: kind.slice(0, 40), p_ref: ref.slice(0, 80), p_amount: amount, p_cap: cap }),
+      });
+      const rows = (await res.json().catch(() => null)) as Array<{ out_granted?: unknown; out_balance?: unknown; out_reason?: unknown }> | { out_granted?: unknown; out_balance?: unknown; out_reason?: unknown } | null;
+      const row = Array.isArray(rows) ? rows[0] : rows;
+      const balance = Number(row?.out_balance);
+      return { granted: row?.out_granted === true, balance: Number.isInteger(balance) && balance > 0 ? balance : 0, reason: typeof row?.out_reason === "string" ? row.out_reason : "dup" };
+    },
+
     /** 코인 1장 사용. 남은 장수를 돌려주고, 잔액이 없으면 -1 이에요. */
     async spendCoin(userId: string): Promise<number> {
       const res = await call("rpc/coin_spend", { method: "POST", headers: headers(), body: JSON.stringify({ p_user: safeId(userId) }) });

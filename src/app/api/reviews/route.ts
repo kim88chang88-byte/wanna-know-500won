@@ -1,9 +1,11 @@
+import { createHash } from "node:crypto";
 import { NextResponse } from "next/server";
 import { normalizeTopic } from "@/lib/ai/reading";
 import { readCookie, SESSION_COOKIE, verifySessionToken } from "@/lib/auth/session";
 import { createDb, loadDbConfig } from "@/lib/db/supabase";
 import { enforceLimits, guardOrigin } from "@/lib/guard";
 import { parseReview } from "@/lib/reviews";
+import { isRewardableText, REWARD_KIND, REWARD_MONTH_CAP, rewardRef, type RewardResult } from "@/lib/reviewReward";
 
 export const runtime = "nodejs";
 
@@ -33,5 +35,20 @@ export async function POST(request: Request) {
     console.error("insertReview failed:", err instanceof Error ? err.message : "unknown");
     return NextResponse.json({ error: "후기를 저장하지 못했어요. 잠시 뒤에 다시 시도해 주세요." }, { status: 502 });
   }
-  return NextResponse.json({ ok: true });
+
+  // 정성 후기 보상: 로그인한 회원이 40자 이상 정성껏 쓴 후기면 500원 뽑기 코인 1장을 바로 줘요. (보상이 안 돼도 후기는 이미 저장됐어요)
+  let reward: RewardResult = "none";
+  if (session) {
+    if (!isRewardableText(review.text)) {
+      reward = "short";
+    } else {
+      try {
+        const r = await db.grantCoinCapped(session.sub, REWARD_KIND, rewardRef(review.text, (v) => createHash("sha256").update(v).digest("hex")), REWARD_MONTH_CAP, 1);
+        reward = r.granted ? "granted" : r.reason === "cap" ? "cap" : "dup";
+      } catch (err) {
+        console.error("review reward failed:", err instanceof Error ? err.message : "unknown");
+      }
+    }
+  }
+  return NextResponse.json({ ok: true, reward });
 }

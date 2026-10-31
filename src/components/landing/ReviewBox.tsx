@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { isRewardableText, REWARD_MIN_CHARS, REWARD_MONTH_CAP, type RewardResult } from "@/lib/reviewReward";
 import { LOW_RATING, MAX_REVIEW_REASONS, MAX_REVIEW_TEXT, REVIEW_REASONS, type ReviewReasonId } from "@/lib/reviews";
 
 type Phase = "idle" | "sending" | "done";
@@ -8,13 +9,14 @@ type Phase = "idle" | "sending" | "done";
 const LABELS = ["", "별로예요", "조금 아쉬워요", "괜찮아요", "좋았어요", "아주 좋았어요"];
 
 /** 결과 화면 맨 아래의 사용후기 상자. 별점만 눌러도 제출돼요. (결과 하나당 한 번만 낼 수 있어요) */
-export default function ReviewBox({ topic, premium }: { topic: string; premium: boolean }) {
+export default function ReviewBox({ topic, premium, loggedIn = false }: { topic: string; premium: boolean; loggedIn?: boolean }) {
   const [rating, setRating] = useState(0);
   const [reasons, setReasons] = useState<ReviewReasonId[]>([]);
   const [text, setText] = useState("");
   const [publicOk, setPublicOk] = useState(false);
   const [phase, setPhase] = useState<Phase>("idle");
   const [error, setError] = useState<string | null>(null);
+  const [reward, setReward] = useState<RewardResult>("none");
 
   function toggleReason(id: ReviewReasonId) {
     setReasons((cur) => (cur.includes(id) ? cur.filter((r) => r !== id) : cur.length >= MAX_REVIEW_REASONS ? cur : [...cur, id]));
@@ -34,6 +36,11 @@ export default function ReviewBox({ topic, premium }: { topic: string; premium: 
         const data = (await res.json().catch(() => null)) as { error?: string } | null;
         throw new Error(data?.error ?? "후기를 저장하지 못했어요. 잠시 뒤에 다시 시도해 주세요.");
       }
+      const data = (await res.json().catch(() => null)) as { reward?: RewardResult } | null;
+      const got = data?.reward ?? "none";
+      setReward(got);
+      // 코인이 늘었으니 위쪽 "내 주머니"가 새로 읽도록 알려요.
+      if (got === "granted") window.dispatchEvent(new Event("wanna500:coins"));
       setPhase("done");
     } catch (err) {
       setError(err instanceof Error ? err.message : "후기를 저장하지 못했어요.");
@@ -44,8 +51,16 @@ export default function ReviewBox({ topic, premium }: { topic: string; premium: 
   if (phase === "done") {
     return (
       <div data-testid="review-done" role="status" className="mt-5 rounded-2xl bg-emerald-50 border border-emerald-200 px-4 py-4 text-center">
-        <p className="font-bold text-emerald-800 text-sm">후기 고마워요 🫧</p>
-        <p className="mt-1 text-[11px] text-emerald-700">도리가 더 잘 풀어줄 수 있게 소중하게 읽어볼게요.</p>
+        <p className="font-bold text-emerald-800 text-sm">{reward === "granted" ? "후기 고마워요! 🎁" : "후기 고마워요 🫧"}</p>
+        <p data-testid="review-reward-msg" className="mt-1 text-[11px] text-emerald-700">
+          {reward === "granted"
+            ? "정성 후기 선물로 500원 뽑기 1회를 드렸어요. 위쪽 주머니에서 확인해 보세요."
+            : reward === "cap"
+              ? "이번 달 후기 선물은 모두 받으셨어요. 후기는 소중하게 읽어볼게요."
+              : reward === "dup"
+                ? "같은 후기로는 선물을 한 번만 드려요. 후기는 소중하게 읽어볼게요."
+                : "도리가 더 잘 풀어줄 수 있게 소중하게 읽어볼게요."}
+        </p>
       </div>
     );
   }
@@ -126,6 +141,13 @@ export default function ReviewBox({ topic, premium }: { topic: string; premium: 
               {text.length}/{MAX_REVIEW_TEXT} · 이름·연락처 같은 개인정보는 적지 말아 주세요. 후기는 서비스 개선에 써요.
             </p>
           </div>
+          <p data-testid="review-reward-hint" className={`rounded-xl px-3 py-2 text-[11px] leading-relaxed ${loggedIn && isRewardableText(text) ? "bg-emerald-50 text-emerald-800" : "bg-amber-50 text-amber-800"}`}>
+            {loggedIn
+              ? isRewardableText(text)
+                ? "🎁 선물 조건을 채웠어요! 후기를 남기면 500원 뽑기 1회를 바로 드려요."
+                : `🎁 ${REWARD_MIN_CHARS}자 이상 정성껏 남기면 500원 뽑기 1회를 선물로 드려요. (한 달 ${REWARD_MONTH_CAP}번까지, 별점은 상관없어요)`
+              : `🎁 로그인하고 ${REWARD_MIN_CHARS}자 이상 정성껏 남기면 500원 뽑기 1회를 선물로 드려요.`}
+          </p>
           {text.trim().length > 0 && (
             <label className="flex items-start gap-2 rounded-xl bg-brand-50/60 px-3 py-2 text-[11px] leading-relaxed text-gray-700">
               <input type="checkbox" data-testid="review-public" checked={publicOk} onChange={(e) => setPublicOk(e.target.checked)} className="mt-0.5 h-3.5 w-3.5 shrink-0 accent-brand-600" />

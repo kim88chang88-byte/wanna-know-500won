@@ -146,6 +146,12 @@ export default function Landing() {
       setGift(false);
     }
   }, [loggedIn, refreshCoins]);
+  // 후기 보상 등으로 코인이 늘어난 순간(다른 화면에서 알려줘요) 잔액을 새로 읽어요.
+  useEffect(() => {
+    const on = () => void refreshCoins();
+    window.addEventListener("wanna500:coins", on);
+    return () => window.removeEventListener("wanna500:coins", on);
+  }, [refreshCoins]);
   // 친구 초대 링크(?ref=코드)로 들어왔으면 코드를 기억해 두고 주소창은 깔끔하게 정리해요.
   useEffect(() => {
     const c = refFromSearch(window.location.search);
