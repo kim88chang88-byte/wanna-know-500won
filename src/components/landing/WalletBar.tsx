@@ -54,11 +54,8 @@ export default function WalletBar({ bills, coins, free }: WalletValues) {
       </span>
       <span data-testid="wallet-free" className="contents">
         <Chip label="오늘 남은 무료 뽑기" count={free} tone="border-pink-200">
-          <span className="relative inline-flex h-[22px] w-[22px] items-center justify-center rounded-full bg-gradient-to-b from-pink-100 to-brand-100 ring-1 ring-pink-200">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/images/dori-icon.webp" alt="" width={18} height={18} className="h-[18px] w-[18px] rounded-full object-cover" />
-            <span aria-hidden="true" className="absolute -right-1 -top-1.5 text-[10px] leading-none">✨</span>
-          </span>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/images/free-tag.webp" alt="" width={40} height={20} className="h-[18px] w-auto object-contain drop-shadow-sm" />
         </Chip>
       </span>
     </div>
