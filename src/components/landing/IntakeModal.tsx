@@ -38,6 +38,7 @@ import { IMAGES } from "./images";
 import LoadingBar from "./LoadingBar";
 import { ReadingCard } from "./ReadingCard";
 import StoryReport from "./StoryReport";
+import CompatStory from "./CompatStory";
 import { birthSummary, isStoryReport } from "@/lib/storyHelpers";
 import { VaultSaveBar } from "./VaultSaveBar";
 import { profileSummary, profileToForm, sameBirth, type SavedProfile } from "@/lib/profile";
@@ -493,7 +494,7 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
     abortRef.current = ctrl;
     try {
       // 사주 리포트도 함께 받아요. 프리미엄은 전체, 일반 자판기는 기본(원국·오행·신강신약). 실패해도 기본 풀이는 그대로 보여줘요.
-      const premiumPromise = fetchPremiumReport(input, target.premium ? "full" : "basic", target.fortune, concern, partnerInput, ctrl.signal);
+      const premiumPromise = fetchPremiumReport(input, target.premium && !compat ? "full" : "basic", target.fortune, concern, partnerInput, ctrl.signal);
       const res = await fetch("/api/reading", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -573,7 +574,8 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
   }
 
   // 프리미엄 결과 화면만 미드나잇+골드 톤으로 보여줘요. (입력·로딩 화면은 기존 그대로)
-  const luxe = target.premium === true && phase === "result";
+  // 둘의 궁합은 500원 풀이와 같은 밝은 템플릿으로 보여줘요. (10쪽 책·어두운 테마는 9,900원 종합 사주만)
+  const luxe = target.premium === true && !compat && phase === "result";
   const storyMode = !luxe && premiumReport ? isStoryReport(premiumReport) : false;
   const bookMode = luxe && !!premiumReport && premiumReport.level === "full" && premiumReport.book.length > 0;
   const resultTitle = phase === "result" && chart && premiumReport && (
@@ -637,7 +639,7 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
                 <VaultSaveBar
                   luxe={luxe}
                   autoSave={saveVault}
-                  snapshot={{ topic: target.fortune, premium: target.premium === true, report: premiumReport, reading, kkotgeoji: reading?.kkotgeoji ?? null, reason: reading?.reason ?? null, story: reading?.story ?? null, folds: reading?.folds ?? null, heads: reading?.heads ?? null, note: birthNote }}
+                  snapshot={{ topic: target.fortune, premium: target.premium === true && !compat, report: premiumReport, reading, kkotgeoji: reading?.kkotgeoji ?? null, reason: reading?.reason ?? null, story: reading?.story ?? null, folds: reading?.folds ?? null, heads: reading?.heads ?? null, note: birthNote }}
                 />
               )}
 
@@ -657,13 +659,17 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
                 <>
                   {/* 2) 이야기 순서: 내 정보·고민 → 네 기둥 → 한마디로 → 접어 둔 풀이 → 도리의 쪽지 */}
                   <div data-testid="premium-result">
-                    <StoryReport
-                      report={premiumReport}
-                      reading={reading}
-                      intro={null}
-                      lastWord={<><ResultHero report={premiumReport} aiQuote={reading?.kkotgeoji ?? null} luxe={false} hideLucky /><ResultShareCard report={premiumReport} aiQuote={reading?.kkotgeoji ?? null} /></>}
-                      closing={askInput ? <AskChips input={askInput} luxe={false} /> : undefined}
-                    />
+                    {compat && premiumReport.compat ? (
+                      <CompatStory report={premiumReport} intro={null}
+                        lastWord={<><ResultHero report={premiumReport} aiQuote={reading?.kkotgeoji ?? null} luxe={false} hideLucky /><ResultShareCard report={premiumReport} aiQuote={reading?.kkotgeoji ?? null} /></>}
+                        closing={askInput ? <AskChips input={askInput} luxe={false} /> : undefined}
+                      />
+                    ) : (
+                      <StoryReport report={premiumReport} reading={reading} intro={null}
+                        lastWord={<><ResultHero report={premiumReport} aiQuote={reading?.kkotgeoji ?? null} luxe={false} hideLucky /><ResultShareCard report={premiumReport} aiQuote={reading?.kkotgeoji ?? null} /></>}
+                        closing={askInput ? <AskChips input={askInput} luxe={false} /> : undefined}
+                      />
+                    )}
                   </div>
                 </>
               ) : (

@@ -27,7 +27,7 @@ const STEPS: Array<{ key: FoldKey; name: string }> = [
 ];
 
 /** 형광펜 색: 주제별 동물 그림에 맞춰요. (용 노랑 · 토끼 분홍 · 남자 팬더 연보라 · 여자 팬더 장미 · 여우 주황 · 수달 하늘색) */
-const MARK: Record<string, string> = {
+export const MARK: Record<string, string> = {
   success: "rgba(253,224,71,0.75)",
   money: "rgba(249,168,212,0.7)",
   love: "rgba(196,181,253,0.75)",
@@ -52,7 +52,7 @@ const EL_ORDER: Element[] = ["wood", "fire", "earth", "metal", "water"];
 /** 기둥 이름 아래에 붙이는 쉬운 뜻 */
 const PILLAR_HINT: Record<string, string> = { hour: "태어난 시", day: "나", month: "태어난 달", year: "태어난 해" };
 
-function Pillars({ report }: { report: PremiumReportView }) {
+export function Pillars({ report }: { report: PremiumReportView }) {
   // 한국식 만세력 순서: 시 · 일 · 월 · 연
   const order = ["hour", "day", "month", "year"] as const;
   const list = order.map((k) => report.pillars.find((p) => p.key === k)).filter((p): p is NonNullable<typeof p> => Boolean(p));
@@ -122,7 +122,7 @@ function Pillars({ report }: { report: PremiumReportView }) {
 }
 
 /** 긴 글을 문단으로 나눠 보여줘요. (내용이 바뀌는 곳마다 한 줄 띄움) */
-function Paras({ text, className = "", mark }: { text: string; className?: string; mark: string }) {
+export function Paras({ text, className = "", mark }: { text: string; className?: string; mark: string }) {
   return (
     <div className={`space-y-3.5 ${className}`}>
       {toParagraphs(text).map((p, i) => (
@@ -153,7 +153,7 @@ function PendingNote() {
   );
 }
 
-function Fold({ label, title, children, testId, defaultOpen = false }: { label: string; title: string; children: ReactNode; testId?: string; defaultOpen?: boolean }) {
+export function Fold({ label, title, children, testId, defaultOpen = false }: { label: string; title: string; children: ReactNode; testId?: string; defaultOpen?: boolean }) {
   return (
     <details data-testid={testId ?? "story-fold"} open={defaultOpen} className="group border-t border-brand-100 first:border-t-0">
       <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-1 py-3.5">

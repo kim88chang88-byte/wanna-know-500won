@@ -5,6 +5,7 @@ import LoginButtons from "@/components/landing/LoginButtons";
 import ManseReport from "@/components/premium/ManseReport";
 import { ResultHero } from "@/components/landing/PhotoCard";
 import { ReadingCard } from "@/components/landing/ReadingCard";
+import CompatStory from "@/components/landing/CompatStory";
 import StoryReport from "@/components/landing/StoryReport";
 import { isStoryReport } from "@/lib/storyHelpers";
 import type { VaultSnapshot } from "@/lib/vault";
@@ -99,7 +100,9 @@ export default function VaultApp() {
         <div className={luxe ? "mt-3 rounded-3xl border border-[#e6c887]/40 bg-gradient-to-b from-[#1d1a28] via-[#171520] to-[#12101a] p-5 sm:p-6 text-[#f5efe0] shadow-[0_20px_60px_rgba(20,16,34,0.35)]" : "mt-3"}>
         {!(!luxe && isStoryReport(s.report)) && !(luxe && s.report.level === "full" && s.report.book.length > 0) && <ResultHero report={s.report} aiQuote={s.kkotgeoji} luxe={luxe} />}
         {s.note && <p className={`mt-4 p-3 rounded-2xl border text-xs leading-relaxed ${luxe ? "bg-white/[0.04] border-[#e6c887]/25 text-[#e8dfca]/80" : "bg-brand-50 border-brand-100 text-gray-700"}`}>{s.note}</p>}
-        {!luxe && isStoryReport(s.report) ? (
+        {!luxe && isStoryReport(s.report) && s.report.compat ? (
+          <CompatStory report={s.report} intro={null} lastWord={<ResultHero report={s.report} aiQuote={s.kkotgeoji} luxe={false} hideLucky />} />
+        ) : !luxe && isStoryReport(s.report) ? (
           <StoryReport report={s.report} intro={null} lastWord={<ResultHero report={s.report} aiQuote={s.kkotgeoji} luxe={false} hideLucky />} reading={s.card ? { keyword: s.card.keyword, total: { score: s.card.score, summary: s.card.summary }, indicators: s.card.indicators.map((i) => ({ label: i.label, score: i.score, comment: i.comment })), reason: s.reason ?? undefined, story: s.story ?? undefined, folds: s.folds ?? undefined, heads: s.heads ?? undefined } : null} />
         ) : (
           <>
