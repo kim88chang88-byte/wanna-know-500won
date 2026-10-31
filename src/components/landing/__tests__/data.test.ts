@@ -18,7 +18,7 @@ describe("랜딩 카드 데이터", () => {
   });
 
   it("'HOT' 스티커는 성공운·재물운·연애·결혼운·둘의 궁합, 'NEW' 스티커는 2027 신년운 카드에만 붙는다", () => {
-    expect(MACHINES.filter((m) => m.sticker === "HOT").map((m) => m.fortune)).toEqual(["성공운", "재물운", "연애·결혼운", "둘의 궁합"]);
+    expect(MACHINES.filter((m) => m.sticker === "HOT").map((m) => m.fortune)).toEqual(["성공운", "둘의 궁합", "재물운", "연애·결혼운"]);
     expect(MACHINES.filter((m) => m.sticker === "NEW").map((m) => m.fortune)).toEqual(["2027 신년운"]);
     expect(MACHINES.filter((m) => m.sticker).length).toBe(5);
   });
@@ -28,7 +28,7 @@ describe("랜딩 카드 데이터", () => {
   });
 
   it("자판기의 운 종류가 서버가 알아보는 여섯 가지와 같다", () => {
-    expect(MACHINES.map((m) => m.fortune)).toEqual(["2027 신년운", "성공운", "재물운", "연애·결혼운", "둘의 궁합", "건강운"]);
+    expect(MACHINES.map((m) => m.fortune)).toEqual(["2027 신년운", "성공운", "둘의 궁합", "재물운", "연애·결혼운", "건강운"]);
   });
 
   it("둘의 궁합은 1,000원 카드이고 상대방 정보를 받는 풀이로 열린다", () => {
