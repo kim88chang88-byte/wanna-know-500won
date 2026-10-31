@@ -31,6 +31,13 @@ describe("랜딩 카드 데이터", () => {
     expect(MACHINES.map((m) => m.fortune)).toEqual(["2027 신년운", "성공운", "재물운", "연애·결혼운", "둘의 궁합", "건강운"]);
   });
 
+  it("둘의 궁합은 1,000원 카드이고 상대방 정보를 받는 풀이로 열린다", () => {
+    const c = MACHINES.find((m) => m.fortune === "둘의 궁합");
+    expect(c?.price).toBe("1,000원");
+    expect(c?.premium).toBe(true);
+    expect(c?.fortune.includes("궁합")).toBe(true);
+  });
+
   it("비어 있는 문구가 없다", () => {
     for (const m of MACHINES) {
       expect([m.badge, m.name, m.fortune, m.desc, m.tag, m.emoji].every(Boolean)).toBe(true);

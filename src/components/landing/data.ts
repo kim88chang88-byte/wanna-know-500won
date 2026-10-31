@@ -37,6 +37,8 @@ export interface MachineCard {
   premium?: boolean;
   /** 카드 위쪽 작은 안내 (없으면 "1회 무료") */
   chip?: string;
+  /** 따로 값을 받는 카드의 가격 표시 (없으면 일반 뽑기) */
+  price?: string;
 }
 
 /** 6대 운명의 자판기 */
@@ -141,7 +143,8 @@ export const MACHINES: readonly MachineCard[] = [
     divider: "border-fuchsia-100",
     blob: "bg-fuchsia-200",
     premium: true,
-    chip: "프리미엄 풀이",
+    chip: "1,000원",
+    price: "1,000원",
   },
   {
     key: "machine-health",

@@ -497,7 +497,7 @@ function ChapterCover({ page, mascot }: { page: BookPage; mascot: Mascot }) {
 
 const NEXT_PRODUCTS = [
   { t: "올해 월별 운세 한눈에", d: "달마다 조심할 일과 기회를 짚어드려요", h: "/" },
-  { t: "궁합이 궁금하다면", d: "둘의 사주를 겹쳐 보는 500원 풀이", h: "/" },
+  { t: "궁합이 궁금하다면", d: "둘의 사주를 겹쳐 보는 1,000원 풀이", h: "/" },
   { t: "요즘 고민, 한 가지만 콕", d: "500원으로 고민에 맞춘 한 줄 답을 받아요", h: "/" },
 ];
 
@@ -563,6 +563,7 @@ export default function PremiumBook({ report, flush = false, finale, previewBlur
   const num = (n: number) => String(n).padStart(2, "0");
   const lockedTotal = pages.reduce((a, p) => a + p.sections.filter((x) => x.locked).length, 0);
   const lockedHere = page.sections.filter((x) => x.locked).length;
+  const won = report.compat ? "1,000원" : "9,900원";
   const unlock = (
     <button
       type="button"
@@ -570,7 +571,7 @@ export default function PremiumBook({ report, flush = false, finale, previewBlur
       onClick={() => setUnlockMsg(true)}
       className="mt-3 w-full rounded-full bg-gradient-to-r from-[#f0d9a0] to-[#d3ac62] py-2.5 text-[13px] font-bold text-[#1b1824] active:scale-95 transition-transform"
     >
-      {previewBlur ? "전체 사주서 열기 (정식 오픈 후 9,900원)" : "9,900원으로 전체 열기"}
+      {previewBlur ? `전체 사주서 열기 (정식 오픈 후 ${won})` : `${won}으로 전체 열기`}
     </button>
   );
 

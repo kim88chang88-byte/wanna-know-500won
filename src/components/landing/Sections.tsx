@@ -219,7 +219,7 @@ export function MachinesSection({ onSpin, lastKey = null }: SpinProps & { lastKe
           </div>
           <h3 className="text-base sm:text-lg font-bold text-gray-900">매일 첫 1회 무료 운세</h3>
         </div>
-        <span className="shrink-0 rounded-full bg-gray-100 px-2.5 py-0.5 text-[11px] text-gray-500">이후 500원</span>
+        <span className="shrink-0 rounded-full bg-gray-100 px-2.5 py-0.5 text-[11px] text-gray-500">이후 500원 · 궁합 1,000원</span>
       </div>
 
       {/* 옆으로 밀어서 넘기는 카드예요. (큰 화면에서는 한눈에 펼쳐져요) */}
@@ -241,8 +241,8 @@ export function MachinesSection({ onSpin, lastKey = null }: SpinProps & { lastKe
               role="button"
               tabIndex={0}
               aria-label={`${m.name} 운세 보기`}
-              onClick={() => onSpin(m.key, m.fortune, m.premium ? "9,900원" : FREE_PRICE_LABEL, m.premium)}
-              onKeyDown={(e) => activateOnKey(e, () => onSpin(m.key, m.fortune, m.premium ? "9,900원" : FREE_PRICE_LABEL, m.premium))}
+              onClick={() => onSpin(m.key, m.fortune, m.price ?? FREE_PRICE_LABEL, m.premium)}
+              onKeyDown={(e) => activateOnKey(e, () => onSpin(m.key, m.fortune, m.price ?? FREE_PRICE_LABEL, m.premium))}
               className={`scroll-mt-24 relative flex h-full cursor-pointer select-none flex-col gap-2.5 overflow-hidden rounded-3xl p-3 transition-shadow hover:shadow-lg group focus:outline-none focus-visible:ring-4 focus-visible:ring-brand-300 ${m.card}`}
             >
               <span aria-hidden="true" className={`pointer-events-none absolute -right-8 -top-8 h-24 w-24 rounded-full opacity-50 blur-xl ${m.blob}`} />
