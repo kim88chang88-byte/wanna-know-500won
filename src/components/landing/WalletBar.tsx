@@ -5,11 +5,11 @@ import type { ReactNode } from "react";
  */
 
 export interface WalletValues {
-  /** 1,000원 지폐 장수 (결제 기능이 열리면 채워져요) */
+  /** 결제로 산 1,000원 지폐 장수 (결제 기능이 열리면 채워져요) */
   bills: number;
-  /** 500원 뽑기 동전 개수 (로그인·초대·후기 선물 등) */
+  /** 결제로 산 500원 동전 개수 (결제 기능이 열리면 채워져요) */
   coins: number;
-  /** 오늘 남은 무료 뽑기 횟수 */
+  /** 무료로 뽑을 수 있는 횟수: 오늘 남은 무료 + 선물·도장으로 받은 뽑기권 */
   free: number;
 }
 
@@ -41,19 +41,19 @@ export default function WalletBar({ bills, coins, free }: WalletValues) {
   return (
     <div data-testid="wallet-bar" className="flex items-center justify-end gap-1.5">
       <span data-testid="wallet-bills" className="contents">
-        <Chip label="1,000원 지폐" count={bills} tone="border-sky-200">
+        <Chip label="결제한 1,000원 지폐" count={bills} tone="border-sky-200">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/images/bill-1000.webp" alt="" width={44} height={25} className="h-[18px] w-auto rounded-[3px] shadow-[0_1px_2px_rgba(0,0,0,0.2)]" />
         </Chip>
       </span>
       <span data-testid="wallet-coins" className="contents">
-        <Chip label="500원 동전" count={coins} tone="border-amber-200">
+        <Chip label="결제한 500원 동전" count={coins} tone="border-amber-200">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/images/coin-500.webp" alt="" width={22} height={22} className="h-[22px] w-[22px] object-contain drop-shadow-sm" />
         </Chip>
       </span>
       <span data-testid="wallet-free" className="contents">
-        <Chip label="오늘 남은 무료 뽑기" count={free} tone="border-pink-200">
+        <Chip label="무료 뽑기" count={free} tone="border-pink-200">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/images/free-tag.webp" alt="" width={40} height={20} className="h-[18px] w-auto object-contain drop-shadow-sm" />
         </Chip>
