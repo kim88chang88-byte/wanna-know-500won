@@ -13,6 +13,7 @@ const good = {
 describe("normalizeTopic", () => {
   it("화면 문구에서 주제를 찾는다", () => {
     expect(normalizeTopic("연애운 슬롯")).toBe("love");
+    expect(normalizeTopic("연애·결혼운")).toBe("marriage");
     expect(normalizeTopic("재물운")).toBe("money");
     expect(normalizeTopic("성공운 자판기")).toBe("success");
     expect(normalizeTopic("우리 둘의 궁합 리포트")).toBe("general");

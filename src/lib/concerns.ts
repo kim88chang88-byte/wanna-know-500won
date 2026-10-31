@@ -86,6 +86,7 @@ const CHIPS_BY_KIND: Array<{ match: string; ids: ConcernId[] }> = [
   // 더 구체적인 이름을 먼저 확인해요. (예: '재물·직장 리포트'가 '재물운'보다 먼저)
   { match: "종합", ids: ["job", "career", "money", "relationship", "marriage", "stress", "burnout"] },
   { match: "궁합", ids: ["relationship", "crush", "marriage", "partner", "doubt", "breakup", "friends"] },
+  { match: "연애·결혼", ids: ["crush", "meet", "relationship", "marriage", "partner", "breakup", "prep"] },
   { match: "연애 결혼", ids: ["crush", "meet", "relationship", "marriage", "partner", "breakup", "prep"] },
   { match: "성공 재물", ids: ["job", "career", "promotion", "money", "income", "spending", "stable"] },
   // (예전 이름도 계속 알아봐요)

@@ -17,18 +17,18 @@ describe("랜딩 카드 데이터", () => {
     expect(new Set(allKeys).size).toBe(allKeys.length);
   });
 
-  it("'HOT' 스티커는 성공운·재물운·연애운, 'NEW' 스티커는 2027 신년운 카드에만 붙는다", () => {
-    expect(MACHINES.filter((m) => m.sticker === "HOT").map((m) => m.fortune)).toEqual(["성공운", "재물운", "연애운"]);
+  it("'HOT' 스티커는 성공운·재물운·연애·결혼운·둘의 궁합, 'NEW' 스티커는 2027 신년운 카드에만 붙는다", () => {
+    expect(MACHINES.filter((m) => m.sticker === "HOT").map((m) => m.fortune)).toEqual(["성공운", "재물운", "연애·결혼운", "둘의 궁합"]);
     expect(MACHINES.filter((m) => m.sticker === "NEW").map((m) => m.fortune)).toEqual(["2027 신년운"]);
-    expect(MACHINES.filter((m) => m.sticker).length).toBe(4);
+    expect(MACHINES.filter((m) => m.sticker).length).toBe(5);
   });
 
   it("BEST 는 연애운 자판기 하나뿐", () => {
-    expect(MACHINES.filter((m) => m.best).map((m) => m.fortune)).toEqual(["연애운"]);
+    expect(MACHINES.filter((m) => m.best).map((m) => m.fortune)).toEqual(["연애·결혼운"]);
   });
 
   it("자판기의 운 종류가 서버가 알아보는 여섯 가지와 같다", () => {
-    expect(MACHINES.map((m) => m.fortune)).toEqual(["2027 신년운", "성공운", "재물운", "연애운", "결혼운", "건강운"]);
+    expect(MACHINES.map((m) => m.fortune)).toEqual(["2027 신년운", "성공운", "재물운", "연애·결혼운", "둘의 궁합", "건강운"]);
   });
 
   it("비어 있는 문구가 없다", () => {
@@ -92,7 +92,7 @@ describe("문구 가이드 (BRIEF.md: 뽑기 언어, 겁주거나 신비롭게 �
   });
 
   it("일반 자판기는 동물 그림(성공운 용, 재물운 토끼, 연애운 남자 팬더, 결혼운 여자 팬더, 건강운 여우, 학업운 수달)을 쓰고, 프리미엄은 일반과 구분되는 전용 배경 일러스트(premium-main.webp)을 쓴다", () => {
-    const animal: Record<string, string> = { 성공운: "dragon", 재물운: "rabbit-rich", 연애운: "panda-couple", 결혼운: "panda-wedding", 건강운: "fox-run", "2027 신년운": "otter-newyear" };
+    const animal: Record<string, string> = { 성공운: "dragon", 재물운: "rabbit-rich", "연애·결혼운": "panda-couple", "둘의 궁합": "panda-wedding", 건강운: "fox-run", "2027 신년운": "otter-newyear" };
     for (const m of MACHINES) expect(IMAGES[m.image]).toBe(`/images/animal-${animal[m.fortune]}.webp`);
     for (const c of PREMIUM_CARDS) expect(IMAGES[c.image]).toBe("/images/premium-main.webp");
   });

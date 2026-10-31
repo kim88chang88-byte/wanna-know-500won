@@ -241,8 +241,8 @@ export function MachinesSection({ onSpin, lastKey = null }: SpinProps & { lastKe
               role="button"
               tabIndex={0}
               aria-label={`${m.name} 운세 보기`}
-              onClick={() => onSpin(m.key, m.fortune, FREE_PRICE_LABEL)}
-              onKeyDown={(e) => activateOnKey(e, () => onSpin(m.key, m.fortune, FREE_PRICE_LABEL))}
+              onClick={() => onSpin(m.key, m.fortune, m.premium ? "9,900원" : FREE_PRICE_LABEL, m.premium)}
+              onKeyDown={(e) => activateOnKey(e, () => onSpin(m.key, m.fortune, m.premium ? "9,900원" : FREE_PRICE_LABEL, m.premium))}
               className={`scroll-mt-24 relative flex h-full cursor-pointer select-none flex-col gap-2.5 overflow-hidden rounded-3xl p-3 transition-shadow hover:shadow-lg group focus:outline-none focus-visible:ring-4 focus-visible:ring-brand-300 ${m.card}`}
             >
               <span aria-hidden="true" className={`pointer-events-none absolute -right-8 -top-8 h-24 w-24 rounded-full opacity-50 blur-xl ${m.blob}`} />
@@ -250,7 +250,7 @@ export function MachinesSection({ onSpin, lastKey = null }: SpinProps & { lastKe
                 <span className={`flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-bold ${m.badgeClass}`}>
                   <span aria-hidden="true">{m.emoji}</span> {m.badge}
                 </span>
-                <span className="rounded-full bg-brand-100 px-2 py-0.5 text-[10px] font-bold text-brand-700">1회 무료</span>
+                <span className="rounded-full bg-brand-100 px-2 py-0.5 text-[10px] font-bold text-brand-700">{m.chip ?? "1회 무료"}</span>
               </div>
 
               <div className={`relative flex aspect-[4/3] w-full items-center justify-center overflow-hidden rounded-2xl border p-1.5 ${m.imageBox}`}>

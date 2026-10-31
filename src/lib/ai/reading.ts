@@ -18,6 +18,8 @@ export const TOPIC_LABEL: Record<ReadingTopic, string> = {
 /** "연애운 슬롯", "재물운 자판기" 같은 화면 문구에서 주제를 골라요. 모르면 general. */
 export function normalizeTopic(raw: unknown): ReadingTopic {
   if (typeof raw !== "string") return "general";
+  // 합쳐진 카드 이름 "연애·결혼운"은 결혼 쪽(연애 이야기 포함)으로 풀어요.
+  if (/연애\s*[·⋅・]\s*결혼/.test(raw)) return "marriage";
   const found = (Object.entries(TOPIC_LABEL) as Array<[ReadingTopic, string]>).find(
     ([key, label]) => key !== "general" && raw.includes(label),
   );

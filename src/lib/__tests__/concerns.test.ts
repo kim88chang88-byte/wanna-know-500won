@@ -88,6 +88,9 @@ describe("풀이 종류에 맞는 고민 항목", () => {
     expect(ids("건강운")).not.toContain("job");
     expect(ids("2027 신년운")).toContain("exam");
     expect(ids("결혼운")).toContain("marriage");
+    expect(ids("연애·결혼운")).toEqual(expect.arrayContaining(["crush", "marriage"]));
+    expect(ids("연애·결혼운")).not.toContain("job");
+    expect(ids("둘의 궁합")).toContain("relationship");
   });
   it("프리미엄 카드도 맞는 항목만 보인다", () => {
     expect(ids("올해 성공 재물 리포트")).toContain("money");

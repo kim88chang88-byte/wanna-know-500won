@@ -33,6 +33,10 @@ export interface MachineCard {
   divider: string;
   /** 카드 모서리의 은은한 색 번짐 */
   blob: string;
+  /** 프리미엄 풀이로 여는 카드면 true (상대방 정보를 따로 받는 궁합 등) */
+  premium?: boolean;
+  /** 카드 위쪽 작은 안내 (없으면 "1회 무료") */
+  chip?: string;
 }
 
 /** 6대 운명의 자판기 */
@@ -101,10 +105,10 @@ export const MACHINES: readonly MachineCard[] = [
     key: "machine-love",
     image: "machineLove",
     emoji: "🌙",
-    badge: "연애운",
-    name: "연애운",
-    fortune: "연애운",
-    desc: "설레는 썸과 인연이 다가오는 타이밍을 짚어줘요",
+    badge: "연애·결혼운",
+    name: "연애·결혼운",
+    fortune: "연애·결혼운",
+    desc: "설레는 썸부터 결혼까지, 인연이 오는 시기와 흐름을 짚어줘요",
     tag: "매일 첫 1회 무료",
     best: true,
     sticker: "HOT",
@@ -118,16 +122,16 @@ export const MACHINES: readonly MachineCard[] = [
     blob: "bg-brand-200",
   },
   {
-    key: "machine-marriage",
+    key: "machine-compat",
     image: "machineMarriage",
-    emoji: "💍",
-    badge: "결혼운",
-    name: "결혼운",
-    fortune: "결혼운",
-    desc: "평생의 짝꿍과 함께할 인연의 시기와 궁합 이야기",
+    emoji: "💞",
+    badge: "둘의 궁합",
+    name: "둘의 궁합",
+    fortune: "둘의 궁합",
+    desc: "둘의 사주를 겹쳐 보고 잘 맞는 점과 조심할 점을 알려줘요",
     tag: "매일 첫 1회 무료",
     best: false,
-    sticker: null,
+    sticker: "HOT",
     card: "bg-gradient-to-b from-fuchsia-50/70 via-white to-white border border-fuchsia-200 shadow-sm",
     badgeClass: "bg-fuchsia-100 text-fuchsia-800 border border-fuchsia-200/80",
     tagClass: "text-fuchsia-700 bg-fuchsia-50 border border-fuchsia-200",
@@ -136,6 +140,8 @@ export const MACHINES: readonly MachineCard[] = [
     titleClass: "text-gray-900",
     divider: "border-fuchsia-100",
     blob: "bg-fuchsia-200",
+    premium: true,
+    chip: "프리미엄 풀이",
   },
   {
     key: "machine-health",
