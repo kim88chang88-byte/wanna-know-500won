@@ -5,6 +5,14 @@ import type { PremiumReportView, TopicKey } from "@/lib/premium/types";
 import { drawPhotoCard } from "@/lib/card/drawPhotoCard";
 import { buildPhotoCardData, CARD_H, CARD_SCALE, CARD_W, photoAltText, photoFileName, shareCaption } from "@/lib/card/photoData";
 import { IMAGES } from "./images";
+import { getBrowserStorage } from "@/lib/drawCounter";
+import { readMyCode, withRef } from "@/lib/referral";
+
+/** 공유 주소: 로그인한 회원이면 내 추천 코드가 붙어, 친구가 로그인할 때 자동으로 적용돼요. */
+function shareOrigin(): string {
+  if (typeof window === "undefined") return "";
+  return withRef(window.location.origin, readMyCode(getBrowserStorage()));
+}
 
 /** 같은 사이트 안의 도리 로고. 다른 사이트 그림은 저장용 캔버스를 막아서 쓰지 않아요. */
 const CARD_LOGO = "/images/dori-icon.webp";
@@ -40,7 +48,7 @@ export default function ResultShareCard({ report, aiQuote }: { report: PremiumRe
   const [copied, setCopied] = useState(false);
   const [linkMsg, setLinkMsg] = useState("");
   const data = useMemo(
-    () => buildPhotoCardData(report, { date: new Date(), siteLabel: typeof window === "undefined" ? "" : window.location.host, shareUrl: typeof window === "undefined" ? "" : window.location.origin, aiQuote }),
+    () => buildPhotoCardData(report, { date: new Date(), siteLabel: typeof window === "undefined" ? "" : window.location.host, shareUrl: shareOrigin(), aiQuote }),
     [report, aiQuote],
   );
 
@@ -76,7 +84,7 @@ export default function ResultShareCard({ report, aiQuote }: { report: PremiumRe
   /** 문구와 링크를 클립보드에 넣어요. 이미지만 올려도 붙여넣기로 링크를 같이 보낼 수 있어요. */
   async function copyCaption(): Promise<boolean> {
     try {
-      await navigator.clipboard.writeText(shareCaption(data, window.location.origin));
+      await navigator.clipboard.writeText(shareCaption(data, shareOrigin()));
       return true;
     } catch {
       return false;
@@ -84,7 +92,7 @@ export default function ResultShareCard({ report, aiQuote }: { report: PremiumRe
   }
 
   async function shareLink() {
-    const url = window.location.origin;
+    const url = shareOrigin();
     const text = `${data.topicLabel} 결과가 신기해서 공유해! 너도 무료로 볼 수 있어 👉`;
     try {
       if (navigator.share) {
@@ -117,7 +125,7 @@ export default function ResultShareCard({ report, aiQuote }: { report: PremiumRe
       const nav = navigator as Navigator & { canShare?: (d: ShareData) => boolean };
       if (nav.canShare?.({ files: [file] })) {
         try {
-          await nav.share({ files: [file], text: shareCaption(data, window.location.origin) });
+          await nav.share({ files: [file], text: shareCaption(data, shareOrigin()) });
           setState("done");
           return;
         } catch (e) {

@@ -1,6 +1,7 @@
 "use client";
 
 import LoginButtons from "./LoginButtons";
+import ReferralBox from "./ReferralBox";
 import { profileSummary, type SavedProfile } from "@/lib/profile";
 import type { SavedPerson } from "@/lib/people";
 import { useEffect, useRef, useState, type ReactNode } from "react";
@@ -197,6 +198,7 @@ export function LoginModal({ onClose, user = null, result = null, onLogout, onWi
               </button>
             </div>
           )}
+          <ReferralBox />
           <SavedPeopleBox />
           <a
             href="/vault"

@@ -9,6 +9,7 @@ import { dayKey, getBrowserStorage, readCounts, recordDraw, type DrawCounts } fr
 import { readVisitDays, recordVisit } from "@/lib/streak";
 import { grantTickets, readTickets, spendTicket, STREAK_FOR_TICKET } from "@/lib/stampReward";
 import { FREE_PER_DAY } from "@/lib/db/config";
+import { clearRef, isFinalRedeem, readRef, redeemMessage, refFromSearch, saveMyCode, saveRef } from "@/lib/referral";
 import { DailyLineCard } from "./DailyLineCard";
 import { FollowupCard } from "./FollowupCard";
 import { VaultFollowupCard } from "./VaultFollowupCard";
@@ -47,6 +48,8 @@ export default function Landing() {
   // 서버에 쌓인 뽑기 코인(로그인 선물 등)과, 방금 선물을 받았는지
   const [coins, setCoins] = useState(0);
   const [gift, setGift] = useState(false);
+  // 친구 초대 코드 적용 결과 안내
+  const [notice, setNotice] = useState<string | null>(null);
   const refreshCoins = useCallback(async () => {
     try {
       const res = await fetch("/api/coins", { method: "POST" });
@@ -143,6 +146,54 @@ export default function Landing() {
       setGift(false);
     }
   }, [loggedIn, refreshCoins]);
+  // 친구 초대 링크(?ref=코드)로 들어왔으면 코드를 기억해 두고 주소창은 깔끔하게 정리해요.
+  useEffect(() => {
+    const c = refFromSearch(window.location.search);
+    if (!c) return;
+    saveRef(getBrowserStorage(), c);
+    try {
+      const u = new URL(window.location.href);
+      u.searchParams.delete("ref");
+      window.history.replaceState(null, "", u.toString());
+    } catch {
+      // 주소 정리는 못 해도 괜찮아요
+    }
+  }, []);
+  // 로그인하면 기억해 둔 초대 코드를 자동으로 적용하고, 내 코드도 받아 둬요. (공유 링크에 붙여요)
+  useEffect(() => {
+    if (!loggedIn) return;
+    const st = getBrowserStorage();
+    let alive = true;
+    void (async () => {
+      const code = readRef(st);
+      if (code) {
+        try {
+          const res = await fetch("/api/referral", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ code }) });
+          const d = (await res.json().catch(() => null)) as { result?: unknown } | null;
+          const r = typeof d?.result === "string" ? d.result : "failed";
+          if (isFinalRedeem(r)) clearRef(st);
+          if (alive && r !== "failed") setNotice(redeemMessage(r).text);
+        } catch {
+          // 네트워크 문제면 코드를 남겨 두고 다음에 다시 시도해요
+        }
+      }
+      try {
+        const res = await fetch("/api/referral", { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" });
+        const d = (await res.json().catch(() => null)) as { code?: unknown } | null;
+        if (typeof d?.code === "string") saveMyCode(st, d.code);
+      } catch {
+        // 내 코드를 못 받아도 공유는 코드 없이 그대로 돼요
+      }
+    })();
+    return () => {
+      alive = false;
+    };
+  }, [loggedIn]);
+  useEffect(() => {
+    if (!notice) return;
+    const t = window.setTimeout(() => setNotice(null), 7000);
+    return () => window.clearTimeout(t);
+  }, [notice]);
   useEffect(() => {
     if (!gift) return;
     const t = window.setTimeout(() => setGift(false), 6000);
@@ -255,18 +306,20 @@ export default function Landing() {
       {ritual && <CoinRitual bill={ritualBill} />}
       <StickyDrawCta hidden={Boolean(intake) || loginOpen || ritual} />
 
-      {((justLoggedIn && user) || gift) && (
+      {((justLoggedIn && user) || gift || notice) && (
         <div
           role="status"
           data-testid="welcome-toast"
           className="fixed left-1/2 -translate-x-1/2 top-20 z-[60] w-[calc(100%-2rem)] max-w-sm rounded-2xl bg-emerald-600 text-white shadow-xl px-4 py-3 text-sm font-bold flex items-center justify-between gap-3"
         >
           <span>
-            {gift
+            {notice
+              ? notice
+              : gift
               ? `🎁 ${user?.nickname ? `${user.nickname}님, ` : ""}로그인 선물로 500원 무료 뽑기 1회가 도착했어요!`
               : `🫧 ${user?.nickname ? `${user.nickname}님, ` : ""}로그인됐어요! 매일 첫 1회는 무료예요.`}
           </span>
-          <button type="button" onClick={() => { clearWelcome(); setGift(false); }} aria-label="알림 닫기" className="shrink-0 text-white/80 hover:text-white">
+          <button type="button" onClick={() => { clearWelcome(); setGift(false); setNotice(null); }} aria-label="알림 닫기" className="shrink-0 text-white/80 hover:text-white">
             <span className="material-symbols-outlined text-[18px]">close</span>
           </button>
         </div>

@@ -301,6 +301,39 @@ export function createDb(config: DbConfig, fetchImpl: FetchLike = fetch) {
       return typeof n === "number" && Number.isInteger(n) ? n : -1;
     },
 
+    /** 내 추천 코드 (없으면 DB 에서 만들어요) */
+    async referralCode(userId: string): Promise<string | null> {
+      const res = await call("rpc/referral_code_get", { method: "POST", headers: headers(), body: JSON.stringify({ p_user: safeId(userId) }) });
+      const v = await res.json().catch(() => null);
+      return typeof v === "string" && /^[A-Z0-9]{6,12}$/.test(v) ? v : null;
+    },
+
+    /** 친구 코드 입력. ok / bad_code / self / already / too_old / used_draw */
+    async redeemReferral(userId: string, code: string): Promise<string> {
+      const res = await call("rpc/referral_redeem", { method: "POST", headers: headers(), body: JSON.stringify({ p_user: safeId(userId), p_code: code.slice(0, 20) }) });
+      const v = await res.json().catch(() => null);
+      return typeof v === "string" ? v : "failed";
+    },
+
+    /** 초대받은 친구의 첫 풀이가 끝났을 때 호출해요. 보상은 DB 함수 안에서 한 번만 지급돼요. */
+    async completeReferral(userId: string): Promise<{ referee: boolean; referrer: boolean }> {
+      const res = await call("rpc/referral_complete", { method: "POST", headers: headers(), body: JSON.stringify({ p_user: safeId(userId) }) });
+      const rows = (await res.json().catch(() => null)) as Array<{ out_referee?: unknown; out_referrer?: unknown }> | { out_referee?: unknown; out_referrer?: unknown } | null;
+      const row = Array.isArray(rows) ? rows[0] : rows;
+      return { referee: row?.out_referee === true, referrer: row?.out_referrer === true };
+    },
+
+    /** 내가 초대한 친구 수 (첫 풀이를 마친 친구 / 아직 기다리는 친구) */
+    async referralStats(userId: string): Promise<{ done: number; pending: number }> {
+      const id = safeId(userId);
+      const one = async (status: string) => {
+        const res = await call(`referrals?referrer_id=eq.${id}&status=eq.${status}&select=referee_id&limit=1`, { method: "GET", headers: headers({ Prefer: "count=exact" }) });
+        const n = Number(res.headers.get("content-range")?.split("/")[1]);
+        return Number.isInteger(n) && n >= 0 ? n : 0;
+      };
+      return { done: await one("done"), pending: await one("pending") };
+    },
+
     /** 오늘(한국 시간)·이번 달 뽑기 횟수 */
     async getCounts(userId: string, now: Date = new Date()): Promise<DrawCounts> {
       const id = safeId(userId);

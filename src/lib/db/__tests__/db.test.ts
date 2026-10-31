@@ -183,6 +183,24 @@ describe("createDb", () => {
     expect(await createDb(cfg, recorder(() => new Response("0", { status: 200 })).f).spendCoin("4242")).toBe(0);
   });
 
+  it("추천: 코드 발급·입력·완료·현황을 DB 함수로 처리해요", async () => {
+    const code = recorder(() => new Response('"AB12CD34"', { status: 200 }));
+    expect(await createDb(cfg, code.f).referralCode("4242")).toBe("AB12CD34");
+    expect(code.calls[0].url).toBe("https://x.supabase.co/rest/v1/rpc/referral_code_get");
+    expect(await createDb(cfg, recorder(() => new Response('"hack"', { status: 200 })).f).referralCode("4242")).toBeNull();
+
+    const red = recorder(() => new Response('"ok"', { status: 200 }));
+    expect(await createDb(cfg, red.f).redeemReferral("4242", "AB12CD34")).toBe("ok");
+    expect(JSON.parse(String(red.calls[0].init?.body))).toEqual({ p_user: "4242", p_code: "AB12CD34" });
+
+    const done = recorder(() => new Response(JSON.stringify([{ out_referee: true, out_referrer: false }]), { status: 200 }));
+    expect(await createDb(cfg, done.f).completeReferral("4242")).toEqual({ referee: true, referrer: false });
+
+    const stats = recorder(() => new Response("[]", { status: 200, headers: { "content-range": "*/3" } }));
+    expect(await createDb(cfg, stats.f).referralStats("4242")).toEqual({ done: 3, pending: 3 });
+    await expect(createDb(cfg, code.f).redeemReferral("a/b", "AB12CD34")).rejects.toThrow();
+  });
+
   it("코인 함수는 안전하지 않은 사용자 id 를 거절해요", async () => {
     const db = createDb(cfg, recorder(() => new Response("[]", { status: 200 })).f);
     await expect(db.getCoins("a/b?x")).rejects.toThrow();

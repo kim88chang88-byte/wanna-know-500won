@@ -322,3 +322,129 @@ revoke all on function public.coin_grant(text, text, text, int) from public, ano
 grant execute on function public.coin_grant(text, text, text, int) to service_role;
 revoke all on function public.coin_spend(text) from public, anon, authenticated;
 grant execute on function public.coin_spend(text) to service_role;
+
+-- ─────────────────────────────────────────────────────────────────────────────
+-- 친구 초대(추천 코드): 친구가 내 코드를 입력하고 첫 풀이를 마치면 두 사람 모두 뽑기 코인 1장.
+-- · 코드 입력은 가입 후 7일 안, 아직 뽑기를 해 보지 않은 계정만 가능해요.
+-- · 초대한 사람은 한 달(한국 시간)에 3번까지 받아요. 초대받은 친구는 항상 받아요.
+-- 이 부분만 따로 Run 해도 되고, 파일 전체를 다시 Run 해도 안전해요. (코인 테이블이 먼저 있어야 해요)
+-- ─────────────────────────────────────────────────────────────────────────────
+create table if not exists public.referral_codes (
+  user_id text primary key references public.users(id) on delete cascade,
+  code text not null unique
+);
+create table if not exists public.referrals (
+  referee_id text primary key references public.users(id) on delete cascade,   -- 초대받은 친구 (한 사람당 한 번만)
+  referrer_id text not null references public.users(id) on delete cascade,     -- 초대한 사람
+  status text not null default 'pending',                                       -- pending: 코드 입력 / done: 첫 풀이 완료, 보상 지급
+  created_at timestamptz not null default now(),
+  completed_at timestamptz
+);
+create index if not exists referrals_referrer_idx on public.referrals (referrer_id, status);
+alter table public.referral_codes enable row level security;
+alter table public.referrals enable row level security;
+
+-- 내 추천 코드를 돌려줘요. 없으면 만들어요.
+create or replace function public.referral_code_get(p_user text)
+returns text
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  c text;
+  tries int := 0;
+begin
+  select rc.code into c from public.referral_codes rc where rc.user_id = p_user;
+  if c is not null then
+    return c;
+  end if;
+  loop
+    c := substr(upper(md5(random()::text || clock_timestamp()::text || p_user)), 1, 8);
+    begin
+      insert into public.referral_codes (user_id, code) values (p_user, c);
+      return c;
+    exception when unique_violation then
+      select rc.code into c from public.referral_codes rc where rc.user_id = p_user;
+      if c is not null then
+        return c;
+      end if;
+      tries := tries + 1;
+      if tries > 5 then
+        raise exception 'code failed';
+      end if;
+    end;
+  end loop;
+end;
+$$;
+
+-- 친구 코드 입력. 결과: ok / bad_code / self / already / too_old / used_draw
+create or replace function public.referral_redeem(p_user text, p_code text)
+returns text
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  ref text;
+  made timestamptz;
+begin
+  select rc.user_id into ref from public.referral_codes rc where rc.code = upper(trim(p_code));
+  if ref is null then
+    return 'bad_code';
+  end if;
+  if ref = p_user then
+    return 'self';
+  end if;
+  if exists (select 1 from public.referrals r where r.referee_id = p_user) then
+    return 'already';
+  end if;
+  select u.created_at into made from public.users u where u.id = p_user;
+  if made is null or made < now() - interval '7 days' then
+    return 'too_old';
+  end if;
+  if exists (select 1 from public.draws d where d.user_id = p_user) then
+    return 'used_draw';
+  end if;
+  insert into public.referrals (referee_id, referrer_id) values (p_user, ref) on conflict do nothing;
+  return 'ok';
+end;
+$$;
+
+-- 친구가 첫 풀이를 마쳤을 때 호출: 보상을 한 번만 지급해요.
+create or replace function public.referral_complete(p_user text)
+returns table (out_referee boolean, out_referrer boolean)
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  r record;
+  cnt int;
+  month_start timestamptz;
+  gave boolean := false;
+begin
+  select * into r from public.referrals where referee_id = p_user and status = 'pending' for update;
+  if not found then
+    return query select false, false;
+    return;
+  end if;
+  update public.referrals set status = 'done', completed_at = now() where referee_id = p_user;
+  perform public.coin_grant(p_user, 'referral_join', r.referrer_id, 1);
+  month_start := date_trunc('month', now() at time zone 'Asia/Seoul') at time zone 'Asia/Seoul';
+  select count(*) into cnt from public.coin_log
+    where user_id = r.referrer_id and kind = 'referral_invite' and created_at >= month_start;
+  if cnt < 3 then
+    perform public.coin_grant(r.referrer_id, 'referral_invite', p_user, 1);
+    gave := true;
+  end if;
+  return query select true, gave;
+end;
+$$;
+
+revoke all on function public.referral_code_get(text) from public, anon, authenticated;
+grant execute on function public.referral_code_get(text) to service_role;
+revoke all on function public.referral_redeem(text, text) from public, anon, authenticated;
+grant execute on function public.referral_redeem(text, text) to service_role;
+revoke all on function public.referral_complete(text) from public, anon, authenticated;
+grant execute on function public.referral_complete(text) to service_role;

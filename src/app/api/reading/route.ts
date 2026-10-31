@@ -180,6 +180,12 @@ export async function POST(request: Request) {
     try {
       await db.ensureUser(userId, session?.nick);
       await db.recordDraw(userId, normalizeTopic(rawTopic));
+      // 초대받은 친구의 첫 풀이라면 두 사람에게 코인을 지급해요. (코드를 입력하지 않았거나 이미 받았으면 아무 일도 없어요)
+      try {
+        await db.completeReferral(userId);
+      } catch (err) {
+        console.error("completeReferral failed:", err instanceof Error ? err.message : "unknown");
+      }
       counts = counts ? { today: counts.today + 1, month: counts.month + 1 } : null;
     } catch (err) {
       console.error("recordDraw failed:", err instanceof Error ? err.message : "unknown");
