@@ -186,6 +186,35 @@ function FieldTitle({ children }: { children: React.ReactNode }) {
 }
 
 /** 처음 쓰는 분(비회원·저장된 정보가 없는 회원)용: 생년월일·성별·태어난 시간을 한 화면에서 직접 적어요. */
+/** 기억해 둔 사람을 눌러서 고르는 줄. 궁합 상대에도, 다른 운세를 볼 때 "내 자리"에도 같이 써요. */
+function SavedPeoplePicker({ people, onPick, title }: { people: SavedPerson[]; onPick: (p: SavedPerson) => void; title: string }) {
+  return (
+    <div data-testid="saved-people" className="mb-3 rounded-xl bg-brand-50 border border-brand-100 px-3 py-2.5">
+      <p className="text-[11px] font-bold text-brand-700 mb-1.5">{title}</p>
+      <div className="flex flex-wrap gap-1.5">
+        {people.map((p) => (
+          <button
+            key={p.id}
+            type="button"
+            data-testid="saved-person"
+            onClick={() => onPick(p)}
+            className="rounded-full bg-white border border-brand-200 px-3 py-1.5 text-xs font-bold text-brand-700 hover:bg-brand-100"
+          >
+            {p.label}
+            <span className="ml-1 font-normal text-gray-500">{profileSummary(p.birth).split(" ")[0]}</span>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/** 별명을 안 적었을 때 쓰는 이름: 생년월일 */
+function autoLabel(b: { year: number; month: number; day: number }): string {
+  const p = (n: number) => String(n).padStart(2, "0");
+  return `${b.year}.${p(b.month)}.${p(b.day)}`;
+}
+
 function CombinedBirthFields({ f, patch }: { f: IntakeForm; patch: (p: Partial<IntakeForm>) => void }) {
   const [dateText, setDateText] = useState(() => (f.calendar === "solar" ? f.solarDate : f.lunarYear && f.lunarMonth && f.lunarDay ? `${f.lunarYear.padStart(4, "0")}-${f.lunarMonth.padStart(2, "0")}-${f.lunarDay.padStart(2, "0")}` : ""));
   function onDate(raw: string) {
@@ -371,9 +400,10 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
   const [partner, setPartner] = useState<BirthFields>(EMPTY_BIRTH);
   // 기억해 둔 다른 사람 (로그인 회원 + 궁합일 때만 불러와요. 표가 아직 없으면 조용히 빈 목록)
   const [people, setPeople] = useState<SavedPerson[]>([]);
-  const [savePerson, setSavePerson] = useState(false);
+  const [savePerson, setSavePerson] = useState(true); // 기본은 켜 두고, 끌 수 있어요 (로그인한 회원만 보여요)
   const [personLabel, setPersonLabel] = useState("");
   const [pickedPerson, setPickedPerson] = useState<string | null>(null);
+  const [meKey, setMeKey] = useState(0);
   const [stepIndex, setStepIndex] = useState(() => (savedProfile ? firstAfterMe : 0));
   // 선택 동의: 둘 다 기본은 꺼짐. (이미 저장해 둔 회원이 정보를 고치는 경우만, 전에 동의한 "기억하기"를 켜 둬요)
   const [saveProfile, setSaveProfile] = useState(savedProfile !== null);
@@ -399,7 +429,7 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
   useEffect(() => () => abortRef.current?.abort(), []);
 
   useEffect(() => {
-    if (!compat || !loggedIn) return;
+    if (!loggedIn) return;
     let alive = true;
     fetch("/api/people", { cache: "no-store" })
       .then((r) => (r.ok ? r.json() : null))
@@ -410,7 +440,16 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
     return () => {
       alive = false;
     };
-  }, [compat, loggedIn]);
+  }, [loggedIn]);
+
+  /** 기억해 둔 사람을 "내 정보 자리"에 불러와요. (다른 운세를 볼 때. 내 기억 정보는 바꾸지 않아요) */
+  function pickForMe(p: SavedPerson) {
+    setForm((f) => ({ ...f, ...profileToForm(p.birth) }));
+    setSaveProfile(false);
+    setMeKey((k) => k + 1);
+    setError(null);
+    setStepIndex(firstAfterMe); // 궁합이면 상대방 질문으로, 아니면 고민 단계로
+  }
 
   /** 기억해 둔 사람을 고르면 상대방 질문을 건너뛰고 고민 단계로 가요. */
   function pickPerson(p: SavedPerson) {
@@ -446,8 +485,8 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
     // 저장된 정보를 그대로 쓰는 경우엔 다시 저장하지 않아요.
     const wantSave = loggedIn && saveProfile && !sameBirth(savedProfile, input);
     // 상대방을 기억해 두기 (선택 동의. 풀이와 따로 보내고, 실패해도 풀이엔 영향 없어요)
-    if (compat && loggedIn && savePerson && !pickedPerson && partnerInput && personLabel.trim()) {
-      void fetch("/api/people", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ label: personLabel, birth: partnerInput }) }).catch(() => {});
+    if (compat && loggedIn && savePerson && !pickedPerson && partnerInput && people.length < MAX_PEOPLE) {
+      void fetch("/api/people", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ label: personLabel.trim() || autoLabel(partnerInput), birth: partnerInput }) }).catch(() => {});
     }
     const wantShare = shareConcern && concern !== null;
     const ctrl = new AbortController();
@@ -808,26 +847,14 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
             </div>
           )}
 
-          {step === "birth" && <CombinedBirthFields f={form} patch={update} />}
+          {(step === "birth" || step === "date") && people.length > 0 && <SavedPeoplePicker people={people} onPick={pickForMe} title="기억해 둔 사람으로 볼래요? (눌러서 바로 불러와요)" />}
+          {step === "birth" && <CombinedBirthFields key={meKey} f={form} patch={update} />}
           {(step === "date" || step === "time" || step === "gender") && <BirthStepFields kind={step} f={form} patch={update} />}
-          {step === "pdate" && people.length > 0 && (
-            <div data-testid="saved-people" className="mb-3 rounded-xl bg-brand-50 border border-brand-100 px-3 py-2.5">
-              <p className="text-[11px] font-bold text-brand-700 mb-1.5">기억해 둔 사람 (눌러서 바로 불러와요)</p>
-              <div className="flex flex-wrap gap-1.5">
-                {people.map((p) => (
-                  <button
-                    key={p.id}
-                    type="button"
-                    data-testid="saved-person"
-                    onClick={() => pickPerson(p)}
-                    className="rounded-full bg-white border border-brand-200 px-3 py-1.5 text-xs font-bold text-brand-700 hover:bg-brand-100"
-                  >
-                    {p.label}
-                    <span className="ml-1 font-normal text-gray-500">{profileSummary(p.birth).split(" ")[0]}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
+          {step === "pdate" && people.length > 0 && <SavedPeoplePicker people={people} onPick={pickPerson} title="기억해 둔 사람 (눌러서 바로 불러와요)" />}
+          {step === "pdate" && !loggedIn && (
+            <p data-testid="people-nudge" className="mb-3 rounded-xl bg-amber-50 border border-amber-200 px-3 py-2 text-center text-[11px] font-bold text-amber-900">
+              🫧 로그인하면 상대방 정보를 기억해 두고, 다음에 눌러서 바로 고를 수 있어요
+            </p>
           )}
           {(step === "pdate" || step === "ptime" || step === "pgender") && (
             <BirthStepFields kind={step === "pdate" ? "date" : step === "ptime" ? "time" : "gender"} f={partner} patch={updatePartner} />
@@ -932,7 +959,7 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
                   <label className="flex items-start gap-2 text-xs text-gray-700 leading-relaxed">
                     <input type="checkbox" name="savePerson" className="mt-0.5" checked={savePerson} onChange={(e) => setSavePerson(e.target.checked)} />
                     <span>
-                      (선택) 이 상대방의 생년월일시·성별을 별명과 함께 기억해 둬요. 다음 궁합 때 다시 입력하지 않아도 돼요. 상대방이 알려도 괜찮다고 한 정보만 저장해 주세요. 로그인 창에서 언제든 지울 수 있고, 탈퇴하면 함께 삭제돼요.
+                      (선택) 이 상대방의 생년월일시·성별을 기억해 둬요. 다음 궁합이나 다른 운세를 볼 때 눌러서 바로 고를 수 있어요. 상대방이 알려도 괜찮다고 한 정보만 저장해 주세요. 로그인 창에서 언제든 지울 수 있고, 탈퇴하면 함께 삭제돼요.
                     </span>
                   </label>
                   {savePerson && (
@@ -943,7 +970,7 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
                       value={personLabel}
                       maxLength={MAX_LABEL}
                       onChange={(e) => setPersonLabel(e.target.value)}
-                      placeholder="별명 (예: 내 짝꿍) · 실명은 피해 주세요"
+                      placeholder="별명 (선택, 예: 내 짝꿍) · 실명은 피해 주세요"
                       className="w-full rounded-xl border border-brand-200 px-3 py-2 text-xs"
                     />
                   )}
