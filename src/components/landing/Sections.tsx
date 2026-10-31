@@ -129,23 +129,28 @@ export function Header({ onOpenLogin, user = null, wallet = null }: { onOpenLogi
 export function HeroSection({ visitors = null, tickets = 0 }: { visitors?: { today: number; total: number } | null; tickets?: number }) {
   return (
     <section className="text-left mb-3">
-      {/* 방문자 수: 서버가 센 값이 있을 때만 보여요 */}
-      {visitors && (
-        <div data-testid="visitors" className="inline-flex items-center gap-2 rounded-full bg-white/80 border border-brand-100 px-4 py-1.5 text-xs text-gray-500 shadow-sm">
-          <span>
-            <b className="font-bold text-brand-500">Today</b>: <span data-testid="visitors-today">{visitors.today.toLocaleString("ko-KR")}</span>명
-          </span>
-          <span aria-hidden="true" className="h-3 w-px bg-brand-200" />
-          <span>
-            <b className="font-bold text-indigo-800">Total</b>: <span data-testid="visitors-total">{visitors.total.toLocaleString("ko-KR")}</span>명
-          </span>
-        </div>
-      )}
-      {tickets > 0 && (
-        <p data-testid="ticket-badge" className="mt-2 text-[11px] font-bold text-rose-600">
-          🎟 보너스 뽑기 {tickets}장 보유 중 · 오늘 무료 뽑기를 다 쓴 뒤 뽑으면 자동으로 써요
-        </p>
-      )}
+      {/* 방문자 수(왼쪽) + 보너스 뽑기 안내(오른쪽 끝) 한 줄 */}
+      <div className="flex items-center justify-between gap-2">
+        {visitors ? (
+          <div data-testid="visitors" className="inline-flex items-center gap-2 rounded-full bg-white/80 border border-brand-100 px-4 py-1.5 text-xs text-gray-500 shadow-sm shrink-0">
+            <span>
+              <b className="font-bold text-brand-500">Today</b>: <span data-testid="visitors-today">{visitors.today.toLocaleString("ko-KR")}</span>명
+            </span>
+            <span aria-hidden="true" className="h-3 w-px bg-brand-200" />
+            <span>
+              <b className="font-bold text-indigo-800">Total</b>: <span data-testid="visitors-total">{visitors.total.toLocaleString("ko-KR")}</span>명
+            </span>
+          </div>
+        ) : (
+          <span />
+        )}
+        {tickets > 0 && (
+          <p data-testid="ticket-badge" className="text-right leading-tight text-rose-600">
+            <span className="block text-[11px] font-bold">🎟 보너스 뽑기 {tickets}장</span>
+            <span className="block text-[9px] font-medium text-rose-400">무료 소진 후 자동 사용</span>
+          </p>
+        )}
+      </div>
     </section>
   );
 }
