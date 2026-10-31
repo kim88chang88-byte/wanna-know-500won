@@ -404,6 +404,8 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
   const [savePerson, setSavePerson] = useState(true); // 기본은 켜 두고, 끌 수 있어요 (로그인한 회원만 보여요)
   const [personLabel, setPersonLabel] = useState("");
   const [pickedPerson, setPickedPerson] = useState<string | null>(null);
+  /** 결과 화면에 보여 줄 상대방 정보 (궁합일 때만) */
+  const [resultPartner, setResultPartner] = useState<{ birth: BirthInput; name: string } | null>(null);
   const [meKey, setMeKey] = useState(0);
   const [stepIndex, setStepIndex] = useState(() => (savedProfile ? firstAfterMe : 0));
   // 선택 동의: 둘 다 기본은 꺼짐. (이미 저장해 둔 회원이 정보를 고치는 경우만, 전에 동의한 "기억하기"를 켜 둬요)
@@ -522,6 +524,7 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
       if (p.rest) void fetchRestChapters({ ...(p.rest as object), conclusion: conclusionOf(p.report) }, ctrl.signal, (part) => { if (ctrl.signal.aborted) return; setPremiumReport((prev) => (prev ? mergeChapters(prev, part) : prev)); }).then((rep) => { if (ctrl.signal.aborted) return; if (rep.aiNotice) setAiNotice(true); });
       setChart(data.chart);
       setAskInput(input);
+      setResultPartner(partnerInput ? { birth: partnerInput, name: people.find((x) => x.id === pickedPerson)?.label || personLabel.trim() || "상대" } : null);
       setBirthNote([data.birthAdjustNote, data.boundaryNote].filter(Boolean).join("\n") || null);
       setReading(data.reading ?? null);
       setReadingStatus(status);
@@ -584,14 +587,19 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
       className={`mb-4 rounded-2xl px-4 py-4 text-center ${luxe ? "border border-[#e6c887]/50 bg-gradient-to-b from-[#e6c887]/15 to-transparent" : "border-2 border-brand-300 bg-gradient-to-br from-brand-50 via-white to-amber-50 shadow-[0_6px_20px_rgba(128,87,224,0.12)]"}`}
     >
       <h3 id="intake-title" className={`font-cute text-[25px] sm:text-[28px] font-normal leading-tight break-keep ${luxe ? "text-[#fbf3de]" : "text-brand-700"}`}>
-        {nickname?.trim() ? `${nickname.trim()}님의 사주 해설` : "나의 사주 해설"}
+        {compat && resultPartner ? `${nickname?.trim() || "나"} ♥ ${resultPartner.name}` : nickname?.trim() ? `${nickname.trim()}님의 사주 해설` : "나의 사주 해설"}
       </h3>
       {askInput && (
         <p
           data-testid="result-title-birth"
           className={`mx-auto mt-2.5 inline-block rounded-full px-3.5 py-1 text-[14px] font-bold tracking-tight ${luxe ? "border border-[#e6c887]/50 text-[#f6dfa8]" : "bg-white text-brand-700 ring-1 ring-brand-200"}`}
         >
-          {birthSummary(askInput)}
+          {compat && resultPartner ? `나 ${birthSummary(askInput)}` : birthSummary(askInput)}
+        </p>
+      )}
+      {compat && resultPartner && (
+        <p data-testid="result-title-partner" className="mx-auto mt-1.5 block w-fit rounded-full bg-white px-3.5 py-1 text-[14px] font-bold tracking-tight text-brand-700 ring-1 ring-brand-200">
+          {`${resultPartner.name} ${birthSummary(resultPartner.birth)}`}
         </p>
       )}
     </div>
@@ -660,7 +668,7 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
                   {/* 2) 이야기 순서: 내 정보·고민 → 네 기둥 → 한마디로 → 접어 둔 풀이 → 도리의 쪽지 */}
                   <div data-testid="premium-result">
                     {compat && premiumReport.compat ? (
-                      <CompatStory report={premiumReport} intro={null}
+                      <CompatStory report={premiumReport} intro={null} partnerName={resultPartner?.name ?? "상대"}
                         lastWord={<><ResultHero report={premiumReport} aiQuote={reading?.kkotgeoji ?? null} luxe={false} hideLucky /><ResultShareCard report={premiumReport} aiQuote={reading?.kkotgeoji ?? null} /></>}
                         closing={askInput ? <AskChips input={askInput} luxe={false} /> : undefined}
                       />

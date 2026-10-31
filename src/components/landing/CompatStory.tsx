@@ -11,12 +11,12 @@ import { Fold, MARK, Paras, Pillars } from "./StoryReport";
  * 계산 결과(report.compat)만 쓰고, AI 를 새로 부르지 않아요.
  */
 
-function PersonCard({ p }: { p: CompatPerson }) {
+function PersonCard({ p, name }: { p: CompatPerson; name: string }) {
   const [stem, branch] = p.dayPillar ? Array.from(p.dayPillar) : [null, null];
   const cells = [stem, branch].map((ch, i) => ({ ch, el: ch ? elementOfChar(ch, i === 1) : null, reading: p.dayReading ? Array.from(p.dayReading)[i] : "" }));
   return (
     <div data-testid="compat-person" className="rounded-xl bg-brand-50/60 p-3 text-center">
-      <p className="text-[11px] font-bold text-gray-500">{p.label}의 일주</p>
+      <p className="text-[11px] font-bold text-gray-500">{name}의 일주</p>
       <div className="mt-1.5 flex justify-center gap-1.5">
         {cells.map((c, i) => (
           <div key={i} className={`relative flex w-12 flex-col items-center rounded-xl pb-1.5 pt-5 ${c.el ? ELEMENT_BOX[c.el] : "bg-gray-100"}`}>
@@ -27,18 +27,21 @@ function PersonCard({ p }: { p: CompatPerson }) {
         ))}
       </div>
       <p className="mt-2 flex flex-wrap justify-center gap-1">
-        {p.elements.filter((e) => e.count > 0).map((e) => (
-          <span key={e.name} className="rounded-full bg-white px-2 py-0.5 text-[10.5px] font-bold text-gray-700">
-            {e.name} {e.count}
-          </span>
-        ))}
+        {p.elements.map((e) => {
+          const el = EL_LABEL[e.kind];
+          return (
+            <span key={e.name} data-testid="compat-el" className={`rounded-full px-2 py-0.5 text-[10.5px] font-bold ${e.count > 0 ? "bg-white text-gray-700" : "bg-white/50 text-gray-400"}`}>
+              {el.icon} {el.name} {e.count}
+            </span>
+          );
+        })}
       </p>
       {p.hourUnknown && <p className="mt-1.5 text-[10.5px] text-amber-700">시간 모름 · 시주 제외</p>}
     </div>
   );
 }
 
-export default function CompatStory({ report, intro, closing, lastWord }: { report: PremiumReportView; intro: string | null; closing?: ReactNode; lastWord?: ReactNode }) {
+export default function CompatStory({ report, intro, closing, lastWord, partnerName = "상대" }: { report: PremiumReportView; intro: string | null; closing?: ReactNode; lastWord?: ReactNode; partnerName?: string }) {
   const c = report.compat;
   if (!c) return null;
   const mark = MARK.marriage;
@@ -54,11 +57,17 @@ export default function CompatStory({ report, intro, closing, lastWord }: { repo
       <section aria-label="두 사람 정보" className="rounded-2xl border border-brand-100 bg-white p-4">
         {intro && <p data-testid="story-intro" className="text-xs font-semibold text-brand-700">{intro}</p>}
         <div className="mt-2.5 grid grid-cols-2 gap-2">
-          <PersonCard p={c.me} />
-          <PersonCard p={c.partner} />
+          <PersonCard p={c.me} name="나" />
+          <PersonCard p={c.partner} name={partnerName} />
         </div>
         <p className="mt-3.5 text-[11px] font-bold text-gray-500">나의 사주 네 기둥</p>
-        <Pillars report={report} />
+        <Pillars report={report} pillars={c.me.pillars} owner="내" hint="위 칸은 겉으로 드러나는 기운(하늘), 아래 칸은 바탕이 되는 기운(땅)이에요. 두 사람의 같은 자리(특히 일주)를 견주어 보세요." />
+        {c.partner.pillars && (
+          <>
+            <p className="mt-5 text-[11px] font-bold text-gray-500">{partnerName}의 사주 네 기둥</p>
+            <Pillars pillars={c.partner.pillars} owner={`${partnerName}의`} hint="같은 자리끼리 글자가 어울리면 합, 부딪히면 충이에요. 어떤 자리가 어떻게 만나는지는 아래 풀이에서 풀어 드려요." />
+          </>
+        )}
       </section>
 
       <section data-testid="story-lead" aria-labelledby="story-lead-h" className="rounded-2xl border border-brand-100 bg-gradient-to-br from-brand-50 via-white to-amber-50/60 p-4">
@@ -72,7 +81,7 @@ export default function CompatStory({ report, intro, closing, lastWord }: { repo
             <span data-testid="compat-score" className="rounded-full border border-brand-100 bg-white px-2 py-0.5 text-[11px] font-bold text-brand-700">{c.score}점</span>
           </span>
         </div>
-        <Paras mark={mark} text={`${c.headline}\n\n${c.closing}`} className="mt-3 text-[16px] leading-[1.85] text-gray-800 break-keep" />
+        <Paras mark={mark} text={c.summary ?? `${c.headline}\n\n${c.closing}`} className="mt-3 text-[16px] leading-[1.85] text-gray-800 break-keep" />
         <p className="mt-2 text-[11px] text-gray-500">점수는 재미로 보는 참고 지수예요.</p>
       </section>
 

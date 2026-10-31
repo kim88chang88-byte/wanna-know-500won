@@ -209,6 +209,8 @@ export interface CompatPerson {
   elements: ElementView[];
   /** 태어난 시간을 몰라 시주를 뺀 경우 true */
   hourUnknown: boolean;
+  /** 네 기둥 (시·일·월·연 순서로 그릴 수 있게 모두 담아요). 예전에 저장된 풀이에는 없을 수 있어요. */
+  pillars?: Array<{ key: "year" | "month" | "day" | "hour"; label: string; full: string | null; reading: string | null }>;
 }
 
 export interface CompatPoint {
@@ -227,6 +229,8 @@ export interface CompatView {
   points: CompatPoint[];
   /** 마무리 한마디 */
   closing: string;
+  /** 두 사람의 계산 결과를 이어 쓴 요약 (예전에 저장된 풀이에는 없을 수 있어요) */
+  summary?: string;
 }
 
 export type PremiumErrorCode = "bad_request" | "rate_limited" | "failed";

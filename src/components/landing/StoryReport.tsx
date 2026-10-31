@@ -52,10 +52,18 @@ const EL_ORDER: Element[] = ["wood", "fire", "earth", "metal", "water"];
 /** 기둥 이름 아래에 붙이는 쉬운 뜻 */
 const PILLAR_HINT: Record<string, string> = { hour: "태어난 시", day: "나", month: "태어난 달", year: "태어난 해" };
 
-export function Pillars({ report }: { report: PremiumReportView }) {
+export interface PillarLike {
+  key: "year" | "month" | "day" | "hour";
+  label: string;
+  full: string | null;
+  reading: string | null;
+}
+
+export function Pillars({ report, pillars, owner = "내", hint }: { report?: PremiumReportView; pillars?: PillarLike[]; owner?: string; hint?: string }) {
   // 한국식 만세력 순서: 시 · 일 · 월 · 연
   const order = ["hour", "day", "month", "year"] as const;
-  const list = order.map((k) => report.pillars.find((p) => p.key === k)).filter((p): p is NonNullable<typeof p> => Boolean(p));
+  const source: PillarLike[] = pillars ?? report?.pillars ?? [];
+  const list = order.map((k) => source.find((p) => p.key === k)).filter((p): p is PillarLike => Boolean(p));
   // 여덟 글자 중 오행별로 몇 개인지 세요.
   const counts: Record<Element, number> = { wood: 0, fire: 0, earth: 0, metal: 0, water: 0 };
   for (const p of list) {
@@ -104,7 +112,7 @@ export function Pillars({ report }: { report: PremiumReportView }) {
           );
         })}
       </div>
-      <p className="mt-2 text-[11px] leading-relaxed text-gray-500">위 칸은 겉으로 드러나는 기운(하늘), 아래 칸은 바탕이 되는 기운(땅)이에요. 색은 다섯 가지 기운을 뜻해요.</p>
+      <p className="mt-2 text-[11px] leading-relaxed text-gray-500">{hint ?? "위 칸은 겉으로 드러나는 기운(하늘), 아래 칸은 바탕이 되는 기운(땅)이에요. 색은 다섯 가지 기운을 뜻해요."}</p>
       <div data-testid="element-legend" className="mt-2 flex flex-wrap items-center gap-1.5">
         {EL_ORDER.map((e) => (
           <span key={e} className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-bold ${ELEMENT_BOX[e]} ${counts[e] === 0 ? "opacity-40" : ""}`}>
@@ -114,7 +122,7 @@ export function Pillars({ report }: { report: PremiumReportView }) {
       </div>
       {total > 0 && counts[top] > 0 && (
         <p data-testid="element-summary" className="mt-1.5 text-[12px] font-bold text-gray-700">
-          내 사주엔 {EL_LABEL[top].icon} {EL_LABEL[top].name}의 기운이 가장 많아요 ({counts[top]}/{total})
+          {owner} 사주엔 {EL_LABEL[top].icon} {EL_LABEL[top].name}의 기운이 가장 많아요 ({counts[top]}/{total})
         </p>
       )}
     </div>

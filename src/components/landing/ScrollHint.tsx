@@ -24,16 +24,16 @@ export default function ScrollHint({ label, luxe = false }: { label: string; lux
   return (
     <>
       <div ref={end} aria-hidden="true" className="h-px" />
-      <div className="sticky bottom-2 h-0 flex justify-center pointer-events-none">
+      <div className="sticky bottom-2 h-0 flex justify-end pr-1 pointer-events-none">
         {more && (
           <span
             data-testid="scroll-hint"
-            className={`-translate-y-full inline-flex items-center gap-1 rounded-full ${luxe ? "bg-[#e6c887] text-[#1b1824]" : "bg-brand-600/95 text-white"} px-3.5 py-1.5 text-[11px] font-bold shadow-lg motion-safe:animate-bounce`}
+            className={`-translate-y-full inline-flex h-9 w-9 items-center justify-center rounded-full ${luxe ? "bg-[#e6c887] text-[#1b1824]" : "bg-brand-600/90 text-white"} text-[11px] font-bold shadow-lg motion-safe:animate-bounce`}
           >
-            <span className="material-symbols-outlined text-[16px] leading-none" aria-hidden="true">
+            <span className="material-symbols-outlined text-[22px] leading-none" aria-hidden="true">
               keyboard_arrow_down
             </span>
-            {label}
+            <span className="sr-only">{label}</span>
           </span>
         )}
       </div>

@@ -71,6 +71,12 @@ function person(label: string, r: SsajuForCompat, hourKnown: boolean): CompatPer
     dayReading: `${d.stemKo}${d.branchKo}`,
     elements: countElements(r, hourKnown),
     hourUnknown: !hourKnown,
+    pillars: (["year", "month", "day", "hour"] as const).map((key) => {
+      const pd = r.pillarDetails[key];
+      const label = { year: "연주", month: "월주", day: "일주", hour: "시주" }[key];
+      if (key === "hour" && !hourKnown) return { key, label, full: null, reading: null };
+      return { key, label, full: r.pillars[key] || null, reading: `${pd.stemKo}${pd.branchKo}` };
+    }),
   };
 }
 
@@ -91,6 +97,20 @@ function headlineFor(score: number): string {
   if (score >= 75) return "닮은 듯 다르고, 균형이 좋은 사이예요";
   if (score >= 65) return "서로 맞춰 가며 더 빛나는 사이예요";
   return "다른 점이 서로에게 새로운 자극이 되는 사이예요";
+}
+
+/** 두 사람의 계산 결과를 이어서 요약 문단을 만들어요. (같은 점수여도 관계가 다르면 다른 글이 나와요) */
+function buildSummary(f: { headline: string; god: TenGod; godBack: TenGod; combine: boolean; clash: boolean; dayRel: string | null; filled: boolean; goods: number; tips: number }): string {
+  const parts: string[] = [`${f.headline}.`];
+  parts.push(`내가 보는 상대는 ${f.god}의 기운, 상대가 보는 나는 ${f.godBack}의 기운이에요. ${GOD_MEANING[f.god].text}`);
+  if (f.combine) parts.push("두 사람의 중심 글자(일간)가 서로 합을 이뤄서, 처음부터 마음이 가는 끌림이 있어요.");
+  else if (f.clash) parts.push("두 사람의 중심 글자(일간)가 정면으로 마주쳐서, 솔직한 만큼 말투만 부드럽게 맞추면 서로에게 좋은 자극이 돼요.");
+  if (f.dayRel === "합") parts.push("가장 가까운 마음 자리(일지)가 합을 이뤄서, 함께 있을 때 편안함이 커요.");
+  else if (f.dayRel === "충") parts.push("가장 가까운 마음 자리(일지)가 부딪혀서, 의견이 다를 땐 한 박자 쉬어 가면 훨씬 부드러워져요.");
+  else if (f.dayRel === "해") parts.push("가장 가까운 마음 자리(일지)에 작은 엇박자가 있어서, 오해는 바로 풀어 주면 가볍게 지나가요.");
+  if (f.filled) parts.push("한 사람에게 모자란 기운을 다른 사람이 채워 주는 구석도 있어요.");
+  parts.push(f.goods >= f.tips ? "잘 맞는 부분이 더 많으니, 아래 풀이에서 맞춰 가면 좋은 점만 살짝 챙겨 보세요." : "다른 점이 많은 만큼 서로에게 배울 것도 많아요. 아래 풀이를 보며 다름을 보완으로 바꿔 보세요.");
+  return parts.join("\n\n");
 }
 
 /** 두 사람의 계산 결과로 궁합을 만들어요. */
@@ -128,8 +148,10 @@ export function buildCompat(me: SsajuForCompat, other: SsajuForCompat, meHourKno
     { key: "month", label: "월지 · 생활 방식", good: "일과 생활 리듬에서 서로에게 힘이 돼요.", weight: { 합: 3, 충: -2, 해: -1 } },
     { key: "year", label: "연지 · 띠 궁합", good: "주변과 가족, 큰 흐름에서 서로를 편하게 받아 줘요.", weight: { 합: 3, 충: -2, 해: -1 } },
   ];
+  let dayRel: string | null = null;
   for (const p of pairs) {
     const rel = branchRelation(branchOf(me.pillars[p.key]), branchOf(other.pillars[p.key]));
+    if (p.key === "day") dayRel = rel;
     if (!rel) continue;
     score += p.weight[rel];
     points.push({
@@ -155,6 +177,7 @@ export function buildCompat(me: SsajuForCompat, other: SsajuForCompat, meHourKno
     }
   }
   score += fillBonus;
+  const filled = points.some((x) => x.title.startsWith("오행 보완"));
 
   const final = clamp(Math.round(score), 55, 96);
   const goods = points.filter((p) => p.tone === "good").length;
@@ -167,6 +190,7 @@ export function buildCompat(me: SsajuForCompat, other: SsajuForCompat, meHourKno
     me: person("나", me, meHourKnown),
     partner: person("상대", other, otherHourKnown),
     points,
+    summary: buildSummary({ headline: headlineFor(final), god, godBack, combine, clash, dayRel, filled, goods, tips }),
     closing:
       tips === 0
         ? "큰 어긋남 없이 편안하게 어울리는 조합이에요. 지금의 편안함을 소중히 가꿔 보세요."
