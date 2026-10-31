@@ -39,6 +39,7 @@ import LoadingBar from "./LoadingBar";
 import { ReadingCard } from "./ReadingCard";
 import StoryReport from "./StoryReport";
 import CompatStory from "./CompatStory";
+import CompatAsk from "./CompatAsk";
 import { birthSummary, isStoryReport } from "@/lib/storyHelpers";
 import { VaultSaveBar } from "./VaultSaveBar";
 import { profileSummary, profileToForm, sameBirth, type SavedProfile } from "@/lib/profile";
@@ -670,7 +671,7 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
                     {compat && premiumReport.compat ? (
                       <CompatStory report={premiumReport} intro={null} partnerName={resultPartner?.name ?? "상대"}
                         lastWord={<><ResultHero report={premiumReport} aiQuote={reading?.kkotgeoji ?? null} luxe={false} hideLucky /><ResultShareCard report={premiumReport} aiQuote={reading?.kkotgeoji ?? null} /></>}
-                        closing={askInput ? <AskChips input={askInput} luxe={false} /> : undefined}
+                        closing={premiumReport.compat ? <CompatAsk compat={premiumReport.compat} /> : undefined}
                       />
                     ) : (
                       <StoryReport report={premiumReport} reading={reading} intro={null}
@@ -695,7 +696,7 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
                 </>
               )}
 
-              {askInput && (
+              {askInput && !compat && (
                 <details data-testid="more-tools" className={`mt-6 rounded-2xl border group ${luxe ? "border-[#e6c887]/30 bg-[#fbf6ea]" : "border-brand-100 bg-brand-50/40"}`}>
                   <summary className="cursor-pointer list-none px-4 py-3 flex items-center justify-between text-sm font-bold text-gray-900">
                     <span>✨ 더 해보기 <span className="font-normal text-xs text-gray-500">고민 비교 · MBTI · 시간 후보</span></span>

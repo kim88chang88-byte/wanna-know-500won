@@ -1,5 +1,6 @@
 import { STEMS } from "@/lib/saju/constants";
 import { branchRelation, tenGodOf, type TenGod } from "@/lib/ai/dailyFacts";
+import { buildExtras, type CompatRelation } from "./compatExtras";
 import type { CompatPerson, CompatPoint, CompatView, ElementKind, ElementView } from "./types";
 
 /*
@@ -114,7 +115,7 @@ function buildSummary(f: { headline: string; god: TenGod; godBack: TenGod; combi
 }
 
 /** 두 사람의 계산 결과로 궁합을 만들어요. */
-export function buildCompat(me: SsajuForCompat, other: SsajuForCompat, meHourKnown: boolean, otherHourKnown: boolean): CompatView {
+export function buildCompat(me: SsajuForCompat, other: SsajuForCompat, meHourKnown: boolean, otherHourKnown: boolean, opts: { year?: number | null; relation?: CompatRelation | null } = {}): CompatView {
   const meDay = me.pillars.day;
   const otDay = other.pillars.day;
   const points: CompatPoint[] = [];
@@ -190,6 +191,23 @@ export function buildCompat(me: SsajuForCompat, other: SsajuForCompat, meHourKno
     me: person("나", me, meHourKnown),
     partner: person("상대", other, otherHourKnown),
     points,
+    ...buildExtras({
+      meStem,
+      otStem,
+      meDayBranch: branchOf(meDay),
+      otDayBranch: branchOf(otDay),
+      me: me.pillars,
+      other: other.pillars,
+      combine,
+      clash,
+      godGood: g.good,
+      godBackGood: gb.good,
+      meElements: meEl,
+      otElements: otEl,
+      filled,
+      year: opts.year ?? null,
+      relation: opts.relation ?? null,
+    }),
     summary: buildSummary({ headline: headlineFor(final), god, godBack, combine, clash, dayRel, filled, goods, tips }),
     closing:
       tips === 0

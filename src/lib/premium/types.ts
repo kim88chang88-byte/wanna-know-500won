@@ -220,6 +220,25 @@ export interface CompatPoint {
   tone: "good" | "tip";
 }
 
+export interface CompatScore {
+  label: string;
+  score: number;
+  note: string;
+}
+
+export interface CompatLink {
+  place: string;
+  me: string;
+  partner: string;
+  rel: "합" | "충" | "해" | null;
+}
+
+export interface CompatTip {
+  emoji: string;
+  title: string;
+  body: string;
+}
+
 export interface CompatView {
   /** 재미로 보는 참고 지수 (55~96) */
   score: number;
@@ -231,6 +250,16 @@ export interface CompatView {
   closing: string;
   /** 두 사람의 계산 결과를 이어 쓴 요약 (예전에 저장된 풀이에는 없을 수 있어요) */
   summary?: string;
+  /** 항목별 점수 (예전에 저장된 풀이에는 없을 수 있어요) */
+  scores?: CompatScore[];
+  /** 같은 자리끼리의 만남 (합·충·해) */
+  links?: CompatLink[];
+  partnerTrait?: { title: string; body: string };
+  tips?: CompatTip[];
+  /** 올해·내년 둘의 흐름 */
+  timing?: Array<{ title: string; body: string }>;
+  /** 고민에서 읽은 관계 종류 (연인·썸·결혼·친구) */
+  relation?: string | null;
 }
 
 export type PremiumErrorCode = "bad_request" | "rate_limited" | "failed";

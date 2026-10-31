@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { BRANCHES, STEMS } from "@/lib/saju/constants";
+import { relationFromConcern } from "../compatExtras";
+import { compatQuestions } from "@/components/landing/CompatAsk";
 import { buildCompat, countElements, isCompatFortune, type SsajuForCompat } from "../compat";
 
 const KO = { wood: "목", fire: "화", earth: "토", metal: "금", water: "수" } as const;
@@ -85,6 +87,58 @@ describe("궁합 결과 구성", () => {
     expect(a).not.toBe(b);
     expect(a).toContain("합");
     expect(a + b).not.toMatch(/이별|이혼|파경|불행/);
+  });
+});
+
+describe("궁합 덧붙임(항목 점수·자리별 만남·팁·흐름)", () => {
+  const me = chart("庚午", "辛巳", "甲子", "丙寅");
+  const other = chart("辛未", "癸未", "己丑", "壬申");
+
+  it("항목 점수는 50~98 안이고, 합이 많은 쪽이 더 높다", () => {
+    const good = buildCompat(me, other, true, true, { year: 2026 });
+    const plain = buildCompat(me, chart("壬申", "戊戌", "庚申", "甲辰"), true, true, { year: 2026 });
+    for (const sc of [...good.scores!, ...plain.scores!]) {
+      expect(sc.score).toBeGreaterThanOrEqual(50);
+      expect(sc.score).toBeLessThanOrEqual(98);
+    }
+    expect(good.scores!.find((x) => x.label === "마음의 거리")!.score).toBeGreaterThan(plain.scores!.find((x) => x.label === "마음의 거리")!.score);
+  });
+
+  it("자리별 만남은 네 곳이고, 일간·일지 합이 표시된다", () => {
+    const c = buildCompat(me, other, true, true);
+    expect(c.links).toHaveLength(4);
+    expect(c.links![0].rel).toBe("합");
+    expect(c.links![1].rel).toBe("합");
+  });
+
+  it("연도를 주면 올해와 내년 흐름이 두 개 나오고, 안 주면 없다", () => {
+    expect(buildCompat(me, other, true, true, { year: 2026 }).timing).toHaveLength(2);
+    expect(buildCompat(me, other, true, true).timing).toHaveLength(0);
+    expect(buildCompat(me, other, true, true, { year: 2026 }).timing![0].title).toContain("2026년");
+  });
+
+  it("팁은 세 가지가 기본이고, 관계 종류를 주면 한 가지가 더 붙는다", () => {
+    expect(buildCompat(me, other, true, true).tips).toHaveLength(3);
+    const c = buildCompat(me, other, true, true, { relation: "결혼" });
+    expect(c.tips).toHaveLength(4);
+    expect(c.relation).toBe("결혼");
+    expect(JSON.stringify(c)).not.toMatch(/이별|이혼|파경|불행|사고|질병/);
+  });
+
+  it("고민에서 관계 종류를 읽고, 이별 같은 민감한 고민은 정하지 않는다", () => {
+    expect(relationFromConcern(["marriage"])).toBe("결혼");
+    expect(relationFromConcern(["relationship"])).toBe("연인");
+    expect(relationFromConcern(["crush"])).toBe("썸");
+    expect(relationFromConcern(["friends"])).toBe("친구");
+    expect(relationFromConcern(["breakup"])).toBeNull();
+    expect(relationFromConcern(undefined)).toBeNull();
+  });
+
+  it("이어 묻기 질문은 계산 결과로만 답하고, 결혼 질문은 단정하지 않는다", () => {
+    const c = buildCompat(me, other, true, true, { year: 2026 });
+    const qs = compatQuestions(c);
+    expect(qs.map((q) => q.id)).toEqual(["marriage", "fight", "talk", "date", "year", "who"]);
+    expect(qs[0].answer).toContain("정할 수는 없어요");
   });
 });
 

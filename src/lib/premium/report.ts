@@ -7,6 +7,7 @@ import { buildBook20 } from "./book/book20";
 import { applyLocks } from "./book/lock";
 import { CONCERN_CHIPS, hasConcern, parseConcern, type Concern } from "@/lib/concerns";
 import { buildCompat } from "./compat";
+import { relationFromConcern } from "./compatExtras";
 import { buildCompatBook, lockCompatBook, type BookSource } from "./book/compatBook";
 import { buildConcernAnswers } from "./concernAnswer";
 import { buildTopicInsight, resolveTopic } from "./topic";
@@ -94,7 +95,7 @@ export function validatePremiumInput(raw: unknown): ValidationResult {
 }
 
 /** 상대방 사주를 계산해 두 사람의 궁합과 10페이지 궁합 리포트를 만들어요. 계산할 수 없는 입력이면 ssaju 의 Error 를 그대로 던져요. */
-function computeCompat(meResult: BookSource, meHourUnknown: boolean, partner: BirthInput, now: Date, full: boolean, lock: boolean) {
+function computeCompat(meResult: BookSource, meHourUnknown: boolean, partner: BirthInput, now: Date, full: boolean, lock: boolean, concernTags: readonly string[] = []) {
   const pHourUnknown = partner.hour === null || partner.hour === undefined;
   const pr = calculateSaju({
     year: partner.year,
@@ -107,7 +108,7 @@ function computeCompat(meResult: BookSource, meHourUnknown: boolean, partner: Bi
     leap: partner.calendar === "lunar" && partner.isLeapMonth === true,
     now,
   }) as unknown as BookSource;
-  const compat = buildCompat(meResult, pr, !meHourUnknown, !pHourUnknown);
+  const compat = buildCompat(meResult, pr, !meHourUnknown, !pHourUnknown, { year: new Date(now.getTime() + 9 * 3600_000).getUTCFullYear(), relation: relationFromConcern(concernTags) });
   if (!full) return { compat, book: [] as BookPage[] };
   const book = buildCompatBook(meResult, pr, { compat, meHourKnown: !meHourUnknown, otherHourKnown: !pHourUnknown });
   return { compat, book: lock ? lockCompatBook(book, meResult.currentYear) : book };
@@ -184,7 +185,7 @@ export function buildPremiumReport(rawInput: BirthInput, now: Date = new Date(),
   const topic = buildTopicInsight(topicKey, r, { elements, hourUnknown, level });
   const locking = full && lock;
   // 궁합이면 10페이지 리포트도 두 사람 기준 궁합 리포트로 바꿔요.
-  const pair = partner ? computeCompat(r as unknown as BookSource, hourUnknown, partner, now, full, locking) : null;
+  const pair = partner ? computeCompat(r as unknown as BookSource, hourUnknown, partner, now, full, locking, concern?.tags ?? []) : null;
   const gradeLabel = GRADE[r.advanced.dayStrength.strength] ?? r.advanced.dayStrength.strength;
   return {
     level,

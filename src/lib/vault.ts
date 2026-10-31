@@ -99,7 +99,7 @@ export function parseVaultBody(raw: unknown, now: Date = new Date()): ParsedVaul
   if (body.length > MAX_VAULT_BYTES) return null;
   const kst = new Date(now.getTime() + 9 * 3600_000);
   const date = `${kst.getUTCMonth() + 1}월 ${kst.getUTCDate()}일`;
-  const label = TOPIC_LABEL[topic];
+  const label = (r as { compat?: unknown }).compat ? "둘의 궁합" : TOPIC_LABEL[topic];
   return {
     snapshot,
     title: `${label}${snapshot.premium ? " · 프리미엄" : ""} · ${date}`,

@@ -1,7 +1,8 @@
 "use client";
 
 import type { ReactNode } from "react";
-import type { CompatPerson, PremiumReportView } from "@/lib/premium/types";
+import type { CompatLink, CompatPerson, CompatScore, PremiumReportView } from "@/lib/premium/types";
+import { josa } from "@/lib/premium/josa";
 import { ELEMENT_BOX, EL_LABEL, elementOfChar } from "@/lib/elementColor";
 import { Fold, MARK, Paras, Pillars } from "./StoryReport";
 
@@ -41,6 +42,76 @@ function PersonCard({ p, name }: { p: CompatPerson; name: string }) {
   );
 }
 
+
+const REL_STYLE: Record<string, string> = {
+  합: "bg-emerald-100 text-emerald-800",
+  충: "bg-orange-100 text-orange-800",
+  해: "bg-amber-100 text-amber-800",
+};
+
+/** 같은 자리끼리 만나는 모습: 합이면 초록, 충이면 주황으로 표시해요. */
+function LinkStrip({ links, partnerName }: { links: CompatLink[]; partnerName: string }) {
+  return (
+    <div data-testid="compat-links" className="mt-3.5">
+      <p className="text-[11px] font-bold text-gray-500">같은 자리끼리 이렇게 만나요</p>
+      <ul className="mt-1.5 space-y-1.5">
+        {links.map((l) => (
+          <li key={l.place} className="flex items-center gap-2 rounded-xl bg-brand-50/60 px-3 py-2 text-[12.5px]">
+            <span className="w-[8.5rem] shrink-0 font-bold text-gray-700">{l.place}</span>
+            <span className="font-serifKr text-[17px] font-black text-gray-900" aria-label="나">{l.me}</span>
+            <span aria-hidden="true" className="text-gray-300">—</span>
+            <span className="font-serifKr text-[17px] font-black text-gray-900" aria-label={partnerName}>{l.partner}</span>
+            <span className={`ml-auto rounded-full px-2 py-0.5 text-[11px] font-bold ${l.rel ? REL_STYLE[l.rel] : "bg-gray-100 text-gray-500"}`}>{l.rel ?? "무난"}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+/** 두 사람의 오행을 막대로 견줘요. */
+function ElementBars({ me, partner, partnerName }: { me: CompatPerson; partner: CompatPerson; partnerName: string }) {
+  const max = Math.max(3, ...me.elements.map((e) => e.count), ...partner.elements.map((e) => e.count));
+  return (
+    <div data-testid="compat-elbars" className="mt-3.5">
+      <p className="text-[11px] font-bold text-gray-500">오행 비교 <span className="font-normal text-gray-400">(보라: 나 · 분홍: {partnerName})</span></p>
+      <ul className="mt-1.5 space-y-1.5">
+        {me.elements.map((e, i) => {
+          const o = partner.elements[i];
+          const el = e.kind === "unknown" ? { icon: "", name: e.name } : EL_LABEL[e.kind];
+          return (
+            <li key={e.name} className="flex items-center gap-2 text-[12px]">
+              <span className="w-12 shrink-0 font-bold text-gray-700">{el.icon} {el.name}</span>
+              <span className="flex-1 space-y-1">
+                <span className="flex items-center gap-1.5"><span className="h-2 rounded-full bg-brand-400" style={{ width: `${(e.count / max) * 100}%`, minWidth: e.count ? 6 : 0 }} /><span className="text-[10.5px] text-gray-500">{e.count}</span></span>
+                <span className="flex items-center gap-1.5"><span className="h-2 rounded-full bg-pink-300" style={{ width: `${((o?.count ?? 0) / max) * 100}%`, minWidth: o?.count ? 6 : 0 }} /><span className="text-[10.5px] text-gray-500">{o?.count ?? 0}</span></span>
+              </span>
+            </li>
+          );
+        })}
+      </ul>
+    </div>
+  );
+}
+
+function ScoreBars({ scores }: { scores: CompatScore[] }) {
+  return (
+    <ul data-testid="compat-scores" className="mt-3.5 space-y-2">
+      {scores.map((s) => (
+        <li key={s.label}>
+          <div className="flex items-baseline justify-between text-[12.5px]">
+            <span className="font-bold text-gray-800">{s.label}</span>
+            <span className="text-[11.5px] text-gray-500">{s.note} · <b className="text-brand-700">{s.score}</b></span>
+          </div>
+          <div className="mt-1 h-2 overflow-hidden rounded-full bg-brand-100">
+            <div className="h-full rounded-full bg-gradient-to-r from-brand-400 to-pink-400" style={{ width: `${s.score}%` }} />
+          </div>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
 export default function CompatStory({ report, intro, closing, lastWord, partnerName = "상대" }: { report: PremiumReportView; intro: string | null; closing?: ReactNode; lastWord?: ReactNode; partnerName?: string }) {
   const c = report.compat;
   if (!c) return null;
@@ -68,6 +139,14 @@ export default function CompatStory({ report, intro, closing, lastWord, partnerN
             <Pillars pillars={c.partner.pillars} owner={`${partnerName}의`} hint="같은 자리끼리 글자가 어울리면 합, 부딪히면 충이에요. 어떤 자리가 어떻게 만나는지는 아래 풀이에서 풀어 드려요." />
           </>
         )}
+        {c.links && <LinkStrip links={c.links} partnerName={partnerName} />}
+        <ElementBars me={c.me} partner={c.partner} partnerName={partnerName} />
+        {c.partnerTrait?.body && (
+          <div data-testid="compat-trait" className="mt-3.5 rounded-xl bg-pink-50/70 px-3.5 py-2.5">
+            <p className="text-[11px] font-bold text-gray-500">{josa(partnerName, "은/는")} 이런 사람이에요</p>
+            <p className="mt-0.5 text-[13.5px] leading-relaxed text-gray-800 break-keep">{c.partnerTrait.body}</p>
+          </div>
+        )}
       </section>
 
       <section data-testid="story-lead" aria-labelledby="story-lead-h" className="rounded-2xl border border-brand-100 bg-gradient-to-br from-brand-50 via-white to-amber-50/60 p-4">
@@ -82,6 +161,8 @@ export default function CompatStory({ report, intro, closing, lastWord, partnerN
           </span>
         </div>
         <Paras mark={mark} text={c.summary ?? `${c.headline}\n\n${c.closing}`} className="mt-3 text-[16px] leading-[1.85] text-gray-800 break-keep" />
+        {c.scores && <ScoreBars scores={c.scores} />}
+        {c.relation && <p className="mt-2 text-[11px] text-brand-700">고른 고민을 바탕으로 ‘{c.relation}’ 사이에 맞춰 보았어요.</p>}
         <p className="mt-2 text-[11px] text-gray-500">점수는 재미로 보는 참고 지수예요.</p>
       </section>
 
@@ -94,6 +175,16 @@ export default function CompatStory({ report, intro, closing, lastWord, partnerN
             </Fold>
           )),
         )}
+        {(c.timing ?? []).map((t) => (
+          <Fold key={t.title} testId="story-fold" label="📅 올해·내년 흐름" title={t.title}>
+            {t.body}
+          </Fold>
+        ))}
+        {(c.tips ?? []).map((t) => (
+          <Fold key={t.title} testId="story-fold" label={`${t.emoji} 도리의 팁`} title={t.title}>
+            {t.body}
+          </Fold>
+        ))}
         {lastWord && (
           <Fold testId="story-fold-last" label="마지막 한마디" title="도리가 마지막으로 전하는 말이에요" defaultOpen>
             {lastWord}
