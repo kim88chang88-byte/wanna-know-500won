@@ -40,6 +40,7 @@ import { ReadingCard } from "./ReadingCard";
 import StoryReport from "./StoryReport";
 import CompatStory from "./CompatStory";
 import CompatAsk from "./CompatAsk";
+import { josa } from "@/lib/premium/josa";
 import { birthSummary, isStoryReport } from "@/lib/storyHelpers";
 import { VaultSaveBar } from "./VaultSaveBar";
 import { profileSummary, profileToForm, sameBirth, type SavedProfile } from "@/lib/profile";
@@ -525,7 +526,7 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
       if (p.rest) void fetchRestChapters({ ...(p.rest as object), conclusion: conclusionOf(p.report) }, ctrl.signal, (part) => { if (ctrl.signal.aborted) return; setPremiumReport((prev) => (prev ? mergeChapters(prev, part) : prev)); }).then((rep) => { if (ctrl.signal.aborted) return; if (rep.aiNotice) setAiNotice(true); });
       setChart(data.chart);
       setAskInput(input);
-      setResultPartner(partnerInput ? { birth: partnerInput, name: people.find((x) => x.id === pickedPerson)?.label || personLabel.trim() || "상대" } : null);
+      setResultPartner(partnerInput ? { birth: partnerInput, name: ((l) => (l && l !== autoLabel(partnerInput) ? l : "상대방"))(people.find((x) => x.id === pickedPerson)?.label || personLabel.trim()) } : null);
       setBirthNote([data.birthAdjustNote, data.boundaryNote].filter(Boolean).join("\n") || null);
       setReading(data.reading ?? null);
       setReadingStatus(status);
@@ -588,7 +589,7 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
       className={`mb-4 rounded-2xl px-4 py-4 text-center ${luxe ? "border border-[#e6c887]/50 bg-gradient-to-b from-[#e6c887]/15 to-transparent" : "border-2 border-brand-300 bg-gradient-to-br from-brand-50 via-white to-amber-50 shadow-[0_6px_20px_rgba(128,87,224,0.12)]"}`}
     >
       <h3 id="intake-title" className={`font-cute text-[25px] sm:text-[28px] font-normal leading-tight break-keep ${luxe ? "text-[#fbf3de]" : "text-brand-700"}`}>
-        {compat && resultPartner ? `${nickname?.trim() || "나"} ♥ ${resultPartner.name}` : nickname?.trim() ? `${nickname.trim()}님의 사주 해설` : "나의 사주 해설"}
+        {compat && resultPartner ? `${josa(nickname?.trim() ? `${nickname.trim()}님` : "나", "과/와")} 상대방의 궁합♥` : nickname?.trim() ? `${nickname.trim()}님의 사주 해설` : "나의 사주 해설"}
       </h3>
       {askInput && (
         <p
