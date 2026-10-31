@@ -279,7 +279,7 @@ export default function Landing() {
   return (
     <>
       <BubbleBackground />
-      <Header onOpenLogin={openLogin} user={user} />
+      <Header onOpenLogin={openLogin} user={user} wallet={user ? { bills: 0, coins: coins + tickets, free: Math.max(0, FREE_PER_DAY - counts.today) } : null} />
 
       <main className="relative z-10 max-w-[34rem] lg:max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-5 pb-20 sm:pb-24">
         <HeroSection visitors={visitors} tickets={tickets + coins} />

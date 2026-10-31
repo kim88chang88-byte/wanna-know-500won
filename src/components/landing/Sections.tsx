@@ -7,6 +7,7 @@ import { FREE_PRICE_LABEL, MACHINES, PREMIUM_CARDS } from "./data";
 import { HelpMenuButton, MachineMenuButton } from "./MenuButton";
 import { HERO_IMAGE, IMAGES, LOGO_IMAGE } from "./images";
 import SafeImage from "./SafeImage";
+import WalletBar, { type WalletValues } from "./WalletBar";
 import BrandLink from "./BrandLink";
 import DoriIcon from "./DoriIcon";
 import ReviewsSection from "./ReviewsSection";
@@ -48,7 +49,7 @@ export function firstGlyph(nickname: string | null | undefined): string {
   return Array.from((nickname ?? "").trim())[0] ?? "🫧";
 }
 
-export function Header({ onOpenLogin, user = null }: { onOpenLogin: () => void; user?: AuthUser | null }) {
+export function Header({ onOpenLogin, user = null, wallet = null }: { onOpenLogin: () => void; user?: AuthUser | null; wallet?: WalletValues | null }) {
   return (
     <>
       <header className="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-brand-100 shadow-[0_2px_15px_rgba(128,87,224,0.06)]">
@@ -111,6 +112,12 @@ export function Header({ onOpenLogin, user = null }: { onOpenLogin: () => void; 
             <MachineMenuButton />
           </div>
         </div>
+        {/* 로그인한 회원에게만: 내 지폐 · 동전 · 오늘 남은 무료 뽑기 (오른쪽 위) */}
+        {user && wallet && (
+          <div className="max-w-[34rem] lg:max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 pb-2 -mt-1">
+            <WalletBar {...wallet} />
+          </div>
+        )}
       </header>
 
     </>
