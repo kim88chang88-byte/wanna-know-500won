@@ -28,7 +28,7 @@ function PersonCard({ p, name }: { p: CompatPerson; name: string }) {
       </div>
       <p className="mt-2 flex flex-wrap justify-center gap-1">
         {p.elements.map((e) => {
-          const el = EL_LABEL[e.kind];
+          const el = e.kind === "unknown" ? { icon: "", name: e.name } : EL_LABEL[e.kind];
           return (
             <span key={e.name} data-testid="compat-el" className={`rounded-full px-2 py-0.5 text-[10.5px] font-bold ${e.count > 0 ? "bg-white text-gray-700" : "bg-white/50 text-gray-400"}`}>
               {el.icon} {el.name} {e.count}
