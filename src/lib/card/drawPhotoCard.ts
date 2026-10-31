@@ -164,7 +164,7 @@ export function drawPhotoCard(ctx: CanvasRenderingContext2D, d: PhotoCardData, a
   }
   ctx.fillStyle = INK;
   setFont(ctx, 800, 13, SERIF);
-  ctx.fillText("도리운세사주", nameX, 40);
+  ctx.fillText("도리운세⋅사주", nameX, 40);
   ctx.fillStyle = MUTED;
   setFont(ctx, 700, 9.5, SANS);
   spaced(ctx, 2.2);

@@ -12,7 +12,7 @@ export default function BrandLink({ heading = true }: { heading?: boolean }) {
         <SafeImage src={LOGO_IMAGE} alt="도리 운세 사주 로고" className="w-full h-full object-cover" fallback="🦦" fallbackClass="text-2xl" />
       </div>
       <Title className="font-cute font-normal text-[19px] min-[400px]:text-[22px] sm:text-[30px] leading-none whitespace-nowrap tracking-normal bg-gradient-to-r from-brand-500 via-fuchsia-500 to-pink-500 bg-clip-text text-transparent inline-flex items-center gap-1.5">
-        &apos;도리&apos;운세사주
+        도리운세⋅사주
         <span
           data-testid="beta-sticker"
           className="-rotate-6 rounded-md border border-amber-300 bg-amber-100 px-1.5 py-0.5 font-sans text-[9px] font-extrabold uppercase leading-none tracking-wide text-amber-700 shadow-[1px_1px_0_0_rgba(217,119,6,0.35)] sm:text-[11px]"
