@@ -209,14 +209,14 @@ export default function StoryReport({
   };
   const hasFolds = Boolean(f.elements || f.self || f.praise || f.lack || f.flow || f.improve);
   const heads = reading?.heads ?? {};
-  // 요약하자면: 총운 한 줄 → 도리가 본 이유 → 고민에 대한 답을 라벨 없이 한 흐름으로 이어요.
+  // 요약하자면: 총운 한 줄 → 도리가 본 이유를 한 흐름으로 이어요. (고민에 대한 답은 고민 바로 아래 "도리의 답" 카드로 따로 보여줘요)
   const joinFlow = (parts: Array<string | undefined | null>) =>
     parts
       .map((x) => x?.trim())
       .filter((x): x is string => Boolean(x))
       .map((x) => (/[.!?…~]$/.test(x) ? x : `${x}.`))
       .join(" ");
-  const summary = (reading?.story?.trim() ? trimToLastSentence(stripSummaryLead(reading.story.trim())) : "") || joinFlow([reading?.total.summary, reading?.reason, concern?.answers[0]?.body]);
+  const summary = (reading?.story?.trim() ? trimToLastSentence(stripSummaryLead(reading.story.trim())) : "") || joinFlow([reading?.total.summary, reading?.reason]);
 
   return (
     <div data-testid="story-report" className="mt-5 space-y-5">
@@ -227,6 +227,13 @@ export default function StoryReport({
           <div data-testid="story-concern" className="mt-2.5 rounded-xl bg-brand-50/70 px-3.5 py-2.5">
             <p className="text-[11px] font-bold text-gray-500">내가 고른 고민</p>
             <p className="mt-0.5 text-sm leading-relaxed text-gray-800">{concernText}</p>
+          </div>
+        )}
+        {concernText && concern?.answers[0] && (
+          <div data-testid="story-concern-answer" className="mt-2 rounded-xl border border-brand-100 bg-gradient-to-br from-white to-amber-50/60 px-3.5 py-3">
+            <p className="text-[11px] font-bold text-brand-700">도리의 답</p>
+            <p className="mt-1 text-sm font-bold text-gray-900">{concern.answers[0].emoji} {concern.answers[0].title}</p>
+            <Paras mark={mark} text={concern.answers[0].body} className="mt-1.5 text-[14.5px] leading-[1.8] text-gray-800 break-keep" />
           </div>
         )}
         <p className="mt-3.5 text-[11px] font-bold text-gray-500">나의 사주 네 기둥</p>
