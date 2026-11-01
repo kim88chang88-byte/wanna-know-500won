@@ -13,7 +13,11 @@ import { clearRef, isFinalRedeem, readRef, redeemMessage, refFromSearch, saveMyC
 import { DailyLineCard } from "./DailyLineCard";
 import { FollowupCard } from "./FollowupCard";
 import { VaultFollowupCard } from "./VaultFollowupCard";
-import IntakeModal, { type IntakeTarget } from "./IntakeModal";
+import dynamic from "next/dynamic";
+import type { IntakeTarget } from "./IntakeModal";
+
+// 입력·결과 창은 코드가 커서, 처음 화면에는 싣지 않고 따로 받아요. (아래에서 화면이 한가할 때 미리 받아 둬서 열 때 기다리지 않아요)
+const IntakeModal = dynamic(() => import("./IntakeModal"), { ssr: false });
 import { LoginModal } from "./Modals";
 import { useAuth } from "./useAuth";
 import BubbleBackground from "./BubbleBackground";
@@ -222,6 +226,19 @@ export default function Landing() {
   useEffect(() => {
     if (loginResult) setLoginOpen(true);
   }, [loginResult]);
+  // 첫 화면이 다 그려지고 한가해지면 입력 창 코드를 미리 받아 둬요.
+  useEffect(() => {
+    const preload = () => {
+      void import("./IntakeModal");
+    };
+    if (typeof window.requestIdleCallback === "function") {
+      const id = window.requestIdleCallback(preload, { timeout: 5000 });
+      return () => window.cancelIdleCallback(id);
+    }
+    const t = window.setTimeout(preload, 2500);
+    return () => window.clearTimeout(t);
+  }, []);
+
   const closeIntake = useCallback(() => setIntake(null), []);
   // 생년월일시 입력이 끝나 결과를 받았을 때만 뽑기 횟수를 올려요. (입력창만 열고 닫은 건 세지 않아요)
   // 로그인 회원이고 서버가 횟수를 세어 줬다면 그 값을 쓰고, 아니면 이 브라우저에서만 세요.

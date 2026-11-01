@@ -83,6 +83,16 @@ export async function POST(request: Request) {
     }
   }
 
+  // 회원 등록 확인은 AI 풀이를 기다리는 동안 미리 해 둬요. (이미 있으면 아무 일도 없는 요청이라 안전해요. 실패하면 저장할 때 한 번 더 시도해요)
+  const ensuredEarly: Promise<boolean> | null = db && userId
+    ? db.ensureUser(userId, session?.nick).then(() => true, () => false)
+    : null;
+  const ensureUserOnce = async () => {
+    if (!db || !userId) return;
+    if (ensuredEarly && (await ensuredEarly)) return;
+    await db.ensureUser(userId, session?.nick);
+  };
+
   // TODO: 결제 확인(500원)을 통과한 요청만 전체 풀이를 주도록 연결. 지금은 항상 무료 공개 범위만 내려가요.
 
   // 출생지 보정: 보정한 입력으로 계산하고, 저장용 input 에는 birthPlace 를 넣지 않아요.
@@ -108,7 +118,7 @@ export async function POST(request: Request) {
   let profileSaved = false;
   if (db && userId && saveProfile === true) {
     try {
-      await db.ensureUser(userId, session?.nick);
+      await ensureUserOnce();
       await db.upsertProfile(userId, { ...profileInput, hour: input.hour ?? null, minute: input.hour == null ? null : (input.minute ?? 0), isLeapMonth: input.calendar === "lunar" && input.isLeapMonth === true });
       profileSaved = true;
     } catch (err) {
@@ -117,7 +127,7 @@ export async function POST(request: Request) {
   }
   if (db && shareConcern === true && hasConcern(concern)) {
     try {
-      if (userId) await db.ensureUser(userId, session?.nick);
+      if (userId) await ensureUserOnce();
       await db.recordConcern({ userId, topic: normalizeTopic(rawTopic), concern, gender: input.gender, ageBand: ageBand(input.year) });
     } catch (err) {
       console.error("recordConcern failed:", err instanceof Error ? err.message : "unknown");
@@ -173,15 +183,14 @@ export async function POST(request: Request) {
   // AI 호출이 일시적으로 실패한 요청(failed)은 세지 않아요.
   const countable = readingStatus === "unavailable" || (readingStatus === "ok" && reading !== null);
   if (userId && db && countable) {
-    if (useCoin) {
-      try {
-        await db.spendCoin(userId);
-      } catch (err) {
-        console.error("spendCoin failed:", err instanceof Error ? err.message : "unknown");
-      }
-    }
+    // 코인 차감은 뽑기 기록과 동시에 해요. (서로 기다릴 필요가 없어요)
+    const spend = useCoin
+      ? db.spendCoin(userId).catch((err) => {
+          console.error("spendCoin failed:", err instanceof Error ? err.message : "unknown");
+        })
+      : null;
     try {
-      await db.ensureUser(userId, session?.nick);
+      await ensureUserOnce();
       await db.recordDraw(userId, normalizeTopic(rawTopic));
       // 초대받은 친구의 첫 풀이라면 두 사람에게 코인을 지급해요. (코드를 입력하지 않았거나 이미 받았으면 아무 일도 없어요)
       try {
@@ -193,6 +202,7 @@ export async function POST(request: Request) {
     } catch (err) {
       console.error("recordDraw failed:", err instanceof Error ? err.message : "unknown");
     }
+    await spend;
   }
 
   return NextResponse.json({ chart, reading, readingStatus, detailInfo, counts, profileSaved, birthAdjust, birthAdjustNote: birthAdjust ? adjustNote(birthAdjust) : null, boundaryNote: boundaryNote(input as BirthInput) });

@@ -3,7 +3,10 @@ import { RealityLight } from "./RealityLight";
 import CompatCard from "./CompatCard";
 import ConcernCard from "./ConcernCard";
 import type { ReactNode } from "react";
-import PremiumBook from "./PremiumBook";
+import dynamic from "next/dynamic";
+
+// 프리미엄 책은 코드가 커서, 프리미엄 풀이를 열 때만 받아요.
+const PremiumBook = dynamic(() => import("./PremiumBook"));
 import { ELEMENT_BOX, elementOfChar, elName } from "@/lib/elementColor";
 
 const ELEMENT_STYLE: Record<ElementKind, { bar: string; chip: string }> = {
