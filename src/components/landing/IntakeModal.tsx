@@ -624,7 +624,7 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
   return (
     <ModalShell
       labelId="intake-title"
-      panelClass={`max-w-md p-5 sm:p-6 max-h-[90vh] overflow-y-auto ${luxe ? "border border-[#e6c887]/40" : "border-2 border-brand-300"}`}
+      panelClass={`max-w-md ${luxe ? "md:max-w-[800px]" : ""} p-5 sm:p-6 max-h-[90vh] overflow-y-auto ${luxe ? "border border-[#e6c887]/40" : "border-2 border-brand-300"}`}
       onClose={onClose}
       closeOnOverlay={false}
       luxe={luxe}

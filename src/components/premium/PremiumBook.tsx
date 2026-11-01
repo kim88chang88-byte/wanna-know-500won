@@ -481,7 +481,7 @@ function BubbleRow({ text, img, right = false }: { text: string; img: string; ri
 function ChapterCover({ page, mascot }: { page: BookPage; mascot: Mascot }) {
   const t = titleParts(page.title);
   return (
-    <section data-testid="chapter-cover" aria-label={`${page.title} 표지`} className="relative flex aspect-[3/4] flex-col justify-start overflow-hidden rounded-[14px] bg-gradient-to-b from-[#0b0e22] to-[#1d2350] px-5 pt-7">
+    <section data-testid="chapter-cover" aria-label={`${page.title} 표지`} className="relative flex aspect-[3/4] md:aspect-[16/9] flex-col justify-start overflow-hidden rounded-[14px] bg-gradient-to-b from-[#0b0e22] to-[#1d2350] px-5 pt-7">
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img src={sceneOf(mascot)} alt="" className="absolute inset-0 h-full w-full object-cover opacity-90" />
       <div className="absolute inset-0 bg-gradient-to-b from-[#0b0e22]/80 via-transparent to-[#0b0e22]/55" />
@@ -593,7 +593,7 @@ export default function PremiumBook({ report, flush = false, finale, previewBlur
         if (e.key === "ArrowRight") go(i + 1);
         if (e.key === "ArrowLeft") go(i - 1);
       }}
-      className={`mx-auto max-w-[440px] text-[#efe7d3] scroll-mt-4 ${flush ? "pt-2" : "rounded-[1.75rem] bg-[#10142b] p-5 sm:p-6 shadow-[0_20px_60px_rgba(20,16,34,0.45)] border border-[#e6c887]/30"}`}
+      className={`mx-auto max-w-[440px] md:max-w-[720px] text-[#efe7d3] scroll-mt-4 ${flush ? "pt-2" : "rounded-[1.75rem] bg-[#10142b] p-5 sm:p-6 shadow-[0_20px_60px_rgba(20,16,34,0.45)] border border-[#e6c887]/30"}`}
     >
       <div className="flex items-center justify-between">
         <span className={`text-[11px] font-bold tracking-[0.18em] ${GOLD}`}>DORI 20쪽 사주서</span>
