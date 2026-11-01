@@ -544,6 +544,7 @@ export default function PremiumBook({ report, flush = false, finale, previewBlur
   const pages = report.book;
   const [i, setI] = useState(0);
   const [unlockMsg, setUnlockMsg] = useState(false);
+  const [tocOpen, setTocOpen] = useState(false);
   const top = useRef<HTMLDivElement>(null);
   const first = useRef(true);
   useEffect(() => {
@@ -596,10 +597,49 @@ export default function PremiumBook({ report, flush = false, finale, previewBlur
     >
       <div className="flex items-center justify-between">
         <span className={`text-[11px] font-bold tracking-[0.18em] ${GOLD}`}>DORI 20쪽 사주서</span>
-        <span data-testid="book-counter" className="text-xs tabular-nums text-[#e8dfca]/70">
-          {num(page.no)} / {num(pages.length)}
+        <span className="flex items-center gap-2">
+          <button
+            type="button"
+            data-testid="book-toc-toggle"
+            aria-expanded={tocOpen}
+            aria-controls="book-toc"
+            onClick={() => setTocOpen((v) => !v)}
+            className={`rounded-full border ${HAIR} px-2.5 py-0.5 text-[11px] font-bold ${GOLD} active:scale-95 transition-transform`}
+          >
+            목차 {tocOpen ? "▴" : "▾"}
+          </button>
+          <span data-testid="book-counter" className="text-xs tabular-nums text-[#e8dfca]/70">
+            {num(page.no)} / {num(pages.length)}
+          </span>
         </span>
       </div>
+
+      {tocOpen && (
+        <ol id="book-toc" data-testid="book-toc" aria-label="목차" className={`mt-2 rounded-2xl border ${HAIR} bg-white/[0.04] px-3 py-2`}>
+          {pages.map((p, k) => {
+            const t = titleParts(p.title);
+            const closed = previewBlur && p.no >= PREVIEW_OPEN_PAGES;
+            return (
+              <li key={p.key}>
+                <button
+                  type="button"
+                  data-testid={`book-toc-${p.no}`}
+                  onClick={() => {
+                    go(k);
+                    setTocOpen(false);
+                  }}
+                  aria-current={k === i ? "page" : undefined}
+                  className={`flex w-full items-baseline gap-3 py-1.5 text-left text-[13px] ${k === i ? `font-bold ${GOLD}` : "text-[#efe7d3]"}`}
+                >
+                  <span className="w-6 shrink-0 tabular-nums text-[11px] text-[#e8dfca]/60">{num(p.no)}</span>
+                  <span className="flex-1">{t.small ? `${t.small} · ${t.main}` : t.main}</span>
+                  {closed && <span aria-label="잠김" className="text-[11px]">🔒</span>}
+                </button>
+              </li>
+            );
+          })}
+        </ol>
+      )}
 
       <nav aria-label="리포트 페이지" className="mt-1 flex gap-[3px]">
         {pages.map((p, k) => (
