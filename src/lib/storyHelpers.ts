@@ -144,3 +144,8 @@ export function splitBold(text: string): BoldPart[] {
   if (last < t.length) out.push({ text: t.slice(last), bold: false });
   return out;
 }
+
+/** 결과 제목에 쓰는 이름: "2027 신년운", "성공운"처럼 ~운으로 끝나면 그대로, 아니면(프리미엄 종합 사주 등) "사주" */
+export function readingKind(fortune: string): string {
+  return /운$/.test(fortune.trim()) ? fortune.trim() : "사주";
+}

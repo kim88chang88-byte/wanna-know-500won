@@ -41,7 +41,7 @@ import StoryReport from "./StoryReport";
 import CompatStory from "./CompatStory";
 import CompatAsk from "./CompatAsk";
 import { josa } from "@/lib/premium/josa";
-import { birthSummary, isStoryReport } from "@/lib/storyHelpers";
+import { birthSummary, isStoryReport, readingKind } from "@/lib/storyHelpers";
 import { VaultSaveBar } from "./VaultSaveBar";
 import { profileSummary, profileToForm, sameBirth, type SavedProfile } from "@/lib/profile";
 import { MAX_LABEL, MAX_PEOPLE, type SavedPerson } from "@/lib/people";
@@ -75,7 +75,7 @@ interface Props {
   onComplete: (serverCounts?: { today: number; month: number } | null) => void;
   /** 로그인한 회원이면 true. 아니면 "로그인하면 생년월일시를 기억해요" 안내를 보여줘요. */
   loggedIn?: boolean;
-  /** 로그인 닉네임. 결과 화면 제목("○○님의 사주 해설")에 써요. */
+  /** 로그인 닉네임. 결과 화면 제목("○○님의 2027 신년운 해설")에 써요. */
   nickname?: string | null;
   /** 로그인한 회원이 전에 저장해 둔 생년월일시. 있으면 질문지를 미리 채우고 고민 단계부터 시작해요. */
   savedProfile?: SavedProfile | null;
@@ -610,7 +610,7 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
       className={`mb-4 rounded-2xl px-4 py-4 text-center ${luxe ? "border border-[#e6c887]/50 bg-gradient-to-b from-[#e6c887]/15 to-transparent" : "border-2 border-brand-300 bg-gradient-to-br from-brand-50 via-white to-amber-50 shadow-[0_6px_20px_rgba(128,87,224,0.12)]"}`}
     >
       <h3 id="intake-title" className={`font-cute text-[25px] sm:text-[28px] font-normal leading-tight break-keep ${luxe ? "text-[#fbf3de]" : "text-brand-700"}`}>
-        {compat && resultPartner ? `${josa(nickname?.trim() ? `${nickname.trim()}님` : "나", "과/와")} 상대방의 궁합♥` : nickname?.trim() ? `${nickname.trim()}님의 사주 해설` : "나의 사주 해설"}
+        {compat && resultPartner ? `${josa(nickname?.trim() ? `${nickname.trim()}님` : "나", "과/와")} 상대방의 궁합♥` : `${nickname?.trim() ? `${nickname.trim()}님` : "나"}의 ${readingKind(target.fortune)} 해설`}
       </h3>
       {askInput && (
         <p
