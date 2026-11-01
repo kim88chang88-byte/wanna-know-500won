@@ -2,6 +2,8 @@
 
 import LoginButtons from "./LoginButtons";
 import ReferralBox from "./ReferralBox";
+import { getBrowserStorage } from "@/lib/drawCounter";
+import { cleanRefCode, clearRef, readRef, saveRef } from "@/lib/referral";
 import AddPersonForm from "./AddPersonForm";
 import { profileSummary, type SavedProfile } from "@/lib/profile";
 import { MAX_PEOPLE, type SavedPerson } from "@/lib/people";
@@ -174,6 +176,70 @@ function SavedPeopleBox() {
   );
 }
 
+/** 로그인(가입) 전에 친구에게 받은 초대 코드를 미리 적어 두는 칸. 로그인하면 자동으로 적용돼요. */
+function RefCodeEntry() {
+  const [saved, setSaved] = useState<string | null>(null);
+  const [input, setInput] = useState("");
+  const [msg, setMsg] = useState<string | null>(null);
+  useEffect(() => {
+    setSaved(readRef(getBrowserStorage()));
+  }, []);
+  function save() {
+    const code = cleanRefCode(input);
+    if (!code) {
+      setMsg("코드는 영문 대문자와 숫자 8자리예요. 다시 확인해 주세요.");
+      return;
+    }
+    saveRef(getBrowserStorage(), code);
+    setSaved(code);
+    setInput("");
+    setMsg(null);
+  }
+  return (
+    <details data-testid="ref-entry" open={saved !== null} className="mb-3 rounded-2xl border border-amber-200 bg-amber-50 px-3.5 py-2.5 text-left">
+      <summary className="cursor-pointer list-none text-xs font-bold text-amber-900">🎁 친구에게 받은 초대 코드가 있나요? (선택)</summary>
+      {saved ? (
+        <div className="mt-2">
+          <p data-testid="ref-entry-saved" className="text-[11.5px] leading-relaxed text-amber-900">
+            초대 코드 <b className="font-mono tracking-widest">{saved}</b>를 저장해 뒀어요. 아래에서 가입하고 첫 풀이를 마치면 두 분 모두 500원 뽑기 1회를 받아요 🎁
+          </p>
+          <button
+            type="button"
+            onClick={() => {
+              clearRef(getBrowserStorage());
+              setSaved(null);
+            }}
+            className="mt-1 text-[11px] text-amber-800 underline"
+          >
+            코드 지우기
+          </button>
+        </div>
+      ) : (
+        <div className="mt-2">
+          <div className="flex items-center gap-2">
+            <input
+              value={input}
+              onChange={(e) => {
+                setInput(e.target.value.toUpperCase());
+                setMsg(null);
+              }}
+              maxLength={12}
+              placeholder="예: C8C4F7C9"
+              aria-label="친구에게 받은 초대 코드"
+              className="min-w-0 flex-1 rounded-lg border border-amber-200 bg-white px-3 py-1.5 font-mono text-sm uppercase tracking-widest"
+            />
+            <button type="button" onClick={save} disabled={input.trim().length === 0} className="rounded-full bg-brand-500 px-3 py-1.5 text-xs font-bold text-white disabled:opacity-50">
+              저장
+            </button>
+          </div>
+          <p className="mt-1.5 text-[11px] leading-relaxed text-amber-800">코드를 적어 두고 아래에서 가입하면 자동으로 적용돼요.</p>
+          {msg && <p role="status" className="mt-1 text-[11px] text-rose-600">{msg}</p>}
+        </div>
+      )}
+    </details>
+  );
+}
+
 export function LoginModal({ onClose, user = null, result = null, onLogout, onWithdraw, profile = null, onDeleteProfile }: LoginModalProps) {
   const [profileBusy, setProfileBusy] = useState(false);
   const [profileError, setProfileError] = useState(false);
@@ -297,7 +363,10 @@ export function LoginModal({ onClose, user = null, result = null, onLogout, onWi
           )}
         </div>
       ) : (
-        <LoginButtons className="flex flex-col gap-2.5 mb-4" />
+        <>
+          <RefCodeEntry />
+          <LoginButtons className="flex flex-col gap-2.5 mb-4" />
+        </>
       )}
 
       {result && (
