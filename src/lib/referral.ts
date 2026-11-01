@@ -80,7 +80,7 @@ export function withRef(url: string, code: string | null): string {
 export function redeemMessage(result: string): { ok: boolean; text: string } {
   switch (result) {
     case "ok":
-      return { ok: true, text: "친구 초대 코드가 적용됐어요! 첫 풀이를 마치면 두 분 모두 500원 뽑기 1회를 받아요 🎁" };
+      return { ok: true, text: "친구 초대 코드가 적용됐어요! 풀이를 한 번 마치면 두 분 모두 500원 뽑기 1회를 받아요 🎁" };
     case "bad_code":
       return { ok: false, text: "없는 코드예요. 친구에게 코드를 다시 확인해 보세요." };
     case "self":

@@ -403,9 +403,7 @@ begin
   if made is null or made < now() - interval '7 days' then
     return 'too_old';
   end if;
-  if exists (select 1 from public.draws d where d.user_id = p_user) then
-    return 'used_draw';
-  end if;
+  -- 이미 뽑기를 해 본 계정도 입력할 수 있어요. (보상은 코드를 입력한 뒤의 첫 풀이를 마칠 때 지급돼요)
   insert into public.referrals (referee_id, referrer_id) values (p_user, ref) on conflict do nothing;
   return 'ok';
 end;
