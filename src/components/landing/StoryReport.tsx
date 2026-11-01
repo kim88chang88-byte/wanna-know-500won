@@ -218,9 +218,32 @@ export default function StoryReport({
       .join(" ");
   const summary = (reading?.story?.trim() ? trimToLastSentence(stripSummaryLead(reading.story.trim())) : "") || joinFlow([reading?.total.summary, reading?.reason]);
 
+  // 고민 칩이 아니라 질문 문장으로 고른 경우엔 미리 만든 답이 없어서, AI 요약(=답)을 고민 바로 아래로 올려요.
+  const summaryFirst = Boolean(concernText && !concern?.answers[0] && summary);
+  const summaryBlock = summary ? (
+        <section data-testid="story-lead" aria-labelledby="story-lead-h" className="rounded-2xl bg-gradient-to-br from-brand-50 via-white to-amber-50/60 border border-brand-100 p-4">
+          <div className="flex items-center justify-between gap-2">
+            <h5 id="story-lead-h" className="font-cute text-lg font-normal text-brand-700">요약하자면</h5>
+            {reading && (
+              <span className="flex items-center gap-1.5 text-xs">
+                <Stars score={reading.total.score} />
+                <span className="rounded-full border border-brand-100 bg-white px-2 py-0.5 text-[11px] font-bold text-brand-700">#{reading.keyword}</span>
+              </span>
+            )}
+          </div>
+          <Paras mark={mark} text={summary} className="mt-3 text-[16px] leading-[1.85] text-gray-800 break-keep" />
+        </section>
+      ) : null;
+  const pillarsBlock = (
+    <>
+      <p className="mt-3.5 text-[11px] font-bold text-gray-500">나의 사주 네 기둥</p>
+      <Pillars report={report} />
+      {report.hourUnknown && <p className="mt-2 text-[11px] leading-relaxed text-amber-700">태어난 시간을 몰라 정오(12시) 기준으로 계산했어요. 시주는 비워 뒀어요.</p>}
+    </>
+  );
   return (
     <div data-testid="story-report" className="mt-5 space-y-5">
-      {/* 1) 내 정보와 고민 */}
+      {/* 1) 내 정보와 고민 (질문 문장 고민이면: 고민 → 요약하자면(답) → 네 기둥) */}
       <section aria-label="내 정보" className="rounded-2xl border border-brand-100 bg-white p-4">
         {intro && <p data-testid="story-intro" className="text-xs font-semibold text-brand-700">{intro}</p>}
         {concernText && (
@@ -236,26 +259,17 @@ export default function StoryReport({
             <Paras mark={mark} text={concern.answers[0].body} className="mt-1.5 text-[14.5px] leading-[1.8] text-gray-800 break-keep" />
           </div>
         )}
-        <p className="mt-3.5 text-[11px] font-bold text-gray-500">나의 사주 네 기둥</p>
-        <Pillars report={report} />
-        {report.hourUnknown && <p className="mt-2 text-[11px] leading-relaxed text-amber-700">태어난 시간을 몰라 정오(12시) 기준으로 계산했어요. 시주는 비워 뒀어요.</p>}
+        {!summaryFirst && pillarsBlock}
       </section>
 
-      {/* 2) 요약하자면 */}
-      {summary && (
-        <section data-testid="story-lead" aria-labelledby="story-lead-h" className="rounded-2xl bg-gradient-to-br from-brand-50 via-white to-amber-50/60 border border-brand-100 p-4">
-          <div className="flex items-center justify-between gap-2">
-            <h5 id="story-lead-h" className="font-cute text-lg font-normal text-brand-700">요약하자면</h5>
-            {reading && (
-              <span className="flex items-center gap-1.5 text-xs">
-                <Stars score={reading.total.score} />
-                <span className="rounded-full border border-brand-100 bg-white px-2 py-0.5 text-[11px] font-bold text-brand-700">#{reading.keyword}</span>
-              </span>
-            )}
-          </div>
-          <Paras mark={mark} text={summary} className="mt-3 text-[16px] leading-[1.85] text-gray-800 break-keep" />
+      {summaryFirst && summaryBlock}
+      {summaryFirst && (
+        <section aria-label="나의 사주 네 기둥" className="rounded-2xl border border-brand-100 bg-white p-4 [&>p:first-child]:mt-0">
+          {pillarsBlock}
         </section>
       )}
+
+      {!summaryFirst && summaryBlock}
 
       {/* 3) 접어 둔 풀이: 오행 → 나는 누구 → 칭찬 → 아쉬움 → 개선 → 행운 처방 → 원국 → 마지막 한마디 */}
       <section aria-label="자세한 풀이" data-testid="story-folds" className="rounded-2xl border border-brand-100 bg-white px-4">
