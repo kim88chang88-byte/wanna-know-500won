@@ -147,7 +147,7 @@ function TogetherCard({ c, name, partnerName }: { c: CompatView; name: string | 
         <p className="mt-0.5 text-[14.5px] leading-relaxed text-gray-800 break-keep">{together.action}</p>
       </div>
       <button type="button" data-testid="compat-send" onClick={send} className="mt-3.5 w-full rounded-full border border-brand-300 bg-white py-2.5 text-sm font-bold text-brand-700">
-        💌 상대에게 요약 보내기
+        💌 상대방에게 우리 궁합 결과 보내기
       </button>
       {msg && <p role="status" className="mt-2 text-center text-xs text-gray-500">{msg}</p>}
     </section>

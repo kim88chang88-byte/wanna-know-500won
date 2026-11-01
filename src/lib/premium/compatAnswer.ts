@@ -115,7 +115,7 @@ export function buildShareSummary(c: CompatView, names: { me?: string | null; pa
     "도리가 알려 준 우리 둘의 질문 3개:",
     ...together.questions.map((q, i) => `${i + 1}. ${q}`),
     "",
-    `너도 무료로 볼 수 있어요 👉 ${url}`,
+    `들어와서 어서 무료로 운세를 보세요! 👉 ${url}`,
   ].join("\n");
 }
 

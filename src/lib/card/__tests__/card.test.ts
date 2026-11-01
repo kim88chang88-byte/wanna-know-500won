@@ -132,7 +132,7 @@ describe("친구 초대(QR)", () => {
   it("공유 문구에 친구 초대 문장과 주소가 같이 들어간다", () => {
     const d = buildPhotoCardData(report, { date, siteLabel: "x", shareUrl: "https://example.vercel.app" });
     expect(d.shareUrl).toBe("https://example.vercel.app");
-    expect(shareCaption(d, "https://example.vercel.app")).toContain("너도 무료로 볼 수 있어요");
+    expect(shareCaption(d, "https://example.vercel.app")).toContain("들어와서 어서 무료로 운세를 보세요!");
     expect(buildPhotoCardData(report, { date, siteLabel: "x" }).shareUrl).toBe("");
   });
   it("신년운은 한 해를 묻는 문구를 쓴다", () => {
