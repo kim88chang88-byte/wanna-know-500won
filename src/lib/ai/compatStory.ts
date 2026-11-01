@@ -37,6 +37,10 @@ export const COMPAT_SYSTEM_PROMPT = `너는 "도리", 맑은 옹달샘의 수달
  ②둘째 문단: "근데 말이야,"처럼 시작해서 그 장면에서 서로 서운하거나 엇갈리기 쉬운 지점을 살짝 넘겨짚어.
  ③셋째 문단: "그러니까"처럼 이어서 이번 주부터 해 볼 수 있는 현실적인 조언 한두 가지.
 
+도리의 팁(id 가 k 로 시작하는 항목)
+- 같은 3문단, 440~520자. ①이 상황이 두 사람 사이에서 실제로 어떻게 벌어지는지 장면 ②그때 서로 속으로 어떻게 느끼기 쉬운지 살짝 넘겨짚기 ③그래서 쓸 수 있는 구체적인 방법과 바로 말해 볼 수 있는 문장 한두 개(따옴표로).
+- 내용에 행운 방향·색·활동처럼 정해진 사실이 있으면 빠뜨리지 말고 그대로 넣어. head 는 쓰되 화면에는 쓰이지 않아.
+
 소름 포인트(중요)
 - 읽는 사람이 "어, 우리 얘기인데?" 하고 놀랄 만큼 구체적으로 써. 예: "연락이 반나절 끊기면 한쪽은 괜히 휴대폰을 다시 확인하고, 다른 한쪽은 일부러 여유를 부리는 편이지", "싸운 날 밤엔 먼저 말을 꺼내고 싶은데 타이밍만 재고 있었을 수도 있어".
 - 단정하지 말고 "~했던 적 있지?", "~한 편이지", "~했을 수 있어"처럼 살짝 넘겨짚는 말투로. 넘겨짚는 건 연락·대화·감정·습관 같은 관계 속 행동 패턴까지만. 직업·가족사·재산·건강·과거 사건은 짚지 마.
@@ -88,12 +92,13 @@ export interface CompatAiNames {
   partner?: string | null;
 }
 
-/** AI 가 다시 써 줄 항목: 풀이 문장들 (행운 방향·색 같은 사실 팁은 건드리지 않아요) */
+/** AI 가 다시 써 줄 항목: 풀이 문장들과 도리의 팁 (id 가 k 로 시작하면 팁) */
 export function rewritableItems(c: CompatView): Array<{ id: string; 제목: string; 내용: string }> {
   return [
     ...c.points.map((p, i) => ({ id: `p${i}`, 제목: `${p.tone === "good" ? "잘 맞는 점" : "맞춰 가면 좋은 점"} · ${p.title}`, 내용: p.body })),
     ...(c.timing ?? []).map((t, i) => ({ id: `t${i}`, 제목: `올해·내년 흐름 · ${t.title}`, 내용: t.body })),
     ...(c.partnerTrait?.body ? [{ id: "r0", 제목: "상대는 이런 사람이에요", 내용: c.partnerTrait.body }] : []),
+    ...(c.tips ?? []).map((t, i) => ({ id: `k${i}`, 제목: `도리의 팁 · ${t.title}`, 내용: t.body })),
   ];
 }
 
@@ -198,6 +203,7 @@ export function applyCompatAi(c: CompatView, core: CompatCore | null, items: Com
     points: c.points.map((p, i) => ({ ...p, title: head(`p${i}`, p.title), body: body(`p${i}`, p.body) })),
     ...(c.timing ? { timing: c.timing.map((t, i) => ({ ...t, body: body(`t${i}`, t.body) })) } : {}),
     ...(c.partnerTrait ? { partnerTrait: { ...c.partnerTrait, body: body("r0", c.partnerTrait.body) } } : {}),
+    ...(c.tips ? { tips: c.tips.map((t, i) => ({ ...t, body: body(`k${i}`, t.body) })) } : {}),
     ai: {
       ...(core?.answer ? { answer: core.answer } : {}),
       ...(core?.summary ? { summary: core.summary } : {}),
@@ -220,7 +226,7 @@ export interface CompatAiOptions {
 
 /**
  * 궁합 결과를 AI 로 다시 써요. 글이 길어서 500원 풀이처럼 몇 갈래로 나눠 동시에 써요.
- * (핵심 글 1번 + 풀이 글 2번). 어느 갈래가 실패하면 그 부분만 규칙 문장으로 남아요.
+ * (핵심 글 1번 + 풀이·팁 글 몇 번). 어느 갈래가 실패하면 그 부분만 규칙 문장으로 남아요.
  */
 export async function addCompatAi(c: CompatView, opts: CompatAiOptions = {}): Promise<CompatView> {
   const apiKey = opts.apiKey ?? aiKey();
@@ -229,8 +235,10 @@ export async function addCompatAi(c: CompatView, opts: CompatAiOptions = {}): Pr
   const concern = opts.concern ?? null;
   const names = opts.names ?? {};
   const allIds = rewritableItems(c).map((x) => x.id);
-  const half = Math.ceil(allIds.length / 2);
-  const groups = [allIds.slice(0, half), allIds.slice(half)].filter((g) => g.length > 0);
+  // 글이 길어서 한 번에 4~5개씩 나눠 동시에 써요. (분량 미달·시간 초과를 줄이려고)
+  const per = Math.ceil(allIds.length / Math.max(1, Math.ceil(allIds.length / 5)));
+  const groups: string[][] = [];
+  for (let i = 0; i < allIds.length; i += per) groups.push(allIds.slice(i, i + per));
   const common = { system: COMPAT_SYSTEM_PROMPT, apiKey, model, fetchImpl: opts.fetchImpl, timeoutMs: opts.timeoutMs ?? 26_000, onUsage: opts.onUsage };
   try {
     const [core, ...itemParts] = await Promise.all([

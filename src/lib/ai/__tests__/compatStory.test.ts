@@ -16,8 +16,8 @@ const base = {
 } as unknown as CompatView;
 
 describe("compat ai", () => {
-  it("다시 쓸 항목은 풀이와 흐름과 상대 성향만이고 팁은 건드리지 않아요", () => {
-    expect(rewritableItems(base).map((x) => x.id)).toEqual(["p0", "p1", "t0"]);
+  it("다시 쓸 항목은 풀이·흐름·상대 성향·도리의 팁이에요", () => {
+    expect(rewritableItems(base).map((x) => x.id)).toEqual(["p0", "p1", "t0", "k0"]);
     expect(rewritableItems({ ...base, partnerTrait: { title: "t", body: "b" } }).map((x) => x.id)).toContain("r0");
   });
 
@@ -61,7 +61,14 @@ describe("compat ai", () => {
     expect(out.timing![0].body).toBe("원래 t");
     expect(out.ai?.answer).toBeTruthy();
     expect(out.ai?.summary).toBeUndefined();
-    expect(out.tips).toBe(base.tips);
+    expect(out.tips![0].body).toBe("팁");
+  });
+
+  it("도리의 팁도 AI 글로 바뀌고 제목은 그대로예요", () => {
+    const items = parseItems({ items: [{ id: "k0", head: "싸운 뒤에도 먼저 손 내밀기 쉬운 사이네요", body: long("싸운 날 밤엔 말을 꺼내기가 어렵지. ") }] }, ["p0", "p1", "t0", "k0"]);
+    const out = applyCompatAi(base, null, items);
+    expect(out.tips![0].title).toBe("k");
+    expect(out.tips![0].body).not.toBe("팁");
   });
 
   it("금지 표현이 있으면 버려요", () => {
