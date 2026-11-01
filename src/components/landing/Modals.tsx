@@ -2,8 +2,9 @@
 
 import LoginButtons from "./LoginButtons";
 import ReferralBox from "./ReferralBox";
+import AddPersonForm from "./AddPersonForm";
 import { profileSummary, type SavedProfile } from "@/lib/profile";
-import type { SavedPerson } from "@/lib/people";
+import { MAX_PEOPLE, type SavedPerson } from "@/lib/people";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { LOGIN_RESULT_MESSAGE, type AuthUser, type LoginResult } from "./useAuth";
 
@@ -90,13 +91,18 @@ function SavedPeopleBox() {
   const [people, setPeople] = useState<SavedPerson[]>([]);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [failed, setFailed] = useState(false);
+  const [enabled, setEnabled] = useState(false);
+  const [adding, setAdding] = useState(false);
 
   useEffect(() => {
     let alive = true;
     fetch("/api/people", { cache: "no-store" })
       .then((r) => (r.ok ? r.json() : null))
-      .then((j: { people?: SavedPerson[] } | null) => {
-        if (alive && j && Array.isArray(j.people)) setPeople(j.people);
+      .then((j: { people?: SavedPerson[]; enabled?: boolean } | null) => {
+        if (alive && j && Array.isArray(j.people)) {
+          setPeople(j.people);
+          setEnabled(j.enabled !== false);
+        }
       })
       .catch(() => {});
     return () => {
@@ -104,10 +110,12 @@ function SavedPeopleBox() {
     };
   }, []);
 
-  if (people.length === 0) return null;
+  // 기능이 꺼져 있거나(표가 아직 없음) 불러오지 못했으면 아무것도 안 보여요.
+  if (!enabled) return null;
   return (
     <div data-testid="saved-people-box" className="rounded-2xl bg-brand-50 border border-brand-100 p-3">
       <p className="text-[11px] font-bold text-brand-700 text-center">도리가 기억하고 있는 다른 사람</p>
+      {people.length === 0 && !adding && <p className="mt-1 text-center text-[11px] text-gray-500">아직 없어요. 가족·친구·연인을 추가해 두면 눌러서 바로 풀이할 수 있어요.</p>}
       <ul className="mt-1.5 space-y-1">
         {people.map((p) => (
           <li key={p.id} className="flex items-center justify-between gap-2 text-xs text-gray-700">
@@ -141,6 +149,26 @@ function SavedPeopleBox() {
         <p role="alert" className="text-[11px] font-bold text-brand-600 mt-1 text-center">
           지우지 못했어요. 잠시 뒤에 다시 시도해 주세요.
         </p>
+      )}
+      {adding ? (
+        <AddPersonForm
+          onCancel={() => setAdding(false)}
+          onAdded={(p) => {
+            setPeople((list) => (list.some((x) => x.id === p.id) ? list : [p, ...list]));
+            setAdding(false);
+          }}
+        />
+      ) : people.length < MAX_PEOPLE ? (
+        <button
+          type="button"
+          data-testid="add-person"
+          onClick={() => setAdding(true)}
+          className="mt-2 w-full rounded-full border border-brand-300 bg-white py-1.5 text-[11px] font-bold text-brand-700 active:scale-95 transition-transform"
+        >
+          + 다른 사람 추가하기
+        </button>
+      ) : (
+        <p className="mt-2 text-center text-[11px] text-gray-500">가득 찼어요. (최대 {MAX_PEOPLE}명) 안 쓰는 사람을 지우면 새로 추가할 수 있어요.</p>
       )}
     </div>
   );

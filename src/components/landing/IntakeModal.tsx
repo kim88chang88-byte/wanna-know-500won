@@ -406,6 +406,9 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
   const [savePerson, setSavePerson] = useState(true); // 기본은 켜 두고, 끌 수 있어요 (로그인한 회원만 보여요)
   const [personLabel, setPersonLabel] = useState("");
   const [pickedPerson, setPickedPerson] = useState<string | null>(null);
+  // 궁합이 아닌 풀이에서, 지금 적은 정보가 다른 사람 것일 때 기억해 두기 (선택 동의, 기본은 꺼짐)
+  const [saveOther, setSaveOther] = useState(false);
+  const [otherLabel, setOtherLabel] = useState("");
   /** 결과 화면에 보여 줄 상대방 정보 (궁합일 때만) */
   const [resultPartner, setResultPartner] = useState<{ birth: BirthInput; name: string } | null>(null);
   const [meKey, setMeKey] = useState(0);
@@ -488,10 +491,14 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
     setError(null);
     const concern = buildConcern(form);
     // 저장된 정보를 그대로 쓰는 경우엔 다시 저장하지 않아요.
-    const wantSave = loggedIn && saveProfile && !sameBirth(savedProfile, input);
+    const wantSave = loggedIn && saveProfile && !saveOther && !sameBirth(savedProfile, input);
     // 상대방을 기억해 두기 (선택 동의. 풀이와 따로 보내고, 실패해도 풀이엔 영향 없어요)
     if (compat && loggedIn && savePerson && !pickedPerson && partnerInput && people.length < MAX_PEOPLE) {
       void fetch("/api/people", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ label: personLabel.trim() || autoLabel(partnerInput), birth: partnerInput }) }).catch(() => {});
+    }
+    // 궁합이 아닌 풀이에서 다른 사람 것을 기억해 두기 (풀이와 따로 보내고, 실패해도 풀이엔 영향 없어요)
+    if (!compat && loggedIn && saveOther && people.length < MAX_PEOPLE && !people.some((x) => sameBirth(x.birth, input)) && !sameBirth(savedProfile, input)) {
+      void fetch("/api/people", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ label: otherLabel.trim() || autoLabel(input), birth: input }) }).catch(() => {});
     }
     const wantShare = shareConcern && concern !== null;
     const ctrl = new AbortController();
@@ -955,7 +962,7 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
                   </p>
                 ) : (
                   <label className="flex items-start gap-2 text-xs text-gray-700 leading-relaxed">
-                    <input type="checkbox" name="saveProfile" className="mt-0.5" checked={saveProfile} onChange={(e) => setSaveProfile(e.target.checked)} />
+                    <input type="checkbox" name="saveProfile" className="mt-0.5" checked={saveProfile} onChange={(e) => { setSaveProfile(e.target.checked); if (e.target.checked) setSaveOther(false); }} />
                     <span>
                       (선택) 도리가 생년월일시·성별을 기억하게 저장해요. 다음부터 다시 입력하지 않아도 돼요. 로그인 창에서 언제든 지울 수 있고, 탈퇴하면 함께 삭제돼요.
                     </span>
@@ -969,6 +976,43 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
                   <span>(선택) 본 풀이를 내 보관함에 저장해요. 언제든 다시 볼 수 있고, 다시 볼 때는 추가 비용이 없어요. 보관함에서 지울 수 있고 탈퇴하면 함께 삭제돼요.</span>
                 </label>
               )}
+
+              {!compat && loggedIn && people.length < MAX_PEOPLE && (() => {
+                const cur = buildBirthInput({ ...form, consent: true });
+                if (!cur || sameBirth(savedProfile, cur) || people.some((x) => sameBirth(x.birth, cur))) return null;
+                return (
+                  <div className="space-y-1.5">
+                    <label className="flex items-start gap-2 text-xs text-gray-700 leading-relaxed">
+                      <input
+                        type="checkbox"
+                        name="saveOther"
+                        data-testid="save-other"
+                        className="mt-0.5"
+                        checked={saveOther}
+                        onChange={(e) => {
+                          setSaveOther(e.target.checked);
+                          if (e.target.checked) setSaveProfile(false);
+                        }}
+                      />
+                      <span>
+                        (선택) 이 풀이는 <b>다른 사람</b> 것이에요. 그 사람의 생년월일시·성별을 기억해 둬요. 다음에 눌러서 바로 고를 수 있어요. 본인이 알려도 괜찮다고 한 정보만 저장해 주세요. 로그인 창에서 언제든 지울 수 있어요.
+                      </span>
+                    </label>
+                    {saveOther && (
+                      <input
+                        type="text"
+                        name="otherLabel"
+                        data-testid="other-label"
+                        value={otherLabel}
+                        maxLength={MAX_LABEL}
+                        onChange={(e) => setOtherLabel(e.target.value)}
+                        placeholder="별명 (선택, 예: 엄마) · 실명은 피해 주세요"
+                        className="w-full rounded-xl border border-brand-200 px-3 py-2 text-xs"
+                      />
+                    )}
+                  </div>
+                );
+              })()}
 
               {compat && loggedIn && !pickedPerson && people.length < MAX_PEOPLE && (
                 <div className="space-y-1.5">
