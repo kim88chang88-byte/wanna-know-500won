@@ -283,6 +283,16 @@ export function MachinesSection({ onSpin, lastKey = null }: SpinProps & { lastKe
 export function PremiumSection({ onSpin }: SpinProps) {
   return (
     <section id="premium" className="mb-8 relative z-10 scroll-mt-20">
+      <div className="flex items-end justify-between gap-2 px-1 mb-2">
+        <div>
+          <div className="flex items-center gap-1 text-brand-600">
+            <span className="material-symbols-outlined text-[16px]" aria-hidden="true">workspace_premium</span>
+            <span className="text-[11px] font-bold uppercase tracking-wider">Premium Report</span>
+          </div>
+          <h3 className="text-base sm:text-lg font-bold text-gray-900">고민에 답하는 종합 사주</h3>
+        </div>
+        <span className="shrink-0 rounded-full bg-gray-100 px-2.5 py-0.5 text-[11px] text-gray-500">심층 리포트</span>
+      </div>
       <div
         className="card-water-glow rounded-[2.5rem] p-4 sm:p-6 bg-[#2a1a5e] border-2 border-brand-300 shadow-[0_12px_36px_rgba(80,40,160,0.35)] relative overflow-hidden"
         style={{ backgroundImage: "url(/images/premium-bg.webp)", backgroundSize: "cover", backgroundPosition: "80% top" }}
