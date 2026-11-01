@@ -30,7 +30,7 @@ export function useChatEnabled(): boolean {
 }
 
 /** "도리에게 더 물어보기" 버튼: 맥락을 담아 상담방으로 가요. 열려 있지 않은 사람에게는 보이지 않아요. */
-export function ChatEntry({ ctx, luxe = false, className = "" }: { ctx: ChatCtx; luxe?: boolean; className?: string }) {
+export function ChatEntry({ ctx, luxe = false, className = "", inScene = false }: { ctx: ChatCtx; luxe?: boolean; className?: string; /** 오늘 카드 말풍선 안에 넣을 때: 글자·여백을 장면 너비(cqw)에 맞춰요 */ inScene?: boolean }) {
   const enabled = useChatEnabled();
   const router = useRouter();
   if (!enabled) return null;
@@ -42,7 +42,8 @@ export function ChatEntry({ ctx, luxe = false, className = "" }: { ctx: ChatCtx;
         saveChatCtx(ctx);
         router.push("/chat");
       }}
-      className={`rounded-full px-4 py-2 text-xs font-bold shadow-sm active:scale-95 ${luxe ? "bg-[#e6c887] text-[#1b1824]" : "bg-brand-500 text-white"} ${className}`}
+      style={inScene ? { fontSize: "3cqw", padding: "2cqw 0", width: "100%" } : undefined}
+      className={`rounded-full font-bold shadow-sm active:scale-95 ${inScene ? "" : "px-4 py-2 text-xs"} ${luxe ? "bg-[#e6c887] text-[#1b1824]" : "bg-brand-500 text-white"} ${className}`}
     >
       💬 도리에게 더 물어보기
     </button>

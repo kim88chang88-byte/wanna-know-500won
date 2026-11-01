@@ -71,7 +71,7 @@ export function DailyLineCard({ onOpened }: { onOpened?: () => void }) {
         <div role="status">
           <p className="text-xs font-bold text-brand-600"><DoriIcon />오늘의 도리 한마디</p>
           <div className="mt-2">
-            <DoriScene line={daily.line} tip={daily.tip} />
+            <DoriScene line={daily.line} tip={daily.tip} action={<ChatEntry inScene ctx={{ kind: "daily", summary: `오늘의 한마디: ${daily.line}\n오늘의 팁: ${daily.tip}\n오늘 일진: ${daily.ganzhi}` }} />} />
           </div>
           <div data-testid="daily-ganzhi" className="mt-2 flex items-center gap-1.5">
             <span className="shrink-0 rounded-full bg-brand-50 px-2 py-0.5 text-[11px] font-bold text-brand-600">오늘 일진</span>
@@ -80,9 +80,6 @@ export function DailyLineCard({ onOpened }: { onOpened?: () => void }) {
               {ganzhiParts(daily.ganzhi).hangul && <span className="ml-0.5 text-gray-400">({ganzhiParts(daily.ganzhi).hanja})</span>}
               {ganzhiMeaning(daily.ganzhi, true) && <span> · {ganzhiMeaning(daily.ganzhi, true)}</span>}
             </FitText>
-          </div>
-          <div className="mt-2 flex justify-end">
-            <ChatEntry ctx={{ kind: "daily", summary: `오늘의 한마디: ${daily.line}\n오늘의 팁: ${daily.tip}\n오늘 일진: ${daily.ganzhi}` }} />
           </div>
         </div>
       ) : (

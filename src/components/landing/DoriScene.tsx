@@ -1,9 +1,10 @@
+import type { ReactNode } from "react";
 /**
  * 오늘의 도리 한마디 장면: 파스텔 하늘 배경에서 도리가 손을 흔들고, 오른쪽 말풍선에 한마디와 작은 실천이 보여요.
  * 배경 그림(daily-scene.webp)의 말풍선 자리를 같은 모양의 풍선으로 덮어서, 글은 실제 글자로 보여줘요.
  * 글자 크기는 장면 너비에 비례해서(cqw) 화면이 좁아도 그림과 같은 비율로 줄어요.
  */
-export default function DoriScene({ line, tip }: { line: string; tip: string }) {
+export default function DoriScene({ line, tip, action }: { line: string; tip: string; /** 말풍선 맨 아래에 붙는 버튼 (예: 도리에게 더 물어보기) */ action?: ReactNode }) {
   const long = line.length > 42;
   // "오늘의 작은 실천: 내 속도대로…" → "오늘의 작은 실천:" 다음에서 줄을 바꿔요
   const cleanTip = tip.replace(/^🫧\s*/, "");
@@ -49,6 +50,7 @@ export default function DoriScene({ line, tip }: { line: string; tip: string }) 
             </>
           )}
         </p>
+        {action}
       </div>
     </div>
   );
