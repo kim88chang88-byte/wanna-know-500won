@@ -28,6 +28,8 @@ import type { PublicReading } from "@/lib/ai/reading";
 import { dayKey, getBrowserStorage } from "@/lib/drawCounter";
 import { rememberConcern } from "@/lib/followup";
 import { AskChips } from "./AskChips";
+import { ChatEntry } from "@/components/chat/ChatEntry";
+import { summarizeReport } from "@/lib/chatContext";
 import { CompareCard } from "./CompareCard";
 import { HoursCard } from "./HoursCard";
 import { MbtiCard } from "./MbtiCard";
@@ -798,6 +800,21 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
           )}
 
           {bookMode && premiumReport && <NextProductBanner report={premiumReport} />}
+
+          {phase === "result" && premiumReport && askInput && (
+            <div className="mt-6 text-center">
+              <ChatEntry
+                luxe={luxe}
+                ctx={{
+                  kind: compat && premiumReport.compat ? "compat" : "reading",
+                  summary: summarizeReport(premiumReport),
+                  birth: askInput,
+                  ...(compat && resultPartner ? { partnerBirth: resultPartner.birth, partnerName: resultPartner.name } : {}),
+                  name: nickname?.trim() || null,
+                }}
+              />
+            </div>
+          )}
 
           {luxe ? (
             <div className="mt-6 rounded-2xl border border-[#e6c887]/30 bg-[#fbf6ea] p-1">

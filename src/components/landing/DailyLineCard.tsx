@@ -5,6 +5,7 @@ import DoriScene from "./DoriScene";
 import FitText from "./FitText";
 import { ganzhiMeaning } from "@/lib/ganzhiMeaning";
 import { useEffect, useState } from "react";
+import { ChatEntry } from "@/components/chat/ChatEntry";
 import { dayKey, getBrowserStorage } from "@/lib/drawCounter";
 
 interface Daily {
@@ -79,6 +80,9 @@ export function DailyLineCard({ onOpened }: { onOpened?: () => void }) {
               {ganzhiParts(daily.ganzhi).hangul && <span className="ml-0.5 text-gray-400">({ganzhiParts(daily.ganzhi).hanja})</span>}
               {ganzhiMeaning(daily.ganzhi, true) && <span> · {ganzhiMeaning(daily.ganzhi, true)}</span>}
             </FitText>
+          </div>
+          <div className="mt-2 flex justify-end">
+            <ChatEntry ctx={{ kind: "daily", summary: `오늘의 한마디: ${daily.line}\n오늘의 팁: ${daily.tip}\n오늘 일진: ${daily.ganzhi}` }} />
           </div>
         </div>
       ) : (
