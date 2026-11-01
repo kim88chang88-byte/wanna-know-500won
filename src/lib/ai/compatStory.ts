@@ -23,9 +23,11 @@ export const COMPAT_SYSTEM_PROMPT = `너는 "도리", 맑은 옹달샘의 수달
 규칙
 - 부드러운 해요체. 반말 금지. 사실은 입력의 "사실"에 있는 것만 쓰고, 없는 글자·관계·점수를 지어내지 마.
 - "나"는 이 글을 읽는 사람이고 "상대"는 상대방이야. 이름이 있으면 "○○님"처럼 불러(빈칸 표기 "○○" 금지, 실제 이름 사용). 이름이 없으면 "나", "상대"라고 써.
-- answer: 이용자의 고민에 직접 답하는 한 문단(5~6문장, 300자 안팎). 고민이 없으면 두 사람의 관계 종류에 맞춰 가장 큰 힘과 맞춰 갈 점을 말해. 순서: ①마음 알아주기 ②입력 사실(점수·글자 관계) 한두 가지를 근거로 짚기 ③그래서 지금 어떻게 하면 좋은지 ④이번 주 둘이 해 볼 작은 행동 하나. "해도 된다/안 된다"처럼 단정하지 마. 결정은 두 사람의 몫이라는 태도.
+- answer: 이용자의 고민에 직접 답하는 한 문단(5~6문장, 300자 안팎). 고민이 없으면 두 사람의 관계 종류에 맞춰 가장 큰 힘과 맞춰 갈 점을 말해. 순서: ①마음 알아주기 ②입력 사실(점수·글자 관계) 한두 가지를 근거로 짚기 ③그래서 지금 어떤 마음으로 보면 좋은지. (행동 제안은 action 에 따로 써.) "해도 된다/안 된다"처럼 단정하지 마. 결정은 두 사람의 몫이라는 태도.
 - summary: "요약하자면" 한 문단(3~4문장). answer 와 같은 문장을 반복하지 말고 두 사람의 전체 분위기를 그려 줘.
 - items: 입력의 items 각각을 3~4문장으로 풀어 써. 각 id 는 그대로 돌려줘. 원래 내용과 어긋나지 않게, 일상 장면 하나(예: 같이 밥 먹을 때, 연락 주고받을 때)로 풀어.
+- questions: 두 사람이 마주 앉아 서로에게 물어볼 수 있는 질문 정확히 3개(각 20~60자, 해요체, 답이 "예/아니오"로 끝나지 않게). 이 두 사람의 사실(가장 맞춰 갈 항목, 오행 차이 등)에서 하나 이상 끌어와.
+- action: 이번 주 둘이 해 볼 작은 행동 하나(한두 문장, 100자 안팎). 구체적이고 쉬운 것.
 - last: 마지막 한마디 2문장. 이미 서로를 알고 있는 두 사람이라는 전제로, 따뜻하게 응원해. "좋은 인연을 기다리는" 같은 만나기 전 표현 금지.
 - 쉽고 재밌게: 사주 용어(충·합·편재 등)는 한 번 짧게만 곁들이고 곧바로 일상 모습으로 풀어 줘. 비유는 한 가지만.
 - 겁주기, 단정, 예언 금지. 질병·이혼·사고·파산·투자·의료·법률 얘기 금지.
@@ -38,6 +40,8 @@ export const COMPAT_SCHEMA = {
     answer: { type: "string", description: `고민 맞춤 답 한 문단. ${ANSWER_MAX}자 이내` },
     summary: { type: "string", description: `요약하자면 한 문단. ${SUMMARY_MAX}자 이내` },
     last: { type: "string", description: `마지막 한마디 2문장. ${LAST_MAX}자 이내` },
+    questions: { type: "array", items: { type: "string" }, description: "두 사람이 서로에게 물어볼 질문 3개" },
+    action: { type: "string", description: "이번 주 둘이 해 볼 작은 행동 한두 문장" },
     items: {
       type: "array",
       items: {
@@ -51,7 +55,7 @@ export const COMPAT_SCHEMA = {
       },
     },
   },
-  required: ["answer", "summary", "last", "items"],
+  required: ["answer", "summary", "last", "questions", "action", "items"],
   additionalProperties: false,
 } as const;
 
@@ -89,7 +93,7 @@ export function buildCompatPrompt(c: CompatView, concern: Concern | null, names:
     },
     items: rewritableItems(c),
   };
-  return `궁합 결과:\n${JSON.stringify(payload, null, 2)}\n\nanswer, summary, last, items 를 써 줘.`;
+  return `궁합 결과:\n${JSON.stringify(payload, null, 2)}\n\nanswer, summary, questions, action, last, items 를 써 줘.`;
 }
 
 function okText(v: unknown, min: number, max: number): string | null {
@@ -103,12 +107,14 @@ export interface CompatAiResult {
   answer: string | null;
   summary: string | null;
   last: string | null;
+  questions: string[] | null;
+  action: string | null;
   items: Map<string, string>;
 }
 
 /** 모델 응답에서 검사를 통과한 부분만 골라요. */
 export function parseCompatAi(value: unknown, validIds: string[]): CompatAiResult {
-  const o = (value ?? {}) as { answer?: unknown; summary?: unknown; last?: unknown; items?: unknown };
+  const o = (value ?? {}) as { answer?: unknown; summary?: unknown; last?: unknown; questions?: unknown; action?: unknown; items?: unknown };
   const items = new Map<string, string>();
   if (Array.isArray(o.items)) {
     for (const it of o.items) {
@@ -119,18 +125,20 @@ export function parseCompatAi(value: unknown, validIds: string[]): CompatAiResul
       if (t) items.set(id, t);
     }
   }
-  return { answer: okText(o.answer, ANSWER_MIN, ANSWER_MAX), summary: okText(o.summary, SUMMARY_MIN, SUMMARY_MAX), last: okText(o.last, LAST_MIN, LAST_MAX), items };
+  const qs = Array.isArray(o.questions) ? o.questions.map((q) => okText(q, 12, 90)) : [];
+  const questions = qs.length === 3 && qs.every((q): q is string => q !== null) ? qs : null;
+  return { answer: okText(o.answer, ANSWER_MIN, ANSWER_MAX), summary: okText(o.summary, SUMMARY_MIN, SUMMARY_MAX), last: okText(o.last, LAST_MIN, LAST_MAX), questions, action: okText(o.action, 20, 200), items };
 }
 
 /** 검사를 통과한 부분을 궁합 결과에 끼워 넣어요. */
 export function applyCompatAi(c: CompatView, r: CompatAiResult): CompatView {
-  const hasAny = r.answer || r.summary || r.last || r.items.size > 0;
+  const hasAny = r.answer || r.summary || r.last || r.questions || r.action || r.items.size > 0;
   if (!hasAny) return c;
   return {
     ...c,
     points: c.points.map((p, i) => ({ ...p, body: r.items.get(`p${i}`) ?? p.body })),
     ...(c.timing ? { timing: c.timing.map((t, i) => ({ ...t, body: r.items.get(`t${i}`) ?? t.body })) } : {}),
-    ai: { ...(r.answer ? { answer: r.answer } : {}), ...(r.summary ? { summary: r.summary } : {}), ...(r.last ? { last: r.last } : {}) },
+    ai: { ...(r.answer ? { answer: r.answer } : {}), ...(r.summary ? { summary: r.summary } : {}), ...(r.last ? { last: r.last } : {}), ...(r.questions ? { questions: r.questions } : {}), ...(r.action ? { action: r.action } : {}) },
   };
 }
 

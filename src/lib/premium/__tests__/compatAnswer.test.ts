@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildCompatAnswer, elementNote } from "../compatAnswer";
+import { buildCompatAnswer, buildShareSummary, buildTogether, elementNote } from "../compatAnswer";
 import type { CompatPerson, CompatView } from "../types";
 
 const el = (counts: number[]): CompatPerson["elements"] =>
@@ -34,5 +34,36 @@ describe("buildCompatAnswer", () => {
     expect(a.body).toContain("‘대화’(74점)");
     expect(a.body).toContain("‘힘’(64점)");
     expect(a.body).toContain("작은 약속을 챙겨요.");
+  });
+});
+
+describe("buildTogether / buildShareSummary", () => {
+  const c = {
+    score: 70,
+    headline: "서로 맞춰 가며 더 빛나는 사이예요",
+    relation: "연인",
+    scores: [{ label: "대화와 소통", score: 74, note: "" }, { label: "서로에게 주는 힘", score: 64, note: "" }],
+  } as unknown as CompatView;
+
+  it("질문은 항상 3개고, 가장 낮은 항목에 맞는 질문·행동이 들어가요", () => {
+    const t = buildTogether(c);
+    expect(t.questions).toHaveLength(3);
+    expect(t.questions[0]).toContain("힘이 돼요");
+    expect(t.action).toContain("조언 대신");
+  });
+
+  it("관계도 점수도 없으면 기본 문구로 채워요", () => {
+    const t = buildTogether({ score: 60, headline: "h" } as unknown as CompatView);
+    expect(t.questions).toHaveLength(3);
+    expect(t.action.length).toBeGreaterThan(10);
+  });
+
+  it("공유 글에는 점수·질문·주소만 담고 생년월일 같은 정보는 없어요", () => {
+    const t = buildTogether(c);
+    const text = buildShareSummary(c, { me: "은혁", partner: null }, t, "https://x.test");
+    expect(text).toContain("은혁님과 너의 궁합 70점");
+    expect(text).toContain("1. ");
+    expect(text).toContain("https://x.test");
+    expect(text).not.toMatch(/19\d\d|20\d\d\./);
   });
 });

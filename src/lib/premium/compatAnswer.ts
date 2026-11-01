@@ -61,3 +61,60 @@ export function elementNote(me: CompatPerson, partner: CompatPerson, partnerName
   if (parts.length === 0) parts.push("두 사람의 오행이 비슷하게 어우러져요. 서로의 결이 닮아서 편안한 사이예요.");
   return parts.join(" ");
 }
+
+/* ------------------------------------------------------------------ 둘이 같이 해 보기 */
+
+const QUESTION_BY_LABEL: Record<string, string> = {
+  "마음의 거리": "요즘 서로에게 가장 고마웠던 순간은 언제였어요?",
+  "대화와 소통": "내가 말하는 방식 중에 이렇게 바뀌면 좋겠다 싶은 게 있어요?",
+  "생활 리듬": "하루 중 가장 편한 시간대는 언제예요? 같이 맞출 수 있는 시간이 있을까요?",
+  "서로에게 주는 힘": "내가 어떻게 해 주면 가장 힘이 돼요?",
+};
+
+const QUESTIONS_BY_RELATION: Record<string, string[]> = {
+  결혼: ["오래 함께한다면 우리가 꼭 지키고 싶은 일상의 약속은 뭐예요?", "돈과 시간을 어떻게 쓰고 싶은지, 서로 편한 때에 이야기해 볼까요?"],
+  연인: ["우리 둘이 같이 해 보고 싶은 게 있다면 뭐예요?", "서운했는데 말 못 한 게 있다면, 오늘 가볍게 꺼내 볼까요?"],
+  썸: ["요즘 어떤 얘기를 할 때 가장 즐거워요?", "다음에 같이 가 보고 싶은 곳이 있어요?"],
+  친구: ["우리 사이에서 가장 마음에 드는 점은 뭐예요?", "앞으로 같이 해 보고 싶은 게 있어요?"],
+};
+const QUESTIONS_DEFAULT = ["우리 둘이 가장 잘 통한다고 느낄 때는 언제예요?", "서로에게 바라는 작은 한 가지가 있다면 뭐예요?"];
+
+const ACTION_BY_LABEL: Record<string, string> = {
+  "마음의 거리": "오늘 하루 중 고마웠던 일을 한 가지만 말로 전해 보세요.",
+  "대화와 소통": "이번 주엔 하루에 한 번, 상대의 말이 끝날 때까지 끼어들지 않고 들어 보세요.",
+  "생활 리듬": "이번 주에 둘이 편한 시간을 하나 정해 함께 보내 보세요. 짧아도 괜찮아요.",
+  "서로에게 주는 힘": "이번 주엔 상대가 힘들어 보일 때 조언 대신 ‘많이 힘들었겠다’는 말을 먼저 건네 보세요.",
+};
+const ACTION_DEFAULT = "이번 주엔 서로에게 고마운 점을 한 가지씩 말해 보세요.";
+
+export interface Together {
+  questions: string[];
+  action: string;
+}
+
+/** 둘이 같이 해 볼 질문 3개와 이번 주 작은 행동 하나. 가장 맞춰 갈 항목에 맞춰 골라요. */
+export function buildTogether(c: CompatView): Together {
+  const worst = [...(c.scores ?? [])].sort((a, b) => a.score - b.score)[0]?.label;
+  const first = (worst && QUESTION_BY_LABEL[worst]) || null;
+  const rel = (c.relation && QUESTIONS_BY_RELATION[c.relation]) || QUESTIONS_DEFAULT;
+  const questions = [...(first ? [first] : []), ...rel].slice(0, 3);
+  while (questions.length < 3) questions.push(QUESTIONS_DEFAULT[questions.length % 2]);
+  return { questions, action: (worst && ACTION_BY_LABEL[worst]) || ACTION_DEFAULT };
+}
+
+/** 상대에게 보낼 한 장 요약 글 (생년월일 같은 개인 정보는 담지 않아요) */
+export function buildShareSummary(c: CompatView, names: { me?: string | null; partner?: string | null }, together: Together, url: string): string {
+  const me = names.me?.trim() ? `${names.me.trim()}님` : "나";
+  const pa = names.partner?.trim() ? `${names.partner.trim()}님` : "너";
+  const best = [...(c.scores ?? [])].sort((a, b) => b.score - a.score)[0];
+  return [
+    `💞 ${josa(me, "과/와")} ${pa}의 궁합 ${c.score}점`,
+    `“${c.headline}”`,
+    ...(best ? [`가장 든든한 곳은 ‘${best.label}’(${best.score}점)이래요.`] : []),
+    "",
+    "도리가 알려 준 우리 둘의 질문 3개:",
+    ...together.questions.map((q, i) => `${i + 1}. ${q}`),
+    "",
+    `너도 무료로 볼 수 있어요 👉 ${url}`,
+  ].join("\n");
+}

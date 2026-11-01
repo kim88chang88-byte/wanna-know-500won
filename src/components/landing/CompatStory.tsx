@@ -1,9 +1,11 @@
 "use client";
 
-import type { ReactNode } from "react";
-import type { CompatLink, CompatPerson, CompatScore, PremiumReportView } from "@/lib/premium/types";
+import { useState, type ReactNode } from "react";
+import type { CompatLink, CompatPerson, CompatScore, CompatView, PremiumReportView } from "@/lib/premium/types";
 import { josa } from "@/lib/premium/josa";
-import { buildCompatAnswer, elementNote } from "@/lib/premium/compatAnswer";
+import { buildCompatAnswer, buildShareSummary, buildTogether, elementNote } from "@/lib/premium/compatAnswer";
+import { getBrowserStorage } from "@/lib/drawCounter";
+import { readMyCode, withRef } from "@/lib/referral";
 import { ELEMENT_BOX, EL_LABEL, elementOfChar } from "@/lib/elementColor";
 import { Fold, MARK, Paras, Pillars } from "./StoryReport";
 
@@ -104,6 +106,54 @@ function ScoreBars({ scores }: { scores: CompatScore[] }) {
   );
 }
 
+/** 둘이 마주 앉아 해 볼 질문 3개 + 이번 주 작은 행동 + 상대에게 보낼 한 장 요약 */
+function TogetherCard({ c, name, partnerName }: { c: CompatView; name: string | null; partnerName: string }) {
+  const [msg, setMsg] = useState("");
+  const base = buildTogether(c);
+  const together = { questions: c.ai?.questions ?? base.questions, action: c.ai?.action ?? base.action };
+  async function send() {
+    const origin = typeof window === "undefined" ? "" : withRef(window.location.origin, readMyCode(getBrowserStorage()));
+    const text = buildShareSummary(c, { me: name, partner: partnerName === "상대" || partnerName === "상대방" ? null : partnerName }, together, origin);
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: "도리 운세 사주 · 둘의 궁합", text });
+        setMsg("");
+        return;
+      }
+    } catch (e) {
+      if (e instanceof DOMException && e.name === "AbortError") return;
+    }
+    try {
+      await navigator.clipboard.writeText(text);
+      setMsg("요약을 복사했어요. 상대에게 붙여넣어 보내 주세요 🫧");
+    } catch {
+      setMsg("복사하지 못했어요. 글을 길게 눌러 직접 복사해 주세요.");
+    }
+  }
+  return (
+    <section data-testid="compat-together" aria-label="둘이 같이 해 보기" className="rounded-2xl border border-brand-100 bg-white p-4">
+      <p className="text-[11px] font-bold text-brand-500">💞 둘이 같이 해 보기</p>
+      <p className="mt-1 text-[15px] font-bold leading-snug text-gray-900">마주 앉아 서로에게 물어보세요</p>
+      <ol className="mt-2.5 space-y-2">
+        {together.questions.map((q, i) => (
+          <li key={i} className="flex gap-2 rounded-xl bg-brand-50/60 px-3 py-2 text-[14.5px] leading-relaxed text-gray-800 break-keep">
+            <span className="font-bold text-brand-600">{i + 1}</span>
+            <span>{q}</span>
+          </li>
+        ))}
+      </ol>
+      <div data-testid="compat-action" className="mt-3 rounded-xl bg-amber-50/80 px-3.5 py-2.5">
+        <p className="text-[11px] font-bold text-amber-700">이번 주 작은 행동</p>
+        <p className="mt-0.5 text-[14.5px] leading-relaxed text-gray-800 break-keep">{together.action}</p>
+      </div>
+      <button type="button" data-testid="compat-send" onClick={send} className="mt-3.5 w-full rounded-full border border-brand-300 bg-white py-2.5 text-sm font-bold text-brand-700">
+        💌 상대에게 요약 보내기
+      </button>
+      {msg && <p role="status" className="mt-2 text-center text-xs text-gray-500">{msg}</p>}
+    </section>
+  );
+}
+
 export default function CompatStory({ report, intro, closing, lastWord, partnerName = "상대", name = null }: { report: PremiumReportView; intro: string | null; closing?: ReactNode; lastWord?: ReactNode; partnerName?: string; name?: string | null }) {
   const c = report.compat;
   if (!c) return null;
@@ -200,6 +250,8 @@ export default function CompatStory({ report, intro, closing, lastWord, partnerN
           </Fold>
         )}
       </section>
+
+      <TogetherCard c={c} name={who ?? null} partnerName={partnerName} />
 
       <section data-testid="story-note" aria-label="도리의 쪽지" className="relative rounded-2xl border border-amber-200 bg-[#fff9e6] p-4 shadow-sm">
         <span aria-hidden="true" className="absolute -top-2.5 left-6 h-4 w-16 -rotate-2 rounded-sm bg-amber-200/80" />
