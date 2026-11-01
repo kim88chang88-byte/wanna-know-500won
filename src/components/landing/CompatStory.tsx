@@ -114,12 +114,20 @@ export default function CompatStory({ report, intro, closing, lastWord, partnerN
     { key: "good", label: "잘 맞는 점", emoji: "💗", list: good },
     { key: "tip", label: "맞춰 가면 좋은 점", emoji: "🌱", list: tip },
   ].filter((g) => g.list.length > 0);
+  const concern = report.concern;
+  const concernText = concern?.text?.trim() || (concern?.answers.length ? concern.answers.map((a) => a.title).join(" · ") : "");
   const answer = buildCompatAnswer(c);
   const who = name?.trim();
   const answerTitle = answer?.hasRelation ? `${who ? `${who}님` : "나"}의 고민에 대한 도리의 답은...` : "두 사람에 대한 도리의 답은...";
   const stars = Math.max(1, Math.min(5, Math.round(c.score / 20)));
   return (
     <div data-testid="story-report" className="mt-5 space-y-5">
+      {concernText && (
+        <section data-testid="compat-concern" aria-label="내가 고른 고민" className="-mb-2.5 rounded-2xl bg-brand-50/70 px-4 py-3">
+          <p className="text-[11px] font-bold text-gray-500">내가 고른 고민</p>
+          <p className="mt-0.5 text-sm leading-relaxed text-gray-800">{concernText}</p>
+        </section>
+      )}
       {answer && (
         <section data-testid="compat-answer" aria-label="도리의 답" className="rounded-2xl border border-brand-100 bg-gradient-to-br from-white to-amber-50/60 px-4 py-3.5">
           <p className="text-[11px] font-bold text-brand-700">{answerTitle}</p>
