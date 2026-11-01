@@ -382,6 +382,42 @@ export function createDb(config: DbConfig, fetchImpl: FetchLike = fetch) {
       return (await res.json().catch(() => null)) === true;
     },
 
+    /** AI 호출 기록 한 줄을 더해요. (calls/hits 는 0 또는 1, 토큰은 실제 사용량) */
+    async addAiCost(day: string, model: string, calls: number, hits: number, input: number, output: number): Promise<void> {
+      await call("rpc/ai_cost_add", {
+        method: "POST",
+        headers: headers({ Prefer: "return=minimal" }),
+        body: JSON.stringify({ p_day: day, p_model: model.slice(0, 80), p_calls: calls, p_hits: hits, p_in: Math.max(0, Math.round(input)), p_out: Math.max(0, Math.round(output)) }),
+      });
+    },
+
+    /** since(YYYY-MM-DD) 이후의 날짜·모델별 AI 사용 기록 */
+    async listAiCost(since: string): Promise<Array<{ day: string; model: string; calls: number; cacheHits: number; input: number; output: number }>> {
+      const q = new URLSearchParams({ select: "day,model,calls,cache_hits,input_tokens,output_tokens", day: `gte.${since}`, order: "day.desc" });
+      const res = await call(`ai_cost?${q.toString()}`, { method: "GET", headers: headers() });
+      const rows = (await res.json().catch(() => [])) as Array<Record<string, unknown>>;
+      if (!Array.isArray(rows)) return [];
+      return rows.map((r) => ({ day: String(r.day), model: String(r.model), calls: Number(r.calls) || 0, cacheHits: Number(r.cache_hits) || 0, input: Number(r.input_tokens) || 0, output: Number(r.output_tokens) || 0 }));
+    },
+
+    /** 관리자 테스트 캐시 읽기. 없으면 null. */
+    async getAiCache(key: string): Promise<string | null> {
+      if (!/^[0-9a-f]{64}$/.test(key)) return null;
+      const res = await call(`ai_cache?key=eq.${key}&select=payload&limit=1`, { method: "GET", headers: headers() });
+      const rows = (await res.json().catch(() => [])) as Array<{ payload?: unknown }>;
+      return Array.isArray(rows) && typeof rows[0]?.payload === "string" ? rows[0].payload : null;
+    },
+
+    /** 관리자 테스트 캐시 쓰기. (같은 키면 덮어써요) */
+    async putAiCache(key: string, model: string, payload: string): Promise<void> {
+      if (!/^[0-9a-f]{64}$/.test(key)) return;
+      await call("ai_cache?on_conflict=key", {
+        method: "POST",
+        headers: headers({ Prefer: "resolution=merge-duplicates,return=minimal" }),
+        body: JSON.stringify({ key, model: model.slice(0, 80), payload }),
+      });
+    },
+
     /**
      * 속도 제한(여러 서버 공용). 한도 안이면 0, 넘었으면 다시 시도할 때까지 남은 초를 돌려줘요.
      * DB 함수(rate_limit_take) 안에서 한 번에 세서 동시에 불러도 틀어지지 않아요.

@@ -479,3 +479,46 @@ $$;
 
 revoke all on function public.coin_grant_capped(text, text, text, int, int) from public, anon, authenticated;
 grant execute on function public.coin_grant_capped(text, text, text, int, int) to service_role;
+
+-- ─────────────────────────────────────────────────────────────────────────────
+-- AI 비용 점검용: ① 날짜·모델별 호출 횟수/토큰 기록(관리자 화면에 표시)  ② 관리자 테스트 캐시
+-- 이 파일 전체를 다시 Run 하면 추가돼요. (없어도 사이트는 그대로 동작하고, 기록·캐시만 빠져요)
+-- 사용량 확인: select * from public.ai_cost order by day desc;
+-- 캐시 비우기: delete from public.ai_cache;
+-- ─────────────────────────────────────────────────────────────────────────────
+create table if not exists public.ai_cost (
+  day date not null,                             -- 한국 시간(KST) 기준 날짜
+  model text not null,
+  calls int not null default 0,                  -- 실제로 AI 를 부른 횟수
+  cache_hits int not null default 0,             -- 캐시로 대신해서 비용이 안 든 횟수
+  input_tokens bigint not null default 0,
+  output_tokens bigint not null default 0,
+  primary key (day, model)
+);
+alter table public.ai_cost enable row level security;
+
+create or replace function public.ai_cost_add(p_day date, p_model text, p_calls int, p_hits int, p_in bigint, p_out bigint)
+returns void
+language sql
+security definer
+set search_path = public
+as $$
+  insert into public.ai_cost as c (day, model, calls, cache_hits, input_tokens, output_tokens)
+  values (p_day, p_model, p_calls, p_hits, p_in, p_out)
+  on conflict (day, model) do update set
+    calls = c.calls + p_calls,
+    cache_hits = c.cache_hits + p_hits,
+    input_tokens = c.input_tokens + p_in,
+    output_tokens = c.output_tokens + p_out;
+$$;
+
+revoke all on function public.ai_cost_add(date, text, int, int, bigint, bigint) from public, anon, authenticated;
+grant execute on function public.ai_cost_add(date, text, int, int, bigint, bigint) to service_role;
+
+create table if not exists public.ai_cache (
+  key text primary key,                          -- 모델+프롬프트+입력의 해시
+  model text not null,
+  payload text not null,                         -- AI 가 돌려준 JSON 글
+  created_at timestamptz not null default now()
+);
+alter table public.ai_cache enable row level security;

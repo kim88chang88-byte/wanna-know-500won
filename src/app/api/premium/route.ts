@@ -10,6 +10,7 @@ import { addBookNotes } from "@/lib/ai/bookNotes";
 import { CHAPTER_BATCH_2, CHAPTER_BATCHES, chapterName, rewriteChapters } from "@/lib/ai/bookChapter";
 import { takeAiBudget } from "@/lib/ai/budget";
 import { isAdmin } from "@/lib/admin/auth";
+import { enableAdminAiCache } from "@/lib/ai/aiTools";
 import { previewBlank } from "@/lib/premium/book/lock";
 import { PREVIEW_OPEN_PAGES } from "@/lib/premium/config";
 import { createDb, loadDbConfig } from "@/lib/db/supabase";
@@ -51,6 +52,8 @@ export async function POST(request: Request) {
     const session = verifySessionToken(readCookie(cookieHeader, SESSION_COOKIE), process.env.AUTH_SECRET);
     const entitled = hasEntitlement(readCookie(cookieHeader, ENTITLEMENT_COOKIE), process.env.AUTH_SECRET, session?.sub ?? null);
     const lock = isPremiumLocked(process.env) && !entitled;
+    // 관리자 요청이면 테스트 캐시를 켜요. (같은 입력으로 다시 열어도 AI 비용이 또 들지 않아요)
+    if (isAdmin(session?.sub, process.env)) enableAdminAiCache();
     // PREMIUM_AI_GATE=true 이면 AI 장 풀이(비용이 드는 부분)는 이용권이 있거나 관리자(ADMIN_USER_IDS)인 요청에만 줘요. 꺼 두면 지금처럼 모두에게 줘요.
     const aiGated = process.env.PREMIUM_AI_GATE?.trim().toLowerCase() === "true" && !entitled && !isAdmin(session?.sub, process.env);
     const report = buildPremiumReport(parsed.value, new Date(), parsed.level, parsed.topic, lock, parsed.concern, parsed.partner);

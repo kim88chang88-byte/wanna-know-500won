@@ -1,6 +1,8 @@
 import { hasAiKey } from "@/lib/ai/llm";
 import { NextResponse } from "next/server";
 import { takeAiBudget } from "@/lib/ai/budget";
+import { enableAdminAiCache } from "@/lib/ai/aiTools";
+import { isAdmin } from "@/lib/admin/auth";
 import { buildCoreFacts } from "@/lib/ai/coreFacts";
 import { kstToday } from "@/lib/ai/dailyFacts";
 import { interpretDetail } from "@/lib/ai/detail";
@@ -50,6 +52,7 @@ export async function POST(request: Request) {
 
   // 로그인한 회원이고 DB 가 연결되어 있으면, 뽑기 횟수를 서버에서 세요. (아니면 브라우저 카운터만 써요)
   const session = verifySessionToken(readCookie(request.headers.get("cookie"), SESSION_COOKIE), process.env.AUTH_SECRET);
+  if (session && isAdmin(session.sub, process.env)) enableAdminAiCache();
   const dbConfig = loadDbConfig(process.env);
   const db = dbConfig ? createDb(dbConfig) : null;
   const userId = session && db ? session.sub : null;

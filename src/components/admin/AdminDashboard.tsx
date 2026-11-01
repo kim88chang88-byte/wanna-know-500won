@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import type { AdminStats } from "@/lib/admin/stats";
+import AiUsageSection from "./AiUsageSection";
 
 type State =
   | { kind: "loading" }
@@ -183,6 +184,8 @@ export default function AdminDashboard() {
               <Kpi label="고민 통계 동의 건수(전체)" value={state.stats.totals.concernLogs} testId="kpi-concerns" />
               <Kpi label="전체 후기" value={state.stats.totals.reviews} testId="kpi-reviews" />
             </div>
+
+            <AiUsageSection />
 
             <section className={CARD} data-testid="reviews-section">
               <div className="flex items-center justify-between gap-2 flex-wrap mb-3">

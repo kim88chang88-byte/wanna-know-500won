@@ -7,6 +7,7 @@
  */
 
 import { readingFirst } from "@/lib/hanjaReading";
+import { adminCacheOn, aiCacheKey, logAiCall, readAiCache, writeAiCache } from "./aiTools";
 
 export type Provider = "anthropic" | "gemini";
 export type Tier = "free" | "paid";
@@ -146,9 +147,35 @@ async function callGemini(r: LlmRequest): Promise<LlmResult> {
   return { kind: "ok", text, usage };
 }
 
-/** 제공자에 맞는 호출을 해서 같은 모양의 결과로 돌려줘요. 네트워크 오류·시간 초과는 던지니 호출하는 쪽 try/catch 로 받으세요. */
+/**
+ * 제공자에 맞는 호출을 해서 같은 모양의 결과로 돌려줘요. 네트워크 오류·시간 초과는 던지니 호출하는 쪽 try/catch 로 받으세요.
+ * 모든 AI 호출이 여기를 지나가므로, 관리자 테스트 캐시와 호출 기록(비용 점검)도 여기서 처리해요.
+ */
 export async function callLlm(r: LlmRequest, env: Env = process.env): Promise<LlmResult> {
+  // 관리자 테스트 캐시: 같은 모델·프롬프트·입력이면 저장해 둔 결과를 그대로 써요. (프롬프트를 고치면 자동으로 새로 불러요)
+  const cacheKey = adminCacheOn() && !r.fetchImpl ? aiCacheKey(r.model, r.system, r.user, r.schema, r.maxTokens) : null;
+  if (cacheKey) {
+    const hit = await readAiCache(cacheKey);
+    if (hit) {
+      await logAiCall(r.model, { hit: true });
+      return { kind: "ok", text: hit, usage: { input: 0, output: 0 } };
+    }
+  }
   const res = await (activeProvider(env) === "gemini" ? callGemini(r) : callAnthropic(r));
+  if (res.kind === "ok" && !r.fetchImpl) await logAiCall(r.model, { usage: res.usage });
   // 풀이 속 한자는 모두 "음(한자)" 모양으로 맞춰서 돌려줘요. (예: 병오(丙午))
-  return res.kind === "ok" && res.text ? { ...res, text: readingFirst(res.text) } : res;
+  if (res.kind === "ok" && res.text) {
+    const text = readingFirst(res.text);
+    // JSON 으로 읽히는 결과만 캐시해요. (깨진 결과가 계속 재사용되지 않게)
+    if (cacheKey) {
+      try {
+        JSON.parse(text);
+        await writeAiCache(cacheKey, r.model, text);
+      } catch {
+        /* 건너뜀 */
+      }
+    }
+    return { ...res, text };
+  }
+  return res;
 }
