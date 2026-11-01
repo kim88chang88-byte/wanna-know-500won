@@ -610,7 +610,7 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
       className={`mb-4 rounded-2xl px-4 py-4 text-center ${luxe ? "border border-[#e6c887]/50 bg-gradient-to-b from-[#e6c887]/15 to-transparent" : "border-2 border-brand-300 bg-gradient-to-br from-brand-50 via-white to-amber-50 shadow-[0_6px_20px_rgba(128,87,224,0.12)]"}`}
     >
       <h3 id="intake-title" className={`font-cute text-[25px] sm:text-[28px] font-normal leading-tight break-keep ${luxe ? "text-[#fbf3de]" : "text-brand-700"}`}>
-        {compat && resultPartner ? `${josa(nickname?.trim() ? `${nickname.trim()}님` : "나", "과/와")} 상대방의 궁합♥` : `${nickname?.trim() ? `${nickname.trim()}님` : "나"}의 ${readingKind(target.fortune)} 해설`}
+        {compat && resultPartner ? `${josa(nickname?.trim() ? `${nickname.trim()}님` : "나", "과/와")} ${resultPartner.name}의 궁합♥` : `${nickname?.trim() ? `${nickname.trim()}님` : "나"}의 ${readingKind(target.fortune)} 해설`}
       </h3>
       {askInput && (
         <p
@@ -691,8 +691,8 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
                   {/* 2) 이야기 순서: 내 정보·고민 → 네 기둥 → 한마디로 → 접어 둔 풀이 → 도리의 쪽지 */}
                   <div data-testid="premium-result">
                     {compat && premiumReport.compat ? (
-                      <CompatStory report={premiumReport} intro={null} partnerName={resultPartner?.name ?? "상대"}
-                        lastWord={<><ResultHero report={premiumReport} aiQuote={reading?.kkotgeoji ?? null} luxe={false} hideLucky /><ResultShareCard report={premiumReport} aiQuote={reading?.kkotgeoji ?? null} /></>}
+                      <CompatStory report={premiumReport} intro={null} partnerName={resultPartner?.name ?? "상대"} name={nickname}
+                        lastWord={<><ResultHero report={premiumReport} aiQuote={null} luxe={false} hideLucky /><ResultShareCard report={premiumReport} aiQuote={null} /></>}
                         closing={premiumReport.compat ? <CompatAsk compat={premiumReport.compat} /> : undefined}
                       />
                     ) : (

@@ -1,5 +1,6 @@
 import { BRANCHES, STEMS } from "@/lib/saju/constants";
 import { branchRelation } from "@/lib/ai/dailyFacts";
+import { josa } from "./josa";
 import { ELEMENT_INFO } from "./topic";
 import type { CompatLink, CompatScore, CompatTip, ElementView } from "./types";
 
@@ -134,7 +135,7 @@ export function buildExtras(x: ExtrasInput) {
   const tips: CompatTip[] = [
     { emoji: "🤝", title: "싸웠을 때 화해하는 법", body: reconcile },
     { emoji: "💬", title: "상대에게 잘 통하는 대화법", body: TALK[ELEMENT_KEY[KO_OF[elOfStem(x.otStem)]]] ?? "" },
-    { emoji: "🌿", title: `함께하면 좋은 활동 · ${info.color}`, body: `둘이 함께 비어 있는 ${lowest} 기운을 채워 주면 좋아요. ${ACTIVITY[lowest]}을(를) 추천해요. 행운 방향은 ${info.direction}, 포인트 컬러는 ${info.color}예요.` },
+    { emoji: "🌿", title: `함께하면 좋은 활동 · ${info.color}`, body: `둘이 함께 비어 있는 ${lowest} 기운을 채워 주면 좋아요. ${josa(ACTIVITY[lowest], "을/를")} 추천해요. 행운 방향은 ${info.direction}, 포인트 컬러는 ${info.color}예요.` },
   ];
   if (x.relation) tips.push({ emoji: "💌", title: `${x.relation} 사이에서 마음 쓰면 좋은 점`, body: RELATION_TIP[x.relation] });
 

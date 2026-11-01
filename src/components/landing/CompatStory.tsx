@@ -3,6 +3,7 @@
 import type { ReactNode } from "react";
 import type { CompatLink, CompatPerson, CompatScore, PremiumReportView } from "@/lib/premium/types";
 import { josa } from "@/lib/premium/josa";
+import { buildCompatAnswer, elementNote } from "@/lib/premium/compatAnswer";
 import { ELEMENT_BOX, EL_LABEL, elementOfChar } from "@/lib/elementColor";
 import { Fold, MARK, Paras, Pillars } from "./StoryReport";
 
@@ -27,16 +28,6 @@ function PersonCard({ p, name }: { p: CompatPerson; name: string }) {
           </div>
         ))}
       </div>
-      <p className="mt-2 flex flex-wrap justify-center gap-1">
-        {p.elements.map((e) => {
-          const el = e.kind === "unknown" ? { icon: "", name: e.name } : EL_LABEL[e.kind];
-          return (
-            <span key={e.name} data-testid="compat-el" className={`rounded-full px-2 py-0.5 text-[10.5px] font-bold ${e.count > 0 ? "bg-white text-gray-700" : "bg-white/50 text-gray-400"}`}>
-              {el.icon} {el.name} {e.count}
-            </span>
-          );
-        })}
-      </p>
       {p.hourUnknown && <p className="mt-1.5 text-[10.5px] text-amber-700">시간 모름 · 시주 제외</p>}
     </div>
   );
@@ -90,6 +81,7 @@ function ElementBars({ me, partner, partnerName }: { me: CompatPerson; partner: 
           );
         })}
       </ul>
+      <p data-testid="compat-elnote" className="mt-2 text-[12.5px] leading-relaxed text-gray-600 break-keep">{elementNote(me, partner, partnerName)}</p>
     </div>
   );
 }
@@ -112,7 +104,7 @@ function ScoreBars({ scores }: { scores: CompatScore[] }) {
   );
 }
 
-export default function CompatStory({ report, intro, closing, lastWord, partnerName = "상대" }: { report: PremiumReportView; intro: string | null; closing?: ReactNode; lastWord?: ReactNode; partnerName?: string }) {
+export default function CompatStory({ report, intro, closing, lastWord, partnerName = "상대", name = null }: { report: PremiumReportView; intro: string | null; closing?: ReactNode; lastWord?: ReactNode; partnerName?: string; name?: string | null }) {
   const c = report.compat;
   if (!c) return null;
   const mark = MARK.marriage;
@@ -122,9 +114,35 @@ export default function CompatStory({ report, intro, closing, lastWord, partnerN
     { key: "good", label: "잘 맞는 점", emoji: "💗", list: good },
     { key: "tip", label: "맞춰 가면 좋은 점", emoji: "🌱", list: tip },
   ].filter((g) => g.list.length > 0);
+  const answer = buildCompatAnswer(c);
+  const who = name?.trim();
+  const answerTitle = answer?.hasRelation ? `${who ? `${who}님` : "나"}의 고민에 대한 도리의 답은...` : "두 사람에 대한 도리의 답은...";
   const stars = Math.max(1, Math.min(5, Math.round(c.score / 20)));
   return (
     <div data-testid="story-report" className="mt-5 space-y-5">
+      {answer && (
+        <section data-testid="compat-answer" aria-label="도리의 답" className="rounded-2xl border border-brand-100 bg-gradient-to-br from-white to-amber-50/60 px-4 py-3.5">
+          <p className="text-[11px] font-bold text-brand-700">{answerTitle}</p>
+          <Paras mark={mark} text={answer.body} className="mt-1.5 text-[15px] leading-[1.85] text-gray-800 break-keep" />
+        </section>
+      )}
+
+      <section data-testid="story-lead" aria-labelledby="story-lead-h" className="rounded-2xl border border-brand-100 bg-gradient-to-br from-brand-50 via-white to-amber-50/60 p-4">
+        <div className="flex items-center justify-between gap-2">
+          <h5 id="story-lead-h" className="font-cute text-lg font-normal text-brand-700">요약하자면</h5>
+          <span className="flex items-center gap-1.5 text-xs">
+            <span className="whitespace-nowrap text-amber-400" aria-label={`5점 만점에 ${stars}점`}>
+              {"★".repeat(stars)}
+              <span className="text-gray-200">{"★".repeat(5 - stars)}</span>
+            </span>
+            <span data-testid="compat-score" className="rounded-full border border-brand-100 bg-white px-2 py-0.5 text-[11px] font-bold text-brand-700">{c.score}점</span>
+          </span>
+        </div>
+        <Paras mark={mark} text={c.summary ?? `${c.headline}\n\n${c.closing}`} className="mt-3 text-[16px] leading-[1.85] text-gray-800 break-keep" />
+        {c.scores && <ScoreBars scores={c.scores} />}
+        <p className="mt-2 text-[11px] text-gray-500">점수는 재미로 보는 참고 지수예요.</p>
+      </section>
+
       <section aria-label="두 사람 정보" className="rounded-2xl border border-brand-100 bg-white p-4">
         {intro && <p data-testid="story-intro" className="text-xs font-semibold text-brand-700">{intro}</p>}
         <div className="mt-2.5 grid grid-cols-2 gap-2">
@@ -147,23 +165,6 @@ export default function CompatStory({ report, intro, closing, lastWord, partnerN
             <p className="mt-0.5 text-[13.5px] leading-relaxed text-gray-800 break-keep">{c.partnerTrait.body}</p>
           </div>
         )}
-      </section>
-
-      <section data-testid="story-lead" aria-labelledby="story-lead-h" className="rounded-2xl border border-brand-100 bg-gradient-to-br from-brand-50 via-white to-amber-50/60 p-4">
-        <div className="flex items-center justify-between gap-2">
-          <h5 id="story-lead-h" className="font-cute text-lg font-normal text-brand-700">요약하자면</h5>
-          <span className="flex items-center gap-1.5 text-xs">
-            <span className="whitespace-nowrap text-amber-400" aria-label={`5점 만점에 ${stars}점`}>
-              {"★".repeat(stars)}
-              <span className="text-gray-200">{"★".repeat(5 - stars)}</span>
-            </span>
-            <span data-testid="compat-score" className="rounded-full border border-brand-100 bg-white px-2 py-0.5 text-[11px] font-bold text-brand-700">{c.score}점</span>
-          </span>
-        </div>
-        <Paras mark={mark} text={c.summary ?? `${c.headline}\n\n${c.closing}`} className="mt-3 text-[16px] leading-[1.85] text-gray-800 break-keep" />
-        {c.scores && <ScoreBars scores={c.scores} />}
-        {c.relation && <p className="mt-2 text-[11px] text-brand-700">고른 고민을 바탕으로 ‘{c.relation}’ 사이에 맞춰 보았어요.</p>}
-        <p className="mt-2 text-[11px] text-gray-500">점수는 재미로 보는 참고 지수예요.</p>
       </section>
 
       <section aria-label="자세한 풀이" data-testid="story-folds" className="rounded-2xl border border-brand-100 bg-white px-4">
