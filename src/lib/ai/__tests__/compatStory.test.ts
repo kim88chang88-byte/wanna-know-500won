@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { applyCompatAi, buildCompatPrompt, parseCompatAi, rewritableItems } from "../compatStory";
 import type { CompatView } from "@/lib/premium/types";
 
-const long = (s: string) => s.repeat(8);
+const long = (s: string) => s.repeat(40);
 const base = {
   score: 70,
   headline: "h",
