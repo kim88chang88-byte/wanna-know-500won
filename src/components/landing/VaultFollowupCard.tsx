@@ -1,6 +1,7 @@
 "use client";
 
 import DoriIcon from "./DoriIcon";
+import { ConfirmChoice } from "@/components/ConfirmChoice";
 import { useEffect, useState } from "react";
 import { getBrowserStorage } from "@/lib/drawCounter";
 import { followupPrompt, markAnswered, pickVaultFollowup, readAnswered, type FollowupPick } from "@/lib/vaultFollowup";
@@ -9,6 +10,7 @@ import { followupPrompt, markAnswered, pickVaultFollowup, readAnswered, type Fol
 export function VaultFollowupCard() {
   const [pick, setPick] = useState<FollowupPick | null>(null);
   const [chosen, setChosen] = useState<number | null>(null);
+  const [asking, setAsking] = useState<number | null>(null);
   const [hidden, setHidden] = useState(false);
 
   useEffect(() => {
@@ -54,13 +56,23 @@ export function VaultFollowupCard() {
             type="button"
             aria-pressed={chosen === i}
             disabled={chosen !== null}
-            onClick={() => choose(i)}
+            onClick={() => setAsking(i)}
             className={`rounded-full border px-3.5 py-1.5 text-xs font-bold transition-colors ${chosen === i ? "border-amber-500 bg-amber-500 text-white" : "border-amber-300 bg-white text-amber-800 hover:border-amber-500 disabled:opacity-60"}`}
           >
             {o.label}
           </button>
         ))}
       </div>
+      {asking !== null && chosen === null && (
+        <ConfirmChoice
+          label={check.options[asking].label}
+          onNo={() => setAsking(null)}
+          onYes={() => {
+            choose(asking);
+            setAsking(null);
+          }}
+        />
+      )}
       {chosen !== null && (
         <div role="status" className="mt-2.5">
           <p data-testid="vault-followup-reply" className="text-[13.5px] leading-relaxed text-gray-800">{check.options[chosen].message}</p>

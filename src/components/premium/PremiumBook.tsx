@@ -1,5 +1,6 @@
 "use client";
 
+import { ConfirmChoice } from "@/components/ConfirmChoice";
 import { PREVIEW_OPEN_PAGES } from "@/lib/premium/config";
 import ConcernCard from "./ConcernCard";
 import { josa } from "@/lib/premium/josa";
@@ -94,6 +95,7 @@ function CheckList({ items }: { items: string[] }) {
 /** 사주가 보여 준 흐름과 지금 내 현실을 견줘 보는 세 갈래. 어느 쪽이든 응원으로 마무리해요. */
 function RealityPick({ rc }: { rc: RealityCheck }) {
   const [pick, setPick] = useState<number | null>(null);
+  const [asking, setAsking] = useState<number | null>(null);
   return (
     <div data-testid="book-reality" className="mt-4 rounded-xl border border-[#9a93b0]/50 bg-white/60 px-4 py-3.5">
       <p className="text-[13px] font-bold text-[#8a5f12]">🔎 지금 내 현실과 견줘 보기</p>
@@ -104,7 +106,7 @@ function RealityPick({ rc }: { rc: RealityCheck }) {
             key={o.label}
             type="button"
             aria-pressed={pick === i}
-            onClick={() => setPick(i)}
+            onClick={() => (pick === null ? setAsking(i) : setPick(i))}
             className={`rounded-full border px-3.5 py-1.5 text-[12.5px] font-bold transition-colors ${
               pick === i ? "border-[#b98a2f] bg-[#b98a2f] text-white" : "border-[#9a93b0] text-[#322f47] hover:border-[#b98a2f]"
             }`}
@@ -113,6 +115,16 @@ function RealityPick({ rc }: { rc: RealityCheck }) {
           </button>
         ))}
       </div>
+      {asking !== null && pick === null && (
+        <ConfirmChoice
+          label={rc.options[asking].label}
+          onNo={() => setAsking(null)}
+          onYes={() => {
+            setPick(asking);
+            setAsking(null);
+          }}
+        />
+      )}
       <p role="status" data-testid="book-reality-result" className="min-h-[1.25rem] pt-2.5 text-[13.5px] leading-relaxed text-[#1d1a30]">
         {pick !== null ? rc.options[pick].message : ""}
       </p>
