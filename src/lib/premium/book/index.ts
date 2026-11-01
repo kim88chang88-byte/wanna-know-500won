@@ -135,7 +135,7 @@ export function buildBook(r: SajuResult, ctx: BookContext): BookPage[] {
       { heading: "나를 한 문장으로", body: `${profile.core.split(". ")[0]}. ${strength.head}이고, ${geuk.head.split(" · ")[1]}로 풀이돼요.` },
       {
         heading: "핵심 3줄 요약",
-        body: `① 강점: ${profile.strength} ② 채우면 좋은 기운: ${lowest.name}(${lucky.color}) — ${ELEMENT_LACK[lowest.name]} ③ 지금의 계절: ${cur ? `${cur.ganzhi} 대운(${cur.startAge}~${cur.endAge}세) — ${FLOW_LINE[groupsOf(cur.stemTenGod, cur.branchTenGod)[0] ?? dominant]}` : "10년 단위의 흐름을 8쪽에서 확인해 보세요."}`,
+        body: `① 강점: ${profile.strength} ② 채우면 좋은 기운: ${lowest.name}(${lucky.color}) — ${ELEMENT_LACK[lowest.name]} ③ 지금의 계절: ${cur ? `${cur.ganzhi} 대운(${cur.startAge}~${cur.endAge}세) — ${FLOW_LINE[groupsOf(cur.stemTenGod, cur.branchTenGod)[0] ?? dominant]}` : "10년 단위의 큰 흐름은 부록의 대운 풀이에서 확인해 보세요."}`,
       },
       {
         heading: "이 리포트 읽는 법",
@@ -143,7 +143,7 @@ export function buildBook(r: SajuResult, ctx: BookContext): BookPage[] {
       },
       {
         heading: `${year}년의 한 줄`,
-        body: sy ? `${sy.ganzhi}년은 ${FLOW_LINE[groupsOf(sy.tenGodStem, sy.tenGodBranch)[0] ?? dominant]}` : "올해의 흐름은 9쪽에서 자세히 볼 수 있어요.",
+        body: sy ? `${sy.ganzhi}년은 ${FLOW_LINE[groupsOf(sy.tenGodStem, sy.tenGodBranch)[0] ?? dominant]}` : "올해의 흐름은 부록의 올해·내년 풀이에서 자세히 볼 수 있어요.",
       },
     ],
     [
@@ -313,7 +313,7 @@ export function buildBook(r: SajuResult, ctx: BookContext): BookPage[] {
       { heading: "신강·신약과의 조합", body: `${strength.head}에 ${r.advanced.geukguk} 구조이니, ${strength.advice}` },
       ...(johuSection(dayStem, r.pillars.month[1]) ? [johuSection(dayStem, r.pillars.month[1]) as BookSection] : []),
       ...(yongsinRoleSection(dayStem, yongsinEls, ctx.gradeLabel) ? [yongsinRoleSection(dayStem, yongsinEls, ctx.gradeLabel) as BookSection] : []),
-      ...(yongsinSections.length ? yongsinSections : [{ heading: "용신", body: "균형을 돕는 기운은 4쪽의 오행 균형 팁을 참고해 주세요." }]),
+      ...(yongsinSections.length ? yongsinSections : [{ heading: "용신", body: "균형을 돕는 기운은 2장의 오행 분석에 나온 생활 팁을 참고해 주세요." }]),
       { heading: "잘 맞는 성장의 길", body: GEUKGUK_CAREER[r.advanced.geukguk] ?? GEUKGUK_CAREER["기타"] },
       { heading: `${ctx.gradeLabel} 사주의 인생 전략`, body: (STRATEGY[ctx.gradeLabel] ?? STRATEGY["중화"]).map((t, n) => `${["①", "②", "③"][n]} ${t}`).join(" ") },
       { heading: "용신 활용법", body: "용신은 '꼭 지켜야 할 규칙'이 아니라 '기분과 컨디션이 좋아지는 방향'이에요. 부담 없이 색, 공간, 습관 중 한 가지만 골라 가볍게 시작해 보세요." },
