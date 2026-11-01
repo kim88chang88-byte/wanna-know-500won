@@ -118,3 +118,34 @@ export function buildShareSummary(c: CompatView, names: { me?: string | null; pa
     `너도 무료로 볼 수 있어요 👉 ${url}`,
   ].join("\n");
 }
+
+/* ------------------------------------------------------------------ 풀이 제목을 쉬운 말로 */
+
+const GOD_FEEL: Record<string, string> = {
+  비견: "대등한 친구 같은 느낌",
+  겁재: "승부욕 있는 라이벌 같은 느낌",
+  식신: "함께 있으면 여유로운 느낌",
+  상관: "솔직하고 재치 있는 느낌",
+  편재: "새로운 경험을 함께하는 느낌",
+  정재: "차분히 아끼고 챙기는 느낌",
+  편관: "설렘과 긴장이 함께 있는 느낌",
+  정관: "믿음직하고 반듯한 느낌",
+  편인: "개성 있고 자극이 되는 느낌",
+  정인: "포근하게 기대는 느낌",
+};
+const EL_PLAIN: Record<string, string> = { 목: "나무", 화: "불", 토: "땅", 금: "쇠", 수: "물" };
+const REL_VERB: Record<string, string> = { 합: "서로 끌어당겨요", 충: "서로 부딪혀요", 해: "살짝 엇갈려요" };
+const SEAT: Record<string, string> = { 일지: "마음이 가장 가까운 자리", 월지: "생활 방식이 만나는 자리", 연지: "띠 자리(주변·가족)" };
+
+/** 풀이 제목의 사주 용어를 일상 말로 바꿔요. 모르는 제목은 그대로 둬요. (화면에서만 바꿔서 예전에 저장된 풀이에도 적용돼요) */
+export function plainPointTitle(title: string): string {
+  let m = title.match(/^(내가 보는 상대|상대가 보는 나) · (.+)의 기운$/);
+  if (m && GOD_FEEL[m[2]]) return `${m[1]} · ${GOD_FEEL[m[2]]}`;
+  m = title.match(/^(일지|월지|연지) · .+ · (합|충|해)$/);
+  if (m) return `${SEAT[m[1]]}: ${REL_VERB[m[2]]}`;
+  m = title.match(/^오행 보완 · (.+)$/);
+  if (m) return `빈 ${EL_PLAIN[m[1]] ?? m[1]} 기운을 채워 줘요`;
+  if (title === "일간의 합 · 끌림") return "처음부터 마음이 끌리는 사이";
+  if (title === "일간의 충 · 자극") return "솔직하게 부딪히며 자극이 되는 사이";
+  return title;
+}

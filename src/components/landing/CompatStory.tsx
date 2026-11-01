@@ -3,7 +3,7 @@
 import { useState, type ReactNode } from "react";
 import type { CompatLink, CompatPerson, CompatScore, CompatView, PremiumReportView } from "@/lib/premium/types";
 import { josa } from "@/lib/premium/josa";
-import { buildCompatAnswer, buildShareSummary, buildTogether, elementNote } from "@/lib/premium/compatAnswer";
+import { buildCompatAnswer, buildShareSummary, buildTogether, elementNote, plainPointTitle } from "@/lib/premium/compatAnswer";
 import { getBrowserStorage } from "@/lib/drawCounter";
 import { readMyCode, withRef } from "@/lib/referral";
 import { ELEMENT_BOX, EL_LABEL, elementOfChar } from "@/lib/elementColor";
@@ -207,14 +207,6 @@ export default function CompatStory({ report, intro, closing, lastWord, partnerN
           <PersonCard p={c.me} name="나" />
           <PersonCard p={c.partner} name={partnerName} />
         </div>
-        <p className="mt-3.5 text-[11px] font-bold text-gray-500">나의 사주 네 기둥</p>
-        <Pillars report={report} pillars={c.me.pillars} owner="내" hint="위 칸은 겉으로 드러나는 기운(하늘), 아래 칸은 바탕이 되는 기운(땅)이에요. 두 사람의 같은 자리(특히 일주)를 견주어 보세요." />
-        {c.partner.pillars && (
-          <>
-            <p className="mt-5 text-[11px] font-bold text-gray-500">{partnerName}의 사주 네 기둥</p>
-            <Pillars pillars={c.partner.pillars} owner={`${partnerName}의`} hint="같은 자리끼리 글자가 어울리면 합, 부딪히면 충이에요. 어떤 자리가 어떻게 만나는지는 아래 풀이에서 풀어 드려요." />
-          </>
-        )}
         {c.links && <LinkStrip links={c.links} partnerName={partnerName} />}
         <ElementBars me={c.me} partner={c.partner} partnerName={partnerName} />
         {c.partnerTrait?.body && (
@@ -223,13 +215,29 @@ export default function CompatStory({ report, intro, closing, lastWord, partnerN
             <p className="mt-0.5 text-[13.5px] leading-relaxed text-gray-800 break-keep">{c.partnerTrait.body}</p>
           </div>
         )}
+        <details data-testid="compat-pillars" className="group mt-3.5 rounded-xl border border-brand-100">
+          <summary className="flex cursor-pointer list-none items-center justify-between px-3.5 py-2.5 text-[13px] font-bold text-gray-700">
+            <span>두 사람의 사주 네 기둥 자세히 보기</span>
+            <span aria-hidden="true" className="text-gray-400 transition-transform group-open:rotate-180">⌄</span>
+          </summary>
+          <div className="px-3.5 pb-3.5">
+            <p className="mt-3.5 text-[11px] font-bold text-gray-500">나의 사주 네 기둥</p>
+            <Pillars report={report} pillars={c.me.pillars} owner="내" hint="위 칸은 겉으로 드러나는 기운(하늘), 아래 칸은 바탕이 되는 기운(땅)이에요. 두 사람의 같은 자리(특히 일주)를 견주어 보세요." />
+            {c.partner.pillars && (
+              <>
+                <p className="mt-5 text-[11px] font-bold text-gray-500">{partnerName}의 사주 네 기둥</p>
+                <Pillars pillars={c.partner.pillars} owner={`${partnerName}의`} hint="같은 자리끼리 글자가 어울리면 합, 부딪히면 충이에요. 어떤 자리가 어떻게 만나는지는 아래 풀이에서 풀어 드려요." />
+              </>
+            )}
+          </div>
+        </details>
       </section>
 
       <section aria-label="자세한 풀이" data-testid="story-folds" className="rounded-2xl border border-brand-100 bg-white px-4">
         <p className="pt-3.5 text-xs text-gray-500">각 제목을 누르면 풀이가 펼쳐져요</p>
         {groups.map((g) =>
           g.list.map((pt, n) => (
-            <Fold key={`${g.key}-${n}`} testId="story-fold" label={`${g.emoji} ${g.label}`} title={pt.title}>
+            <Fold key={`${g.key}-${n}`} testId="story-fold" label={`${g.emoji} ${g.label}`} title={plainPointTitle(pt.title)}>
               {pt.body}
             </Fold>
           )),
