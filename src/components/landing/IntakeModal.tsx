@@ -696,7 +696,7 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
                         closing={premiumReport.compat ? <CompatAsk compat={premiumReport.compat} /> : undefined}
                       />
                     ) : (
-                      <StoryReport report={premiumReport} reading={reading} intro={null}
+                      <StoryReport report={premiumReport} reading={reading} intro={null} name={nickname}
                         lastWord={<><ResultHero report={premiumReport} aiQuote={reading?.kkotgeoji ?? null} luxe={false} hideLucky /><ResultShareCard report={premiumReport} aiQuote={reading?.kkotgeoji ?? null} /></>}
                         closing={askInput ? <AskChips input={askInput} luxe={false} /> : undefined}
                       />

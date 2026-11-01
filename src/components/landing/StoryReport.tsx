@@ -182,6 +182,7 @@ export default function StoryReport({
   intro,
   closing,
   lastWord,
+  name,
 }: {
   report: PremiumReportView;
   reading: StoryReading | null;
@@ -191,6 +192,8 @@ export default function StoryReport({
   closing?: ReactNode;
   /** 접이식 맨 아래 "마지막 한마디"에 넣을 내용 (한 줄 결론 + 해시태그 + 행운 컬러) */
   lastWord?: ReactNode;
+  /** 로그인 닉네임. 고민 답 제목("○○님의 고민에 대한 도리의 답은...")에 써요. */
+  name?: string | null;
 }) {
   const t = report.topic;
   const mark = MARK[t.key] ?? MARK.general;
@@ -220,10 +223,12 @@ export default function StoryReport({
 
   // 고민 칩이 아니라 질문 문장으로 고른 경우엔 미리 만든 답이 없어서, AI 요약(=답)을 고민 바로 아래로 올려요.
   const summaryFirst = Boolean(concernText && !concern?.answers[0] && summary);
+  const who = (name ?? report.viewerName ?? "").trim();
+  const leadTitle = summaryFirst ? `${who ? `${who}님` : "나"}의 고민에 대한 도리의 답은...` : "요약하자면";
   const summaryBlock = summary ? (
         <section data-testid="story-lead" aria-labelledby="story-lead-h" className="rounded-2xl bg-gradient-to-br from-brand-50 via-white to-amber-50/60 border border-brand-100 p-4">
           <div className="flex items-center justify-between gap-2">
-            <h5 id="story-lead-h" className="font-cute text-lg font-normal text-brand-700">요약하자면</h5>
+            <h5 id="story-lead-h" className="font-cute text-lg font-normal text-brand-700">{leadTitle}</h5>
             {reading && (
               <span className="flex items-center gap-1.5 text-xs">
                 <Stars score={reading.total.score} />
