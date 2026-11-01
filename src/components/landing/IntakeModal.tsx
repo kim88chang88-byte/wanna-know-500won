@@ -213,6 +213,18 @@ function SavedPeoplePicker({ people, onPick, title }: { people: SavedPerson[]; o
 }
 
 /** 별명을 안 적었을 때 쓰는 이름: 생년월일 */
+/** 별명 칸 바로 아래: 실명이 아니라는 확인과, 저장해도 되는 사람이라는 확인을 한 번에 받아요. */
+function PersonOkCheck({ checked, onChange }: { checked: boolean; onChange: (v: boolean) => void }) {
+  return (
+    <label className="flex items-start gap-2 text-xs text-gray-700 leading-relaxed">
+      <input type="checkbox" name="personOk" data-testid="person-ok" className="mt-0.5" checked={checked} onChange={(e) => onChange(e.target.checked)} />
+      <span>
+        실명이 아닌 별명이고, 이 정보를 저장해도 괜찮은 사람이에요. <span className="text-[11px] text-gray-500">(체크해야 저장돼요)</span>
+      </span>
+    </label>
+  );
+}
+
 function autoLabel(b: { year: number; month: number; day: number }): string {
   const p = (n: number) => String(n).padStart(2, "0");
   return `${b.year}.${p(b.month)}.${p(b.day)}`;
@@ -409,6 +421,8 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
   // 궁합이 아닌 풀이에서, 지금 적은 정보가 다른 사람 것일 때 기억해 두기 (선택 동의, 기본은 꺼짐)
   const [saveOther, setSaveOther] = useState(false);
   const [otherLabel, setOtherLabel] = useState("");
+  // 다른 사람을 기억해 둘 때: 실명이 아닌 별명이고 저장해도 괜찮은 사람이라는 확인 (둘 다 같이 써요)
+  const [personOk, setPersonOk] = useState(false);
   /** 결과 화면에 보여 줄 상대방 정보 (궁합일 때만) */
   const [resultPartner, setResultPartner] = useState<{ birth: BirthInput; name: string } | null>(null);
   const [meKey, setMeKey] = useState(0);
@@ -493,11 +507,11 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
     // 저장된 정보를 그대로 쓰는 경우엔 다시 저장하지 않아요.
     const wantSave = loggedIn && saveProfile && !saveOther && !sameBirth(savedProfile, input);
     // 상대방을 기억해 두기 (선택 동의. 풀이와 따로 보내고, 실패해도 풀이엔 영향 없어요)
-    if (compat && loggedIn && savePerson && !pickedPerson && partnerInput && people.length < MAX_PEOPLE) {
+    if (compat && loggedIn && savePerson && personOk && !pickedPerson && partnerInput && people.length < MAX_PEOPLE) {
       void fetch("/api/people", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ label: personLabel.trim() || autoLabel(partnerInput), birth: partnerInput }) }).catch(() => {});
     }
     // 궁합이 아닌 풀이에서 다른 사람 것을 기억해 두기 (풀이와 따로 보내고, 실패해도 풀이엔 영향 없어요)
-    if (!compat && loggedIn && saveOther && people.length < MAX_PEOPLE && !people.some((x) => sameBirth(x.birth, input)) && !sameBirth(savedProfile, input)) {
+    if (!compat && loggedIn && saveOther && personOk && people.length < MAX_PEOPLE && !people.some((x) => sameBirth(x.birth, input)) && !sameBirth(savedProfile, input)) {
       void fetch("/api/people", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ label: otherLabel.trim() || autoLabel(input), birth: input }) }).catch(() => {});
     }
     const wantShare = shareConcern && concern !== null;
@@ -995,7 +1009,7 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
                         }}
                       />
                       <span>
-                        (선택) 이 풀이는 <b>다른 사람</b> 것이에요. 그 사람의 생년월일시·성별을 기억해 둬요. 다음에 눌러서 바로 고를 수 있어요. 본인이 알려도 괜찮다고 한 정보만 저장해 주세요. 로그인 창에서 언제든 지울 수 있어요.
+                        (선택) 이 풀이는 <b>다른 사람</b> 것이에요. 그 사람의 생년월일시·성별을 기억해 둬요. 다음에 눌러서 바로 고를 수 있어요. 로그인 창에서 언제든 지울 수 있고, 탈퇴하면 함께 삭제돼요.
                       </span>
                     </label>
                     {saveOther && (
@@ -1010,6 +1024,7 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
                         className="w-full rounded-xl border border-brand-200 px-3 py-2 text-xs"
                       />
                     )}
+                    {saveOther && <PersonOkCheck checked={personOk} onChange={setPersonOk} />}
                   </div>
                 );
               })()}
@@ -1019,7 +1034,7 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
                   <label className="flex items-start gap-2 text-xs text-gray-700 leading-relaxed">
                     <input type="checkbox" name="savePerson" className="mt-0.5" checked={savePerson} onChange={(e) => setSavePerson(e.target.checked)} />
                     <span>
-                      (선택) 이 상대방의 생년월일시·성별을 기억해 둬요. 다음 궁합이나 다른 운세를 볼 때 눌러서 바로 고를 수 있어요. 상대방이 알려도 괜찮다고 한 정보만 저장해 주세요. 로그인 창에서 언제든 지울 수 있고, 탈퇴하면 함께 삭제돼요.
+                      (선택) 이 상대방의 생년월일시·성별을 기억해 둬요. 다음 궁합이나 다른 운세를 볼 때 눌러서 바로 고를 수 있어요. 로그인 창에서 언제든 지울 수 있고, 탈퇴하면 함께 삭제돼요.
                     </span>
                   </label>
                   {savePerson && (
@@ -1034,6 +1049,7 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
                       className="w-full rounded-xl border border-brand-200 px-3 py-2 text-xs"
                     />
                   )}
+                  {savePerson && <PersonOkCheck checked={personOk} onChange={setPersonOk} />}
                 </div>
               )}
 

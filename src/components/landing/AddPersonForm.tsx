@@ -45,7 +45,7 @@ export default function AddPersonForm({ onAdded, onCancel }: { onAdded: (p: Save
       return;
     }
     if (!agree) {
-      setError("본인이 알려도 괜찮다고 한 정보인지 체크해 주세요.");
+      setError("별명 아래 확인란을 체크해 주세요. (실명이 아닌 별명이고, 저장해도 괜찮은 사람)");
       return;
     }
     setBusy(true);
@@ -80,6 +80,10 @@ export default function AddPersonForm({ onAdded, onCancel }: { onAdded: (p: Save
         placeholder="별명 (예: 엄마, 내 짝꿍) · 실명은 피해 주세요"
         className={INPUT}
       />
+      <label className="flex items-start gap-2 text-[11px] leading-relaxed text-gray-700">
+        <input type="checkbox" name="addAgree" data-testid="add-person-agree" className="mt-0.5" checked={agree} onChange={(e) => setAgree(e.target.checked)} />
+        <span>실명이 아닌 별명이고, 이 정보를 저장해도 괜찮은 사람이에요.</span>
+      </label>
       <div className="flex gap-2" role="group" aria-label="양력 또는 음력">
         <Pill on={f.calendar === "solar"} onClick={() => setDate(dateText, "solar")} testId="add-cal-solar">
           양력
@@ -116,10 +120,7 @@ export default function AddPersonForm({ onAdded, onCancel }: { onAdded: (p: Save
         </Pill>
       </div>
       <BirthTimeSelect time={f.time} known={f.timeKnown} onChange={(n) => patch({ time: n.time, timeKnown: n.known })} selectClassName={INPUT} />
-      <label className="flex items-start gap-2 text-[11px] leading-relaxed text-gray-700">
-        <input type="checkbox" name="addAgree" data-testid="add-person-agree" className="mt-0.5" checked={agree} onChange={(e) => setAgree(e.target.checked)} />
-        <span>본인이 알려도 괜찮다고 한 정보예요. 이 목록에서 언제든 지울 수 있고, 탈퇴하면 함께 삭제돼요.</span>
-      </label>
+      <p className="text-[11px] leading-relaxed text-gray-500">이 목록에서 언제든 지울 수 있고, 탈퇴하면 함께 삭제돼요.</p>
       {error && (
         <p role="alert" className="text-[11px] font-bold text-brand-600">
           {error}
