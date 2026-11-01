@@ -7,7 +7,8 @@ import { containsForbidden } from "./reading";
 
 /* 사주 × MBTI 교차. 두 체계가 같은 말을 하는 곳과 다르게 말하는 곳을 쉬운 말로 짚어요. */
 
-export const MBTI_TYPES = ["INTJ", "INTP", "ENTJ", "ENTP", "INFJ", "INFP", "ENFJ", "ENFP", "ISTJ", "ISFJ", "ESTJ", "ESFJ", "ISTP", "ISFP", "ESTP", "ESFP"] as const;
+import { MBTI_TYPES } from "./mbtiTypes";
+export { MBTI_TYPES };
 export type Mbti = (typeof MBTI_TYPES)[number];
 
 export function parseMbti(raw: unknown): Mbti | null {

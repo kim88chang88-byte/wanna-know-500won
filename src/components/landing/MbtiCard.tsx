@@ -4,7 +4,7 @@ import { fetchRetry } from "@/lib/fetchRetry";
 import InlineProgress from "./InlineProgress";
 import { useState } from "react";
 import type { MbtiResult } from "@/lib/ai/mbti";
-import { MBTI_TYPES } from "@/lib/ai/mbti";
+import { MBTI_TYPES } from "@/lib/ai/mbtiTypes";
 import type { BirthInput } from "@/lib/saju/types";
 
 const ROWS: Array<[keyof MbtiResult, string]> = [
