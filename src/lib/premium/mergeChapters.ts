@@ -52,7 +52,7 @@ export async function fetchRestChapters(
 }
 
 /** 연애·결혼운 쪽에 붙일 "운명의 짝" 이미지와 프로필을 받아요. 만 20세 미만·잠금이면 null, 이미지만 실패하면 프로필만 와요. (풀이는 그대로 나가요) */
-export async function fetchPartnerImage(body: unknown, signal?: AbortSignal): Promise<PartnerImageView | null> {
+export async function fetchPartnerImage(body: unknown, signal?: AbortSignal, attempt = 0, retryDelayMs = 4000): Promise<PartnerImageView | null> {
   try {
     const res = await fetch("/api/premium/partner-image", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body), signal });
     if (!res.ok) return null;
@@ -60,6 +60,7 @@ export async function fetchPartnerImage(body: unknown, signal?: AbortSignal): Pr
       image?: { src?: string; notice?: string; alt?: string } | null;
       profile?: Array<{ label?: unknown; tags?: unknown }>;
       title?: unknown;
+      reason?: unknown;
     } | null;
     if (!data || typeof data.title !== "string" || !Array.isArray(data.profile)) return null;
     const profile = data.profile
@@ -67,6 +68,14 @@ export async function fetchPartnerImage(body: unknown, signal?: AbortSignal): Pr
       .map((r) => ({ label: r.label, tags: r.tags.slice(0, 4) }));
     const img = data.image;
     const src = img && typeof img.src === "string" && img.src.startsWith("data:image/") ? img.src : null;
+    // 이미지 모델이 잠깐 실패한 경우에는 한 번만 더 시도해요.
+    if (!src && data.reason === "failed" && attempt < 1 && !signal?.aborted) {
+      await new Promise((r) => setTimeout(r, retryDelayMs));
+      if (!signal?.aborted) {
+        const again = await fetchPartnerImage(body, signal, attempt + 1, retryDelayMs);
+        if (again?.src) return again;
+      }
+    }
     if (!src && profile.length === 0) return null;
     return { src, notice: img?.notice ?? "AI가 만든 가상의 인물, 참고용 상상도", alt: data.title, title: data.title, profile };
   } catch {

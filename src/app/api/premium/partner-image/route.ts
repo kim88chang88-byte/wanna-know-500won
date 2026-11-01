@@ -27,8 +27,8 @@ function elementOf(yongsin: string[]): Element5 {
  * 응답: { image: { src, notice, alt, usd } | null, profile, title, reason? } (이미지가 실패해도 프로필은 줘요. 미성년·잠금 등은 { image: null, reason })
  */
 export async function POST(request: Request) {
-  const denied = guardOrigin(request) ?? (await enforceLimits(request, { name: "partner-image", windowMs: 600_000, ip: 4, user: 8 }, "이미지 요청이 너무 많아요. 잠시 뒤에 다시 시도해 주세요."));
-  if (denied) return denied;
+  const originDenied = guardOrigin(request);
+  if (originDenied) return originDenied;
   let raw: unknown;
   try {
     raw = await request.json();
@@ -39,15 +39,12 @@ export async function POST(request: Request) {
   if (!parsed.ok) return NextResponse.json({ image: null, reason: "bad_request" }, { status: 400 });
   const none = (reason: string) => NextResponse.json({ image: null, reason });
 
-  const apiKey = process.env.GEMINI_API_KEY?.trim();
-  if (!apiKey) return none("no_key");
-
   const cookieHeader = request.headers.get("cookie");
   const session = verifySessionToken(readCookie(cookieHeader, SESSION_COOKIE), process.env.AUTH_SECRET);
+  const admin = isAdmin(session?.sub, process.env);
   const entitled = hasEntitlement(readCookie(cookieHeader, ENTITLEMENT_COOKIE), process.env.AUTH_SECRET, session?.sub ?? null);
-  // 결제 오픈 뒤에는 이용권이 있는 요청에만, AI 게이트가 켜져 있으면 이용권·관리자에게만 줘요.
+  // 결제 오픈 뒤에는 이용권이 있는 요청에만 줘요.
   if (isPremiumLocked(process.env) && !entitled) return none("locked");
-  if (process.env.PREMIUM_AI_GATE?.trim().toLowerCase() === "true" && !entitled && !isAdmin(session?.sub, process.env)) return none("gated");
 
   const g = parsed.value.gender;
   if (g !== "male" && g !== "female") return none("gender");
@@ -56,12 +53,24 @@ export async function POST(request: Request) {
   const partnerAge = partnerAgeFor(g, age);
   if (!partnerAge) return none("minor");
 
+  // 프로필 글은 규칙으로 만들어서 비용이 없어요. 그림을 못 만드는 어떤 경우에도 프로필은 보여 줘요.
   const el = elementOf(buildPremiumReport(parsed.value, new Date(), "full", parsed.topic, false, parsed.concern, null).yongsin);
   const partner = g === "male" ? "female" : "male";
   const seed = (parsed.value.year * 400 + parsed.value.month * 31 + parsed.value.day) % 6;
   const profile = partnerProfile(partner, el, seed);
   const title = partnerTitle(chapterName(session?.nick));
   const noImage = (reason: string) => NextResponse.json({ image: null, profile, title, reason });
+
+  // 그림은 비용이 드니까 요청 횟수를 제한해요. (관리자는 테스트하기 쉽게 제외)
+  if (!admin) {
+    const limited = await enforceLimits(request, { name: "partner-image", windowMs: 600_000, ip: 4, user: 8 }, "이미지 요청이 너무 많아요. 잠시 뒤에 다시 시도해 주세요.");
+    if (limited) return noImage("rate");
+  }
+  const apiKey = process.env.GEMINI_API_KEY?.trim();
+  if (!apiKey) return noImage("no_key");
+  // AI 게이트가 켜져 있으면 그림은 이용권·관리자에게만 줘요.
+  if (process.env.PREMIUM_AI_GATE?.trim().toLowerCase() === "true" && !entitled && !admin) return noImage("gated");
+
   try {
     const dbCfg = loadDbConfig(process.env);
     const gate = await takeAiBudget(process.env, dbCfg ? createDb(dbCfg) : null);

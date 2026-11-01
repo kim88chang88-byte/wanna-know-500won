@@ -17,9 +17,18 @@ describe("fetchPartnerImage", () => {
   });
   it("이미지만 실패하면 프로필만 보여요", async () => {
     mock({ image: null, title: "님의 짝", profile: [{ label: "성격", tags: ["침착함"] }], reason: "failed" });
-    const r = await fetchPartnerImage({});
+    const r = await fetchPartnerImage({}, undefined, 0, 0);
     expect(r?.src).toBeNull();
     expect(r?.profile).toHaveLength(1);
+  });
+  it("그림이 잠깐 실패하면 한 번 더 받아 봐요", async () => {
+    const f = vi.fn()
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ image: null, title: "t", profile: [{ label: "성격", tags: ["a"] }], reason: "failed" }) })
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ image: { src: "data:image/png;base64,AAA" }, title: "t", profile: [{ label: "성격", tags: ["a"] }] }) });
+    vi.stubGlobal("fetch", f);
+    const r = await fetchPartnerImage({}, undefined, 0, 0);
+    expect(f).toHaveBeenCalledTimes(2);
+    expect(r?.src).toBe("data:image/png;base64,AAA");
   });
   it("이미지가 아닌 주소는 받지 않아요", async () => {
     mock({ image: { src: "https://evil.example/x.png", notice: "n", alt: "a" }, title: "t", profile: [{ label: "직업", tags: ["a"] }] });
