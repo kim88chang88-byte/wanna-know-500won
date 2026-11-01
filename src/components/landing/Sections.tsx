@@ -49,7 +49,7 @@ export function firstGlyph(nickname: string | null | undefined): string {
   return Array.from((nickname ?? "").trim())[0] ?? "🫧";
 }
 
-export function Header({ onOpenLogin, user = null, wallet = null }: { onOpenLogin: () => void; user?: AuthUser | null; wallet?: WalletValues | null }) {
+export function Header({ onOpenLogin, user = null }: { onOpenLogin: () => void; user?: AuthUser | null }) {
   return (
     <>
       <header className="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-brand-100 shadow-[0_2px_15px_rgba(128,87,224,0.06)]">
@@ -112,12 +112,6 @@ export function Header({ onOpenLogin, user = null, wallet = null }: { onOpenLogi
             <MachineMenuButton />
           </div>
         </div>
-        {/* 로그인한 회원에게만: 내 지폐 · 동전 · 오늘 남은 무료 뽑기 (오른쪽 위) */}
-        {user && wallet && (
-          <div className="max-w-[34rem] lg:max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 pb-2 -mt-1">
-            <WalletBar {...wallet} />
-          </div>
-        )}
       </header>
 
     </>
@@ -126,31 +120,33 @@ export function Header({ onOpenLogin, user = null, wallet = null }: { onOpenLogi
 
 /* ------------------------------------------------------------------ 히어로 */
 
-export function HeroSection({ visitors = null, tickets = 0 }: { visitors?: { today: number; total: number } | null; tickets?: number }) {
+export function HeroSection({ visitors = null, tickets = 0, wallet = null }: { visitors?: { today: number; total: number } | null; tickets?: number; wallet?: WalletValues | null }) {
   return (
     <section className="text-left mb-3">
-      {/* 방문자 수(왼쪽) + 보너스 뽑기 안내(오른쪽 끝) 한 줄 */}
+      {/* 방문자 수(왼쪽) + 내 지폐·동전·무료 뽑기(오른쪽, 로그인한 회원만) 한 줄 */}
       <div className="flex items-center justify-between gap-2">
         {visitors ? (
-          <div data-testid="visitors" className="inline-flex items-center gap-2 rounded-full bg-white/80 border border-brand-100 px-4 py-1.5 text-xs text-gray-500 shadow-sm shrink-0">
+          <div data-testid="visitors" className="inline-flex items-center gap-1.5 rounded-full bg-white/80 border border-brand-100 px-3 py-1.5 text-xs text-gray-500 shadow-sm shrink-0">
             <span>
-              <b className="font-bold text-brand-500">Today</b>: <span data-testid="visitors-today">{visitors.today.toLocaleString("ko-KR")}</span>명
+              <b className="font-bold text-brand-500">Today</b> <span data-testid="visitors-today">{visitors.today.toLocaleString("ko-KR")}</span>
+              <span className="hidden min-[400px]:inline">명</span>
             </span>
             <span aria-hidden="true" className="h-3 w-px bg-brand-200" />
             <span>
-              <b className="font-bold text-indigo-800">Total</b>: <span data-testid="visitors-total">{visitors.total.toLocaleString("ko-KR")}</span>명
+              <b className="font-bold text-indigo-800">Total</b> <span data-testid="visitors-total">{visitors.total.toLocaleString("ko-KR")}</span>
+              <span className="hidden min-[400px]:inline">명</span>
             </span>
           </div>
         ) : (
           <span />
         )}
-        {tickets > 0 && (
-          <p data-testid="ticket-badge" className="text-right leading-tight text-rose-600">
-            <span className="block text-[11px] font-bold">🎟 보너스 뽑기 {tickets}장</span>
-            <span className="block text-[9px] font-medium text-rose-400">무료 소진 후 자동 사용</span>
-          </p>
-        )}
+        {wallet && <WalletBar {...wallet} />}
       </div>
+      {tickets > 0 && (
+        <p data-testid="ticket-badge" className="mt-1 text-right text-[11px] font-bold leading-tight text-rose-600">
+          🎟 보너스 뽑기 {tickets}장 <span className="text-[10px] font-medium text-rose-400">· 무료 소진 후 자동 사용</span>
+        </p>
+      )}
     </section>
   );
 }
