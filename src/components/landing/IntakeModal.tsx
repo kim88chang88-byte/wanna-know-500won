@@ -442,6 +442,8 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
   const [aiNotice, setAiNotice] = useState(false);
   const [aiGated, setAiGated] = useState(false);
   const [premiumReport, setPremiumReport] = useState<PremiumReportView | null>(null);
+  /** 나머지 장·운명의 짝 그림을 아직 받는 중이면 true (보관함 자동 저장은 다 받은 뒤에 해요) */
+  const [restPending, setRestPending] = useState(false);
   const [premiumError, setPremiumError] = useState<string | null>(null);
   const loadingAnimal = IMAGES[MACHINES.find((m) => m.fortune === target.fortune)?.image ?? ""] ?? "/images/animal-otter.webp";
   const [loadDone, setLoadDone] = useState(false);
@@ -546,8 +548,10 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
       setPremiumReport(p.report);
       setPremiumError(p.error);
       // 나머지 장은 이어서 받아 와서 끼워 넣어요.
-      if (p.rest) void fetchPartnerImage(p.rest, ctrl.signal).then((img) => { if (img && !ctrl.signal.aborted) setPremiumReport((prev) => (prev ? { ...prev, partnerImage: img } : prev)); });
-      if (p.rest) void fetchRestChapters({ ...(p.rest as object), conclusion: conclusionOf(p.report) }, ctrl.signal, (part) => { if (ctrl.signal.aborted) return; setPremiumReport((prev) => (prev ? mergeChapters(prev, part) : prev)); }).then((rep) => { if (ctrl.signal.aborted) return; if (rep.aiNotice) setAiNotice(true); });
+      setRestPending(!!p.rest);
+      const imgDone: Promise<unknown> = p.rest ? fetchPartnerImage(p.rest, ctrl.signal).then((img) => { if (img && !ctrl.signal.aborted) setPremiumReport((prev) => (prev ? { ...prev, partnerImage: img } : prev)); }) : Promise.resolve();
+      const restDone: Promise<unknown> = p.rest ? fetchRestChapters({ ...(p.rest as object), conclusion: conclusionOf(p.report) }, ctrl.signal, (part) => { if (ctrl.signal.aborted) return; setPremiumReport((prev) => (prev ? mergeChapters(prev, part) : prev)); }).then((rep) => { if (ctrl.signal.aborted) return; if (rep.aiNotice) setAiNotice(true); }) : Promise.resolve();
+      void Promise.allSettled([imgDone, restDone]).then(() => { if (!ctrl.signal.aborted) setRestPending(false); });
       setChart(data.chart);
       setAskInput(input);
       setResultPartner(partnerInput ? { birth: partnerInput, name: ((l) => (l && l !== autoLabel(partnerInput) ? l : "상대방"))(people.find((x) => x.id === pickedPerson)?.label || personLabel.trim()) } : null);
@@ -673,6 +677,7 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
                 <VaultSaveBar
                   luxe={luxe}
                   autoSave={saveVault}
+                  ready={!restPending}
                   snapshot={{ topic: target.fortune, premium: target.premium === true && !compat, report: premiumReport, reading, kkotgeoji: reading?.kkotgeoji ?? null, reason: reading?.reason ?? null, story: reading?.story ?? null, folds: reading?.folds ?? null, heads: reading?.heads ?? null, note: birthNote }}
                 />
               )}
