@@ -613,7 +613,7 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
       className={`mb-4 rounded-2xl px-4 py-4 text-center ${luxe ? "border border-[#e6c887]/50 bg-gradient-to-b from-[#e6c887]/15 to-transparent" : "border-2 border-brand-300 bg-gradient-to-br from-brand-50 via-white to-amber-50 shadow-[0_6px_20px_rgba(128,87,224,0.12)]"}`}
     >
       <h3 id="intake-title" className={`font-cute text-[25px] sm:text-[28px] font-normal leading-tight break-keep ${luxe ? "text-[#fbf3de]" : "text-brand-700"}`}>
-        {compat && resultPartner ? `${josa(nickname?.trim() ? `${nickname.trim()}님` : "나", "과/와")} ${resultPartner.name}의 궁합♥` : `${nickname?.trim() ? `${nickname.trim()}님` : "나"}의 ${readingKind(target.fortune)} 해설`}
+        {compat && resultPartner ? `${josa(nickname?.trim() ? `${nickname.trim()}님` : "나", "과/와")} ${resultPartner.name}의 궁합♥` : `${nickname?.trim() ? `${nickname.trim()}님` : "나"}의 ${luxe ? "종합 사주 프리미엄 분석" : `${readingKind(target.fortune)} 해설`}`}
       </h3>
       {askInput && (
         <p
