@@ -213,28 +213,6 @@ export default function Landing() {
     return () => window.clearTimeout(t);
   }, [justLoggedIn, clearWelcome]);
 
-  // 화면을 누르면 작은 물방울이 톡 터져요. (움직임 줄이기 설정이면 만들지 않아요)
-  useEffect(() => {
-    if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return;
-    const onPointerDown = (e: PointerEvent) => {
-      for (let i = 0; i < 4; i++) {
-        const el = document.createElement("span");
-        const size = 8 + Math.random() * 10;
-        el.className = "click-bubble";
-        el.style.width = el.style.height = `${size}px`;
-        el.style.left = `${e.clientX}px`;
-        el.style.top = `${e.clientY}px`;
-        el.style.setProperty("--dx", `${(Math.random() - 0.5) * 70}px`);
-        el.style.setProperty("--dy", `${-20 - Math.random() * 40}px`);
-        el.setAttribute("aria-hidden", "true");
-        document.body.appendChild(el);
-        window.setTimeout(() => el.remove(), 800);
-      }
-    };
-    document.addEventListener("pointerdown", onPointerDown);
-    return () => document.removeEventListener("pointerdown", onPointerDown);
-  }, []);
-
   const openLogin = useCallback(() => setLoginOpen(true), []);
   const closeLogin = useCallback(() => {
     setLoginOpen(false);
