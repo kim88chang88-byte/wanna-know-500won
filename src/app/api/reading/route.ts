@@ -139,6 +139,8 @@ export async function POST(request: Request) {
   let readingStatus: ReadingStatus = "ok";
   let detailInfo: string | null = null;
   try {
+    // 둘의 궁합은 /api/premium 에서 AI 가 한 번에 써요. 여기서는 AI 를 따로 부르지 않아요. (뽑기 횟수는 그대로 세요)
+    if (typeof rawTopic === "string" && rawTopic.includes("궁합")) throw new ReadingUnavailableError();
     // 키가 있을 때만 비용 한도를 확인해요. 한도를 넘었거나 비상 차단 중이면 AI 한마디만 빼고 사주 리포트는 그대로 나가요.
     if (hasAiKey()) {
       const gate = await takeAiBudget(process.env, db);

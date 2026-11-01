@@ -131,9 +131,9 @@ function ChoiceButton({
 type ReadingStatus = "ok" | "unavailable" | "failed";
 
 /** 프리미엄 리포트를 받아요. 실패해도 예외 대신 사용자에게 보여 줄 문장을 돌려줘요. */
-async function fetchPremiumReport(input: BirthInput, level: "basic" | "full", topic: string, concern: Concern | null, partner: BirthInput | null, signal: AbortSignal): Promise<{ report: PremiumReportView | null; error: string | null; rest?: unknown; aiNotice?: boolean; aiGated?: boolean }> {
+async function fetchPremiumReport(input: BirthInput, level: "basic" | "full", topic: string, concern: Concern | null, partner: BirthInput | null, signal: AbortSignal, partnerName: string | null = null): Promise<{ report: PremiumReportView | null; error: string | null; rest?: unknown; aiNotice?: boolean; aiGated?: boolean }> {
   try {
-    const reqBody = { ...input, level, topic, concern, ...(partner ? { partner } : {}) };
+    const reqBody = { ...input, level, topic, concern, ...(partner ? { partner, ...(partnerName ? { partnerName } : {}) } : {}) };
     const res = await fetch("/api/premium", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -519,7 +519,8 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
     abortRef.current = ctrl;
     try {
       // 사주 리포트도 함께 받아요. 프리미엄은 전체, 일반 자판기는 기본(원국·오행·신강신약). 실패해도 기본 풀이는 그대로 보여줘요.
-      const premiumPromise = fetchPremiumReport(input, target.premium && !compat ? "full" : "basic", target.fortune, concern, partnerInput, ctrl.signal);
+      const partnerLabel = compat ? ((l) => (l && partnerInput && l !== autoLabel(partnerInput) ? l : null))(people.find((x) => x.id === pickedPerson)?.label || personLabel.trim()) : null;
+      const premiumPromise = fetchPremiumReport(input, target.premium && !compat ? "full" : "basic", target.fortune, concern, partnerInput, ctrl.signal, partnerLabel);
       const res = await fetch("/api/reading", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -692,7 +693,7 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
                   <div data-testid="premium-result">
                     {compat && premiumReport.compat ? (
                       <CompatStory report={premiumReport} intro={null} partnerName={resultPartner?.name ?? "상대"} name={nickname}
-                        lastWord={<><ResultHero report={premiumReport} aiQuote={null} luxe={false} hideLucky /><ResultShareCard report={premiumReport} aiQuote={null} /></>}
+                        lastWord={<><ResultHero report={premiumReport} aiQuote={premiumReport.compat?.ai?.last ?? null} luxe={false} hideLucky /><ResultShareCard report={premiumReport} aiQuote={premiumReport.compat?.ai?.last ?? null} /></>}
                         closing={premiumReport.compat ? <CompatAsk compat={premiumReport.compat} /> : undefined}
                       />
                     ) : (

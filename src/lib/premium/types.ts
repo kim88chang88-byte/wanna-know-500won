@@ -264,6 +264,8 @@ export interface CompatView {
   timing?: Array<{ title: string; body: string }>;
   /** 고민에서 읽은 관계 종류 (연인·썸·결혼·친구) */
   relation?: string | null;
+  /** AI 가 두 사람 이야기로 새로 쓴 부분 (없으면 규칙 문장을 그대로 써요) */
+  ai?: { answer?: string; summary?: string; last?: string };
 }
 
 export type PremiumErrorCode = "bad_request" | "rate_limited" | "failed";

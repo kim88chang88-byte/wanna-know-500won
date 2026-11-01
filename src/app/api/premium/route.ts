@@ -7,6 +7,7 @@ import { readingFirstDeep } from "@/lib/hanjaReading";
 import { buildPremiumReport, validatePremiumInput } from "@/lib/premium/report";
 import { enforceLimits, guardOrigin } from "@/lib/guard";
 import { addBookNotes } from "@/lib/ai/bookNotes";
+import { addCompatAi } from "@/lib/ai/compatStory";
 import { CHAPTER_BATCH_2, CHAPTER_BATCHES, chapterName, rewriteChapters } from "@/lib/ai/bookChapter";
 import { takeAiBudget } from "@/lib/ai/budget";
 import { isAdmin } from "@/lib/admin/auth";
@@ -101,6 +102,21 @@ export async function POST(request: Request) {
         if (chapter.note.includes("fail")) console.error("book chapters:", chapter.note.slice(0, 300));
         const rep = chapter.replaced;
         if (Object.keys(rep).length > 0) report.book = report.book.map((p) => (rep[p.no] ? { ...p, sections: rep[p.no] } : p));
+      }
+    }
+    // 둘의 궁합(1,000원): AI 가 두 사람 이야기로 한 번에 다시 써요. (비용 한도·이용권 규칙은 프리미엄과 같아요. 실패하면 규칙 문장이 그대로 나가요)
+    if (parsed.partner && parsed.level !== "full" && report.compat && hasAiKey() && !aiGated && !second) {
+      try {
+        const dbCfg2 = loadDbConfig(process.env);
+        const gate2 = await takeAiBudget(process.env, dbCfg2 ? createDb(dbCfg2) : null);
+        if (gate2 === "ok") {
+          const pn = typeof raw === "object" && raw !== null ? (raw as { partnerName?: unknown }).partnerName : undefined;
+          // eslint-disable-next-line no-control-regex
+          const partnerName = typeof pn === "string" ? pn.replace(/[\u0000-\u001f<>{}]/g, "").trim().slice(0, 12) || null : null;
+          report.compat = await addCompatAi(report.compat, { concern: parsed.concern, names: { me: chapterName(session?.nick), partner: partnerName }, onUsage: (u) => { usage.in += u.input; usage.out += u.output; usage.calls++; } });
+        }
+      } catch (err) {
+        console.error("compat ai failed:", err instanceof Error ? err.message : "unknown");
       }
     }
     if (preview && parsed.level === "full") {

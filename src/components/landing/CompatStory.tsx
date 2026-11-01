@@ -118,7 +118,7 @@ export default function CompatStory({ report, intro, closing, lastWord, partnerN
   const concernText = concern?.text?.trim() || (concern?.answers.length ? concern.answers.map((a) => a.title).join(" · ") : "");
   const answer = buildCompatAnswer(c);
   const who = name?.trim();
-  const answerTitle = answer?.hasRelation ? `${who ? `${who}님` : "나"}의 고민에 대한 도리의 답은...` : "두 사람에 대한 도리의 답은...";
+  const answerTitle = concernText || answer?.hasRelation ? `${who ? `${who}님` : "나"}의 고민에 대한 도리의 답은...` : "두 사람에 대한 도리의 답은...";
   const stars = Math.max(1, Math.min(5, Math.round(c.score / 20)));
   return (
     <div data-testid="story-report" className="mt-5 space-y-5">
@@ -128,10 +128,10 @@ export default function CompatStory({ report, intro, closing, lastWord, partnerN
           <p className="mt-0.5 text-sm leading-relaxed text-gray-800">{concernText}</p>
         </section>
       )}
-      {answer && (
+      {(answer || c.ai?.answer) && (
         <section data-testid="compat-answer" aria-label="도리의 답" className="rounded-2xl border border-brand-100 bg-gradient-to-br from-white to-amber-50/60 px-4 py-3.5">
           <p className="text-[11px] font-bold text-brand-700">{answerTitle}</p>
-          <Paras mark={mark} text={answer.body} className="mt-1.5 text-[15px] leading-[1.85] text-gray-800 break-keep" />
+          <Paras mark={mark} text={c.ai?.answer ?? answer?.body ?? ""} className="mt-1.5 text-[15px] leading-[1.85] text-gray-800 break-keep" />
         </section>
       )}
 
@@ -146,7 +146,7 @@ export default function CompatStory({ report, intro, closing, lastWord, partnerN
             <span data-testid="compat-score" className="rounded-full border border-brand-100 bg-white px-2 py-0.5 text-[11px] font-bold text-brand-700">{c.score}점</span>
           </span>
         </div>
-        <Paras mark={mark} text={c.summary ?? `${c.headline}\n\n${c.closing}`} className="mt-3 text-[16px] leading-[1.85] text-gray-800 break-keep" />
+        <Paras mark={mark} text={c.ai?.summary ?? c.summary ?? `${c.headline}\n\n${c.closing}`} className="mt-3 text-[16px] leading-[1.85] text-gray-800 break-keep" />
         {c.scores && <ScoreBars scores={c.scores} />}
         <p className="mt-2 text-[11px] text-gray-500">점수는 재미로 보는 참고 지수예요.</p>
       </section>
