@@ -355,6 +355,89 @@ function YearStrip({ table }: { table: BookTable }) {
   );
 }
 
+/** 십이운성 단계별 기운의 높이(0~100). 좋고 나쁨이 아니라 "기운의 세기"를 보여 주는 그림용 값이에요. */
+const STAGE_LEVEL: Record<string, number> = { 장생: 62, 목욕: 48, 관대: 76, 건록: 92, 제왕: 100, 쇠: 70, 병: 46, 사: 30, 묘: 24, 절: 12, 태: 22, 양: 40 };
+
+/** 대운별 십이운성 곡선: 10년 단위로 기운이 오르내리는 모양 (잠긴 칸은 점선 자리만) */
+function StageCurve({ table }: { table: BookTable }) {
+  const rows = table.rows;
+  if (rows.length < 2) return null;
+  const W = 300;
+  const H = 110;
+  const px = (i: number) => 20 + (i * (W - 40)) / (rows.length - 1);
+  const stageOf = (r: BookRow) => (r.locked ? "" : (r.value.split(" · ")[1] ?? ""));
+  const py = (lv: number) => H - 14 - (lv / 100) * (H - 34);
+  const open = rows.map((r, i) => ({ r, i, lv: STAGE_LEVEL[stageOf(r)] })).filter((x) => x.lv !== undefined);
+  const path = open.map((x, k) => `${k === 0 ? "M" : "L"}${px(x.i).toFixed(1)} ${py(x.lv).toFixed(1)}`).join(" ");
+  return (
+    <div data-testid="stage-curve" className="mb-6">
+      <p className={`text-[12px] font-bold tracking-[0.12em] ${GOLD}`}>10년마다 달라지는 기운의 세기</p>
+      <svg viewBox={`0 0 ${W} ${H + 22}`} className="mt-3 w-full" role="img" aria-label="대운별 십이운성 곡선">
+        <line x1="12" x2={W - 12} y1={H - 12} y2={H - 12} stroke="rgba(255,255,255,0.15)" />
+        {path && <path d={path} fill="none" stroke="#e6c887" strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" />}
+        {rows.map((r, i) => {
+          const st = stageOf(r);
+          const lv = STAGE_LEVEL[st];
+          return (
+            <g key={`${r.label}-${i}`}>
+              {lv !== undefined ? (
+                <>
+                  <circle cx={px(i)} cy={py(lv)} r={r.highlight ? 6 : 3.5} fill={r.highlight ? "#fff" : "#e6c887"} stroke={r.highlight ? "#e6c887" : "none"} strokeWidth="2" />
+                  <text x={px(i)} y={py(lv) - 10} textAnchor="middle" fontSize="9" fill="#f5efe0">{st}</text>
+                </>
+              ) : (
+                <circle cx={px(i)} cy={H - 40} r="3.5" fill="none" stroke="rgba(255,255,255,0.35)" strokeDasharray="2 2" />
+              )}
+              <text x={px(i)} y={H + 4} textAnchor="middle" fontSize="8.5" fill={r.highlight ? "#fff" : "rgba(232,223,202,0.75)"} fontWeight={r.highlight ? 700 : 400}>{r.label.replace("세", "")}</text>
+            </g>
+          );
+        })}
+      </svg>
+      <p className="mt-1 text-[11px] leading-relaxed text-[#e8dfca]/60">높은 때는 힘이 차오르는 시기, 낮은 때는 쉬며 준비하는 시기예요. 낮다고 나쁜 때가 아니고 &lsquo;지금 어울리는 속도&rsquo;를 보는 참고용 그림이에요. 흰 점이 지금이에요.</p>
+    </div>
+  );
+}
+
+/** 오행별로 챙기면 좋은 몸의 곳 (전통 오행 대응). 병을 말하는 게 아니라 생활 습관 힌트예요. */
+const BODY_MAP: Record<string, { area: string; habit: string }> = {
+  목: { area: "눈 · 간 · 근육", habit: "스트레칭과 눈 쉬어 주기" },
+  화: { area: "심장 · 혈액순환", habit: "가벼운 유산소와 충분한 웃음" },
+  토: { area: "소화 · 위장", habit: "규칙적인 식사 시간" },
+  금: { area: "호흡 · 피부", habit: "환기와 깊은 호흡" },
+  수: { area: "허리 · 신장 · 수면", habit: "따뜻한 물과 일정한 잠" },
+};
+
+/** 건강운 장기 지도: 많은 기운은 쉬어 가기, 적은 기운은 채워 주기로만 안내해요 */
+function BodyMap({ report }: { report: PremiumReportView }) {
+  const els = report.elements;
+  if (els.length === 0) return null;
+  const avg = els.reduce((a, e) => a + e.count, 0) / els.length;
+  const tone = (n: number) => (n === 0 || n < avg - 0.6 ? { t: "채워 주면 좋아요", c: "bg-sky-300/20 text-sky-100" } : n > avg + 1.2 ? { t: "쉬어 가며 써요", c: "bg-rose-300/20 text-rose-100" } : { t: "무난해요", c: "bg-white/10 text-[#e8dfca]" });
+  return (
+    <div data-testid="body-map" className="mb-6">
+      <p className={`text-[12px] font-bold tracking-[0.12em] ${GOLD}`}>기운별로 챙기면 좋은 곳</p>
+      <ul className="mt-3 space-y-2">
+        {els.map((e) => {
+          const b = BODY_MAP[e.name];
+          const k = tone(e.count);
+          if (!b) return null;
+          return (
+            <li key={e.name} data-testid="body-row" className={`rounded-2xl border ${HAIR} bg-white/[0.04] px-3 py-2.5`}>
+              <div className="flex items-center gap-2">
+                <span className={`w-9 shrink-0 rounded-full border py-0.5 text-center text-xs font-bold ${HAIR} ${GOLD}`}>{elName(e.name)}</span>
+                <span className="flex-1 text-sm font-bold text-[#f5efe0]">{b.area}</span>
+                <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${k.c}`}>{k.t}</span>
+              </div>
+              <p className="ml-11 mt-1 text-[11px] text-[#e8dfca]/70">{b.habit}</p>
+            </li>
+          );
+        })}
+      </ul>
+      <p className="mt-2 text-[11px] leading-relaxed text-[#e8dfca]/60">병이나 증상을 알려 주는 그림이 아니에요. 생활 습관을 정할 때 참고하는 전통 오행 대응이고, 몸이 불편하면 꼭 전문가와 상담해 주세요.</p>
+    </div>
+  );
+}
+
 function Visual({ page, report }: { page: BookPage; report: PremiumReportView }) {
   if (page.chart) return <LifeChart chart={page.chart} />;
   const max = Math.max(1, ...report.elements.map((e) => e.count));
@@ -547,6 +630,10 @@ function Visual({ page, report }: { page: BookPage; report: PremiumReportView })
       );
     case "years:2":
       return page.tables[0] ? <MonthBars table={page.tables[0]} /> : null;
+    case "stage12":
+      return page.tables[0] ? <StageCurve table={page.tables[0]} /> : null;
+    case "topic:health":
+      return <BodyMap report={report} />;
     case "tengods":
       return page.tables[0] ? <GodBars table={page.tables[0]} /> : null;
     default:
