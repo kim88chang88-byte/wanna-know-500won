@@ -106,7 +106,8 @@ export default function VaultApp() {
           <StoryReport report={s.report} intro={null} lastWord={<ResultHero report={s.report} aiQuote={s.kkotgeoji} luxe={false} hideLucky />} reading={s.card ? { keyword: s.card.keyword, total: { score: s.card.score, summary: s.card.summary }, indicators: s.card.indicators.map((i) => ({ label: i.label, score: i.score, comment: i.comment })), reason: s.reason ?? undefined, story: s.story ?? undefined, folds: s.folds ?? undefined, heads: s.heads ?? undefined } : null} />
         ) : (
           <>
-        {s.card && (
+        {/* 프리미엄 사주서에는 하루짜리 풀이 카드를 넣지 않아요 */}
+        {!luxe && s.card && (
           <ReadingCard
             reading={{
               keyword: s.card.keyword,
@@ -117,7 +118,7 @@ export default function VaultApp() {
             luxe={luxe}
           />
         )}
-        {!s.card && s.reason && (
+        {!luxe && !s.card && s.reason && (
           <div className={`mt-4 p-4 rounded-2xl border text-sm leading-relaxed ${luxe ? "bg-white/[0.03] border-[#e6c887]/25 text-[#efe7d3]" : "bg-white border-brand-100 text-gray-800"}`}>
             <p className={`text-xs font-semibold mb-1 ${luxe ? "text-[#e6c887]" : "text-brand-700"}`}>🔎 도리가 본 이유</p>
             {s.reason}
