@@ -239,6 +239,110 @@ function LifeChart({ chart }: { chart: BookChart }) {
   );
 }
 
+/** 달별 막대: 달마다 이 주제의 기운이 얼마나 힘을 받는지 (표의 bar 값을 그려요) */
+function MonthBars({ table }: { table: BookTable }) {
+  const rows = table.rows;
+  if (rows.length === 0) return null;
+  const monthOf = (label: string) => `${label.match(/(\d+)월경/)?.[1] ?? "?"}월`;
+  return (
+    <div data-testid="month-bars">
+      <p className={`text-[12px] font-bold tracking-[0.12em] ${GOLD}`}>{table.title}</p>
+      <div className="mt-3 flex h-[120px] items-end gap-[5px] border-b border-white/15" role="img" aria-label={`${table.title} 막대 그래프`}>
+        {rows.map((r, i) => (
+          <div key={`${r.label}-${i}`} className="flex h-full min-w-0 flex-1 flex-col items-center justify-end">
+            <span className="mb-0.5 h-3 text-[10px] leading-none text-[#f6dfa8]">{r.locked ? "🔒" : r.highlight ? "★" : ""}</span>
+            {r.locked ? (
+              <i className="block w-full rounded-t-[5px] border border-dashed border-white/30" style={{ height: "28%" }} />
+            ) : (
+              <i
+                data-testid={r.highlight ? "month-bar-hit" : "month-bar"}
+                className={`block w-full rounded-t-[5px] ${r.highlight ? "bg-gradient-to-b from-[#f6dfa8] to-[#e6c887]" : "bg-[#e6c887]/40"} ${r.current ? "outline outline-2 outline-offset-1 outline-white" : ""}`}
+                style={{ height: `${Math.max(12, Math.min(100, r.bar ?? 40)) * 0.8}%` }}
+              />
+            )}
+          </div>
+        ))}
+      </div>
+      <div className="mt-1 flex gap-[5px]">
+        {rows.map((r, i) => (
+          <span key={`${r.label}-l${i}`} className={`min-w-0 flex-1 text-center text-[10px] ${r.current ? "font-bold text-white" : "text-[#e8dfca]/80"}`}>
+            {monthOf(r.label)}
+          </span>
+        ))}
+      </div>
+      <p className="mt-2 flex flex-wrap gap-x-3 text-[11px] text-[#e8dfca]/80">
+        <span><b aria-hidden="true" className="mr-1 inline-block h-2 w-2 rounded-sm bg-[#f6dfa8]" />포인트 달 ★</span>
+        <span><b aria-hidden="true" className="mr-1 inline-block h-2 w-2 rounded-sm bg-[#e6c887]/40" />잔잔한 달</span>
+        <span>흰 테두리 = 지금</span>
+      </p>
+      <p className="mt-2 text-[11px] leading-relaxed text-[#e8dfca]/60">달마다 이 주제와 닿는 기운이 얼마나 힘을 받는지 보여 주는 상대 지수예요. 높다고 꼭 좋은 일이 생긴다는 뜻은 아니고, 힘을 쏟기 좋은 때를 읽는 참고용 그림이에요.</p>
+    </div>
+  );
+}
+
+/** 십성 막대: 5가지 기운 중 어디에 힘이 실려 있는지 (오행 막대와 같은 모양) */
+function GodBars({ table }: { table: BookTable }) {
+  const rows = table.rows.map((r) => ({ ...r, n: r.locked ? 0 : Number(r.value.match(/\d+/)?.[0] ?? 0) }));
+  if (rows.length === 0) return null;
+  const max = Math.max(1, ...rows.map((r) => r.n));
+  return (
+    <div data-testid="god-bars">
+      <p className={`text-[12px] font-bold tracking-[0.12em] ${GOLD}`}>내가 가진 기운의 크기</p>
+      <ul className="mt-3 space-y-3">
+        {rows.map((r) => (
+          <li key={r.label} data-testid="god-row">
+            <div className="flex items-center gap-3">
+              <span className={`w-12 shrink-0 rounded-full border py-1 text-center text-xs font-bold ${HAIR} ${GOLD}`}>{r.label}</span>
+              <div className="h-2.5 flex-1 overflow-hidden rounded-full bg-white/10" role="img" aria-label={`${r.label} ${r.n}`}>
+                <div className={`h-full rounded-full ${r.highlight ? "bg-gradient-to-r from-[#f0d9a0] to-[#d3ac62]" : "bg-[#e6c887]/60"}`} style={{ width: `${(r.n / max) * 100}%` }} />
+              </div>
+              <span className="w-6 text-right text-sm font-bold tabular-nums text-[#f5efe0]">{r.locked ? "🔒" : r.n}</span>
+            </div>
+            {r.highlight && !r.locked && r.note && <p className="ml-[3.75rem] mt-1 text-[11px] text-[#e8dfca]/70">{r.note} · 가장 두드러져요</p>}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+/** 올해 앞뒤 5년 띠: 해마다 이 주제의 기운이 얼마나 힘을 받는지 */
+function YearStrip({ table }: { table: BookTable }) {
+  const rows = table.rows.slice(0, 5);
+  if (rows.length < 2) return null;
+  const curIdx = rows.findIndex((r) => r.current);
+  const top = Math.max(...rows.filter((r) => !r.locked).map((r) => r.bar ?? 0));
+  const tag = (i: number) => {
+    if (curIdx < 0) return "";
+    const d = i - curIdx;
+    return d === 0 ? "올해" : d === -1 ? "지난해" : d === 1 ? "내년" : d < -1 ? "돌아보기" : "미리 보기";
+  };
+  return (
+    <div data-testid="year-strip" className="mb-5">
+      <p className={`text-[12px] font-bold tracking-[0.12em] ${GOLD}`}>{table.title}</p>
+      <ol className="mt-3 grid grid-cols-5 gap-1.5">
+        {rows.map((r, i) => (
+          <li key={r.label} aria-current={r.current ? "true" : undefined} className={`rounded-xl border px-0.5 py-2 text-center ${r.current ? "border-[#e6c887] bg-[#e6c887] text-[#1b1824]" : `${HAIR} bg-white/[0.04] text-[#f5efe0]`}`}>
+            <div className="text-[11px] font-bold">{r.label.replace("년", "")}</div>
+            <div className="my-0.5 font-serifKr text-[15px] font-bold">{r.locked ? "●●" : r.value}</div>
+            <div className={`text-[10px] ${r.current ? "text-[#1b1824]/75" : "text-[#e8dfca]/70"}`}>{tag(i)}{!r.locked && top > 0 && r.bar === top ? " ★" : ""}</div>
+            {r.locked ? (
+              <span className="mt-1 block text-[10px]">🔒</span>
+            ) : (
+              <i
+                aria-hidden="true"
+                className={`mx-auto mt-1.5 block rounded-full ${r.current ? "bg-[#1b1824]" : "bg-[#e6c887]"}`}
+                style={{ width: 6 + ((r.bar ?? 40) / 100) * 10, height: 6 + ((r.bar ?? 40) / 100) * 10, opacity: 0.35 + ((r.bar ?? 40) / 100) * 0.65 }}
+              />
+            )}
+          </li>
+        ))}
+      </ol>
+      <p className="mt-2 text-[11px] leading-relaxed text-[#e8dfca]/60">점이 크고 밝을수록 그 해에 이 주제의 기운이 힘을 받아요. 흐름의 높낮이를 보는 참고용이에요.</p>
+    </div>
+  );
+}
+
 function Visual({ page, report }: { page: BookPage; report: PremiumReportView }) {
   if (page.chart) return <LifeChart chart={page.chart} />;
   const max = Math.max(1, ...report.elements.map((e) => e.count));
@@ -418,12 +522,21 @@ function Visual({ page, report }: { page: BookPage; report: PremiumReportView })
         </div>
       ) : null;
     case "years":
-      return report.seyun ? (
-        <p data-testid="seyun" className={`mb-6 rounded-2xl border ${HAIR} bg-white/[0.04] px-4 py-3 text-sm text-[#f5efe0]`}>
-          <span className={`font-bold ${GOLD}`}>{report.seyun.year}년</span> 세운 {report.seyun.ganzhi}
-          <span className="text-[#e8dfca]/60"> ({report.seyun.tenGodStem} · {report.seyun.tenGodBranch})</span>
-        </p>
-      ) : null;
+      return (
+        <>
+          {page.tables[0] && <YearStrip table={page.tables[0]} />}
+          {report.seyun ? (
+            <p data-testid="seyun" className={`mb-6 rounded-2xl border ${HAIR} bg-white/[0.04] px-4 py-3 text-sm text-[#f5efe0]`}>
+              <span className={`font-bold ${GOLD}`}>{report.seyun.year}년</span> 세운 {report.seyun.ganzhi}
+              <span className="text-[#e8dfca]/60"> ({report.seyun.tenGodStem} · {report.seyun.tenGodBranch})</span>
+            </p>
+          ) : null}
+        </>
+      );
+    case "years:2":
+      return page.tables[0] ? <MonthBars table={page.tables[0]} /> : null;
+    case "tengods":
+      return page.tables[0] ? <GodBars table={page.tables[0]} /> : null;
     default:
       return null;
   }

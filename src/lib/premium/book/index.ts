@@ -85,6 +85,18 @@ function groupsOf(...gods: Array<string | undefined>): Group[] {
   return gods.map(groupOf).filter((g): g is Group => g !== null);
 }
 
+/** 달·해마다 '이 주제의 기운'이 얼마나 힘을 받는지 0~100 상대 지수예요. (그림용. 실제 확률이 아니라 흐름의 높낮이를 보는 참고용이에요) */
+function flowScore(focus: Group, stemGod?: string, branchGod?: string): number {
+  const s = groupsOf(stemGod)[0];
+  const b = groupsOf(branchGod)[0];
+  let v = 42;
+  if (s === focus) v += 34;
+  else if (s === "식상" || s === "인성") v += 5;
+  if (b === focus) v += 22;
+  else if (b === "식상" || b === "인성") v += 3;
+  return Math.max(20, Math.min(95, v));
+}
+
 function idxOfCurrent(r: SajuResult): number {
   const c = r.daeun.current;
   return c ? r.daeun.list.findIndex((d) => d.startAge === c.startAge) : -1;
@@ -423,12 +435,18 @@ export function buildBook(r: SajuResult, ctx: BookContext): BookPage[] {
   // ── 9. 올해·내년·월별
   const yearRows: BookRow[] = r.seyun
     .filter((s) => s.year >= year - 1 && s.year <= year + 3)
-    .map((s) => ({ label: `${s.year}년`, value: s.ganzhi, note: groupLabel(s.tenGodStem, s.tenGodBranch), highlight: s.year === year }));
+    .map((s) => ({ label: `${s.year}년`, value: s.ganzhi, note: groupLabel(s.tenGodStem, s.tenGodBranch), highlight: s.year === year, bar: flowScore(topicGroup, s.tenGodStem, s.tenGodBranch), current: s.year === year }));
+  // 지금이 몇 번째 달인지(절기가 대략 매달 7일 무렵 바뀌어서, 그 전이면 지난달로 봐요)
+  const curMonth = (() => {
+    const d = kstNow.getUTCDate();
+    const m = kstNow.getUTCMonth() + 1;
+    return d >= 7 ? m : m === 1 ? 12 : m - 1;
+  })();
   const monthRows: BookRow[] = r.wolun.map((m) => {
     const gs = groupsOf(m.stemTenGod, m.branchTenGod);
     const hit = gs.includes(topicGroup);
     const solarMonth = (m.month % 12) + 1;
-    return { label: `${solarMonth}월경 · ${m.ganzhi}`, value: GOD_MONTH_LINE[m.stemTenGod] ?? (gs[0] ? MONTH_LINE[gs[0]] : "-"), note: hit ? `${insight.label} 포인트` : undefined, highlight: hit };
+    return { label: `${solarMonth}월경 · ${m.ganzhi}`, value: GOD_MONTH_LINE[m.stemTenGod] ?? (gs[0] ? MONTH_LINE[gs[0]] : "-"), note: hit ? `${insight.label} 포인트` : undefined, highlight: hit, bar: flowScore(topicGroup, m.stemTenGod, m.branchTenGod), current: solarMonth === curMonth };
   });
   const hitMonths = r.wolun.filter((m) => groupsOf(m.stemTenGod, m.branchTenGod).includes(topicGroup)).map((m) => `${(m.month % 12) + 1}월경`);
   const yearSections: BookSection[] = [];

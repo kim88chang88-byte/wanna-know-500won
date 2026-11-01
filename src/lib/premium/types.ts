@@ -82,6 +82,10 @@ export interface BookRow {
   locked?: boolean;
   /** 표에서 눈에 띄게 (현재 대운, 포인트 달 등) */
   highlight?: boolean;
+  /** 그림용 0~100 상대 지수 (달별·연도별 흐름). 실제 확률이 아니에요. 잠긴 칸에는 내려보내지 않아요. */
+  bar?: number;
+  /** 그림에서 "지금"으로 표시할 칸 */
+  current?: boolean;
 }
 export interface BookTable {
   title: string;

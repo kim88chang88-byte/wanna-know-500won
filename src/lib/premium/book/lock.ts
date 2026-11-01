@@ -28,7 +28,7 @@ function lockSection(s: BookSection, heading?: string): BookSection {
 }
 
 function lockRow(r: BookRow): BookRow {
-  return { ...r, value: MASK_VALUE, note: r.note ? "●●" : undefined, locked: true };
+  return { ...r, value: MASK_VALUE, note: r.note ? "●●" : undefined, bar: undefined, current: undefined, locked: true };
 }
 
 type SecRule = (s: BookSection, nth: number) => { lock: boolean; heading?: string };
