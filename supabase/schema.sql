@@ -324,8 +324,8 @@ revoke all on function public.coin_spend(text) from public, anon, authenticated;
 grant execute on function public.coin_spend(text) to service_role;
 
 -- ─────────────────────────────────────────────────────────────────────────────
--- 친구 초대(추천 코드): 친구가 내 코드를 입력하고 첫 풀이를 마치면 두 사람 모두 뽑기 코인 1장.
--- · 코드 입력은 가입 후 7일 안, 아직 뽑기를 해 보지 않은 계정만 가능해요.
+-- 친구 초대(추천 코드): 친구가 내 코드를 입력하고 그 뒤 첫 풀이를 마치면 두 사람 모두 뽑기 코인 1장.
+-- · 코드 입력은 가입 후 7일 안의 계정만 가능해요. (이미 뽑기를 해 본 계정도 입력할 수 있어요)
 -- · 초대한 사람은 한 달(한국 시간)에 3번까지 받아요. 초대받은 친구는 항상 받아요.
 -- 이 부분만 따로 Run 해도 되고, 파일 전체를 다시 Run 해도 안전해요. (코인 테이블이 먼저 있어야 해요)
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -378,7 +378,7 @@ begin
 end;
 $$;
 
--- 친구 코드 입력. 결과: ok / bad_code / self / already / too_old / used_draw
+-- 친구 코드 입력. 결과: ok / bad_code / self / already / too_old
 create or replace function public.referral_redeem(p_user text, p_code text)
 returns text
 language plpgsql
@@ -409,7 +409,7 @@ begin
 end;
 $$;
 
--- 친구가 첫 풀이를 마쳤을 때 호출: 보상을 한 번만 지급해요.
+-- 코드를 입력한 친구가 그 뒤 첫 풀이를 마쳤을 때 호출: 보상을 한 번만 지급해요.
 create or replace function public.referral_complete(p_user text)
 returns table (out_referee boolean, out_referrer boolean)
 language plpgsql
