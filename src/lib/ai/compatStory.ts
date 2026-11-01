@@ -69,6 +69,7 @@ export function rewritableItems(c: CompatView): Array<{ id: string; 제목: stri
   return [
     ...c.points.map((p, i) => ({ id: `p${i}`, 제목: `${p.tone === "good" ? "잘 맞는 점" : "맞춰 가면 좋은 점"} · ${p.title}`, 내용: p.body })),
     ...(c.timing ?? []).map((t, i) => ({ id: `t${i}`, 제목: `올해·내년 흐름 · ${t.title}`, 내용: t.body })),
+    ...(c.partnerTrait?.body ? [{ id: "r0", 제목: "상대는 이런 사람이에요", 내용: c.partnerTrait.body }] : []),
   ];
 }
 
@@ -138,6 +139,7 @@ export function applyCompatAi(c: CompatView, r: CompatAiResult): CompatView {
     ...c,
     points: c.points.map((p, i) => ({ ...p, body: r.items.get(`p${i}`) ?? p.body })),
     ...(c.timing ? { timing: c.timing.map((t, i) => ({ ...t, body: r.items.get(`t${i}`) ?? t.body })) } : {}),
+    ...(c.partnerTrait ? { partnerTrait: { ...c.partnerTrait, body: r.items.get("r0") ?? c.partnerTrait.body } } : {}),
     ai: { ...(r.answer ? { answer: r.answer } : {}), ...(r.summary ? { summary: r.summary } : {}), ...(r.last ? { last: r.last } : {}), ...(r.questions ? { questions: r.questions } : {}), ...(r.action ? { action: r.action } : {}) },
   };
 }

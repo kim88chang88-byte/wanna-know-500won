@@ -108,6 +108,15 @@ export function buildExtras(x: ExtrasInput) {
     { label: "생활 리듬", score: clamp(70 + w(monthRel, 14, -6, -3) + w(yearRel, 6, -3, -1), 50, 98) },
     { label: "서로에게 주는 힘", score: clamp(68 + (x.filled ? 12 : 0) + flow * 2, 50, 98) },
   ].map((s) => ({ ...s, note: noteFor(s.score) }));
+  // 점수가 비슷비슷하면 전부 "무난해요"로 보여서, 가장 높은 곳과 가장 낮은 곳은 서로 견줘 말해 줘요.
+  const hi = Math.max(...scores.map((s) => s.score));
+  const lo = Math.min(...scores.map((s) => s.score));
+  if (hi > lo) {
+    for (const s of scores) {
+      if (s.score === hi && s.score < 75) s.note = "가장 든든해요";
+      else if (s.score === lo && s.score >= 65) s.note = "조금 더 맞춰 가요";
+    }
+  }
 
   const links: CompatLink[] = [
     { place: "중심 글자 (일간)", me: x.meStem, partner: x.otStem, rel: x.combine ? "합" : x.clash ? "충" : null },

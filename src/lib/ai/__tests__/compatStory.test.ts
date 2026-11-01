@@ -18,6 +18,7 @@ const base = {
 describe("compat ai", () => {
   it("다시 쓸 항목은 풀이와 흐름만이고 팁은 건드리지 않아요", () => {
     expect(rewritableItems(base).map((x) => x.id)).toEqual(["p0", "p1", "t0"]);
+    expect(rewritableItems({ ...base, partnerTrait: { title: "t", body: "b" } }).map((x) => x.id)).toContain("r0");
   });
 
   it("프롬프트에 이름·관계·고민을 데이터로 담아요", () => {
