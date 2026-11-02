@@ -176,20 +176,6 @@ export function ShowcaseSection() {
               fallback="🦦"
               fallbackClass="text-8xl"
             />
-            {/* 반복 영상: 소리 없이 자동 재생해요. 움직임 줄이기 설정이면 위의 그림만 보여요. */}
-            <video
-              data-testid="hero-video"
-              className="absolute inset-0 h-full w-full object-cover motion-reduce:hidden"
-              src="/images/hero-loop.mp4"
-              poster={HERO_IMAGE}
-              autoPlay
-              muted
-              loop
-              playsInline
-              preload="auto"
-              aria-hidden="true"
-              tabIndex={-1}
-            />
           </div>
         </div>
       </div>
