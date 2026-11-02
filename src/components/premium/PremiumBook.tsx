@@ -887,7 +887,7 @@ export default function PremiumBook({ report, flush = false, finale, previewBlur
           {unlock}
           {unlockMsg && (
             <p role="status" data-testid="unlock-message" className="mt-2 text-center text-[11.5px] font-bold text-[#f6dfa8]">
-              지금은 베타 테스트 중이라 결제를 받지 않아요. 정식 오픈하면 여기서 전체 사주서를 열 수 있어요 🫧
+              지금은 베타 테스트 중이라 결제를 받지 않아요. 정식 오픈하면 여기서 전체 사주서를 열 수 있어요 ❄️
             </p>
           )}
         </div>

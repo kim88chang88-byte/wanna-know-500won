@@ -40,7 +40,7 @@ export const CONCERN_CHIPS: readonly ConcernChip[] = [
   { id: "career", label: "진로·커리어 방향", emoji: "🧭", topic: "success" },
   { id: "money", label: "돈 모으기·재테크 불안", emoji: "🪙", topic: "money" },
   { id: "burnout", label: "번아웃·무기력", emoji: "🔋", topic: "health" },
-  { id: "selfesteem", label: "자존감·불안한 마음", emoji: "🫧", topic: "health" },
+  { id: "selfesteem", label: "자존감·불안한 마음", emoji: "❄️", topic: "health" },
   { id: "exam", label: "새해 목표·계획 세우기", emoji: "🎍", topic: "study" },
   { id: "friends", label: "친구·가족과의 관계", emoji: "🤝", topic: "general" },
   // ── 재물

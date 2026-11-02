@@ -13,7 +13,7 @@ export default function ConcernCard({ concern, dark = false }: { concern: Concer
   return (
     <section data-testid="concern-card" aria-labelledby={dark ? "concern-h-dark" : "concern-h"} className={wrap}>
       <h2 id={dark ? "concern-h-dark" : "concern-h"} className={h}>
-        <span aria-hidden="true">🫧</span> 요즘 고민에 대한 도리의 답
+        <span aria-hidden="true">❄️</span> 요즘 고민에 대한 도리의 답
       </h2>
       {concern.text && (
         <p data-testid="concern-quote" className={`mt-2 text-xs leading-relaxed ${dark ? "text-[#e8dfca]/80" : "text-gray-500"}`}>

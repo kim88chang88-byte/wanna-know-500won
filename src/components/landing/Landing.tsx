@@ -43,6 +43,7 @@ export default function Landing() {
   const [loginOpen, setLoginOpen] = useState(false);
   // 비회원이 뽑기를 누르면 로그인 창을 열면서, 왜 열렸는지 한 줄로 알려줘요.
   const [loginReason, setLoginReason] = useState<string | null>(null);
+  const [vaultAsk, setVaultAsk] = useState(false); // 보관함 안부 카드가 보이는 중이면 다른 안부 카드는 숨겨요
   const userRef = useRef<typeof user>(null);
   userRef.current = user;
   const [intake, setIntake] = useState<IntakeTarget | null>(null);
@@ -122,7 +123,7 @@ export default function Landing() {
       // 운세 뽑기는 로그인한 회원만 할 수 있어요. 비회원은 로그인 창으로 안내해요.
       if (!userRef.current) {
         track("login_click");
-        setLoginReason(`${fortune} 뽑기는 로그인하고 이용할 수 있어요 🫧`);
+        setLoginReason(`${fortune} 뽑기는 로그인하고 이용할 수 있어요 ❄️`);
         setLoginOpen(true);
         return;
       }
@@ -316,8 +317,8 @@ export default function Landing() {
           recordVisit(getBrowserStorage(), dayKey(new Date()));
           syncReward();
         }} />}
-        {user && <VaultFollowupCard />}
-        <FollowupCard />
+        {user && <VaultFollowupCard onShow={setVaultAsk} />}
+        {!(user && vaultAsk) && <FollowupCard />}
         <MachinesSection onSpin={handleSpin} lastKey={lastKey} />
         <PremiumSection onSpin={handleSpin} />
         <SampleSection />
@@ -343,7 +344,7 @@ export default function Landing() {
               ? notice
               : gift
               ? `🎁 ${user?.nickname ? `${user.nickname}님, ` : ""}로그인 선물로 500원 무료 뽑기 1회가 도착했어요!`
-              : `🫧 ${user?.nickname ? `${user.nickname}님, ` : ""}로그인됐어요! 매일 첫 1회는 무료예요.`}
+              : `❄️ ${user?.nickname ? `${user.nickname}님, ` : ""}로그인됐어요! 매일 첫 1회는 무료예요.`}
           </span>
           <button type="button" onClick={() => { clearWelcome(); setGift(false); setNotice(null); }} aria-label="알림 닫기" className="shrink-0 text-white/80 hover:text-white">
             <span className="material-symbols-outlined text-[18px]">close</span>

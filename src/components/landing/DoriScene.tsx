@@ -7,7 +7,7 @@ import type { ReactNode } from "react";
 export default function DoriScene({ line, tip, action }: { line: string; tip: string; /** 말풍선 맨 아래에 붙는 버튼 (예: 도리에게 더 물어보기) */ action?: ReactNode }) {
   const long = line.length > 42;
   // "오늘의 작은 실천: 내 속도대로…" → "오늘의 작은 실천:" 다음에서 줄을 바꿔요
-  const cleanTip = tip.replace(/^🫧\s*/, "");
+  const cleanTip = tip.replace(/^(?:❄️|🫧)\s*/u, "");
   const m = /^([^:：]{1,20}[:：])\s*(.+)$/s.exec(cleanTip);
   const tipHead = m ? m[1] : cleanTip;
   const tipRest = m ? m[2] : "";
@@ -42,7 +42,7 @@ export default function DoriScene({ line, tip, action }: { line: string; tip: st
           “{line}”
         </p>
         <p data-testid="dori-scene-tip" className="border border-white/80 bg-white/60 text-left font-bold text-[#5b2a4a]" style={{ fontSize: "2.9cqw", lineHeight: 1.4, padding: "1.8cqw 2.6cqw", borderRadius: "2.8cqw", wordBreak: "keep-all" }}>
-          🫧 {tipHead}
+          ❄️ {tipHead}
           {tipRest && (
             <>
               <br />

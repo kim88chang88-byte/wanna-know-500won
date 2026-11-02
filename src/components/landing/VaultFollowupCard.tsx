@@ -7,7 +7,7 @@ import { getBrowserStorage } from "@/lib/drawCounter";
 import { followupPrompt, markAnswered, pickVaultFollowup, readAnswered, type FollowupPick } from "@/lib/vaultFollowup";
 
 /** 보관함에 있는 지난 풀이를 현실과 견줘 보게 물어요. 로그인한 회원에게만 보이고, 어느 쪽을 골라도 응원으로 마무리해요. */
-export function VaultFollowupCard() {
+export function VaultFollowupCard({ onShow }: { onShow?: (shown: boolean) => void } = {}) {
   const [pick, setPick] = useState<FollowupPick | null>(null);
   const [chosen, setChosen] = useState<number | null>(null);
   const [asking, setAsking] = useState<number | null>(null);
@@ -19,7 +19,9 @@ export function VaultFollowupCard() {
       .then((r) => (r.ok ? r.json() : null))
       .then((data: { items?: Array<{ id: string; topic: string; premium?: boolean; created_at: string }> } | null) => {
         if (!alive || !data?.items) return;
-        setPick(pickVaultFollowup(data.items, new Date(), readAnswered(getBrowserStorage())));
+        const next = pickVaultFollowup(data.items, new Date(), readAnswered(getBrowserStorage()));
+        setPick(next);
+        onShow?.(Boolean(next)); // 안부 카드는 한 번에 하나만 보여 주려고, 위쪽에 알려요
       })
       .catch(() => {
         /* 못 불러와도 조용히 넘어가요 */

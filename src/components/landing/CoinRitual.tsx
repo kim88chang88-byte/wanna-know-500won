@@ -11,7 +11,7 @@ export default function CoinRitual({ bill = false, big = false }: { bill?: boole
       ) : (
         <img src="/images/coin-500.webp" alt="" width={96} height={96} className="coin-ritual-coin" />
       )}
-      <p className="coin-ritual-text">도리가 운세를 꺼내는 중… 🫧</p>
+      <p className="coin-ritual-text">도리가 운세를 꺼내는 중… ❄️</p>
     </div>
   );
 }

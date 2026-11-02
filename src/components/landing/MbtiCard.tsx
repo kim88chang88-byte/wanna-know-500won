@@ -11,7 +11,7 @@ const ROWS: Array<[keyof MbtiResult, string]> = [
   ["common", "🤝 둘이 같은 말을 해요"],
   ["differ", "🔀 서로 다르게 말해요"],
   ["strength", "✨ 둘 다 가리키는 강점"],
-  ["caution", "🫧 둘 다 살짝 알려주는 점"],
+  ["caution", "❄️ 둘 다 살짝 알려주는 점"],
   ["tip", "🌱 이 조합 사용법"],
 ];
 

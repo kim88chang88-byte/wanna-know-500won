@@ -125,7 +125,7 @@ function TogetherCard({ c, name, partnerName }: { c: CompatView; name: string | 
     }
     try {
       await navigator.clipboard.writeText(text);
-      setMsg("요약을 복사했어요. 상대에게 붙여넣어 보내 주세요 🫧");
+      setMsg("요약을 복사했어요. 상대에게 붙여넣어 보내 주세요 ❄️");
     } catch {
       setMsg("복사하지 못했어요. 글을 길게 눌러 직접 복사해 주세요.");
     }
@@ -264,7 +264,7 @@ export default function CompatStory({ report, intro, closing, lastWord, partnerN
       <section data-testid="story-note" aria-label="도리의 쪽지" className="relative rounded-2xl border border-amber-200 bg-[#fff9e6] p-4 shadow-sm">
         <span aria-hidden="true" className="absolute -top-2.5 left-6 h-4 w-16 -rotate-2 rounded-sm bg-amber-200/80" />
         <p className="text-[11px] font-bold text-amber-700">🦦 도리의 쪽지 · 더 물어보기</p>
-        <p className="mt-1 text-[14.5px] font-bold leading-relaxed text-gray-900">읽다가 더 궁금한 게 생겼어? 도리한테 편하게 물어봐 🫧</p>
+        <p className="mt-1 text-[14.5px] font-bold leading-relaxed text-gray-900">읽다가 더 궁금한 게 생겼어? 도리한테 편하게 물어봐 ❄️</p>
         {closing}
       </section>
     </div>

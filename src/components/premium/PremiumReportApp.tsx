@@ -43,7 +43,7 @@ function PremiumProgress() {
       <p className="mt-2 text-center text-xs text-[#e8dfca]/80">
         {stage.text} · {Math.round(pct)}%
       </p>
-      <p className="mt-1 text-center text-[11px] text-[#e8dfca]/50">미리보기를 만드는 중이에요. 잠깐만 기다려 주세요 🫧</p>
+      <p className="mt-1 text-center text-[11px] text-[#e8dfca]/50">미리보기를 만드는 중이에요. 잠깐만 기다려 주세요 ❄️</p>
       <span className="sr-only">{Math.floor(sec)}초 경과</span>
     </div>
   );
@@ -187,7 +187,7 @@ export default function PremiumReportApp() {
       )}
 
       <button type="submit" disabled={busy} className="w-full rounded-full bg-gradient-to-r from-[#f0d9a0] to-[#d3ac62] py-3.5 font-serifKr font-bold text-[#1b1824] shadow-md disabled:opacity-60 active:scale-95 transition-transform">
-        {busy ? "물길을 읽는 중… 🫧" : "내 사주 리포트 보기"}
+        {busy ? "물길을 읽는 중… ❄️" : "내 사주 리포트 보기"}
       </button>
       {busy && <PremiumProgress />}
     </form>

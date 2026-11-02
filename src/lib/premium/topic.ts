@@ -22,7 +22,7 @@ export const TOPIC_META: Record<TopicKey, { label: string; emoji: string }> = {
   success: { label: "성공·재물운", emoji: "🌊" },
   health: { label: "건강운", emoji: "🌿" },
   study: { label: "2027 신년운", emoji: "🎍" },
-  general: { label: "오늘의 운", emoji: "🫧" },
+  general: { label: "오늘의 운", emoji: "❄️" },
 };
 
 /** 화면 문구("연애운", "연애 결혼 리포트", "올해 성공 재물 리포트", "우리 둘의 궁합 리포트")에서 주제를 골라요. */

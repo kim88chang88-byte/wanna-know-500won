@@ -46,7 +46,7 @@ function activateOnKey(e: React.KeyboardEvent, run: () => void) {
 
 /** 닉네임의 첫 글자. 이모지처럼 글자 하나가 두 칸을 차지하는 문자도 깨지지 않게 Array.from 으로 나눠요. */
 export function firstGlyph(nickname: string | null | undefined): string {
-  return Array.from((nickname ?? "").trim())[0] ?? "🫧";
+  return Array.from((nickname ?? "").trim())[0] ?? "❄️";
 }
 
 export function Header({ onOpenLogin, user = null }: { onOpenLogin: () => void; user?: AuthUser | null }) {
@@ -144,7 +144,7 @@ export function HeroSection({ visitors = null, tickets = 0, wallet = null }: { v
       </div>
       {tickets > 0 && (
         <p data-testid="ticket-badge" className="mt-1 text-right text-[11px] font-bold leading-tight text-rose-600">
-          🎟 보너스 뽑기 {tickets}장 <span className="text-[10px] font-medium text-rose-400">· 무료 소진 후 자동 사용</span>
+          🎟 보너스 뽑기 {tickets}장 <span className="hidden text-[10px] font-medium text-rose-400 min-[420px]:inline">· 무료 소진 후 자동 사용</span>
         </p>
       )}
     </section>
@@ -396,7 +396,7 @@ export function Footer() {
     <footer className="relative z-10 bg-white border-t border-brand-100 pt-5 pb-24 sm:pb-8 text-center text-xs text-gray-500">
       <div className="max-w-[34rem] lg:max-w-7xl mx-auto px-4 flex flex-col items-center gap-2">
         <div className="flex items-center gap-1.5 text-brand-500 font-cute font-normal">
-          <DoriIcon className="!mr-0" /> {SERVICE_NAME} <span aria-hidden="true">🫧</span>
+          <DoriIcon className="!mr-0" /> {SERVICE_NAME} <span aria-hidden="true">❄️</span>
         </div>
         <p className="text-gray-400">“궁금하면 500원! 퐁당, 오늘의 운을 뽑아봐.”</p>
         <ShareSiteBar />

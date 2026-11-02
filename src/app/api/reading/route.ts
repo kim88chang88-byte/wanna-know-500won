@@ -79,7 +79,7 @@ export async function POST(request: Request) {
       }
       if (coins < 1) {
         return NextResponse.json(
-          { error: "오늘의 무료 뽑기는 이미 사용했어요. 결제는 아직 준비 중이에요. 내일 다시 만나요 🫧", code: "free_used", counts },
+          { error: "오늘의 무료 뽑기는 이미 사용했어요. 결제는 아직 준비 중이에요. 내일 다시 만나요 ❄️", code: "free_used", counts },
           { status: 402 },
         );
       }

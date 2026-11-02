@@ -23,7 +23,7 @@ export default function InlineProgress({ label = "도리가 물결을 읽는 중
       className={`p-4 rounded-2xl border ${luxe ? "bg-white/[0.04] border-[#e6c887]/25 text-[#e8dfca]/80" : "bg-brand-50/60 border-brand-100 text-gray-600"}`}
     >
       <p className="flex items-center justify-between gap-3 text-sm">
-        <span>{label} 🫧</span>
+        <span>{label} ❄️</span>
         <span data-testid="ask-loading-pct" className={`tabular-nums font-bold ${luxe ? "text-[#e6c887]" : "text-brand-600"}`}>{shown}%</span>
       </p>
       <div

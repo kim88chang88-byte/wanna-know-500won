@@ -105,7 +105,7 @@ export default function ResultShareCard({ report, aiQuote }: { report: PremiumRe
     }
     try {
       await navigator.clipboard.writeText(`${text} ${url}`);
-      setLinkMsg("링크를 복사했어요. 친구에게 붙여넣어 보내 주세요 🫧");
+      setLinkMsg("링크를 복사했어요. 친구에게 붙여넣어 보내 주세요 ❄️");
     } catch {
       setLinkMsg(url);
     }
@@ -168,7 +168,7 @@ export default function ResultShareCard({ report, aiQuote }: { report: PremiumRe
         {state === "busy" ? "카드 만드는 중…" : "✨ 결과 카드 저장·공유하기"}
       </button>
       <p role="status" className="mt-1.5 text-[11px] text-gray-500">
-        {state === "done" ? (copied ? "카드를 만들었어요. 링크도 복사했으니 올릴 때 붙여넣기만 하세요 🫧" : "카드를 만들었어요. 친구에게 자랑해 보세요 🫧") : state === "error" ? "지금은 카드를 만들 수 없어요. 잠시 뒤에 다시 눌러 주세요." : "인스타 스토리 크기로 저장돼요 · 이 기기에서만 만들어요"}
+        {state === "done" ? (copied ? "카드를 만들었어요. 링크도 복사했으니 올릴 때 붙여넣기만 하세요 ❄️" : "카드를 만들었어요. 친구에게 자랑해 보세요 ❄️") : state === "error" ? "지금은 카드를 만들 수 없어요. 잠시 뒤에 다시 눌러 주세요." : "인스타 스토리 크기로 저장돼요 · 이 기기에서만 만들어요"}
       </p>
       <button
         type="button"

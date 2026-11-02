@@ -6,9 +6,9 @@ import SafeImage from "@/components/landing/SafeImage";
 import { CHAT_LOG_KEY, MSG_MAX, TURN_CAP, readChatCtx, type ChatCtx, type ChatKind, type ChatMsg } from "@/lib/chatContext";
 
 const GREETING: Record<ChatKind, string> = {
-  daily: "안녕! 오늘의 한마디 잘 받았어? 오늘 하루 더 궁금한 거 있으면 편하게 물어봐 🫧",
-  reading: "방금 본 풀이, 도리도 기억하고 있어! 읽다가 더 궁금했던 부분을 편하게 물어봐 🫧",
-  compat: "두 사람 궁합, 도리가 다 기억하고 있어! 둘 사이에서 더 궁금한 거 편하게 물어봐 🫧",
+  daily: "안녕! 오늘의 한마디 잘 받았어? 오늘 하루 더 궁금한 거 있으면 편하게 물어봐 ❄️",
+  reading: "방금 본 풀이, 도리도 기억하고 있어! 읽다가 더 궁금했던 부분을 편하게 물어봐 ❄️",
+  compat: "두 사람 궁합, 도리가 다 기억하고 있어! 둘 사이에서 더 궁금한 거 편하게 물어봐 ❄️",
 };
 
 const CTX_LABEL: Record<ChatKind, { name: string; icon: string }> = {
@@ -250,7 +250,7 @@ export default function ChatApp() {
       if (res.ok && typeof data?.left === "number") {
         setLeft(data.left);
         setCoins(data.coins ?? 0);
-        flash(`질문 ${data.added ?? 5}개가 더해졌어요 🫧`);
+        flash(`질문 ${data.added ?? 5}개가 더해졌어요 ❄️`);
       } else if (data?.code === "no_coin") {
         setCoins(0);
         flash("뽑기 코인이 없어요. 친구를 초대하면 코인을 받을 수 있어요 🎁");
@@ -331,7 +331,7 @@ export default function ChatApp() {
               <button type="button" aria-label="메뉴 닫기" className="fixed inset-0 z-10 cursor-default" onClick={() => setMenu(false)} />
               <div role="menu" className="absolute right-0 top-10 z-20 w-44 overflow-hidden rounded-2xl border border-brand-100 bg-white py-1 shadow-lg">
                 <button role="menuitem" type="button" onClick={newChat} className="block w-full px-4 py-2.5 text-left text-sm hover:bg-brand-50">
-                  🫧 새 대화 시작
+                  ❄️ 새 대화 시작
                 </button>
                 <button role="menuitem" type="button" onClick={() => void copyAll()} disabled={msgs.length === 0} className="block w-full px-4 py-2.5 text-left text-sm hover:bg-brand-50 disabled:opacity-40">
                   📋 대화 내용 복사
@@ -473,7 +473,7 @@ export default function ChatApp() {
       >
         <div className="mx-1 mb-2 flex items-center justify-between text-[11px] text-[#8a7fa8]">
           <span>
-            🫧 질문 <b className="text-gray-800">{leftNow}번</b> 남았어요
+            ❄️ 질문 <b className="text-gray-800">{leftNow}번</b> 남았어요
             <span className="ml-2 text-[#b08722]">🪙 코인 {coins}개</span>
           </span>
           <button type="button" onClick={() => setBuyOpen(true)} className="rounded-full bg-[#fff3c9] px-2.5 py-1 font-extrabold text-[#8a5b00] active:scale-95">

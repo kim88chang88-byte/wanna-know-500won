@@ -51,7 +51,7 @@ export default function ReviewBox({ topic, premium, loggedIn = false }: { topic:
   if (phase === "done") {
     return (
       <div data-testid="review-done" role="status" className="mt-5 rounded-2xl bg-emerald-50 border border-emerald-200 px-4 py-4 text-center">
-        <p className="font-bold text-emerald-800 text-sm">{reward === "granted" ? "후기 고마워요! 🎁" : "후기 고마워요 🫧"}</p>
+        <p className="font-bold text-emerald-800 text-sm">{reward === "granted" ? "후기 고마워요! 🎁" : "후기 고마워요 ❄️"}</p>
         <p data-testid="review-reward-msg" className="mt-1 text-[11px] text-emerald-700">
           {reward === "granted"
             ? "정성 후기 선물로 500원 뽑기 1회를 드렸어요. 위쪽 주머니에서 확인해 보세요."

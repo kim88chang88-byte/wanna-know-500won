@@ -423,7 +423,7 @@ export function buildCompatBook(me: BookSource, other: BookSource, ctx: CompatBo
         heading: "오래가는 비결 3가지",
         body: `① ${niceGood ? `'${niceGood.title}'의 장점을 자주 칭찬해 주세요.` : "서로 편안하게 어울리는 점을 자주 말해 주세요."} ② ${tips[0] ? `'${tips[0].title}'은 미리 약속을 정해 두면 편해요.` : "작은 약속을 꾸준히 지켜 주세요."} ③ 한 달에 한 번, 서로에게 고마웠던 일을 하나씩 이야기해 보세요.`,
       },
-      { heading: "마무리 편지", body: `${compat.closing} 도리 궁합 지수 ${compat.score}점은 재미로 보는 참고 점수예요. 두 사람이 함께 쌓아 가는 시간이 사주보다 훨씬 큰 힘이라는 걸 기억해 주세요. 🫧` },
+      { heading: "마무리 편지", body: `${compat.closing} 도리 궁합 지수 ${compat.score}점은 재미로 보는 참고 점수예요. 두 사람이 함께 쌓아 가는 시간이 사주보다 훨씬 큰 힘이라는 걸 기억해 주세요. ❄️` },
     ],
     [
       {

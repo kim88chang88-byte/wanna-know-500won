@@ -48,7 +48,7 @@ export async function POST(request: Request) {
     const result = await crossMbti({ chart, gender: input.gender, mbti, core });
     return NextResponse.json({ mbti, result });
   } catch (err) {
-    if (err instanceof ReadingUnavailableError) return NextResponse.json({ error: "오늘은 도리가 많이 답해서 잠깐 쉬고 있어요. 내일 다시 물어봐 주세요 🫧" }, { status: 503 });
+    if (err instanceof ReadingUnavailableError) return NextResponse.json({ error: "오늘은 도리가 많이 답해서 잠깐 쉬고 있어요. 내일 다시 물어봐 주세요 ❄️" }, { status: 503 });
     console.error("crossMbti failed:", err instanceof Error ? err.message : "unknown");
     return NextResponse.json({ error: "도리가 잠깐 물놀이하러 갔어요. 다시 눌러 볼래요?" }, { status: 502 });
   }

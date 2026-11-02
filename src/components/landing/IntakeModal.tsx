@@ -92,11 +92,11 @@ interface Props {
 export const LOGIN_NUDGE = "로그인하면 도리가 생년월일시를 기억해서 다시 입력할 필요가 없어요!";
 
 const BUBBLE: Record<AnyStepId, string> = {
-  birth: "먼저 생년월일, 성별, 태어난 시간을 알려줄래? (시간은 몰라도 괜찮아!) 🫧",
-  date: "먼저, 언제 태어났어? 🫧",
+  birth: "먼저 생년월일, 성별, 태어난 시간을 알려줄래? (시간은 몰라도 괜찮아!) ❄️",
+  date: "먼저, 언제 태어났어? ❄️",
   time: "태어난 시간도 알면 더 또렷하게 볼 수 있어. 몰라도 괜찮아!",
   gender: "성별도 알려줄래?",
-  concern: "요즘 마음에 걸리는 게 있어? 골라주면 그 얘기를 더 살려서 풀어줄게 🫧",
+  concern: "요즘 마음에 걸리는 게 있어? 골라주면 그 얘기를 더 살려서 풀어줄게 ❄️",
   consent: "풀이를 만들기 전에, 개인정보 처리 동의만 확인할게.",
   pdate: "이번엔 궁합을 볼 상대방이야! 상대방은 언제 태어났어? 💞",
   ptime: "상대방이 태어난 시간도 알면 더 또렷해. 몰라도 괜찮아!",
@@ -837,7 +837,7 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
 
           {!loggedIn && (
             <div data-testid="login-nudge-result" className={`mt-4 rounded-2xl border px-4 py-3 text-center ${luxe ? "bg-white/[0.04] border-[#e6c887]/30" : "bg-amber-50 border-amber-200"}`}>
-              <p className={`text-xs font-bold ${luxe ? "text-[#f3e7c9]" : "text-amber-900"}`}>🫧 {LOGIN_NUDGE}</p>
+              <p className={`text-xs font-bold ${luxe ? "text-[#f3e7c9]" : "text-amber-900"}`}>❄️ {LOGIN_NUDGE}</p>
               {onRequestLogin && (
                 <button type="button" onClick={onRequestLogin} className={`mt-1.5 text-[11px] font-bold underline underline-offset-2 ${luxe ? "text-[#e6c887]" : "text-brand-600"}`}>
                   로그인하러 가기
@@ -882,7 +882,7 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
 
           <div className="flex items-start gap-2.5 mb-4">
             <span className="text-2xl" aria-hidden="true">
-              🫧
+              ❄️
             </span>
             <p className="flex-1 rounded-2xl rounded-tl-sm bg-brand-50 border border-brand-100 px-3.5 py-2.5 text-sm text-gray-800">
               {BUBBLE[step]}
@@ -904,7 +904,7 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
 
           {(step === "date" || step === "birth") && !loggedIn && (
             <div data-testid="login-nudge" className="mb-3 rounded-xl bg-amber-50 border border-amber-200 px-3 py-2.5 text-center">
-              <p className="text-[12px] font-bold text-amber-900 leading-snug">🫧 {LOGIN_NUDGE}</p>
+              <p className="text-[12px] font-bold text-amber-900 leading-snug">❄️ {LOGIN_NUDGE}</p>
               {onRequestLogin && (
                 <button type="button" data-testid="nudge-login" onClick={onRequestLogin} className="mt-1.5 text-[11px] font-bold text-brand-600 underline underline-offset-2">
                   로그인하러 가기
@@ -919,7 +919,7 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
           {step === "pdate" && people.length > 0 && <SavedPeoplePicker people={people} onPick={pickPerson} title="기억해 둔 사람 (눌러서 바로 불러와요)" />}
           {step === "pdate" && !loggedIn && (
             <p data-testid="people-nudge" className="mb-3 rounded-xl bg-amber-50 border border-amber-200 px-3 py-2 text-center text-[11px] font-bold text-amber-900">
-              🫧 로그인하면 상대방 정보를 기억해 두고, 다음에 눌러서 바로 고를 수 있어요
+              ❄️ 로그인하면 상대방 정보를 기억해 두고, 다음에 눌러서 바로 고를 수 있어요
             </p>
           )}
           {(step === "pdate" || step === "ptime" || step === "pgender") && (

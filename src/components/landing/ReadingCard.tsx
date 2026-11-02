@@ -16,7 +16,7 @@ export function ReadingCard({ reading, luxe = false }: { reading: Pick<PublicRea
   return (
     <section data-testid="reading-card" className={`mt-4 rounded-2xl border p-4 ${luxe ? "border-[#e6c887]/25 bg-white/[0.03] text-[#efe7d3]" : "border-brand-100 bg-white text-gray-800"}`}>
       <div className="flex items-center justify-between gap-2">
-        <p className={`text-xs font-semibold ${luxe ? "text-[#e6c887]" : "text-brand-700"}`}>{luxe ? "◆ 오늘 도리의 풀이" : "🫧 오늘 도리의 풀이"}</p>
+        <p className={`text-xs font-semibold ${luxe ? "text-[#e6c887]" : "text-brand-700"}`}>{luxe ? "◆ 오늘 도리의 풀이" : "❄️ 오늘 도리의 풀이"}</p>
         <span className={`rounded-full border px-2.5 py-0.5 text-[11px] font-bold ${luxe ? "border-[#e6c887]/40 text-[#e6c887]" : "bg-brand-50 border-brand-100 text-brand-700"}`}>#{reading.keyword}</span>
       </div>
       <p className="mt-2 flex items-start gap-2 text-sm leading-relaxed">

@@ -26,7 +26,7 @@ export async function POST(request: Request) {
   if (denied) return denied;
   const session = sessionOf(request);
   if (!session) return NextResponse.json({ error: "로그인이 필요해요." }, { status: 401 });
-  if (!canChat(session.sub)) return NextResponse.json({ error: "도리 상담방은 곧 열려요. 조금만 기다려 주세요 🫧" }, { status: 403 });
+  if (!canChat(session.sub)) return NextResponse.json({ error: "도리 상담방은 곧 열려요. 조금만 기다려 주세요 ❄️" }, { status: 403 });
 
   let body: { ctx?: unknown; messages?: unknown } | null;
   try {
@@ -64,7 +64,7 @@ export async function POST(request: Request) {
 
     // 하루에 한 사람이 보낼 수 있는 전체 질문 수 (범위가 달라도 합쳐서)
     const day = await takeLimit("chat-day", `u:${session.sub}`, DAY_CAP, 24 * 60 * 60 * 1000);
-    if (!day.ok) return NextResponse.json({ error: "오늘은 도리가 질문을 많이 받았어요. 내일 다시 물어봐 주세요 🫧", code: "day_cap", left: 0 }, { status: 429 });
+    if (!day.ok) return NextResponse.json({ error: "오늘은 도리가 질문을 많이 받았어요. 내일 다시 물어봐 주세요 ❄️", code: "day_cap", left: 0 }, { status: 429 });
 
     taken = await takeQuestion(db, target);
     if (taken.left < 0) {
@@ -90,7 +90,7 @@ export async function POST(request: Request) {
     // 답을 못 만들었으면 쓴 질문을 돌려줘요.
     if (taken && taken.left >= 0) await refundQuestion(db, target, taken.via);
     if (err instanceof SajuInputError) return NextResponse.json({ error: err.message }, { status: 400 });
-    if (err instanceof ReadingUnavailableError) return NextResponse.json({ error: "오늘은 도리가 많이 답해서 잠깐 쉬고 있어요. 내일 다시 물어봐 주세요 🫧" }, { status: 503 });
+    if (err instanceof ReadingUnavailableError) return NextResponse.json({ error: "오늘은 도리가 많이 답해서 잠깐 쉬고 있어요. 내일 다시 물어봐 주세요 ❄️" }, { status: 503 });
     console.error("chat failed:", err instanceof Error ? err.message : "unknown");
     return NextResponse.json({ error: "도리가 잠깐 물놀이하러 갔어요. 다시 보내 볼래요?" }, { status: 502 });
   }
