@@ -641,15 +641,12 @@ function Visual({ page, report }: { page: BookPage; report: PremiumReportView })
   }
 }
 
-/** 리포트마다 한 동물만 나와요: 연애 결혼 = 토끼, 그 밖(성공·재물·궁합 등) = 수달 (용 그림은 쓰지 않아요) */
-type Mascot = "rabbit" | "otter";
-function mascotOf(report: PremiumReportView): Mascot {
-  if (report.compat) return "otter";
-  const k = report.topic.key;
-  if (k === "love" || k === "marriage") return "rabbit";
+/** 프리미엄 책의 마스코트는 모두 수달이에요. (용·토끼 그림은 쓰지 않아요) */
+type Mascot = "otter";
+function mascotOf(_report: PremiumReportView): Mascot {
   return "otter";
 }
-const MASCOT_EMOJI: Record<Mascot, string> = { rabbit: "🐰", otter: "🦦" };
+const MASCOT_EMOJI: Record<Mascot, string> = { otter: "🦦" };
 const avatarOf = (m: Mascot) => `/images/animal-${m}.webp`;
 const sceneOf = (m: Mascot) => `/images/premium-scene-${m}.webp`;
 

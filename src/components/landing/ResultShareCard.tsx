@@ -93,7 +93,7 @@ export default function ResultShareCard({ report, aiQuote }: { report: PremiumRe
 
   async function shareLink() {
     const url = shareOrigin();
-    const text = `${data.topicLabel} 결과가 신기해서 공유해! 너도 무료로 볼 수 있어 👉`;
+    const text = `${data.topicLabel} 결과가 신기해서 공유해! 들어와서 어서 무료로 운세를 보세요! 👉`;
     try {
       if (navigator.share) {
         await navigator.share({ title: "도리 운세 사주", text, url });
