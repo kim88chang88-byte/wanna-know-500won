@@ -48,6 +48,7 @@ export default function Landing() {
   const timers = useRef<number[]>([]);
   const [ritual, setRitual] = useState(false);
   const [ritualBill, setRitualBill] = useState(false);
+  const [ritualBig, setRitualBig] = useState(false);
   const [tickets, setTickets] = useState(0);
   // 서버에 쌓인 뽑기 코인(로그인 선물 등)과, 방금 선물을 받았는지
   const [coins, setCoins] = useState(0);
@@ -126,7 +127,10 @@ export default function Landing() {
         return;
       }
       // 1,000원 카드(둘의 궁합)는 동전 대신 지폐가 들어가요.
-      setRitualBill(price.startsWith("1,000"));
+      // 9,900원 프리미엄 종합 사주는 만원권이 낙엽처럼 떨어져요. (1,000원 궁합은 천원권 그대로)
+      const big = price.startsWith("9,900");
+      setRitualBig(big);
+      setRitualBill(price.startsWith("1,000") || big);
       setRitual(true);
       timers.current.push(
         window.setTimeout(() => {
@@ -313,7 +317,7 @@ export default function Landing() {
       <div aria-hidden="true" className="h-16 lg:hidden" />
       <BottomTabs />
 
-      {ritual && <CoinRitual bill={ritualBill} />}
+      {ritual && <CoinRitual bill={ritualBill} big={ritualBig} />}
       <StickyDrawCta hidden={Boolean(intake) || loginOpen || ritual} />
 
       {((justLoggedIn && user) || gift || notice) && (
