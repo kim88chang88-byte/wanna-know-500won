@@ -116,6 +116,20 @@ describe("19쪽이 1쪽 결론과 같은 방향으로 쓰이게 하는 근거", 
     expect(withIt).toContain("남아서 준비");
     expect(chapterFacts([page("lucky")], page("lucky"), "철수", null, "결론")).not.toContain("1쪽에서 이미 전한 결론");
   });
+  it("책 전체가 한 사람을 같은 모습으로 그리도록 1쪽 한 줄과 장별 비유 소재를 넘겨 줘요", () => {
+    const overview = { ...page("overview"), sections: [{ heading: "나를 한 문장으로", body: "큰 나무처럼 묵묵히 버티는 사람이에요." }] };
+    const money = page("topic:money");
+    const facts = chapterFacts([overview, money], money, "철수", null);
+    expect(facts).toContain("큰 나무처럼 묵묵히");
+    expect(facts).toContain("물이 드나드는 저수지");
+    expect(facts).toContain("'날씨와 지도'(서문)와 '계절'(대운 장)");
+    // 대운 장은 '계절'이 자기 비유라서 막지 않아요
+    const daeun = chapterFacts([overview, page("daeun")], page("daeun"), "철수", null);
+    expect(daeun).toContain("사계절");
+    expect(daeun).not.toContain("'계절'(대운 장)");
+    // 한 줄이 없으면 그 부분만 빠져요
+    expect(chapterFacts([money], money, null, null)).not.toContain("이 사람을 그리는 한 줄");
+  });
   it("올해가 몇 년인지 알려 줘서 엉뚱한 해를 올해라고 쓰지 않게 해요", () => {
     expect(chapterFacts([page("lucky")], page("lucky"), null, null)).toMatch(/올해는 20\d\d년/);
   });
