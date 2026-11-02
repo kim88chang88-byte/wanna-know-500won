@@ -455,8 +455,8 @@ function Visual({ page, report }: { page: BookPage; report: PremiumReportView })
                   {p.full ? (
                     <>
                       <div className="mt-1.5 space-y-1 px-1.5" aria-label={`${p.label} ${p.full}`}>
-                        <ElementTile ch={stem} el={elementOfChar(stem, false)} reading={p.reading?.[0] ?? ""} tone="dark" sizeClass="text-[34px]" />
-                        <ElementTile ch={branch} el={elementOfChar(branch, true)} reading={p.reading?.[1] ?? ""} tone="dark" sizeClass="text-[34px]" />
+                        <ElementTile ch={stem} el={elementOfChar(stem, false)} reading={p.reading?.[0] ?? ""} tone="dark" sizeClass="text-[36px]" />
+                        <ElementTile ch={branch} el={elementOfChar(branch, true)} reading={p.reading?.[1] ?? ""} tone="dark" sizeClass="text-[36px]" />
                       </div>
                       <div className="mt-1.5 text-[10px] text-[#e8dfca]/60 leading-tight">
                         <div>{p.tenGodStem}</div>
