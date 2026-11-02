@@ -18,8 +18,12 @@ export async function GET(request: Request) {
   const raw = Number(new URL(request.url).searchParams.get("days"));
   const days = [7, 30, 90].includes(raw) ? raw : 30;
   try {
-    const rows = await createDb(cfg).visitFunnel(sinceDayFor(days, new Date()));
-    return NextResponse.json({ days, rows }, { headers: NO_STORE });
+    const db = createDb(cfg);
+    const since = sinceDayFor(days, new Date());
+    const rows = await db.visitFunnel(since);
+    // 일별 추이는 함수를 아직 안 만들었어도 퍼널은 보이게 따로 시도해요
+    const daily = await db.visitDaily(since).catch(() => []);
+    return NextResponse.json({ days, rows, daily }, { headers: NO_STORE });
   } catch (err) {
     console.error("admin funnel failed:", err instanceof Error ? err.message : "unknown");
     return NextResponse.json({ error: "퍼널을 불러오지 못했어요. (supabase/schema.sql 을 다시 Run 해야 기록이 쌓여요)" }, { status: 502, headers: NO_STORE });

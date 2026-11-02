@@ -498,6 +498,16 @@ export function createDb(config: DbConfig, fetchImpl: FetchLike = fetch) {
         .map((r) => ({ src: r.src as string, event: r.event as string, n: Number(r.n) }));
     },
 
+    /** 일별 방문자 수와 처음 온 사람 수. (관리자 화면용) */
+    async visitDaily(sinceDay: string): Promise<Array<{ day: string; visitors: number; fresh: number }>> {
+      const res = await call("rpc/visit_daily", { method: "POST", headers: headers(), body: JSON.stringify({ p_since: sinceDay }) });
+      const rows = (await res.json().catch(() => [])) as Array<{ day?: unknown; visitors?: unknown; fresh?: unknown }>;
+      if (!Array.isArray(rows)) return [];
+      return rows
+        .filter((r) => typeof r.day === "string" && Number.isFinite(Number(r.visitors)))
+        .map((r) => ({ day: r.day as string, visitors: Number(r.visitors), fresh: Number(r.fresh) || 0 }));
+    },
+
     /** 저장된 생년월일시를 읽어요. 없으면 null. */
     async getProfile(userId: string): Promise<SavedProfile | null> {
       const res = await call(`profiles?user_id=eq.${safeId(userId)}&select=*&limit=1`, { method: "GET", headers: headers() });

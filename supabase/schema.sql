@@ -702,3 +702,22 @@ revoke all on function public.visit_funnel(date) from public, anon, authenticate
 grant execute on function public.visit_attr(text, text) to service_role;
 grant execute on function public.visit_event(date, text, text) to service_role;
 grant execute on function public.visit_funnel(date) to service_role;
+
+-- ─────────────────────────────────────────────────────────────────────────────
+-- 일별 방문 추이(관리자 화면): 하루 방문자 수와 그중 처음 온 사람 수. 이 파일 전체를 다시 Run 하면 추가돼요.
+-- ─────────────────────────────────────────────────────────────────────────────
+create or replace function public.visit_daily(p_since date)
+returns table (day date, visitors int, fresh int)
+language sql
+security definer
+set search_path = public
+as $$
+  select d.day, count(*)::int, count(*) filter (where v.first_day = d.day)::int
+    from public.visit_days d join public.visitors v on v.vid = d.vid
+   where d.day >= p_since
+   group by d.day
+   order by d.day;
+$$;
+
+revoke all on function public.visit_daily(date) from public, anon, authenticated;
+grant execute on function public.visit_daily(date) to service_role;
