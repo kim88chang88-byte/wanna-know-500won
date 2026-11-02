@@ -285,7 +285,7 @@ export default function Landing() {
       <main className="relative z-10 max-w-[34rem] lg:max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-5 pb-20 sm:pb-24">
         <HeroSection visitors={visitors} tickets={tickets + coins} wallet={user ? { bills: 0, coins: 0, free: Math.max(0, FREE_PER_DAY - counts.today) + coins + tickets } : null} />
         <ShowcaseSection />
-        {!user && <BirthdayTeaser />}
+        {!user && <BirthdayTeaser onOpenLogin={openLogin} />}
         {/* 도리의 소식 카드들은 첫 화면의 "뽑으러 가기" 버튼 아래로 옮겼어요. (첫 화면에서 눌러야 할 것이 하나만 보이게) */}
         {user && profile && <DailyLineCard onOpened={() => {
           recordVisit(getBrowserStorage(), dayKey(new Date()));

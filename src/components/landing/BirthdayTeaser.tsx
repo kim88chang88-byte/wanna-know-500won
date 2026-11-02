@@ -14,7 +14,7 @@ interface Teaser {
 }
 
 /** 가입 없이 생년월일만 넣으면 바로 보이는 '오늘의 도리 한마디'. 입력값은 저장하지 않아요. */
-export default function BirthdayTeaser() {
+export default function BirthdayTeaser({ onOpenLogin }: { onOpenLogin?: () => void } = {}) {
   const [value, setValue] = useState("");
   const [state, setState] = useState<"idle" | "loading" | "error">("idle");
   const [error, setError] = useState("");
@@ -64,7 +64,23 @@ export default function BirthdayTeaser() {
             </FitText>
           )}
           <div className="mt-3">
-            <DoriScene line={result.line} tip={result.tip} />
+            <DoriScene
+              line={result.line}
+              tip={result.tip}
+              action={
+                onOpenLogin ? (
+                  <button
+                    type="button"
+                    data-testid="teaser-chat-login"
+                    onClick={onOpenLogin}
+                    className="w-full rounded-full bg-brand-500 font-bold text-white shadow-sm active:scale-95"
+                    style={{ fontSize: "3cqw", lineHeight: 1.25, padding: "2cqw 1.5cqw" }}
+                  >
+                    💬 로그인하고 도리에게 더 물어보기
+                  </button>
+                ) : undefined
+              }
+            />
           </div>
           <button type="button" onClick={() => setResult(null)} className="mt-3 block mx-auto text-[11px] text-gray-400 underline">
             다른 생일로 보기
