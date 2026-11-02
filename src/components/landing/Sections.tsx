@@ -275,17 +275,17 @@ export function PremiumSection({ onSpin }: SpinProps) {
             <span className="material-symbols-outlined text-[16px]" aria-hidden="true">workspace_premium</span>
             <span className="text-[11px] font-bold uppercase tracking-wider">Premium Report</span>
           </div>
-          <h3 className="text-base sm:text-lg font-bold text-gray-900">명쾌한 해답을 제시하는 종합 사주</h3>
+          <h3 className="text-base sm:text-lg font-bold text-gray-900">신통방통 프리미엄 종합 사주</h3>
         </div>
         <span className="shrink-0 rounded-full bg-gray-100 px-2.5 py-0.5 text-[11px] text-gray-500">심층 리포트</span>
       </div>
       <div
-        className="card-water-glow rounded-[2.5rem] p-4 sm:p-6 bg-[#2a1a5e] border-2 border-brand-300 shadow-[0_12px_36px_rgba(80,40,160,0.35)] relative overflow-hidden"
+        className="card-water-glow rounded-[2.5rem] p-2.5 sm:p-4 bg-[#2a1a5e] border-2 border-brand-300 shadow-[0_12px_36px_rgba(80,40,160,0.35)] relative overflow-hidden"
         style={{ backgroundImage: "url(/images/premium-bg.webp)", backgroundSize: "cover", backgroundPosition: "80% top" }}
       >
-        <div className="relative z-10 pt-4 pb-3">
+        <div className="relative z-10 pt-1 pb-1">
           {PREMIUM_CARDS.map((p) => (
-            <div key={p.key} className="relative mx-auto w-full max-w-[360px] transition-transform hover:-translate-y-1 active:scale-[0.98]">
+            <div key={p.key} className="relative mx-auto w-full max-w-[460px] transition-transform hover:-translate-y-1 active:scale-[0.98]">
             {p.ribbon && <Sticker text={p.ribbon} testId={"premium-sticker"} />}
             <div
               id={p.key}
@@ -295,7 +295,7 @@ export function PremiumSection({ onSpin }: SpinProps) {
               aria-label={`${p.title} 보기`}
               onClick={() => onSpin(p.key, p.fortune, "9,900원", true)}
               onKeyDown={(e) => activateOnKey(e, () => onSpin(p.key, p.fortune, "9,900원", true))}
-              className={`scroll-mt-24 card-water-glow relative flex flex-col justify-between rounded-3xl p-6 h-full bg-white cursor-pointer select-none hover:shadow-lg transition-shadow group focus:outline-none focus-visible:ring-4 focus-visible:ring-brand-300 ${p.card}`}
+              className={`scroll-mt-24 card-water-glow relative flex flex-col justify-between rounded-3xl p-3.5 h-full bg-white cursor-pointer select-none hover:shadow-lg transition-shadow group focus:outline-none focus-visible:ring-4 focus-visible:ring-brand-300 ${p.card}`}
             >
               <div>
                 <div className={`w-full aspect-[16/9] rounded-2xl flex items-center justify-center overflow-hidden mb-3.5 border ${p.imageBox}`}>
@@ -317,7 +317,7 @@ export function PremiumSection({ onSpin }: SpinProps) {
             </div>
           ))}
         </div>
-        <div className="relative z-10 mt-6 text-center">
+        <div className="relative z-10 mt-3 text-center">
           <Link href="/premium" data-testid="premium-report-link" className="text-sm font-bold text-pink-200 hover:text-white underline underline-offset-4">
             샘플 먼저 보기 →
           </Link>
