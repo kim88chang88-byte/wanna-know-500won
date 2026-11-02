@@ -39,65 +39,64 @@ body {
   animation: floatBubble 3.8s ease-in-out infinite;
 }
 
-/* ------------------------------------------------------------------ 물방울 배경 (수달 도사 테마) */
-@keyframes bubbleRise {
+/* ------------------------------------------------------------------ 눈꽃송이 배경 (랜딩 화면: 하늘에서 천천히 내려요) */
+@keyframes snowFall {
   0% {
-    transform: translateY(105vh) translateX(0) scale(0.7);
+    transform: translate3d(0, -8vh, 0) rotate(0deg);
     opacity: 0;
   }
-  10% {
-    opacity: 0.75;
+  8% {
+    opacity: 0.95;
   }
-  50% {
-    transform: translateY(50vh) translateX(18px) scale(1.05);
+  30% {
+    transform: translate3d(22px, 28vh, 0) rotate(110deg);
+  }
+  55% {
+    transform: translate3d(-18px, 58vh, 0) rotate(220deg);
   }
   80% {
-    opacity: 0.7;
+    transform: translate3d(20px, 86vh, 0) rotate(310deg);
+    opacity: 0.9;
   }
   100% {
-    transform: translateY(-10vh) translateX(-18px) scale(1.1);
+    transform: translate3d(-6px, 112vh, 0) rotate(380deg);
     opacity: 0;
   }
 }
 
-.bubble-item {
+.snow-item {
   position: absolute;
   top: 0;
-  border-radius: 9999px;
   pointer-events: none;
-  background: radial-gradient(
-    circle at 30% 28%,
-    rgba(255, 255, 255, 0.95) 0%,
-    rgba(255, 214, 236, 0.5) 35%,
-    rgba(214, 196, 255, 0.32) 70%,
-    rgba(255, 255, 255, 0.45) 100%
-  );
-  box-shadow: inset 0 2px 5px rgba(255, 255, 255, 0.85), inset 0 -2px 4px rgba(200, 120, 220, 0.14),
-    0 4px 12px rgba(255, 160, 210, 0.22);
-  animation: bubbleRise linear infinite;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='-12 -12 24 24' fill='none' stroke-linecap='round'%3E%3Cg stroke='%239ec3ff' stroke-width='3'%3E%3Cpath d='M0 0V-10M0 -5.5L-3.2 -8.4M0 -5.5L3.2 -8.4' transform='rotate(0)'/%3E%3Cpath d='M0 0V-10M0 -5.5L-3.2 -8.4M0 -5.5L3.2 -8.4' transform='rotate(60)'/%3E%3Cpath d='M0 0V-10M0 -5.5L-3.2 -8.4M0 -5.5L3.2 -8.4' transform='rotate(120)'/%3E%3Cpath d='M0 0V-10M0 -5.5L-3.2 -8.4M0 -5.5L3.2 -8.4' transform='rotate(180)'/%3E%3Cpath d='M0 0V-10M0 -5.5L-3.2 -8.4M0 -5.5L3.2 -8.4' transform='rotate(240)'/%3E%3Cpath d='M0 0V-10M0 -5.5L-3.2 -8.4M0 -5.5L3.2 -8.4' transform='rotate(300)'/%3E%3C/g%3E%3Cg stroke='%23ffffff' stroke-width='1.4'%3E%3Cpath d='M0 0V-10M0 -5.5L-3.2 -8.4M0 -5.5L3.2 -8.4' transform='rotate(0)'/%3E%3Cpath d='M0 0V-10M0 -5.5L-3.2 -8.4M0 -5.5L3.2 -8.4' transform='rotate(60)'/%3E%3Cpath d='M0 0V-10M0 -5.5L-3.2 -8.4M0 -5.5L3.2 -8.4' transform='rotate(120)'/%3E%3Cpath d='M0 0V-10M0 -5.5L-3.2 -8.4M0 -5.5L3.2 -8.4' transform='rotate(180)'/%3E%3Cpath d='M0 0V-10M0 -5.5L-3.2 -8.4M0 -5.5L3.2 -8.4' transform='rotate(240)'/%3E%3Cpath d='M0 0V-10M0 -5.5L-3.2 -8.4M0 -5.5L3.2 -8.4' transform='rotate(300)'/%3E%3C/g%3E%3C/svg%3E") center / contain no-repeat;
+  filter: drop-shadow(0 0 3px rgba(120, 165, 255, 0.55));
+  animation: snowFall linear infinite;
   will-change: transform, opacity;
 }
 
-.bubble-item::after {
-  content: "";
-  position: absolute;
-  top: 18%;
-  left: 22%;
-  width: 28%;
-  height: 28%;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.85);
-}
-
-/* 화면을 누르면 톡 터지는 물방울 (JS 가 잠깐 만들었다가 지워요) */
-.click-bubble {
+/* 화면을 누르면 눈꽃송이가 살짝 튀어 올랐다가 가볍게 떨어져요 (JS 가 잠깐 만들었다가 지워요) */
+.click-snow {
   position: fixed;
   pointer-events: none;
   z-index: 9999;
-  border-radius: 50%;
-  background: radial-gradient(circle at 30% 25%, #ffffff 0%, rgba(255, 183, 222, 0.85) 45%, rgba(196, 167, 255, 0.45) 80%, rgba(255, 255, 255, 0.9) 100%);
-  box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.9), 0 3px 10px rgba(236, 110, 190, 0.35);
-  animation: popOut 0.75s cubic-bezier(0.18, 0.89, 0.32, 1.28) forwards;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='-12 -12 24 24' fill='none' stroke-linecap='round'%3E%3Cg stroke='%239ec3ff' stroke-width='3'%3E%3Cpath d='M0 0V-10M0 -5.5L-3.2 -8.4M0 -5.5L3.2 -8.4' transform='rotate(0)'/%3E%3Cpath d='M0 0V-10M0 -5.5L-3.2 -8.4M0 -5.5L3.2 -8.4' transform='rotate(60)'/%3E%3Cpath d='M0 0V-10M0 -5.5L-3.2 -8.4M0 -5.5L3.2 -8.4' transform='rotate(120)'/%3E%3Cpath d='M0 0V-10M0 -5.5L-3.2 -8.4M0 -5.5L3.2 -8.4' transform='rotate(180)'/%3E%3Cpath d='M0 0V-10M0 -5.5L-3.2 -8.4M0 -5.5L3.2 -8.4' transform='rotate(240)'/%3E%3Cpath d='M0 0V-10M0 -5.5L-3.2 -8.4M0 -5.5L3.2 -8.4' transform='rotate(300)'/%3E%3C/g%3E%3Cg stroke='%23ffffff' stroke-width='1.4'%3E%3Cpath d='M0 0V-10M0 -5.5L-3.2 -8.4M0 -5.5L3.2 -8.4' transform='rotate(0)'/%3E%3Cpath d='M0 0V-10M0 -5.5L-3.2 -8.4M0 -5.5L3.2 -8.4' transform='rotate(60)'/%3E%3Cpath d='M0 0V-10M0 -5.5L-3.2 -8.4M0 -5.5L3.2 -8.4' transform='rotate(120)'/%3E%3Cpath d='M0 0V-10M0 -5.5L-3.2 -8.4M0 -5.5L3.2 -8.4' transform='rotate(180)'/%3E%3Cpath d='M0 0V-10M0 -5.5L-3.2 -8.4M0 -5.5L3.2 -8.4' transform='rotate(240)'/%3E%3Cpath d='M0 0V-10M0 -5.5L-3.2 -8.4M0 -5.5L3.2 -8.4' transform='rotate(300)'/%3E%3C/g%3E%3C/svg%3E") center / contain no-repeat;
+  filter: drop-shadow(0 0 3px rgba(120, 165, 255, 0.6));
+  animation: snowPop 0.9s cubic-bezier(0.2, 0.8, 0.3, 1) forwards;
+}
+
+@keyframes snowPop {
+  0% {
+    transform: translate(-50%, -50%) scale(0.3) rotate(0deg);
+    opacity: 1;
+  }
+  40% {
+    transform: translate(calc(-50% + var(--dx, 0px)), calc(-50% + var(--dy, -30px))) scale(1) rotate(calc(var(--rot, 90deg) * 0.5));
+    opacity: 1;
+  }
+  100% {
+    transform: translate(calc(-50% + var(--dx, 0px) * 1.25), calc(-50% + var(--dy, -30px) + 46px)) scale(0.45) rotate(var(--rot, 180deg));
+    opacity: 0;
+  }
 }
 
 @keyframes popOut {
@@ -160,12 +159,12 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .lever-rotating,
   .floating-anim,
-  .bubble-item,
-  .click-bubble,
+  .snow-item,
+  .click-snow,
   .otter-bubble-aura {
     animation: none !important;
   }
-  .bubble-item {
+  .snow-item {
     display: none;
   }
 }
