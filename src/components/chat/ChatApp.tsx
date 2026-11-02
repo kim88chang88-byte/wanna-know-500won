@@ -51,6 +51,12 @@ interface Bubble extends ChatMsg {
   liked?: boolean;
 }
 
+/** 도리은행 500원 동전 그림 (글 옆에 작게) */
+function CoinIcon() {
+  // eslint-disable-next-line @next/next/no-img-element
+  return <img src="/images/coin-500.webp" alt="" width={16} height={16} aria-hidden="true" className="mr-0.5 inline-block h-4 w-4 -translate-y-px object-contain align-middle" />;
+}
+
 function readLog(): Bubble[] {
   try {
     const v = JSON.parse(sessionStorage.getItem(CHAT_LOG_KEY) ?? "[]") as Bubble[];
@@ -433,7 +439,7 @@ export default function ChatApp() {
               500원 동전으로 질문을 더 할 수 있어요.
             </p>
             <button type="button" onClick={() => setBuyOpen(true)} className="mt-3 block w-full rounded-full bg-gradient-to-br from-brand-500 to-[#c24fe0] py-3 text-sm font-extrabold text-white shadow active:scale-[0.98]">
-              🪙 500원 동전으로 질문 5개 더하기
+              <CoinIcon /> 500원 동전으로 질문 5개 더하기
             </button>
             <button type="button" onClick={newChat} className="mt-2 text-xs font-bold text-brand-600">
               새 대화 시작하기
@@ -474,10 +480,10 @@ export default function ChatApp() {
         <div className="mx-1 mb-2 flex items-center justify-between text-[11px] text-[#8a7fa8]">
           <span>
             ❄️ 질문 <b className="text-gray-800">{leftNow}번</b> 남았어요
-            <span className="ml-2 text-[#b08722]">🪙 코인 {coins}개</span>
+            <span className="ml-2 text-[#b08722]"><CoinIcon /> 코인 {coins}개</span>
           </span>
           <button type="button" onClick={() => setBuyOpen(true)} className="rounded-full bg-[#fff3c9] px-2.5 py-1 font-extrabold text-[#8a5b00] active:scale-95">
-            🪙 동전으로 더 묻기
+            <CoinIcon /> 동전으로 더 묻기
           </button>
         </div>
         <div className="flex items-end gap-2">
