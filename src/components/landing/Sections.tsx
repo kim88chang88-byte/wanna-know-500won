@@ -275,7 +275,7 @@ export function PremiumSection({ onSpin }: SpinProps) {
             <span className="material-symbols-outlined text-[16px]" aria-hidden="true">workspace_premium</span>
             <span className="text-[11px] font-bold uppercase tracking-wider">Premium Report</span>
           </div>
-          <h3 className="text-base sm:text-lg font-bold text-gray-900">고민에 답하는 종합 사주</h3>
+          <h3 className="text-base sm:text-lg font-bold text-gray-900">명쾌한 해답을 제시하는 종합 사주</h3>
         </div>
         <span className="shrink-0 rounded-full bg-gray-100 px-2.5 py-0.5 text-[11px] text-gray-500">심층 리포트</span>
       </div>
