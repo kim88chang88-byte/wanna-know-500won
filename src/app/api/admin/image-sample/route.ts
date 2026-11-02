@@ -34,7 +34,7 @@ export async function GET(request: Request) {
 
   const sp = new URL(request.url).searchParams;
   let partner: "male" | "female" = sp.get("partner") === "male" ? "male" : "female";
-  let age: "late 20s" | "mid 30s" | "early 40s" = "late 20s";
+  let age: "mid 20s" | "late 20s" | "mid 30s" = "mid 20s";
   const user = sp.get("user");
   if (user === "male" || user === "female") {
     const a = partnerAgeFor(user, Number(sp.get("userAge")));

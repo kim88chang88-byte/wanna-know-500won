@@ -57,7 +57,7 @@ export function isElement5(v: string | null | undefined): v is Element5 {
 }
 
 /** 결과 이미지 속 인물의 연령대(영어 표현). 규칙은 docs/PARTNER_IMAGE.md 에 있어요. */
-export type PartnerAge = "late 20s" | "mid 30s" | "early 40s";
+export type PartnerAge = "mid 20s" | "late 20s" | "mid 30s";
 
 /**
  * 이용자의 성별·만 나이로 결과 이미지 속 인물의 연령대를 정해요. (docs/PARTNER_IMAGE.md)
@@ -66,13 +66,13 @@ export type PartnerAge = "late 20s" | "mid 30s" | "early 40s";
 export function partnerAgeFor(userGender: "male" | "female", userAge: number): PartnerAge | null {
   if (!Number.isFinite(userAge) || userAge < 20) return null;
   if (userGender === "male") {
-    if (userAge < 50) return "late 20s";
-    if (userAge < 60) return "mid 30s";
-    return "early 40s";
+    if (userAge < 50) return "mid 20s";
+    if (userAge < 60) return "late 20s";
+    return "mid 30s";
   }
-  if (userAge < 30) return "late 20s";
-  if (userAge < 40) return "mid 30s";
-  return "early 40s";
+  if (userAge < 30) return "mid 20s";
+  if (userAge < 40) return "late 20s";
+  return "mid 30s";
 }
 
 /** 생년월일(양력)과 기준일로 만 나이를 구해요. */
@@ -82,7 +82,7 @@ export function ageOn(birth: { year: number; month: number; day: number }, now: 
   return age;
 }
 
-export function spousePrompt(partner: "male" | "female", element: Element5, age: PartnerAge = "late 20s", seed = 0): string {
+export function spousePrompt(partner: "male" | "female", element: Element5, age: PartnerAge = "mid 20s", seed = 0): string {
   const look = LOOK[element];
   const list = OUTFITS[partner];
   const o = list[((Math.floor(seed) % list.length) + list.length) % list.length];

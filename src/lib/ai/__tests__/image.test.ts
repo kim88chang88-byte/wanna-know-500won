@@ -39,15 +39,15 @@ describe("이미지 생성", () => {
 });
 
 describe("결과 이미지 연령 규칙", () => {
-  it("남성 이용자: 20~40대 20대 후반, 50대 30대 중반, 60대 이상 40대 초반", () => {
-    for (const a of [20, 29, 30, 39, 40, 49]) expect(partnerAgeFor("male", a)).toBe("late 20s");
-    for (const a of [50, 59]) expect(partnerAgeFor("male", a)).toBe("mid 30s");
-    for (const a of [60, 75]) expect(partnerAgeFor("male", a)).toBe("early 40s");
+  it("남성 이용자: 20~40대 20대 중반, 50대 20대 후반, 60대 이상 30대 중반", () => {
+    for (const a of [20, 29, 30, 39, 40, 49]) expect(partnerAgeFor("male", a)).toBe("mid 20s");
+    for (const a of [50, 59]) expect(partnerAgeFor("male", a)).toBe("late 20s");
+    for (const a of [60, 75]) expect(partnerAgeFor("male", a)).toBe("mid 30s");
   });
-  it("여성 이용자: 20대 20대 후반, 30대 30대 중반, 40대 이상 40대 초반", () => {
-    for (const a of [20, 29]) expect(partnerAgeFor("female", a)).toBe("late 20s");
-    for (const a of [30, 39]) expect(partnerAgeFor("female", a)).toBe("mid 30s");
-    for (const a of [40, 55, 70]) expect(partnerAgeFor("female", a)).toBe("early 40s");
+  it("여성 이용자: 20대 20대 중반, 30대 20대 후반, 40대 이상 30대 중반", () => {
+    for (const a of [20, 29]) expect(partnerAgeFor("female", a)).toBe("mid 20s");
+    for (const a of [30, 39]) expect(partnerAgeFor("female", a)).toBe("late 20s");
+    for (const a of [40, 55, 70]) expect(partnerAgeFor("female", a)).toBe("mid 30s");
   });
   it("20세 미만이거나 나이를 모르면 이미지를 만들지 않는다", () => {
     for (const g of ["male", "female"] as const) {
@@ -55,8 +55,8 @@ describe("결과 이미지 연령 규칙", () => {
     }
   });
   it("프롬프트에 연령대가 들어가고 성인이라고 적는다", () => {
-    expect(spousePrompt("female", "fire", "early 40s")).toMatch(/her early 40s/);
-    expect(spousePrompt("male", "water", "mid 30s")).toMatch(/his mid 30s/);
+    expect(spousePrompt("female", "fire", "mid 30s")).toMatch(/her mid 30s/);
+    expect(spousePrompt("male", "water", "late 20s")).toMatch(/his late 20s/);
     expect(spousePrompt("female", "fire")).toMatch(/clearly an adult/);
   });
   it("만 나이는 생일 전에는 한 살 적다", () => {
@@ -67,20 +67,20 @@ describe("결과 이미지 연령 규칙", () => {
 
 describe("복장과 안내 문구", () => {
   it("같은 seed 는 같은 복장, seed 가 다르면 복장이 달라진다", () => {
-    expect(spousePrompt("female", "water", "late 20s", 2)).toBe(spousePrompt("female", "water", "late 20s", 2));
-    const set = new Set([0, 1, 2, 3, 4, 5].map((v) => spousePrompt("male", "fire", "late 20s", v)));
+    expect(spousePrompt("female", "water", "mid 20s", 2)).toBe(spousePrompt("female", "water", "mid 20s", 2));
+    const set = new Set([0, 1, 2, 3, 4, 5].map((v) => spousePrompt("male", "fire", "mid 20s", v)));
     expect(set.size).toBe(6);
   });
   it("복장에 오행 색이 들어가고, 한복·정장 같은 복장이 목록에 있다", () => {
-    const all = [0, 1, 2, 3, 4, 5].map((v) => spousePrompt("female", "water", "late 20s", v)).join("\n");
+    const all = [0, 1, 2, 3, 4, 5].map((v) => spousePrompt("female", "water", "mid 20s", v)).join("\n");
     expect(all).toMatch(/navy/);
     expect(all).toMatch(/hanbok/);
     expect(all).toMatch(/jeans/);
-    expect(["0", "1", "2", "3", "4", "5"].map((v) => spousePrompt("male", "earth", "mid 30s", Number(v))).join("\n")).toMatch(/suit/);
+    expect(["0", "1", "2", "3", "4", "5"].map((v) => spousePrompt("male", "earth", "late 20s", Number(v))).join("\n")).toMatch(/suit/);
   });
   it("음수·큰 seed 도 오류 없이 복장을 고른다", () => {
-    expect(spousePrompt("male", "metal", "early 40s", -3)).toMatch(/Korean man/);
-    expect(spousePrompt("female", "wood", "early 40s", 999)).toMatch(/Korean woman/);
+    expect(spousePrompt("male", "metal", "mid 30s", -3)).toMatch(/Korean man/);
+    expect(spousePrompt("female", "wood", "mid 30s", 999)).toMatch(/Korean woman/);
   });
   it("안내 문구가 정해진 문장이다", () => {
     expect(AI_IMAGE_NOTICE).toBe("AI가 만든 가상의 인물, 참고용 상상도");
