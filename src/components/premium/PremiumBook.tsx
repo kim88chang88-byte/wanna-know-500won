@@ -7,7 +7,8 @@ import { josa } from "@/lib/premium/josa";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { checkMessage } from "@/lib/premium/book/resonance";
 import type { BookChart, BookPage, BookRow, BookTable, ElementKind, PremiumReportView, RealityCheck } from "@/lib/premium/types";
-import { ELEMENT_BOX, EL_LABEL, elementOfChar, elName } from "@/lib/elementColor";
+import { elementOfChar, elName } from "@/lib/elementColor";
+import ElementTile from "@/components/ElementTile";
 import { formatWon } from "@/lib/premium/book/charts";
 
 /*
@@ -453,22 +454,10 @@ function Visual({ page, report }: { page: BookPage; report: PremiumReportView })
                   <div className={`text-[11px] font-bold ${GOLD}`}>{p.label}</div>
                   {p.full ? (
                     <>
-                      <div className="mt-1.5 space-y-1 px-1.5 font-serifKr font-black text-3xl leading-tight" aria-label={`${p.label} ${p.full}`}>
-                        {[
-                          { ch: stem, el: elementOfChar(stem, false) },
-                          { ch: branch, el: elementOfChar(branch, true) },
-                        ].map((c, n) => (
-                          <div key={n} className={`relative rounded-xl pb-1 pt-4 ${ELEMENT_BOX[c.el ?? "earth"]}`}>
-                            {c.el && (
-                              <span data-testid="element-chip" className="absolute right-1 top-1 whitespace-nowrap rounded-full bg-black/15 px-1.5 py-px font-sans text-[9px] font-bold leading-tight">
-                                {EL_LABEL[c.el].icon} {EL_LABEL[c.el].name}
-                              </span>
-                            )}
-                            {c.ch}
-                          </div>
-                        ))}
+                      <div className="mt-1.5 space-y-1 px-1.5" aria-label={`${p.label} ${p.full}`}>
+                        <ElementTile ch={stem} el={elementOfChar(stem, false)} reading={p.reading?.[0] ?? ""} tone="dark" sizeClass="text-[34px]" />
+                        <ElementTile ch={branch} el={elementOfChar(branch, true)} reading={p.reading?.[1] ?? ""} tone="dark" sizeClass="text-[34px]" />
                       </div>
-                      <div className="mt-1 text-[11px] text-[#e8dfca]/70">{p.reading}</div>
                       <div className="mt-1.5 text-[10px] text-[#e8dfca]/60 leading-tight">
                         <div>{p.tenGodStem}</div>
                         <div>{p.tenGodBranch}</div>

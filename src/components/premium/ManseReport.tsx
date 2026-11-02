@@ -7,7 +7,8 @@ import dynamic from "next/dynamic";
 
 // 프리미엄 책은 코드가 커서, 프리미엄 풀이를 열 때만 받아요.
 const PremiumBook = dynamic(() => import("./PremiumBook"));
-import { ELEMENT_BOX, elementOfChar, elName } from "@/lib/elementColor";
+import { elementOfChar, elName } from "@/lib/elementColor";
+import ElementTile from "@/components/ElementTile";
 
 const ELEMENT_STYLE: Record<ElementKind, { bar: string; chip: string }> = {
   wood: { bar: "bg-emerald-500", chip: "bg-emerald-50 text-emerald-700" },
@@ -80,11 +81,10 @@ export default function ManseReport({ report, hideHeadline = false, flush = fals
                 <div className="text-[11px] sm:text-xs font-bold text-brand-500">{p.label}</div>
                 {p.full ? (
                   <>
-                    <div className="mt-1.5 space-y-1 px-1.5 font-serifKr font-black text-2xl sm:text-4xl leading-tight" aria-label={`${p.label} ${p.full}`}>
-                      <div className={`rounded-xl py-1 ${ELEMENT_BOX[elementOfChar(stem, false) ?? "earth"]}`}>{stem}</div>
-                      <div className={`rounded-xl py-1 ${ELEMENT_BOX[elementOfChar(branch, true) ?? "earth"]}`}>{branch}</div>
+                    <div className="mt-1.5 space-y-1 px-1.5" aria-label={`${p.label} ${p.full}`}>
+                      <ElementTile ch={stem} el={elementOfChar(stem, false)} reading={p.reading?.[0] ?? ""} sizeClass="text-[32px] sm:text-5xl" />
+                      <ElementTile ch={branch} el={elementOfChar(branch, true)} reading={p.reading?.[1] ?? ""} sizeClass="text-[32px] sm:text-5xl" />
                     </div>
-                    <div className="mt-1 text-[11px] text-slate-500">{p.reading}</div>
                     <div className="mt-1.5 text-[10px] sm:text-[11px] text-slate-500 leading-tight">
                       <div>{p.tenGodStem}</div>
                       <div>{p.tenGodBranch}</div>
