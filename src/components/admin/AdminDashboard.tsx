@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import type { AdminStats } from "@/lib/admin/stats";
 import AiUsageSection from "./AiUsageSection";
+import FunnelSection from "./FunnelSection";
 
 type State =
   | { kind: "loading" }
@@ -184,6 +185,8 @@ export default function AdminDashboard() {
               <Kpi label="고민 통계 동의 건수(전체)" value={state.stats.totals.concernLogs} testId="kpi-concerns" />
               <Kpi label="전체 후기" value={state.stats.totals.reviews} testId="kpi-reviews" />
             </div>
+
+            <FunnelSection days={state.stats.days} />
 
             <AiUsageSection />
 

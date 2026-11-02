@@ -9,6 +9,7 @@ import { dayKey, getBrowserStorage, readCounts, recordDraw, type DrawCounts } fr
 import { readVisitDays, recordVisit } from "@/lib/streak";
 import { grantTickets, readTickets, spendTicket, STREAK_FOR_TICKET } from "@/lib/stampReward";
 import { FREE_PER_DAY } from "@/lib/db/config";
+import { ensureVid, track } from "@/lib/track";
 import { clearRef, isFinalRedeem, readRef, redeemMessage, refFromSearch, saveMyCode, saveRef } from "@/lib/referral";
 import { DailyLineCard } from "./DailyLineCard";
 import { FollowupCard } from "./FollowupCard";
@@ -36,7 +37,6 @@ import {
 const MODAL_DELAY_MS = 150;
 const RITUAL_MS = 2000;
 const LAST_KEY = "wanna500:last:v1";
-const VISITOR_KEY = "wanna500:vid:v1";
 
 export default function Landing() {
   const { user, profile, setProfile, deleteProfile, serverCounts, setServerCounts, result: loginResult, clearResult, justLoggedIn, clearWelcome, logout, withdraw } = useAuth();
@@ -60,7 +60,10 @@ export default function Landing() {
       if (!res.ok) return;
       const d = (await res.json()) as { balance?: unknown; granted?: unknown };
       setCoins(typeof d.balance === "number" && d.balance > 0 ? d.balance : 0);
-      if (d.granted === true) setGift(true);
+      if (d.granted === true) {
+        setGift(true);
+        track("signup");
+      }
     } catch {
       // 코인 확인이 안 돼도 뽑기는 그대로 돼요
     }
@@ -90,17 +93,10 @@ export default function Landing() {
     // 방문자 수: 이 브라우저의 무작위 ID(이름·연락처 아님)를 보내 오늘·누적 방문자를 세요. 실패하면 숫자를 숨겨요.
     void (async () => {
       try {
-        const st = getBrowserStorage();
-        let vid = st?.getItem(VISITOR_KEY) ?? "";
-        if (!/^[A-Za-z0-9-]{16,64}$/.test(vid)) {
-          vid = crypto.randomUUID();
-          try {
-            st?.setItem(VISITOR_KEY, vid);
-          } catch {
-            // 저장이 막혀 있으면 이번 방문만 센 값으로 보여줘요
-          }
-        }
-        const res = await fetch("/api/visit", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ vid }) });
+        const vid = ensureVid();
+        const utm = new URLSearchParams(window.location.search).get("utm_source") ?? "";
+        const friend = Boolean(refFromSearch(window.location.search));
+        const res = await fetch("/api/visit", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ vid, utm, friend, ref: document.referrer }) });
         const d = (await res.json().catch(() => null)) as { today?: number; total?: number } | null;
         if (res.ok && typeof d?.today === "number" && typeof d?.total === "number") setVisitors({ today: d.today, total: d.total });
       } catch {
@@ -119,6 +115,7 @@ export default function Landing() {
   const handleSpin = useCallback(
     (key: string, fortune: string, price: string, premium?: boolean) => {
       spinKey.current = key;
+      track("draw_start");
       // 오늘 무료 뽑기를 이미 썼고 보너스 뽑기가 있으면, 보너스로 한 번 더 뽑아요.
       const bonus = countsRef.current.today >= FREE_PER_DAY && readTickets(getBrowserStorage()) > 0;
       bonusRef.current = bonus;
@@ -217,7 +214,18 @@ export default function Landing() {
     return () => window.clearTimeout(t);
   }, [justLoggedIn, clearWelcome]);
 
-  const openLogin = useCallback(() => setLoginOpen(true), []);
+  const openLogin = useCallback(() => {
+    track("login_click");
+    setLoginOpen(true);
+  }, []);
+  const openChatLogin = useCallback(() => {
+    track("chat_login_click");
+    setLoginOpen(true);
+  }, []);
+  // 로그인 완료(방문자 ID 와 회원 번호는 연결하지 않고, '완료했다'는 표시만 남겨요)
+  useEffect(() => {
+    if (justLoggedIn && user) track("login_done");
+  }, [justLoggedIn, user]);
   const closeLogin = useCallback(() => {
     setLoginOpen(false);
     clearResult();
@@ -246,6 +254,7 @@ export default function Landing() {
     (fromServer?: { today: number; month: number } | null) => {
       // 오늘을 방문한 날로 기록해서 연속 방문 '물길'을 이어요. (이 기기에서만 세요)
       recordVisit(getBrowserStorage(), dayKey(new Date()));
+      track("draw_done");
       if (bonusRef.current) {
         spendTicket(getBrowserStorage());
         bonusRef.current = false;
@@ -285,7 +294,7 @@ export default function Landing() {
       <main className="relative z-10 max-w-[34rem] lg:max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-5 pb-20 sm:pb-24">
         <HeroSection visitors={visitors} tickets={tickets + coins} wallet={user ? { bills: 0, coins: 0, free: Math.max(0, FREE_PER_DAY - counts.today) + coins + tickets } : null} />
         <ShowcaseSection />
-        {!user && <BirthdayTeaser onOpenLogin={openLogin} />}
+        {!user && <BirthdayTeaser onOpenLogin={openChatLogin} />}
         {/* 도리의 소식 카드들은 첫 화면의 "뽑으러 가기" 버튼 아래로 옮겼어요. (첫 화면에서 눌러야 할 것이 하나만 보이게) */}
         {user && profile && <DailyLineCard onOpened={() => {
           recordVisit(getBrowserStorage(), dayKey(new Date()));

@@ -478,6 +478,26 @@ export function createDb(config: DbConfig, fetchImpl: FetchLike = fetch) {
       return Number.isFinite(today) && Number.isFinite(total) ? { today, total } : null;
     },
 
+    /** 처음 온 경로를 한 번만 기록해요. (이미 있으면 그대로) */
+    async setVisitSource(vid: string, src: string): Promise<void> {
+      await call("rpc/visit_attr", { method: "POST", headers: headers(), body: JSON.stringify({ p_vid: vid, p_src: src }) });
+    },
+
+    /** 핵심 행동을 하루 한 번 기록해요. (vid 는 이미 해시된 값) */
+    async recordVisitEvent(day: string, vid: string, event: string): Promise<void> {
+      await call("rpc/visit_event", { method: "POST", headers: headers(), body: JSON.stringify({ p_day: day, p_vid: vid, p_event: event }) });
+    },
+
+    /** 출처별 방문자 수와 행동별 사람 수. (관리자 화면용) */
+    async visitFunnel(sinceDay: string): Promise<Array<{ src: string; event: string; n: number }>> {
+      const res = await call("rpc/visit_funnel", { method: "POST", headers: headers(), body: JSON.stringify({ p_since: sinceDay }) });
+      const rows = (await res.json().catch(() => [])) as Array<{ src?: unknown; event?: unknown; n?: unknown }>;
+      if (!Array.isArray(rows)) return [];
+      return rows
+        .filter((r) => typeof r.src === "string" && typeof r.event === "string" && Number.isFinite(Number(r.n)))
+        .map((r) => ({ src: r.src as string, event: r.event as string, n: Number(r.n) }));
+    },
+
     /** 저장된 생년월일시를 읽어요. 없으면 null. */
     async getProfile(userId: string): Promise<SavedProfile | null> {
       const res = await call(`profiles?user_id=eq.${safeId(userId)}&select=*&limit=1`, { method: "GET", headers: headers() });

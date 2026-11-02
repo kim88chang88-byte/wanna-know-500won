@@ -631,3 +631,74 @@ grant execute on function public.chat_quota(text, text, int) to service_role;
 grant execute on function public.chat_take(text, text, int) to service_role;
 grant execute on function public.chat_refund(text, text) to service_role;
 grant execute on function public.chat_buy(text, text, int, int) to service_role;
+
+-- ─────────────────────────────────────────────────────────────────────────────
+-- 방문 출처·핵심 행동(퍼널): 어디서 왔는지(src)와 어디까지 해 봤는지(event)를 익명 ID(해시)로만 세요.
+-- 방문자 ID 와 회원 번호는 연결하지 않아요. 생일·고민 글·이름 같은 입력값은 저장하지 않아요.
+-- 행동 기록은 90일이 지나면 지워요. 이 파일 전체를 다시 Run 하면 추가돼요. (없으면 퍼널 숫자만 안 쌓이고 서비스는 그대로예요)
+-- ─────────────────────────────────────────────────────────────────────────────
+alter table public.visitors add column if not exists src text;   -- 처음 온 경로(direct / friend / utm:xxx / web:도메인)
+
+create table if not exists public.visit_events (
+  day date not null,                             -- 한국 시간(KST) 기준 날짜
+  vid text not null,                             -- 해시된 방문자 ID
+  event text not null,                           -- 정해진 이름만(서버가 확인해요)
+  primary key (day, vid, event)                  -- 같은 날 같은 행동은 한 번만 세요
+);
+alter table public.visit_events enable row level security;
+
+-- 처음 온 경로를 한 번만 기록해요. (이미 있으면 그대로 둬요)
+create or replace function public.visit_attr(p_vid text, p_src text)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if p_vid is not null and length(p_vid) between 8 and 128 and p_src is not null and length(p_src) <= 80 then
+    update public.visitors set src = p_src where vid = p_vid and src is null;
+  end if;
+end;
+$$;
+
+-- 핵심 행동을 하루 한 번 기록해요. 가끔(약 1%) 90일 지난 기록도 지워요.
+create or replace function public.visit_event(p_day date, p_vid text, p_event text)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if p_vid is not null and length(p_vid) between 8 and 128 and p_event ~ '^[a-z_]{3,24}$' then
+    insert into public.visit_events (day, vid, event) values (p_day, p_vid, p_event) on conflict do nothing;
+  end if;
+  if random() < 0.01 then
+    delete from public.visit_events where day < p_day - 90;
+  end if;
+end;
+$$;
+
+-- 출처별로 방문자 수와 행동별 사람 수를 돌려줘요. (관리자 화면용)
+create or replace function public.visit_funnel(p_since date)
+returns table (src text, event text, n int)
+language sql
+security definer
+set search_path = public
+as $$
+  select coalesce(v.src, 'direct'), 'visit'::text, count(distinct d.vid)::int
+    from public.visit_days d join public.visitors v on v.vid = d.vid
+   where d.day >= p_since
+   group by 1
+  union all
+  select coalesce(v.src, 'direct'), e.event, count(distinct e.vid)::int
+    from public.visit_events e join public.visitors v on v.vid = e.vid
+   where e.day >= p_since
+   group by 1, 2;
+$$;
+
+revoke all on function public.visit_attr(text, text) from public, anon, authenticated;
+revoke all on function public.visit_event(date, text, text) from public, anon, authenticated;
+revoke all on function public.visit_funnel(date) from public, anon, authenticated;
+grant execute on function public.visit_attr(text, text) to service_role;
+grant execute on function public.visit_event(date, text, text) to service_role;
+grant execute on function public.visit_funnel(date) to service_role;

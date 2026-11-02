@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { kstDay } from "@/lib/db/kst";
 import { createDb, loadDbConfig } from "@/lib/db/supabase";
 import { enforceLimits, guardOrigin } from "@/lib/guard";
+import { refererHost, sourceLabel } from "@/lib/visitTrack";
 
 export const runtime = "nodejs";
 
@@ -16,7 +17,7 @@ export async function POST(request: Request) {
   const denied = await enforceLimits(request, { name: "visit", windowMs: 60000, ip: 20, user: 20 });
   if (denied) return denied;
 
-  const body = (await request.json().catch(() => null)) as { vid?: unknown } | null;
+  const body = (await request.json().catch(() => null)) as { vid?: unknown; utm?: unknown; friend?: unknown; ref?: unknown } | null;
   const vid = typeof body?.vid === "string" ? body.vid : "";
   if (!/^[A-Za-z0-9-]{16,64}$/.test(vid)) return NextResponse.json({ error: "잘못된 요청입니다." }, { status: 400 });
 
@@ -26,6 +27,13 @@ export async function POST(request: Request) {
   try {
     const counts = await createDb(config).recordVisit(kstDay(new Date()), hashed);
     if (!counts) return NextResponse.json({ error: "unavailable" }, { status: 503 });
+    // 처음 온 경로(출처). 도메인만 남기고 주소·검색어는 버려요. 실패해도 방문자 수에는 영향 없어요.
+    try {
+      const host = refererHost(typeof body?.ref === "string" ? body.ref : "", request.headers.get("host"));
+      await createDb(config).setVisitSource(hashed, sourceLabel({ friend: body?.friend === true, utm: body?.utm, host }));
+    } catch {
+      // visit_attr 함수를 아직 안 만들었어도 괜찮아요
+    }
     return NextResponse.json(counts, { headers: { "Cache-Control": "no-store" } });
   } catch {
     return NextResponse.json({ error: "unavailable" }, { status: 503 });

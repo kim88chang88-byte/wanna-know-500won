@@ -1,5 +1,6 @@
 "use client";
 
+import { track } from "@/lib/track";
 import { useState } from "react";
 import { formatDateInput } from "@/lib/intake";
 import DoriScene from "./DoriScene";
@@ -39,6 +40,7 @@ export default function BirthdayTeaser({ onOpenLogin }: { onOpenLogin?: () => vo
       if (!res.ok || !data?.line) throw new Error(data?.error ?? "");
       setResult(data);
       setState("idle");
+      track("bday_read");
     } catch (err) {
       setState("error");
       setError(err instanceof Error && err.message ? err.message : "지금은 열 수 없어요. 잠시 뒤에 다시 시도해 주세요.");
