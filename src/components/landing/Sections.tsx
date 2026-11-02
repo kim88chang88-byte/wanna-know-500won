@@ -93,7 +93,7 @@ export function Header({ onOpenLogin, user = null }: { onOpenLogin: () => void; 
               {user ? (
                 // 로그인된 상태는 작은 화면에서도 닉네임이 보이게 해요 (길면 말줄임)
                 <div className="min-w-0">
-                  <span data-testid="mypage-name" className="block max-w-[3.5rem] min-[400px]:max-w-[5.5rem] sm:max-w-[9rem] truncate text-xs font-bold text-gray-800">
+                  <span data-testid="mypage-name" className="hidden min-[380px]:block max-w-[3rem] min-[400px]:max-w-[5.5rem] sm:max-w-[9rem] truncate text-xs font-bold text-gray-800">
                     {user.nickname ? `${user.nickname}님` : "회원님"}
                   </span>
                   <span className="sr-only sm:not-sr-only sm:block text-[10px] font-medium text-emerald-700">로그인됨</span>
@@ -160,13 +160,6 @@ export function ShowcaseSection() {
       <div className="pointer-events-none absolute -bottom-16 -left-16 w-80 h-80 rounded-full bg-indigo-100/40 blur-3xl" aria-hidden="true" />
 
       <div className="relative w-full max-w-5xl mx-auto rounded-3xl shadow-[0_14px_34px_rgba(128,87,224,0.12)] bg-white p-3 sm:p-5 border-2 border-sky-200 overflow-hidden z-10">
-        {/* 둥둥 떠 있는 물방울 장식 */}
-        <div aria-hidden="true" className="pointer-events-none absolute -top-4 -left-3 w-9 h-9 rounded-full bg-gradient-to-br from-white via-sky-100 to-sky-300/40 border border-white/80 shadow-md otter-bubble-aura flex items-center justify-center text-sm z-20">
-          🫧
-        </div>
-        <div aria-hidden="true" className="pointer-events-none absolute top-12 -right-3 w-8 h-8 rounded-full bg-gradient-to-br from-white via-blue-100 to-indigo-200/50 border border-white/80 shadow-sm otter-bubble-aura z-20" style={{ animationDelay: "1.5s" }} />
-        <div aria-hidden="true" className="pointer-events-none absolute bottom-12 -left-2 w-6 h-6 rounded-full bg-white/70 border border-sky-200 shadow-sm otter-bubble-aura z-20" style={{ animationDelay: "2.7s" }} />
-
         <div className="grid grid-cols-1 gap-3 sm:gap-4 items-center">
           <div className="relative w-full max-w-3xl mx-auto aspect-[16/9] rounded-2xl overflow-hidden bg-sky-50 flex items-center justify-center border border-sky-100 shadow-sm">
             <SafeImage

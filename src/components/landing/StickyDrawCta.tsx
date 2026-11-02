@@ -6,9 +6,11 @@ import { useEffect, useState } from "react";
  * 첫 화면의 "오늘의 운 뽑으러 가기" 버튼이 화면 밖으로 나가고, 운세 카드 고르는 곳도 아직 안 보일 때만
  * 화면 아래에 따라오는 작은 버튼이에요. (맨 아래 푸터가 보이면 링크를 가리지 않도록 숨겨요) 누르면 운세 카드 고르는 곳으로 올라가요.
  * 입력창·로그인 창이 열려 있을 때는 숨겨요.
+ * 글을 읽으며 내려가는 동안에는 글자를 가리지 않게 숨기고, 위로 올라갈 때(= 뽑으러 돌아가고 싶을 때)만 보여요.
  */
 export default function StickyDrawCta({ hidden = false }: { hidden?: boolean }) {
   const [show, setShow] = useState(false);
+  const [up, setUp] = useState(false); // 마지막 스크롤이 위쪽 방향인가
 
   useEffect(() => {
     const hero = document.getElementById("hero-cta");
@@ -31,12 +33,24 @@ export default function StickyDrawCta({ hidden = false }: { hidden?: boolean }) 
     return () => io.disconnect();
   }, []);
 
-  if (hidden || !show) return null;
+  useEffect(() => {
+    let last = window.scrollY;
+    const onScroll = () => {
+      const y = window.scrollY;
+      if (Math.abs(y - last) < 8) return; // 살짝 떨리는 것은 무시
+      setUp(y < last);
+      last = y;
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  if (hidden || !show || !up) return null;
   return (
     <a
       href="#machines"
       data-testid="sticky-cta"
-      className="fixed bottom-[4.75rem] left-1/2 lg:bottom-4 z-40 inline-flex -translate-x-1/2 items-center gap-2 rounded-full bg-gradient-to-r from-brand-500 to-fuchsia-500 px-6 py-3 text-sm font-bold text-white shadow-xl shadow-brand-500/40 active:scale-95 focus:outline-none focus-visible:ring-4 focus-visible:ring-brand-300"
+      className="fixed bottom-[4.75rem] left-1/2 lg:bottom-4 z-40 inline-flex -translate-x-1/2 items-center gap-2 rounded-full bg-gradient-to-r from-brand-500 to-fuchsia-500 px-5 py-2.5 text-[13px] font-bold text-white shadow-xl shadow-brand-500/40 active:scale-95 focus:outline-none focus-visible:ring-4 focus-visible:ring-brand-300"
     >
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img src="/images/coin-500.webp" alt="" width={24} height={24} className="h-6 w-6 shrink-0 object-contain drop-shadow" aria-hidden="true" />
