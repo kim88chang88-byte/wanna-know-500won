@@ -2,11 +2,11 @@ import { describe, expect, it } from "vitest";
 import { checkLogin } from "../requireLogin";
 import { createSessionToken, SESSION_COOKIE } from "../session";
 
-const SECRET = "test-secret-test-secret-test-secret-1234";
+const SECRET = "s".repeat(40);
 
 describe("checkLogin", () => {
   it("유효한 로그인 쿠키가 있으면 통과해요", () => {
-    const token = createSessionToken({ sub: "123", nick: "철수" } as never, SECRET);
+    const token = createSessionToken({ sub: "123", nick: "철수", exp: Math.floor(Date.now() / 1000) + 3600 }, SECRET);
     const r = checkLogin(`${SESSION_COOKIE}=${token}`, SECRET);
     expect(r.ok).toBe(true);
   });
@@ -14,7 +14,7 @@ describe("checkLogin", () => {
     expect(checkLogin(null, SECRET).ok).toBe(false);
     expect(checkLogin("", SECRET).ok).toBe(false);
     expect(checkLogin(`${SESSION_COOKIE}=abc.def`, SECRET).ok).toBe(false);
-    const token = createSessionToken({ sub: "123", nick: "철수" } as never, SECRET);
-    expect(checkLogin(`${SESSION_COOKIE}=${token}`, "another-secret-another-secret-another-1")).toEqual({ ok: false });
+    const token = createSessionToken({ sub: "123", nick: "철수", exp: Math.floor(Date.now() / 1000) + 3600 }, SECRET);
+    expect(checkLogin(`${SESSION_COOKIE}=${token}`, "x".repeat(40))).toEqual({ ok: false });
   });
 });
