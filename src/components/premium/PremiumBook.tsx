@@ -651,7 +651,8 @@ function mascotOf(report: PremiumReportView): Mascot {
 }
 const MASCOT_EMOJI: Record<Mascot, string> = { rabbit: "🐰", otter: "🦦" };
 const avatarOf = (m: Mascot) => `/images/animal-${m}.webp`;
-const sceneOf = (m: Mascot) => `/images/premium-scene-${m}.webp`;
+/** 장 표지 그림은 프리미엄 대문 그림 한 장을 모든 장이 같이 써요. */
+const COVER_SCENE = "/images/premium-main.webp";
 
 /** "제7장 · 재물운" → 작은 글씨 "제 7 장", 큰 제목 "재물운", 부제 */
 function titleParts(title: string): { small: string; main: string; sub: string } {
@@ -689,12 +690,12 @@ function BubbleRow({ text, img, right = false }: { text: string; img: string; ri
 }
 
 /** 장 표지: 큰 장면 위에 장 제목, 아래에 도리의 한마디 */
-function ChapterCover({ page, mascot }: { page: BookPage; mascot: Mascot }) {
+function ChapterCover({ page }: { page: BookPage }) {
   const t = titleParts(page.title);
   return (
     <section data-testid="chapter-cover" aria-label={`${page.title} 표지`} className="relative flex aspect-[3/4] md:aspect-[16/9] flex-col justify-start overflow-hidden rounded-[14px] bg-gradient-to-b from-[#0b0e22] to-[#1d2350] px-5 pt-7">
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={sceneOf(mascot)} alt="" className="absolute inset-0 h-full w-full object-cover opacity-90" />
+      <img src={COVER_SCENE} alt="" className="absolute inset-0 h-full w-full object-cover opacity-90" />
       <div className="absolute inset-0 bg-gradient-to-b from-[#0b0e22]/80 via-transparent to-[#0b0e22]/55" />
       <div className="relative z-[1] text-center">
         <small className="block text-[13px] tracking-[0.3em] text-[#e6c887]">{t.small}</small>
@@ -896,7 +897,7 @@ export default function PremiumBook({ report, flush = false, finale, previewBlur
         <h3 id="book-title" className="sr-only">
           {page.title}
         </h3>
-        <ChapterCover page={page} mascot={mascot} />
+        <ChapterCover page={page} />
 
         {/* 도리 한 마리에 말풍선 하나: AI 한 줄이 있으면 그것을, 없으면 쪽 첫 문장을 보여요. */}
         <div data-testid={page.key === "concernTop" ? "book-opening" : page.note ? "book-note" : "book-lead"}>
