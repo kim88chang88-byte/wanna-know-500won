@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 
 /**
- * 첫 화면의 "오늘의 운 뽑으러 가기" 버튼이 화면 밖으로 나가고, 운세 카드 고르는 곳도 아직 안 보일 때만
+ * 첫 화면의 대문 그림이 화면 밖으로 나가고, 운세 카드 고르는 곳도 아직 안 보일 때만
  * 화면 아래에 따라오는 작은 버튼이에요. (맨 아래 푸터가 보이면 링크를 가리지 않도록 숨겨요) 누르면 운세 카드 고르는 곳으로 올라가요.
  * 입력창·로그인 창이 열려 있을 때는 숨겨요.
  * 글을 읽으며 내려가는 동안에는 글자를 가리지 않게 숨기고, 위로 올라갈 때(= 뽑으러 돌아가고 싶을 때)만 보여요.
@@ -13,7 +13,7 @@ export default function StickyDrawCta({ hidden = false }: { hidden?: boolean }) 
   const [up, setUp] = useState(false); // 마지막 스크롤이 위쪽 방향인가
 
   useEffect(() => {
-    const hero = document.getElementById("hero-cta");
+    const hero = document.getElementById("hero-showcase");
     const machines = document.getElementById("machines");
     const footer = document.querySelector("footer");
     if (!hero || !machines || typeof IntersectionObserver === "undefined") return;

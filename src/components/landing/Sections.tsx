@@ -155,7 +155,7 @@ export function HeroSection({ visitors = null, tickets = 0, wallet = null }: { v
 
 export function ShowcaseSection() {
   return (
-    <section className="rounded-[2.5rem] bg-gradient-to-b from-white via-sky-50/40 to-white border border-brand-200/70 p-3 sm:p-5 mb-6 shadow-[0_12px_40px_rgba(128,87,224,0.06)] relative overflow-hidden">
+    <section id="hero-showcase" className="rounded-[2.5rem] bg-gradient-to-b from-white via-sky-50/40 to-white border border-brand-200/70 p-3 sm:p-5 mb-6 shadow-[0_12px_40px_rgba(128,87,224,0.06)] relative overflow-hidden">
       <div className="pointer-events-none absolute -top-16 -right-16 w-80 h-80 rounded-full bg-sky-200/35 blur-3xl" aria-hidden="true" />
       <div className="pointer-events-none absolute -bottom-16 -left-16 w-80 h-80 rounded-full bg-indigo-100/40 blur-3xl" aria-hidden="true" />
 
@@ -173,22 +173,6 @@ export function ShowcaseSection() {
         </div>
       </div>
 
-      <div className="relative z-10 mt-3 text-center">
-        {/* 첫 화면에서 눌러야 할 것은 이 버튼 하나예요. 누르면 아래 운세 카드 고르는 곳으로 내려가요. */}
-        <a
-          href="#machines"
-          id="hero-cta"
-          data-testid="scroll-cue"
-          className="inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-brand-500 to-fuchsia-500 px-7 py-3.5 text-[15px] font-bold text-white shadow-lg shadow-brand-500/30 transition-transform hover:brightness-105 active:scale-95 focus:outline-none focus-visible:ring-4 focus-visible:ring-brand-300 sm:text-base"
-        >
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/images/coin-500.webp" alt="" width={28} height={28} className="h-7 w-7 shrink-0 object-contain drop-shadow" aria-hidden="true" />
-          <span>오늘의 운 뽑으러 가기</span>
-          <span className="material-symbols-outlined text-[22px] leading-none motion-safe:animate-bounce" aria-hidden="true">
-            arrow_downward
-          </span>
-        </a>
-      </div>
     </section>
   );
 }
