@@ -29,6 +29,7 @@ import { dayKey, getBrowserStorage } from "@/lib/drawCounter";
 import { rememberConcern } from "@/lib/followup";
 import { AskChips } from "./AskChips";
 import { ChatEntry } from "@/components/chat/ChatEntry";
+import AdminCopyResult from "@/components/admin/AdminCopyResult";
 import { summarizeReport } from "@/lib/chatContext";
 import { CompareCard } from "./CompareCard";
 import { HoursCard } from "./HoursCard";
@@ -806,6 +807,10 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
           )}
 
           {bookMode && premiumReport && <NextProductBanner report={premiumReport} />}
+
+          {phase === "result" && premiumReport && (
+            <AdminCopyResult report={premiumReport} reading={reading} topic={target.fortune} name={nickname?.trim() || null} partnerName={compat ? resultPartner?.name ?? null : null} />
+          )}
 
           {phase === "result" && premiumReport && askInput && (
             <div className="mt-6 text-center">
