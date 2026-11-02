@@ -19,6 +19,9 @@ export function isTrackEvent(v: unknown): v is TrackEvent {
   return typeof v === "string" && (TRACK_EVENTS as readonly string[]).includes(v);
 }
 
+/** 로그인 창이 거쳐 가는 주소는 '어디서 왔는지'가 아니라서 출처로 세지 않아요. */
+const LOGIN_HOSTS = ["kauth.kakao.com", "accounts.kakao.com", "accounts.google.com", "nid.naver.com"];
+
 /** 레퍼러 주소에서 도메인만 뽑아요. (경로·검색어는 버려요) 우리 사이트이거나 이상하면 빈 문자열 */
 export function refererHost(referrer: string | null | undefined, ownHost: string | null | undefined): string {
   if (!referrer) return "";
@@ -26,6 +29,7 @@ export function refererHost(referrer: string | null | undefined, ownHost: string
     const h = new URL(referrer).hostname.toLowerCase().replace(/^(www|m|l|mobile)\./, "");
     if (!/^[a-z0-9.-]{3,60}$/.test(h)) return "";
     const own = (ownHost ?? "").toLowerCase().replace(/^www\./, "").replace(/:\d+$/, "");
+    if (LOGIN_HOSTS.includes(h)) return "";
     if (own && (h === own || h.endsWith(`.${own}`))) return "";
     return h;
   } catch {

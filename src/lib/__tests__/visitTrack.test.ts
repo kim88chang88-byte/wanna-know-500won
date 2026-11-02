@@ -11,6 +11,7 @@ describe("visitTrack", () => {
     expect(refererHost("https://l.instagram.com/?u=https%3A%2F%2Fx&secret=1", "dori.kr")).toBe("instagram.com");
     expect(refererHost("https://www.google.com/search?q=사주", "dori.kr")).toBe("google.com");
     expect(refererHost("https://dori.kr/chat", "dori.kr")).toBe("");
+    expect(refererHost("https://kauth.kakao.com/oauth/authorize", "dori.kr")).toBe("");
     expect(refererHost("not a url", "dori.kr")).toBe("");
     expect(refererHost("", "dori.kr")).toBe("");
   });
