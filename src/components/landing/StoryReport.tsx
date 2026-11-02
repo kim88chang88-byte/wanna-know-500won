@@ -247,7 +247,7 @@ export default function StoryReport({
     </>
   );
   return (
-    <div data-testid="story-report" className="mt-5 space-y-5">
+    <div data-testid="story-report" data-no-click-fx="" className="mt-5 space-y-5">
       {/* 1) 내 정보와 고민 (질문 문장 고민이면: 고민 → 요약하자면(답) → 네 기둥) */}
       <section aria-label="내 정보" className="rounded-2xl border border-brand-100 bg-white p-4">
         {intro && <p data-testid="story-intro" className="text-xs font-semibold text-brand-700">{intro}</p>}

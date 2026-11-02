@@ -108,7 +108,7 @@ export default function PremiumReportApp() {
 
   if (report) {
     return (
-      <div className="space-y-6">
+      <div data-no-click-fx="" className="space-y-6">
         {(aiNotice || aiGated) && <AiNotice dark gated={aiGated} />}
         <ManseReport report={report} previewBlur />
         <button type="button" onClick={() => setReport(null)} className="w-full rounded-full border border-[#e6c887]/40 py-3 text-sm font-bold text-[#e6c887]">

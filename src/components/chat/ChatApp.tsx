@@ -468,6 +468,7 @@ export default function ChatApp() {
           e.preventDefault();
           void send(input);
         }}
+        data-no-click-fx=""
         className="z-20 border-t border-brand-100 bg-white/85 px-3 pb-[max(12px,env(safe-area-inset-bottom))] pt-1.5 backdrop-blur"
       >
         <div className="mx-1 mb-2 flex items-center justify-between text-[11px] text-[#8a7fa8]">

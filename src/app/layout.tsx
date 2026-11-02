@@ -1,3 +1,4 @@
+import ClickBubbles from "@/components/ClickBubbles";
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
@@ -34,7 +35,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           rel="stylesheet"
         />
       </head>
-      <body className="bg-[#FFF8FC] text-[#2A2140] font-sans antialiased selection:bg-brand-200">{children}</body>
+      <body className="bg-[#FFF8FC] text-[#2A2140] font-sans antialiased selection:bg-brand-200">{children}
+        <ClickBubbles />
+      </body>
     </html>
   );
 }

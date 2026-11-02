@@ -799,6 +799,7 @@ export default function PremiumBook({ report, flush = false, finale, previewBlur
     <div
       ref={top}
       data-testid="premium-book"
+      data-no-click-fx=""
       tabIndex={-1}
       onKeyDown={(e: { key: string }) => {
         if (e.key === "ArrowRight") go(i + 1);

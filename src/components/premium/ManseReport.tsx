@@ -29,7 +29,7 @@ export default function ManseReport({ report, hideHeadline = false, flush = fals
   if (report.level === "full" && report.book.length > 0) return <PremiumBook report={report} flush={flush} finale={finale} previewBlur={previewBlur} />;
 
   return (
-    <div data-testid="manse-report" className="space-y-6">
+    <div data-testid="manse-report" data-no-click-fx="" className="space-y-6">
       {parts === "all" && report.compat && <CompatCard compat={report.compat} />}
       {parts === "all" && report.concern && <ConcernCard concern={report.concern} />}
       {parts === "all" && <section aria-labelledby="topic-h" data-testid="topic-card" className="rounded-3xl bg-gradient-to-br from-violet-50 via-white to-sky-50 border border-violet-100 p-5 sm:p-6 shadow-[0_8px_30px_rgba(120,100,220,0.10)]">

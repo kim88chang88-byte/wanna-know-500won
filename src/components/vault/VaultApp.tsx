@@ -90,7 +90,7 @@ export default function VaultApp() {
     const s = detail.snapshot;
     const luxe = s.premium === true;
     return (
-      <div data-testid="vault-detail">
+      <div data-testid="vault-detail" data-no-click-fx="">
         <button type="button" onClick={() => setDetail(null)} className="text-xs font-bold text-brand-600 underline underline-offset-2">
           ← 보관함 목록
         </button>
