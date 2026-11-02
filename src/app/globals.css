@@ -41,29 +41,34 @@ body {
 
 /* ------------------------------------------------------------------ 눈꽃송이 배경 (랜딩 화면: 하늘에서 천천히 내려요) */
 @keyframes snowFall {
+  /* --sway: 좌우로 흔들리는 폭, --spin: 돌아가는 각도, --op: 눈송이마다 다른 진하기 (모두 JS 가 송이마다 다르게 줘요) */
   0% {
     transform: translate3d(0, -8vh, 0) rotate(0deg);
     opacity: 0;
   }
   8% {
-    opacity: 0.95;
+    opacity: var(--op, 0.9);
   }
-  30% {
-    transform: translate3d(22px, 28vh, 0) rotate(110deg);
+  22% {
+    transform: translate3d(calc(var(--sway, 20px) * 1), 20vh, 0) rotate(calc(var(--spin, 200deg) * 0.2));
   }
-  55% {
-    transform: translate3d(-18px, 58vh, 0) rotate(220deg);
+  41% {
+    transform: translate3d(calc(var(--sway, 20px) * -0.7), 42vh, 0) rotate(calc(var(--spin, 200deg) * 0.45));
   }
-  80% {
-    transform: translate3d(20px, 86vh, 0) rotate(310deg);
-    opacity: 0.9;
+  63% {
+    transform: translate3d(calc(var(--sway, 20px) * 0.9), 66vh, 0) rotate(calc(var(--spin, 200deg) * 0.7));
+  }
+  82% {
+    transform: translate3d(calc(var(--sway, 20px) * -0.5), 90vh, 0) rotate(calc(var(--spin, 200deg) * 0.9));
+    opacity: var(--op, 0.9);
   }
   100% {
-    transform: translate3d(-6px, 112vh, 0) rotate(380deg);
+    transform: translate3d(calc(var(--sway, 20px) * 0.3), 112vh, 0) rotate(var(--spin, 200deg));
     opacity: 0;
   }
 }
 
+/* 눈꽃송이 하나의 기본 모양 */
 .snow-item {
   position: absolute;
   top: 0;
