@@ -36,7 +36,6 @@ import {
 
 const MODAL_DELAY_MS = 150;
 const RITUAL_MS = 2000;
-const RITUAL_LUXE_MS = 2600;
 const LAST_KEY = "wanna500:last:v1";
 
 export default function Landing() {
@@ -49,7 +48,6 @@ export default function Landing() {
   const timers = useRef<number[]>([]);
   const [ritual, setRitual] = useState(false);
   const [ritualBill, setRitualBill] = useState(false);
-  const [ritualLuxe, setRitualLuxe] = useState(false);
   const [tickets, setTickets] = useState(0);
   // 서버에 쌓인 뽑기 코인(로그인 선물 등)과, 방금 선물을 받았는지
   const [coins, setCoins] = useState(0);
@@ -129,14 +127,12 @@ export default function Landing() {
       }
       // 1,000원 카드(둘의 궁합)는 동전 대신 지폐가 들어가요.
       setRitualBill(price.startsWith("1,000"));
-      // 프리미엄(9,900원)은 동전 대신 금빛 불꽃놀이가 터져요. 조금 더 길게 보여줘요.
-      setRitualLuxe(premium === true);
       setRitual(true);
       timers.current.push(
         window.setTimeout(() => {
           setRitual(false);
           open();
-        }, premium === true ? RITUAL_LUXE_MS : RITUAL_MS),
+        }, RITUAL_MS),
       );
     },
     [],
@@ -317,7 +313,7 @@ export default function Landing() {
       <div aria-hidden="true" className="h-16 lg:hidden" />
       <BottomTabs />
 
-      {ritual && <CoinRitual bill={ritualBill} luxe={ritualLuxe} />}
+      {ritual && <CoinRitual bill={ritualBill} />}
       <StickyDrawCta hidden={Boolean(intake) || loginOpen || ritual} />
 
       {((justLoggedIn && user) || gift || notice) && (
