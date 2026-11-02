@@ -92,6 +92,11 @@ export default function ChatApp() {
   const [typing, setTyping] = useState<{ idx: number; shown: number } | null>(null);
   const [jump, setJump] = useState(false);
   const [vh, setVh] = useState<number | null>(null);
+  /** 서버가 알려 주는 남은 질문 수 (아직 모르면 null) 와 내 뽑기 코인 수 */
+  const [left, setLeft] = useState<number | null>(null);
+  const [coins, setCoins] = useState(0);
+  const [buyOpen, setBuyOpen] = useState(false);
+  const [buying, setBuying] = useState(false);
   const scroller = useRef<HTMLDivElement>(null);
   const field = useRef<HTMLTextAreaElement>(null);
   const nearBottom = useRef(true);
@@ -103,6 +108,23 @@ export default function ChatApp() {
     setMsgs(readLog());
     setReady(true);
   }, []);
+
+  // 들어오자마자 남은 질문 수와 코인 수를 받아 와요
+  useEffect(() => {
+    if (!ready) return;
+    let alive = true;
+    fetch("/api/chat/quota", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ctx }) })
+      .then((r) => (r.ok ? (r.json() as Promise<{ left?: number; coins?: number }>) : null))
+      .then((d) => {
+        if (!alive || !d) return;
+        if (typeof d.left === "number") setLeft(d.left);
+        if (typeof d.coins === "number") setCoins(d.coins);
+      })
+      .catch(() => undefined);
+    return () => {
+      alive = false;
+    };
+  }, [ready, ctx]);
 
   // 키보드가 올라와도 입력창이 가려지지 않게, 보이는 화면 높이에 맞춰요
   useEffect(() => {
@@ -159,7 +181,8 @@ export default function ChatApp() {
   }, [input]);
 
   const asked = msgs.filter((m) => m.role === "user" && !m.error).length;
-  const left = Math.max(0, TURN_CAP - asked);
+  // 서버 값을 아직 못 받았으면 이 화면에서 센 값으로 보여 줘요
+  const leftNow = left ?? Math.max(0, TURN_CAP - asked);
   const chips = useMemo(() => {
     const done = new Set(msgs.filter((m) => m.role === "user").map((m) => m.text));
     return CHIP_POOL[ctx.kind].filter((c) => !done.has(c)).slice(0, 4);
@@ -168,7 +191,7 @@ export default function ChatApp() {
 
   async function send(raw: string) {
     const text = raw.trim().slice(0, MSG_MAX);
-    if (!text || inflight.current || left === 0) return;
+    if (!text || inflight.current || leftNow === 0) return;
     inflight.current = true;
     setInput("");
     setTyping(null);
@@ -182,8 +205,17 @@ export default function ChatApp() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ctx, messages: next.map(({ role, text: t }) => ({ role, text: t })) }),
       });
-      const data = (await res.json().catch(() => null)) as { answer?: string; error?: string } | null;
+      const data = (await res.json().catch(() => null)) as { answer?: string; error?: string; code?: string; left?: number } | null;
+      if (res.status === 402 && data?.code === "quota") {
+        // 질문을 다 쓴 경우: 방금 보낸 말은 입력창으로 돌려놓고 "동전으로 더하기" 카드를 보여 줘요
+        setLeft(0);
+        setMsgs(next.slice(0, -1));
+        setInput(text);
+        return;
+      }
       if (!res.ok || !data?.answer) throw new Error(data?.error ?? "도리가 잠깐 물놀이하러 갔어요. 다시 보내 볼래요?");
+      if (typeof data.left === "number") setLeft(data.left);
+      else setLeft((l) => (l === null ? null : Math.max(0, l - 1)));
       const all: Bubble[] = [...next, { role: "dori", text: data.answer, at: Date.now() }];
       setMsgs(all);
       if (!prefersReducedMotion()) setTyping({ idx: all.length - 1, shown: 0 });
@@ -207,6 +239,30 @@ export default function ChatApp() {
   function flash(t: string) {
     setNote(t);
     setTimeout(() => setNote(null), 2600);
+  }
+
+  async function buy() {
+    if (buying) return;
+    setBuying(true);
+    try {
+      const res = await fetch("/api/chat/buy", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ctx }) });
+      const data = (await res.json().catch(() => null)) as { left?: number; coins?: number; added?: number; error?: string; code?: string } | null;
+      if (res.ok && typeof data?.left === "number") {
+        setLeft(data.left);
+        setCoins(data.coins ?? 0);
+        flash(`질문 ${data.added ?? 5}개가 더해졌어요 🫧`);
+      } else if (data?.code === "no_coin") {
+        setCoins(0);
+        flash("뽑기 코인이 없어요. 친구를 초대하면 코인을 받을 수 있어요 🎁");
+      } else {
+        flash(data?.error ?? "코인을 쓰지 못했어요. 잠시 뒤에 다시 시도해 주세요.");
+      }
+    } catch {
+      flash("인터넷 연결을 확인해 주세요.");
+    } finally {
+      setBuying(false);
+      setBuyOpen(false);
+    }
   }
 
   async function copy(text: string, i: number) {
@@ -243,7 +299,7 @@ export default function ChatApp() {
 
   const label = CTX_LABEL[ctx.kind];
   const summaryLines = ctx.summary.split("\n").map((l) => l.trim()).filter(Boolean);
-  const showEnd = left === 0 && !busy && !typingNow;
+  const showEnd = leftNow === 0 && !busy && !typingNow;
 
   return (
     <div
@@ -376,7 +432,7 @@ export default function ChatApp() {
               <br />
               500원 동전으로 질문을 더 할 수 있어요.
             </p>
-            <button type="button" onClick={() => flash("동전으로 질문 더하기는 곧 열려요 🫧")} className="mt-3 block w-full rounded-full bg-gradient-to-br from-brand-500 to-[#c24fe0] py-3 text-sm font-extrabold text-white shadow active:scale-[0.98]">
+            <button type="button" onClick={() => setBuyOpen(true)} className="mt-3 block w-full rounded-full bg-gradient-to-br from-brand-500 to-[#c24fe0] py-3 text-sm font-extrabold text-white shadow active:scale-[0.98]">
               🪙 500원 동전으로 질문 5개 더하기
             </button>
             <button type="button" onClick={newChat} className="mt-2 text-xs font-bold text-brand-600">
@@ -397,7 +453,7 @@ export default function ChatApp() {
         </p>
       )}
 
-      {left > 0 && !busy && !typingNow && chips.length > 0 && (
+      {leftNow > 0 && !busy && !typingNow && chips.length > 0 && (
         <div className="z-10 flex gap-[7px] overflow-x-auto px-3.5 pb-2 pt-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden" aria-label="추천 질문">
           {chips.map((c) => (
             <button key={c} type="button" onClick={() => void send(c)} className="shrink-0 whitespace-nowrap rounded-full border border-brand-200 bg-white px-3.5 py-2 text-[12.5px] font-semibold text-brand-700 shadow-sm active:scale-95">
@@ -416,9 +472,10 @@ export default function ChatApp() {
       >
         <div className="mx-1 mb-2 flex items-center justify-between text-[11px] text-[#8a7fa8]">
           <span>
-            🫧 질문 <b className="text-gray-800">{left}번</b> 남았어요
+            🫧 질문 <b className="text-gray-800">{leftNow}번</b> 남았어요
+            <span className="ml-2 text-[#b08722]">🪙 코인 {coins}개</span>
           </span>
-          <button type="button" onClick={() => flash("동전으로 질문 더하기는 곧 열려요 🫧")} className="rounded-full bg-[#fff3c9] px-2.5 py-1 font-extrabold text-[#8a5b00] active:scale-95">
+          <button type="button" onClick={() => setBuyOpen(true)} className="rounded-full bg-[#fff3c9] px-2.5 py-1 font-extrabold text-[#8a5b00] active:scale-95">
             🪙 동전으로 더 묻기
           </button>
         </div>
@@ -434,15 +491,15 @@ export default function ChatApp() {
               }
             }}
             rows={1}
-            disabled={left === 0}
-            placeholder={left === 0 ? "오늘 대화는 여기까지예요" : "도리에게 고민을 적어봐요…"}
+            disabled={leftNow === 0}
+            placeholder={leftNow === 0 ? "오늘 대화는 여기까지예요" : "도리에게 고민을 적어봐요…"}
             aria-label="도리에게 보낼 질문"
             className="max-h-[120px] min-h-[42px] flex-1 resize-none rounded-[22px] border-[1.5px] border-brand-200 bg-white px-4 py-[10px] text-[14px] leading-snug outline-none focus:border-brand-400 disabled:bg-[#f3f0fa]"
           />
           <button
             type="submit"
             aria-label="보내기"
-            disabled={busy || typingNow || !input.trim() || left === 0}
+            disabled={busy || typingNow || !input.trim() || leftNow === 0}
             className="grid h-[42px] w-[42px] shrink-0 place-items-center rounded-full bg-gradient-to-br from-brand-500 to-brand-600 text-white shadow-[0_4px_12px_#8057e055] transition active:scale-95 disabled:bg-none disabled:bg-[#e5defa] disabled:shadow-none"
           >
             <svg viewBox="0 0 24 24" width="19" height="19" fill="currentColor" aria-hidden="true">
@@ -452,6 +509,22 @@ export default function ChatApp() {
         </div>
         {input.length > MSG_MAX - 60 && <p className="mr-2 mt-1 text-right text-[10px] text-[#a99bd0]">{input.length}/{MSG_MAX}</p>}
       </form>
+      {buyOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 px-6" onClick={() => !buying && setBuyOpen(false)}>
+          <div role="alertdialog" aria-modal="true" aria-label="코인으로 질문 더하기" onClick={(e) => e.stopPropagation()} className="w-full max-w-[320px] rounded-2xl bg-white px-5 py-5 text-center shadow-xl">
+            <p className="text-[15px] font-bold leading-relaxed text-gray-900">뽑기 코인 1개로 질문 5개를 더할까요?</p>
+            <p className="mt-1 text-xs text-slate-500">내 코인: {coins}개 {coins === 0 && "· 코인이 없어요"}</p>
+            <div className="mt-4 flex gap-2">
+              <button type="button" onClick={() => setBuyOpen(false)} disabled={buying} className="flex-1 rounded-full border border-slate-300 bg-white py-2.5 text-sm font-bold text-slate-600">
+                아니요
+              </button>
+              <button type="button" onClick={() => void buy()} disabled={buying || coins === 0} className="flex-1 rounded-full bg-brand-500 py-2.5 text-sm font-bold text-white disabled:opacity-50">
+                {buying ? "쓰는 중…" : "네, 더할게요"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

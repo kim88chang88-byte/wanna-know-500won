@@ -520,3 +520,114 @@ create table if not exists public.ai_cache (
   created_at timestamptz not null default now()
 );
 alter table public.ai_cache enable row level security;
+
+-- ─────────────────────────────────────────────────────────────────────────────
+-- 도리 상담방 질문 횟수: 회원마다·범위(scope)마다 무료 질문과 동전으로 산 질문을 따로 세요.
+-- · 오늘의 한마디 카드에서 들어오면 하루 3번, 결과서(500원·1,000원)에서 들어오면 그 결과마다 한 달에 10번 무료예요.
+-- · 뽑기 코인 1장으로 질문 5개를 더할 수 있어요 (chat_buy).
+-- 이 부분만 따로 Run 해도 되고, 파일 전체를 다시 Run 해도 안전해요. (코인 테이블이 먼저 있어야 해요)
+-- ─────────────────────────────────────────────────────────────────────────────
+create table if not exists public.chat_credits (
+  user_id text not null references public.users(id) on delete cascade,
+  scope text not null,                                  -- 예: d:2026-11-02 / r:2026-11:해시
+  free_left int not null default 0 check (free_left >= 0),
+  extra_left int not null default 0 check (extra_left >= 0),
+  updated_at timestamptz not null default now(),
+  primary key (user_id, scope)
+);
+alter table public.chat_credits enable row level security;
+
+-- 남은 질문 수. 아직 한 번도 안 물었으면 무료 p_free 개로 시작해요.
+create or replace function public.chat_quota(p_user text, p_scope text, p_free int)
+returns int
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  f int;
+  e int;
+begin
+  select c.free_left, c.extra_left into f, e from public.chat_credits c where c.user_id = p_user and c.scope = p_scope;
+  if f is null then
+    return p_free;
+  end if;
+  return f + e;
+end;
+$$;
+
+-- 질문 1개 사용(무료 먼저, 그다음 산 것). 사용한 뒤 남은 수를 돌려주고, 남은 게 없으면 -1.
+create or replace function public.chat_take(p_user text, p_scope text, p_free int)
+returns int
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  f int;
+  e int;
+begin
+  insert into public.chat_credits (user_id, scope, free_left) values (p_user, p_scope, p_free) on conflict do nothing;
+  update public.chat_credits set free_left = free_left - 1, updated_at = now()
+    where user_id = p_user and scope = p_scope and free_left >= 1
+    returning free_left, extra_left into f, e;
+  if f is null then
+    update public.chat_credits set extra_left = extra_left - 1, updated_at = now()
+      where user_id = p_user and scope = p_scope and extra_left >= 1
+      returning free_left, extra_left into f, e;
+  end if;
+  if f is null then
+    return -1;
+  end if;
+  return f + e;
+end;
+$$;
+
+-- AI 가 답하지 못했을 때 질문 1개를 돌려줘요.
+create or replace function public.chat_refund(p_user text, p_scope text)
+returns void
+language sql
+security definer
+set search_path = public
+as $$
+  update public.chat_credits set extra_left = extra_left + 1, updated_at = now() where user_id = p_user and scope = p_scope;
+$$;
+
+-- 뽑기 코인 1장을 써서 질문 p_amount 개를 더해요. 코인이 없으면 out_left = -1.
+create or replace function public.chat_buy(p_user text, p_scope text, p_free int, p_amount int)
+returns table (out_left int, out_coins int)
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  bal int;
+  f int;
+  e int;
+begin
+  if p_amount < 1 or p_amount > 20 then
+    raise exception 'bad amount';
+  end if;
+  update public.user_coins set balance = balance - 1, updated_at = now()
+    where user_id = p_user and balance >= 1
+    returning balance into bal;
+  if bal is null then
+    return query select -1, 0;
+    return;
+  end if;
+  insert into public.coin_log (user_id, kind, ref, delta) values (p_user, 'chat_buy', clock_timestamp()::text, -1);
+  insert into public.chat_credits (user_id, scope, free_left, extra_left) values (p_user, p_scope, p_free, p_amount)
+    on conflict (user_id, scope) do update set extra_left = public.chat_credits.extra_left + p_amount, updated_at = now();
+  select c.free_left, c.extra_left into f, e from public.chat_credits c where c.user_id = p_user and c.scope = p_scope;
+  return query select f + e, bal;
+end;
+$$;
+
+revoke all on function public.chat_quota(text, text, int) from public, anon, authenticated;
+revoke all on function public.chat_take(text, text, int) from public, anon, authenticated;
+revoke all on function public.chat_refund(text, text) from public, anon, authenticated;
+revoke all on function public.chat_buy(text, text, int, int) from public, anon, authenticated;
+grant execute on function public.chat_quota(text, text, int) to service_role;
+grant execute on function public.chat_take(text, text, int) to service_role;
+grant execute on function public.chat_refund(text, text) to service_role;
+grant execute on function public.chat_buy(text, text, int, int) to service_role;

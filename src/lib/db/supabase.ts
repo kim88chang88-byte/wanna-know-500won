@@ -314,6 +314,38 @@ export function createDb(config: DbConfig, fetchImpl: FetchLike = fetch) {
       return typeof n === "number" && Number.isInteger(n) ? n : -1;
     },
 
+    /** 상담방 남은 질문 수 (처음이면 무료 free 개). DB 함수(chat_quota) */
+    async chatQuota(userId: string, scope: string, free: number): Promise<number> {
+      const res = await call("rpc/chat_quota", { method: "POST", headers: headers(), body: JSON.stringify({ p_user: safeId(userId), p_scope: scope.slice(0, 120), p_free: free }) });
+      const n = await res.json().catch(() => null);
+      if (typeof n !== "number" || !Number.isInteger(n)) throw new Error("chat_quota 응답 이상");
+      return n;
+    },
+
+    /** 질문 1개 사용 → 남은 수. 남은 게 없으면 -1. DB 함수(chat_take) */
+    async chatTake(userId: string, scope: string, free: number): Promise<number> {
+      const res = await call("rpc/chat_take", { method: "POST", headers: headers(), body: JSON.stringify({ p_user: safeId(userId), p_scope: scope.slice(0, 120), p_free: free }) });
+      const n = await res.json().catch(() => null);
+      if (typeof n !== "number" || !Number.isInteger(n)) throw new Error("chat_take 응답 이상");
+      return n;
+    },
+
+    /** AI 가 답하지 못했을 때 질문 1개를 돌려줘요. */
+    async chatRefund(userId: string, scope: string): Promise<void> {
+      await call("rpc/chat_refund", { method: "POST", headers: headers(), body: JSON.stringify({ p_user: safeId(userId), p_scope: scope.slice(0, 120) }) });
+    },
+
+    /** 코인 1장으로 질문 amount 개 더하기. 코인이 없으면 left = -1. DB 함수(chat_buy) */
+    async chatBuy(userId: string, scope: string, free: number, amount: number): Promise<{ left: number; coins: number }> {
+      const res = await call("rpc/chat_buy", { method: "POST", headers: headers(), body: JSON.stringify({ p_user: safeId(userId), p_scope: scope.slice(0, 120), p_free: free, p_amount: amount }) });
+      const rows = (await res.json().catch(() => null)) as Array<{ out_left?: unknown; out_coins?: unknown }> | { out_left?: unknown; out_coins?: unknown } | null;
+      const row = Array.isArray(rows) ? rows[0] : rows;
+      const left = Number(row?.out_left);
+      const coins = Number(row?.out_coins);
+      if (!Number.isInteger(left)) throw new Error("chat_buy 응답 이상");
+      return { left, coins: Number.isInteger(coins) && coins > 0 ? coins : 0 };
+    },
+
     /** 내 추천 코드 (없으면 DB 에서 만들어요) */
     async referralCode(userId: string): Promise<string | null> {
       const res = await call("rpc/referral_code_get", { method: "POST", headers: headers(), body: JSON.stringify({ p_user: safeId(userId) }) });

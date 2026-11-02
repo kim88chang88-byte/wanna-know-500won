@@ -1,47 +1,24 @@
 import { NextResponse } from "next/server";
-import { isAdmin } from "@/lib/admin/auth";
 import { takeAiBudget } from "@/lib/ai/budget";
 import { chatDori, cleanHistory, CRISIS_ANSWER, isCrisis } from "@/lib/ai/chat";
 import { buildCoreFacts } from "@/lib/ai/coreFacts";
 import { buildDailyFacts, kstToday } from "@/lib/ai/dailyFacts";
 import { ReadingUnavailableError } from "@/lib/ai/interpret";
 import { hasAiKey } from "@/lib/ai/llm";
-import { readCookie, SESSION_COOKIE, verifySessionToken } from "@/lib/auth/session";
-import { TURN_CAP, type ChatKind } from "@/lib/chatContext";
-import { createDb, loadDbConfig } from "@/lib/db/supabase";
-import { enforceLimits, guardOrigin } from "@/lib/guard";
+import { DAY_CAP } from "@/lib/chatQuota";
+import { canChat, dbOrNull, parseCtx, quotaLeft, refundQuestion, sessionOf, takeQuestion, targetOf } from "@/lib/chatServer";
+import { enforceLimits, guardOrigin, takeLimit } from "@/lib/guard";
 import { resolveBirth } from "@/lib/saju/birthPlace";
 import { calculateSaju } from "@/lib/saju/calculate";
 import { SajuInputError } from "@/lib/saju/errors";
-import type { BirthInput } from "@/lib/saju/types";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
-
-/** 상담방을 열어 줄 사람: 지금은 관리자만. CHAT_OPEN=true 로 바꾸면 로그인한 모든 회원에게 열려요. */
-function canChat(sub: string | null | undefined): boolean {
-  if (!sub) return false;
-  if (process.env.CHAT_OPEN?.trim().toLowerCase() === "true") return true;
-  return isAdmin(sub, process.env);
-}
-
-function sessionOf(request: Request) {
-  return verifySessionToken(readCookie(request.headers.get("cookie"), SESSION_COOKIE), process.env.AUTH_SECRET);
-}
 
 /** 화면이 "도리에게 더 물어보기" 버튼을 보여 줄지 물어봐요. */
 export async function GET(request: Request) {
   const s = sessionOf(request);
   return NextResponse.json({ enabled: canChat(s?.sub) }, { headers: { "Cache-Control": "no-store" } });
-}
-
-function validBirth(v: unknown): BirthInput | null {
-  if (typeof v !== "object" || v === null) return null;
-  try {
-    return resolveBirth(v as BirthInput).input;
-  } catch {
-    return null;
-  }
 }
 
 export async function POST(request: Request) {
@@ -57,48 +34,61 @@ export async function POST(request: Request) {
   } catch {
     return NextResponse.json({ error: "잘못된 요청입니다." }, { status: 400 });
   }
-  const ctx = (body?.ctx ?? {}) as { kind?: unknown; summary?: unknown; birth?: unknown; partnerBirth?: unknown; partnerName?: unknown; name?: unknown };
-  const kind: ChatKind | null = ctx.kind === "daily" || ctx.kind === "reading" || ctx.kind === "compat" ? ctx.kind : null;
+  const ctx = parseCtx(body?.ctx);
   const history = cleanHistory(body?.messages);
-  if (!kind || !history) return NextResponse.json({ error: "잘못된 요청입니다." }, { status: 400 });
-  if (history.filter((m) => m.role === "user").length > TURN_CAP) return NextResponse.json({ error: "이번 대화는 여기까지예요. 새로 시작해서 이어 물어봐 주세요 🫧" }, { status: 429 });
+  if (!ctx || !history) return NextResponse.json({ error: "잘못된 요청입니다." }, { status: 400 });
 
+  const db = dbOrNull();
+  const target = targetOf(session.sub, ctx);
+
+  // 마음이 힘든 말은 AI 를 부르지 않고 안내만 해요. (질문 횟수도 쓰지 않아요)
   const last = history[history.length - 1].text;
-  if (isCrisis(last)) return NextResponse.json({ answer: CRISIS_ANSWER, safe: true });
+  if (isCrisis(last)) return NextResponse.json({ answer: CRISIS_ANSWER, safe: true, left: await quotaLeft(db, target) });
 
   if (!hasAiKey()) return NextResponse.json({ error: "지금은 도리가 답을 준비하지 못했어요." }, { status: 503 });
-  try {
-    const dbConfig = loadDbConfig(process.env);
-    const db = dbConfig ? createDb(dbConfig) : null;
 
+  let taken: { left: number; via: "db" | "mem" } | null = null;
+  try {
     // 누구의 사주인지: 결과서에서 왔으면 그 풀이의 생년월일시, 오늘 카드면 저장된 내 정보
-    let birth = validBirth(ctx.birth);
-    if (kind === "daily" || !birth) {
+    let birth = ctx.birth;
+    if (ctx.kind === "daily" || !birth) {
       const profile = db ? await db.getProfile(session.sub) : null;
       if (!profile) return NextResponse.json({ error: "내 정보를 먼저 저장해 주세요." }, { status: 404 });
       birth = resolveBirth(profile).input;
     }
     const chart = calculateSaju(birth);
-    const partnerBirth = kind === "compat" ? validBirth(ctx.partnerBirth) : null;
+    const partnerChart = ctx.partnerBirth ? calculateSaju(ctx.partnerBirth) : null;
 
     const gate = await takeAiBudget(process.env, db);
     if (gate !== "ok") throw new ReadingUnavailableError();
+
+    // 하루에 한 사람이 보낼 수 있는 전체 질문 수 (범위가 달라도 합쳐서)
+    const day = await takeLimit("chat-day", `u:${session.sub}`, DAY_CAP, 24 * 60 * 60 * 1000);
+    if (!day.ok) return NextResponse.json({ error: "오늘은 도리가 질문을 많이 받았어요. 내일 다시 물어봐 주세요 🫧", code: "day_cap", left: 0 }, { status: 429 });
+
+    taken = await takeQuestion(db, target);
+    if (taken.left < 0) {
+      return NextResponse.json({ error: "질문을 모두 사용했어요. 500원 동전으로 질문을 더할 수 있어요.", code: "quota", left: 0 }, { status: 402 });
+    }
+
     const now = new Date();
     const answer = await chatDori(
       {
-        kind,
-        name: typeof ctx.name === "string" ? ctx.name.slice(0, 12) : null,
-        partnerName: typeof ctx.partnerName === "string" ? ctx.partnerName.slice(0, 12) : null,
-        summary: typeof ctx.summary === "string" ? ctx.summary : "",
+        kind: ctx.kind,
+        name: ctx.name,
+        partnerName: ctx.partnerName,
+        summary: ctx.summary,
         chart,
         core: buildCoreFacts(birth, now, true),
-        daily: kind === "daily" ? buildDailyFacts(chart, kstToday(now)) : null,
-        partnerChart: partnerBirth ? calculateSaju(partnerBirth) : null,
+        daily: ctx.kind === "daily" ? buildDailyFacts(chart, kstToday(now)) : null,
+        partnerChart,
       },
       history,
     );
-    return NextResponse.json({ answer });
+    return NextResponse.json({ answer, left: taken.left });
   } catch (err) {
+    // 답을 못 만들었으면 쓴 질문을 돌려줘요.
+    if (taken && taken.left >= 0) await refundQuestion(db, target, taken.via);
     if (err instanceof SajuInputError) return NextResponse.json({ error: err.message }, { status: 400 });
     if (err instanceof ReadingUnavailableError) return NextResponse.json({ error: "오늘은 도리가 많이 답해서 잠깐 쉬고 있어요. 내일 다시 물어봐 주세요 🫧" }, { status: 503 });
     console.error("chat failed:", err instanceof Error ? err.message : "unknown");

@@ -63,7 +63,7 @@ export const CRISIS_ANSWER =
 
 /** 서버에서 대화 기록을 다시 정리해요 (길이·개수 제한, 마지막은 반드시 사용자의 말). */
 export function cleanHistory(raw: unknown): ChatMsg[] | null {
-  if (!Array.isArray(raw)) return null;
+  if (!Array.isArray(raw) || raw.length > 80) return null;
   const list: ChatMsg[] = [];
   for (const m of raw) {
     if (typeof m !== "object" || m === null) return null;
@@ -73,7 +73,7 @@ export function cleanHistory(raw: unknown): ChatMsg[] | null {
     if (t) list.push({ role, text: t });
   }
   if (list.length === 0 || list[list.length - 1].role !== "user") return null;
-  return list;
+  return list.slice(-HISTORY_MAX * 2);
 }
 
 export interface ChatFactsInput {
