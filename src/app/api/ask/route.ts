@@ -7,6 +7,7 @@ import { buildCoreFacts } from "@/lib/ai/coreFacts";
 import { ReadingUnavailableError } from "@/lib/ai/interpret";
 import { createDb, loadDbConfig } from "@/lib/db/supabase";
 import { enforceLimits, guardOrigin } from "@/lib/guard";
+import { requireLogin } from "@/lib/auth/requireLogin";
 import { resolveBirth } from "@/lib/saju/birthPlace";
 import { calculateSaju } from "@/lib/saju/calculate";
 import { SajuInputError } from "@/lib/saju/errors";
@@ -15,6 +16,8 @@ import type { BirthInput } from "@/lib/saju/types";
 export const maxDuration = 60;
 
 export async function POST(request: Request) {
+  const loginNeeded = guardOrigin(request) ?? requireLogin(request);
+  if (loginNeeded) return loginNeeded;
   const denied = guardOrigin(request) ?? (await enforceLimits(request, { name: "ask", windowMs: 60000, ip: 6, user: 12 }, "질문이 너무 빨라요. 잠시 뒤에 다시 물어봐 주세요."));
   if (denied) return denied;
   let body: (BirthInput & { q?: unknown }) | null;

@@ -41,6 +41,10 @@ const LAST_KEY = "wanna500:last:v1";
 export default function Landing() {
   const { user, profile, setProfile, deleteProfile, serverCounts, setServerCounts, result: loginResult, clearResult, justLoggedIn, clearWelcome, logout, withdraw } = useAuth();
   const [loginOpen, setLoginOpen] = useState(false);
+  // 비회원이 뽑기를 누르면 로그인 창을 열면서, 왜 열렸는지 한 줄로 알려줘요.
+  const [loginReason, setLoginReason] = useState<string | null>(null);
+  const userRef = useRef<typeof user>(null);
+  userRef.current = user;
   const [intake, setIntake] = useState<IntakeTarget | null>(null);
   const [counts, setCounts] = useState<DrawCounts>({ today: 0, month: 0 });
   // 화면에 보이는 최신 횟수. (상태 업데이터 안에서 저장소에 쓰면 개발 모드에서 두 번 실행되어 2씩 늘어나서 ref 를 씁니다)
@@ -115,6 +119,13 @@ export default function Landing() {
 
   const handleSpin = useCallback(
     (key: string, fortune: string, price: string, premium?: boolean) => {
+      // 운세 뽑기는 로그인한 회원만 할 수 있어요. 비회원은 로그인 창으로 안내해요.
+      if (!userRef.current) {
+        track("login_click");
+        setLoginReason(`${fortune} 뽑기는 로그인하고 이용할 수 있어요 🫧`);
+        setLoginOpen(true);
+        return;
+      }
       spinKey.current = key;
       track("draw_start");
       // 오늘 무료 뽑기를 이미 썼고 보너스 뽑기가 있으면, 보너스로 한 번 더 뽑아요.
@@ -232,6 +243,7 @@ export default function Landing() {
   }, [justLoggedIn, user]);
   const closeLogin = useCallback(() => {
     setLoginOpen(false);
+    setLoginReason(null);
     clearResult();
   }, [clearResult]);
   // 카카오에서 돌아왔는데 실패·취소였다면 로그인 창을 다시 열어 이유를 알려줘요.
@@ -339,7 +351,7 @@ export default function Landing() {
         </div>
       )}
 
-      {loginOpen && <LoginModal onClose={closeLogin} user={user} result={loginResult} onLogout={logout} onWithdraw={withdraw} profile={profile} onDeleteProfile={deleteProfile} />}
+      {loginOpen && <LoginModal onClose={closeLogin} reason={loginReason} user={user} result={loginResult} onLogout={logout} onWithdraw={withdraw} profile={profile} onDeleteProfile={deleteProfile} />}
       {intake && (
         <IntakeModal
           target={intake}

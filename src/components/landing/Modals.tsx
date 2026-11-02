@@ -77,6 +77,8 @@ export function CloseButton({ onClose, luxe = false }: { onClose: () => void; lu
 
 interface LoginModalProps {
   onClose: () => void;
+  /** 비회원이 뽑기를 눌러서 열렸을 때 보여 주는 안내 한 줄 */
+  reason?: string | null;
   user?: AuthUser | null;
   result?: LoginResult | null;
   onLogout?: () => void | Promise<void>;
@@ -240,7 +242,7 @@ function RefCodeEntry() {
   );
 }
 
-export function LoginModal({ onClose, user = null, result = null, onLogout, onWithdraw, profile = null, onDeleteProfile }: LoginModalProps) {
+export function LoginModal({ onClose, reason = null, user = null, result = null, onLogout, onWithdraw, profile = null, onDeleteProfile }: LoginModalProps) {
   const [profileBusy, setProfileBusy] = useState(false);
   const [profileError, setProfileError] = useState(false);
   const [confirmWithdraw, setConfirmWithdraw] = useState(false);
@@ -260,7 +262,7 @@ export function LoginModal({ onClose, user = null, result = null, onLogout, onWi
         <p className="text-xs text-gray-500 mt-1 whitespace-pre-line">
           {user
             ? `${user.nickname ? `${user.nickname}님, ` : ""}어서 와요! 로그인되어 있어요.`
-            : "간편 가입하고 매일 첫 1회 무료 뽑기를 챙기세요!\n로그인하면 도리가 생년월일시를 기억해서 다시 입력할 필요가 없어요!"}
+            : `${reason ? `${reason}\n` : ""}간편 가입하고 매일 첫 1회 무료 뽑기를 챙기세요!\n로그인하면 도리가 생년월일시를 기억해서 다시 입력할 필요가 없어요!`}
         </p>
       </div>
 

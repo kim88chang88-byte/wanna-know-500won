@@ -1,4 +1,5 @@
 import { hasAiKey } from "@/lib/ai/llm";
+import { requireLogin } from "@/lib/auth/requireLogin";
 import { NextResponse } from "next/server";
 import { takeAiBudget } from "@/lib/ai/budget";
 import { enableAdminAiCache } from "@/lib/ai/aiTools";
@@ -33,6 +34,9 @@ function callName(nick: string | undefined | null): string | null {
 }
 
 export async function POST(request: Request) {
+  // 운세 뽑기는 로그인한 회원만 쓸 수 있어요.
+  const loginNeeded = guardOrigin(request) ?? requireLogin(request);
+  if (loginNeeded) return loginNeeded;
   const denied = guardOrigin(request) ?? (await enforceLimits(request, { name: "reading", windowMs: 60000, ip: 6, user: 12 }, "뽑기가 너무 빨라요. 잠시 뒤에 다시 시도해 주세요."));
   if (denied) return denied;
 

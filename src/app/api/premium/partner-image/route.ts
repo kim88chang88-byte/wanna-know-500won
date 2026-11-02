@@ -3,6 +3,7 @@ import { AI_IMAGE_NOTICE, ageOn, estimateCostUsd, generateImage, partnerAgeFor, 
 import { takeAiBudget } from "@/lib/ai/budget";
 import { isAdmin } from "@/lib/admin/auth";
 import { readCookie, SESSION_COOKIE, verifySessionToken } from "@/lib/auth/session";
+import { requireLogin } from "@/lib/auth/requireLogin";
 import { createDb, loadDbConfig } from "@/lib/db/supabase";
 import { enforceLimits, guardOrigin } from "@/lib/guard";
 import { hasEntitlement, ENTITLEMENT_COOKIE } from "@/lib/premium/entitlement";
@@ -29,6 +30,8 @@ function elementOf(yongsin: string[]): Element5 {
 export async function POST(request: Request) {
   const originDenied = guardOrigin(request);
   if (originDenied) return originDenied;
+  const loginNeeded = requireLogin(request);
+  if (loginNeeded) return loginNeeded;
   let raw: unknown;
   try {
     raw = await request.json();

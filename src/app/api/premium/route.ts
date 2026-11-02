@@ -2,6 +2,7 @@ import { hasAiKey } from "@/lib/ai/llm";
 import { NextResponse } from "next/server";
 import { hasEntitlement, ENTITLEMENT_COOKIE } from "@/lib/premium/entitlement";
 import { readCookie, SESSION_COOKIE, verifySessionToken } from "@/lib/auth/session";
+import { requireLogin } from "@/lib/auth/requireLogin";
 import { isPremiumLocked } from "@/lib/premium/config";
 import { readingFirstDeep } from "@/lib/hanjaReading";
 import { buildPremiumReport, validatePremiumInput } from "@/lib/premium/report";
@@ -41,6 +42,11 @@ export async function POST(request: Request) {
   const conclusionRaw = typeof raw === "object" && raw !== null ? (raw as { conclusion?: unknown }).conclusion : undefined;
   const conclusion = typeof conclusionRaw === "string" && conclusionRaw.trim() ? conclusionRaw.trim().slice(0, 1400) : null;
   const preview = typeof raw === "object" && raw !== null && (raw as { preview?: unknown }).preview === true;
+  // 샘플 미리 보기(preview)는 누구나 볼 수 있지만, 실제 풀이는 로그인한 회원만 받아요.
+  if (!preview) {
+    const loginNeeded = requireLogin(request);
+    if (loginNeeded) return loginNeeded;
+  }
   const parsed = validatePremiumInput(raw);
   if (!parsed.ok) return NextResponse.json({ code: "bad_request", error: parsed.error }, { status: 400 });
 

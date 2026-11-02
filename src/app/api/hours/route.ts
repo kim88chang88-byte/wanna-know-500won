@@ -5,12 +5,15 @@ import { compareHours, findCandidates, parseRange } from "@/lib/ai/hourRange";
 import { ReadingUnavailableError } from "@/lib/ai/interpret";
 import { createDb, loadDbConfig } from "@/lib/db/supabase";
 import { enforceLimits, guardOrigin } from "@/lib/guard";
+import { requireLogin } from "@/lib/auth/requireLogin";
 import { SajuInputError } from "@/lib/saju/errors";
 import type { BirthInput } from "@/lib/saju/types";
 
 export const maxDuration = 60;
 
 export async function POST(request: Request) {
+  const loginNeeded = guardOrigin(request) ?? requireLogin(request);
+  if (loginNeeded) return loginNeeded;
   const denied = guardOrigin(request) ?? (await enforceLimits(request, { name: "hours", windowMs: 60000, ip: 4, user: 8 }, "요청이 너무 빨라요. 잠시 뒤에 다시 해 주세요."));
   if (denied) return denied;
   let body: (BirthInput & { start?: unknown; end?: unknown }) | null;
