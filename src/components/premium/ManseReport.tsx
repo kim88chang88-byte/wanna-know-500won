@@ -82,9 +82,9 @@ export default function ManseReport({ report, hideHeadline = false, flush = fals
                 <div className="text-[11px] sm:text-xs font-bold text-brand-500">{p.label}</div>
                 {p.full ? (
                   <>
-                    <div className="mt-1.5 space-y-1 px-1.5" aria-label={`${p.label} ${p.full}`}>
-                      <ElementTile ch={stem} el={elementOfChar(stem, false)} reading={p.reading?.[0] ?? ""} sizeClass="text-[32px] sm:text-5xl" />
-                      <ElementTile ch={branch} el={elementOfChar(branch, true)} reading={p.reading?.[1] ?? ""} sizeClass="text-[32px] sm:text-5xl" />
+                    <div className="mt-1.5 space-y-1 px-2.5 sm:px-4" aria-label={`${p.label} ${p.full}`}>
+                      <ElementTile ch={stem} el={elementOfChar(stem, false)} reading={p.reading?.[0] ?? ""} sizeClass="text-[22px] sm:text-[30px]" />
+                      <ElementTile ch={branch} el={elementOfChar(branch, true)} reading={p.reading?.[1] ?? ""} sizeClass="text-[22px] sm:text-[30px]" />
                     </div>
                     <div className="mt-1.5 text-[10px] sm:text-[11px] text-slate-500 leading-tight">
                       <div>{p.tenGodStem}</div>
@@ -104,17 +104,28 @@ export default function ManseReport({ report, hideHeadline = false, flush = fals
         <h2 id="elements-h" className={H2}>
           오행 분포
         </h2>
-        <ul className="space-y-3">
+        {/* 한 줄 비율 막대 + 이름·개수 범례. 0개인 기운은 흐리게 보여요. */}
+        <div role="img" aria-label={report.elements.map((e) => `${elName(e.name)} ${e.count}`).join(", ")} data-testid="element-stack" className="flex h-4 gap-0.5 overflow-hidden rounded-full">
+          {report.elements.filter((e) => e.count > 0).map((e) => (
+            <span key={e.name} className={`${ELEMENT_STYLE[e.kind].bar} first:rounded-l-full last:rounded-r-full`} style={{ flexGrow: e.count, flexBasis: 0 }} />
+          ))}
+        </div>
+        <ul className="mt-3 flex flex-wrap gap-x-3.5 gap-y-1.5 text-[13px] text-slate-700">
           {report.elements.map((e) => (
-            <li key={e.name} data-testid="element-row" className="flex items-center gap-3">
-              <span className={`w-12 shrink-0 text-center text-xs font-bold rounded-full py-1 ${ELEMENT_STYLE[e.kind].chip}`}>{elName(e.name)}</span>
-              <div className="flex-1 h-3 rounded-full bg-slate-100 overflow-hidden" role="img" aria-label={`${elName(e.name)} ${e.count}`}>
-                <div className={`h-full rounded-full ${ELEMENT_STYLE[e.kind].bar}`} style={{ width: `${(e.count / max) * 100}%` }} />
-              </div>
-              <span className="w-8 text-right text-sm font-bold text-slate-700 tabular-nums">{e.count}</span>
+            <li key={e.name} data-testid="element-row" className={`inline-flex items-center gap-1.5 ${e.count === 0 ? "opacity-40" : ""}`}>
+              <span aria-hidden="true" className={`h-2.5 w-2.5 rounded-full ${ELEMENT_STYLE[e.kind].bar}`} />
+              {elName(e.name)} <b className="tabular-nums">{e.count}</b>
             </li>
           ))}
         </ul>
+        {(() => {
+          const tops = report.elements.filter((e) => e.count === max && max > 0);
+          return tops.length > 0 && tops.length < report.elements.length ? (
+            <p data-testid="element-top" className="mt-2.5 text-[13px] font-bold text-slate-800">
+              {tops.map((e) => elName(e.name)).join("과 ")}의 기운이 {tops.length >= 2 ? "똑같이 " : ""}가장 많아요
+            </p>
+          ) : null;
+        })()}
       </section>
 
       <section aria-labelledby="strength-h" className="rounded-3xl bg-gradient-to-br from-brand-50 to-white border border-brand-100 p-5 sm:p-6">
