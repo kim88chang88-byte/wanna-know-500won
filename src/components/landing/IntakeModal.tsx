@@ -708,7 +708,7 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
                     ) : (
                       <StoryReport report={premiumReport} reading={reading} intro={null} name={nickname}
                         lastWord={<><ResultHero report={premiumReport} aiQuote={reading?.kkotgeoji ?? null} luxe={false} hideLucky /><ResultShareCard report={premiumReport} aiQuote={reading?.kkotgeoji ?? null} /></>}
-                        closing={askInput ? <AskChips input={askInput} luxe={false} /> : undefined}
+                        closing={askInput ? <AskChips input={askInput} luxe={false} topic={target.fortune} hideTitle /> : undefined}
                       />
                     )}
                   </div>
@@ -724,7 +724,7 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
                   </div>
 
                   {/* 3) 더 물어보기 */}
-                  {askInput && <AskChips input={askInput} luxe={luxe} />}
+                  {askInput && <AskChips input={askInput} luxe={luxe} topic={target.fortune} />}
                 </>
               )}
 

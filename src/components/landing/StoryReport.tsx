@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
 import ManseReport from "@/components/premium/ManseReport";
 import { RealityLight } from "@/components/premium/RealityLight";
 import type { PremiumReportView } from "@/lib/premium/types";
-import { ELEMENT_BOX, EL_LABEL, elementOfChar } from "@/lib/elementColor";
+import { ELEMENT_BOX, EL_LABEL, elEasyName, elementOfChar } from "@/lib/elementColor";
 import type { Element } from "@/lib/saju/constants";
 import { Stars } from "./ReadingCard";
 import ElementTile from "@/components/ElementTile";
@@ -26,6 +26,11 @@ const STEPS: Array<{ key: FoldKey; name: string }> = [
   { key: "improve", name: "이렇게 개선해보아요 🌱" },
   { key: "flow", name: "올해와 이번 달의 흐름" },
 ];
+
+/** 신년운에서는 "올해와 이번 달" 대신 2027년 기준 이름을 써요. */
+function stepName(key: FoldKey, name: string, topic: string): string {
+  return key === "flow" && topic === "study" ? "2027년의 흐름" : name;
+}
 
 /** 형광펜 색: 주제별 동물 그림에 맞춰요. (용 노랑 · 토끼 분홍 · 남자 팬더 연보라 · 여자 팬더 장미 · 여우 주황 · 수달 하늘색) */
 export const MARK: Record<string, string> = {
@@ -76,6 +81,7 @@ export function Pillars({ report, pillars, owner = "내", hint }: { report?: Pre
     if (b) counts[b]++;
   }
   const top = EL_ORDER.reduce((m, e) => (counts[e] > counts[m] ? e : m), "wood" as Element);
+  const tops = EL_ORDER.filter((e) => counts[e] === counts[top]);
   const total = EL_ORDER.reduce((n, e) => n + counts[e], 0);
   return (
     <div data-testid="story-pillars" className="mt-3">
@@ -115,7 +121,9 @@ export function Pillars({ report, pillars, owner = "내", hint }: { report?: Pre
       </div>
       {total > 0 && counts[top] > 0 && (
         <p data-testid="element-summary" className="mt-1.5 text-[12px] font-bold text-gray-700">
-          {owner} 사주엔 {EL_LABEL[top].icon} {EL_LABEL[top].name}의 기운이 가장 많아요 ({counts[top]}/{total})
+          {tops.length >= 2
+            ? `${owner} 사주엔 ${tops.map((e) => `${EL_LABEL[e].icon} ${EL_LABEL[e].name}`).join("과 ")}의 기운이 ${tops.length === 2 ? "똑같이 " : ""}가장 많아요 (각 ${counts[top]}/${total})`
+            : `${owner} 사주엔 ${EL_LABEL[top].icon} ${EL_LABEL[top].name}의 기운이 가장 많아요 (${counts[top]}/${total})`}
         </p>
       )}
     </div>
@@ -278,14 +286,14 @@ export default function StoryReport({
               <Fold
                 key={st.key}
                 testId={`story-fold-${st.key}`}
-                label={heads[st.key] ? `STEP ${n + 1} · ${st.name}` : `STEP ${n + 1}`}
-                title={heads[st.key] || st.name}
+                label={heads[st.key] ? `STEP ${n + 1} · ${stepName(st.key, st.name, t.key)}` : `STEP ${n + 1}`}
+                title={heads[st.key] || stepName(st.key, st.name, t.key)}
               >
                 {st.key === "elements" && (
                   <p className="mb-2.5 flex flex-wrap gap-1.5">
                     {report.elements.map((e) => (
                       <span key={e.name} className="rounded-full bg-brand-50 px-2.5 py-1 text-[11px] font-bold text-gray-700">
-                        {e.name} {e.count}
+                        {elEasyName(e.name)} {e.count}
                       </span>
                     ))}
                   </p>
@@ -313,7 +321,7 @@ export default function StoryReport({
               </Fold>
             ))}
             {t.timing.length > 0 && (
-              <Fold label="올해와 이번 달의 흐름" title={firstSentence(t.timing[0].body)}>
+              <Fold label={stepName("flow", "올해와 이번 달의 흐름", t.key)} title={firstSentence(t.timing[0].body)}>
                 <ul className="space-y-2.5">
                   {t.timing.map((x) => (
                     <li key={x.title}>
@@ -327,7 +335,7 @@ export default function StoryReport({
             )}
           </>
         )}
-        <Fold testId="story-fold-lucky" label="행운 처방" title={heads.lucky || `행운 컬러는 ${t.lucky.color}, 방향은 ${t.lucky.direction}${iyeyo(t.lucky.direction)}`}>
+        <Fold testId="story-fold-lucky" label={`STEP ${STEPS.length + 1} · 행운 처방`} title={heads.lucky || `행운 컬러는 ${t.lucky.color}, 방향은 ${t.lucky.direction}${iyeyo(t.lucky.direction)}`}>
           {f.lucky && <Paras mark={mark} text={f.lucky} className="mb-3.5" />}
           <p className="flex items-center gap-2">
             <span aria-hidden="true" className="h-4 w-4 shrink-0 rounded-full border border-black/10" style={{ backgroundColor: t.lucky.hex }} />

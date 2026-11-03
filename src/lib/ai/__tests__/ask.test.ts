@@ -45,3 +45,14 @@ describe("질문 칩", () => {
     expect(threw).toBe(true);
   });
 });
+
+describe("신년운 질문 칩", () => {
+  it("신년운에서는 올해·이번 달 대신 2027년 기준 질문이 나온다", async () => {
+    const { askQuestionsFor } = await import("../askQuestions");
+    const labels = askQuestionsFor("study").map((q) => q.label);
+    expect(labels).toContain("2027년 상반기·하반기 흐름은?");
+    expect(labels.join(" ")).not.toMatch(/이번 달|올해/);
+    expect(askQuestionsFor("success").map((q) => q.label)).toContain("이번 달은 어떻게 보내면 좋을까?");
+    expect(findQuestion("half", "study")?.focus).toContain("2027년");
+  });
+});

@@ -140,6 +140,12 @@ export function extractCoreFacts(r: SsajuLike, hourKnown: boolean, now: Date = n
   return facts;
 }
 
+/** 2027 신년운은 "올해"를 2027년으로 놓고 계산해요. (2027년 2월 중순: 정미년의 첫 달인 寅월) */
+const NEW_YEAR_FACTS_NOW = new Date("2027-02-15T12:00:00+09:00");
+export function factsNowFor(topic: string | null | undefined, now: Date): Date {
+  return topic === "study" ? NEW_YEAR_FACTS_NOW : now;
+}
+
 /** 출생 정보로 핵심 사실을 계산해요. 어떤 이유로든 실패하면 null — 이 경우 풀이는 기본 재료만으로 나가요. */
 export function buildCoreFacts(rawInput: BirthInput, now: Date = new Date(), detail = false): CoreFacts | null {
   try {

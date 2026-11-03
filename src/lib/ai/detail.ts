@@ -174,7 +174,7 @@ export const TOPIC_ANGLE: Record<ReadingTopic, string> = {
   love: "끌리는 사람과 연애 스타일, 마음을 표현하는 방식, 관계에서 반복되는 패턴",
   marriage: "결혼과 오래 가는 관계에 대한 생각, 배우자·가정을 대하는 태도, 관계를 지키는 습관",
   health: "생활 리듬, 에너지를 쓰고 채우는 방식, 마음 컨디션을 돌보는 습관 (질병·병원·약 이야기는 절대 하지 말고 잠·식사·산책 같은 생활 습관만)",
-  study: "2027년(정미년, 붉은 양의 해) 한 해의 전체 흐름, 새해에 힘이 붙는 방식, 상반기·하반기 마음가짐, 새해에 채우면 좋은 습관",
+  study: "2027년(정미년, 붉은 양의 해) 한 해의 전체 흐름(사주핵심의 올해세운·올해월운이 모두 2027년 기준이야. 지금 이 순간의 '이번 달' 이야기는 하지 말고 2027년 안의 시기만 말해), 새해에 힘이 붙는 방식, 상반기·하반기 마음가짐, 새해에 채우면 좋은 습관",
 };
 
 export function buildDetailMessage(chart: SajuChart, topic: ReadingTopic, gender: Gender, concern: Concern | null | undefined, extra: ExtraFacts, tail?: string): string {

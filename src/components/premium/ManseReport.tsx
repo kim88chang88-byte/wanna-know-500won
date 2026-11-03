@@ -7,7 +7,7 @@ import dynamic from "next/dynamic";
 
 // 프리미엄 책은 코드가 커서, 프리미엄 풀이를 열 때만 받아요.
 const PremiumBook = dynamic(() => import("./PremiumBook"));
-import { elementOfChar, elName } from "@/lib/elementColor";
+import { elementOfChar, elEasyName as elName } from "@/lib/elementColor";
 import ElementTile from "@/components/ElementTile";
 
 const ELEMENT_STYLE: Record<ElementKind, { bar: string; chip: string }> = {
@@ -74,7 +74,8 @@ export default function ManseReport({ report, hideHeadline = false, flush = fals
           사주 원국
         </h2>
         <div className="grid grid-cols-4 gap-2 sm:gap-4">
-          {report.pillars.map((p) => {
+          {/* 한국식 만세력 순서(시·일·월·연): 위쪽 "나의 사주 네 기둥"과 같아요 */}
+          {[...report.pillars].sort((x, y) => ["hour", "day", "month", "year"].indexOf(x.key) - ["hour", "day", "month", "year"].indexOf(y.key)).map((p) => {
             const [stem, branch] = p.full ? Array.from(p.full) : [null, null];
             return (
               <div key={p.key} data-testid="pillar-card" className="rounded-2xl border border-brand-100 bg-brand-50/60 py-3 text-center">

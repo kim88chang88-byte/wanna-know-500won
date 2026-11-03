@@ -17,6 +17,20 @@ export const ASK_QUESTIONS: AskQuestion[] = [
   { id: "sum", label: "내 사주를 3줄로 요약하면?", focus: "일간, 신강/신약, 눈에 띄는 오행과 관계를 근거로 딱 3문장으로 요약. 번호 없이 줄바꿈으로 3줄." },
 ];
 
-export function findQuestion(id: unknown): AskQuestion | null {
-  return typeof id === "string" ? (ASK_QUESTIONS.find((q) => q.id === id) ?? null) : null;
+/** 신년운(2027)에서는 "올해·이번 달"을 2027년 기준 질문으로 바꿔요. (사주 계산도 2027년 기준) */
+const NEW_YEAR_VERSION: Record<string, Partial<AskQuestion>> = {
+  half: { label: "2027년 상반기·하반기 흐름은?", focus: "2027년 월운(올해월운)을 상반기(2~7월경)와 하반기(8월경~)로 나눠, 분위기가 어떻게 달라지는지와 각각 신경 쓸 점 하나씩." },
+  month: { label: "2027년을 잘 시작하는 방법은?", focus: "2027년 세운과 첫 달 월운이 원국과 만나는 관계를 근거로, 새해 첫 달 분위기와 해 볼 작은 행동 하나." },
+  money: { focus: "재성(숨은 재성 포함)과 비겁 분포, 2027년 세운을 근거로, 돈이 모이는 방식과 새기 쉬운 습관 하나, 작은 처방 하나." },
+  people: { label: "2027년 사람·연애에서 신경 쓸 점은?", focus: "2027년 세운과원국·원국관계 중 사람 관계(일지·월지 자리)와 닿는 근거를 짚고, 신경 쓸 점 하나와 작은 행동 하나." },
+};
+
+/** 주제에 맞는 질문 목록 */
+export function askQuestionsFor(topic?: string | null): AskQuestion[] {
+  if (topic !== "study") return ASK_QUESTIONS;
+  return ASK_QUESTIONS.map((q) => ({ ...q, ...(NEW_YEAR_VERSION[q.id] ?? {}) }));
+}
+
+export function findQuestion(id: unknown, topic?: string | null): AskQuestion | null {
+  return typeof id === "string" ? (askQuestionsFor(topic).find((q) => q.id === id) ?? null) : null;
 }

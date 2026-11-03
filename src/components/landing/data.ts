@@ -6,7 +6,7 @@
  * fortune 값은 서버가 주제(성공운·재물운…)를 알아보는 데 쓰여요. (lib/ai/reading.ts 의 TOPIC_LABEL 과 맞춰요)
  */
 
-export const FREE_PRICE_LABEL = "0원 (매일 첫 1회 무료)";
+export const FREE_PRICE_LABEL = "오늘의 무료 풀이";
 
 export interface MachineCard {
   key: string;

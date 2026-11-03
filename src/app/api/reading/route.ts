@@ -4,7 +4,7 @@ import { NextResponse } from "next/server";
 import { takeAiBudget } from "@/lib/ai/budget";
 import { enableAdminAiCache } from "@/lib/ai/aiTools";
 import { isAdmin } from "@/lib/admin/auth";
-import { buildCoreFacts } from "@/lib/ai/coreFacts";
+import { buildCoreFacts, factsNowFor } from "@/lib/ai/coreFacts";
 import { kstToday } from "@/lib/ai/dailyFacts";
 import { interpretDetail } from "@/lib/ai/detail";
 import { interpretSaju, ReadingUnavailableError } from "@/lib/ai/interpret";
@@ -155,13 +155,15 @@ export async function POST(request: Request) {
     }
     // 오늘의 일진과 사주 핵심(신강/신약·용신 등)을 더해 풀이의 근거를 풍부하게 해요. 계산이 실패해도 풀이는 기본 재료로 나가요.
     const now = new Date();
-    const extra = { today: kstToday(now), core: buildCoreFacts(input, now) };
     const topic = normalizeTopic(rawTopic);
+    // 신년운은 "올해"가 2027년이라, 세운·월운을 2027년 기준으로 계산해서 넘겨요.
+    const factsNow = factsNowFor(topic, now);
+    const extra = { today: kstToday(now), core: buildCoreFacts(input, factsNow) };
     // 긴 "요약하자면" 글은 같은 시간에 따로 써요. 한도를 한 번 더 쓰고, 실패해도 풀이는 그대로 나가요.
     const detailGate = skipDetail ? "premium" : await takeAiBudget(process.env, db);
     let detailStatus = detailGate === "ok" ? "ok" : `skipped:${detailGate}`;
     const detailPromise = detailGate === "ok"
-      ? interpretDetail(chart, { topic, gender: input.gender, concern, extra: { ...extra, core: buildCoreFacts(input, now, true), name: callName(session?.nick) } }).catch((err) => {
+      ? interpretDetail(chart, { topic, gender: input.gender, concern, extra: { ...extra, core: buildCoreFacts(input, factsNow, true), name: callName(session?.nick) } }).catch((err) => {
           console.error("interpretDetail failed:", err instanceof Error ? err.message : "unknown");
           detailStatus = err instanceof Error ? err.message.slice(0, 160) : "failed";
           return null;

@@ -21,6 +21,11 @@ export function elName(name: string): string {
   return name === "금" ? "쇠" : name;
 }
 
+/** 500원 풀이 화면에서 쓰는 쉬운 말 오행 이름 (나무·불·땅·쇠·물) */
+export function elEasyName(name: string): string {
+  return ({ 목: "나무", 화: "불", 토: "땅", 금: "쇠", 수: "물" } as Record<string, string>)[name] ?? name;
+}
+
 /** 박스 모서리에 붙이는 쉬운 말 이름과 그림. 금은 "쇠"예요. */
 export const EL_LABEL: Record<Element, { name: string; icon: string }> = {
   wood: { name: "나무", icon: "🌳" },
