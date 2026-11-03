@@ -313,7 +313,9 @@ export function spousePrompt(partner: "male" | "female", element: Element5, age:
   const po = pickIdx(i, v, OFF_OUTFIT, 0);
   const o = (po.extra ? OUTFITS_X : OUTFITS)[partner][po.idx];
   const color = ACCENTS[element][v];
-  const wear = o.wear.replace("{c}", color);
+  // 옷에는 포인트 색 중 "첫 번째 한 가지"만 써요. 두 색을 같이 넣으면 겉옷이 투톤(라펠·패널 색 다름)으로 그려져 AI 티가 나요.
+  const main = color.split(" and ")[0];
+  const wear = o.wear.replaceAll("{c}", main);
   const ph = pickIdx(i, v, OFF_HAIR, 0);
   const hair = (ph.extra ? HAIR_X : HAIR)[partner][ph.idx];
   const pf = pickIdx(i, v, OFF_FACE, 2);
@@ -330,6 +332,7 @@ export function spousePrompt(partner: "male" | "female", element: Element5, age:
     `A photorealistic fashion-editorial portrait photo of ${person}, wearing ${wear}, ${pose}, in ${o.scene}.`,
     `Mood: ${look.mood}. Flattering soft cinematic lighting, trendy styling, an effortlessly attractive and charming presence.`,
     "Natural skin texture, realistic eyes, shallow depth of field, 3:4 vertical framing. The person is clearly an adult.",
+    "Every jacket, coat, blazer and cardigan is a single solid color from collar to hem, with no two-tone panels, no contrasting lapels or trim, no color-blocking and no mixed fabrics (a plain classic check or plaid is the only allowed pattern).",
     "An entirely fictional person who does not resemble any real person or celebrity. No text, no letters, no logo, no watermark, no captions.",
   ].join(" ");
 }

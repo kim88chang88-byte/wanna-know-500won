@@ -145,3 +145,20 @@ describe("더 다양하게(포즈·추가 복장·헤어·얼굴)", () => {
     for (let seed = 0; seed < 6; seed++) for (let v = 0; v < 3; v++) expect(spousePrompt("female", "fire", "late 20s", seed, v)).toMatch(/no eyeglasses/);
   });
 });
+
+describe("겉옷은 단색", () => {
+  it("모든 그림 설명에 단색 규칙이 있다", () => {
+    for (const partner of ["female", "male"] as const)
+      for (const el of ["wood", "fire", "earth", "metal", "water"] as const)
+        for (let seed = 0; seed < 6; seed++)
+          for (let v = 0; v < 3; v++) expect(spousePrompt(partner, el, "mid 20s", seed, v)).toMatch(/single solid color/);
+  });
+  it("옷 색에는 포인트 색의 첫 색만 쓴다 (두 색을 같이 넣지 않는다)", () => {
+    for (let seed = 0; seed < 6; seed++) {
+      const wear = (p: string) => p.split(", wearing ")[1].split(", in ")[0];
+      expect(wear(spousePrompt("female", "water", "mid 20s", seed, 1))).not.toMatch(/ice blue/);
+      expect(wear(spousePrompt("female", "water", "mid 20s", seed, 0))).not.toMatch(/sky-blue/);
+      expect(wear(spousePrompt("male", "metal", "mid 20s", seed, 2))).not.toMatch(/steel-gray/);
+    }
+  });
+});
