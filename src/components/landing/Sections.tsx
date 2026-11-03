@@ -161,7 +161,7 @@ export function ShowcaseSection() {
 
       <div className="relative w-full max-w-5xl mx-auto rounded-3xl shadow-[0_14px_34px_rgba(128,87,224,0.12)] bg-white p-3 sm:p-5 border-2 border-sky-200 overflow-hidden z-10">
         <div className="grid grid-cols-1 gap-3 sm:gap-4 items-center">
-          <div className="relative w-full max-w-3xl mx-auto aspect-[16/9] rounded-2xl overflow-hidden bg-sky-50 flex items-center justify-center border border-sky-100 shadow-sm">
+          <div className="relative w-full max-w-3xl lg:max-w-4xl mx-auto aspect-[16/9] rounded-2xl overflow-hidden bg-sky-50 flex items-center justify-center border border-sky-100 shadow-sm">
             <SafeImage
               src={HERO_IMAGE}
               alt="수달 도사 도리와 오행 친구들이 말해요: 궁금행? 궁금하면 500원!!"
