@@ -8,7 +8,7 @@ import { createRateLimiter } from "@/lib/rateLimit";
 export const runtime = "nodejs";
 export const maxDuration = 60;
 
-const limiter = createRateLimiter(12, 60_000);
+const limiter = createRateLimiter(40, 60_000);
 const AGE_LABEL: Record<PartnerAge, string> = { "mid 20s": "20대 중반", "late 20s": "20대 후반", "mid 30s": "30대 중반" };
 const NOTICE = AI_IMAGE_NOTICE.replace(/[&<>"']/g, "");
 
@@ -49,6 +49,19 @@ const partnerOf=u=>u==='female'?'male':'female';
 const keyOf=(u,a,e,v,x)=>{x=x==null?Number($('var').value):x;return partnerOf(u)+'/'+a.replace(' ','-')+'/'+e+'/'+v+(x?'-'+x:'')+'.webp'};
 const urlOf=k=>BASE?BASE+'/storage/v1/object/public/partner-images/'+k+'?t='+Date.now():null;
 const cache={};
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+let lastReq=0;
+// 요청 사이를 3초 이상 띄우고, '너무 빨라요'(429)나 일시 실패는 기다렸다가 다시 시도해요.
+async function genFetch(q,onWait){const MAX=6;
+ for(let t=0;t<MAX;t++){
+  const gap=3000-(Date.now()-lastReq);if(gap>0)await sleep(gap);lastReq=Date.now();
+  let r,j=null;try{r=await fetch('?'+q);j=await r.json().catch(()=>null)}catch(e){r=null}
+  if(r&&j&&j.ok)return j;
+  const tooFast=r&&r.status===429;const msg=(j&&j.error)||'네트워크 오류';
+  if(stopFlag)return {ok:false,error:'멈춤'};
+  if(t===MAX-1)return {ok:false,error:msg};
+  const wait=tooFast?20000:8000*(t+1);if(onWait)onWait('잠시 쉬었다가 다시 시도해요 ('+Math.round(wait/1000)+'초) · '+msg);await sleep(wait)}
+ return {ok:false,error:'실패'}}
 const cur=(v,x)=>({u:$('user').value,a:$('age').value,e:$('el').value,v,x:x==null?Number($('var').value):x});
 function render(){const g=$('grid');g.innerHTML='';for(let v=0;v<6;v++){const c=document.createElement('div');c.className='card';c.dataset.v=v;
  c.innerHTML='<b>복장 '+(v+1)+'</b> <span class="tag"></span><div class="box" style="margin-top:6px"><div class="ph">확인 중…</div></div><div style="margin-top:6px"><button class="mk">만들기</button> <button class="sv ok" style="display:none">서버에 저장</button></div>';
@@ -60,7 +73,7 @@ function render(){const g=$('grid');g.innerHTML='';for(let v=0;v<6;v++){const c=
 function setImg(c,src){c.querySelector('.box').innerHTML='<img src="'+src+'">'}
 function mark(c,saved){c.querySelector('.tag').textContent=saved?'✔ 저장됨':'';c.querySelector('.sv').style.display=saved?'none':'';c.querySelector('.mk').textContent=saved?'다시 만들기':'만들기'}
 async function gen(v,c){const s=cur(v),k=keyOf(s.u,s.a,s.e,v),b=c.querySelector('.mk');b.disabled=true;b.textContent='만드는 중…';
- try{const q=new URLSearchParams({gen:'1',user:s.u,age:s.a,el:s.e,v:String(v),var:String(s.x)});const r=await fetch('?'+q);const j=await r.json();
+ try{const q=new URLSearchParams({gen:'1',user:s.u,age:s.a,el:s.e,v:String(v),var:String(s.x)});const j=await genFetch(q,m=>{b.textContent=m});
   if(!j.ok){b.textContent='실패: '+j.error;b.disabled=false;return false}
   const src='data:'+j.mime+';base64,'+j.base64;cache[k]={src,saved:false};total+=j.krw;$('sum').textContent=' 이번 방문 누적 약 '+total.toLocaleString()+'원';
   setImg(c,src);c.querySelector('.tag').textContent='(아직 저장 안 됨)';c.querySelector('.sv').style.display='';b.textContent='다시 만들기';b.disabled=false;return true}
@@ -78,7 +91,7 @@ async function fillRange(items){stopFlag=false;let done=0;for(const it of items)
   const k=keyOf(it.u,it.a,it.e,it.v,it.x);$('log').textContent='진행: '+(++done)+'/'+items.length+' · '+k;
   if(it.u===$('user').value&&it.a===$('age').value&&it.e===$('el').value&&it.x===Number($('var').value)){const c=document.querySelector('.card[data-v="'+it.v+'"]');if(await gen(it.v,c))await save(it.v,c)}
   else{ // 화면에 없는 조합은 화면 없이 처리
-   try{const q=new URLSearchParams({gen:'1',user:it.u,age:it.a,el:it.e,v:String(it.v),var:String(it.x)});const r=await fetch('?'+q);const j=await r.json();if(!j.ok){$('log').textContent+='\\n실패 '+k+': '+j.error;continue}
+   try{const q=new URLSearchParams({gen:'1',user:it.u,age:it.a,el:it.e,v:String(it.v),var:String(it.x)});const j=await genFetch(q,m=>{$('log').textContent='진행: '+done+'/'+items.length+' · '+k+'\\n'+m});if(!j.ok){$('log').textContent+='\\n실패 '+k+': '+j.error;continue}
     total+=j.krw;$('sum').textContent=' 이번 방문 누적 약 '+total.toLocaleString()+'원';const blob=await toWebp('data:'+j.mime+';base64,'+j.base64);
     const r2=await fetch('?save='+encodeURIComponent(k),{method:'POST',headers:{'Content-Type':'image/webp'},body:blob});const j2=await r2.json();if(!j2.ok)$('log').textContent+='\\n저장 실패 '+k}catch(e){$('log').textContent+='\\n오류 '+k}}}
   $('log').textContent+='\\n끝났어요.';render()}
