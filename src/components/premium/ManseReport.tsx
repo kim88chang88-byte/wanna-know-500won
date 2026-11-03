@@ -82,9 +82,9 @@ export default function ManseReport({ report, hideHeadline = false, flush = fals
                 <div className="text-[11px] sm:text-xs font-bold text-brand-500">{p.label}</div>
                 {p.full ? (
                   <>
-                    <div className="mt-1.5 space-y-1 px-2.5 sm:px-4" aria-label={`${p.label} ${p.full}`}>
-                      <ElementTile ch={stem} el={elementOfChar(stem, false)} reading={p.reading?.[0] ?? ""} sizeClass="text-[22px] sm:text-[30px]" />
-                      <ElementTile ch={branch} el={elementOfChar(branch, true)} reading={p.reading?.[1] ?? ""} sizeClass="text-[22px] sm:text-[30px]" />
+                    <div className="mt-1.5 space-y-1 px-1.5" aria-label={`${p.label} ${p.full}`}>
+                      <ElementTile ch={stem} el={elementOfChar(stem, false)} reading={p.reading?.[0] ?? ""} sizeClass="text-[32px] sm:text-5xl" />
+                      <ElementTile ch={branch} el={elementOfChar(branch, true)} reading={p.reading?.[1] ?? ""} sizeClass="text-[32px] sm:text-5xl" />
                     </div>
                     <div className="mt-1.5 text-[10px] sm:text-[11px] text-slate-500 leading-tight">
                       <div>{p.tenGodStem}</div>
