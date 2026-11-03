@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { AI_IMAGE_NOTICE, ageOn, estimateCostUsd, generateImage, partnerAgeFor, spousePrompt, spousePromptV2, usageOf } from "../image";
+import { AI_IMAGE_NOTICE, ageOn, estimateCostUsd, generateImage, partnerAgeFor, spousePrompt, usageOf } from "../image";
 
 const okBody = {
   candidates: [{ finishReason: "STOP", content: { parts: [{ inlineData: { mimeType: "image/png", data: "QUJD" } }] } }],
@@ -55,8 +55,8 @@ describe("결과 이미지 연령 규칙", () => {
     }
   });
   it("프롬프트에 연령대가 들어가고 성인이라고 적는다", () => {
-    expect(spousePrompt("female", "fire", "mid 30s")).toMatch(/her mid 30s/);
-    expect(spousePrompt("male", "water", "late 20s")).toMatch(/his late 20s/);
+    expect(spousePrompt("female", "fire", "mid 30s")).toMatch(/her late 20s/);
+    expect(spousePrompt("male", "water", "late 20s")).toMatch(/his mid 20s/);
     expect(spousePrompt("female", "fire")).toMatch(/clearly an adult/);
   });
   it("만 나이는 생일 전에는 한 살 적다", () => {
@@ -101,16 +101,3 @@ describe("복장과 안내 문구", () => {
   });
 });
 
-
-describe("spousePromptV2 (미리보기)", () => {
-  it("여성은 안경 없음, 연령은 한 단계 어림", () => {
-    for (const el of ["wood", "fire", "earth", "metal", "water"] as const)
-      for (let s = 0; s < 6; s++) {
-        const p = spousePromptV2("female", el, "mid 20s", s);
-        expect(p).toContain("no eyeglasses");
-        expect(p).toContain("early 20s");
-        expect(p).not.toMatch(/wearing stylish thin-frame glasses/);
-      }
-    expect(spousePromptV2("male", "fire", "mid 30s", 0)).toContain("late 20s");
-  });
-});

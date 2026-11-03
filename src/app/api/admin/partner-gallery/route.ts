@@ -1,6 +1,6 @@
 import { isAdmin } from "@/lib/admin/auth";
 import { readCookie, SESSION_COOKIE, verifySessionToken } from "@/lib/auth/session";
-import { DEFAULT_USD_KRW, estimateCostUsd, generateImage, isElement5, spousePrompt, spousePromptV2, AI_IMAGE_NOTICE, type PartnerAge } from "@/lib/ai/image";
+import { DEFAULT_USD_KRW, estimateCostUsd, generateImage, isElement5, spousePrompt, AI_IMAGE_NOTICE, type PartnerAge } from "@/lib/ai/image";
 import { createRateLimiter } from "@/lib/rateLimit";
 
 export const runtime = "nodejs";
@@ -28,7 +28,7 @@ small{color:#666}</style></head><body>
 <select id="user"><option value="male">이용자 남성 → 상대 여성</option><option value="female">이용자 여성 → 상대 남성</option></select>
 <select id="age">${AGES.map((a) => `<option value="${a}">${AGE_LABEL[a]}</option>`).join("")}</select>
 <select id="el"><option value="wood">나무</option><option value="fire">불</option><option value="earth">땅</option><option value="metal">쇠</option><option value="water">물</option></select>
-<button class="go" id="all">새 안 6장 모두 만들기</button><span id="sum"></span></div>
+<button class="go" id="all">6장 모두 만들기</button><span id="sum"></span></div>
 <div class="grid" id="grid"></div>
 <p style="text-align:center;font-size:13px;color:#444">${NOTICE}</p>
 <script>
@@ -36,7 +36,7 @@ const $=i=>document.getElementById(i);let total=0,sum=$('sum');
 const cache={};
 function key(v,s){return [$('user').value,$('age').value,$('el').value,v,s].join('|')}
 function render(){const g=$('grid');g.innerHTML='';for(let v=0;v<6;v++){const c=document.createElement('div');c.className='card';c.innerHTML='<b>복장 '+(v+1)+'</b><div style="display:flex;gap:6px;margin-top:6px"></div>';const row=c.lastChild;
- for(const [s,t] of [['old','현재'],['new','새 안']]){const h=document.createElement('div');h.style.flex='1';h.dataset.s=s;h.innerHTML='<div class="ph">'+t+'</div><button style="margin-top:6px">'+t+' 만들기</button>';h.querySelector('button').onclick=()=>gen(v,s,h);row.appendChild(h);if(cache[key(v,s)])show(h,cache[key(v,s)])}
+ for(const [s,t] of [['new','이미지']]){const h=document.createElement('div');h.style.flex='1';h.dataset.s=s;h.innerHTML='<div class="ph">'+t+'</div><button style="margin-top:6px">'+t+' 만들기</button>';h.querySelector('button').onclick=()=>gen(v,s,h);row.appendChild(h);if(cache[key(v,s)])show(h,cache[key(v,s)])}
  g.appendChild(c)}}
 function show(h,src){const p=h.querySelector('.ph');if(p)p.outerHTML='<img src="'+src+'">';else h.querySelector('img').src=src;h.querySelector('button').textContent='다시 만들기'}
 async function gen(v,s,h){const b=h.querySelector('button');b.disabled=true;b.textContent='만드는 중…';
@@ -65,7 +65,7 @@ export async function GET(request: Request) {
   const elRaw = sp.get("el");
   const el = isElement5(elRaw) ? elRaw : "water";
   const v = Math.min(5, Math.max(0, Math.floor(Number(sp.get("v")) || 0)));
-  const r = await generateImage((sp.get("s") === "new" ? spousePromptV2 : spousePrompt)(partner, el, age, v), apiKey, { model: process.env.GEMINI_IMAGE_MODEL?.trim() || undefined });
+  const r = await generateImage(spousePrompt(partner, el, age, v), apiKey, { model: process.env.GEMINI_IMAGE_MODEL?.trim() || undefined });
   if (!r.ok) return json({ ok: false, error: r.error.slice(0, 80) }, 502);
   const krw = Math.round(estimateCostUsd(r.usage) * (Number(process.env.USD_KRW) || DEFAULT_USD_KRW));
   return json({ ok: true, mime: r.mime, base64: r.base64, krw });

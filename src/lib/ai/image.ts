@@ -32,26 +32,6 @@ interface Outfit {
   scene: string;
 }
 
-/** 복장은 자유롭게 어울리는 것으로. 같은 사람이면 같은 복장이 나오도록 seed 로 골라요. */
-const OUTFITS: Record<"male" | "female", Outfit[]> = {
-  female: [
-    { wear: "an elegant {c} one-piece dress", scene: "a sunny cafe terrace with soft daylight and creamy bokeh" },
-    { wear: "a polished office look: a {c} blouse with a tailored jacket and slacks", scene: "a bright modern office by a large window" },
-    { wear: "a plain white T-shirt, blue jeans and a light {c} cardigan", scene: "a green park in soft afternoon sunlight with creamy bokeh" },
-    { wear: "a graceful modern hanbok in {c} tones with delicate hair ornaments", scene: "a traditional palace garden in soft golden-hour sunlight with creamy bokeh" },
-    { wear: "a cozy {c} knit sweater with a denim jacket", scene: "a quiet tree-lined street in warm autumn light" },
-    { wear: "a stylish {c} tracksuit set", scene: "a riverside walking path on a fresh morning" },
-  ],
-  male: [
-    { wear: "a tailored suit in {c} tones with a white shirt and a tie", scene: "soft indoor window light" },
-    { wear: "business casual: an open-collar shirt with a {c} knit and chinos", scene: "a bright modern cafe with soft window light" },
-    { wear: "a plain white T-shirt and blue jeans with a {c} jacket", scene: "a sunny street with creamy bokeh" },
-    { wear: "a clean {c} athletic zip-up jacket and sportswear", scene: "a riverside park on a fresh morning" },
-    { wear: "a {c} casual knit sweater over a collared shirt", scene: "a warm bookstore with soft light" },
-    { wear: "a casual {c} shirt jacket with a white tee", scene: "a quiet tree-lined street in warm autumn light" },
-  ],
-};
-
 export function isElement5(v: string | null | undefined): v is Element5 {
   return v === "wood" || v === "fire" || v === "earth" || v === "metal" || v === "water";
 }
@@ -80,25 +60,6 @@ export function ageOn(birth: { year: number; month: number; day: number }, now: 
   let age = now.getFullYear() - birth.year;
   if (now.getMonth() + 1 < birth.month || (now.getMonth() + 1 === birth.month && now.getDate() < birth.day)) age--;
   return age;
-}
-
-export function spousePrompt(partner: "male" | "female", element: Element5, age: PartnerAge = "mid 20s", seed = 0): string {
-  const look = LOOK[element];
-  const list = OUTFITS[partner];
-  const o = list[((Math.floor(seed) % list.length) + list.length) % list.length];
-  const wear = o.wear.replace("{c}", look.color);
-  // 여성 인물은 어떤 경우에도 안경을 쓰지 않아요. 남성은 분위기에 따라 가끔(seed 로 정해서 같은 사람은 같게) 얇은 안경을 써요.
-  const maleGlasses = Math.abs(Math.floor(seed)) % 3 === 1;
-  const person =
-    partner === "female"
-      ? `a beautiful Korean woman in her ${age}, natural hair, a warm natural smile, a bare face with no eyeglasses and no eyewear of any kind, eyes clearly visible`
-      : `a handsome Korean man in his ${age}, neat black hair, ${maleGlasses ? "wearing stylish thin-frame glasses, " : ""}a calm friendly expression`;
-  return [
-    `A photorealistic portrait photo of ${person}, wearing ${wear}, in ${o.scene}.`,
-    `Mood: ${look.mood}.`,
-    "Natural skin texture, realistic eyes, shallow depth of field, 3:4 vertical framing. The person is clearly an adult.",
-    "An entirely fictional person who does not resemble any real person or celebrity. No text, no letters, no logo, no watermark, no captions.",
-  ].join(" ");
 }
 
 export interface ImageUsage {
@@ -183,12 +144,12 @@ export async function generateImage(prompt: string, apiKey: string, opts: { mode
   return { ok: false, error: lastErr };
 }
 
-/* ───────── 새 안(미리보기용): 5살 더 어리게 · 다양한 헤어/복장 · 더 매력적으로 ───────── */
+/* 상대 인물 외모 규칙(2026-11-03 개정): 더 어리고, 헤어·얼굴·복장이 다양하고, 더 매력적으로 (docs/PARTNER_IMAGE.md) */
 
-/** 새 안의 연령 표현: 기존보다 한 단계씩 어려요(모두 성인). */
-const AGE_V2: Record<PartnerAge, string> = { "mid 20s": "early 20s", "late 20s": "mid 20s", "mid 30s": "late 20s" };
+/** 그림 속 연령 표현: 표의 연령대보다 한 단계씩 어려요(모두 성인). */
+const AGE_LOOK: Record<PartnerAge, string> = { "mid 20s": "early 20s", "late 20s": "mid 20s", "mid 30s": "late 20s" };
 
-const HAIR_V2: Record<"male" | "female", string[]> = {
+const HAIR: Record<"male" | "female", string[]> = {
   female: [
     "long soft wavy hair with side-swept bangs",
     "a chic shoulder-length bob with airy bangs",
@@ -207,7 +168,7 @@ const HAIR_V2: Record<"male" | "female", string[]> = {
   ],
 };
 
-const FACE_V2: Record<"male" | "female", string[]> = {
+const FACE: Record<"male" | "female", string[]> = {
   female: [
     "bright almond eyes and a sweet dimpled smile",
     "refined cat-like eyes and a confident soft smile",
@@ -226,7 +187,7 @@ const FACE_V2: Record<"male" | "female", string[]> = {
   ],
 };
 
-const OUTFITS_V2: Record<"male" | "female", Outfit[]> = {
+const OUTFITS: Record<"male" | "female", Outfit[]> = {
   female: [
     { wear: "a flowing {c} midi dress with delicate straps and a light cardigan", scene: "a sunny cafe terrace with soft daylight and creamy bokeh" },
     { wear: "a modern {c} tweed jacket set with a pearl accessory", scene: "a bright airy gallery lobby by a large window" },
@@ -245,17 +206,17 @@ const OUTFITS_V2: Record<"male" | "female", Outfit[]> = {
   ],
 };
 
-/** 새 안 프롬프트(미리보기용). 확정되면 spousePrompt 를 이 내용으로 바꿔요. */
-export function spousePromptV2(partner: "male" | "female", element: Element5, age: PartnerAge = "mid 20s", seed = 0): string {
+/** 복장·헤어·표정은 seed(0~5)로 골라요. 같은 사람이면 같게 나와요. */
+export function spousePrompt(partner: "male" | "female", element: Element5, age: PartnerAge = "mid 20s", seed = 0): string {
   const look = LOOK[element];
   const n = 6;
   const i = ((Math.floor(seed) % n) + n) % n;
-  const o = OUTFITS_V2[partner][i];
+  const o = OUTFITS[partner][i];
   const wear = o.wear.replace("{c}", look.color);
-  const hair = HAIR_V2[partner][i];
-  const face = FACE_V2[partner][(i + 2) % n];
+  const hair = HAIR[partner][i];
+  const face = FACE[partner][(i + 2) % n];
   const maleGlasses = i % 3 === 1;
-  const a = AGE_V2[age];
+  const a = AGE_LOOK[age];
   const person =
     partner === "female"
       ? `a strikingly attractive, photogenic Korean woman in her ${a}, ${hair}, ${face}, a youthful fresh-faced look, a bare face with no eyeglasses and no eyewear of any kind, eyes clearly visible`
