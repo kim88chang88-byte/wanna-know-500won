@@ -105,7 +105,7 @@ export function Pillars({ report, pillars, owner = "내", hint }: { report?: Pre
           );
         })}
       </div>
-      <p className="mt-2 text-[11px] leading-relaxed text-gray-500">{hint ?? "위 칸은 겉으로 드러나는 기운(하늘), 아래 칸은 바탕이 되는 기운(땅)이에요. 색은 다섯 가지 기운을 뜻해요."}</p>
+      <p className="mt-2 text-[11px] leading-relaxed text-gray-500">{hint ?? "위 칸은 겉으로 드러나는 기운(하늘 글자), 아래 칸은 바탕이 되는 기운(뿌리 글자)이에요. 색은 다섯 가지 기운을 뜻해요."}</p>
       <div data-testid="element-legend" className="mt-2 flex flex-wrap items-center gap-1.5">
         {EL_ORDER.map((e) => (
           <span key={e} className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-bold ${ELEMENT_BOX[e]} ${counts[e] === 0 ? "opacity-40" : ""}`}>
@@ -220,10 +220,10 @@ export default function StoryReport({
   const leadTitle = summaryFirst ? `${who ? `${who}님` : "나"}의 고민에 대한 도리의 답은...` : "요약하자면";
   const summaryBlock = summary ? (
         <section data-testid="story-lead" aria-labelledby="story-lead-h" className="rounded-2xl bg-gradient-to-br from-brand-50 via-white to-amber-50/60 border border-brand-100 p-4">
-          <div className="flex items-center justify-between gap-2">
-            <h5 id="story-lead-h" className="font-cute text-lg font-normal text-brand-700">{leadTitle}</h5>
+          <div className="flex flex-wrap items-center justify-between gap-x-2 gap-y-1">
+            <h5 id="story-lead-h" className="min-w-0 basis-[11rem] flex-1 font-cute text-lg font-normal text-brand-700">{leadTitle}</h5>
             {reading && (
-              <span className="flex items-center gap-1.5 text-xs">
+              <span className="flex shrink-0 items-center gap-1.5 whitespace-nowrap text-xs">
                 <Stars score={reading.total.score} />
                 <span className="rounded-full border border-brand-100 bg-white px-2 py-0.5 text-[11px] font-bold text-brand-700">#{reading.keyword}</span>
               </span>

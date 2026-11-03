@@ -222,7 +222,7 @@ export default function CompatStory({ report, intro, closing, lastWord, partnerN
           </summary>
           <div className="px-3.5 pb-3.5">
             <p className="mt-3.5 text-[11px] font-bold text-gray-500">나의 사주 네 기둥</p>
-            <Pillars report={report} pillars={c.me.pillars} owner="내" hint="위 칸은 겉으로 드러나는 기운(하늘), 아래 칸은 바탕이 되는 기운(땅)이에요. 두 사람의 같은 자리(특히 일주)를 견주어 보세요." />
+            <Pillars report={report} pillars={c.me.pillars} owner="내" hint="위 칸은 겉으로 드러나는 기운(하늘 글자), 아래 칸은 바탕이 되는 기운(뿌리 글자)이에요. 두 사람의 같은 자리(특히 일주)를 견주어 보세요." />
             {c.partner.pillars && (
               <>
                 <p className="mt-5 text-[11px] font-bold text-gray-500">{partnerName}의 사주 네 기둥</p>

@@ -56,7 +56,7 @@ export function Header({ onOpenLogin, user = null }: { onOpenLogin: () => void; 
         <div className="max-w-[34rem] lg:max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-3.5 flex items-center justify-between gap-2 sm:gap-3">
           {/* 왼쪽 위: 로고 + Beta 스티커 */}
           <div className="flex flex-col items-start gap-1 min-w-0">
-            <BrandLink />
+            <BrandLink overlayBeta />
           </div>
 
           {/* 오른쪽 위: 로그인 전에는 "로그인" 버튼, 로그인 후에는 닉네임(마이페이지) + "?" 안내 메뉴 + 햄버거(자판기) 메뉴. 둘 다 같은 창(로그인/내 정보)을 열어요 */}
