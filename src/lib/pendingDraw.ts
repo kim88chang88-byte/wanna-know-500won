@@ -13,7 +13,8 @@ export interface PendingDraw {
   premium: boolean;
 }
 
-type Store = Pick<Storage, "getItem" | "setItem" | "removeItem">;
+/** getItem/setItem 만 있는 저장소(`StorageLike`)도 받아요. removeItem 이 없으면 빈 값으로 덮어써서 지워요. */
+type Store = { getItem(key: string): string | null; setItem(key: string, value: string): void; removeItem?(key: string): void };
 
 function short(v: unknown, max: number): v is string {
   return typeof v === "string" && v.length > 0 && v.length <= max;
@@ -29,7 +30,9 @@ export function savePendingDraw(store: Store | null, d: PendingDraw, now: number
 
 export function clearPendingDraw(store: Store | null): void {
   try {
-    store?.removeItem(PENDING_DRAW_KEY);
+    if (!store) return;
+    if (store.removeItem) store.removeItem(PENDING_DRAW_KEY);
+    else store.setItem(PENDING_DRAW_KEY, "");
   } catch {
     /* 무시 */
   }
