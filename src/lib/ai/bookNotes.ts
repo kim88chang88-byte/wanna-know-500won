@@ -1,4 +1,5 @@
 import { concernLabel, hasConcern, type Concern } from "@/lib/concerns";
+import { repairName } from "./nameRepair";
 import type { BookPage } from "@/lib/premium/types";
 import { aiKey, callLlm, modelFor, PAID_MODEL } from "./llm";
 import { containsForbidden, isGeneric } from "./reading";
@@ -19,8 +20,8 @@ const MAX_TOKENS = 5000;
 export const NOTES_SYSTEM_PROMPT = `너는 "도리", 맑은 옹달샘의 수달 도사야. 사주 리포트의 각 쪽 맨 위에 붙는 "도리의 한 줄"을 쓴다.
 
 규칙
-- 쪽마다 한 줄(1~2문장, 90자 안팎). 부드러운 해요체. 반말 금지.
-- 그 쪽의 "내용" 안에 실제로 나온 사실(일주, 오행, 관계 등) 한 가지를 짚고, 오늘 해 볼 수 있는 작은 행동이나 마음가짐으로 이어 줘.
+- 쪽마다 한 줄(1~2문장, 90자 안팎). 부드러운 해요체(~해요, ~세요). "~하셔요", "~보내셔요" 같은 말투와 반말은 쓰지 마.
+- 그 쪽의 "내용" 안에 실제로 나온 사실(일주, 오행, 관계 등) 한 가지를 짚고, 지금 바로 해 볼 수 있는 작은 행동이나 마음가짐으로 이어 줘. 이 책은 하루 운세가 아니라 평생 사주 책이니 "오늘 하루"처럼 일일 운세식으로는 쓰지 마.
 - 사용자가 "고민"을 적었다면 가장 알맞은 한두 쪽에서만 자연스럽게 닿게 해. 억지로 모든 쪽에 넣지 마.
 - 누구에게나 맞는 말("좋은 일이 있을 거예요")만 쓰지 마. 내용에 없는 사실은 지어내지 마.
 - 겁주기, 단정, 예언 금지. 질병·이혼·사고·파산·투자·의료·법률 얘기 금지.
@@ -133,8 +134,9 @@ export async function addBookNotes(pages: BookPage[], opts: BookNotesOptions): P
     const advice = hasConcern(opts.concern ?? null) ? parseAdvice(json) : null;
     const lastNo = pages[pages.length - 1].no;
     return pages.map((p) => {
-      const out = notes.has(p.no) ? { ...p, note: notes.get(p.no) } : p;
-      return p.no === lastNo && advice ? { ...out, advice } : out;
+      const got = notes.get(p.no);
+      const out = got ? { ...p, note: repairName(got, opts.name) } : p;
+      return p.no === lastNo && advice ? { ...out, advice: repairName(advice, opts.name) } : out;
     });
   } catch {
     return pages;
