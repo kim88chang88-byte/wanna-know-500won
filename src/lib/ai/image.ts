@@ -220,17 +220,105 @@ const OUTFITS: Record<"male" | "female", Outfit[]> = {
   ],
 };
 
+/* 변형 1·2번에서 더 다양하게 쓰는 추가 목록(0번 기본 모습은 위 6가지 그대로예요) */
+const HAIR_X: Record<"male" | "female", string[]> = {
+  female: [
+    "a short soft cut with airy side bangs",
+    "a half-up half-down style with a small ribbon",
+    "a loose side braid with soft wisps",
+    "long layered hair with face-framing curtain bangs",
+    "a neat low ponytail with see-through bangs",
+    "soft shoulder-length waves with a side part",
+  ],
+  male: [
+    "a natural short perm with a side part",
+    "a clean soft slick-back with light texture",
+    "a fluffy comma-style cut with bangs",
+    "short wavy hair with a fresh tidy sideburn",
+    "a neat crop with softly faded sides",
+    "medium-length wavy hair with a natural flow",
+  ],
+};
+const FACE_X: Record<"male" | "female", string[]> = {
+  female: [
+    "gentle fox-like eyes and a soft knowing smile",
+    "round bright eyes and a cheerful laugh",
+    "calm deep-set eyes and a quiet elegant smile",
+    "sparkling eyes, a tiny beauty mark and a warm smile",
+    "soft natural features with a healthy glow and a sweet smile",
+    "clear defined eyes and a bright confident grin",
+  ],
+  male: [
+    "warm smiling eyes that crinkle and an easy laugh",
+    "sleek sharp eyes with a faint playful smirk",
+    "round gentle eyes and a soft shy smile",
+    "strong brows, calm eyes and a reassuring smile",
+    "a bright wide smile with a fresh clean look",
+    "thoughtful eyes and a gentle half-smile",
+  ],
+};
+const OUTFITS_X: Record<"male" | "female", Outfit[]> = {
+  female: [
+    { wear: "a soft {c} knit cardigan over a white camisole and a pleated midi skirt", scene: "a sunlit bookstore aisle with warm light" },
+    { wear: "a trendy {c} blazer dress with a slim belt", scene: "a city rooftop at golden hour with creamy bokeh" },
+    { wear: "a cropped {c} knit polo with high-waist wide pants", scene: "a sunny flower market with soft bokeh" },
+    { wear: "a romantic {c} floral-print blouse with a long skirt", scene: "a spring cherry-blossom lane in soft light" },
+    { wear: "a chic {c} wool coat over a turtleneck and jeans", scene: "a quiet street lined with warm cafe lights at dusk" },
+    { wear: "a minimal {c} satin shirt with tailored trousers and delicate earrings", scene: "a modern gallery with soft window light" },
+  ],
+  male: [
+    { wear: "a {c} linen shirt with rolled sleeves and light chinos", scene: "a seaside promenade in soft sunset light" },
+    { wear: "a {c} blazer over a white tee with slim trousers", scene: "a city street at dusk with creamy bokeh" },
+    { wear: "a {c} zip knit cardigan over a collared shirt", scene: "a cozy library with warm lamps" },
+    { wear: "a {c} bomber jacket with a white shirt and slacks", scene: "a campus path with golden ginkgo leaves in autumn light" },
+    { wear: "a {c} trench coat over a knit and slacks", scene: "a cafe window on a soft rainy afternoon" },
+    { wear: "a relaxed {c} henley shirt with an open overshirt", scene: "a sunlit alley with traditional tiled roofs" },
+  ],
+};
+const POSES: Record<"male" | "female", string[]> = {
+  female: [
+    "looking at the camera with a soft smile, one hand gently holding her bag strap",
+    "laughing naturally while looking slightly away from the camera",
+    "tucking her hair behind her ear with a shy glance",
+    "walking toward the camera with a relaxed step",
+    "holding a takeaway coffee cup close to her chest, looking at the camera",
+    "glancing back over her shoulder with a smile",
+    "standing with her hands loosely behind her back and her head tilted",
+    "seated and relaxed with a gentle smile, hands resting out of frame",
+  ],
+  male: [
+    "looking at the camera with a calm smile, hands in his pockets",
+    "laughing naturally while looking slightly away from the camera",
+    "adjusting his sleeve with a confident glance",
+    "walking toward the camera with a relaxed step",
+    "holding a takeaway coffee cup, looking at the camera",
+    "glancing back over his shoulder with a smile",
+    "leaning lightly against a wall with his arms loosely crossed",
+    "seated and relaxed with a gentle smile, hands resting out of frame",
+  ],
+};
+
+/** 변형 0번은 기본 6가지 안에서, 1·2번은 추가 목록 6가지 안에서 골라요. 같은 값이면 같은 결과예요. */
+function pickIdx(i: number, v: number, off: number[], salt: number): { extra: boolean; idx: number } {
+  if (v === 0) return { extra: false, idx: (i + off[0] + salt) % 6 };
+  return { extra: true, idx: (i * (v + 1) + off[v] + salt) % 6 };
+}
+
 /** 복장·헤어·표정·포인트 색은 seed(0~5)와 변형(0~2)으로 골라요. 같은 값이면 같은 그림 설명이 나와요. */
 export function spousePrompt(partner: "male" | "female", element: Element5, age: PartnerAge = "mid 20s", seed = 0, variant = 0): string {
   const look = LOOK[element];
   const n = 6;
   const i = ((Math.floor(seed) % n) + n) % n;
   const v = ((Math.floor(variant) % PARTNER_VARIANTS) + PARTNER_VARIANTS) % PARTNER_VARIANTS;
-  const o = OUTFITS[partner][(i + OFF_OUTFIT[v]) % n];
+  const po = pickIdx(i, v, OFF_OUTFIT, 0);
+  const o = (po.extra ? OUTFITS_X : OUTFITS)[partner][po.idx];
   const color = ACCENTS[element][v];
   const wear = o.wear.replace("{c}", color);
-  const hair = HAIR[partner][(i + OFF_HAIR[v]) % n];
-  const face = FACE[partner][(i + 2 + OFF_FACE[v]) % n];
+  const ph = pickIdx(i, v, OFF_HAIR, 0);
+  const hair = (ph.extra ? HAIR_X : HAIR)[partner][ph.idx];
+  const pf = pickIdx(i, v, OFF_FACE, 2);
+  const face = (pf.extra ? FACE_X : FACE)[partner][pf.idx];
+  const pose = POSES[partner][(i + 3 * v + (partner === "male" ? 2 : 0)) % POSES[partner].length];
   // 남성은 가끔 얇은 안경을 써요(같은 값이면 같게). 여성은 절대 쓰지 않아요.
   const maleGlasses = (i + v) % 3 === 1;
   const a = AGE_LOOK[age];
@@ -239,7 +327,7 @@ export function spousePrompt(partner: "male" | "female", element: Element5, age:
       ? `a strikingly attractive, photogenic Korean woman in her ${a}, ${hair}, ${face}, a youthful fresh-faced look, a bare face with no eyeglasses and no eyewear of any kind, eyes clearly visible`
       : `a strikingly handsome, photogenic Korean man in his ${a}, ${hair}, ${face}, ${maleGlasses ? "wearing stylish thin-frame glasses, " : ""}a youthful fresh-faced look`;
   return [
-    `A photorealistic fashion-editorial portrait photo of ${person}, wearing ${wear}, in ${o.scene}.`,
+    `A photorealistic fashion-editorial portrait photo of ${person}, wearing ${wear}, ${pose}, in ${o.scene}.`,
     `Mood: ${look.mood}. Flattering soft cinematic lighting, trendy styling, an effortlessly attractive and charming presence.`,
     "Natural skin texture, realistic eyes, shallow depth of field, 3:4 vertical framing. The person is clearly an adult.",
     "An entirely fictional person who does not resemble any real person or celebrity. No text, no letters, no logo, no watermark, no captions.",

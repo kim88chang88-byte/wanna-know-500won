@@ -118,3 +118,30 @@ describe("변형(variant)", () => {
     expect(spousePrompt("female", "water", "mid 20s", 0, 2)).toMatch(/indigo/);
   });
 });
+
+describe("더 다양하게(포즈·추가 복장·헤어·얼굴)", () => {
+  it("한 조합의 18가지(복장 6 × 변형 3)가 모두 서로 다른 그림 설명이에요", () => {
+    for (const partner of ["female", "male"] as const)
+      for (const el of ["wood", "fire", "earth", "metal", "water"] as const) {
+        const set = new Set<string>();
+        for (let seed = 0; seed < 6; seed++) for (let v = 0; v < 3; v++) set.add(spousePrompt(partner, el, "mid 20s", seed, v));
+        expect(set.size).toBe(18);
+      }
+  });
+  it("복장·헤어·얼굴·포즈가 여러 가지로 쓰인다", () => {
+    const f = new Set<string>(), poses = new Set<string>(), hairs = new Set<string>();
+    for (let seed = 0; seed < 6; seed++)
+      for (let v = 0; v < 3; v++) {
+        const p = spousePrompt("female", "water", "mid 20s", seed, v);
+        f.add(p.split(", wearing ")[1].split(", in ")[0]);
+        poses.add(p.split(", wearing ")[1].split(", ").slice(-2, -1)[0] + "|" + p.length);
+        hairs.add(p.split("woman in her early 20s, ")[1].split(", ")[0]);
+      }
+    expect(f.size).toBeGreaterThan(8);
+    expect(hairs.size).toBeGreaterThan(8);
+    expect(poses.size).toBeGreaterThan(8);
+  });
+  it("여성은 포즈를 더해도 안경이 없다", () => {
+    for (let seed = 0; seed < 6; seed++) for (let v = 0; v < 3; v++) expect(spousePrompt("female", "fire", "late 20s", seed, v)).toMatch(/no eyeglasses/);
+  });
+});
