@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { AI_IMAGE_NOTICE, ageOn, estimateCostUsd, generateImage, partnerAgeFor, spousePrompt, usageOf } from "../image";
+import { AI_IMAGE_NOTICE, ageOn, estimateCostUsd, generateImage, partnerAgeFor, spousePrompt, spousePromptV2, usageOf } from "../image";
 
 const okBody = {
   candidates: [{ finishReason: "STOP", content: { parts: [{ inlineData: { mimeType: "image/png", data: "QUJD" } }] } }],
@@ -98,5 +98,19 @@ describe("복장과 안내 문구", () => {
     const withGlasses = [0, 1, 2, 3, 4, 5].filter((v) => /thin-frame glasses/.test(spousePrompt("male", "water", "mid 20s", v)));
     expect(withGlasses).toEqual([1, 4]);
     expect(spousePrompt("male", "fire", "late 20s", 1)).toBe(spousePrompt("male", "fire", "late 20s", 1));
+  });
+});
+
+
+describe("spousePromptV2 (미리보기)", () => {
+  it("여성은 안경 없음, 연령은 한 단계 어림", () => {
+    for (const el of ["wood", "fire", "earth", "metal", "water"] as const)
+      for (let s = 0; s < 6; s++) {
+        const p = spousePromptV2("female", el, "mid 20s", s);
+        expect(p).toContain("no eyeglasses");
+        expect(p).toContain("early 20s");
+        expect(p).not.toMatch(/wearing stylish thin-frame glasses/);
+      }
+    expect(spousePromptV2("male", "fire", "mid 30s", 0)).toContain("late 20s");
   });
 });

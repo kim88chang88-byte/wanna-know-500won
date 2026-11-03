@@ -182,3 +182,88 @@ export async function generateImage(prompt: string, apiKey: string, opts: { mode
   }
   return { ok: false, error: lastErr };
 }
+
+/* ───────── 새 안(미리보기용): 5살 더 어리게 · 다양한 헤어/복장 · 더 매력적으로 ───────── */
+
+/** 새 안의 연령 표현: 기존보다 한 단계씩 어려요(모두 성인). */
+const AGE_V2: Record<PartnerAge, string> = { "mid 20s": "early 20s", "late 20s": "mid 20s", "mid 30s": "late 20s" };
+
+const HAIR_V2: Record<"male" | "female", string[]> = {
+  female: [
+    "long soft wavy hair with side-swept bangs",
+    "a chic shoulder-length bob with airy bangs",
+    "a high ponytail with loose face-framing strands",
+    "long straight silky hair parted in the middle",
+    "a loose low bun with soft wisps",
+    "medium-length layered hair with gentle C-curl ends",
+  ],
+  male: [
+    "a soft two-block cut with natural see-through bangs",
+    "a neat side-parted style with light volume",
+    "short textured hair swept up with a clean forehead",
+    "a soft dandy cut with a natural wave",
+    "medium-length hair with a relaxed center part",
+    "a clean short crop with a fresh youthful look",
+  ],
+};
+
+const FACE_V2: Record<"male" | "female", string[]> = {
+  female: [
+    "bright almond eyes and a sweet dimpled smile",
+    "refined cat-like eyes and a confident soft smile",
+    "big clear eyes and a playful grin",
+    "gentle double-lidded eyes and a graceful calm smile",
+    "luminous clear skin, rosy cheeks and a shy smile",
+    "sharp elegant features and a relaxed charming smile",
+  ],
+  male: [
+    "bright eyes and a boyish warm smile",
+    "sharp refined jawline and a gentle smile",
+    "soft puppy-like eyes and a dimpled grin",
+    "defined brows, deep eyes and a calm confident look",
+    "clear skin, a fresh smile and a kind gaze",
+    "strong clean features and a relaxed charming smile",
+  ],
+};
+
+const OUTFITS_V2: Record<"male" | "female", Outfit[]> = {
+  female: [
+    { wear: "a flowing {c} midi dress with delicate straps and a light cardigan", scene: "a sunny cafe terrace with soft daylight and creamy bokeh" },
+    { wear: "a modern {c} tweed jacket set with a pearl accessory", scene: "a bright airy gallery lobby by a large window" },
+    { wear: "a fitted white tee, high-waist jeans and a {c} trench coat", scene: "a green park in soft afternoon sunlight with creamy bokeh" },
+    { wear: "a graceful modern hanbok in {c} tones with delicate hair ornaments", scene: "a traditional palace garden in soft golden-hour sunlight with creamy bokeh" },
+    { wear: "a cozy oversized {c} knit with a pleated skirt and a small scarf", scene: "a quiet tree-lined street in warm autumn light" },
+    { wear: "a sporty chic {c} windbreaker with a white top and tennis skirt", scene: "a riverside walking path on a fresh morning" },
+  ],
+  male: [
+    { wear: "a sleek {c} suit with an open-collar white shirt, no tie", scene: "soft indoor window light in a modern lounge" },
+    { wear: "a {c} cardigan over a white tee with straight slacks", scene: "a bright modern cafe with soft window light" },
+    { wear: "a white tee, light denim and a {c} bomber jacket", scene: "a sunny street with creamy bokeh" },
+    { wear: "a clean {c} track jacket with a white tee and joggers", scene: "a riverside park on a fresh morning" },
+    { wear: "a {c} turtleneck knit with a long wool coat", scene: "a warm bookstore with soft light" },
+    { wear: "a {c} denim shirt layered over a white tee with beige chinos", scene: "a quiet tree-lined street in warm autumn light" },
+  ],
+};
+
+/** 새 안 프롬프트(미리보기용). 확정되면 spousePrompt 를 이 내용으로 바꿔요. */
+export function spousePromptV2(partner: "male" | "female", element: Element5, age: PartnerAge = "mid 20s", seed = 0): string {
+  const look = LOOK[element];
+  const n = 6;
+  const i = ((Math.floor(seed) % n) + n) % n;
+  const o = OUTFITS_V2[partner][i];
+  const wear = o.wear.replace("{c}", look.color);
+  const hair = HAIR_V2[partner][i];
+  const face = FACE_V2[partner][(i + 2) % n];
+  const maleGlasses = i % 3 === 1;
+  const a = AGE_V2[age];
+  const person =
+    partner === "female"
+      ? `a strikingly attractive, photogenic Korean woman in her ${a}, ${hair}, ${face}, a youthful fresh-faced look, a bare face with no eyeglasses and no eyewear of any kind, eyes clearly visible`
+      : `a strikingly handsome, photogenic Korean man in his ${a}, ${hair}, ${face}, ${maleGlasses ? "wearing stylish thin-frame glasses, " : ""}a youthful fresh-faced look`;
+  return [
+    `A photorealistic fashion-editorial portrait photo of ${person}, wearing ${wear}, in ${o.scene}.`,
+    `Mood: ${look.mood}. Flattering soft cinematic lighting, trendy styling, an effortlessly attractive and charming presence.`,
+    "Natural skin texture, realistic eyes, shallow depth of field, 3:4 vertical framing. The person is clearly an adult.",
+    "An entirely fictional person who does not resemble any real person or celebrity. No text, no letters, no logo, no watermark, no captions.",
+  ].join(" ");
+}
