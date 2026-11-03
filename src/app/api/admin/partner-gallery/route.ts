@@ -51,14 +51,14 @@ const urlOf=k=>BASE?BASE+'/storage/v1/object/public/partner-images/'+k+'?t='+Dat
 const cache={};
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 let lastReq=0;
-// 요청 사이를 3초 이상 띄우고, '너무 빨라요'(429)나 일시 실패는 기다렸다가 다시 시도해요.
+// 일시 실패('너무 빨라요' 429 등)는 기다렸다가 다시 시도해요. 월 사용 한도처럼 기다려도 안 풀리는 오류는 바로 멈춰요.
 async function genFetch(q,onWait){const MAX=6;
  for(let t=0;t<MAX;t++){
-  const gap=3000-(Date.now()-lastReq);if(gap>0)await sleep(gap);lastReq=Date.now();
   let r,j=null;try{r=await fetch('?'+q);j=await r.json().catch(()=>null)}catch(e){r=null}
   if(r&&j&&j.ok)return j;
   const tooFast=r&&r.status===429;const msg=(j&&j.error)||'네트워크 오류';
   if(stopFlag)return {ok:false,error:'멈춤'};
+  if(/spending|billing|quota|monthly/i.test(msg))return {ok:false,error:'Google 사용 한도에 걸렸어요 (결제 한도 확인 필요): '+msg,fatal:true};
   if(t===MAX-1)return {ok:false,error:msg};
   const wait=tooFast?20000:8000*(t+1);if(onWait)onWait('잠시 쉬었다가 다시 시도해요 ('+Math.round(wait/1000)+'초) · '+msg);await sleep(wait)}
  return {ok:false,error:'실패'}}
@@ -91,7 +91,7 @@ async function fillRange(items){stopFlag=false;let done=0;for(const it of items)
   const k=keyOf(it.u,it.a,it.e,it.v,it.x);$('log').textContent='진행: '+(++done)+'/'+items.length+' · '+k;
   if(it.u===$('user').value&&it.a===$('age').value&&it.e===$('el').value&&it.x===Number($('var').value)){const c=document.querySelector('.card[data-v="'+it.v+'"]');if(await gen(it.v,c))await save(it.v,c)}
   else{ // 화면에 없는 조합은 화면 없이 처리
-   try{const q=new URLSearchParams({gen:'1',user:it.u,age:it.a,el:it.e,v:String(it.v),var:String(it.x)});const j=await genFetch(q,m=>{$('log').textContent='진행: '+done+'/'+items.length+' · '+k+'\\n'+m});if(!j.ok){$('log').textContent+='\\n실패 '+k+': '+j.error;continue}
+   try{const q=new URLSearchParams({gen:'1',user:it.u,age:it.a,el:it.e,v:String(it.v),var:String(it.x)});const j=await genFetch(q,m=>{$('log').textContent='진행: '+done+'/'+items.length+' · '+k+'\\n'+m});if(!j.ok){$('log').textContent+='\\n실패 '+k+': '+j.error;if(j.fatal){$('log').textContent+='\\n자동 생성을 멈췄어요. 한도를 해결한 뒤 다시 눌러 주세요.';return}continue}
     total+=j.krw;$('sum').textContent=' 이번 방문 누적 약 '+total.toLocaleString()+'원';const blob=await toWebp('data:'+j.mime+';base64,'+j.base64);
     const r2=await fetch('?save='+encodeURIComponent(k),{method:'POST',headers:{'Content-Type':'image/webp'},body:blob});const j2=await r2.json();if(!j2.ok)$('log').textContent+='\\n저장 실패 '+k}catch(e){$('log').textContent+='\\n오류 '+k}}}
   $('log').textContent+='\\n끝났어요.';render()}
