@@ -28,6 +28,7 @@ export default function ElementTile({
   tone = "light",
   label,
   sizeClass = "text-[38px]",
+  compact = false,
 }: {
   ch: string | null;
   el: Element | null;
@@ -35,6 +36,8 @@ export default function ElementTile({
   tone?: "light" | "dark";
   label?: string;
   sizeClass?: string;
+  /** 작은 글자용: 테두리를 가늘게, 오행 이름표를 작게 */
+  compact?: boolean;
 }) {
   const kind: Element = el ?? "earth";
   const t = TONE[kind];
@@ -51,13 +54,13 @@ export default function ElementTile({
         {/* 한자 뒤만 오행의 짙은 색으로 살짝 눌러서 밝은 그림에서도 글자가 묻히지 않게 해요 */}
         <div aria-hidden="true" className="absolute inset-0" style={{ background: `radial-gradient(circle at 50% 50%, rgba(${t.dark},0.45) 0, rgba(${t.dark},0) 65%)` }} />
         {el && (
-          <span data-testid="element-chip" className="absolute right-1 top-1 z-10 whitespace-nowrap rounded-full px-1.5 py-0.5 font-sans text-[10px] font-bold leading-tight text-white" style={{ background: `rgba(${t.dark},0.85)` }}>
+          <span data-testid="element-chip" className={`absolute right-1 top-1 z-10 whitespace-nowrap rounded-full px-1.5 py-0.5 font-sans ${compact ? "text-[9px]" : "text-[10px]"} font-bold leading-tight text-white`} style={{ background: `rgba(${t.dark},0.85)` }}>
             {EL_LABEL[el].icon} {EL_LABEL[el].name}
           </span>
         )}
         <span
           aria-hidden="true"
-          className={`absolute inset-0 z-[5] flex items-center justify-center font-serifKr font-black leading-none text-white [paint-order:stroke_fill] [-webkit-text-stroke:4px_rgba(20,10,8,0.92)] [text-shadow:0_2px_5px_rgba(0,0,0,0.4)] ${sizeClass}`}
+          className={`absolute inset-0 z-[5] flex items-center justify-center font-serifKr font-black leading-none text-white [paint-order:stroke_fill] ${compact ? "[-webkit-text-stroke:2px_rgba(20,10,8,0.92)]" : "[-webkit-text-stroke:4px_rgba(20,10,8,0.92)]"} [text-shadow:0_2px_5px_rgba(0,0,0,0.4)] ${sizeClass}`}
         >
           {ch}
         </span>
