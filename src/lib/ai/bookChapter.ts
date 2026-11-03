@@ -100,10 +100,10 @@ export function chapterName(nick: string | null | undefined): string | null {
   let t = "";
   for (const w of clean.split(" ")) {
     const next = t ? `${t} ${w}` : w;
-    if (next.length > 12) break;
+    if (next.length > 14) break;
     t = next;
   }
-  return (t || clean.slice(0, 10)).slice(0, 12);
+  return (t || clean.slice(0, 10)).slice(0, 14);
 }
 
 /** 이 쪽이 재물운 장인지 */
