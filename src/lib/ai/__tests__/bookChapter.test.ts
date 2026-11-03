@@ -31,6 +31,8 @@ describe("helpers", () => {
   it("이름은 글자·숫자·공백만 10자까지", () => {
     expect(chapterName("장은혁<script>")).toBe("장은혁script");
     expect(chapterName(null)).toBeNull();
+    expect(chapterName("Chang88 Kim88")).toBe("Chang88 Kim88");
+    expect(chapterName("Abcdefghijklmnop")).toBe("Abcdefghij");
   });
   it("재물운 심층 분석 쪽만 다시 써요", () => {
     const base = { no: 7, key: "topic", title: "재물운 심층 분석", subtitle: "", lead: "", sections: [], tables: [] } as BookPage;

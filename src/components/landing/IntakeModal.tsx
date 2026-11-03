@@ -207,7 +207,7 @@ function SavedPeoplePicker({ people, onPick, title }: { people: SavedPerson[]; o
             className="rounded-full bg-white border border-brand-200 px-3 py-1.5 text-xs font-bold text-brand-700 hover:bg-brand-100"
           >
             {p.label}
-            <span className="ml-1 font-normal text-gray-500">{profileSummary(p.birth).split(" ")[0]}</span>
+            {p.label !== autoLabel(p.birth) && <span className="ml-1 font-normal text-gray-500">{profileSummary(p.birth).split(" ")[0]}</span>}
           </button>
         ))}
       </div>

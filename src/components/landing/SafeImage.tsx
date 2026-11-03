@@ -10,13 +10,15 @@ interface Props {
   fallback: string;
   /** 자리 표시 크기(Tailwind 글자 크기 클래스) */
   fallbackClass?: string;
+  /** 첫 화면에 바로 보이는 큰 이미지는 true (늦게 불러오지 않고 먼저 받아요) */
+  eager?: boolean;
 }
 
 /**
  * 이미지가 없거나(404) 주소가 만료돼도 깨진 아이콘 대신 이모지를 보여주는 이미지예요.
  * 서버에서 만든 HTML 의 이미지는 React 가 붙기 전에 실패할 수도 있어서, 붙은 뒤에 한 번 더 확인해요.
  */
-export default function SafeImage({ src, alt, className, fallback, fallbackClass = "text-6xl" }: Props) {
+export default function SafeImage({ src, alt, className, fallback, fallbackClass = "text-6xl", eager = false }: Props) {
   const [failed, setFailed] = useState(false);
   const ref = useRef<HTMLImageElement>(null);
 
@@ -33,5 +35,5 @@ export default function SafeImage({ src, alt, className, fallback, fallbackClass
     );
   }
   // eslint-disable-next-line @next/next/no-img-element
-  return <img ref={ref} src={src} alt={alt} className={className} loading="lazy" onError={() => setFailed(true)} />;
+  return <img ref={ref} src={src} alt={alt} className={className} loading={eager ? "eager" : "lazy"} fetchPriority={eager ? "high" : undefined} onError={() => setFailed(true)} />;
 }

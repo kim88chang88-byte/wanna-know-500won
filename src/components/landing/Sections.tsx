@@ -168,6 +168,7 @@ export function ShowcaseSection() {
               className="w-full h-full object-cover"
               fallback="🦦"
               fallbackClass="text-8xl"
+              eager
             />
           </div>
         </div>

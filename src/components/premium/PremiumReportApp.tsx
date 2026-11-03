@@ -1,12 +1,13 @@
 "use client";
 
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import type { PremiumErrorBody, PremiumReportView } from "@/lib/premium/types";
 import type { BirthInput } from "@/lib/saju/types";
 import BirthTimeSelect from "@/components/BirthTimeSelect";
 import { formatDateInput } from "@/lib/intake";
 import ManseReport from "./ManseReport";
 import AiNotice from "./AiNotice";
+import { profileToForm, type SavedProfile } from "@/lib/profile";
 import { conclusionOf, fetchPartnerImage, fetchRestChapters, mergeChapters } from "@/lib/premium/mergeChapters";
 
 const field = "w-full rounded-2xl border border-[#e6c887]/30 bg-white/[0.05] px-4 py-3 text-base text-[#fbf3de] [color-scheme:dark] focus:outline-none focus:ring-2 focus:ring-[#e6c887]/50";
@@ -61,6 +62,37 @@ export default function PremiumReportApp() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [report, setReport] = useState<PremiumReportView | null>(null);
+  const [remembered, setRemembered] = useState(false);
+  const progressRef = useRef<HTMLDivElement>(null);
+
+  // 로그인했고 "기억해 주세요"로 저장한 내 정보가 있으면 미리 채워 둬요. (바꾸고 싶으면 그대로 고치면 돼요)
+  useEffect(() => {
+    let alive = true;
+    fetch("/api/auth/me", { cache: "no-store" })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d: { loggedIn?: boolean; profile?: SavedProfile | null } | null) => {
+        if (!alive || !d?.loggedIn || !d.profile) return;
+        const f = profileToForm(d.profile);
+        const lunar = f.calendar === "lunar";
+        const pad = (n: number) => String(n).padStart(2, "0");
+        setDate(lunar ? `${String(d.profile.year).padStart(4, "0")}-${pad(d.profile.month)}-${pad(d.profile.day)}` : f.solarDate);
+        setIsLunar(lunar);
+        setIsLeap(f.isLeapMonth);
+        setIsFemale(f.gender === "female");
+        setTimeUnknown(!f.timeKnown);
+        setTime(f.time);
+        setRemembered(true);
+      })
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, []);
+
+  // 풀이를 만드는 동안 진행 막대가 화면 안에 보이게 해요.
+  useEffect(() => {
+    if (busy) progressRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+  }, [busy]);
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
@@ -120,6 +152,7 @@ export default function PremiumReportApp() {
 
   return (
     <form onSubmit={onSubmit} noValidate className="space-y-5 rounded-3xl bg-white/[0.04] border border-[#e6c887]/30 p-5 sm:p-7 shadow-[0_20px_60px_rgba(0,0,0,0.35)]">
+      {remembered && <p data-testid="remembered-note" className="rounded-2xl bg-[#e6c887]/10 border border-[#e6c887]/30 px-4 py-2.5 text-xs text-[#e8dfca]">기억해 둔 내 정보를 불러왔어요. 바꾸고 싶으면 아래에서 고쳐 주세요.</p>}
       <div>
         <label htmlFor="birth-date" className="block text-sm font-bold text-[#e6c887] mb-1.5">
           생년월일
@@ -189,7 +222,7 @@ export default function PremiumReportApp() {
       <button type="submit" disabled={busy} className="w-full rounded-full bg-gradient-to-r from-[#f0d9a0] to-[#d3ac62] py-3.5 font-serifKr font-bold text-[#1b1824] shadow-md disabled:opacity-60 active:scale-95 transition-transform">
         {busy ? "물길을 읽는 중… ❄️" : "내 사주 리포트 보기"}
       </button>
-      {busy && <PremiumProgress />}
+      {busy && <div ref={progressRef}><PremiumProgress /></div>}
     </form>
   );
 }
