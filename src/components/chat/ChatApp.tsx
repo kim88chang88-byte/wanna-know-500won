@@ -6,7 +6,7 @@ import SafeImage from "@/components/landing/SafeImage";
 import { CHAT_LOG_KEY, MSG_MAX, TURN_CAP, readChatCtx, type ChatCtx, type ChatKind, type ChatMsg } from "@/lib/chatContext";
 
 const GREETING: Record<ChatKind, string> = {
-  daily: "안녕! 오늘의 한마디 잘 받았어? 오늘 하루 더 궁금한 거 있으면 편하게 물어봐 ❄️",
+  daily: "안녕! 오늘의 한마디 잘 받았어? 더 궁금한 거 있으면 편하게 물어봐 ❄️",
   reading: "방금 본 풀이, 도리도 기억하고 있어! 읽다가 더 궁금했던 부분을 편하게 물어봐 ❄️",
   compat: "두 사람 궁합, 도리가 다 기억하고 있어! 둘 사이에서 더 궁금한 거 편하게 물어봐 ❄️",
 };

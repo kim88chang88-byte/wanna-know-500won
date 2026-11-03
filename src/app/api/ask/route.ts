@@ -24,9 +24,9 @@ export async function POST(request: Request) {
   try {
     body = (await request.json()) as BirthInput & { q?: unknown };
   } catch {
-    return NextResponse.json({ error: "잘못된 요청입니다." }, { status: 400 });
+    return NextResponse.json({ error: "요청이 올바르지 않아요. 다시 한 번 확인해 주세요." }, { status: 400 });
   }
-  if (typeof body !== "object" || body === null) return NextResponse.json({ error: "잘못된 요청입니다." }, { status: 400 });
+  if (typeof body !== "object" || body === null) return NextResponse.json({ error: "요청이 올바르지 않아요. 다시 한 번 확인해 주세요." }, { status: 400 });
   const { q, ...input } = body;
   const question = findQuestion(q);
   if (!question) return NextResponse.json({ error: "알 수 없는 질문이에요." }, { status: 400 });

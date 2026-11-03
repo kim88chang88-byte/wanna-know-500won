@@ -17,7 +17,7 @@ export async function POST(request: Request) {
   try {
     body = await request.json();
   } catch {
-    return NextResponse.json({ error: "잘못된 요청입니다." }, { status: 400 });
+    return NextResponse.json({ error: "요청이 올바르지 않아요. 다시 한 번 확인해 주세요." }, { status: 400 });
   }
   const review = parseReview(body);
   if (!review) return NextResponse.json({ error: "별점을 골라 주세요." }, { status: 400 });

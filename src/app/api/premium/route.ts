@@ -30,7 +30,7 @@ export async function POST(request: Request) {
   try {
     raw = await request.json();
   } catch {
-    return NextResponse.json({ code: "bad_request", error: "잘못된 요청입니다." }, { status: 400 });
+    return NextResponse.json({ code: "bad_request", error: "요청이 올바르지 않아요. 다시 한 번 확인해 주세요." }, { status: 400 });
   }
   // 두 번째 요청: 나머지 장만 AI 로 다시 써서 받아 가요. (장을 두 번에 나눠야 AI 요청 한도에 안 걸려요)
   // chapterBatch: 2~4 이면 그 묶음의 장만 써서 받아 가요. (1은 첫 요청이라 따로 지정하지 않아요)

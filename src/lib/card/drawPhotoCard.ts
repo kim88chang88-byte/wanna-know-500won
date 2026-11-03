@@ -313,7 +313,7 @@ export function drawPhotoCard(ctx: CanvasRenderingContext2D, d: PhotoCardData, a
   if (!drawInviteRow(ctx, d, cx, H - 62, { ink: INK, muted: MUTED, accent: "#7C4DDE" })) {
     ctx.fillStyle = INK;
     setFont(ctx, 800, 12, SERIF);
-    ctx.fillText("도리 운세 사주", cx, H - 28);
+    ctx.fillText("도리운세⋅사주", cx, H - 28);
     ctx.fillStyle = MUTED;
     setFont(ctx, 500, 8.5, SANS);
     ctx.fillText(d.siteLabel, cx, H - 14);

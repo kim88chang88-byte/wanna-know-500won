@@ -20,9 +20,9 @@ export async function POST(request: Request) {
   try {
     body = (await request.json()) as BirthInput & { start?: unknown; end?: unknown };
   } catch {
-    return NextResponse.json({ error: "잘못된 요청입니다." }, { status: 400 });
+    return NextResponse.json({ error: "요청이 올바르지 않아요. 다시 한 번 확인해 주세요." }, { status: 400 });
   }
-  if (typeof body !== "object" || body === null) return NextResponse.json({ error: "잘못된 요청입니다." }, { status: 400 });
+  if (typeof body !== "object" || body === null) return NextResponse.json({ error: "요청이 올바르지 않아요. 다시 한 번 확인해 주세요." }, { status: 400 });
   const { start: rawStart, end: rawEnd, hour: _h, minute: _m, ...rest } = body;
   void _h;
   void _m;

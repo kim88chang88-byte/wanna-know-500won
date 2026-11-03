@@ -46,10 +46,10 @@ export async function POST(request: Request) {
   try {
     body = (await request.json()) as { id?: unknown; hidden?: unknown };
   } catch {
-    return NextResponse.json({ error: "잘못된 요청입니다." }, { status: 400, headers: NO_STORE });
+    return NextResponse.json({ error: "요청이 올바르지 않아요. 다시 한 번 확인해 주세요." }, { status: 400, headers: NO_STORE });
   }
   if (typeof body?.id !== "number" || !Number.isInteger(body.id) || body.id < 1 || typeof body.hidden !== "boolean") {
-    return NextResponse.json({ error: "잘못된 요청입니다." }, { status: 400, headers: NO_STORE });
+    return NextResponse.json({ error: "요청이 올바르지 않아요. 다시 한 번 확인해 주세요." }, { status: 400, headers: NO_STORE });
   }
   const dbConfig = loadDbConfig(process.env);
   if (!dbConfig) return NextResponse.json({ error: "DB 가 연결되어 있지 않아요." }, { status: 503, headers: NO_STORE });

@@ -116,7 +116,7 @@ function TogetherCard({ c, name, partnerName }: { c: CompatView; name: string | 
     const text = buildShareSummary(c, { me: name, partner: partnerName === "상대" || partnerName === "상대방" ? null : partnerName }, together, origin);
     try {
       if (navigator.share) {
-        await navigator.share({ title: "도리 운세 사주 · 둘의 궁합", text });
+        await navigator.share({ title: "도리운세⋅사주 · 둘의 궁합", text });
         setMsg("");
         return;
       }

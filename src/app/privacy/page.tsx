@@ -3,8 +3,8 @@ import { ContactList, H2, LegalPage } from "@/components/legal/Legal";
 import { LEGAL_REVISIONS } from "@/lib/siteInfo";
 
 export const metadata: Metadata = {
-  title: "개인정보처리방침 | 도리 운세 사주",
-  description: "도리 운세 사주가 어떤 개인정보를 왜 받고, 얼마나 보관하는지 안내합니다.",
+  title: "개인정보처리방침 · 도리운세⋅사주",
+  description: "도리운세⋅사주가 어떤 개인정보를 왜 받고, 얼마나 보관하는지 안내합니다.",
 };
 
 /* 이 문서는 현재 기능 기준의 초안이며 법률 검토를 받은 것이 아닙니다. 로그인·결제·AI 풀이·후기 기능이 붙을 때 해당 항목을 함께 고쳐야 합니다. */
@@ -14,8 +14,8 @@ export default function PrivacyPage() {
     <LegalPage title="개인정보처리방침">
 
       <p className="mt-4">
-        &lsquo;도리 운세 사주&rsquo;(이하 &ldquo;서비스&rdquo;)는 생년월일시로 사주를 계산하고 풀이를 보여주기 위해 꼭
-        필요한 정보만 받습니다. 아래에서 무엇을, 왜, 얼마나 오래 쓰는지 안내해요.
+        &lsquo;도리운세⋅사주&rsquo;(이하 &ldquo;서비스&rdquo;)는 생년월일시로 사주를 계산하고 풀이를 보여주기 위해 꼭
+        필요한 정보만 받습니다. 아래에서 무엇을, 왜, 얼마나 오래 쓰는지 안내합니다.
       </p>
 
       <H2>1. 받는 정보와 사용 목적</H2>
@@ -44,7 +44,7 @@ export default function PrivacyPage() {
             <tr>
               <td className="p-2 border border-brand-100">선택 (궁합 리포트를 볼 때)</td>
               <td className="p-2 border border-brand-100">상대방의 생년월일(양력/음력)·태어난 시간(알면)·성별 (이름·연락처는 받지 않아요)</td>
-              <td className="p-2 border border-brand-100">두 사람의 궁합 계산에만 쓰고, 계산이 끝나면 서버에 저장하지 않아요. 다만 로그인한 회원이 &lsquo;이 상대방을 기억해 둘게요&rsquo;(미리 체크돼 있고 끌 수 있어요)를 켜 둔 채로 풀이를 보면 별명(또는 생년월일)과 함께 저장해요(아래 2항 참고). 상대방 정보는 사용자가 상대방에게 알려도 괜찮다고 판단한 범위에서만 입력해 주세요</td>
+              <td className="p-2 border border-brand-100">두 사람의 궁합 계산에만 쓰고, 계산이 끝나면 서버에 저장하지 않습니다. 다만 로그인한 회원이 &lsquo;이 상대방을 기억해 둘게요&rsquo;(미리 체크돼 있고 끌 수 있어요)를 켜 둔 채로 풀이를 보면 별명(또는 생년월일)과 함께 저장해요(아래 2항 참고). 상대방 정보는 사용자가 상대방에게 알려도 괜찮다고 판단한 범위에서만 입력해 주세요</td>
             </tr>
             <tr>
               <td className="p-2 border border-brand-100">선택 (카카오·구글·네이버 로그인 시)</td>
@@ -191,7 +191,7 @@ export default function PrivacyPage() {
       </p>
 
       <H2>8. 방침이 바뀔 때</H2>
-      <p>내용이 바뀌면 시행일을 갱신하고 이 페이지에 먼저 알립니다. 이용자에게 중요한 변경은 서비스 화면에서 따로 안내해요.</p>
+      <p>내용이 바뀌면 시행일을 갱신하고 이 페이지에 먼저 알립니다. 이용자에게 중요한 변경은 서비스 화면에서 따로 안내합니다.</p>
       <p className="mt-2">
         선택 동의(생년월일시 기억하기, 고민 통계)를 하시면 동의한 시각과 당시 동의 문구의 버전을 함께 기록합니다. 동의가 있었음을 확인하고 문구가 바뀐 뒤에도
         과거 동의를 구분하기 위한 용도로만 쓰며, 해당 정보와 함께 삭제됩니다.

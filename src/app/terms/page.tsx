@@ -3,7 +3,7 @@ import { ContactList, H2, LegalPage } from "@/components/legal/Legal";
 import { SERVICE_NAME } from "@/lib/siteInfo";
 
 export const metadata: Metadata = {
-  title: `이용약관 | ${SERVICE_NAME}`,
+  title: `이용약관 · ${SERVICE_NAME}`,
   description: `${SERVICE_NAME} 이용약관`,
 };
 

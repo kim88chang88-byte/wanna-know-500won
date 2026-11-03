@@ -378,7 +378,7 @@ export function drawPremiumCard(ctx: CanvasRenderingContext2D, d: PhotoCardData)
     ctx.fillStyle = goldGrad(ctx, 40, 0, 170, 0);
     setFont(ctx, 800, 11.5, SERIF);
     spaced(ctx, 1.5);
-    ctx.fillText("도리 운세 사주", 40, H - 60);
+    ctx.fillText("도리운세⋅사주", 40, H - 60);
     spaced(ctx, 0);
     ctx.fillStyle = IVORY;
     setFont(ctx, 600, 9.5, SERIF);
@@ -391,7 +391,7 @@ export function drawPremiumCard(ctx: CanvasRenderingContext2D, d: PhotoCardData)
     ctx.fillStyle = goldGrad(ctx, cx - 50, 0, cx + 50, 0);
     setFont(ctx, 800, 11.5, SERIF);
     spaced(ctx, 2);
-    ctx.fillText("도리 운세 사주", cx, H - 36);
+    ctx.fillText("도리운세⋅사주", cx, H - 36);
     spaced(ctx, 0);
     ctx.fillStyle = IVORY_DIM;
     setFont(ctx, 500, 8, SANS);

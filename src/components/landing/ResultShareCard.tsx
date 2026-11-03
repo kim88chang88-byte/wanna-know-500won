@@ -96,7 +96,7 @@ export default function ResultShareCard({ report, aiQuote }: { report: PremiumRe
     const text = `${data.topicLabel} 결과가 신기해서 공유해! 너도 무료로 볼 수 있어 👉`;
     try {
       if (navigator.share) {
-        await navigator.share({ title: "도리 운세 사주", text, url });
+        await navigator.share({ title: "도리운세⋅사주", text, url });
         setLinkMsg("");
         return;
       }

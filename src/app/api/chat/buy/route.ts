@@ -14,7 +14,7 @@ export async function POST(request: Request) {
   if (!canChat(session.sub)) return NextResponse.json({ error: "도리 상담방은 곧 열려요." }, { status: 403 });
   const body = (await request.json().catch(() => null)) as { ctx?: unknown } | null;
   const ctx = parseCtx(body?.ctx);
-  if (!ctx) return NextResponse.json({ error: "잘못된 요청입니다." }, { status: 400 });
+  if (!ctx) return NextResponse.json({ error: "요청이 올바르지 않아요. 다시 한 번 확인해 주세요." }, { status: 400 });
   const db = dbOrNull();
   if (!db) return NextResponse.json({ error: "지금은 코인을 쓸 수 없어요." }, { status: 503 });
   const t = targetOf(session.sub, ctx);

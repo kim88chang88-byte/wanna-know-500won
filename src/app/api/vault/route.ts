@@ -39,14 +39,14 @@ export async function POST(request: Request) {
   try {
     raw = await request.text();
   } catch {
-    return NextResponse.json({ error: "잘못된 요청입니다." }, { status: 400 });
+    return NextResponse.json({ error: "요청이 올바르지 않아요. 다시 한 번 확인해 주세요." }, { status: 400 });
   }
   if (raw.length > MAX_VAULT_BYTES + 5000) return NextResponse.json({ error: "저장할 내용이 너무 커요." }, { status: 413 });
   let body: unknown;
   try {
     body = JSON.parse(raw);
   } catch {
-    return NextResponse.json({ error: "잘못된 요청입니다." }, { status: 400 });
+    return NextResponse.json({ error: "요청이 올바르지 않아요. 다시 한 번 확인해 주세요." }, { status: 400 });
   }
   const parsed = parseVaultBody(body);
   if (!parsed) return NextResponse.json({ error: "저장할 수 없는 내용이에요." }, { status: 400 });

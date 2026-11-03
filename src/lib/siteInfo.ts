@@ -1,5 +1,5 @@
 /** 약관/방침 페이지에서 함께 쓰는 서비스 정보입니다. 운영자 정보가 정해지면 여기만 고치면 돼요. */
-export const SERVICE_NAME = "도리 운세 사주";
+export const SERVICE_NAME = "도리운세⋅사주";
 export const CONTACT_EMAILS = ["kim88chang88@gmail.com"] as const;
 export const LEGAL_EFFECTIVE_DATE = "2026년 10월 25일";
 /** 방침 개정 이력 (최신이 위). 내용이 바뀔 때마다 한 줄 추가하고 시행일을 함께 고쳐요. */

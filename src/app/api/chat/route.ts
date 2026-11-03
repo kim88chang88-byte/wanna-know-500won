@@ -32,11 +32,11 @@ export async function POST(request: Request) {
   try {
     body = (await request.json()) as { ctx?: unknown; messages?: unknown };
   } catch {
-    return NextResponse.json({ error: "잘못된 요청입니다." }, { status: 400 });
+    return NextResponse.json({ error: "요청이 올바르지 않아요. 다시 한 번 확인해 주세요." }, { status: 400 });
   }
   const ctx = parseCtx(body?.ctx);
   const history = cleanHistory(body?.messages);
-  if (!ctx || !history) return NextResponse.json({ error: "잘못된 요청입니다." }, { status: 400 });
+  if (!ctx || !history) return NextResponse.json({ error: "요청이 올바르지 않아요. 다시 한 번 확인해 주세요." }, { status: 400 });
 
   const db = dbOrNull();
   const target = targetOf(session.sub, ctx);

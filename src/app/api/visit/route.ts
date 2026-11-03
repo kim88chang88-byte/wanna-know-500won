@@ -19,7 +19,7 @@ export async function POST(request: Request) {
 
   const body = (await request.json().catch(() => null)) as { vid?: unknown; utm?: unknown; friend?: unknown; ref?: unknown } | null;
   const vid = typeof body?.vid === "string" ? body.vid : "";
-  if (!/^[A-Za-z0-9-]{16,64}$/.test(vid)) return NextResponse.json({ error: "잘못된 요청입니다." }, { status: 400 });
+  if (!/^[A-Za-z0-9-]{16,64}$/.test(vid)) return NextResponse.json({ error: "요청이 올바르지 않아요. 다시 한 번 확인해 주세요." }, { status: 400 });
 
   const config = loadDbConfig(process.env);
   if (!config) return NextResponse.json({ error: "unavailable" }, { status: 503 });

@@ -48,7 +48,7 @@ type BirthResult = { ok: true; value: BirthInput } | { ok: false; error: string 
 
 /** 생년월일시·성별 한 사람 분을 검사해요. /api/reading 과 같은 BirthInput 모양을 받아요. */
 function parseBirth(raw: unknown, who: string): BirthResult {
-  if (!isRecord(raw)) return { ok: false, error: "잘못된 요청입니다." };
+  if (!isRecord(raw)) return { ok: false, error: "요청이 올바르지 않아요. 다시 한 번 확인해 주세요." };
   const int = (v: unknown) => (typeof v === "number" && Number.isInteger(v) ? v : null);
   const year = int(raw.year);
   const month = int(raw.month);
@@ -73,7 +73,7 @@ function parseBirth(raw: unknown, who: string): BirthResult {
 
 /** 서버 입력 검사. 궁합이면 `partner`(상대방 생년월일시)도 같은 모양으로 받아요. */
 export function validatePremiumInput(raw: unknown): ValidationResult {
-  if (!isRecord(raw)) return { ok: false, error: "잘못된 요청입니다." };
+  if (!isRecord(raw)) return { ok: false, error: "요청이 올바르지 않아요. 다시 한 번 확인해 주세요." };
   const me = parseBirth(raw, "");
   if (!me.ok) return me;
   let partner: BirthInput | null = null;

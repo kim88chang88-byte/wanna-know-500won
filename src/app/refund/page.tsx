@@ -3,7 +3,7 @@ import { ContactList, H2, LegalPage } from "@/components/legal/Legal";
 import { SERVICE_NAME } from "@/lib/siteInfo";
 
 export const metadata: Metadata = {
-  title: `환불 안내 | ${SERVICE_NAME}`,
+  title: `환불 안내 · ${SERVICE_NAME}`,
   description: `${SERVICE_NAME} 환불 안내`,
 };
 
@@ -13,10 +13,10 @@ export default function RefundPage() {
   return (
     <LegalPage title="환불 안내">
       <p className="mt-4">
-        현재는 베타 테스트 기간이라 결제가 발생하지 않습니다. 아래는 유료 결제가 시작된 뒤 적용되는 기준이에요.
+        현재는 베타 테스트 기간이라 결제가 발생하지 않습니다. 아래는 유료 결제가 시작된 뒤 적용되는 기준입니다.
       </p>
 
-      <H2>1. 환불해 드리는 경우</H2>
+      <H2>1. 환불하는 경우</H2>
       <ul className="list-disc pl-5 space-y-1">
         <li>결제했지만 결과(뽑기 풀이 또는 프리미엄 사주서)가 제공되지 않았거나, 시스템 오류로 정상적으로 열람할 수 없는 경우</li>
         <li>같은 건이 중복으로 결제된 경우</li>
