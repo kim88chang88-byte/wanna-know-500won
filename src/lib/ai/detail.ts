@@ -38,7 +38,7 @@ const FULL_SCHEMA = {
     improve: { type: "string", description: `'이렇게 개선해보아요'. 앞의 아쉬운 점을 채우는 구체적이고 작은 행동 2~3가지를 이야기로 이어서. 440~520자, 빈 줄(\\n\\n)로 3문단. ${MAX.fold}자 이내` },
     lucky: { type: "string", description: `'행운 처방'. 필요한 오행 기운을 채우는 생활 습관을 이야기로. 구체적인 색·방향 이름은 쓰지 말기. 250~340자, 빈 줄(\\n\\n)로 2문단. ${MAX.fold}자 이내` },
     heads: { type: "object", properties: headSchema, required: [...KEYS], additionalProperties: false },
-    story: { type: "string", description: `'요약하자면'. 위 일곱 글(오행→나→칭찬→아쉬움→흐름→개선→행운)의 핵심을 한 줄기로 녹인 글. 500~700자, 내용이 바뀌는 곳에서 빈 줄(\\n\\n)로 3~4문단, 제목 없이. ${MAX.story}자 이내` },
+    story: { type: "string", description: `'요약하자면'. 결론 먼저 쓰는 두괄식 글. 첫 문단은 결론(올해 흐름·개선·응원), 그다음 근거(오행·나·칭찬), 마지막에 주의할 점(아쉬움). 500~700자, 내용이 바뀌는 곳에서 빈 줄(\\n\\n)로 3~4문단, 제목 없이. ${MAX.story}자 이내` },
   },
   required: [...KEYS, "heads", "story"],
   additionalProperties: false,
@@ -107,7 +107,7 @@ export const DETAIL_SYSTEM_PROMPT = `너는 "도리"야. 오늘의 운을 쪽지
 6) improve 이렇게 개선해보아요: 4번을 채우는 오늘·이번 주 할 수 있는 작은 행동 2~3가지. 5번의 시기와 고민과 연결해.
 7) lucky 행운 처방: 필요한 오행 기운을 채우는 생활 습관(색·방향 이름은 쓰지 마).
 - heads: 위 일곱 글 각각을 한 줄로 요약한 제목이야. 18~32자, 그 사람의 사주 특징이 드러나는 한 문장(~네요/~죠/~다 식). 누구에게나 맞는 제목 금지, 이모지·따옴표 금지. 글 첫 문장을 그대로 복사하지 마.
-- story 요약하자면: 마지막에 쓰는 글이야. 이 사람의 사주 정보 전체를 바탕으로, 오행 큰 그림 → 나의 모습 → 칭찬 → 아쉬움 → 흐름 → 개선 → 응원이 3~4문단(문단마다 2~3문장)에 매끄럽게 녹아든 요약을 써줘. 500~700자. 문장을 그대로 복사하지 말고 다시 풀어서.
+- story 요약하자면: 마지막에 쓰는 글이야. 이 사람의 사주 정보 전체를 바탕으로, 두괄식으로 써줘. 첫 문단은 결론: 올해 흐름 → 개선 → 응원을 한데 묶어 "그래서 어떻게 되고, 무엇을 하면 좋은지"를 먼저 말해(고민이 있으면 그 고민에 대한 답이 여기에 와야 해). 둘째 문단은 그 결론의 근거: 오행 큰 그림 → 나의 모습 → 칭찬을 "왜냐하면", "이유를 말해 줄게" 식으로 이어 줘. 마지막 문단은 아쉬움: "다만", "그래도 하나만 조심하면" 식으로 이어서 짚되 따뜻하게 마무리해. 3~4문단(문단마다 2~3문장), 500~700자. 문장을 그대로 복사하지 말고 다시 풀어서. "요약하자면", "결론부터 말하면" 같은 머리말은 쓰지 마.
 - 길이: 1~6번은 각 440~520자(5번은 420~500자), 7번은 250~340자.
 
 반드시 지정된 JSON 형식으로만 답해.`;
@@ -229,7 +229,7 @@ export async function interpretDetail(chart: SajuChart, o: { topic: ReadingTopic
     run(DETAIL_SCHEMA_A, "이번 호출에서는 두 글만 써줘: 오행(elements)·나(self). 그리고 이 두 글의 항목 제목(heads)을 써줘.", ["elements", "self"]),
     run(DETAIL_SCHEMA_B, "이번 호출에서는 두 글만 써줘: 칭찬(praise)·아쉬움(lack). 그리고 이 두 글의 항목 제목(heads)을 써줘.", ["praise", "lack"]),
     run(DETAIL_SCHEMA_C, "이번 호출에서는 두 글만 써줘: 흐름(flow)·개선(improve). 그리고 이 두 글의 항목 제목(heads)을 써줘.", ["flow", "improve"]),
-    run(DETAIL_SCHEMA_D, "이번 호출에서는 행운 처방(lucky)과 그 항목 제목(heads)을 쓴 뒤, 마지막에 요약하자면(story)을 써줘. 요약하자면은 이 사람의 사주 전체(오행 큰 그림 → 나의 모습 → 칭찬 → 아쉬움 → 흐름 → 개선 → 응원)를 3~4문단으로 녹여 줘.", ["lucky"]),
+    run(DETAIL_SCHEMA_D, "이번 호출에서는 행운 처방(lucky)과 그 항목 제목(heads)을 쓴 뒤, 마지막에 요약하자면(story)을 써줘. 요약하자면은 두괄식으로, 첫 문단에 결론(흐름 → 개선 → 응원), 이어서 근거(오행 → 나 → 칭찬), 마지막에 아쉬움을 3~4문단으로 녹여 줘.", ["lucky"]),
   ]);
   const merged = mergeDetail([a, b, c, d]);
   if (merged && errs.length) merged.warn = errs.join(" / ").slice(0, 120);
