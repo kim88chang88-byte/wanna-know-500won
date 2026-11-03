@@ -200,7 +200,7 @@ const OUTFITS: Record<"male" | "female", Outfit[]> = {
     { wear: "a sleek {c} suit with an open-collar white shirt, no tie", scene: "soft indoor window light in a modern lounge" },
     { wear: "a {c} cardigan over a white tee with straight slacks", scene: "a bright modern cafe with soft window light" },
     { wear: "a white tee, light denim and a {c} bomber jacket", scene: "a sunny street with creamy bokeh" },
-    { wear: "a clean {c} track jacket with a white tee and joggers", scene: "a riverside park on a fresh morning" },
+    { wear: "a crisp white oxford shirt with a {c} knit vest and slim slacks", scene: "a riverside park on a fresh morning" },
     { wear: "a {c} turtleneck knit with a long wool coat", scene: "a warm bookstore with soft light" },
     { wear: "a {c} denim shirt layered over a white tee with beige chinos", scene: "a quiet tree-lined street in warm autumn light" },
   ],
