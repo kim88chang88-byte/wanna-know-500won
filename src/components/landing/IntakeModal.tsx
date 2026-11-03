@@ -709,6 +709,7 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
                       <StoryReport report={premiumReport} reading={reading} intro={null} name={nickname}
                         lastWord={<><ResultHero report={premiumReport} aiQuote={reading?.kkotgeoji ?? null} luxe={false} hideLucky /><ResultShareCard report={premiumReport} aiQuote={reading?.kkotgeoji ?? null} /></>}
                         closing={askInput ? <AskChips input={askInput} luxe={false} topic={target.fortune} hideTitle /> : undefined}
+                        chat={askInput ? <ChatEntry ctx={{ kind: "reading", summary: summarizeReport(premiumReport), birth: askInput, name: nickname?.trim() || null }} /> : undefined}
                       />
                     )}
                   </div>
@@ -731,13 +732,13 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
               {askInput && !compat && (
                 <details data-testid="more-tools" className={`mt-6 rounded-2xl border group ${luxe ? "border-[#e6c887]/30 bg-[#fbf6ea]" : "border-brand-100 bg-brand-50/40"}`}>
                   <summary className="cursor-pointer list-none px-4 py-3 flex items-center justify-between text-sm font-bold text-gray-900">
-                    <span>✨ 더 해보기 <span className="font-normal text-xs text-gray-500">고민 비교 · MBTI · 시간 후보</span></span>
+                    <span>✨ 더 해보기 <span className="font-normal text-xs text-gray-500">고민 비교 · MBTI{askInput.hour === null || askInput.hour === undefined ? " · 시간 후보" : ""}</span></span>
                     <span aria-hidden="true" className="text-gray-400 transition-transform group-open:rotate-180">⌄</span>
                   </summary>
                   <div className="px-3 pb-3">
                     <CompareCard input={askInput} />
                     <MbtiCard input={askInput} />
-                    <HoursCard input={askInput} />
+                    {(askInput.hour === null || askInput.hour === undefined) && <HoursCard input={askInput} />}
                   </div>
                 </details>
               )}
@@ -812,7 +813,7 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
             <AdminCopyResult report={premiumReport} reading={reading} topic={target.fortune} name={nickname?.trim() || null} partnerName={compat ? resultPartner?.name ?? null : null} />
           )}
 
-          {phase === "result" && premiumReport && askInput && (
+          {phase === "result" && premiumReport && askInput && !(storyMode && !compat) && (
             <div className="mt-6 text-center">
               <ChatEntry
                 luxe={luxe}

@@ -1,6 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
+import { useChatEnabled } from "@/components/chat/ChatEntry";
 import ManseReport from "@/components/premium/ManseReport";
 import { RealityLight } from "@/components/premium/RealityLight";
 import type { PremiumReportView } from "@/lib/premium/types";
@@ -182,6 +183,7 @@ export default function StoryReport({
   reading,
   intro,
   closing,
+  chat,
   lastWord,
   name,
 }: {
@@ -191,11 +193,14 @@ export default function StoryReport({
   intro: string | null;
   /** 도리의 쪽지 안에 넣을 '이어 묻기' 칩 */
   closing?: ReactNode;
+  /** 도리 상담실 입구 버튼. 상담실이 열려 있으면 쪽지 대신 현실 견주기 바로 아래에 보여요 */
+  chat?: ReactNode;
   /** 접이식 맨 아래 "마지막 한마디"에 넣을 내용 (한 줄 결론 + 해시태그 + 행운 컬러) */
   lastWord?: ReactNode;
   /** 로그인 닉네임. 고민 답 제목("○○님의 고민에 대한 도리의 답은...")에 써요. */
   name?: string | null;
 }) {
+  const chatOn = useChatEnabled() && Boolean(chat);
   const t = report.topic;
   const mark = MARK[t.key] ?? MARK.general;
   const concern = report.concern;
@@ -357,13 +362,24 @@ export default function StoryReport({
       {/* 현실 견주기: 도리의 쪽지 바로 위 */}
       {t.reality && <RealityLight rc={t.reality} />}
 
-      {/* 4) 도리의 쪽지 */}
+      {/* 도리 상담실이 열려 있으면: 현실 견주기 바로 아래에서 상담실로 안내하고, 쪽지(질문 칩)는 숨겨요 */}
+      {chatOn && (
+        <section data-testid="story-chat-cta" aria-label="도리 상담실" className="rounded-2xl border border-brand-300 bg-gradient-to-br from-brand-50 to-white p-4 text-center shadow-sm">
+          <p className="text-[14.5px] font-bold text-gray-900">🦦 읽다가 더 궁금한 게 생겼어?</p>
+          <p className="mt-1 text-xs text-gray-500">도리가 방금 본 풀이를 기억하고 있어요. 편하게 이야기해 봐요 ❄️</p>
+          <div className="mt-3">{chat}</div>
+        </section>
+      )}
+
+      {/* 4) 도리의 쪽지 (상담실이 꺼져 있을 때만) */}
+      {!chatOn && (
       <section data-testid="story-note" aria-label="도리의 쪽지" className="relative rounded-2xl border border-amber-200 bg-[#fff9e6] p-4 shadow-sm">
         <span aria-hidden="true" className="absolute -top-2.5 left-6 h-4 w-16 -rotate-2 rounded-sm bg-amber-200/80" />
         <p className="text-[11px] font-bold text-amber-700">🦦 도리의 쪽지 · 더 물어보기</p>
         <p className="mt-1 text-[14.5px] font-bold leading-relaxed text-gray-900">읽다가 더 궁금한 게 생겼어? 도리한테 편하게 물어봐 ❄️</p>
         {closing}
       </section>
+      )}
     </div>
   );
 }
