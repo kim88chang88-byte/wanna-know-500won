@@ -10,6 +10,7 @@ import { readVisitDays, recordVisit } from "@/lib/streak";
 import { grantTickets, readTickets, spendTicket, STREAK_FOR_TICKET } from "@/lib/stampReward";
 import { FREE_PER_DAY } from "@/lib/db/config";
 import { ensureVid, track } from "@/lib/track";
+import { clearPendingDraw, savePendingDraw, takePendingDraw } from "@/lib/pendingDraw";
 import { clearRef, isFinalRedeem, readRef, redeemMessage, refFromSearch, saveMyCode, saveRef } from "@/lib/referral";
 import { DailyLineCard } from "./DailyLineCard";
 import { FollowupCard } from "./FollowupCard";
@@ -123,6 +124,8 @@ export default function Landing() {
       // 운세 뽑기는 로그인한 회원만 할 수 있어요. 비회원은 로그인 창으로 안내해요.
       if (!userRef.current) {
         track("login_click");
+        // 로그인하고 돌아오면 이 카드를 이어서 열어 주려고, 어떤 카드였는지만 적어 둬요.
+        savePendingDraw(getBrowserStorage(), { key, fortune, price, premium: premium === true });
         setLoginReason(`${fortune} 뽑기는 로그인하고 이용할 수 있어요 ❄️`);
         setLoginOpen(true);
         return;
@@ -230,7 +233,21 @@ export default function Landing() {
     return () => window.clearTimeout(t);
   }, [justLoggedIn, clearWelcome]);
 
+  // 로그인하고 돌아왔는데 누르려던 카드가 있었다면, 환영 인사를 잠깐 보여 준 뒤 그 카드를 이어서 열어요.
+  const resumedRef = useRef(false);
+  useEffect(() => {
+    if (!justLoggedIn || !user || resumedRef.current) return;
+    resumedRef.current = true;
+    const d = takePendingDraw(getBrowserStorage());
+    if (!d) return;
+    setLoginOpen(false);
+    setLoginReason(null);
+    const t = window.setTimeout(() => handleSpin(d.key, d.fortune, d.price, d.premium), 900);
+    timers.current.push(t);
+  }, [justLoggedIn, user, handleSpin]);
+
   const openLogin = useCallback(() => {
+    clearPendingDraw(getBrowserStorage()); // 머리말의 로그인 버튼으로 들어간 경우엔 이어서 열 카드가 없어요
     track("login_click");
     setLoginOpen(true);
   }, []);
@@ -243,6 +260,7 @@ export default function Landing() {
     if (justLoggedIn && user) track("login_done");
   }, [justLoggedIn, user]);
   const closeLogin = useCallback(() => {
+    clearPendingDraw(getBrowserStorage()); // 로그인하지 않고 닫으면 이어서 열지 않아요
     setLoginOpen(false);
     setLoginReason(null);
     clearResult();
