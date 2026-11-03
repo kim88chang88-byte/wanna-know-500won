@@ -194,7 +194,7 @@ const OUTFITS: Record<"male" | "female", Outfit[]> = {
     { wear: "a fitted white tee, high-waist jeans and a {c} trench coat", scene: "a green park in soft afternoon sunlight with creamy bokeh" },
     { wear: "a graceful modern hanbok in {c} tones with delicate hair ornaments", scene: "a traditional palace garden in soft golden-hour sunlight with creamy bokeh" },
     { wear: "a cozy oversized {c} knit with a pleated skirt and a small scarf", scene: "a quiet tree-lined street in warm autumn light" },
-    { wear: "a sporty chic {c} windbreaker with a white top and tennis skirt", scene: "a riverside walking path on a fresh morning" },
+    { wear: "a soft {c} ribbon blouse with a flared long skirt and a small shoulder bag", scene: "a riverside walking path on a fresh morning" },
   ],
   male: [
     { wear: "a sleek {c} suit with an open-collar white shirt, no tie", scene: "soft indoor window light in a modern lounge" },
