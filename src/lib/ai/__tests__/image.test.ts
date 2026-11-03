@@ -85,4 +85,18 @@ describe("복장과 안내 문구", () => {
   it("안내 문구가 정해진 문장이다", () => {
     expect(AI_IMAGE_NOTICE).toBe("AI가 만든 가상의 인물, 참고용 상상도");
   });
+
+  it("여성 인물은 어떤 seed 에서도 안경을 쓰지 않아요", () => {
+    for (const el of ["wood", "fire", "earth", "metal", "water"] as const)
+      for (let v = 0; v < 6; v++) {
+        const p = spousePrompt("female", el, "mid 20s", v);
+        expect(p).toMatch(/no eyeglasses/);
+        expect(p).not.toMatch(/wearing stylish thin-frame glasses/);
+      }
+  });
+  it("남성 인물은 일부 seed 에서만 얇은 안경을 쓰고, 같은 seed 면 같아요", () => {
+    const withGlasses = [0, 1, 2, 3, 4, 5].filter((v) => /thin-frame glasses/.test(spousePrompt("male", "water", "mid 20s", v)));
+    expect(withGlasses).toEqual([1, 4]);
+    expect(spousePrompt("male", "fire", "late 20s", 1)).toBe(spousePrompt("male", "fire", "late 20s", 1));
+  });
 });

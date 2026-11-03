@@ -87,10 +87,12 @@ export function spousePrompt(partner: "male" | "female", element: Element5, age:
   const list = OUTFITS[partner];
   const o = list[((Math.floor(seed) % list.length) + list.length) % list.length];
   const wear = o.wear.replace("{c}", look.color);
+  // 여성 인물은 어떤 경우에도 안경을 쓰지 않아요. 남성은 분위기에 따라 가끔(seed 로 정해서 같은 사람은 같게) 얇은 안경을 써요.
+  const maleGlasses = Math.abs(Math.floor(seed)) % 3 === 1;
   const person =
     partner === "female"
-      ? `a beautiful Korean woman in her ${age}, natural hair, a warm natural smile`
-      : `a handsome Korean man in his ${age}, neat black hair, a calm friendly expression`;
+      ? `a beautiful Korean woman in her ${age}, natural hair, a warm natural smile, a bare face with no eyeglasses and no eyewear of any kind, eyes clearly visible`
+      : `a handsome Korean man in his ${age}, neat black hair, ${maleGlasses ? "wearing stylish thin-frame glasses, " : ""}a calm friendly expression`;
   return [
     `A photorealistic portrait photo of ${person}, wearing ${wear}, in ${o.scene}.`,
     `Mood: ${look.mood}.`,
