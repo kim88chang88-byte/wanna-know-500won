@@ -6,7 +6,8 @@ import { josa } from "@/lib/premium/josa";
 import { buildCompatAnswer, buildShareSummary, buildTogether, elementNote, plainPointTitle } from "@/lib/premium/compatAnswer";
 import { getBrowserStorage } from "@/lib/drawCounter";
 import { readMyCode, withRef } from "@/lib/referral";
-import { ELEMENT_BOX, EL_LABEL, elementOfChar } from "@/lib/elementColor";
+import { EL_LABEL, elementOfChar } from "@/lib/elementColor";
+import ElementTile from "@/components/ElementTile";
 import { Fold, MARK, Paras, Pillars } from "./StoryReport";
 
 /*
@@ -23,10 +24,8 @@ function PersonCard({ p, name }: { p: CompatPerson; name: string }) {
       <p className="text-[11px] font-bold text-gray-500">{name}의 일주</p>
       <div className="mt-1.5 flex justify-center gap-1.5">
         {cells.map((c, i) => (
-          <div key={i} className={`relative flex w-12 flex-col items-center rounded-xl pb-1.5 pt-5 ${c.el ? ELEMENT_BOX[c.el] : "bg-gray-100"}`}>
-            {c.el && <span className="absolute right-1 top-1 rounded-full bg-black/10 px-1 py-px text-[9px] font-bold leading-tight">{EL_LABEL[c.el].icon}</span>}
-            <span className="font-serifKr text-xl font-black leading-none">{c.ch ?? "?"}</span>
-            <span className="text-[10px] font-bold opacity-85">{c.reading}</span>
+          <div key={i} className="w-[3.75rem]">
+            <ElementTile ch={c.ch} el={c.el} reading={c.reading} compact sizeClass="text-[28px]" label={`${name}의 일주`} />
           </div>
         ))}
       </div>
@@ -62,27 +61,48 @@ function LinkStrip({ links, partnerName }: { links: CompatLink[]; partnerName: s
   );
 }
 
-/** 두 사람의 오행을 막대로 견줘요. */
+const EL_BAR: Record<string, string> = { wood: "bg-emerald-500", fire: "bg-rose-500", earth: "bg-amber-500", metal: "bg-slate-400", water: "bg-sky-500", unknown: "bg-brand-500" };
+
+/** 한 사람의 오행을 한 줄 비율 막대로 보여요. */
+function ElementStack({ person, label, tone }: { person: CompatPerson; label: string; tone: string }) {
+  return (
+    <div className="flex items-center gap-2">
+      <span className={`w-[4.5rem] shrink-0 truncate text-[12px] font-bold ${tone}`}>● {label}</span>
+      <div role="img" aria-label={`${label} ${person.elements.map((e) => `${e.name} ${e.count}`).join(", ")}`} className="flex h-4 flex-1 gap-0.5 overflow-hidden rounded-full bg-gray-100">
+        {person.elements.filter((e) => e.count > 0).map((e) => (
+          <span key={e.name} className={EL_BAR[e.kind] ?? EL_BAR.unknown} style={{ flexGrow: e.count, flexBasis: 0 }} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/** 두 사람의 오행을 비율 막대 두 줄로 견줘요. 숫자는 나 · 상대 순서. */
 function ElementBars({ me, partner, partnerName }: { me: CompatPerson; partner: CompatPerson; partnerName: string }) {
-  const max = Math.max(3, ...me.elements.map((e) => e.count), ...partner.elements.map((e) => e.count));
+  const gaps = me.elements.map((e, i) => Math.abs(e.count - (partner.elements[i]?.count ?? 0)));
+  const maxGap = Math.max(0, ...gaps);
   return (
     <div data-testid="compat-elbars" className="mt-3.5">
-      <p className="text-[11px] font-bold text-gray-500">오행 비교 <span className="font-normal text-gray-400">(보라: 나 · 분홍: {partnerName})</span></p>
-      <ul className="mt-1.5 space-y-1.5">
+      <p className="text-[11px] font-bold text-gray-500">오행 비교</p>
+      <div className="mt-1.5 space-y-1.5">
+        <ElementStack person={me} label="나" tone="text-brand-500" />
+        <ElementStack person={partner} label={partnerName} tone="text-pink-500" />
+      </div>
+      <ul className="mt-2 grid grid-cols-5 gap-1 text-center text-[11.5px]">
         {me.elements.map((e, i) => {
           const o = partner.elements[i];
           const el = e.kind === "unknown" ? { icon: "", name: e.name } : EL_LABEL[e.kind];
+          const zero = e.count === 0 && (o?.count ?? 0) === 0;
           return (
-            <li key={e.name} className="flex items-center gap-2 text-[12px]">
-              <span className="w-12 shrink-0 font-bold text-gray-700">{el.icon} {el.name}</span>
-              <span className="flex-1 space-y-1">
-                <span className="flex items-center gap-1.5"><span className="h-2 rounded-full bg-brand-400" style={{ width: `${(e.count / max) * 100}%`, minWidth: e.count ? 6 : 0 }} /><span className="text-[10.5px] text-gray-500">{e.count}</span></span>
-                <span className="flex items-center gap-1.5"><span className="h-2 rounded-full bg-pink-300" style={{ width: `${((o?.count ?? 0) / max) * 100}%`, minWidth: o?.count ? 6 : 0 }} /><span className="text-[10.5px] text-gray-500">{o?.count ?? 0}</span></span>
-              </span>
+            <li key={e.name} className={`rounded-xl bg-brand-50/60 px-0.5 py-1.5 ${zero ? "opacity-45" : ""}`}>
+              <span aria-hidden="true" className={`mx-auto mb-0.5 block h-2 w-2 rounded-full ${EL_BAR[e.kind] ?? EL_BAR.unknown}`} />
+              <span className="font-bold text-gray-700">{el.name}</span>
+              <span className={`block text-[10.5px] ${maxGap >= 2 && gaps[i] === maxGap ? "font-bold text-orange-600" : "text-gray-500"}`}>{e.count} · {o?.count ?? 0}</span>
             </li>
           );
         })}
       </ul>
+      <p className="mt-1.5 text-[10.5px] text-gray-400">숫자는 나 · {partnerName} 순서예요.</p>
       <p data-testid="compat-elnote" className="mt-2 text-[12.5px] leading-relaxed text-gray-600 break-keep">{elementNote(me, partner, partnerName)}</p>
     </div>
   );
