@@ -326,7 +326,7 @@ export default function Landing() {
       <SnowBackground />
       <Header onOpenLogin={openLogin} user={user} />
 
-      <main className="relative z-10 max-w-[34rem] lg:max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-5 pb-20 sm:pb-24">
+      <main className="relative z-10 max-w-[34rem] lg:max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-5 pb-20 sm:pb-24">
         <HeroSection visitors={visitors} tickets={tickets + coins} wallet={user ? { bills: 0, coins: 0, free: Math.max(0, FREE_PER_DAY - counts.today) + coins + tickets } : null} />
         <ShowcaseSection />
         {!user && <BirthdayTeaser onOpenLogin={openChatLogin} />}

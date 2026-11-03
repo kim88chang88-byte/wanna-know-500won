@@ -53,7 +53,7 @@ export function Header({ onOpenLogin, user = null }: { onOpenLogin: () => void; 
   return (
     <>
       <header className="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-brand-100 shadow-[0_2px_15px_rgba(128,87,224,0.06)]">
-        <div className="max-w-[34rem] lg:max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-3.5 flex items-center justify-between gap-2 sm:gap-3">
+        <div className="max-w-[34rem] lg:max-w-5xl mx-auto px-3 sm:px-6 lg:px-8 py-3.5 flex items-center justify-between gap-2 sm:gap-3">
           {/* 왼쪽 위: 로고 + Beta 스티커 */}
           <div className="flex flex-col items-start gap-1 min-w-0">
             <BrandLink overlayBeta />
@@ -196,7 +196,7 @@ export function MachinesSection({ onSpin, lastKey = null }: SpinProps & { lastKe
       {/* 옆으로 밀어서 넘기는 카드예요. (큰 화면에서는 한눈에 펼쳐져요) */}
       <div
         data-testid="machine-scroller"
-        className="-mx-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-4 pt-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:-mx-6 sm:px-6 lg:mx-0 lg:grid lg:grid-cols-3 lg:gap-4 lg:overflow-visible lg:px-0 xl:grid-cols-6"
+        className="-mx-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-4 pt-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:-mx-6 sm:px-6 lg:mx-0 lg:grid lg:grid-cols-3 lg:gap-4 lg:overflow-visible lg:px-0"
       >
         {MACHINES.map((m) => (
           <div key={m.key} className="relative w-[210px] shrink-0 snap-start sm:w-[230px] lg:w-auto">
@@ -262,7 +262,7 @@ export function PremiumSection({ onSpin }: SpinProps) {
       >
         <div className="relative z-10 pt-1 pb-1">
           {PREMIUM_CARDS.map((p) => (
-            <div key={p.key} className="relative mx-auto w-full max-w-[460px] transition-transform hover:-translate-y-1 active:scale-[0.98]">
+            <div key={p.key} className="relative mx-auto w-full max-w-[460px] lg:max-w-[560px] transition-transform hover:-translate-y-1 active:scale-[0.98]">
             {p.ribbon && <Sticker text={p.ribbon} testId={"premium-sticker"} />}
             <div
               id={p.key}
@@ -378,7 +378,7 @@ export function FaqSection() {
 export function Footer() {
   return (
     <footer className="relative z-10 bg-white border-t border-brand-100 pt-5 pb-24 sm:pb-8 text-center text-xs text-gray-500">
-      <div className="max-w-[34rem] lg:max-w-7xl mx-auto px-4 flex flex-col items-center gap-2">
+      <div className="max-w-[34rem] lg:max-w-5xl mx-auto px-4 flex flex-col items-center gap-2">
         <div className="flex items-center gap-1.5 text-brand-500 font-cute font-normal">
           <DoriIcon className="!mr-0" /> {SERVICE_NAME} <span aria-hidden="true">❄️</span>
         </div>
