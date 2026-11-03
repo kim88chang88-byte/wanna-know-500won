@@ -67,7 +67,7 @@ export async function fetchPartnerImage(body: unknown, signal?: AbortSignal, att
       .filter((r): r is { label: string; tags: string[] } => typeof r.label === "string" && Array.isArray(r.tags) && r.tags.every((t) => typeof t === "string"))
       .map((r) => ({ label: r.label, tags: r.tags.slice(0, 4) }));
     const img = data.image;
-    const src = img && typeof img.src === "string" && img.src.startsWith("data:image/") ? img.src : null;
+    const src = img && typeof img.src === "string" && (img.src.startsWith("data:image/") || /^https:\/\/[^\s]+\/storage\/v1\/object\/public\/partner-images\//.test(img.src)) ? img.src : null;
     // 이미지 모델이 잠깐 실패한 경우에는 한 번만 더 시도해요.
     if (!src && data.reason === "failed" && attempt < 1 && !signal?.aborted) {
       await new Promise((r) => setTimeout(r, retryDelayMs));

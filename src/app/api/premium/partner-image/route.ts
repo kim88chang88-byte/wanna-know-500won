@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { partnerImageKey, partnerImageExists, partnerPublicUrl } from "@/lib/ai/partnerStore";
 import { AI_IMAGE_NOTICE, ageOn, estimateCostUsd, generateImage, partnerAgeFor, spousePrompt, type Element5 } from "@/lib/ai/image";
 import { takeAiBudget } from "@/lib/ai/budget";
 import { isAdmin } from "@/lib/admin/auth";
@@ -63,6 +64,17 @@ export async function POST(request: Request) {
   const profile = partnerProfile(partner, el, seed);
   const title = partnerTitle(chapterName(session?.nick));
   const noImage = (reason: string) => NextResponse.json({ image: null, profile, title, reason });
+
+  // 서버에 저장해 둔 이미지가 있으면 AI 를 부르지 않고 그것을 줘요. (조합 180가지 × 1장, 비용 0원)
+  const store = loadDbConfig(process.env);
+  if (store) {
+    const key = partnerImageKey(partner, partnerAge, el, seed);
+    if (await partnerImageExists(store.url, key)) {
+      return NextResponse.json({ image: { src: partnerPublicUrl(store.url, key), notice: AI_IMAGE_NOTICE, alt: title, usd: 0 }, profile, title });
+    }
+  }
+  // 저장된 이미지만 쓰기로 했다면(PARTNER_IMAGE_STORED_ONLY=true) 없는 조합은 글 프로필만 보여 줘요.
+  if (process.env.PARTNER_IMAGE_STORED_ONLY?.trim().toLowerCase() === "true") return noImage("not_stored");
 
   // 그림은 비용이 드니까 요청 횟수를 제한해요. (관리자는 테스트하기 쉽게 제외)
   if (!admin) {

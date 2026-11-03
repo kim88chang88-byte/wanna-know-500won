@@ -52,7 +52,8 @@ export function VaultSaveBar({ snapshot, autoSave, luxe = false, ready = true }:
       let body = snapshot;
       const pi = snapshot.report.partnerImage;
       if (pi?.src) {
-        const small = await shrinkImage(pi.src);
+        // 서버에 저장된 그림은 주소만 보관함에 넣어요(이미 작아요). 직접 그린 그림(data:)만 줄여서 넣어요.
+        const small = pi.src.startsWith("data:") ? await shrinkImage(pi.src) : pi.src;
         body = { ...snapshot, report: { ...snapshot.report, partnerImage: { ...pi, src: small } } };
       }
       const res = await fetch("/api/vault", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });

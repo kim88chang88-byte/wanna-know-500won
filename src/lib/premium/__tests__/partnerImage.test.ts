@@ -34,6 +34,11 @@ describe("fetchPartnerImage", () => {
     mock({ image: { src: "https://evil.example/x.png", notice: "n", alt: "a" }, title: "t", profile: [{ label: "직업", tags: ["a"] }] });
     expect((await fetchPartnerImage({}))?.src).toBeNull();
   });
+  it("서버에 저장해 둔 이미지 주소는 받아요", async () => {
+    const u = "https://abc.supabase.co/storage/v1/object/public/partner-images/female/mid-20s/water/3.webp";
+    mock({ image: { src: u, notice: "n", alt: "a" }, title: "t", profile: [{ label: "직업", tags: ["a"] }] });
+    expect((await fetchPartnerImage({}))?.src).toBe(u);
+  });
   it("네트워크 오류·HTTP 오류도 null", async () => {
     mock({}, false);
     expect(await fetchPartnerImage({})).toBeNull();
