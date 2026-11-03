@@ -53,7 +53,7 @@ export default function BottomTabs() {
           <span className={icon} aria-hidden="true">home</span>홈
         </button>
         <button type="button" className={tab("theme")} onClick={() => scrollToId("machines")}>
-          <span className={icon} aria-hidden="true">magic_button</span>테마사주
+          <span className={icon} aria-hidden="true">magic_button</span>운세 뽑기
         </button>
         <button type="button" className={tab("premium")} onClick={() => scrollToId("premium")}>
           <span className={icon} aria-hidden="true">menu_book</span>프리미엄

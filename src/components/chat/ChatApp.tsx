@@ -213,7 +213,7 @@ export default function ChatApp() {
       });
       const data = (await res.json().catch(() => null)) as { answer?: string; error?: string; code?: string; left?: number } | null;
       if (res.status === 402 && data?.code === "quota") {
-        // 질문을 다 쓴 경우: 방금 보낸 말은 입력창으로 돌려놓고 "동전으로 더하기" 카드를 보여 줘요
+        // 질문을 다 쓴 경우: 방금 보낸 말은 입력창으로 돌려놓고 "코인으로 더하기" 카드를 보여 줘요
         setLeft(0);
         setMsgs(next.slice(0, -1));
         setInput(text);
@@ -436,10 +436,10 @@ export default function ChatApp() {
             <p className="mt-1 text-[12.5px] leading-relaxed text-[#6a5a7a]">
               도리가 더 들여다보고 싶은 얘기가 남았다면,
               <br />
-              500원 동전으로 질문을 더 할 수 있어요.
+              뽑기 코인으로 질문을 더 할 수 있어요.
             </p>
             <button type="button" onClick={() => setBuyOpen(true)} className="mt-3 block w-full rounded-full bg-gradient-to-br from-brand-500 to-[#c24fe0] py-3 text-sm font-extrabold text-white shadow active:scale-[0.98]">
-              <CoinIcon /> 500원 동전으로 질문 5개 더하기
+              <CoinIcon /> 뽑기 코인으로 질문 5개 더하기
             </button>
             <button type="button" onClick={newChat} className="mt-2 text-xs font-bold text-brand-600">
               새 대화 시작하기
@@ -483,7 +483,7 @@ export default function ChatApp() {
             <span className="ml-2 text-[#b08722]"><CoinIcon /> 코인 {coins}개</span>
           </span>
           <button type="button" onClick={() => setBuyOpen(true)} className="rounded-full bg-[#fff3c9] px-2.5 py-1 font-extrabold text-[#8a5b00] active:scale-95">
-            <CoinIcon /> 동전으로 더 묻기
+            <CoinIcon /> 코인으로 더 묻기
           </button>
         </div>
         <div className="flex items-end gap-2">
