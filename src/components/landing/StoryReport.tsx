@@ -149,7 +149,7 @@ export function Paras({ text, className = "", mark }: { text: string; className?
 function PendingNote() {
   return (
     <p data-testid="fold-pending" className="mt-3 rounded-xl border border-amber-200 bg-amber-50 px-3.5 py-2.5 text-[14px] font-bold leading-relaxed text-amber-800">
-      풀이를 준비 중이에요, 잠시 뒤에 다시 시도해 주세요
+      풀이를 준비 중이에요. 잠시 뒤에 다시 시도해 주세요.
     </p>
   );
 }

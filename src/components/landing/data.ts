@@ -35,7 +35,7 @@ export interface MachineCard {
   blob: string;
   /** 프리미엄 풀이로 여는 카드면 true (상대방 정보를 따로 받는 궁합 등) */
   premium?: boolean;
-  /** 카드 위쪽 작은 안내 (없으면 "1회 무료") */
+  /** 카드 위쪽 작은 안내 (없으면 표시하지 않아요) */
   chip?: string;
   /** 따로 값을 받는 카드의 가격 표시 (없으면 일반 뽑기) */
   price?: string;

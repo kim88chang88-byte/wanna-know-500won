@@ -102,7 +102,7 @@ export function parseVaultBody(raw: unknown, now: Date = new Date()): ParsedVaul
   const label = (r as { compat?: unknown }).compat ? "둘의 궁합" : TOPIC_LABEL[topic];
   return {
     snapshot,
-    title: `${label}${snapshot.premium ? " · 프리미엄" : ""} · ${date}`,
+    title: `${label}${snapshot.premium ? " · 프리미엄" : ""}`,
     summary: snapshot.kkotgeoji ?? text(r.summary, 200),
     // 하루 안에 같은 결과를 또 저장하지 않게, 날짜(KST 일 단위)를 섞어요. 다른 날 다시 본 결과는 따로 남아요.
     payloadHash: createHash("sha256").update(date).update(body).digest("hex"),

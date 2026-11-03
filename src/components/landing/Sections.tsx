@@ -189,7 +189,7 @@ export function MachinesSection({ onSpin, lastKey = null }: SpinProps & { lastKe
             <span className="material-symbols-outlined text-[16px]" aria-hidden="true">wb_sunny</span>
             <span className="text-[11px] font-bold uppercase tracking-wider">Daily Special</span>
           </div>
-          <h3 className="text-base sm:text-lg font-bold text-gray-900">매일 첫 1회 무료 운세</h3>
+          <h3 className="text-base sm:text-lg font-bold text-gray-900">하루 1번, 골라서 무료</h3>
         </div>
         <span className="shrink-0 rounded-full bg-gray-100 px-2.5 py-0.5 text-[11px] text-gray-500">이후 500원 · 궁합 1,000원</span>
       </div>
@@ -230,7 +230,7 @@ export function MachinesSection({ onSpin, lastKey = null }: SpinProps & { lastKe
               <div className="relative">
                 <div className="mb-1 flex items-center justify-between gap-2">
                   <h4 className={`font-cute text-base font-normal ${m.titleClass}`}>{m.name}</h4>
-                  <span className="shrink-0 rounded-full bg-brand-100 px-2 py-0.5 text-[10px] font-bold text-brand-700">{m.chip ?? "1회 무료"}</span>
+                  {m.chip && <span className="shrink-0 rounded-full bg-brand-100 px-2 py-0.5 text-[10px] font-bold text-brand-700">{m.chip}</span>}
                 </div>
                 <p className="line-clamp-2 min-h-[2.6rem] text-xs leading-relaxed text-slate-600">{m.desc}</p>
               </div>

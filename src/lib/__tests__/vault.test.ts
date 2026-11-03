@@ -16,7 +16,7 @@ describe("내 보관함 입력 검사", () => {
   it("정상 입력은 제목·요약·해시를 만들어요", () => {
     const p = parseVaultBody({ topic: "재물운 자판기", premium: true, report, kkotgeoji: "  한마디  ", reason: null }, NOW);
     expect(p?.snapshot.topic).toBe("money");
-    expect(p?.title).toBe("재물운 · 프리미엄 · 10월 23일");
+    expect(p?.title).toBe("재물운 · 프리미엄");
     expect(p?.summary).toBe("한마디");
     expect(p?.payloadHash.length).toBe(64);
   });

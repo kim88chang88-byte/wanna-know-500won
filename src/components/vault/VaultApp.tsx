@@ -29,6 +29,11 @@ interface Detail {
 type View = { kind: "loading" } | { kind: "login" } | { kind: "error"; message: string } | { kind: "list"; items: Row[] };
 
 /** 저장한 날짜와 시간. 예: 2026년 10월 31일 오후 2:05 */
+/** 예전에 저장된 제목 끝의 " · 11월 1일"은 오른쪽 날짜와 겹쳐서 지워요. */
+function stripDate(title: string): string {
+  return title.replace(/ · \d+월 \d+일$/, "");
+}
+
 function day(iso: string): string {
   try {
     return new Intl.DateTimeFormat("ko-KR", { timeZone: "Asia/Seoul", year: "numeric", month: "long", day: "numeric", hour: "numeric", minute: "2-digit", hour12: true }).format(new Date(iso));
@@ -95,7 +100,7 @@ export default function VaultApp() {
           ← 보관함 목록
         </button>
         <p className="mt-2 text-xs text-gray-500">
-          {detail.title} · {day(detail.created_at)}에 저장
+          {stripDate(detail.title)} · {day(detail.created_at)}에 저장
         </p>
         <div className={luxe ? "mt-3 rounded-3xl border border-[#e6c887]/40 bg-gradient-to-b from-[#1d1a28] via-[#171520] to-[#12101a] p-5 sm:p-6 text-[#f5efe0] shadow-[0_20px_60px_rgba(20,16,34,0.35)]" : "mt-3"}>
         {!(!luxe && isStoryReport(s.report)) && !(luxe && s.report.level === "full" && s.report.book.length > 0) && <ResultHero report={s.report} aiQuote={s.kkotgeoji} luxe={luxe} />}
@@ -186,7 +191,7 @@ export default function VaultApp() {
               className="w-full text-left rounded-2xl border border-brand-100 bg-white p-4 hover:border-brand-300 transition-colors disabled:opacity-60"
             >
               <span className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-0.5">
-                <span className="text-sm font-bold text-gray-900">{it.title}</span>
+                <span className="text-sm font-bold text-gray-900">{stripDate(it.title)}</span>
                 <span className="text-[11px] text-gray-400">{day(it.created_at)}</span>
               </span>
               {it.summary && <span className="mt-1 block text-xs text-gray-600 leading-relaxed line-clamp-2">{it.summary}</span>}
