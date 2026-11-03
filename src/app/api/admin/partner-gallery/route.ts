@@ -1,7 +1,7 @@
 import { isAdmin } from "@/lib/admin/auth";
 import { readCookie, SESSION_COOKIE, verifySessionToken } from "@/lib/auth/session";
 import { DEFAULT_USD_KRW, estimateCostUsd, generateImage, isElement5, spousePrompt, AI_IMAGE_NOTICE, type PartnerAge } from "@/lib/ai/image";
-import { MAX_STORED_BYTES, PARTNER_AGES, allPartnerKeys, isPartnerKey, partnerImageExists, partnerPublicUrl, savePartnerImage } from "@/lib/ai/partnerStore";
+import { MAX_STORED_BYTES, PARTNER_AGES, PARTNER_VARIANTS, allPartnerKeys, isPartnerKey, partnerImageExists, partnerPublicUrl, savePartnerImage } from "@/lib/ai/partnerStore";
 import { loadDbConfig } from "@/lib/db/supabase";
 import { createRateLimiter } from "@/lib/rateLimit";
 
@@ -30,14 +30,15 @@ button.go{background:#4338ca;color:#fff;border-color:#4338ca}button.ok{backgroun
 .card{border:1px solid #ddd;border-radius:12px;padding:8px;text-align:center}.card img{width:100%;border-radius:8px}.ph{aspect-ratio:3/4;display:flex;align-items:center;justify-content:center;background:#f3f3f3;border-radius:8px;color:#888;font-size:13px}
 .tag{font-size:12px;color:#059669;font-weight:700}small{color:#666}#log{font-size:12px;color:#444;white-space:pre-wrap}</style></head><body>
 <h2>운명의 상대 이미지 갤러리 (관리자)</h2>
-<p><small>조합마다 1장만 서버에 저장해요(총 180장). 저장된 이미지는 결과서에서 AI 호출 없이 그대로 쓰여요. 이미지 1장 생성은 약 100원이에요.</small></p>
+<p><small>조합마다 변형 3장씩 서버에 저장해요(총 540장). 같은 조건이어도 사람(생년월일시)마다 다른 변형이 나와요. 저장된 이미지는 결과서에서 AI 호출 없이 그대로 쓰여요. 이미지 1장 생성은 약 100원이에요.</small></p>
 ${base ? "" : '<p style="color:#b91c1c">SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY 가 없어서 저장은 못 해요.</p>'}
 <div class="bar">
 <select id="user"><option value="male">이용자 남성 → 상대 여성</option><option value="female">이용자 여성 → 상대 남성</option></select>
 <select id="age">${ages}</select>
+<select id="var"><option value="0">변형 1 (기본)</option><option value="1">변형 2</option><option value="2">변형 3</option></select>
 <select id="el"><option value="wood">나무</option><option value="fire">불</option><option value="earth">땅</option><option value="metal">쇠</option><option value="water">물</option></select>
 <button class="go" id="fill">이 조합 비어 있는 칸 만들어 저장</button></div>
-<div class="bar"><button id="status">저장 현황 (180장 중)</button><button class="go" id="fillAll">전체 비어 있는 칸 자동 생성·저장</button><button id="stop">멈추기</button><span id="sum"></span></div>
+<div class="bar"><button id="status">저장 현황 (540장 중)</button><button class="go" id="fillAll">전체 비어 있는 칸 자동 생성·저장 (540장)</button><button id="stop">멈추기</button><span id="sum"></span></div>
 <div id="log"></div>
 <div class="grid" id="grid"></div>
 <p style="text-align:center;font-size:13px;color:#444">${NOTICE}</p>
@@ -45,10 +46,10 @@ ${base ? "" : '<p style="color:#b91c1c">SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY
 const BASE=${JSON.stringify(base)};const $=i=>document.getElementById(i);let total=0,stopFlag=false;
 const AGES=${JSON.stringify(PARTNER_AGES)},ELS=['wood','fire','earth','metal','water'];
 const partnerOf=u=>u==='female'?'male':'female';
-const keyOf=(u,a,e,v)=>partnerOf(u)+'/'+a.replace(' ','-')+'/'+e+'/'+v+'.webp';
+const keyOf=(u,a,e,v,x)=>{x=x==null?Number($('var').value):x;return partnerOf(u)+'/'+a.replace(' ','-')+'/'+e+'/'+v+(x?'-'+x:'')+'.webp'};
 const urlOf=k=>BASE?BASE+'/storage/v1/object/public/partner-images/'+k+'?t='+Date.now():null;
 const cache={};
-const cur=v=>({u:$('user').value,a:$('age').value,e:$('el').value,v});
+const cur=(v,x)=>({u:$('user').value,a:$('age').value,e:$('el').value,v,x:x==null?Number($('var').value):x});
 function render(){const g=$('grid');g.innerHTML='';for(let v=0;v<6;v++){const c=document.createElement('div');c.className='card';c.dataset.v=v;
  c.innerHTML='<b>복장 '+(v+1)+'</b> <span class="tag"></span><div class="box" style="margin-top:6px"><div class="ph">확인 중…</div></div><div style="margin-top:6px"><button class="mk">만들기</button> <button class="sv ok" style="display:none">서버에 저장</button></div>';
  g.appendChild(c);const s=cur(v),k=keyOf(s.u,s.a,s.e,v);
@@ -59,7 +60,7 @@ function render(){const g=$('grid');g.innerHTML='';for(let v=0;v<6;v++){const c=
 function setImg(c,src){c.querySelector('.box').innerHTML='<img src="'+src+'">'}
 function mark(c,saved){c.querySelector('.tag').textContent=saved?'✔ 저장됨':'';c.querySelector('.sv').style.display=saved?'none':'';c.querySelector('.mk').textContent=saved?'다시 만들기':'만들기'}
 async function gen(v,c){const s=cur(v),k=keyOf(s.u,s.a,s.e,v),b=c.querySelector('.mk');b.disabled=true;b.textContent='만드는 중…';
- try{const q=new URLSearchParams({gen:'1',user:s.u,age:s.a,el:s.e,v:String(v)});const r=await fetch('?'+q);const j=await r.json();
+ try{const q=new URLSearchParams({gen:'1',user:s.u,age:s.a,el:s.e,v:String(v),var:String(s.x)});const r=await fetch('?'+q);const j=await r.json();
   if(!j.ok){b.textContent='실패: '+j.error;b.disabled=false;return false}
   const src='data:'+j.mime+';base64,'+j.base64;cache[k]={src,saved:false};total+=j.krw;$('sum').textContent=' 이번 방문 누적 약 '+total.toLocaleString()+'원';
   setImg(c,src);c.querySelector('.tag').textContent='(아직 저장 안 됨)';c.querySelector('.sv').style.display='';b.textContent='다시 만들기';b.disabled=false;return true}
@@ -74,19 +75,19 @@ async function save(v,c){const s=cur(v),k=keyOf(s.u,s.a,s.e,v),e=cache[k];if(!e|
   cache[k]={src:e.src,saved:true};mark(c,true);b.disabled=false;b.textContent='서버에 저장';return true}
  catch(err){b.textContent='저장 오류';b.disabled=false;return false}}
 async function fillRange(items){stopFlag=false;let done=0;for(const it of items){if(stopFlag){$('log').textContent+='\\n멈췄어요.';return}
-  const k=keyOf(it.u,it.a,it.e,it.v);$('log').textContent='진행: '+(++done)+'/'+items.length+' · '+k;
-  if(it.u===$('user').value&&it.a===$('age').value&&it.e===$('el').value){const c=document.querySelector('.card[data-v="'+it.v+'"]');if(await gen(it.v,c))await save(it.v,c)}
+  const k=keyOf(it.u,it.a,it.e,it.v,it.x);$('log').textContent='진행: '+(++done)+'/'+items.length+' · '+k;
+  if(it.u===$('user').value&&it.a===$('age').value&&it.e===$('el').value&&it.x===Number($('var').value)){const c=document.querySelector('.card[data-v="'+it.v+'"]');if(await gen(it.v,c))await save(it.v,c)}
   else{ // 화면에 없는 조합은 화면 없이 처리
-   try{const q=new URLSearchParams({gen:'1',user:it.u,age:it.a,el:it.e,v:String(it.v)});const r=await fetch('?'+q);const j=await r.json();if(!j.ok){$('log').textContent+='\\n실패 '+k+': '+j.error;continue}
+   try{const q=new URLSearchParams({gen:'1',user:it.u,age:it.a,el:it.e,v:String(it.v),var:String(it.x)});const r=await fetch('?'+q);const j=await r.json();if(!j.ok){$('log').textContent+='\\n실패 '+k+': '+j.error;continue}
     total+=j.krw;$('sum').textContent=' 이번 방문 누적 약 '+total.toLocaleString()+'원';const blob=await toWebp('data:'+j.mime+';base64,'+j.base64);
     const r2=await fetch('?save='+encodeURIComponent(k),{method:'POST',headers:{'Content-Type':'image/webp'},body:blob});const j2=await r2.json();if(!j2.ok)$('log').textContent+='\\n저장 실패 '+k}catch(e){$('log').textContent+='\\n오류 '+k}}}
   $('log').textContent+='\\n끝났어요.';render()}
 async function missingKeys(){const r=await fetch('?status=1');return await r.json()}
-$('status').onclick=async()=>{$('log').textContent='확인 중…';const j=await missingKeys();$('log').textContent='저장됨 '+j.saved.length+' / 180장 (비어 있음 '+j.missing.length+'장)'};
+$('status').onclick=async()=>{$('log').textContent='확인 중…';const j=await missingKeys();$('log').textContent='저장됨 '+j.saved.length+' / 540장 (비어 있음 '+j.missing.length+'장)'};
 $('fill').onclick=async()=>{const items=[];for(let v=0;v<6;v++){const s=cur(v),k=keyOf(s.u,s.a,s.e,v);if(!(cache[k]&&cache[k].saved))items.push(s)}await fillRange(items)};
-$('fillAll').onclick=async()=>{if(!confirm('비어 있는 칸을 모두 만들어 저장할까요? 장당 약 100원이 들어요.'))return;const j=await missingKeys();const items=j.missing.map(k=>{const p=k.split('/');return {u:p[0]==='female'?'male':'female',a:p[1].replace('-',' '),e:p[2],v:Number(p[3].split('.')[0])}});await fillRange(items)};
+$('fillAll').onclick=async()=>{if(!confirm('비어 있는 칸을 모두 만들어 저장할까요? 장당 약 100원이 들어요.'))return;const j=await missingKeys();const items=j.missing.map(k=>{const p=k.split('/');const f=p[3].split('.')[0].split('-');return {u:p[0]==='female'?'male':'female',a:p[1].replace('-',' '),e:p[2],v:Number(f[0]),x:Number(f[1]||0)}});await fillRange(items)};
 $('stop').onclick=()=>{stopFlag=true};
-['user','age','el'].forEach(i=>$(i).onchange=render);render();
+['user','age','el','var'].forEach(i=>$(i).onchange=render);render();
 </script></body></html>`;
 }
 
@@ -115,7 +116,8 @@ export async function GET(request: Request) {
   const elRaw = sp.get("el");
   const el = isElement5(elRaw) ? elRaw : "water";
   const v = Math.min(5, Math.max(0, Math.floor(Number(sp.get("v")) || 0)));
-  const r = await generateImage(spousePrompt(partner, el, age, v), apiKey, { model: process.env.GEMINI_IMAGE_MODEL?.trim() || undefined });
+  const variant = Math.min(PARTNER_VARIANTS - 1, Math.max(0, Math.floor(Number(sp.get("var")) || 0)));
+  const r = await generateImage(spousePrompt(partner, el, age, v, variant), apiKey, { model: process.env.GEMINI_IMAGE_MODEL?.trim() || undefined });
   if (!r.ok) return json({ ok: false, error: r.error.slice(0, 80) }, 502);
   const krw = Math.round(estimateCostUsd(r.usage) * (Number(process.env.USD_KRW) || DEFAULT_USD_KRW));
   return json({ ok: true, mime: r.mime, base64: r.base64, krw });

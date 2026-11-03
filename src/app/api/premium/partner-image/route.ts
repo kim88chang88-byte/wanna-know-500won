@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { partnerImageKey, partnerImageExists, partnerPublicUrl } from "@/lib/ai/partnerStore";
+import { partnerImageKey, partnerImageExists, partnerPublicUrl, variantFor, variantOrder } from "@/lib/ai/partnerStore";
 import { AI_IMAGE_NOTICE, ageOn, estimateCostUsd, generateImage, partnerAgeFor, spousePrompt, type Element5 } from "@/lib/ai/image";
 import { takeAiBudget } from "@/lib/ai/budget";
 import { isAdmin } from "@/lib/admin/auth";
@@ -11,7 +11,7 @@ import { hasEntitlement, ENTITLEMENT_COOKIE } from "@/lib/premium/entitlement";
 import { isPremiumLocked } from "@/lib/premium/config";
 import { buildPremiumReport, validatePremiumInput } from "@/lib/premium/report";
 import { chapterName } from "@/lib/ai/bookChapter";
-import { partnerProfile, partnerTitle } from "@/lib/premium/partnerProfile";
+import { partnerProfile, partnerTitle, profileSeed } from "@/lib/premium/partnerProfile";
 import { STEMS } from "@/lib/saju/constants";
 
 export const runtime = "nodejs";
@@ -61,16 +61,19 @@ export async function POST(request: Request) {
   const el = elementOf(buildPremiumReport(parsed.value, new Date(), "full", parsed.topic, false, parsed.concern, null).yongsin);
   const partner = g === "male" ? "female" : "male";
   const seed = (parsed.value.year * 400 + parsed.value.month * 31 + parsed.value.day) % 6;
-  const profile = partnerProfile(partner, el, seed);
+  const variant = variantFor({ year: parsed.value.year, month: parsed.value.month, day: parsed.value.day, hour: parsed.value.hour });
+  const profile = partnerProfile(partner, el, profileSeed(parsed.value));
   const title = partnerTitle(chapterName(session?.nick));
   const noImage = (reason: string) => NextResponse.json({ image: null, profile, title, reason });
 
   // 서버에 저장해 둔 이미지가 있으면 AI 를 부르지 않고 그것을 줘요. (조합 180가지 × 1장, 비용 0원)
   const store = loadDbConfig(process.env);
   if (store) {
-    const key = partnerImageKey(partner, partnerAge, el, seed);
-    if (await partnerImageExists(store.url, key)) {
-      return NextResponse.json({ image: { src: partnerPublicUrl(store.url, key), notice: AI_IMAGE_NOTICE, alt: title, usd: 0 }, profile, title });
+    const keys = variantOrder(variant).map((v) => partnerImageKey(partner, partnerAge, el, seed, v));
+    const has = await Promise.all(keys.map((k) => partnerImageExists(store.url, k)));
+    const idx = has.indexOf(true);
+    if (idx >= 0) {
+      return NextResponse.json({ image: { src: partnerPublicUrl(store.url, keys[idx]), notice: AI_IMAGE_NOTICE, alt: title, usd: 0 }, profile, title });
     }
   }
   // 저장된 이미지만 쓰기로 했다면(PARTNER_IMAGE_STORED_ONLY=true) 없는 조합은 글 프로필만 보여 줘요.
@@ -90,7 +93,7 @@ export async function POST(request: Request) {
     const dbCfg = loadDbConfig(process.env);
     const gate = await takeAiBudget(process.env, dbCfg ? createDb(dbCfg) : null);
     if (gate !== "ok") return noImage("budget");
-    const r = await generateImage(spousePrompt(partner, el, partnerAge, seed), apiKey, { model: process.env.GEMINI_IMAGE_MODEL?.trim() || undefined, timeoutMs: 45_000 });
+    const r = await generateImage(spousePrompt(partner, el, partnerAge, seed, variant), apiKey, { model: process.env.GEMINI_IMAGE_MODEL?.trim() || undefined, timeoutMs: 45_000 });
     if (!r.ok) {
       console.error("partner image failed:", r.error.slice(0, 200));
       return noImage("failed");

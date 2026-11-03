@@ -147,6 +147,20 @@ export async function generateImage(prompt: string, apiKey: string, opts: { mode
 /* 상대 인물 외모 규칙(2026-11-03 개정): 더 어리고, 헤어·얼굴·복장이 다양하고, 더 매력적으로 (docs/PARTNER_IMAGE.md) */
 
 /** 그림 속 연령 표현: 표의 연령대보다 한 단계씩 어려요(모두 성인). */
+/** 같은 오행이어도 변형(0~2)마다 포인트 색을 조금씩 달리해요. 0번이 기본 색이에요. */
+const ACCENTS: Record<Element5, string[]> = {
+  wood: ["soft green", "fresh mint and cream", "olive green and warm beige"],
+  fire: ["warm coral red", "soft peach-pink and cream", "deep burgundy and blush"],
+  earth: ["warm ochre-yellow and beige", "camel brown and ivory", "soft mustard and warm gray"],
+  metal: ["white and silver-gray", "pearl white and light charcoal", "ivory and cool steel-gray"],
+  water: ["navy and soft sky-blue", "teal and ice blue", "deep indigo and pale lavender-blue"],
+};
+/** 변형(0~2)마다 복장·헤어·얼굴이 서로 다른 짝으로 엮이게 하는 비껴 가기 값이에요. 0번은 처음 규칙과 같아요. */
+export const PARTNER_VARIANTS = 3;
+const OFF_OUTFIT = [0, 2, 4];
+const OFF_HAIR = [0, 3, 1];
+const OFF_FACE = [0, 4, 1];
+
 const AGE_LOOK: Record<PartnerAge, string> = { "mid 20s": "early 20s", "late 20s": "mid 20s", "mid 30s": "late 20s" };
 
 const HAIR: Record<"male" | "female", string[]> = {
@@ -206,16 +220,19 @@ const OUTFITS: Record<"male" | "female", Outfit[]> = {
   ],
 };
 
-/** 복장·헤어·표정은 seed(0~5)로 골라요. 같은 사람이면 같게 나와요. */
-export function spousePrompt(partner: "male" | "female", element: Element5, age: PartnerAge = "mid 20s", seed = 0): string {
+/** 복장·헤어·표정·포인트 색은 seed(0~5)와 변형(0~2)으로 골라요. 같은 값이면 같은 그림 설명이 나와요. */
+export function spousePrompt(partner: "male" | "female", element: Element5, age: PartnerAge = "mid 20s", seed = 0, variant = 0): string {
   const look = LOOK[element];
   const n = 6;
   const i = ((Math.floor(seed) % n) + n) % n;
-  const o = OUTFITS[partner][i];
-  const wear = o.wear.replace("{c}", look.color);
-  const hair = HAIR[partner][i];
-  const face = FACE[partner][(i + 2) % n];
-  const maleGlasses = i % 3 === 1;
+  const v = ((Math.floor(variant) % PARTNER_VARIANTS) + PARTNER_VARIANTS) % PARTNER_VARIANTS;
+  const o = OUTFITS[partner][(i + OFF_OUTFIT[v]) % n];
+  const color = ACCENTS[element][v];
+  const wear = o.wear.replace("{c}", color);
+  const hair = HAIR[partner][(i + OFF_HAIR[v]) % n];
+  const face = FACE[partner][(i + 2 + OFF_FACE[v]) % n];
+  // 남성은 가끔 얇은 안경을 써요(같은 값이면 같게). 여성은 절대 쓰지 않아요.
+  const maleGlasses = (i + v) % 3 === 1;
   const a = AGE_LOOK[age];
   const person =
     partner === "female"

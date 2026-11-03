@@ -1,13 +1,14 @@
-import type { Element5, PartnerAge } from "@/lib/ai/image";
+import { PARTNER_VARIANTS, type Element5, type PartnerAge } from "@/lib/ai/image";
 
 /**
  * 운명의 상대 이미지를 서버(Supabase Storage)에 저장해 두고 꺼내 쓰기 위한 도구예요.
- * 조합은 상대 성별 2 × 연령대 3 × 오행 5 × 복장 6 = 180가지, 조합마다 1장이에요. (docs/PARTNER_IMAGE.md)
+ * 조합은 상대 성별 2 × 연령대 3 × 오행 5 × 복장 6 = 180가지이고, 각 조합마다 변형 3장씩 모두 540장이에요. (docs/PARTNER_IMAGE.md)
  */
 export const PARTNER_BUCKET = "partner-images";
 export const PARTNER_AGES: PartnerAge[] = ["mid 20s", "late 20s", "mid 30s"];
 export const PARTNER_ELEMENTS: Element5[] = ["wood", "fire", "earth", "metal", "water"];
 export const PARTNER_SEEDS = [0, 1, 2, 3, 4, 5];
+export { PARTNER_VARIANTS };
 export const MAX_STORED_BYTES = 600_000;
 
 export interface StoreConfig {
@@ -16,16 +17,36 @@ export interface StoreConfig {
 }
 type FetchLike = (input: string, init?: RequestInit) => Promise<Response>;
 
-/** 파일 이름: 상대성별/연령대/오행/복장번호.webp */
-export function partnerImageKey(partner: "male" | "female", age: PartnerAge, element: Element5, seed: number): string {
+/** 파일 이름: 상대성별/연령대/오행/복장번호.webp (변형 0번), 변형 1·2번은 복장번호-변형.webp */
+export function partnerImageKey(partner: "male" | "female", age: PartnerAge, element: Element5, seed: number, variant = 0): string {
   const s = ((Math.floor(seed) % 6) + 6) % 6;
-  return `${partner}/${age.replace(" ", "-")}/${element}/${s}.webp`;
+  const v = ((Math.floor(variant) % PARTNER_VARIANTS) + PARTNER_VARIANTS) % PARTNER_VARIANTS;
+  return `${partner}/${age.replace(" ", "-")}/${element}/${s}${v === 0 ? "" : `-${v}`}.webp`;
 }
 
 export function allPartnerKeys(): string[] {
   const keys: string[] = [];
-  for (const p of ["female", "male"] as const) for (const a of PARTNER_AGES) for (const e of PARTNER_ELEMENTS) for (const s of PARTNER_SEEDS) keys.push(partnerImageKey(p, a, e, s));
+  for (const p of ["female", "male"] as const)
+    for (const a of PARTNER_AGES) for (const e of PARTNER_ELEMENTS) for (const s of PARTNER_SEEDS) for (let v = 0; v < PARTNER_VARIANTS; v++) keys.push(partnerImageKey(p, a, e, s, v));
   return keys;
+}
+
+/**
+ * 생년월일시로 변형(0~2)을 골라요. 같은 사람은 항상 같은 변형이 나오고, 사람마다 고르게 퍼져요.
+ * (복장 번호 seed 와 겹치지 않게 따로 섞어요)
+ */
+export function variantFor(b: { year: number; month: number; day: number; hour?: number | null }): number {
+  let h = 2166136261;
+  for (const ch of `${b.year}-${b.month}-${b.day}-${b.hour ?? "x"}`) {
+    h ^= ch.charCodeAt(0);
+    h = Math.imul(h, 16777619) >>> 0;
+  }
+  return (h >>> 7) % PARTNER_VARIANTS;
+}
+
+/** 지금 보여 줄 이미지 후보 순서: 고른 변형을 먼저, 없으면 다른 변형 */
+export function variantOrder(first: number): number[] {
+  return Array.from({ length: PARTNER_VARIANTS }, (_, k) => (first + k) % PARTNER_VARIANTS);
 }
 
 /** 관리자가 보낸 키가 우리가 만든 180가지 중 하나인지 확인해요. */

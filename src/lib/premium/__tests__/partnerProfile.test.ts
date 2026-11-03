@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { partnerProfile, partnerTitle } from "../partnerProfile";
+import { partnerProfile, partnerTitle, profileSeed } from "../partnerProfile";
 
 describe("partnerProfile", () => {
   it("직업·외모·성격·특징 네 줄이고 태그가 비어 있지 않아요", () => {
@@ -23,6 +23,15 @@ describe("partnerProfile", () => {
   });
   it("같은 입력이면 같은 결과예요", () => {
     expect(partnerProfile("male", "fire", 3)).toEqual(partnerProfile("male", "fire", 3));
+  });
+  it("사람(생년월일시)마다 프로필이 고르게 달라져요", () => {
+    const set = new Set<string>();
+    for (let d = 1; d <= 28; d++) set.add(JSON.stringify(partnerProfile("female", "water", profileSeed({ year: 1990, month: 5, day: d, hour: 8 }))));
+    expect(set.size).toBeGreaterThan(20);
+    expect(profileSeed({ year: 1990, month: 5, day: 3, hour: 8 })).toBe(profileSeed({ year: 1990, month: 5, day: 3, hour: 8 }));
+  });
+  it("한 줄 안에서 같은 태그가 겹치지 않아요", () => {
+    for (let s = 0; s < 200; s++) for (const r of partnerProfile("male", "fire", s * 7919)) expect(new Set(r.tags).size).toBe(r.tags.length);
   });
   it("제목에 닉네임이 들어가고 없으면 '당신'이에요", () => {
     expect(partnerTitle("철수")).toBe("철수 님의 미래 운명의 짝");

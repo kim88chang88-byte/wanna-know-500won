@@ -101,3 +101,20 @@ describe("복장과 안내 문구", () => {
   });
 });
 
+describe("변형(variant)", () => {
+  it("변형 0번은 기본, 1·2번은 서로 다른 그림 설명이에요", () => {
+    for (const partner of ["female", "male"] as const)
+      for (let seed = 0; seed < 6; seed++) {
+        const set = new Set([0, 1, 2].map((v) => spousePrompt(partner, "water", "mid 20s", seed, v)));
+        expect(set.size).toBe(3);
+        expect(spousePrompt(partner, "water", "mid 20s", seed)).toBe(spousePrompt(partner, "water", "mid 20s", seed, 0));
+      }
+  });
+  it("여성은 어떤 변형에서도 안경이 없고, 변형마다 포인트 색이 달라요", () => {
+    for (const el of ["wood", "fire", "earth", "metal", "water"] as const)
+      for (let seed = 0; seed < 6; seed++)
+        for (let v = 0; v < 3; v++) expect(spousePrompt("female", el, "mid 20s", seed, v)).toMatch(/no eyeglasses/);
+    expect(spousePrompt("female", "water", "mid 20s", 0, 1)).toMatch(/teal/);
+    expect(spousePrompt("female", "water", "mid 20s", 0, 2)).toMatch(/indigo/);
+  });
+});
