@@ -1,10 +1,10 @@
 "use client";
 
-import Link from "next/link";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import SafeImage from "@/components/landing/SafeImage";
 import PurchaseModal from "@/components/pay/PurchaseModal";
-import { CHAT_LOG_KEY, MSG_MAX, TURN_CAP, readChatCtx, type ChatCtx, type ChatKind, type ChatMsg } from "@/lib/chatContext";
+import { MSG_MAX, TURN_CAP, type ChatCtx, type ChatKind, type ChatMsg } from "@/lib/chatContext";
+import type { RoomMsg } from "@/lib/chatRooms";
 
 const GREETING: Record<ChatKind, string> = {
   daily: "안녕! 오늘의 한마디 잘 받았어? 더 궁금한 거 있으면 편하게 물어봐 ❄️",
@@ -80,17 +80,6 @@ function CoinIcon() {
   return <img src="/images/coin-500.webp" alt="" width={16} height={16} aria-hidden="true" className="mr-0.5 inline-block h-4 w-4 -translate-y-px object-contain align-middle" />;
 }
 
-function readLog(): Bubble[] {
-  try {
-    const v = JSON.parse(sessionStorage.getItem(CHAT_LOG_KEY) ?? "[]") as Bubble[];
-    return Array.isArray(v)
-      ? v.filter((m) => (m.role === "user" || m.role === "dori") && typeof m.text === "string").map((m) => ({ ...m, at: typeof m.at === "number" ? m.at : Date.now() }))
-      : [];
-  } catch {
-    return [];
-  }
-}
-
 const timeOf = (at: number) => new Date(at).toLocaleTimeString("ko-KR", { hour: "numeric", minute: "2-digit" });
 
 /** **굵게** 를 형광펜 글씨로 바꿔요 */
@@ -108,9 +97,9 @@ function rich(text: string): ReactNode[] {
 
 const prefersReducedMotion = () => typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches === true;
 
-export default function ChatApp() {
-  const [ctx, setCtx] = useState<ChatCtx>({ kind: "daily", summary: "" });
-  const [msgs, setMsgs] = useState<Bubble[]>([]);
+export default function ChatApp({ initialCtx, initialMsgs, onChange, onBack }: { initialCtx: ChatCtx; initialMsgs: RoomMsg[]; onChange: (msgs: RoomMsg[]) => void; onBack: () => void }) {
+  const [ctx] = useState<ChatCtx>(initialCtx);
+  const [msgs, setMsgs] = useState<Bubble[]>(initialMsgs);
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
   const [ready, setReady] = useState(false);
@@ -133,9 +122,6 @@ export default function ChatApp() {
   const inflight = useRef(false);
 
   useEffect(() => {
-    const c = readChatCtx();
-    if (c) setCtx(c);
-    setMsgs(readLog());
     setReady(true);
   }, []);
 
@@ -168,11 +154,8 @@ export default function ChatApp() {
 
   useEffect(() => {
     if (!ready) return;
-    try {
-      sessionStorage.setItem(CHAT_LOG_KEY, JSON.stringify(msgs.slice(-40)));
-    } catch {
-      /* 저장 실패는 무시 */
-    }
+    onChange(msgs.slice(-40));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [msgs, ready]);
 
   const toBottom = useCallback((smooth = true) => {
@@ -314,11 +297,6 @@ export default function ChatApp() {
     setMenu(false);
     setMsgs([]);
     setTyping(null);
-    try {
-      sessionStorage.removeItem(CHAT_LOG_KEY);
-    } catch {
-      /* 무시 */
-    }
   }
 
   async function copyAll() {
@@ -346,9 +324,9 @@ export default function ChatApp() {
       <span aria-hidden="true" className="pointer-events-none absolute right-4 top-[26%] h-12 w-12 rounded-full bg-[radial-gradient(circle_at_30%_30%,#ffffffaa,#c9b6ff22)]" />
 
       <header className="z-20 flex items-center gap-2.5 border-b border-brand-100 bg-white/80 px-3 py-2.5 backdrop-blur">
-        <Link href="/" aria-label="처음으로" className="grid h-9 w-9 place-items-center rounded-full text-xl text-gray-600 hover:bg-gray-100">
+        <button type="button" onClick={onBack} aria-label="대화방 목록" className="grid h-9 w-9 place-items-center rounded-full text-xl text-gray-600 hover:bg-gray-100">
           ‹
-        </Link>
+        </button>
         <div className="relative h-[42px] w-[42px] shrink-0">
           <SafeImage src="/images/dori-icon.webp" alt="" className="h-[42px] w-[42px] rounded-full border-2 border-brand-200 bg-white object-contain" fallback="🦦" fallbackClass="text-2xl" />
           <i aria-hidden="true" className="absolute -bottom-px -right-px h-[11px] w-[11px] rounded-full border-2 border-white bg-emerald-400" />

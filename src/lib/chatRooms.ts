@@ -1,0 +1,133 @@
+import type { ChatCtx, ChatMsg } from "@/lib/chatContext";
+
+/*
+ * 도리 상담실 대화방 목록. 풀이(오늘의 한마디·결과서·궁합)마다 방이 하나씩 생겨요.
+ * 대화는 이 기기(브라우저)에만 저장해요. 서버에는 저장하지 않아요. 로그아웃·탈퇴하면 지워요.
+ */
+export const CHAT_ROOMS_KEY = "wanna500:chat:rooms:v1";
+export const MAX_ROOMS = 10;
+export const MAX_ROOM_MSGS = 40;
+
+export interface RoomMsg extends ChatMsg {
+  at: number;
+  error?: boolean;
+  liked?: boolean;
+  follow?: string[];
+}
+
+export interface ChatRoom {
+  id: string;
+  ctx: ChatCtx;
+  title: string;
+  chip: string;
+  icon: string;
+  msgs: RoomMsg[];
+  updatedAt: number;
+  /** 오늘의 한마디 방은 날짜(YYYY-MM-DD)가 바뀌면 새로 시작해요 */
+  day: string;
+}
+
+interface StoreLike {
+  getItem(k: string): string | null;
+  setItem(k: string, v: string): void;
+  removeItem(k: string): void;
+}
+
+const dayOf = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+
+function hash(s: string): string {
+  let h = 5381;
+  for (let i = 0; i < s.length; i++) h = ((h << 5) + h + s.charCodeAt(i)) | 0;
+  return (h >>> 0).toString(36);
+}
+
+const topicLine = (summary: string) => /^주제: (.+)$/m.exec(summary)?.[1]?.trim() ?? "";
+
+/** 같은 풀이는 같은 방이 되게 하는 값 */
+export function roomIdFor(ctx: ChatCtx): string {
+  if (ctx.kind === "daily") return "daily";
+  return `${ctx.kind}:${hash(JSON.stringify([ctx.birth ?? null, ctx.partnerBirth ?? null, ctx.topic ?? null, topicLine(ctx.summary)]))}`;
+}
+
+export function roomLook(ctx: ChatCtx): { title: string; chip: string; icon: string } {
+  if (ctx.kind === "daily") return { title: "오늘의 한마디", chip: "오늘", icon: "🌙" };
+  if (ctx.kind === "compat") return { title: `${ctx.partnerName?.trim() || "상대"}님과의 궁합`, chip: "궁합", icon: "💞" };
+  if (ctx.topic === "study") return { title: "2027 신년운", chip: "신년운", icon: "📜" };
+  const t = topicLine(ctx.summary);
+  return { title: t || "사주 풀이", chip: t || "풀이", icon: "📜" };
+}
+
+function validMsg(m: unknown): m is RoomMsg {
+  const v = m as Partial<RoomMsg> | null;
+  return !!v && (v.role === "user" || v.role === "dori") && typeof v.text === "string" && typeof v.at === "number";
+}
+
+export function loadRooms(st: StoreLike | null): ChatRoom[] {
+  try {
+    const raw = JSON.parse(st?.getItem(CHAT_ROOMS_KEY) ?? "[]") as unknown;
+    if (!Array.isArray(raw)) return [];
+    const out: ChatRoom[] = [];
+    for (const r of raw as Partial<ChatRoom>[]) {
+      const c = r?.ctx as ChatCtx | undefined;
+      if (!r || typeof r.id !== "string" || !c || (c.kind !== "daily" && c.kind !== "reading" && c.kind !== "compat") || typeof c.summary !== "string") continue;
+      out.push({
+        id: r.id,
+        ctx: c,
+        ...roomLook(c),
+        msgs: Array.isArray(r.msgs) ? r.msgs.filter(validMsg).slice(-MAX_ROOM_MSGS) : [],
+        updatedAt: typeof r.updatedAt === "number" ? r.updatedAt : 0,
+        day: typeof r.day === "string" ? r.day : "",
+      });
+    }
+    return sortRooms(out).slice(0, MAX_ROOMS);
+  } catch {
+    return [];
+  }
+}
+
+export function saveRooms(st: StoreLike | null, rooms: ChatRoom[]): void {
+  try {
+    st?.setItem(CHAT_ROOMS_KEY, JSON.stringify(sortRooms(rooms).slice(0, MAX_ROOMS)));
+  } catch {
+    /* 저장이 막혀 있으면 이번 방문에서만 써요 */
+  }
+}
+
+export function clearRooms(st: StoreLike | null): void {
+  try {
+    st?.removeItem(CHAT_ROOMS_KEY);
+  } catch {
+    /* 무시 */
+  }
+}
+
+export const sortRooms = (rooms: ChatRoom[]): ChatRoom[] => [...rooms].sort((a, b) => b.updatedAt - a.updatedAt);
+
+/** 맥락으로 방을 열어요. 같은 풀이면 기존 방(대화 이어서), 아니면 새 방. */
+export function upsertRoom(rooms: ChatRoom[], ctx: ChatCtx, now: Date = new Date()): { rooms: ChatRoom[]; id: string } {
+  const id = roomIdFor(ctx);
+  const day = dayOf(now);
+  const old = rooms.find((r) => r.id === id);
+  let room: ChatRoom;
+  if (!old || (ctx.kind === "daily" && old.day !== day)) {
+    room = { id, ctx, ...roomLook(ctx), msgs: [], updatedAt: now.getTime(), day };
+  } else {
+    const merged: ChatCtx = { ...old.ctx, ...ctx, summary: ctx.summary || old.ctx.summary };
+    room = { ...old, ctx: merged, ...roomLook(merged), day: ctx.kind === "daily" ? day : old.day };
+  }
+  return { rooms: sortRooms([room, ...rooms.filter((r) => r.id !== id)]).slice(0, MAX_ROOMS), id };
+}
+
+/** 대화가 바뀌었을 때만 갱신 시각을 올려요 */
+export function withMsgs(rooms: ChatRoom[], id: string, msgs: RoomMsg[], now: Date = new Date()): ChatRoom[] {
+  return rooms.map((r) => {
+    if (r.id !== id) return r;
+    const next = msgs.slice(-MAX_ROOM_MSGS);
+    const changed = next.length !== r.msgs.length || next[next.length - 1]?.at !== r.msgs[r.msgs.length - 1]?.at;
+    return { ...r, msgs: next, updatedAt: changed ? now.getTime() : r.updatedAt };
+  });
+}
+
+export function removeRoom(rooms: ChatRoom[], id: string): ChatRoom[] {
+  return rooms.filter((r) => r.id !== id);
+}

@@ -1,4 +1,4 @@
-import ChatApp from "@/components/chat/ChatApp";
+import ChatHome from "@/components/chat/ChatHome";
 import { SERVICE_NAME } from "@/lib/siteInfo";
 
 export const metadata = {
@@ -8,5 +8,5 @@ export const metadata = {
 };
 
 export default function ChatPage() {
-  return <ChatApp />;
+  return <ChatHome />;
 }

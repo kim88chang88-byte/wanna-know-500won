@@ -2,6 +2,8 @@
 
 import type { SavedProfile } from "@/lib/profile";
 import { useCallback, useEffect, useState } from "react";
+import { clearRooms } from "@/lib/chatRooms";
+import { getBrowserStorage } from "@/lib/drawCounter";
 
 export interface AuthUser {
   nickname: string | null;
@@ -69,6 +71,7 @@ export function useAuth() {
     } catch {
       /* 무시 */
     }
+    clearRooms(getBrowserStorage()); // 이 기기에 저장된 상담실 대화도 함께 지워요
     setUser(null);
     setServerCounts(null);
     setProfile(null);
@@ -82,6 +85,7 @@ export function useAuth() {
     } catch {
       return false;
     }
+    clearRooms(getBrowserStorage()); // 이 기기에 저장된 상담실 대화도 함께 지워요
     setUser(null);
     setServerCounts(null);
     setProfile(null);
