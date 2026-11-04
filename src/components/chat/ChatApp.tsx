@@ -439,7 +439,7 @@ export default function ChatApp() {
               뽑기 동전으로 질문을 더 할 수 있어요.
             </p>
             <button type="button" onClick={() => setBuyOpen(true)} className="mt-3 block w-full rounded-full bg-gradient-to-br from-brand-500 to-[#c24fe0] py-3 text-sm font-extrabold text-white shadow active:scale-[0.98]">
-              <CoinIcon /> 뽑기 동전으로 질문 5개 더하기
+              <CoinIcon /> 동전 하나로 5번 더 물어보기
             </button>
             <button type="button" onClick={newChat} className="mt-2 text-xs font-bold text-brand-600">
               새 대화 시작하기
@@ -477,13 +477,13 @@ export default function ChatApp() {
         data-no-click-fx=""
         className="z-20 border-t border-brand-100 bg-white/85 px-3 pb-[max(12px,env(safe-area-inset-bottom))] pt-1.5 backdrop-blur"
       >
-        <div className="mx-1 mb-2 flex items-center justify-between text-[11px] text-[#8a7fa8]">
+        <div className="mx-1 mb-2 flex flex-wrap items-center justify-between gap-x-2 gap-y-1.5 text-[11px] text-[#8a7fa8]">
           <span>
             ❄️ 질문 <b className="text-gray-800">{leftNow}번</b> 남았어요
             <span className="ml-2 text-[#b08722]"><CoinIcon /> 동전 {coins}개</span>
           </span>
-          <button type="button" onClick={() => setBuyOpen(true)} className="rounded-full bg-[#fff3c9] px-2.5 py-1 font-extrabold text-[#8a5b00] active:scale-95">
-            <CoinIcon /> 동전으로 더 묻기
+          <button type="button" onClick={() => setBuyOpen(true)} className="shrink-0 whitespace-nowrap rounded-full bg-[#fff3c9] px-2.5 py-1 font-extrabold text-[#8a5b00] active:scale-95">
+            <CoinIcon /> 동전 하나로 5번 더 물어보기
           </button>
         </div>
         <div className="flex items-end gap-2">
