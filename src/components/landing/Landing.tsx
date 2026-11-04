@@ -365,8 +365,8 @@ export default function Landing() {
       </main>
 
       <Footer />
-      <div aria-hidden="true" className="h-16 lg:hidden" />
-      <BottomTabs />
+      <div aria-hidden="true" className="h-24 lg:hidden" />
+      <BottomTabs freeLeft={Math.max(0, FREE_PER_DAY - counts.today) + tickets + coins > 0} />
 
       {ritual && <CoinRitual bill={ritualBill} big={ritualBig} />}
       <StickyDrawCta hidden={Boolean(intake) || loginOpen || ritual} />
