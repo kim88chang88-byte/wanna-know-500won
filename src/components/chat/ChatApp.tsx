@@ -74,7 +74,7 @@ const timeOf = (at: number) => new Date(at).toLocaleTimeString("ko-KR", { hour: 
 function rich(text: string): ReactNode[] {
   return text.split(/(\*\*[^*]+\*\*)/g).map((t, i) =>
     t.startsWith("**") && t.endsWith("**") && t.length > 4 ? (
-      <mark key={i} className="bg-[linear-gradient(transparent_62%,#f3dcff_62%)] font-extrabold text-brand-700">
+      <mark key={i} className="bg-transparent bg-[linear-gradient(transparent_62%,#f3dcff_62%)] font-extrabold text-brand-700">
         {t.slice(2, -2)}
       </mark>
     ) : (
