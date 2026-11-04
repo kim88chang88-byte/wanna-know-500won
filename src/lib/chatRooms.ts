@@ -30,7 +30,7 @@ export interface ChatRoom {
 interface StoreLike {
   getItem(k: string): string | null;
   setItem(k: string, v: string): void;
-  removeItem(k: string): void;
+  removeItem?(k: string): void;
 }
 
 const dayOf = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
@@ -95,7 +95,7 @@ export function saveRooms(st: StoreLike | null, rooms: ChatRoom[]): void {
 
 export function clearRooms(st: StoreLike | null): void {
   try {
-    st?.removeItem(CHAT_ROOMS_KEY);
+    st?.removeItem?.(CHAT_ROOMS_KEY);
   } catch {
     /* 무시 */
   }
