@@ -1,6 +1,6 @@
 /** 방문 출처·핵심 행동(퍼널) 기록에 쓰는 공용 규칙. 서버와 브라우저가 같이 써요. 입력값(생일·글·이름)은 절대 넣지 않아요. */
 
-export const TRACK_EVENTS = ["bday_read", "draw_start", "draw_done", "login_click", "chat_login_click", "login_done", "signup"] as const;
+export const TRACK_EVENTS = ["bday_read", "draw_start", "draw_done", "login_click", "chat_login_click", "login_done", "signup", "pay_open", "pay_notify"] as const;
 export type TrackEvent = (typeof TRACK_EVENTS)[number];
 
 /** 관리자 화면에 보여 줄 순서와 이름 */
@@ -13,6 +13,8 @@ export const FUNNEL_STEPS: Array<{ key: "visit" | TrackEvent; label: string }> =
   { key: "chat_login_click", label: "상담 로그인 클릭" },
   { key: "login_done", label: "로그인 완료" },
   { key: "signup", label: "신규 가입" },
+  { key: "pay_open", label: "결제하기 클릭" },
+  { key: "pay_notify", label: "결제 알림 신청" },
 ];
 
 export function isTrackEvent(v: unknown): v is TrackEvent {

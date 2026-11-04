@@ -58,6 +58,7 @@ import ReviewBox from "./ReviewBox";
 import ScrollHint from "./ScrollHint";
 import ManseReport from "@/components/premium/ManseReport";
 import { NextProductBanner } from "@/components/premium/PremiumBook";
+import PurchaseModal from "@/components/pay/PurchaseModal";
 import type { PremiumReportView } from "@/lib/premium/types";
 import type { BirthInput } from "@/lib/saju/types";
 
@@ -436,6 +437,8 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
   // 보던 풀이를 내 보관함에 저장 (로그인한 회원이 선택. 기본은 켜 두고, 끌 수 있어요)
   const [saveVault, setSaveVault] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [freeUsed, setFreeUsed] = useState(false);
+  const [payOpen, setPayOpen] = useState(false);
   const [phase, setPhase] = useState<"form" | "loading" | "result">("form");
   const [chart, setChart] = useState<SajuChart | null>(null);
   const [reading, setReading] = useState<PublicReading | null>(null);
@@ -505,6 +508,7 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
     if (!input) return;
     const partnerInput = compat ? buildBirthFields(partner) : null;
     if (compat && !partnerInput) return;
+    setFreeUsed(false);
     setLoadDone(false);
     setPhase("loading");
     setError(null);
@@ -542,6 +546,7 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
         boundaryNote?: string | null;
         error?: string;
       } | null;
+      if (res.status === 402 && (data as { code?: string } | null)?.code === "free_used") setFreeUsed(true);
       if (!res.ok || !data?.chart) throw new Error(data?.error ?? "풀이를 만들지 못했어요. 잠시 뒤에 다시 해볼래요?");
       const status: ReadingStatus = data.readingStatus ?? "failed";
       const p = await premiumPromise;
@@ -1101,6 +1106,12 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
               {error}
             </p>
           )}
+          {freeUsed && error && (
+            <button type="button" onClick={() => setPayOpen(true)} className="mt-2 w-full rounded-full bg-brand-500 py-2.5 text-sm font-bold text-white">
+              동전으로 한 번 더 뽑기
+            </button>
+          )}
+          {payOpen && <PurchaseModal purpose="뽑기 1회" onClose={() => setPayOpen(false)} />}
 
           <div className="mt-5 flex gap-2">
             {stepIndex > 0 && (

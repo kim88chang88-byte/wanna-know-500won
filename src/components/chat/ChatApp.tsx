@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import SafeImage from "@/components/landing/SafeImage";
+import PurchaseModal from "@/components/pay/PurchaseModal";
 import { CHAT_LOG_KEY, MSG_MAX, TURN_CAP, readChatCtx, type ChatCtx, type ChatKind, type ChatMsg } from "@/lib/chatContext";
 
 const GREETING: Record<ChatKind, string> = {
@@ -125,6 +126,7 @@ export default function ChatApp() {
   const [coins, setCoins] = useState(0);
   const [buyOpen, setBuyOpen] = useState(false);
   const [buying, setBuying] = useState(false);
+  const [payOpen, setPayOpen] = useState(false);
   const scroller = useRef<HTMLDivElement>(null);
   const field = useRef<HTMLTextAreaElement>(null);
   const nearBottom = useRef(true);
@@ -286,7 +288,7 @@ export default function ChatApp() {
         flash(`질문 ${data.added ?? 5}개가 더해졌어요 ❄️`);
       } else if (data?.code === "no_coin") {
         setCoins(0);
-        flash("동전이 없어요. 친구를 초대하면 동전을 받을 수 있어요 🎁");
+        setPayOpen(true);
       } else {
         flash(data?.error ?? "동전을 쓰지 못했어요. 잠시 뒤에 다시 시도해 주세요.");
       }
@@ -552,13 +554,20 @@ export default function ChatApp() {
               <button type="button" onClick={() => setBuyOpen(false)} disabled={buying} className="flex-1 rounded-full border border-slate-300 bg-white py-2.5 text-sm font-bold text-slate-600">
                 아니요
               </button>
-              <button type="button" onClick={() => void buy()} disabled={buying || coins === 0} className="flex-1 rounded-full bg-brand-500 py-2.5 text-sm font-bold text-white disabled:opacity-50">
-                {buying ? "쓰는 중…" : "네, 더할게요"}
-              </button>
+              {coins === 0 ? (
+                <button type="button" onClick={() => { setBuyOpen(false); setPayOpen(true); }} className="flex-1 rounded-full bg-brand-500 py-2.5 text-sm font-bold text-white">
+                  동전 구매하기
+                </button>
+              ) : (
+                <button type="button" onClick={() => void buy()} disabled={buying} className="flex-1 rounded-full bg-brand-500 py-2.5 text-sm font-bold text-white disabled:opacity-50">
+                  {buying ? "쓰는 중…" : "네, 더할게요"}
+                </button>
+              )}
             </div>
           </div>
         </div>
       )}
+      {payOpen && <PurchaseModal purpose="질문 5번 더 하기" onClose={() => setPayOpen(false)} />}
     </div>
   );
 }
