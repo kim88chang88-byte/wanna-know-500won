@@ -45,10 +45,32 @@ const CHIP_POOL: Record<ChatKind, string[]> = {
   ],
 };
 
+/** 신년운(2027)에서 들어왔을 때: 올해 대신 2027년 기준 질문 */
+const STUDY_CHIPS = [
+  "2027년에 조심할 달은 언제야?",
+  "상반기랑 하반기 중 언제가 더 좋아?",
+  "2027년 첫 달에 해 볼 일은?",
+  "2027년 내 장점을 살리는 방법이 궁금해",
+  "이번 주에 바로 해 볼 일을 알려 줘",
+  "마음이 불안할 때 어떻게 하면 좋아?",
+];
+
+/** 신년운에서 들어오면 풀이의 한 줄 결론을 넣어 "기억하고 있다"는 느낌을 줘요 */
+function greetingFor(ctx: ChatCtx): string {
+  if (ctx.kind === "reading" && ctx.topic === "study") {
+    const head = /한 줄 결론: (.+)/.exec(ctx.summary)?.[1]?.trim();
+    if (head && head.length <= 40) return `2027년 신년운 보고 왔구나! "${head}"라고 나왔던 거, 더 궁금한 거 편하게 물어봐 ❄️`;
+    return "2027년 신년운 보고 왔구나! 읽다가 더 궁금했던 달이나 흐름을 편하게 물어봐 ❄️";
+  }
+  return GREETING[ctx.kind];
+}
+
 interface Bubble extends ChatMsg {
   at: number;
   error?: boolean;
   liked?: boolean;
+  /** 도리 답에서 이어지는 다음 질문 칩 */
+  follow?: string[];
 }
 
 /** 도리은행 500원 동전 그림 (글 옆에 작게) */
@@ -191,8 +213,13 @@ export default function ChatApp() {
   const leftNow = left ?? Math.max(0, TURN_CAP - asked);
   const chips = useMemo(() => {
     const done = new Set(msgs.filter((m) => m.role === "user").map((m) => m.text));
-    return CHIP_POOL[ctx.kind].filter((c) => !done.has(c)).slice(0, 4);
-  }, [msgs, ctx.kind]);
+    // 방금 도리 답에 후속 질문이 있으면 그것부터, 없으면 기본 칩
+    const lastMsg = msgs[msgs.length - 1];
+    const follow = lastMsg?.role === "dori" && !lastMsg.error ? (lastMsg.follow ?? []).filter((c) => !done.has(c)) : [];
+    if (follow.length > 0) return follow.slice(0, 3);
+    const pool = ctx.kind === "reading" && ctx.topic === "study" ? STUDY_CHIPS : CHIP_POOL[ctx.kind];
+    return pool.filter((c) => !done.has(c)).slice(0, 4);
+  }, [msgs, ctx.kind, ctx.topic]);
   const typingNow = typing !== null;
 
   async function send(raw: string) {
@@ -211,7 +238,7 @@ export default function ChatApp() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ctx, messages: next.map(({ role, text: t }) => ({ role, text: t })) }),
       });
-      const data = (await res.json().catch(() => null)) as { answer?: string; error?: string; code?: string; left?: number } | null;
+      const data = (await res.json().catch(() => null)) as { answer?: string; followups?: unknown; error?: string; code?: string; left?: number } | null;
       if (res.status === 402 && data?.code === "quota") {
         // 질문을 다 쓴 경우: 방금 보낸 말은 입력창으로 돌려놓고 "동전으로 더하기" 카드를 보여 줘요
         setLeft(0);
@@ -222,7 +249,7 @@ export default function ChatApp() {
       if (!res.ok || !data?.answer) throw new Error(data?.error ?? "도리가 잠깐 물놀이하러 갔어요. 다시 보내 볼래요?");
       if (typeof data.left === "number") setLeft(data.left);
       else setLeft((l) => (l === null ? null : Math.max(0, l - 1)));
-      const all: Bubble[] = [...next, { role: "dori", text: data.answer, at: Date.now() }];
+      const all: Bubble[] = [...next, { role: "dori", text: data.answer, at: Date.now(), follow: Array.isArray(data.followups) ? data.followups.filter((f): f is string => typeof f === "string").slice(0, 3) : undefined }];
       setMsgs(all);
       if (!prefersReducedMotion()) setTyping({ idx: all.length - 1, shown: 0 });
     } catch (e) {
@@ -384,7 +411,7 @@ export default function ChatApp() {
         aria-label="도리와의 대화"
       >
         <p className="mx-auto w-fit rounded-full border border-brand-100 bg-white/60 px-3 py-1 text-[11px] text-[#8a7fa8]">오늘 · 도리의 달빛 서재에서 🌙</p>
-        <DoriRow text={GREETING[ctx.kind]} />
+        <DoriRow text={greetingFor(ctx)} />
         {msgs.map((m, i) => {
           if (m.role === "user") return <UserRow key={i} text={m.text} at={m.at} />;
           const live = typing?.idx === i;

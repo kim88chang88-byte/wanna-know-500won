@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { takeAiBudget } from "@/lib/ai/budget";
 import { chatDori, cleanHistory, CRISIS_ANSWER, isCrisis } from "@/lib/ai/chat";
-import { buildCoreFacts } from "@/lib/ai/coreFacts";
+import { buildCoreFacts, factsNowFor } from "@/lib/ai/coreFacts";
 import { buildDailyFacts, kstToday } from "@/lib/ai/dailyFacts";
 import { ReadingUnavailableError } from "@/lib/ai/interpret";
 import { hasAiKey } from "@/lib/ai/llm";
@@ -72,20 +72,20 @@ export async function POST(request: Request) {
     }
 
     const now = new Date();
-    const answer = await chatDori(
+    const reply = await chatDori(
       {
         kind: ctx.kind,
         name: ctx.name,
         partnerName: ctx.partnerName,
         summary: ctx.summary,
         chart,
-        core: buildCoreFacts(birth, now, true),
+        core: buildCoreFacts(birth, factsNowFor(ctx.topic, now), true),
         daily: ctx.kind === "daily" ? buildDailyFacts(chart, kstToday(now)) : null,
         partnerChart,
       },
       history,
     );
-    return NextResponse.json({ answer, left: taken.left });
+    return NextResponse.json({ answer: reply.answer, followups: reply.followups, left: taken.left });
   } catch (err) {
     // 답을 못 만들었으면 쓴 질문을 돌려줘요.
     if (taken && taken.left >= 0) await refundQuestion(db, target, taken.via);

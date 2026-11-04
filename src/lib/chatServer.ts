@@ -35,10 +35,11 @@ export interface ParsedCtx {
   partnerName: string | null;
   birth: BirthInput | null;
   partnerBirth: BirthInput | null;
+  topic: "study" | null;
 }
 
 export function parseCtx(raw: unknown): ParsedCtx | null {
-  const c = (raw ?? {}) as { kind?: unknown; summary?: unknown; birth?: unknown; partnerBirth?: unknown; partnerName?: unknown; name?: unknown };
+  const c = (raw ?? {}) as { kind?: unknown; summary?: unknown; birth?: unknown; partnerBirth?: unknown; partnerName?: unknown; name?: unknown; topic?: unknown };
   const kind: ChatKind | null = c.kind === "daily" || c.kind === "reading" || c.kind === "compat" ? c.kind : null;
   if (!kind) return null;
   return {
@@ -48,6 +49,7 @@ export function parseCtx(raw: unknown): ParsedCtx | null {
     partnerName: typeof c.partnerName === "string" ? c.partnerName.slice(0, 12) : null,
     birth: validBirth(c.birth),
     partnerBirth: kind === "compat" ? validBirth(c.partnerBirth) : null,
+    topic: kind === "reading" && c.topic === "study" ? "study" : null,
   };
 }
 

@@ -709,7 +709,7 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
                       <StoryReport report={premiumReport} reading={reading} intro={null} name={nickname}
                         lastWord={<><ResultHero report={premiumReport} aiQuote={reading?.kkotgeoji ?? null} luxe={false} hideLucky /><ResultShareCard report={premiumReport} aiQuote={reading?.kkotgeoji ?? null} /></>}
                         closing={askInput ? <AskChips input={askInput} luxe={false} topic={target.fortune} hideTitle /> : undefined}
-                        chat={askInput ? <ChatEntry ctx={{ kind: "reading", summary: summarizeReport(premiumReport), birth: askInput, name: nickname?.trim() || null }} /> : undefined}
+                        chat={askInput ? <ChatEntry ctx={{ kind: "reading", summary: summarizeReport(premiumReport), birth: askInput, name: nickname?.trim() || null, ...(target.fortune === "study" ? { topic: "study" as const } : {}) }} /> : undefined}
                       />
                     )}
                   </div>
@@ -823,6 +823,7 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
                   birth: askInput,
                   ...(compat && resultPartner ? { partnerBirth: resultPartner.birth, partnerName: resultPartner.name } : {}),
                   name: nickname?.trim() || null,
+                  ...(target.fortune === "study" && !compat ? { topic: "study" as const } : {}),
                 }}
               />
             </div>

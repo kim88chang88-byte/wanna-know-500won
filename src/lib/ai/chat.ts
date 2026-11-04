@@ -20,8 +20,12 @@ export const CHAT_SYSTEM_PROMPT = `너는 "도리", 맑은 옹달샘의 수달 �
 
 말투
 - 친구에게 카톡하듯 다정한 반말. 이모지는 한 답에 0~1개. 이름이 있으면 "○○님"처럼 불러(실제 이름 사용).
-- 답은 220~450자, 빈 줄(\\n\\n)로 2~3문단. 첫 문단은 질문에 바로 답하는 결론, 둘째는 사주 근거를 쉬운 말로, 셋째는 이번 주에 해 볼 작은 행동이나 도리가 되묻는 질문 하나.
+- 대화의 첫 질문에는 220~450자, 빈 줄(\\n\\n)로 2~3문단. 첫 문단은 질문에 바로 답하는 결론, 둘째는 사주 근거를 쉬운 말로, 셋째는 이번 주에 해 볼 작은 행동이나 도리가 되묻는 질문 하나.
+- 이어지는 질문(대화 기록에 도리의 답이 이미 있을 때)에는 150~300자, 1~2문단으로 더 짧게. 되묻는 질문은 매번 붙이지 말고, 필요할 때만 가끔.
+- 사용자의 말에 불안·걱정·서운함 같은 감정이 담겨 있으면 결론보다 먼저 공감 한 줄(예: "불안했구나")로 시작해. 감정이 없는 질문엔 바로 답해.
+- 앞서 도리가 한 말과 같은 근거·같은 문장을 되풀이하지 마. 이미 쓴 사주 근거는 "아까 말한 것처럼" 정도로만 짚고, 새 관점이나 더 구체적인 장면을 줘.
 - 가장 핵심이 되는 한 문장만 **이렇게** 별표 두 개로 감싸(한 답에 한 곳만). 그 밖에는 마크다운을 쓰지 마.
+- followups 에는 방금 답에서 자연스럽게 이어지는 사용자의 다음 질문 3개를 20자 안팎으로 써(사용자가 도리에게 묻는 말투, 예: "물 기운을 채우는 습관이 있어?"). 이미 물어본 질문과 겹치지 않게. 의료·법률·투자·결정을 대신 내려 달라는 질문은 넣지 마.
 
 사실과 한계
 - 사실은 입력의 "계산된 사주 정보", "방금 본 풀이", "대화 기록"에 있는 것만 써. 없는 글자·합충·신살·사건은 지어내지 마. 근거가 부족하면 "이건 사주만으로 단정하기 어려워"라고 솔직히 말해.
@@ -37,8 +41,11 @@ export const CHAT_SYSTEM_PROMPT = `너는 "도리", 맑은 옹달샘의 수달 �
 
 export const CHAT_SCHEMA = {
   type: "object",
-  properties: { answer: { type: "string", description: `도리의 채팅 답. 220~450자 안팎, 최대 ${CHAT_MAX}자, 빈 줄로 2~3문단` } },
-  required: ["answer"],
+  properties: {
+    answer: { type: "string", description: `도리의 채팅 답. 첫 질문은 220~450자, 이어지는 질문은 150~300자, 최대 ${CHAT_MAX}자, 빈 줄로 1~3문단` },
+    followups: { type: "array", items: { type: "string" }, description: "방금 답에서 이어지는 사용자의 다음 질문 3개 (각 20자 안팎)" },
+  },
+  required: ["answer", "followups"],
   additionalProperties: false,
 } as const;
 
@@ -49,6 +56,31 @@ export function parseChatAnswer(value: unknown): string | null {
   if (t.length < CHAT_MIN || t.length > CHAT_MAX) return null;
   if (isGeneric(t) || containsForbidden(t)) return null;
   return t;
+}
+
+export interface ChatReply {
+  answer: string;
+  followups: string[];
+}
+
+/** 후속 질문 칩: 길이·금지어·중복을 거르고 3개까지. 하나도 못 쓰면 빈 목록(화면은 기본 칩을 보여 줘요). */
+export function cleanFollowups(raw: unknown): string[] {
+  if (!Array.isArray(raw)) return [];
+  const out: string[] = [];
+  for (const v of raw) {
+    if (typeof v !== "string") continue;
+    const t = v.trim().replace(/\s+/g, " ");
+    if (t.length < 4 || t.length > 40 || containsForbidden(t) || out.includes(t)) continue;
+    out.push(t);
+    if (out.length === 3) break;
+  }
+  return out;
+}
+
+export function parseChatReply(value: unknown): ChatReply | null {
+  const answer = parseChatAnswer(value);
+  if (answer === null) return null;
+  return { answer, followups: cleanFollowups((value as { followups?: unknown } | null)?.followups) };
 }
 
 /** 마음이 많이 힘들다는 말이 보이면 AI 를 부르지 않고 정해 둔 답으로 안내해요. */
@@ -97,6 +129,16 @@ function chartFacts(chart: SajuChart) {
   };
 }
 
+/** 최근 기록 밖으로 밀려난 사용자의 예전 질문을 한 줄로 이어 붙여요(AI 를 따로 부르지 않아요). */
+export function earlierQuestions(history: ChatMsg[]): string {
+  const old = history.slice(0, Math.max(0, history.length - HISTORY_MAX));
+  return old
+    .filter((m) => m.role === "user")
+    .map((m) => m.text.replace(/\s+/g, " ").slice(0, 40))
+    .slice(-6)
+    .join(" / ");
+}
+
 export function buildChatPrompt(i: ChatFactsInput, history: ChatMsg[]): string {
   const where = i.kind === "daily" ? "오늘의 도리 한마디 카드에서 들어왔어요" : i.kind === "compat" ? "궁합 결과서를 읽고 들어왔어요" : "사주 풀이 결과서를 읽고 들어왔어요";
   const facts = {
@@ -111,15 +153,16 @@ export function buildChatPrompt(i: ChatFactsInput, history: ChatMsg[]): string {
     .slice(-HISTORY_MAX)
     .map((m) => `${m.role === "user" ? "사용자" : "도리"}: ${m.text}`)
     .join("\n");
-  return `계산된 사주 정보:\n${JSON.stringify(facts, null, 2)}\n\n방금 본 풀이(요약):\n${i.summary.slice(0, SUMMARY_MAX) || "(없음)"}\n\n대화 기록(마지막 줄이 새 질문):\n${log}\n\n마지막 사용자 질문에 answer 로 답해 줘.`;
+  const earlier = earlierQuestions(history);
+  return `계산된 사주 정보:\n${JSON.stringify(facts, null, 2)}\n\n방금 본 풀이(요약):\n${i.summary.slice(0, SUMMARY_MAX) || "(없음)"}\n\n${earlier ? `앞서 물어본 것(오래된 대화 요약): ${earlier}\n\n` : ""}대화 기록(마지막 줄이 새 질문):\n${log}\n\n마지막 사용자 질문에 answer 와 followups 로 답해 줘.`;
 }
 
 export async function chatDori(
   i: ChatFactsInput,
   history: ChatMsg[],
   opts: { apiKey?: string; model?: string; fetchImpl?: typeof fetch; onUsage?: (u: { input: number; output: number }) => void } = {},
-): Promise<string> {
-  return callJson<string>({
+): Promise<ChatReply> {
+  return callJson<ChatReply>({
     system: CHAT_SYSTEM_PROMPT,
     user: buildChatPrompt(i, history),
     schema: CHAT_SCHEMA,
@@ -129,6 +172,6 @@ export async function chatDori(
     fetchImpl: opts.fetchImpl,
     timeoutMs: 22_000,
     onUsage: opts.onUsage,
-    parse: parseChatAnswer,
+    parse: parseChatReply,
   });
 }

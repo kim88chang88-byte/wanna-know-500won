@@ -18,6 +18,8 @@ export interface ChatCtx {
   partnerName?: string;
   /** 부르는 이름 */
   name?: string | null;
+  /** 결과서의 주제 (신년운은 "study"): 상담실도 2027년 기준으로 맞춰요 */
+  topic?: "study";
 }
 
 export interface ChatMsg {
