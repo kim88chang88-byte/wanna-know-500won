@@ -11,6 +11,9 @@ import { grantTickets, readTickets, spendTicket, STREAK_FOR_TICKET } from "@/lib
 import { FREE_PER_DAY } from "@/lib/db/config";
 import { ensureVid, track } from "@/lib/track";
 import { clearPendingDraw, savePendingDraw, takePendingDraw } from "@/lib/pendingDraw";
+import { clearAfterLoginChat, saveAfterLoginChat, takeAfterLoginChat } from "@/lib/afterLoginChat";
+import { saveChatCtx, type ChatCtx } from "@/lib/chatContext";
+import { useRouter } from "next/navigation";
 import { clearRef, isFinalRedeem, readRef, redeemMessage, refFromSearch, saveMyCode, saveRef } from "@/lib/referral";
 import { DailyLineCard } from "./DailyLineCard";
 import { FollowupCard } from "./FollowupCard";
@@ -40,6 +43,7 @@ const RITUAL_MS = 2000;
 const LAST_KEY = "wanna500:last:v1";
 
 export default function Landing() {
+  const router = useRouter();
   const { user, profile, setProfile, deleteProfile, serverCounts, setServerCounts, result: loginResult, clearResult, justLoggedIn, clearWelcome, logout, withdraw } = useAuth();
   const [loginOpen, setLoginOpen] = useState(false);
   // 비회원이 뽑기를 누르면 로그인 창을 열면서, 왜 열렸는지 한 줄로 알려줘요.
@@ -238,21 +242,36 @@ export default function Landing() {
   useEffect(() => {
     if (!justLoggedIn || !user || resumedRef.current) return;
     resumedRef.current = true;
+    // "로그인하고 도리에게 더 물어보기"로 들어왔다면, 상담실이 열려 있는 경우 곧바로 상담실로 가요.
+    const chatCtx = takeAfterLoginChat(getBrowserStorage());
+    if (chatCtx) {
+      fetch("/api/chat", { cache: "no-store" })
+        .then((r) => r.json() as Promise<{ enabled?: boolean }>)
+        .then((d) => {
+          if (d.enabled !== true) return;
+          saveChatCtx(chatCtx);
+          router.push("/chat");
+        })
+        .catch(() => undefined);
+      return;
+    }
     const d = takePendingDraw(getBrowserStorage());
     if (!d) return;
     setLoginOpen(false);
     setLoginReason(null);
     const t = window.setTimeout(() => handleSpin(d.key, d.fortune, d.price, d.premium), 900);
     timers.current.push(t);
-  }, [justLoggedIn, user, handleSpin]);
+  }, [justLoggedIn, user, handleSpin, router]);
 
   const openLogin = useCallback(() => {
     clearPendingDraw(getBrowserStorage()); // 머리말의 로그인 버튼으로 들어간 경우엔 이어서 열 카드가 없어요
+    clearAfterLoginChat(getBrowserStorage());
     track("login_click");
     setLoginOpen(true);
   }, []);
-  const openChatLogin = useCallback(() => {
+  const openChatLogin = useCallback((chat: ChatCtx) => {
     track("chat_login_click");
+    saveAfterLoginChat(getBrowserStorage(), chat);
     setLoginOpen(true);
   }, []);
   // 로그인 완료(방문자 ID 와 회원 번호는 연결하지 않고, '완료했다'는 표시만 남겨요)
@@ -261,6 +280,7 @@ export default function Landing() {
   }, [justLoggedIn, user]);
   const closeLogin = useCallback(() => {
     clearPendingDraw(getBrowserStorage()); // 로그인하지 않고 닫으면 이어서 열지 않아요
+    clearAfterLoginChat(getBrowserStorage());
     setLoginOpen(false);
     setLoginReason(null);
     clearResult();

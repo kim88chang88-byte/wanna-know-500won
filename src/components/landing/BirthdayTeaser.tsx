@@ -7,6 +7,7 @@ import DoriScene from "./DoriScene";
 import DoriIcon from "./DoriIcon";
 import FitText from "./FitText";
 import { ganzhiSentenceParts } from "@/lib/ganzhiMeaning";
+import type { ChatCtx } from "@/lib/chatContext";
 
 interface Teaser {
   line: string;
@@ -15,7 +16,7 @@ interface Teaser {
 }
 
 /** 가입 없이 생년월일만 넣으면 바로 보이는 '오늘의 도리 한마디'. 입력값은 저장하지 않아요. */
-export default function BirthdayTeaser({ onOpenLogin }: { onOpenLogin?: () => void } = {}) {
+export default function BirthdayTeaser({ onOpenLogin }: { /** 로그인하면 이 한마디를 들고 곧바로 상담실로 가요 */ onOpenLogin?: (chat: ChatCtx) => void } = {}) {
   const [value, setValue] = useState("");
   const [state, setState] = useState<"idle" | "loading" | "error">("idle");
   const [error, setError] = useState("");
@@ -74,7 +75,7 @@ export default function BirthdayTeaser({ onOpenLogin }: { onOpenLogin?: () => vo
                   <button
                     type="button"
                     data-testid="teaser-chat-login"
-                    onClick={onOpenLogin}
+                    onClick={() => onOpenLogin({ kind: "daily", summary: `오늘의 한마디: ${result.line}\n오늘의 팁: ${result.tip}\n오늘 일진: ${result.ganzhi}` })}
                     className="w-full rounded-full bg-brand-500 font-bold text-white shadow-sm active:scale-95"
                     style={{ fontSize: "3cqw", lineHeight: 1.25, padding: "2cqw 1.5cqw" }}
                   >
