@@ -5,7 +5,7 @@ import { enforceLimits, guardOrigin } from "@/lib/guard";
 
 export const runtime = "nodejs";
 
-/** 뽑기 코인 1장으로 질문 5개를 더해요. 코인이 없으면 409 (코드 no_coin). */
+/** 뽑기 동전 1장으로 질문 5개를 더해요. 동전이 없으면 409 (코드 no_coin). */
 export async function POST(request: Request) {
   const denied = guardOrigin(request) ?? (await enforceLimits(request, { name: "chat-buy", windowMs: 60000, ip: 10, user: 10 }));
   if (denied) return denied;
@@ -16,14 +16,14 @@ export async function POST(request: Request) {
   const ctx = parseCtx(body?.ctx);
   if (!ctx) return NextResponse.json({ error: "요청이 올바르지 않아요. 다시 한 번 확인해 주세요." }, { status: 400 });
   const db = dbOrNull();
-  if (!db) return NextResponse.json({ error: "지금은 코인을 쓸 수 없어요." }, { status: 503 });
+  if (!db) return NextResponse.json({ error: "지금은 동전을 쓸 수 없어요." }, { status: 503 });
   const t = targetOf(session.sub, ctx);
   try {
     const r = await db.chatBuy(t.user, t.scope, t.free, BUY_AMOUNT);
-    if (r.left < 0) return NextResponse.json({ error: "뽑기 코인이 없어요.", code: "no_coin", coins: 0 }, { status: 409 });
+    if (r.left < 0) return NextResponse.json({ error: "뽑기 동전이 없어요.", code: "no_coin", coins: 0 }, { status: 409 });
     return NextResponse.json({ left: r.left, coins: r.coins, added: BUY_AMOUNT });
   } catch (err) {
     console.error("chatBuy failed:", err instanceof Error ? err.message : "unknown");
-    return NextResponse.json({ error: "코인을 쓰지 못했어요. 잠시 뒤에 다시 시도해 주세요." }, { status: 502 });
+    return NextResponse.json({ error: "동전을 쓰지 못했어요. 잠시 뒤에 다시 시도해 주세요." }, { status: 502 });
   }
 }

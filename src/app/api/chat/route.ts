@@ -68,7 +68,7 @@ export async function POST(request: Request) {
 
     taken = await takeQuestion(db, target);
     if (taken.left < 0) {
-      return NextResponse.json({ error: "질문을 모두 사용했어요. 뽑기 코인으로 질문을 더할 수 있어요.", code: "quota", left: 0 }, { status: 402 });
+      return NextResponse.json({ error: "질문을 모두 사용했어요. 뽑기 동전으로 질문을 더할 수 있어요.", code: "quota", left: 0 }, { status: 402 });
     }
 
     const now = new Date();

@@ -98,7 +98,7 @@ export default function ChatApp() {
   const [typing, setTyping] = useState<{ idx: number; shown: number } | null>(null);
   const [jump, setJump] = useState(false);
   const [vh, setVh] = useState<number | null>(null);
-  /** 서버가 알려 주는 남은 질문 수 (아직 모르면 null) 와 내 뽑기 코인 수 */
+  /** 서버가 알려 주는 남은 질문 수 (아직 모르면 null) 와 내 뽑기 동전 수 */
   const [left, setLeft] = useState<number | null>(null);
   const [coins, setCoins] = useState(0);
   const [buyOpen, setBuyOpen] = useState(false);
@@ -115,7 +115,7 @@ export default function ChatApp() {
     setReady(true);
   }, []);
 
-  // 들어오자마자 남은 질문 수와 코인 수를 받아 와요
+  // 들어오자마자 남은 질문 수와 동전 수를 받아 와요
   useEffect(() => {
     if (!ready) return;
     let alive = true;
@@ -213,7 +213,7 @@ export default function ChatApp() {
       });
       const data = (await res.json().catch(() => null)) as { answer?: string; error?: string; code?: string; left?: number } | null;
       if (res.status === 402 && data?.code === "quota") {
-        // 질문을 다 쓴 경우: 방금 보낸 말은 입력창으로 돌려놓고 "코인으로 더하기" 카드를 보여 줘요
+        // 질문을 다 쓴 경우: 방금 보낸 말은 입력창으로 돌려놓고 "동전으로 더하기" 카드를 보여 줘요
         setLeft(0);
         setMsgs(next.slice(0, -1));
         setInput(text);
@@ -259,9 +259,9 @@ export default function ChatApp() {
         flash(`질문 ${data.added ?? 5}개가 더해졌어요 ❄️`);
       } else if (data?.code === "no_coin") {
         setCoins(0);
-        flash("뽑기 코인이 없어요. 친구를 초대하면 코인을 받을 수 있어요 🎁");
+        flash("뽑기 동전이 없어요. 친구를 초대하면 동전을 받을 수 있어요 🎁");
       } else {
-        flash(data?.error ?? "코인을 쓰지 못했어요. 잠시 뒤에 다시 시도해 주세요.");
+        flash(data?.error ?? "동전을 쓰지 못했어요. 잠시 뒤에 다시 시도해 주세요.");
       }
     } catch {
       flash("인터넷 연결을 확인해 주세요.");
@@ -436,10 +436,10 @@ export default function ChatApp() {
             <p className="mt-1 text-[12.5px] leading-relaxed text-[#6a5a7a]">
               도리가 더 들여다보고 싶은 얘기가 남았다면,
               <br />
-              뽑기 코인으로 질문을 더 할 수 있어요.
+              뽑기 동전으로 질문을 더 할 수 있어요.
             </p>
             <button type="button" onClick={() => setBuyOpen(true)} className="mt-3 block w-full rounded-full bg-gradient-to-br from-brand-500 to-[#c24fe0] py-3 text-sm font-extrabold text-white shadow active:scale-[0.98]">
-              <CoinIcon /> 뽑기 코인으로 질문 5개 더하기
+              <CoinIcon /> 뽑기 동전으로 질문 5개 더하기
             </button>
             <button type="button" onClick={newChat} className="mt-2 text-xs font-bold text-brand-600">
               새 대화 시작하기
@@ -480,10 +480,10 @@ export default function ChatApp() {
         <div className="mx-1 mb-2 flex items-center justify-between text-[11px] text-[#8a7fa8]">
           <span>
             ❄️ 질문 <b className="text-gray-800">{leftNow}번</b> 남았어요
-            <span className="ml-2 text-[#b08722]"><CoinIcon /> 코인 {coins}개</span>
+            <span className="ml-2 text-[#b08722]"><CoinIcon /> 동전 {coins}개</span>
           </span>
           <button type="button" onClick={() => setBuyOpen(true)} className="rounded-full bg-[#fff3c9] px-2.5 py-1 font-extrabold text-[#8a5b00] active:scale-95">
-            <CoinIcon /> 코인으로 더 묻기
+            <CoinIcon /> 동전으로 더 묻기
           </button>
         </div>
         <div className="flex items-end gap-2">
@@ -518,9 +518,9 @@ export default function ChatApp() {
       </form>
       {buyOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 px-6" onClick={() => !buying && setBuyOpen(false)}>
-          <div role="alertdialog" aria-modal="true" aria-label="코인으로 질문 더하기" onClick={(e) => e.stopPropagation()} className="w-full max-w-[320px] rounded-2xl bg-white px-5 py-5 text-center shadow-xl">
-            <p className="text-[15px] font-bold leading-relaxed text-gray-900">뽑기 코인 1개로 질문 5개를 더할까요?</p>
-            <p className="mt-1 text-xs text-slate-500">내 코인: {coins}개 {coins === 0 && "· 코인이 없어요"}</p>
+          <div role="alertdialog" aria-modal="true" aria-label="동전으로 질문 더하기" onClick={(e) => e.stopPropagation()} className="w-full max-w-[320px] rounded-2xl bg-white px-5 py-5 text-center shadow-xl">
+            <p className="text-[15px] font-bold leading-relaxed text-gray-900">뽑기 동전 1개로 질문 5개를 더할까요?</p>
+            <p className="mt-1 text-xs text-slate-500">내 동전: {coins}개 {coins === 0 && "· 동전이 없어요"}</p>
             <div className="mt-4 flex gap-2">
               <button type="button" onClick={() => setBuyOpen(false)} disabled={buying} className="flex-1 rounded-full border border-slate-300 bg-white py-2.5 text-sm font-bold text-slate-600">
                 아니요
