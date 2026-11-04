@@ -436,7 +436,7 @@ export default function ChatApp() {
             <p className="mt-1 text-[12.5px] leading-relaxed text-[#6a5a7a]">
               도리가 더 들여다보고 싶은 얘기가 남았다면,
               <br />
-              뽑기 동전으로 질문을 더 할 수 있어요.
+              동전 하나로 질문을 5번 더 할 수 있어요.
             </p>
             <button type="button" onClick={() => setBuyOpen(true)} className="mt-3 block w-full rounded-full bg-gradient-to-br from-brand-500 to-[#c24fe0] py-3 text-sm font-extrabold text-white shadow active:scale-[0.98]">
               <CoinIcon /> 동전 하나로 5번 더 물어보기
@@ -519,7 +519,7 @@ export default function ChatApp() {
       {buyOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 px-6" onClick={() => !buying && setBuyOpen(false)}>
           <div role="alertdialog" aria-modal="true" aria-label="동전으로 질문 더하기" onClick={(e) => e.stopPropagation()} className="w-full max-w-[320px] rounded-2xl bg-white px-5 py-5 text-center shadow-xl">
-            <p className="text-[15px] font-bold leading-relaxed text-gray-900">뽑기 동전 1개로 질문 5개를 더할까요?</p>
+            <p className="text-[15px] font-bold leading-relaxed text-gray-900">동전 하나로 질문 5개를 더 할까요?</p>
             <p className="mt-1 text-xs text-slate-500">내 동전: {coins}개 {coins === 0 && "· 동전이 없어요"}</p>
             <div className="mt-4 flex gap-2">
               <button type="button" onClick={() => setBuyOpen(false)} disabled={buying} className="flex-1 rounded-full border border-slate-300 bg-white py-2.5 text-sm font-bold text-slate-600">
