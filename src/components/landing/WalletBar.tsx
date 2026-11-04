@@ -47,7 +47,7 @@ export default function WalletBar({ bills, coins, free }: WalletValues) {
         </Chip>
       </span>
       <span data-testid="wallet-coins" className="contents">
-        <Chip label="뽑기 동전" count={coins} tone="border-amber-200">
+        <Chip label="동전" count={coins} tone="border-amber-200">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/images/coin-500.webp" alt="" width={22} height={22} className="h-[22px] w-[22px] object-contain drop-shadow-sm" />
         </Chip>

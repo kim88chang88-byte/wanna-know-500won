@@ -98,7 +98,7 @@ export default function ChatApp() {
   const [typing, setTyping] = useState<{ idx: number; shown: number } | null>(null);
   const [jump, setJump] = useState(false);
   const [vh, setVh] = useState<number | null>(null);
-  /** 서버가 알려 주는 남은 질문 수 (아직 모르면 null) 와 내 뽑기 동전 수 */
+  /** 서버가 알려 주는 남은 질문 수 (아직 모르면 null) 와 내 동전 수 */
   const [left, setLeft] = useState<number | null>(null);
   const [coins, setCoins] = useState(0);
   const [buyOpen, setBuyOpen] = useState(false);
@@ -259,7 +259,7 @@ export default function ChatApp() {
         flash(`질문 ${data.added ?? 5}개가 더해졌어요 ❄️`);
       } else if (data?.code === "no_coin") {
         setCoins(0);
-        flash("뽑기 동전이 없어요. 친구를 초대하면 동전을 받을 수 있어요 🎁");
+        flash("동전이 없어요. 친구를 초대하면 동전을 받을 수 있어요 🎁");
       } else {
         flash(data?.error ?? "동전을 쓰지 못했어요. 잠시 뒤에 다시 시도해 주세요.");
       }

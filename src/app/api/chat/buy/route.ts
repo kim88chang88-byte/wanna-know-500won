@@ -5,7 +5,7 @@ import { enforceLimits, guardOrigin } from "@/lib/guard";
 
 export const runtime = "nodejs";
 
-/** 뽑기 동전 1장으로 질문 5개를 더해요. 동전이 없으면 409 (코드 no_coin). */
+/** 동전 1장으로 질문 5개를 더해요. 동전이 없으면 409 (코드 no_coin). */
 export async function POST(request: Request) {
   const denied = guardOrigin(request) ?? (await enforceLimits(request, { name: "chat-buy", windowMs: 60000, ip: 10, user: 10 }));
   if (denied) return denied;
@@ -20,7 +20,7 @@ export async function POST(request: Request) {
   const t = targetOf(session.sub, ctx);
   try {
     const r = await db.chatBuy(t.user, t.scope, t.free, BUY_AMOUNT);
-    if (r.left < 0) return NextResponse.json({ error: "뽑기 동전이 없어요.", code: "no_coin", coins: 0 }, { status: 409 });
+    if (r.left < 0) return NextResponse.json({ error: "동전이 없어요.", code: "no_coin", coins: 0 }, { status: 409 });
     return NextResponse.json({ left: r.left, coins: r.coins, added: BUY_AMOUNT });
   } catch (err) {
     console.error("chatBuy failed:", err instanceof Error ? err.message : "unknown");
