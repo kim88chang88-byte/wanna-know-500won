@@ -10,6 +10,7 @@ import { interpretDetail } from "@/lib/ai/detail";
 import { interpretSaju, ReadingUnavailableError } from "@/lib/ai/interpret";
 import { hasEntitlement, ENTITLEMENT_COOKIE } from "@/lib/premium/entitlement";
 import { isPremiumLocked } from "@/lib/premium/config";
+import { isCompatFortune } from "@/lib/premium/compat";
 import { normalizeTopic, toPublicReading, type PublicReading } from "@/lib/ai/reading";
 import { hasConcern, parseConcern } from "@/lib/concerns";
 import { ageBand } from "@/lib/profile";
@@ -62,6 +63,8 @@ export async function POST(request: Request) {
   const userId = session && db ? session.sub : null;
   let counts: DrawCounts | null = null;
   let useCoin = false;
+  // 궁합(1,000원)은 동전 2개, 그 밖의 뽑기는 1개
+  const coinCost = rawPremium === true && typeof rawTopic === "string" && isCompatFortune(rawTopic) ? 2 : 1;
   if (userId && db) {
     try {
       counts = await db.getCounts(userId);
@@ -77,7 +80,7 @@ export async function POST(request: Request) {
       } catch {
         // 코인 기능이 아직 꺼져 있거나 DB 가 잠깐 안 되면 기존 안내로 돌아가요.
       }
-      if (coins < 1) {
+      if (coins < coinCost) {
         return NextResponse.json(
           { error: "오늘의 무료 뽑기는 이미 사용했어요. 결제는 아직 준비 중이에요. 내일 다시 만나요 ❄️", code: "free_used", counts },
           { status: 402 },
@@ -193,7 +196,9 @@ export async function POST(request: Request) {
   if (userId && db && countable) {
     // 코인 차감은 뽑기 기록과 동시에 해요. (서로 기다릴 필요가 없어요)
     const spend = useCoin
-      ? db.spendCoin(userId).catch((err) => {
+      ? (async () => {
+          for (let i = 0; i < coinCost; i++) await db.spendCoin(userId);
+        })().catch((err) => {
           console.error("spendCoin failed:", err instanceof Error ? err.message : "unknown");
         })
       : null;

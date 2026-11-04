@@ -567,7 +567,7 @@ export default function ChatApp() {
           </div>
         </div>
       )}
-      {payOpen && <PurchaseModal purpose="질문 5번 더 하기" onClose={() => setPayOpen(false)} />}
+      {payOpen && <PurchaseModal preselect="reading" onClose={() => setPayOpen(false)} />}
     </div>
   );
 }

@@ -1111,7 +1111,7 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
               동전으로 한 번 더 뽑기
             </button>
           )}
-          {payOpen && <PurchaseModal purpose="뽑기 1회" onClose={() => setPayOpen(false)} />}
+          {payOpen && <PurchaseModal preselect={compat ? "compat" : "reading"} onClose={() => setPayOpen(false)} />}
 
           <div className="mt-5 flex gap-2">
             {stepIndex > 0 && (
