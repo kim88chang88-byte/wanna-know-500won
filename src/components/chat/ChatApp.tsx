@@ -467,7 +467,7 @@ export default function ChatApp() {
               <br />
               동전 하나로 질문을 5번 더 할 수 있어요.
             </p>
-            <button type="button" onClick={() => setBuyOpen(true)} className="mt-3 block w-full rounded-full bg-gradient-to-br from-brand-500 to-[#c24fe0] py-3 text-sm font-extrabold text-white shadow active:scale-[0.98]">
+            <button type="button" onClick={() => setBuyOpen(true)} className="mx-auto mt-3 block rounded-full bg-gradient-to-br from-brand-500 to-[#c24fe0] px-6 py-2.5 text-sm font-extrabold text-white shadow active:scale-[0.98]">
               <CoinIcon /> 동전 하나로 5번 더 물어보기
             </button>
             <button type="button" onClick={newChat} className="mt-2 text-xs font-bold text-brand-600">
