@@ -26,14 +26,16 @@ export interface BodyGroup {
 }
 
 export const BODY_GROUPS: BodyGroup[] = [
-  { el: "금", label: "폐", area: "호흡 · 피부", habit: "환기를 자주 하고, 자기 전 깊은 호흡 5번", side: "L", y: 370, marks: [[185, 370]] },
-  { el: "목", label: "간 · 눈", area: "눈 · 간 · 근육", habit: "점심 뒤 5분 먼 곳 보기, 늦은 야식 줄이기", side: "L", y: 475, marks: [[195, 475], [203, 166], [290, 166]] },
-  { el: "수", label: "신장", area: "허리 · 신장 · 수면", habit: "따뜻한 물을 하루 3번, 같은 시각에 잠자리에 들기", side: "L", y: 590, marks: [[185, 570], [315, 562]] },
-  { el: "화", label: "심장", area: "심장 · 혈액순환", habit: "하루 20분 가벼운 걷기, 소리 내어 웃는 시간 만들기", side: "R", y: 370, marks: [[250, 370], [250, 595]] },
-  { el: "토", label: "위", area: "소화 · 위장", habit: "식사 시간을 하루 중 같은 때로 맞추기", side: "R", y: 490, marks: [[305, 490]] },
+  { el: "금", label: "폐", area: "호흡 · 피부", habit: "환기를 자주 하고, 자기 전 깊은 호흡 5번", side: "L", y: 270, marks: [[185, 370]] },
+  { el: "목", label: "간 · 눈", area: "눈 · 간 · 근육", habit: "점심 뒤 5분 먼 곳 보기, 늦은 야식 줄이기", side: "L", y: 470, marks: [[195, 475], [203, 166], [290, 166]] },
+  { el: "수", label: "신장", area: "허리 · 신장 · 수면", habit: "따뜻한 물을 하루 3번, 같은 시각에 잠자리에 들기", side: "L", y: 670, marks: [[185, 570], [315, 562]] },
+  { el: "화", label: "심장", area: "심장 · 혈액순환", habit: "하루 20분 가벼운 걷기, 소리 내어 웃는 시간 만들기", side: "R", y: 340, marks: [[250, 370], [250, 595]] },
+  { el: "토", label: "위", area: "소화 · 위장", habit: "식사 시간을 하루 중 같은 때로 맞추기", side: "R", y: 540, marks: [[305, 490]] },
 ];
 
 export const STATE_TEXT: Record<BodyState, string> = { fill: "채워 주면 좋아요", rest: "쉬어 가며 써요", ok: "무난해요" };
+/** 그림 옆 라벨용 짧은 말 (좁은 화면에서도 한 줄) */
+export const STATE_SHORT: Record<BodyState, string> = { fill: "채워 주기", rest: "쉬어 가기", ok: "무난해요" };
 
 /** 오행별 많고 적음으로 상태를 정해요. (적으면 채우기, 많으면 쉬어 가며 쓰기) */
 export function bodyStates(elements: ElementView[]): Partial<Record<BodyEl, BodyState>> {

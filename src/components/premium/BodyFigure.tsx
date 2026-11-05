@@ -1,4 +1,4 @@
-import { BODY_GROUPS, BODY_IMG, STATE_TEXT, topBodyPicks, type BodyEl, type BodyState } from "@/lib/premium/bodyMap";
+import { BODY_GROUPS, BODY_IMG, STATE_SHORT, STATE_TEXT, topBodyPicks, type BodyEl, type BodyState } from "@/lib/premium/bodyMap";
 
 /** 오행별 표시 색 (밝은 바탕 위) */
 const COLOR: Record<BodyEl, string> = { 목: "#3fa66b", 화: "#e5484d", 토: "#d9a21b", 금: "#8a9bb0", 수: "#3b82f6" };
@@ -82,7 +82,7 @@ export default function BodyFigure({ states, focus, compact = false }: { states:
                   <i className="inline-block h-2 w-2 shrink-0 rounded-full" style={{ background: COLOR[g.el] }} />
                   <span className="truncate">{g.label}</span>
                 </p>
-                <p className="text-[10px] font-bold" style={{ color: STATE_COLOR[st] }}>{STATE_TEXT[st]}</p>
+                <p className="whitespace-nowrap text-[10.5px] font-bold" style={{ color: STATE_COLOR[st] }}>{STATE_SHORT[st]}</p>
               </div>
             );
           })}
