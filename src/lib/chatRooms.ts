@@ -57,6 +57,24 @@ export function roomLook(ctx: ChatCtx): { title: string; chip: string; icon: str
   return { title: t || "사주 풀이", chip: t || "풀이", icon: "📜" };
 }
 
+/** 방 목록 맨 왼쪽에 보여 줄 도리사주 동물 얼굴 (주제로 정해요) */
+export function roomAnimal(ctx: ChatCtx): string {
+  const img = (n: string) => `/images/animal-${n}.webp`;
+  if (ctx.kind === "daily") return img("otter");
+  if (ctx.kind === "compat") return img("panda-couple");
+  if (ctx.topic === "study") return img("otter-study");
+  const t = topicLine(ctx.summary);
+  if (/연애|결혼/.test(t)) return img("rabbit");
+  if (/재물|성공/.test(t)) return img("rabbit-rich");
+  if (/건강/.test(t)) return img("fox-run");
+  return img("dragon");
+}
+
+/** 방 목록의 남은 질문 알약 글자: 오늘의 한마디는 "오늘 N번", 그 밖은 "이번 달 N번" */
+export function leftLabel(ctx: ChatCtx, left: number): string {
+  return `${ctx.kind === "daily" ? "오늘" : "이번 달"} ${left}번`;
+}
+
 function validMsg(m: unknown): m is RoomMsg {
   const v = m as Partial<RoomMsg> | null;
   return !!v && (v.role === "user" || v.role === "dori") && typeof v.text === "string" && typeof v.at === "number";

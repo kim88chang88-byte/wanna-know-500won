@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import ChatApp from "@/components/chat/ChatApp";
 import SafeImage from "@/components/landing/SafeImage";
 import { CHAT_CTX_KEY, CHAT_LOG_KEY, readChatCtx } from "@/lib/chatContext";
-import { loadRooms, removeRoom, saveRooms, upsertRoom, withMsgs, type ChatRoom, type RoomMsg } from "@/lib/chatRooms";
+import { leftLabel, loadRooms, removeRoom, roomAnimal, saveRooms, upsertRoom, withMsgs, type ChatRoom, type RoomMsg } from "@/lib/chatRooms";
 import { getBrowserStorage } from "@/lib/drawCounter";
 
 /** 도리 상담실 첫 화면: 대화방 목록. 결과서에서 넘어오면 그 풀이의 방으로 바로 들어가요. */
@@ -28,6 +28,7 @@ export default function ChatHome() {
   const [open, setOpen] = useState<string | null>(null);
   const [ready, setReady] = useState(false);
   const [left, setLeft] = useState<number | null>(null);
+  const [roomLeft, setRoomLeft] = useState<Record<string, number>>({});
   const [delId, setDelId] = useState<string | null>(null);
   const ref = useRef<ChatRoom[]>([]);
 
@@ -62,9 +63,20 @@ export default function ChatHome() {
   useEffect(() => {
     if (!ready || open) return;
     let alive = true;
-    fetch("/api/chat/quota", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ctx: { kind: "daily", summary: "" } }) })
-      .then((r) => (r.ok ? (r.json() as Promise<{ left?: number }>) : null))
-      .then((d) => alive && typeof d?.left === "number" && setLeft(d.left))
+    fetch("/api/chat/quota", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ctx: { kind: "daily", summary: "" }, ctxs: ref.current.slice(0, 10).map((r) => r.ctx) }) })
+      .then((r) => (r.ok ? (r.json() as Promise<{ left?: number; lefts?: Array<number | null> }>) : null))
+      .then((d) => {
+        if (!alive || !d) return;
+        if (typeof d.left === "number") setLeft(d.left);
+        if (Array.isArray(d.lefts)) {
+          const m: Record<string, number> = {};
+          ref.current.slice(0, 10).forEach((r, i) => {
+            const v = d.lefts?.[i];
+            if (typeof v === "number") m[r.id] = v;
+          });
+          setRoomLeft(m);
+        }
+      })
       .catch(() => undefined);
     return () => {
       alive = false;
@@ -138,8 +150,9 @@ export default function ChatHome() {
             {rooms.map((r) => (
               <li key={r.id} className="flex items-center gap-1 pr-3">
                 <button type="button" onClick={() => setOpen(r.id)} className="flex min-w-0 flex-1 items-center gap-3 px-3.5 py-3 text-left hover:bg-brand-50">
-                  <span className="grid h-[46px] w-[46px] shrink-0 place-items-center rounded-full border-[1.5px] border-brand-100 bg-brand-50 text-[22px]" aria-hidden="true">
-                    {r.icon}
+                  <span className="relative h-12 w-12 shrink-0 overflow-hidden rounded-full border-[1.5px] border-brand-100 bg-brand-50" aria-hidden="true">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={roomAnimal(r.ctx)} alt="" className="h-full w-full origin-[50%_30%] scale-[1.35] object-cover object-[50%_22%]" />
                   </span>
                   <span className="min-w-0 flex-1">
                     <span className="flex items-center gap-1.5 text-sm font-extrabold text-gray-900">
@@ -148,20 +161,35 @@ export default function ChatHome() {
                     </span>
                     <span className="block truncate text-[12.5px] text-[#8a7fa8]">{lastText(r)}</span>
                   </span>
-                  <span className="shrink-0 self-start pt-1 text-[11px] text-[#a99bd0]">{r.msgs.length > 0 ? whenLabel(r.updatedAt) : ""}</span>
+                  <span className="flex shrink-0 flex-col items-end gap-1 self-start pt-0.5">
+                    <span className="min-h-[16px] text-[11px] text-[#a99bd0]">{r.msgs.length > 0 ? whenLabel(r.updatedAt) : ""}</span>
+                    {roomLeft[r.id] !== undefined && (
+                      <span
+                        data-testid="room-left"
+                        className={`whitespace-nowrap rounded-full px-2.5 py-px text-[11px] font-extrabold ${roomLeft[r.id] === 0 ? "bg-gray-100 text-[#8a7fa8]" : roomLeft[r.id] <= 2 ? "bg-amber-50 text-amber-800" : "bg-brand-50 text-brand-600"}`}
+                      >
+                        {leftLabel(r.ctx, roomLeft[r.id])}
+                      </span>
+                    )}
+                  </span>
                 </button>
                 <button
                   type="button"
-                  aria-label={`${r.title} 대화 삭제`}
+                  aria-label={`${r.title} 대화방 나가기`}
                   onClick={() => {
                     if (delId === r.id) {
                       commit(removeRoom(ref.current, r.id));
                       setDelId(null);
                     } else setDelId(r.id);
                   }}
-                  className={`shrink-0 rounded-full px-2 py-1 text-[11px] ${delId === r.id ? "bg-red-50 font-bold text-red-600" : "text-[#b3a8cc]"}`}
+                  className={`flex min-w-[34px] shrink-0 flex-col items-center gap-px rounded-xl px-1.5 py-1 text-[10.5px] ${delId === r.id ? "bg-red-50 font-bold text-red-600" : "text-[#9a8fb8]"}`}
                 >
-                  {delId === r.id ? "정말 삭제?" : "삭제"}
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                    <path d="M16 17l5-5-5-5" />
+                    <path d="M21 12H9" />
+                  </svg>
+                  {delId === r.id ? "정말 나갈까요?" : "나가기"}
                 </button>
               </li>
             ))}
