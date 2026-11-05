@@ -170,6 +170,10 @@ export interface PremiumReportView {
   hyungsin: string[];
   daeun: DaeunView | null;
   seyun: SeyunView | null;
+  /** 올해 월운(양력 2월경부터 12칸). 건강운 월별 컨디션 달력용 */
+  wolun?: Array<{ month: number; ganzhi: string }>;
+  /** 이번 달이 wolun 의 몇 번째 칸인지 (절기 기준 근사) */
+  wolunNow?: number;
   /** 도리 한마디 아님! 계산 엔진이 만든 짧은 구조 설명 */
   summary: string;
   /** 태어난 시간을 몰라 시주를 비워 둔 경우 true. (신강·신약·용신은 정오 기준이라 달라질 수 있어요) */

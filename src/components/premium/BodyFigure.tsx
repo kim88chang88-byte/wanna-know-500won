@@ -1,4 +1,5 @@
-import { BODY_GROUPS, BODY_IMG, STATE_SHORT, STATE_TEXT, topBodyPicks, type BodyEl, type BodyState } from "@/lib/premium/bodyMap";
+import { BODY_GROUPS, BODY_IMG, STATE_SHORT, STATE_TEXT, bodyWhy, topBodyPicks, type BodyEl, type BodyState } from "@/lib/premium/bodyMap";
+import type { ElementView } from "@/lib/premium/types";
 
 /** 오행별 표시 색 (밝은 바탕 위) */
 const COLOR: Record<BodyEl, string> = { 목: "#3fa66b", 화: "#e5484d", 토: "#d9a21b", 금: "#8a9bb0", 수: "#3b82f6" };
@@ -95,7 +96,7 @@ export default function BodyFigure({ states, focus, compact = false }: { states:
 const CHIP: Record<BodyState, string> = { fill: "bg-blue-50 text-blue-700", rest: "bg-rose-50 text-rose-700", ok: "bg-gray-100 text-gray-600" };
 
 /** 500원 건강운 결과서용 작은 요약: 작은 인체 그림 + 챙길 곳 3가지 */
-export function BodyPicks({ states }: { states: Partial<Record<BodyEl, BodyState>> }) {
+export function BodyPicks({ states, elements }: { states: Partial<Record<BodyEl, BodyState>>; elements?: ElementView[] }) {
   const picks = topBodyPicks(states);
   if (picks.length === 0) return null;
   return (
@@ -114,6 +115,7 @@ export function BodyPicks({ states }: { states: Partial<Record<BodyEl, BodyState
                   {g.area}
                   <span className={`ml-1.5 rounded-full px-2 py-px align-[1px] text-[10.5px] font-bold ${CHIP[state]}`}>{STATE_TEXT[state]}</span>
                 </p>
+                {elements && elements.length > 0 && <p data-testid="body-why" className="text-[11.5px] leading-relaxed text-gray-500">{bodyWhy(g.el, state, elements)}</p>}
                 <p className="text-[12.5px] leading-relaxed text-gray-600">{g.habit}</p>
               </div>
             </li>

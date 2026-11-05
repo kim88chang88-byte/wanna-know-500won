@@ -284,7 +284,7 @@ export default function StoryReport({
 
       {!summaryFirst && summaryBlock}
 
-      {t.key === "health" && <BodyPicks states={bodyStates(report.elements)} />}
+      {t.key === "health" && <BodyPicks states={bodyStates(report.elements)} elements={report.elements} />}
 
       {/* 3) 접어 둔 풀이: 오행 → 나는 누구 → 칭찬 → 아쉬움 → 개선 → 행운 처방 → 원국 → 마지막 한마디 */}
       <section aria-label="자세한 풀이" data-testid="story-folds" className="rounded-2xl border border-brand-100 bg-white px-4">

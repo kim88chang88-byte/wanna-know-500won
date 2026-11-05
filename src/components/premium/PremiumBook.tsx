@@ -11,7 +11,7 @@ import { elementOfChar, elName } from "@/lib/elementColor";
 import ElementTile from "@/components/ElementTile";
 import { formatWon } from "@/lib/premium/book/charts";
 import BodyFigure from "./BodyFigure";
-import { BODY_GROUPS, STATE_TEXT, bodyStates, yearFocus, type BodyState } from "@/lib/premium/bodyMap";
+import { BODY_GROUPS, STATE_SHORT, STATE_TEXT, bodyElName, bodyStates, bodyWhy, dailyRoutine, monthlyCondition, monthlySummary, yearFocus, type BodyEl, type BodyState } from "@/lib/premium/bodyMap";
 
 /*
  * 프리미엄 20페이지 리포트 리더. 한 번에 한 페이지씩 넘겨 보는 고급스러운 책 형태예요.
@@ -432,12 +432,93 @@ function BodyMap({ report }: { report: PremiumReportView }) {
                 <span className="flex-1 text-sm font-bold text-[#f5efe0]">{g.area}</span>
                 <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${k.c}`}>{k.t}</span>
               </div>
+              <p data-testid="body-why" className={`ml-11 mt-1.5 rounded-r-lg border-l-[3px] border-[#e6c887] bg-white/[0.05] px-2 py-1 text-[12px] leading-relaxed text-[#f3ecdc]`}>{bodyWhy(g.el, states[g.el] ?? "ok", els)}</p>
               <p className="ml-11 mt-1 text-[11px] text-[#e8dfca]/70">{g.habit}</p>
             </li>
           );
         })}
       </ul>
+      <MonthCalendar report={report} states={states} />
+      <DailyRoutine states={states} />
       <p className="mt-2 text-[11px] leading-relaxed text-[#e8dfca]/60">병이나 증상을 알려 주는 그림이 아니에요. 생활 습관을 정할 때 참고하는 전통 오행 대응이고, 몸이 불편하면 꼭 전문가와 상담해 주세요.</p>
+    </div>
+  );
+}
+
+const BODY_DOT: Record<BodyEl, string> = { 목: "#3fa66b", 화: "#e5484d", 토: "#d9a21b", 금: "#8a9bb0", 수: "#3b82f6" };
+
+/** 월별 컨디션 달력: 올해 월운 천간 오행 → 그 달에 챙길 부위 */
+function MonthCalendar({ report, states }: { report: PremiumReportView; states: Partial<Record<BodyEl, BodyState>> }) {
+  const cal = monthlyCondition(report.wolun, states, report.wolunNow);
+  const [sel, setSel] = useState<number | null>(null);
+  if (cal.length === 0) return null;
+  const cur = cal.findIndex((c) => c.current);
+  const at = sel ?? (cur >= 0 ? cur : 0);
+  const sum = monthlySummary(cal);
+  return (
+    <div data-testid="body-calendar" className="mt-6">
+      <p className={`text-[12px] font-bold tracking-[0.12em] ${GOLD}`}>월별 컨디션 달력</p>
+      <p className="mt-1 text-[11.5px] leading-relaxed text-[#e8dfca]/70">올해 달마다 어느 부위를 챙기면 좋은지 보여 줘요. 칸을 눌러 보세요.</p>
+      <div className="mt-3 grid grid-cols-4 gap-1.5">
+        {cal.map((c, i) => (
+          <button
+            key={c.label}
+            type="button"
+            data-testid="body-month"
+            aria-pressed={i === at}
+            onClick={() => setSel(i)}
+            className={`relative rounded-2xl border px-1 py-2 text-center ${i === at ? "border-[#e6c887] bg-[#e6c887]/15" : `${HAIR} bg-white/[0.04]`}`}
+          >
+            {c.current && <span className="absolute -top-2 left-1/2 -translate-x-1/2 rounded-full bg-[#e6c887] px-2 text-[9.5px] font-extrabold text-[#1b1824]">지금</span>}
+            <span className="block text-[11px] text-[#e8dfca]/70">{c.label}</span>
+            <i
+              aria-hidden="true"
+              className="mx-auto my-1 block h-3.5 w-3.5 rounded-full"
+              style={{ background: BODY_DOT[c.el], outline: c.state === "fill" ? "2px dashed rgba(255,255,255,0.5)" : undefined, outlineOffset: 2, boxShadow: c.state === "rest" ? "0 0 0 3px rgba(253,164,175,0.5)" : undefined }}
+            />
+            <span className="block text-[12px] font-bold text-[#f5efe0]">{c.group.label}</span>
+            <span className={`block text-[10px] ${c.state === "fill" ? "text-sky-200" : c.state === "rest" ? "text-rose-200" : "text-[#e8dfca]/60"}`}>{STATE_SHORT[c.state]}</span>
+          </button>
+        ))}
+      </div>
+      <p data-testid="body-month-detail" className={`mt-3 rounded-2xl border border-[#e6c887]/60 bg-[#e6c887]/10 px-3 py-2.5 text-[12.5px] leading-relaxed text-[#f3ecdc]`}>{cal[at].text}</p>
+      <div className="mt-2 space-y-1 text-[12px] leading-relaxed text-[#e8dfca]/80">
+        {sum.rest && <p><b className={GOLD}>쉬어 가는 달</b> · {sum.rest}</p>}
+        {sum.fill && <p><b className={GOLD}>채우기 좋은 달</b> · {sum.fill}</p>}
+      </div>
+    </div>
+  );
+}
+
+/** 하루 루틴 처방: 부위별 상태를 하루 시간표로 */
+function DailyRoutine({ states }: { states: Partial<Record<BodyEl, BodyState>> }) {
+  const slots = dailyRoutine(states);
+  if (slots.length === 0) return null;
+  return (
+    <div data-testid="body-routine" className="mt-6">
+      <p className={`text-[12px] font-bold tracking-[0.12em] ${GOLD}`}>하루 루틴 처방</p>
+      <p className="mt-1 text-[11.5px] leading-relaxed text-[#e8dfca]/70">내 기운 상태를 하루 시간표로 옮겼어요. 점 색은 어느 부위를 위한 습관인지 알려 줘요.</p>
+      <div className="mt-3 space-y-2">
+        {slots.map((sl) => (
+          <div key={sl.time} className={`flex gap-3 rounded-2xl border ${HAIR} bg-white/[0.04] px-3 py-2.5`}>
+            <span className={`w-12 shrink-0 text-[13px] font-extrabold ${GOLD}`}>{sl.time}</span>
+            <ul className="min-w-0 flex-1 space-y-1.5">
+              {sl.items.map((it) => {
+                const g = BODY_GROUPS.find((x) => x.el === it.el);
+                return (
+                  <li key={it.text} className="flex items-start gap-2 text-[13px] text-[#f5efe0]">
+                    <i aria-hidden="true" className="mt-1.5 h-2.5 w-2.5 shrink-0 rounded-full" style={{ background: BODY_DOT[it.el] }} />
+                    <span>
+                      {it.text}
+                      <small className="block text-[11px] text-[#e8dfca]/60">{g?.area} · {bodyElName(it.el)} 기운 {STATE_TEXT[states[it.el] ?? "ok"]}</small>
+                    </span>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

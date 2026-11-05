@@ -1,3 +1,4 @@
+import { monthIndexNow } from "./bodyMap";
 import { calculateSaju } from "ssaju";
 import { STEMS } from "@/lib/saju/constants";
 import { isBirthPlace, resolveBirth } from "@/lib/saju/birthPlace";
@@ -198,6 +199,8 @@ export function buildPremiumReport(rawInput: BirthInput, now: Date = new Date(),
     hyungsin: full && !locking ? r.advanced.sinsal.hyungsin : [],
     daeun: full ? daeun : null,
     seyun: full ? seyun : null,
+    wolun: full && !locking ? (r.wolun ?? []).map((m) => ({ month: m.month, ganzhi: m.ganzhi })) : undefined,
+    wolunNow: full && !locking ? monthIndexNow(now) : undefined,
     summary: full && !locking ? r.advanced.interpretation : "",
     hourUnknown,
     // 잠긴 상태에서는 흐름(timing) 문장도 내려보내지 않아요. (7쪽에서 잠긴 글과 같은 내용이에요)
