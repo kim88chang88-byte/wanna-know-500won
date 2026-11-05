@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import ChatApp from "@/components/chat/ChatApp";
 import SafeImage from "@/components/landing/SafeImage";
 import { CHAT_CTX_KEY, CHAT_LOG_KEY, readChatCtx } from "@/lib/chatContext";
-import { leftLabel, loadRooms, removeRoom, roomAnimal, saveRooms, upsertRoom, withMsgs, type ChatRoom, type RoomMsg } from "@/lib/chatRooms";
+import { leftLabel, loadRooms, removeRoom, roomAnimal, roomColor, saveRooms, upsertRoom, withMsgs, type ChatRoom, type RoomMsg } from "@/lib/chatRooms";
 import { getBrowserStorage } from "@/lib/drawCounter";
 
 /** 도리 상담실 첫 화면: 대화방 목록. 결과서에서 넘어오면 그 풀이의 방으로 바로 들어가요. */
@@ -145,17 +145,19 @@ export default function ChatHome() {
           </button>
         </div>
       ) : (
-        <div className="mt-2 flex-1">
-          <ul>
+        <div className="mt-3 flex-1">
+          <ul className="flex flex-col gap-[7px] px-3">
             {rooms.map((r) => (
-              <li key={r.id} className="flex items-center gap-1 pr-3">
-                <button type="button" onClick={() => setOpen(r.id)} className="flex min-w-0 flex-1 items-center gap-3 px-3.5 py-3 text-left hover:bg-brand-50">
-                  <span className="relative h-12 w-12 shrink-0 overflow-hidden rounded-full border-[1.5px] border-brand-100 bg-brand-50" aria-hidden="true">
+              <li key={r.id} data-testid="room-card" className="relative flex items-center gap-1 overflow-hidden rounded-2xl border border-brand-100 bg-white pr-2.5">
+                <i aria-hidden="true" className="absolute inset-y-0 left-0 w-1.5" style={{ background: roomColor(r.ctx) }} />
+                <button type="button" onClick={() => setOpen(r.id)} className="flex min-w-0 flex-1 items-center gap-3 py-2.5 pl-5 pr-1 text-left">
+                  <span className="relative h-12 w-12 shrink-0 overflow-hidden rounded-full bg-brand-50" style={{ boxShadow: `0 0 0 2px #fff, 0 0 0 4px ${roomColor(r.ctx)}` }} aria-hidden="true">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={roomAnimal(r.ctx)} alt="" className="h-full w-full origin-[50%_30%] scale-[1.35] object-cover object-[50%_22%]" />
                   </span>
                   <span className="min-w-0 flex-1">
                     <span className="flex items-center gap-1.5 text-sm font-extrabold text-gray-900">
+                      <i aria-hidden="true" className="h-2 w-2 shrink-0 rounded-full" style={{ background: roomColor(r.ctx) }} />
                       <span className="truncate">{r.title}</span>
                       <span className="shrink-0 rounded-full bg-brand-50 px-2 py-px text-[10.5px] font-bold text-brand-600">{r.chip}</span>
                     </span>

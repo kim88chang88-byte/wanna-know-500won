@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { leftLabel, loadRooms, MAX_ROOMS, roomAnimal, removeRoom, roomIdFor, roomLook, saveRooms, upsertRoom, withMsgs, type ChatRoom } from "../chatRooms";
+import { leftLabel, loadRooms, MAX_ROOMS, roomAnimal, roomColor, removeRoom, roomIdFor, roomLook, saveRooms, upsertRoom, withMsgs, type ChatRoom } from "../chatRooms";
 import type { ChatCtx } from "../chatContext";
 
 const birth = { year: 1990, month: 1, day: 2, hour: 3, minute: 0, calendar: "solar", isLeapMonth: false, gender: "female" } as never;
@@ -59,6 +59,9 @@ describe("상담실 대화방", () => {
     expect(roomAnimal({ kind: "reading", summary: "주제: 건강운" })).toBe("/images/animal-fox-run.webp");
     expect(roomAnimal({ kind: "reading", summary: "주제: 종합운" })).toBe("/images/animal-dragon.webp");
     expect(roomAnimal({ kind: "reading", summary: "", topic: "study" })).toBe("/images/animal-otter-study.webp");
+    expect(roomColor({ kind: "daily", summary: "" })).toBe("#6d4fd8");
+    expect(roomColor({ kind: "reading", summary: "주제: 재물운" })).toBe("#e0a43a");
+    expect(roomColor({ kind: "reading", summary: "주제: 종합운" })).toBe("#a0714f");
     expect(leftLabel({ kind: "daily", summary: "" }, 3)).toBe("오늘 3번");
     expect(leftLabel({ kind: "reading", summary: "" }, 7)).toBe("이번 달 7번");
   });

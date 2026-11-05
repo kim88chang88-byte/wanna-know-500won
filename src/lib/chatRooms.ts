@@ -70,6 +70,18 @@ export function roomAnimal(ctx: ChatCtx): string {
   return img("dragon");
 }
 
+/** 방 목록 카드의 주제 색 (색 띠·동물 링·이름 앞 점) */
+export function roomColor(ctx: ChatCtx): string {
+  if (ctx.kind === "daily") return "#6d4fd8";
+  if (ctx.kind === "compat") return "#e5708a";
+  if (ctx.topic === "study") return "#4a90d9";
+  const t = topicLine(ctx.summary);
+  if (/연애|결혼/.test(t)) return "#f08fb0";
+  if (/재물|성공/.test(t)) return "#e0a43a";
+  if (/건강/.test(t)) return "#3fa66b";
+  return "#a0714f";
+}
+
 /** 방 목록의 남은 질문 알약 글자: 오늘의 한마디는 "오늘 N번", 그 밖은 "이번 달 N번" */
 export function leftLabel(ctx: ChatCtx, left: number): string {
   return `${ctx.kind === "daily" ? "오늘" : "이번 달"} ${left}번`;
