@@ -10,6 +10,8 @@ import type { BookChart, BookPage, BookRow, BookTable, ElementKind, PremiumRepor
 import { elementOfChar, elName } from "@/lib/elementColor";
 import ElementTile from "@/components/ElementTile";
 import { formatWon } from "@/lib/premium/book/charts";
+import BodyFigure from "./BodyFigure";
+import { BODY_GROUPS, STATE_TEXT, bodyStates, yearFocus, type BodyState } from "@/lib/premium/bodyMap";
 
 /*
  * 프리미엄 20페이지 리포트 리더. 한 번에 한 페이지씩 넘겨 보는 고급스러운 책 형태예요.
@@ -399,37 +401,38 @@ function StageCurve({ table }: { table: BookTable }) {
   );
 }
 
-/** 오행별로 챙기면 좋은 몸의 곳 (전통 오행 대응). 병을 말하는 게 아니라 생활 습관 힌트예요. */
-const BODY_MAP: Record<string, { area: string; habit: string }> = {
-  목: { area: "눈 · 간 · 근육", habit: "스트레칭과 눈 쉬어 주기" },
-  화: { area: "심장 · 혈액순환", habit: "가벼운 유산소와 충분한 웃음" },
-  토: { area: "소화 · 위장", habit: "규칙적인 식사 시간" },
-  금: { area: "호흡 · 피부", habit: "환기와 깊은 호흡" },
-  수: { area: "허리 · 신장 · 수면", habit: "따뜻한 물과 일정한 잠" },
-};
-
-/** 건강운 장기 지도: 많은 기운은 쉬어 가기, 적은 기운은 채워 주기로만 안내해요 */
+/** 건강운 장기 지도: 인체 그림 + 기운별 상태. 많은 기운은 쉬어 가기, 적은 기운은 채워 주기로만 안내해요 */
 function BodyMap({ report }: { report: PremiumReportView }) {
   const els = report.elements;
   if (els.length === 0) return null;
-  const avg = els.reduce((a, e) => a + e.count, 0) / els.length;
-  const tone = (n: number) => (n === 0 || n < avg - 0.6 ? { t: "채워 주면 좋아요", c: "bg-sky-300/20 text-sky-100" } : n > avg + 1.2 ? { t: "쉬어 가며 써요", c: "bg-rose-300/20 text-rose-100" } : { t: "무난해요", c: "bg-white/10 text-[#e8dfca]" });
+  const states = bodyStates(els);
+  const focus = yearFocus(report.seyun?.ganzhi);
+  const focusGroup = focus ? BODY_GROUPS.find((g) => g.el === focus) : undefined;
+  const chip = (st: BodyState | undefined) => (st === "fill" ? { t: STATE_TEXT.fill, c: "bg-sky-300/20 text-sky-100" } : st === "rest" ? { t: STATE_TEXT.rest, c: "bg-rose-300/20 text-rose-100" } : { t: STATE_TEXT.ok, c: "bg-white/10 text-[#e8dfca]" });
   return (
     <div data-testid="body-map" className="mb-6">
       <p className={`text-[12px] font-bold tracking-[0.12em] ${GOLD}`}>기운별로 챙기면 좋은 곳</p>
+      <div className="mt-3">
+        <BodyFigure states={states} focus={focus} />
+      </div>
+      {focusGroup && report.seyun && (
+        <p data-testid="body-year" className={`mt-3 rounded-2xl border ${HAIR} bg-white/[0.04] px-3 py-2.5 text-[12.5px] leading-relaxed text-[#f3ecdc]`}>
+          <b className={GOLD}>올해 살펴볼 곳</b> · {report.seyun.year}년은 {elName(focusGroup.el)} 기운이 들어오는 해예요. {focusGroup.area} 쪽을 한 번 더 챙겨 보세요. (그림에서 노란 물결로 반짝여요)
+        </p>
+      )}
       <ul className="mt-3 space-y-2">
         {els.map((e) => {
-          const b = BODY_MAP[e.name];
-          const k = tone(e.count);
-          if (!b) return null;
+          const g = BODY_GROUPS.find((x) => x.el === e.name);
+          if (!g) return null;
+          const k = chip(states[g.el]);
           return (
             <li key={e.name} data-testid="body-row" className={`rounded-2xl border ${HAIR} bg-white/[0.04] px-3 py-2.5`}>
               <div className="flex items-center gap-2">
                 <span className={`w-9 shrink-0 rounded-full border py-0.5 text-center text-xs font-bold ${HAIR} ${GOLD}`}>{elName(e.name)}</span>
-                <span className="flex-1 text-sm font-bold text-[#f5efe0]">{b.area}</span>
+                <span className="flex-1 text-sm font-bold text-[#f5efe0]">{g.area}</span>
                 <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${k.c}`}>{k.t}</span>
               </div>
-              <p className="ml-11 mt-1 text-[11px] text-[#e8dfca]/70">{b.habit}</p>
+              <p className="ml-11 mt-1 text-[11px] text-[#e8dfca]/70">{g.habit}</p>
             </li>
           );
         })}

@@ -2,7 +2,9 @@
 
 import type { ReactNode } from "react";
 import { useChatEnabled } from "@/components/chat/ChatEntry";
+import { BodyPicks } from "@/components/premium/BodyFigure";
 import ManseReport from "@/components/premium/ManseReport";
+import { bodyStates } from "@/lib/premium/bodyMap";
 import { RealityLight } from "@/components/premium/RealityLight";
 import type { PremiumReportView } from "@/lib/premium/types";
 import { ELEMENT_BOX, EL_LABEL, elEasyName, elementOfChar } from "@/lib/elementColor";
@@ -281,6 +283,8 @@ export default function StoryReport({
       )}
 
       {!summaryFirst && summaryBlock}
+
+      {t.key === "health" && <BodyPicks states={bodyStates(report.elements)} />}
 
       {/* 3) 접어 둔 풀이: 오행 → 나는 누구 → 칭찬 → 아쉬움 → 개선 → 행운 처방 → 원국 → 마지막 한마디 */}
       <section aria-label="자세한 풀이" data-testid="story-folds" className="rounded-2xl border border-brand-100 bg-white px-4">
