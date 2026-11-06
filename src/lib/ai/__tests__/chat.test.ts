@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { cleanFollowups, cleanHistory, CRISIS_ANSWER, earlierQuestions, isCrisis, parseChatAnswer, parseChatReply } from "../chat";
+import { cleanFollowups, cleanHistory, CRISIS_ANSWER, earlierQuestions, isCrisis, parseChatAnswer, parseChatReply, polishChatAnswer } from "../chat";
 import { parseCtx } from "@/lib/chatServer";
 import { summarizeReport } from "@/lib/chatContext";
 
@@ -57,5 +57,34 @@ describe("도리 상담방", () => {
     expect(parseCtx({ kind: "reading", summary: "", topic: "study" })?.topic).toBe("study");
     expect(parseCtx({ kind: "daily", summary: "", topic: "study" })?.topic).toBeNull();
     expect(parseCtx({ kind: "reading", summary: "", topic: "love" })?.topic).toBeNull();
+  });
+});
+
+describe("polishChatAnswer", () => {
+  const body = "오늘은 무리하지 말고 천천히 걸어 보는 게 좋아. 아까 말한 것처럼 물 기운을 채워 주면 한결 편해질 거야.";
+  it("앞선 답에서 이미 이름을 불렀으면 맨 앞 호칭을 뗀다", () => {
+    const h = [
+      { role: "user" as const, text: "요즘 어때?" },
+      { role: "dori" as const, text: "은혁님, 요즘 흐름이 좋아." },
+      { role: "user" as const, text: "또 물어볼게" },
+    ];
+    expect(polishChatAnswer(`은혁님, ${body}`, h, "은혁")).toBe(body);
+  });
+  it("첫 답에서는 이름을 그대로 둔다", () => {
+    const h = [{ role: "user" as const, text: "처음 질문" }];
+    expect(polishChatAnswer(`은혁님, ${body}`, h, "은혁")).toBe(`은혁님, ${body}`);
+  });
+  it("몸 증상 질문에는 전문가 안내 한 줄을 붙인다", () => {
+    const h = [{ role: "user" as const, text: "다리가 자주 저려요" }];
+    expect(polishChatAnswer(body, h, null)).toContain("전문가");
+  });
+  it("이미 전문가 안내가 있으면 중복해서 붙이지 않는다", () => {
+    const h = [{ role: "user" as const, text: "다리가 자주 저려요" }];
+    const a = `${body} 계속되면 전문가와 이야기해 봐.`;
+    expect(polishChatAnswer(a, h, null)).toBe(a);
+  });
+  it("증상이 아닌 질문엔 아무것도 붙이지 않는다", () => {
+    const h = [{ role: "user" as const, text: "이직 흐름이 궁금해" }];
+    expect(polishChatAnswer(body, h, null)).toBe(body);
   });
 });

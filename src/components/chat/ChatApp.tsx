@@ -515,9 +515,11 @@ export default function ChatApp({ initialCtx, initialMsgs, onChange, onBack }: {
             ❄️ 질문 <b className="text-gray-800">{leftNow}번</b> 남았어요
             <span className="ml-2 text-[#b08722]"><CoinIcon /> 동전 {coins}개</span>
           </span>
-          <button type="button" onClick={() => setBuyOpen(true)} className="shrink-0 whitespace-nowrap rounded-full bg-[#fff3c9] px-2.5 py-1 font-extrabold text-[#8a5b00] active:scale-95">
-            <CoinIcon /> 동전 하나로 5번 더 물어보기
-          </button>
+          {leftNow >= 1 && leftNow <= 2 && (
+            <button type="button" onClick={() => setBuyOpen(true)} className="shrink-0 whitespace-nowrap rounded-full bg-[#fff3c9] px-2.5 py-1 font-extrabold text-[#8a5b00] active:scale-95">
+              <CoinIcon /> 동전 하나로 5번 더 물어보기
+            </button>
+          )}
         </div>
         <div className="flex items-end gap-2">
           <textarea
