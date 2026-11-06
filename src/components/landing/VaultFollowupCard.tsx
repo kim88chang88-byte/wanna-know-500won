@@ -4,7 +4,7 @@ import DoriIcon from "./DoriIcon";
 import { ConfirmChoice } from "@/components/ConfirmChoice";
 import { useEffect, useState } from "react";
 import { getBrowserStorage } from "@/lib/drawCounter";
-import { followupPrompt, markAnswered, pickVaultFollowup, readAnswered, type FollowupPick } from "@/lib/vaultFollowup";
+import { followupPrompt, markAnswered, pickVaultFollowup, readAnswered, readTodayChoice, saveChoice, type FollowupPick } from "@/lib/vaultFollowup";
 
 /** 보관함에 있는 지난 풀이를 현실과 견줘 보게 물어요. 로그인한 회원에게만 보이고, 어느 쪽을 골라도 응원으로 마무리해요. */
 export function VaultFollowupCard({ onShow }: { onShow?: (shown: boolean) => void } = {}) {
@@ -19,7 +19,18 @@ export function VaultFollowupCard({ onShow }: { onShow?: (shown: boolean) => voi
       .then((r) => (r.ok ? r.json() : null))
       .then((data: { items?: Array<{ id: string; topic: string; premium?: boolean; created_at: string }> } | null) => {
         if (!alive || !data?.items) return;
-        const next = pickVaultFollowup(data.items, new Date(), readAnswered(getBrowserStorage()));
+        const now = new Date();
+        const store = getBrowserStorage();
+        // 오늘 이미 고른 답이 있으면 그 카드를 같은 답으로 다시 보여 줘요. (풀이를 보러 갔다 오거나 새로고침해도 그대로)
+        const today = readTodayChoice(store, now);
+        const kept = today ? pickVaultFollowup(data.items.filter((r) => r.id === today.id), now, []) : null;
+        if (kept && today && today.index < followupPrompt(kept).check.options.length) {
+          setPick(kept);
+          setChosen(today.index);
+          onShow?.(true);
+          return;
+        }
+        const next = pickVaultFollowup(data.items, now, readAnswered(store));
         setPick(next);
         onShow?.(Boolean(next)); // 안부 카드는 한 번에 하나만 보여 주려고, 위쪽에 알려요
       })
@@ -45,6 +56,7 @@ export function VaultFollowupCard({ onShow }: { onShow?: (shown: boolean) => voi
   const choose = (i: number) => {
     setChosen(i);
     markAnswered(getBrowserStorage(), pick.id);
+    saveChoice(getBrowserStorage(), pick.id, i, new Date());
   };
 
   return (

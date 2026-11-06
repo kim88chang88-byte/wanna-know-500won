@@ -85,3 +85,32 @@ export function markAnswered(storage: StorageLike | null, id: string): void {
     /* 저장 실패는 무시 */
   }
 }
+
+/* 오늘 고른 답: 풀이를 보러 갔다 오거나 새로고침해도 같은 답이 보이도록 이 기기에 기억해요. (그날 하루만) */
+export const VAULT_CHOICE_KEY = "wanna500:vault-followup:choice:v1";
+
+export interface TodayChoice {
+  id: string;
+  index: number;
+}
+
+export function saveChoice(storage: StorageLike | null, id: string, index: number, now: Date): void {
+  if (!storage) return;
+  try {
+    storage.setItem(VAULT_CHOICE_KEY, JSON.stringify({ id, index, day: kstDay(now) }));
+  } catch {
+    /* 저장 실패는 무시 */
+  }
+}
+
+/** 오늘 고른 답이 있으면 돌려줘요. 날짜가 지났거나 망가진 값이면 null. */
+export function readTodayChoice(storage: StorageLike | null, now: Date): TodayChoice | null {
+  if (!storage) return null;
+  try {
+    const v = JSON.parse(storage.getItem(VAULT_CHOICE_KEY) ?? "null") as { id?: unknown; index?: unknown; day?: unknown } | null;
+    if (!v || typeof v.id !== "string" || typeof v.index !== "number" || !Number.isInteger(v.index) || v.index < 0 || v.day !== kstDay(now)) return null;
+    return { id: v.id, index: v.index };
+  } catch {
+    return null;
+  }
+}
