@@ -7,6 +7,7 @@ import CoinRitual from "./CoinRitual";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { dayKey, getBrowserStorage, readCounts, recordDraw, type DrawCounts } from "@/lib/drawCounter";
 import { readVisitDays, recordVisit } from "@/lib/streak";
+import { pingNav, writeDrawAvail } from "@/lib/navDots";
 import { grantTickets, readTickets, spendTicket, STREAK_FOR_TICKET } from "@/lib/stampReward";
 import { FREE_PER_DAY } from "@/lib/db/config";
 import { ensureVid, track } from "@/lib/track";
@@ -341,6 +342,12 @@ export default function Landing() {
     else if (!user) applyCounts(readCounts(getBrowserStorage(), new Date()));
   }, [serverCounts, user, applyCounts]);
 
+  // 하단 메뉴 "운세 뽑기" 빨간 점: 오늘 무료 뽑기나 동전이 남아 있는지 적어 둬요 (메뉴를 열면 꺼져요)
+  useEffect(() => {
+    writeDrawAvail(getBrowserStorage(), Math.max(0, FREE_PER_DAY - counts.today) + tickets + coins > 0, coins, new Date());
+    pingNav();
+  }, [counts.today, tickets, coins]);
+
   return (
     <>
       <SnowBackground />
@@ -366,7 +373,7 @@ export default function Landing() {
 
       <Footer />
       <div aria-hidden="true" className="h-24 lg:hidden" />
-      <BottomTabs freeLeft={Math.max(0, FREE_PER_DAY - counts.today) + tickets + coins > 0} />
+      <BottomTabs />
 
       {ritual && <CoinRitual bill={ritualBill} big={ritualBig} />}
       <StickyDrawCta hidden={Boolean(intake) || loginOpen || ritual} />

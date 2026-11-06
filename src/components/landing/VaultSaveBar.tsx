@@ -1,6 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import { getBrowserStorage } from "@/lib/drawCounter";
+import { markVaultNew, pingNav } from "@/lib/navDots";
 import { useEffect, useRef, useState } from "react";
 import type { PremiumReportView } from "@/lib/premium/types";
 
@@ -58,7 +60,11 @@ export function VaultSaveBar({ snapshot, autoSave, luxe = false, ready = true }:
       }
       const res = await fetch("/api/vault", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
       const data = (await res.json().catch(() => null)) as { error?: string; code?: string } | null;
-      if (res.ok) setStatus("saved");
+      if (res.ok) {
+        markVaultNew(getBrowserStorage());
+        pingNav();
+        setStatus("saved");
+      }
       else if (res.status === 409 && data?.code === "full") {
         setStatus("full");
         setMessage(data.error ?? null);

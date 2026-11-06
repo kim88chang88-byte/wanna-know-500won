@@ -1,7 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { getBrowserStorage } from "@/lib/drawCounter";
+import { markNavSeen, NAV_EVENT, readNavDots, type NavDots } from "@/lib/navDots";
 
 type TabKey = "home" | "theme";
 
@@ -46,9 +48,16 @@ function VaultIcon() {
   );
 }
 
-/** 휴대폰·태블릿 아래에 붙는 4칸 메뉴. (큰 화면에서는 숨겨요) */
-export default function BottomTabs({ freeLeft = false }: { freeLeft?: boolean }) {
+/** 새 항목이 있을 때 아이콘 오른쪽 위에 붙는 빨간 점 (숫자 없음) */
+const Dot = () => <i data-testid="nav-dot" aria-hidden="true" className="absolute left-[calc(50%+10px)] top-1 h-[10px] w-[10px] rounded-full border-2 border-white bg-red-500 box-content" />;
+
+/**
+ * 휴대폰·태블릿 아래에 붙는 4칸 메뉴. (큰 화면에서는 숨겨요)
+ * page 모드(도리상담실 목록 등 다른 화면)에서는 홈·운세 뽑기가 첫 화면으로 이동하는 링크가 돼요.
+ */
+export default function BottomTabs({ page = false }: { page?: "chat" | false }) {
   const [active, setActive] = useState<TabKey>("home");
+  const [dots, setDots] = useState<NavDots>({ draw: false, chat: false, vault: false });
   // 도리 상담실을 열어 둔 계정인지 (아직 아니면 눌렀을 때 "곧 열려요"만 알려요)
   const [chatOn, setChatOn] = useState(false);
   const [soon, setSoon] = useState(false);
@@ -62,6 +71,21 @@ export default function BottomTabs({ freeLeft = false }: { freeLeft?: boolean })
       alive = false;
     };
   }, []);
+  // 빨간 점: 이 기기에 적어 둔 값으로 계산해요
+  const refresh = useCallback(() => setDots(readNavDots(getBrowserStorage(), chatOn, new Date())), [chatOn]);
+  useEffect(() => {
+    refresh();
+    window.addEventListener(NAV_EVENT, refresh);
+    window.addEventListener("storage", refresh);
+    return () => {
+      window.removeEventListener(NAV_EVENT, refresh);
+      window.removeEventListener("storage", refresh);
+    };
+  }, [refresh]);
+  const seen = (k: keyof NavDots) => {
+    markNavSeen(getBrowserStorage(), k, new Date());
+    refresh();
+  };
   useEffect(() => {
     if (!soon) return;
     const t = setTimeout(() => setSoon(false), 2400);
@@ -70,7 +94,7 @@ export default function BottomTabs({ freeLeft = false }: { freeLeft?: boolean })
 
   // 지금 화면에 걸쳐 있는 구역에 맞춰 칸을 밝혀 줘요.
   useEffect(() => {
-    if (typeof IntersectionObserver === "undefined") return;
+    if (page || typeof IntersectionObserver === "undefined") return;
     const targets: Array<[string, TabKey]> = [
       ["machines", "theme"],
     ];
@@ -88,7 +112,7 @@ export default function BottomTabs({ freeLeft = false }: { freeLeft?: boolean })
       if (el) io.observe(el);
     }
     return () => io.disconnect();
-  }, []);
+  }, [page]);
 
   const off = "text-[#7a7f98] hover:text-brand-600";
   const tab = (key: TabKey) => `${base} ${active === key ? "text-brand-600" : off}`;
@@ -102,31 +126,54 @@ export default function BottomTabs({ freeLeft = false }: { freeLeft?: boolean })
       className="fixed inset-x-0 bottom-0 z-30 mx-auto w-full max-w-[34rem] px-3 pb-[max(10px,env(safe-area-inset-bottom,0px))] lg:hidden"
     >
       <div className="relative flex items-stretch rounded-[22px] bg-white/95 px-1 pb-2.5 pt-3 shadow-[0_6px_24px_rgba(59,42,138,0.16)] backdrop-blur-xl">
-        <button type="button" className={tab("home")} aria-current={active === "home" ? "page" : undefined} onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}>
-          {bar("home")}
-          <HomeIcon />홈
-        </button>
-        <button type="button" className={tab("theme")} onClick={() => scrollToId("machines")}>
-          {bar("theme")}
-          <SparkIcon on={active === "theme"} />
-          {freeLeft && <i aria-hidden="true" className="absolute left-[calc(50%+11px)] top-1 h-2 w-2 rounded-full bg-pink-500" />}
-          운세 뽑기
-        </button>
-        {chatOn ? (
-          <Link href="/chat" className={`${base} ${off}`}>
+        {page ? (
+          <Link href="/" className={`${base} ${off}`}>
+            <HomeIcon />홈
+          </Link>
+        ) : (
+          <button type="button" className={tab("home")} aria-current={active === "home" ? "page" : undefined} onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}>
+            {bar("home")}
+            <HomeIcon />홈
+          </button>
+        )}
+        {page ? (
+          <Link href="/#machines" className={`${base} ${off}`} onClick={() => seen("draw")}>
+            <SparkIcon on={false} />
+            {dots.draw && <Dot />}
+            운세 뽑기
+          </Link>
+        ) : (
+          <button
+            type="button"
+            className={tab("theme")}
+            onClick={() => {
+              seen("draw");
+              scrollToId("machines");
+            }}
+          >
+            {bar("theme")}
+            <SparkIcon on={active === "theme"} />
+            {dots.draw && <Dot />}
+            운세 뽑기
+          </button>
+        )}
+        {chatOn || page === "chat" ? (
+          <Link href="/chat" className={`${base} ${page === "chat" ? "text-brand-600" : off}`} aria-current={page === "chat" ? "page" : undefined} onClick={() => seen("chat")}>
+            {page === "chat" && <i aria-hidden="true" className="absolute -top-3 left-1/2 h-[5px] w-11 -translate-x-1/2 rounded-b-md bg-brand-600" />}
             <ChatIcon />
-            <span aria-hidden="true" className="absolute -top-1.5 left-[calc(50%-4px)] rounded-full border border-brand-100 bg-brand-50 px-1.5 text-[10.5px] font-extrabold leading-4 text-brand-600">1:1</span>
+            {dots.chat && <Dot />}
             도리상담실
           </Link>
         ) : (
           <button type="button" className={`${base} ${off}`} onClick={() => setSoon(true)}>
             <ChatIcon />
-            <span aria-hidden="true" className="absolute -top-1.5 left-[calc(50%-4px)] rounded-full border border-brand-100 bg-brand-50 px-1.5 text-[10.5px] font-extrabold leading-4 text-brand-600">1:1</span>
             도리상담실
           </button>
         )}
-        <Link href="/vault" className={`${base} ${off}`}>
-          <VaultIcon />보관함
+        <Link href="/vault" className={`${base} ${off}`} onClick={() => seen("vault")}>
+          <VaultIcon />
+          {dots.vault && <Dot />}
+          보관함
         </Link>
       </div>
       {soon && (

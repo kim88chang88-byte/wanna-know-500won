@@ -1,6 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { getBrowserStorage } from "@/lib/drawCounter";
+import { markNavSeen, pingNav } from "@/lib/navDots";
 import LoginButtons from "@/components/landing/LoginButtons";
 import ManseReport from "@/components/premium/ManseReport";
 import { ResultHero } from "@/components/landing/PhotoCard";
@@ -47,6 +49,11 @@ export default function VaultApp() {
   const [detail, setDetail] = useState<Detail | null>(null);
   const [opening, setOpening] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
+  // 보관함을 열었으니 하단 메뉴의 빨간 점을 꺼요
+  useEffect(() => {
+    markNavSeen(getBrowserStorage(), "vault", new Date());
+    pingNav();
+  }, []);
   const [confirmDelete, setConfirmDelete] = useState(false);
 
   const load = useCallback(async () => {

@@ -1,8 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import SafeImage from "@/components/landing/SafeImage";
 import PurchaseModal from "@/components/pay/PurchaseModal";
+import { roomAnimal, roomColor } from "@/lib/chatRooms";
 import { MSG_MAX, TURN_CAP, type ChatCtx, type ChatKind, type ChatMsg } from "@/lib/chatContext";
 import type { RoomMsg } from "@/lib/chatRooms";
 
@@ -99,6 +99,7 @@ const prefersReducedMotion = () => typeof window !== "undefined" && window.match
 
 export default function ChatApp({ initialCtx, initialMsgs, onChange, onBack }: { initialCtx: ChatCtx; initialMsgs: RoomMsg[]; onChange: (msgs: RoomMsg[]) => void; onBack: () => void }) {
   const [ctx] = useState<ChatCtx>(initialCtx);
+  const face = <AnimalFace src={roomAnimal(ctx)} color={roomColor(ctx)} size={36} />;
   const [msgs, setMsgs] = useState<Bubble[]>(initialMsgs);
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
@@ -328,7 +329,7 @@ export default function ChatApp({ initialCtx, initialMsgs, onChange, onBack }: {
           ‹
         </button>
         <div className="relative h-[42px] w-[42px] shrink-0">
-          <SafeImage src="/images/dori-icon.webp" alt="" className="h-[42px] w-[42px] rounded-full border-2 border-brand-200 bg-white object-contain" fallback="🦦" fallbackClass="text-2xl" />
+          <AnimalFace src={roomAnimal(ctx)} color={roomColor(ctx)} size={42} />
           <i aria-hidden="true" className="absolute -bottom-px -right-px h-[11px] w-[11px] rounded-full border-2 border-white bg-emerald-400" />
         </div>
         <div className="min-w-0 flex-1">
@@ -391,13 +392,14 @@ export default function ChatApp({ initialCtx, initialMsgs, onChange, onBack }: {
         aria-label="도리와의 대화"
       >
         <p className="mx-auto w-fit rounded-full border border-brand-100 bg-white/60 px-3 py-1 text-[11px] text-[#8a7fa8]">오늘 · 도리의 달빛 서재에서 🌙</p>
-        <DoriRow text={greetingFor(ctx)} />
+        <DoriRow face={face} text={greetingFor(ctx)} />
         {msgs.map((m, i) => {
           if (m.role === "user") return <UserRow key={i} text={m.text} at={m.at} />;
           const live = typing?.idx === i;
           const shown = live ? m.text.slice(0, typing!.shown) : m.text;
           return (
             <DoriRow
+              face={face}
               key={i}
               text={shown}
               error={m.error}
@@ -550,13 +552,23 @@ export default function ChatApp({ initialCtx, initialMsgs, onChange, onBack }: {
   );
 }
 
-function DoriRow({ text, at, error, actions, onSkip }: { text: string; at?: number; error?: boolean; actions?: ReactNode; onSkip?: () => void }) {
+/** 방마다 정해진 동물 얼굴 (둥글게 잘라 얼굴이 보이게 키워요) */
+function AnimalFace({ src, color, size }: { src: string; color: string; size: number }) {
+  return (
+    <span className="relative inline-block shrink-0 overflow-hidden rounded-full bg-brand-50" style={{ width: size, height: size, boxShadow: `0 0 0 1.5px #fff, 0 0 0 3px ${color}` }} aria-hidden="true">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src={src} alt="" className="h-full w-full origin-[50%_30%] scale-[1.35] object-cover object-[50%_22%]" />
+    </span>
+  );
+}
+
+function DoriRow({ face, text, at, error, actions, onSkip }: { face: ReactNode; text: string; at?: number; error?: boolean; actions?: ReactNode; onSkip?: () => void }) {
   const paras = text.split(/\n{2,}/).filter(Boolean);
   return (
     <div className="flex items-start gap-2">
-      <SafeImage src="/images/dori-icon.webp" alt="" className="h-9 w-9 shrink-0 rounded-full border-[1.5px] border-brand-200 bg-white object-contain" fallback="🦦" fallbackClass="text-2xl" />
+      {face}
       <div className="min-w-0 max-w-[82%]">
-        <p className="mb-[3px] ml-0.5 text-[11px] font-extrabold text-[#7a6e99]">수달 도사 도리</p>
+        <p className="mb-[3px] ml-0.5 text-[11px] font-extrabold text-[#7a6e99]">도리</p>
         <div className="flex items-end gap-1.5">
           <div
             onClick={onSkip}

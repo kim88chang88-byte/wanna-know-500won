@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import ChatApp from "@/components/chat/ChatApp";
+import BottomTabs from "@/components/landing/BottomTabs";
+import { markNavSeen, pingNav } from "@/lib/navDots";
 import SafeImage from "@/components/landing/SafeImage";
 import { CHAT_CTX_KEY, CHAT_LOG_KEY, readChatCtx } from "@/lib/chatContext";
 import { leftLabel, loadRooms, removeRoom, roomAnimal, roomColor, saveRooms, upsertRoom, withMsgs, type ChatRoom, type RoomMsg } from "@/lib/chatRooms";
@@ -57,6 +59,9 @@ export default function ChatHome() {
     ref.current = list;
     setRooms(list);
     setReady(true);
+    // 상담실을 열었으니 하단 메뉴의 빨간 점을 꺼요
+    markNavSeen(getBrowserStorage(), "chat", new Date());
+    pingNav();
   }, []);
 
   // 목록에서는 오늘 남은 무료 질문 수를 보여 줘요
@@ -109,7 +114,7 @@ export default function ChatHome() {
   };
 
   return (
-    <div className="mx-auto flex min-h-[100dvh] w-full max-w-[34rem] flex-col bg-gradient-to-b from-[#fbf7ff] to-[#f1ecfb]">
+    <div className="mx-auto flex min-h-[100dvh] w-full max-w-[34rem] flex-col bg-gradient-to-b from-[#fbf7ff] to-[#f1ecfb] pb-28 lg:pb-0">
       <header className="flex items-center gap-2.5 border-b border-brand-100 bg-white/80 px-3 py-2.5 backdrop-blur">
         <Link href="/" aria-label="처음으로" className="grid h-9 w-9 place-items-center rounded-full text-xl text-gray-600 hover:bg-gray-100">
           ‹
@@ -201,6 +206,7 @@ export default function ChatHome() {
           </button>
         </div>
       )}
+      <BottomTabs page="chat" />
     </div>
   );
 }
