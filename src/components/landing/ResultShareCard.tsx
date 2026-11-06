@@ -43,10 +43,9 @@ function loadArt(topic: TopicKey): Promise<HTMLImageElement | null> {
 /** 결과를 인스타 스토리 크기(1080×1920) 카드 한 장으로 만들어 저장·공유해요. 서버로 보내지 않고 이 기기에서만 그려요. */
 export default function ResultShareCard({ report, aiQuote }: { report: PremiumReportView; aiQuote?: string | null }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [state, setState] = useState<"idle" | "busy" | "done" | "error">("idle");
+  const [state, setState] = useState<"idle" | "busy" | "done" | "cancel" | "error">("idle");
   const [ready, setReady] = useState(false);
   const [copied, setCopied] = useState(false);
-  const [linkMsg, setLinkMsg] = useState("");
   const data = useMemo(
     () => buildPhotoCardData(report, { date: new Date(), siteLabel: typeof window === "undefined" ? "" : window.location.host, shareUrl: shareOrigin(), aiQuote }),
     [report, aiQuote],
@@ -91,26 +90,6 @@ export default function ResultShareCard({ report, aiQuote }: { report: PremiumRe
     }
   }
 
-  async function shareLink() {
-    const url = shareOrigin();
-    const text = `${data.topicLabel} 결과가 신기해서 공유해! 너도 무료로 볼 수 있어 👉`;
-    try {
-      if (navigator.share) {
-        await navigator.share({ title: "도리운세⋅사주", text, url });
-        setLinkMsg("");
-        return;
-      }
-    } catch (e) {
-      if (e instanceof DOMException && e.name === "AbortError") return;
-    }
-    try {
-      await navigator.clipboard.writeText(`${text} ${url}`);
-      setLinkMsg("링크를 복사했어요. 친구에게 붙여넣어 보내 주세요 ❄️");
-    } catch {
-      setLinkMsg(url);
-    }
-  }
-
   async function save() {
     const c = canvasRef.current;
     if (!c || !ready) return;
@@ -130,7 +109,7 @@ export default function ResultShareCard({ report, aiQuote }: { report: PremiumRe
           return;
         } catch (e) {
           if (e instanceof DOMException && e.name === "AbortError") {
-            setState("idle");
+            setState("cancel");
             return;
           }
           /* 공유 창이 안 열리면 저장으로 넘어가요 */
@@ -167,22 +146,21 @@ export default function ResultShareCard({ report, aiQuote }: { report: PremiumRe
       >
         {state === "busy" ? "카드 만드는 중…" : "✨ 결과 카드 저장·공유하기"}
       </button>
-      <p role="status" className="mt-1.5 text-[11px] text-gray-500">
-        {state === "done" ? (copied ? "카드를 만들었어요. 링크도 복사했으니 올릴 때 붙여넣기만 하세요 ❄️" : "카드를 만들었어요. 친구에게 자랑해 보세요 ❄️") : state === "error" ? "지금은 카드를 만들 수 없어요. 잠시 뒤에 다시 눌러 주세요." : "인스타 스토리 크기로 저장돼요 · 이 기기에서만 만들어요"}
+      <p role="status" className="mt-1.5 text-[11px] leading-relaxed text-gray-500">
+        {state === "done"
+          ? copied ? "카드를 만들었어요. 링크도 복사했으니 올릴 때 붙여넣기만 하세요 ❄️" : "카드를 만들었어요. 친구에게 자랑해 보세요 ❄️"
+          : state === "cancel"
+            ? copied ? "카드는 저장하지 않았어요. 링크만 복사했어요 — 친구에게 붙여넣어 보내 주세요 ❄️" : "카드는 저장하지 않았어요."
+            : state === "error"
+              ? "지금은 카드를 만들 수 없어요. 잠시 뒤에 다시 눌러 주세요."
+              : (
+                <>
+                  인스타 스토리 크기로 저장돼요 · 이 기기에서만 만들어요
+                  <br />
+                  친구가 볼 수 있는 링크도 함께 복사돼요 🔗
+                </>
+              )}
       </p>
-      <button
-        type="button"
-        data-testid="share-link-button"
-        onClick={shareLink}
-        className="mt-2 inline-flex items-center gap-1.5 rounded-full border border-brand-200 bg-white px-4 py-1.5 text-xs font-bold text-brand-600 active:scale-95"
-      >
-        🔗 친구에게 링크 보내기
-      </button>
-      {linkMsg && (
-        <p role="status" className="mt-1.5 text-[11px] text-gray-500">
-          {linkMsg}
-        </p>
-      )}
     </div>
   );
 }
