@@ -236,7 +236,7 @@ export default function CompatStory({ report, intro, closing, lastWord, partnerN
             <p className="mt-0.5 text-[13.5px] leading-relaxed text-gray-800 break-keep">{c.partnerTrait.body}</p>
           </div>
         )}
-        <details data-testid="compat-pillars" className="group mt-3.5 rounded-xl border border-brand-100">
+        <details open data-testid="compat-pillars" className="group mt-3.5 rounded-xl border border-brand-100">
           <summary className="flex cursor-pointer list-none items-center justify-between px-3.5 py-2.5 text-[13px] font-bold text-gray-700">
             <span>두 사람의 사주 네 기둥 자세히 보기</span>
             <span aria-hidden="true" className="text-gray-400 transition-transform group-open:rotate-180">⌄</span>
