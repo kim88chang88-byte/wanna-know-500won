@@ -48,14 +48,12 @@ function Chip({ label, count, tone, children }: { label: string; count: number; 
 export default function WalletBar({ tenK = 0, bills, coins, free, onBuy }: WalletValues & { onBuy?: () => void }) {
   const money = (
     <>
-      {tenK > 0 && (
-        <span data-testid="wallet-tenk" className="contents">
-          <Chip label="결제한 10,000원 지폐" count={tenK} tone="border-emerald-200">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/images/bill-10000.webp" alt="" width={44} height={25} className="h-[18px] w-auto rounded-[3px] shadow-[0_1px_2px_rgba(0,0,0,0.2)]" />
-          </Chip>
-        </span>
-      )}
+      <span data-testid="wallet-tenk" className="contents">
+        <Chip label="결제한 10,000원 지폐" count={tenK} tone="border-emerald-200">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/images/bill-10000.webp" alt="" width={44} height={25} className="h-[18px] w-auto rounded-[3px] shadow-[0_1px_2px_rgba(0,0,0,0.2)]" />
+        </Chip>
+      </span>
       <span data-testid="wallet-bills" className="contents">
         <Chip label="결제한 1,000원 지폐" count={bills} tone="border-sky-200">
           {/* eslint-disable-next-line @next/next/no-img-element */}
