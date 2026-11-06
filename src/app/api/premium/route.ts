@@ -66,7 +66,10 @@ export async function POST(request: Request) {
     const report = buildPremiumReport(parsed.value, new Date(), parsed.level, parsed.topic, lock, parsed.concern, parsed.partner);
     // 프리미엄(전체) 리포트에는 쪽마다 AI 가 쓴 '도리의 한 줄'을 붙이고, 재물운 장은 AI 가 이 사람 이야기로 다시 써요.
     // 키가 없거나 한도를 넘거나 실패하면 그 부분만 빠지고 기존 풀이가 그대로 나가요.
-    report.viewerName = chapterName(session?.nick);
+    // 다른 사람의 풀이를 볼 때는 그 사람 이름(또는 이름 없음)으로 불러요. 값은 chapterName 이 걸러 줘요.
+    const callAsRaw = typeof raw === "object" && raw !== null ? (raw as { callAs?: unknown }).callAs : undefined;
+    const callNick = typeof callAsRaw === "string" ? callAsRaw : session?.nick;
+    report.viewerName = chapterName(callNick);
     let chapterNote = "skip";
     const usage = { in: 0, out: 0, calls: 0 };
     if (parsed.level === "full" && report.book.length > 0 && hasAiKey() && !aiGated) {
@@ -80,9 +83,9 @@ export async function POST(request: Request) {
         try {
           const gate = await takeAiBudget(process.env, db);
           if (gate === "ok") {
-            if (!preview) return await addBookNotes(book0, { kind: parsed.partner ? "compat" : "personal", concern: parsed.concern, name: chapterName(session?.nick) });
+            if (!preview) return await addBookNotes(book0, { kind: parsed.partner ? "compat" : "personal", concern: parsed.concern, name: chapterName(callNick) });
             const head = book0.filter((p) => p.no < PREVIEW_OPEN_PAGES);
-            const done = await addBookNotes(head, { kind: parsed.partner ? "compat" : "personal", concern: parsed.concern, name: chapterName(session?.nick) });
+            const done = await addBookNotes(head, { kind: parsed.partner ? "compat" : "personal", concern: parsed.concern, name: chapterName(callNick) });
             return book0.map((p) => done.find((d) => d.no === p.no) ?? p);
           }
         } catch (err) {
@@ -95,7 +98,7 @@ export async function POST(request: Request) {
         try {
           const gate = await takeAiBudget(process.env, db);
           if (gate !== "ok") return null;
-          return await rewriteChapters(book0, { keys: batchKeys.filter((k) => !preview || openKeys.has(k)), name: chapterName(session?.nick), concern: parsed.concern, conclusion, onUsage: (u) => { usage.in += u.input; usage.out += u.output; usage.calls++; } });
+          return await rewriteChapters(book0, { keys: batchKeys.filter((k) => !preview || openKeys.has(k)), name: chapterName(callNick), concern: parsed.concern, conclusion, onUsage: (u) => { usage.in += u.input; usage.out += u.output; usage.calls++; } });
         } catch (err) {
           console.error("book chapter failed:", err instanceof Error ? err.message : "unknown");
           return null;
@@ -119,7 +122,7 @@ export async function POST(request: Request) {
           const pn = typeof raw === "object" && raw !== null ? (raw as { partnerName?: unknown }).partnerName : undefined;
           // eslint-disable-next-line no-control-regex
           const partnerName = typeof pn === "string" ? pn.replace(/[\u0000-\u001f<>{}]/g, "").trim().slice(0, 12) || null : null;
-          report.compat = await addCompatAi(report.compat, { concern: parsed.concern, names: { me: chapterName(session?.nick), partner: partnerName }, onUsage: (u) => { usage.in += u.input; usage.out += u.output; usage.calls++; } });
+          report.compat = await addCompatAi(report.compat, { concern: parsed.concern, names: { me: chapterName(callNick), partner: partnerName }, onUsage: (u) => { usage.in += u.input; usage.out += u.output; usage.calls++; } });
         }
       } catch (err) {
         console.error("compat ai failed:", err instanceof Error ? err.message : "unknown");

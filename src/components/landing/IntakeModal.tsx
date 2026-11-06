@@ -140,9 +140,9 @@ function ChoiceButton({
 type ReadingStatus = "ok" | "unavailable" | "failed";
 
 /** 프리미엄 리포트를 받아요. 실패해도 예외 대신 사용자에게 보여 줄 문장을 돌려줘요. */
-async function fetchPremiumReport(input: BirthInput, level: "basic" | "full", topic: string, concern: Concern | null, partner: BirthInput | null, signal: AbortSignal, partnerName: string | null = null): Promise<{ report: PremiumReportView | null; error: string | null; rest?: unknown; aiNotice?: boolean; aiGated?: boolean }> {
+async function fetchPremiumReport(input: BirthInput, level: "basic" | "full", topic: string, concern: Concern | null, partner: BirthInput | null, signal: AbortSignal, partnerName: string | null = null, callAs: string | null = null): Promise<{ report: PremiumReportView | null; error: string | null; rest?: unknown; aiNotice?: boolean; aiGated?: boolean }> {
   try {
-    const reqBody = { ...input, level, topic, concern, ...(partner ? { partner, ...(partnerName ? { partnerName } : {}) } : {}) };
+    const reqBody = { ...input, level, topic, concern, ...(partner ? { partner, ...(partnerName ? { partnerName } : {}) } : {}), ...(callAs !== null ? { callAs } : {}) };
     const res = await fetch("/api/premium", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -198,6 +198,40 @@ function FieldTitle({ children }: { children: React.ReactNode }) {
 }
 
 /** 처음 쓰는 분(비회원·저장된 정보가 없는 회원)용: 생년월일·성별·태어난 시간을 한 화면에서 직접 적어요. */
+/** 운세를 볼 사람 고르기: 나 · 기억해 둔 사람 · 새로 입력 */
+function WhoPicker({ me, people, onMe, onPerson, onNew }: { me: { name: string; summary: string } | null; people: SavedPerson[]; onMe: () => void; onPerson: (p: SavedPerson) => void; onNew: () => void }) {
+  const card = "flex w-full items-center justify-between gap-2 rounded-2xl border px-4 py-3 text-left transition-colors";
+  return (
+    <div data-testid="who-picker" className="space-y-2">
+      <div className="flex items-start gap-2.5 mb-3">
+        <span className="text-2xl" aria-hidden="true">❄️</span>
+        <p className="flex-1 rounded-2xl rounded-tl-sm bg-brand-50 border border-brand-100 px-3.5 py-2.5 text-sm text-gray-800">누구의 운세를 볼까?</p>
+      </div>
+      {me && (
+        <button type="button" data-testid="who-me" onClick={onMe} className={`${card} border-brand-400 bg-brand-50 hover:bg-brand-100`}>
+          <span>
+            <b className="block text-sm text-brand-700">나{me.name ? ` (${me.name})` : ""}</b>
+            <span className="text-[11px] text-gray-500">{me.summary}</span>
+          </span>
+          <span aria-hidden="true" className="text-brand-500">›</span>
+        </button>
+      )}
+      {people.map((p) => (
+        <button key={p.id} type="button" data-testid="who-person" onClick={() => onPerson(p)} className={`${card} border-brand-100 bg-white hover:bg-brand-50`}>
+          <span>
+            <b className="block text-sm text-gray-800">{p.label}</b>
+            <span className="text-[11px] text-gray-500">{profileSummary(p.birth)}</span>
+          </span>
+          <span aria-hidden="true" className="text-gray-400">›</span>
+        </button>
+      ))}
+      <button type="button" data-testid="who-new" onClick={onNew} className={`${card} border-dashed border-brand-200 bg-white text-sm font-bold text-brand-600 hover:bg-brand-50`}>
+        <span>+ 다른 사람을 새로 입력</span>
+      </button>
+    </div>
+  );
+}
+
 /** 기억해 둔 사람을 눌러서 고르는 줄. 궁합 상대에도, 다른 운세를 볼 때 "내 자리"에도 같이 써요. */
 function SavedPeoplePicker({ people, onPick, title }: { people: SavedPerson[]; onPick: (p: SavedPerson) => void; title: string }) {
   return (
@@ -435,6 +469,9 @@ export default function IntakeModal({ target, wallet = null, onClose, onComplete
   /** 결과 화면에 보여 줄 상대방 정보 (궁합일 때만) */
   const [resultPartner, setResultPartner] = useState<{ birth: BirthInput; name: string } | null>(null);
   const [meKey, setMeKey] = useState(0);
+  // 누구의 운세인지: null 이면 "나", 아니면 고른 다른 사람(이름이 없으면 name 은 null). 궁합은 두 사람이 정해져 있어서 고르지 않아요.
+  const [subject, setSubject] = useState<{ name: string | null } | null>(null);
+  const [whoDone, setWhoDone] = useState(false);
   const [stepIndex, setStepIndex] = useState(() => (savedProfile ? firstAfterMe : 0));
   // 선택 동의: 둘 다 기본은 꺼짐. (이미 저장해 둔 회원이 정보를 고치는 경우만, 전에 동의한 "기억하기"를 켜 둬요)
   const [saveProfile, setSaveProfile] = useState(savedProfile !== null);
@@ -487,6 +524,36 @@ export default function IntakeModal({ target, wallet = null, onClose, onComplete
     setStepIndex(firstAfterMe); // 궁합이면 상대방 질문으로, 아니면 고민 단계로
   }
 
+  // 운세를 볼 사람 고르기 (로그인 회원이 기억해 둔 사람이 있을 때만, 궁합이 아닌 풀이에서)
+  const whoOpen = loggedIn && !compat && people.length > 0 && !whoDone;
+  function chooseMe() {
+    setSubject(null);
+    if (savedProfile) {
+      setForm({ ...EMPTY_FORM, ...profileToForm(savedProfile) });
+      setSaveProfile(true);
+      setMeKey((k) => k + 1);
+      setStepIndex(firstAfterMe);
+    }
+    setError(null);
+    setWhoDone(true);
+  }
+  function choosePerson(p: SavedPerson) {
+    pickForMe(p);
+    setSubject({ name: p.label !== autoLabel(p.birth) ? p.label : null });
+    setWhoDone(true);
+  }
+  function chooseNew() {
+    setSubject(null);
+    setForm(EMPTY_FORM);
+    setSaveProfile(false);
+    setMeKey((k) => k + 1);
+    setError(null);
+    setStepIndex(0);
+    setWhoDone(true);
+  }
+  /** 보여 줄 이름: 다른 사람의 운세면 그 사람 이름, 아니면 내 닉네임 */
+  const viewName: string | null = subject ? subject.name : nickname;
+
   /** 기억해 둔 사람을 고르면 상대방 질문을 건너뛰고 고민 단계로 가요. */
   function pickPerson(p: SavedPerson) {
     setPartner({ ...EMPTY_BIRTH, ...profileToForm(p.birth) });
@@ -535,11 +602,12 @@ export default function IntakeModal({ target, wallet = null, onClose, onComplete
     try {
       // 사주 리포트도 함께 받아요. 프리미엄은 전체, 일반 자판기는 기본(원국·오행·신강신약). 실패해도 기본 풀이는 그대로 보여줘요.
       const partnerLabel = compat ? ((l) => (l && partnerInput && l !== autoLabel(partnerInput) ? l : null))(people.find((x) => x.id === pickedPerson)?.label || personLabel.trim()) : null;
-      const premiumPromise = fetchPremiumReport(input, target.premium && !compat ? "full" : "basic", target.fortune, concern, partnerInput, ctrl.signal, partnerLabel);
+      const callAs = subject ? (subject.name ?? "") : null;
+      const premiumPromise = fetchPremiumReport(input, target.premium && !compat ? "full" : "basic", target.fortune, concern, partnerInput, ctrl.signal, partnerLabel, callAs);
       const res = await fetch("/api/reading", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...input, topic: target.fortune, concern, saveProfile: wantSave, shareConcern: wantShare, premium: target.premium === true, bonus: target.bonus === true }),
+        body: JSON.stringify({ ...input, topic: target.fortune, concern, saveProfile: wantSave, shareConcern: wantShare, premium: target.premium === true, bonus: target.bonus === true, ...(callAs !== null ? { callAs } : {}) }),
         signal: ctrl.signal,
       });
       const data = (await res.json().catch(() => null)) as {
@@ -632,7 +700,7 @@ export default function IntakeModal({ target, wallet = null, onClose, onComplete
       className={`mb-4 rounded-2xl px-4 py-4 text-center ${luxe ? "border border-[#e6c887]/50 bg-gradient-to-b from-[#e6c887]/15 to-transparent" : "border-2 border-brand-300 bg-gradient-to-br from-brand-50 via-white to-amber-50 shadow-[0_6px_20px_rgba(128,87,224,0.12)]"}`}
     >
       <h3 id="intake-title" className={`font-cute text-[25px] sm:text-[28px] font-normal leading-tight break-keep ${luxe ? "text-[#fbf3de]" : "text-brand-700"}`}>
-        {compat && resultPartner ? `${josa(nickname?.trim() ? `${nickname.trim()}님` : "나", "과/와")} ${resultPartner.name}의 궁합♥` : `${nickname?.trim() ? (luxe ? `${nickname.trim()}님의` : possessive(nickname)) : "나의"} ${luxe ? "종합 사주 프리미엄 분석" : `${readingKind(target.fortune)} 해설`}`}
+        {compat && resultPartner ? `${josa(nickname?.trim() ? `${nickname.trim()}님` : "나", "과/와")} ${resultPartner.name}의 궁합♥` : `${viewName?.trim() ? (luxe ? `${viewName.trim()}님의` : possessive(viewName)) : subject ? "" : "나의"} ${luxe ? "종합 사주 프리미엄 분석" : `${readingKind(target.fortune)} 해설`}`}
       </h3>
       {askInput && (
         <p
@@ -721,10 +789,10 @@ export default function IntakeModal({ target, wallet = null, onClose, onComplete
                         closing={premiumReport.compat ? <CompatAsk compat={premiumReport.compat} /> : undefined}
                       />
                     ) : (
-                      <StoryReport report={premiumReport} reading={reading} intro={null} name={nickname}
+                      <StoryReport report={premiumReport} reading={reading} intro={null} name={subject ? (subject.name ?? "") : nickname}
                         lastWord={<><ResultHero report={premiumReport} aiQuote={reading?.kkotgeoji ?? null} luxe={false} hideLucky /><ResultShareCard report={premiumReport} aiQuote={reading?.kkotgeoji ?? null} /></>}
                         closing={askInput ? <AskChips input={askInput} luxe={false} topic={target.fortune} hideTitle /> : undefined}
-                        chat={askInput ? <ChatEntry ctx={{ kind: "reading", summary: summarizeReport(premiumReport), birth: askInput, name: nickname?.trim() || null, ...(target.fortune === "study" ? { topic: "study" as const } : {}) }} /> : undefined}
+                        chat={askInput ? <ChatEntry ctx={{ kind: "reading", summary: summarizeReport(premiumReport), birth: askInput, name: viewName?.trim() || null, ...(target.fortune === "study" ? { topic: "study" as const } : {}) }} /> : undefined}
                       />
                     )}
                   </div>
@@ -825,7 +893,7 @@ export default function IntakeModal({ target, wallet = null, onClose, onComplete
           {bookMode && premiumReport && <NextProductBanner report={premiumReport} />}
 
           {phase === "result" && premiumReport && (
-            <AdminCopyResult report={premiumReport} reading={reading} topic={target.fortune} name={nickname?.trim() || null} partnerName={compat ? resultPartner?.name ?? null : null} />
+            <AdminCopyResult report={premiumReport} reading={reading} topic={target.fortune} name={viewName?.trim() || null} partnerName={compat ? resultPartner?.name ?? null : null} />
           )}
 
           {phase === "result" && premiumReport && askInput && !(storyMode && !compat) && (
@@ -837,7 +905,7 @@ export default function IntakeModal({ target, wallet = null, onClose, onComplete
                   summary: summarizeReport(premiumReport),
                   birth: askInput,
                   ...(compat && resultPartner ? { partnerBirth: resultPartner.birth, partnerName: resultPartner.name } : {}),
-                  name: nickname?.trim() || null,
+                  name: viewName?.trim() || null,
                   ...(target.fortune === "study" && !compat ? { topic: "study" as const } : {}),
                 }}
               />
@@ -878,8 +946,23 @@ export default function IntakeModal({ target, wallet = null, onClose, onComplete
         </div>
       )}
 
-      {phase === "form" && (
+      {phase === "form" && whoOpen && (
+        <WhoPicker
+          me={savedProfile ? { name: nickname?.trim() ?? "", summary: profileSummary(savedProfile) } : null}
+          people={people}
+          onMe={chooseMe}
+          onPerson={choosePerson}
+          onNew={chooseNew}
+        />
+      )}
+
+      {phase === "form" && !whoOpen && (
         <form onSubmit={next} noValidate>
+          {loggedIn && !compat && people.length > 0 && whoDone && (stepIndex === 0 || stepIndex === firstAfterMe) && (
+            <button type="button" data-testid="who-again" onClick={() => setWhoDone(false)} className="mb-2 text-[11px] font-bold text-brand-600 underline underline-offset-2">
+              ← 다른 사람 고르기
+            </button>
+          )}
           <div
             role="progressbar"
             aria-label="입력 진행"
@@ -930,7 +1013,6 @@ export default function IntakeModal({ target, wallet = null, onClose, onComplete
             </div>
           )}
 
-          {(step === "birth" || step === "date") && people.length > 0 && <SavedPeoplePicker people={people} onPick={pickForMe} title="기억해 둔 사람으로 볼래요? (눌러서 바로 불러와요)" />}
           {step === "birth" && <CombinedBirthFields key={meKey} f={form} patch={update} />}
           {(step === "date" || step === "time" || step === "gender") && <BirthStepFields kind={step} f={form} patch={update} />}
           {step === "pdate" && people.length > 0 && <SavedPeoplePicker people={people} onPick={pickPerson} title="기억해 둔 사람 (눌러서 바로 불러와요)" />}

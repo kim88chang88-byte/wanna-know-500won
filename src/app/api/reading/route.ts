@@ -41,16 +41,16 @@ export async function POST(request: Request) {
   const denied = guardOrigin(request) ?? (await enforceLimits(request, { name: "reading", windowMs: 60000, ip: 6, user: 12 }, "뽑기가 너무 빨라요. 잠시 뒤에 다시 시도해 주세요."));
   if (denied) return denied;
 
-  let body: (BirthInput & { topic?: unknown; concern?: unknown; saveProfile?: unknown; shareConcern?: unknown; premium?: unknown; bonus?: unknown }) | null;
+  let body: (BirthInput & { topic?: unknown; concern?: unknown; saveProfile?: unknown; shareConcern?: unknown; premium?: unknown; bonus?: unknown; callAs?: unknown }) | null;
   try {
-    body = (await request.json()) as BirthInput & { topic?: unknown; concern?: unknown; saveProfile?: unknown; shareConcern?: unknown; premium?: unknown; bonus?: unknown };
+    body = (await request.json()) as BirthInput & { topic?: unknown; concern?: unknown; saveProfile?: unknown; shareConcern?: unknown; premium?: unknown; bonus?: unknown; callAs?: unknown };
   } catch {
     return NextResponse.json({ error: "요청이 올바르지 않아요. 다시 한 번 확인해 주세요." }, { status: 400 });
   }
   if (typeof body !== "object" || body === null) {
     return NextResponse.json({ error: "요청이 올바르지 않아요. 다시 한 번 확인해 주세요." }, { status: 400 });
   }
-  const { topic: rawTopic, concern: rawConcern, saveProfile, shareConcern, premium: rawPremium, bonus: rawBonus, ...input } = body;
+  const { topic: rawTopic, concern: rawConcern, saveProfile, shareConcern, premium: rawPremium, bonus: rawBonus, callAs: rawCallAs, ...input } = body;
   // 프리미엄 책은 "긴 풀이"(요약하자면·접이식)를 화면에 쓰지 않아서, 그 호출 4번은 건너뛰어 비용을 아껴요.
   const skipDetail = rawPremium === true;
   const concern = parseConcern(rawConcern);
@@ -168,7 +168,7 @@ export async function POST(request: Request) {
     const detailGate = skipDetail ? "premium" : await takeAiBudget(process.env, db);
     let detailStatus = detailGate === "ok" ? "ok" : `skipped:${detailGate}`;
     const detailPromise = detailGate === "ok"
-      ? interpretDetail(chart, { topic, gender: input.gender, concern, extra: { ...extra, core: buildCoreFacts(input, factsNow, true), name: callName(session?.nick) } }).catch((err) => {
+      ? interpretDetail(chart, { topic, gender: input.gender, concern, extra: { ...extra, core: buildCoreFacts(input, factsNow, true), name: callName(typeof rawCallAs === "string" ? rawCallAs : session?.nick) } }).catch((err) => {
           console.error("interpretDetail failed:", err instanceof Error ? err.message : "unknown");
           detailStatus = err instanceof Error ? err.message.slice(0, 160) : "failed";
           return null;
