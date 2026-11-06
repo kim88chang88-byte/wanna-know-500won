@@ -318,12 +318,6 @@ export default function ChatApp({ initialCtx, initialMsgs, onChange, onBack }: {
     }
   }
 
-  function newChat() {
-    setMenu(false);
-    setMsgs([]);
-    setTyping(null);
-  }
-
   async function copyAll() {
     setMenu(false);
     const t = msgs.filter((m) => !m.error).map((m) => `${m.role === "user" ? "나" : "도리"}: ${m.text}`).join("\n\n");
@@ -368,9 +362,6 @@ export default function ChatApp({ initialCtx, initialMsgs, onChange, onBack }: {
             <>
               <button type="button" aria-label="메뉴 닫기" className="fixed inset-0 z-10 cursor-default" onClick={() => setMenu(false)} />
               <div role="menu" className="absolute right-0 top-10 z-20 w-44 overflow-hidden rounded-2xl border border-brand-100 bg-white py-1 shadow-lg">
-                <button role="menuitem" type="button" onClick={newChat} className="block w-full px-4 py-2.5 text-left text-sm hover:bg-brand-50">
-                  ❄️ 새 대화 시작
-                </button>
                 <button role="menuitem" type="button" onClick={() => void copyAll()} disabled={msgs.length === 0} className="block w-full px-4 py-2.5 text-left text-sm hover:bg-brand-50 disabled:opacity-40">
                   📋 대화 내용 복사
                 </button>
@@ -474,8 +465,8 @@ export default function ChatApp({ initialCtx, initialMsgs, onChange, onBack }: {
             <button type="button" onClick={() => setBuyOpen(true)} className="mx-auto mt-3 block rounded-full bg-gradient-to-br from-brand-500 to-[#c24fe0] px-6 py-2.5 text-sm font-extrabold text-white shadow active:scale-[0.98]">
               <CoinIcon /> 동전 하나로 5번 더 물어보기
             </button>
-            <button type="button" onClick={newChat} className="mt-2 text-xs font-bold text-brand-600">
-              새 대화 시작하기
+            <button type="button" onClick={onBack} className="mt-2 text-xs font-bold text-brand-600">
+              대화 목록으로
             </button>
           </section>
         )}
