@@ -61,6 +61,8 @@ import { NextProductBanner } from "@/components/premium/PremiumBook";
 import PurchaseModal from "@/components/pay/PurchaseModal";
 import type { PremiumReportView } from "@/lib/premium/types";
 import type { BirthInput } from "@/lib/saju/types";
+import SpendConfirm from "./SpendConfirm";
+import { spendPlan, type SpendWallet } from "@/lib/spendPlan";
 
 export interface IntakeTarget {
   /** 어떤 뽑기에서 열었는지 (예: "연애운") */
@@ -74,6 +76,8 @@ export interface IntakeTarget {
 
 interface Props {
   target: IntakeTarget;
+  /** 로그인 회원의 남은 무료·뽑기권·동전. 있으면 "풀이 보기" 전에 무엇이 쓰이는지 확인창을 보여줘요. */
+  wallet?: SpendWallet | null;
   onClose: () => void;
   /** 풀이를 성공적으로 받았을 때 한 번 호출돼요. 로그인 회원이면 서버가 센 횟수를 함께 줘요. (뽑기 횟수 기록용) */
   onComplete: (serverCounts?: { today: number; month: number } | null) => void;
@@ -407,7 +411,7 @@ function BirthStepFields({ kind, f, patch }: { kind: "date" | "time" | "gender";
   );
 }
 
-export default function IntakeModal({ target, onClose, onComplete, loggedIn = false, nickname = null, savedProfile = null, onRequestLogin, onProfileSaved }: Props) {
+export default function IntakeModal({ target, wallet = null, onClose, onComplete, loggedIn = false, nickname = null, savedProfile = null, onRequestLogin, onProfileSaved }: Props) {
   // 저장된 생년월일시가 있으면 미리 채우고, 이미 입력한 질문(생년월일·시간·성별)은 건너뛰어 고민 단계에서 시작해요.
   const [form, setForm] = useState<IntakeForm>(() => (savedProfile ? { ...EMPTY_FORM, ...profileToForm(savedProfile) } : EMPTY_FORM));
   // 궁합 리포트면 상대방의 생년월일시·성별을 더 받아요. (상대방 정보는 계산에만 쓰고 저장하지 않아요)
@@ -438,6 +442,7 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
   const [saveVault, setSaveVault] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [freeUsed, setFreeUsed] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
   const [payOpen, setPayOpen] = useState(false);
   const [phase, setPhase] = useState<"form" | "loading" | "result">("form");
   const [chart, setChart] = useState<SajuChart | null>(null);
@@ -594,8 +599,10 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
       setError(problem);
       return;
     }
-    if (isLast) void submit();
-    else setStepIndex((i) => i + 1);
+    if (isLast) {
+      if (wallet) setConfirmOpen(true);
+      else void submit();
+    } else setStepIndex((i) => i + 1);
   }
 
   function toggleConcern(id: ConcernId) {
@@ -1110,6 +1117,20 @@ export default function IntakeModal({ target, onClose, onComplete, loggedIn = fa
             <button type="button" onClick={() => setPayOpen(true)} className="mt-2 w-full rounded-full bg-brand-500 py-2.5 text-sm font-bold text-white">
               동전으로 한 번 더 뽑기
             </button>
+          )}
+          {confirmOpen && wallet && (
+            <SpendConfirm
+              plan={spendPlan(wallet, compat ? 2 : 1)}
+              onCancel={() => setConfirmOpen(false)}
+              onConfirm={() => {
+                setConfirmOpen(false);
+                void submit();
+              }}
+              onCharge={() => {
+                setConfirmOpen(false);
+                setPayOpen(true);
+              }}
+            />
           )}
           {payOpen && <PurchaseModal preselect={compat ? "compat" : "reading"} onClose={() => setPayOpen(false)} />}
 

@@ -405,6 +405,7 @@ export default function Landing() {
       {intake && (
         <IntakeModal
           target={intake}
+          wallet={user ? { freeLeft: Math.max(0, FREE_PER_DAY - counts.today), tickets, coins } : null}
           onClose={closeIntake}
           onComplete={completeDraw}
           loggedIn={Boolean(user)}
