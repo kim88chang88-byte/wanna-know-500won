@@ -143,6 +143,30 @@ export default function ChatApp({ initialCtx, initialMsgs, onChange, onBack }: {
     };
   }, [ready, ctx]);
 
+  // 구매 체험·결제로 동전이 들어오면 바로 다시 불러와요. 질문이 다 떨어진 상태라면 "질문 더하기" 창을 이어서 열어요.
+  const refreshCoins = useCallback(
+    async (offerBuy: boolean) => {
+      try {
+        const res = await fetch("/api/chat/quota", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ctx }) });
+        const d = res.ok ? ((await res.json()) as { left?: number; coins?: number }) : null;
+        if (!d) return;
+        if (typeof d.left === "number") setLeft(d.left);
+        if (typeof d.coins === "number") {
+          setCoins(d.coins);
+          if (offerBuy && d.coins > 0 && (d.left ?? 0) <= 0) setBuyOpen(true);
+        }
+      } catch {
+        /* 동전 수는 다음에 다시 불러와요 */
+      }
+    },
+    [ctx],
+  );
+  useEffect(() => {
+    const on = () => void refreshCoins(false);
+    window.addEventListener("wanna500:coins", on);
+    return () => window.removeEventListener("wanna500:coins", on);
+  }, [refreshCoins]);
+
   // 키보드가 올라와도 입력창이 가려지지 않게, 보이는 화면 높이에 맞춰요
   useEffect(() => {
     const vv = window.visualViewport;
@@ -547,7 +571,13 @@ export default function ChatApp({ initialCtx, initialMsgs, onChange, onBack }: {
           </div>
         </div>
       )}
-      {payOpen && <PurchaseModal preselect="reading" onClose={() => setPayOpen(false)} />}
+      {payOpen && <PurchaseModal
+          preselect="reading"
+          onClose={() => {
+            setPayOpen(false);
+            void refreshCoins(true);
+          }}
+        />}
     </div>
   );
 }
