@@ -314,39 +314,33 @@ export function SampleSection() {
 /* ------------------------------------------------------------------ 소개 (후기 자리) */
 
 const TRUST_POINTS = [
-  { title: "500원", desc: "동전 하나면 충분한 1회", titleClass: "text-amber-600", box: "border-amber-300" },
-  { title: "매일 첫 1회 무료", desc: "가벼운 마음으로 오늘의 운 뽑아보기", titleClass: "text-brand-500", box: "border-pink-300" },
-  { title: "내 보관함", desc: "본 풀이를 저장해 두고 언제든 다시 보기", titleClass: "text-indigo-600", box: "border-indigo-300" },
+  { title: "500원", desc: "동전 하나면 한 번 봐줄게!", titleClass: "text-amber-600" },
+  { title: "매일 첫 1회 무료", desc: "오늘 운은 도리가 공짜로 ❄️", titleClass: "text-brand-500" },
+  { title: "내 보관함", desc: "도리가 잘 챙겨둘게!", titleClass: "text-indigo-600" },
 ] as const;
 
 export function TrustSection() {
   return (
-    <section className="rounded-[2.5rem] bg-white border border-sky-100 p-4 sm:p-6 mb-4 shadow-sm relative z-10">
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-center">
-        <div className="lg:col-span-5 flex flex-col gap-3">
-          <div className="inline-flex items-center gap-1.5 text-brand-500 font-bold text-xs">
-            <span className="material-symbols-outlined text-[18px]">verified</span>
-            <span>500원짜리 동전 하나의 온기</span>
+    <section className="rounded-[2rem] bg-white border border-sky-100 px-4 py-3.5 sm:p-6 mb-4 shadow-sm relative z-10">
+      <div className="inline-flex items-center gap-1.5 text-brand-500 font-bold text-xs">
+        <span className="material-symbols-outlined text-[18px]">verified</span>
+        <span>찾아갈 필요 없는 사주</span>
+      </div>
+      <h3 className="font-cute text-xl sm:text-3xl font-normal text-gray-900 leading-snug mt-1.5">
+        철학관 찾아가지 않아도,
+        <br />
+        <span className="text-brand-500">동전 하나</span>로 제대로 된 사주.
+      </h3>
+      <p className="text-xs sm:text-sm text-slate-600 leading-relaxed mt-1.5">
+        예약도 대기도 없이, 내 사주를 꼼꼼하게 풀어낸 풀이를 500원 동전 하나로 받아보세요. 마음에 드는 결과는 보관함에 남겨두고 언제든 다시 볼 수 있어요.
+      </p>
+      <div className="grid grid-cols-3 mt-3 pt-3 border-t border-sky-100">
+        {TRUST_POINTS.map((t, i) => (
+          <div key={t.title} className={`min-w-0 px-2 ${i === 0 ? "pl-0" : "border-l border-sky-100"}`}>
+            <div className={`font-cute text-[13.5px] sm:text-xl font-normal leading-tight ${t.titleClass}`}>{t.title}</div>
+            <div className="text-[11px] sm:text-xs text-slate-600 mt-1 leading-snug">{t.desc}</div>
           </div>
-          <h3 className="font-cute text-2xl sm:text-3xl font-normal text-gray-900 leading-snug">
-            철학관 대신,
-            <br />
-            <span className="text-brand-500">동전 하나</span>면 충분해요.
-          </h3>
-          <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-            무거운 분위기도, 예약도 없이 500원 동전 하나로 오늘의 운을 뽑아요. 출퇴근길에 가볍게 뽑아보고,
-            마음에 드는 결과는 내 보관함에 남겨보세요.
-          </p>
-        </div>
-
-        <div className="lg:col-span-7 grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
-          {TRUST_POINTS.map((t) => (
-            <div key={t.title} className={`pl-4 py-1 border-l-[3px] flex flex-col justify-center ${t.box}`}>
-              <div className={`font-cute text-xl font-normal ${t.titleClass}`}>{t.title}</div>
-              <div className="text-xs text-slate-600 mt-2 leading-relaxed">{t.desc}</div>
-            </div>
-          ))}
-        </div>
+        ))}
       </div>
       {/* 실제 이용 후기가 쌓이면 이 자리에 보여주세요. (지어낸 후기나 만족도·적중률 수치는 넣지 않아요) */}
     </section>
