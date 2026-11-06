@@ -649,7 +649,9 @@ export default function IntakeModal({ target, wallet = null, onClose, onComplete
       )}
     </div>
   );
-  const header = (
+  // 궁합 결과 화면에서는 가격 알약을 숨겨요. (입력 단계에서는 그대로 보여요)
+  const hidePriceTag = compat && phase === "result";
+  const header = hidePriceTag ? null : (
     <div className="text-center mb-4">
       <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold ${luxe ? "border border-[#e6c887]/50 text-[#e6c887]" : "bg-brand-100 text-brand-700"}`}>
         {target.fortune} · {target.price}
