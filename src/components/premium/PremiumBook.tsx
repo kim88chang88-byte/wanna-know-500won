@@ -109,9 +109,10 @@ function RealityPick({ rc }: { rc: RealityCheck }) {
             key={o.label}
             type="button"
             aria-pressed={pick === i}
-            onClick={() => (pick === null ? setAsking(i) : setPick(i))}
+            disabled={pick !== null}
+            onClick={() => setAsking(i)}
             className={`rounded-full border px-3.5 py-1.5 text-[12.5px] font-bold transition-colors ${
-              pick === i ? "border-[#b98a2f] bg-[#b98a2f] text-white" : "border-[#9a93b0] text-[#322f47] hover:border-[#b98a2f]"
+              pick === i ? "border-[#b98a2f] bg-[#b98a2f] text-white" : "border-[#9a93b0] text-[#322f47] hover:border-[#b98a2f] disabled:opacity-50 disabled:hover:border-[#9a93b0]"
             }`}
           >
             {o.label}

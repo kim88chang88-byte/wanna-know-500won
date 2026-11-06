@@ -18,9 +18,10 @@ export function RealityLight({ rc }: { rc: RealityCheck }) {
             key={o.label}
             type="button"
             aria-pressed={pick === i}
-            onClick={() => (pick === null ? setAsking(i) : setPick(i))}
+            disabled={pick !== null}
+            onClick={() => setAsking(i)}
             className={`rounded-full border px-3.5 py-1.5 text-xs font-bold transition-colors ${
-              pick === i ? "border-amber-500 bg-amber-500 text-white" : "border-amber-300 bg-white text-amber-800 hover:border-amber-500"
+              pick === i ? "border-amber-500 bg-amber-500 text-white" : "border-amber-300 bg-white text-amber-800 hover:border-amber-500 disabled:opacity-50 disabled:hover:border-amber-300"
             }`}
           >
             {o.label}
