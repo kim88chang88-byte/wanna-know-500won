@@ -147,6 +147,11 @@ export function HeroSection({ visitors = null, tickets = 0, wallet = null, onBuy
           🎟 보너스 뽑기 {tickets}장 <span className="hidden text-[10px] font-medium text-rose-400 min-[420px]:inline">· 무료 소진 후 자동 사용</span>
         </p>
       )}
+      {wallet && wallet.bills + wallet.coins > 0 && (
+        <p data-testid="coin-note" className="mt-1 text-right text-[11px] leading-tight text-slate-500">
+          {tickets > 0 ? "그다음 동전이 자동으로 쓰여요" : "무료 뽑기를 다 쓰면 동전이 자동으로 쓰여요"}
+        </p>
+      )}
     </section>
   );
 }
