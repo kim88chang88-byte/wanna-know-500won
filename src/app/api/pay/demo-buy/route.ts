@@ -3,9 +3,12 @@ import { NextResponse } from "next/server";
 import { readCookie, SESSION_COOKIE, verifySessionToken } from "@/lib/auth/session";
 import { createDb, loadDbConfig } from "@/lib/db/supabase";
 import { DEMO_COINS, DEMO_KIND, DEMO_MONTH_CAP, parseDemoProduct } from "@/lib/demoBuy";
+import { isAdmin } from "@/lib/admin/auth";
 import { enforceLimits, guardOrigin } from "@/lib/guard";
 
 export const runtime = "nodejs";
+
+const ADMIN_MONTH_CAP = 1000;
 
 /**
  * 베타 구매 체험. 실제 결제는 없고, 상품에 맞는 동전만 지급해요. (한 계정 한 달에 DEMO_MONTH_CAP 번)
@@ -28,7 +31,9 @@ export async function POST(request: Request) {
   const db = createDb(config);
   try {
     await db.ensureUser(session.sub, session.nick);
-    const r = await db.grantCoinCapped(session.sub, DEMO_KIND, randomUUID(), DEMO_MONTH_CAP, DEMO_COINS[product]);
+    // 개발·테스트용: 관리자(ADMIN_USER_IDS)는 한 달 체험 횟수 제한을 크게 풀어 둬요.
+    const cap = isAdmin(session.sub, process.env) ? ADMIN_MONTH_CAP : DEMO_MONTH_CAP;
+    const r = await db.grantCoinCapped(session.sub, DEMO_KIND, randomUUID(), cap, DEMO_COINS[product]);
     if (r.reason === "cap") return NextResponse.json({ error: "cap", balance: r.balance }, { status: 429, headers });
     if (!r.granted) return NextResponse.json({ error: "unavailable" }, { status: 503, headers });
     return NextResponse.json({ ok: true, coins: DEMO_COINS[product], balance: r.balance }, { headers });
