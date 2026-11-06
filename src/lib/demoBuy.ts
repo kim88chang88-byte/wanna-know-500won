@@ -8,8 +8,8 @@ export const DEMO_MONTH_CAP = 3;
 
 export type DemoProduct = "reading" | "compat" | "premium";
 
-/** 상품별로 들어오는 동전 수 (500원=1개, 궁합=2개, 프리미엄=보너스 5개) */
-export const DEMO_COINS: Record<DemoProduct, number> = { reading: 1, compat: 2, premium: 5 };
+/** 상품별로 들어오는 동전 수 (500원=1개, 궁합=2개, 프리미엄 9,500원=19개) */
+export const DEMO_COINS: Record<DemoProduct, number> = { reading: 1, compat: 2, premium: 19 };
 
 export function parseDemoProduct(v: unknown): DemoProduct | null {
   return v === "reading" || v === "compat" || v === "premium" ? v : null;

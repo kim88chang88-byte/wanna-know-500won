@@ -63,7 +63,7 @@ import PurchaseModal from "@/components/pay/PurchaseModal";
 import type { PremiumReportView } from "@/lib/premium/types";
 import type { BirthInput } from "@/lib/saju/types";
 import SpendConfirm from "./SpendConfirm";
-import { spendPlan, type SpendWallet } from "@/lib/spendPlan";
+import { readingCoinCost, spendPlan, type SpendWallet } from "@/lib/spendPlan";
 
 export interface IntakeTarget {
   /** 어떤 뽑기에서 열었는지 (예: "연애운") */
@@ -1205,7 +1205,7 @@ export default function IntakeModal({ target, wallet = null, onClose, onComplete
           )}
           {confirmOpen && wallet && (
             <SpendConfirm
-              plan={spendPlan(wallet, compat ? 2 : 1)}
+              plan={spendPlan(wallet, readingCoinCost(target.premium === true, compat))}
               onCancel={() => setConfirmOpen(false)}
               onConfirm={() => {
                 setConfirmOpen(false);

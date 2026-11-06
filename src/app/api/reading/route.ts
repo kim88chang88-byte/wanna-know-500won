@@ -11,6 +11,7 @@ import { interpretSaju, ReadingUnavailableError } from "@/lib/ai/interpret";
 import { hasEntitlement, ENTITLEMENT_COOKIE } from "@/lib/premium/entitlement";
 import { isPremiumLocked } from "@/lib/premium/config";
 import { isCompatFortune } from "@/lib/premium/compat";
+import { readingCoinCost } from "@/lib/spendPlan";
 import { normalizeTopic, toPublicReading, type PublicReading } from "@/lib/ai/reading";
 import { hasConcern, parseConcern } from "@/lib/concerns";
 import { ageBand } from "@/lib/profile";
@@ -64,7 +65,7 @@ export async function POST(request: Request) {
   let counts: DrawCounts | null = null;
   let useCoin = false;
   // 궁합(1,000원)은 동전 2개, 그 밖의 뽑기는 1개
-  const coinCost = rawPremium === true && typeof rawTopic === "string" && isCompatFortune(rawTopic) ? 2 : 1;
+  const coinCost = readingCoinCost(rawPremium === true, typeof rawTopic === "string" && isCompatFortune(rawTopic));
   if (userId && db) {
     try {
       counts = await db.getCounts(userId);

@@ -25,7 +25,7 @@ interface Product {
 export const PRODUCTS: Product[] = [
   { id: "reading", name: "오늘의 풀이", price: 500, line: "동전 1개", use: "성공·재물·연애 등 풀이 1회 (또는 상담실 질문 5번)" },
   { id: "compat", name: "둘의 궁합", price: 1000, line: "동전 2개", use: "궁합 결과서 1회 (또는 상담실 질문 10번)" },
-  { id: "premium", name: "프리미엄 종합 사주", price: 9500, line: "20쪽 사주서 전체", bonus: "+ 동전 5개 보너스!", use: "원국·월별 12개월·10년 대운 + 보너스 동전으로 풀이 5회 · 질문 25번", best: true },
+  { id: "premium", name: "프리미엄 종합 사주", price: 9500, line: "동전 19개", use: "20쪽 사주서 전체 1회 (원국·월별 12개월·10년 대운)", best: true },
 ];
 
 const DemoNote = ({ className = "" }: { className?: string }) => (

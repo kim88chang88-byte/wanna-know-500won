@@ -20,3 +20,13 @@ describe("spendPlan", () => {
     expect(spendPlan({ freeLeft: Number.NaN, tickets: -1, coins: 2.9 }, 1)).toEqual({ kind: "coin", cost: 1, before: 2, after: 1 });
   });
 });
+
+describe("readingCoinCost", () => {
+  it("일반 1개, 궁합 2개, 프리미엄 19개", async () => {
+    const { readingCoinCost, PREMIUM_COINS } = await import("../spendPlan");
+    expect(readingCoinCost(false, false)).toBe(1);
+    expect(readingCoinCost(true, true)).toBe(2);
+    expect(readingCoinCost(true, false)).toBe(PREMIUM_COINS);
+    expect(PREMIUM_COINS * 500).toBe(9500);
+  });
+});
