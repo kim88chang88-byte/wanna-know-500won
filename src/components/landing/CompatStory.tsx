@@ -259,18 +259,18 @@ export default function CompatStory({ report, intro, closing, lastWord, partnerN
         {groups.map((g) =>
           g.list.map((pt, n) => (
             <Fold key={`${g.key}-${n}`} testId="story-fold" label={`${g.emoji} ${g.label}`} title={plainPointTitle(pt.title)}>
-              {pt.body}
+              <Paras mark={mark} text={pt.body} />
             </Fold>
           )),
         )}
         {(c.timing ?? []).map((t) => (
           <Fold key={t.title} testId="story-fold" label="📅 올해·내년 흐름" title={t.title}>
-            {t.body}
+            <Paras mark={mark} text={t.body} />
           </Fold>
         ))}
         {(c.tips ?? []).map((t) => (
           <Fold key={t.title} testId="story-fold" label={`${t.emoji} 도리의 팁`} title={t.title}>
-            {t.body}
+            <Paras mark={mark} text={t.body} />
           </Fold>
         ))}
         {lastWord && (
