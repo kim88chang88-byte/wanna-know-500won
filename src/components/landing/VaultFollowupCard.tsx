@@ -78,9 +78,10 @@ export function VaultFollowupCard({ onShow }: { onShow?: (shown: boolean) => voi
       {chosen !== null && (
         <div role="status" className="mt-2.5">
           <p data-testid="vault-followup-reply" className="text-[13.5px] leading-relaxed text-gray-800">{check.options[chosen].message}</p>
-          <div className="mt-2.5 flex items-center gap-3 text-xs">
-            <a href="/vault" className="rounded-full bg-brand-500 px-3.5 py-1.5 font-bold text-white">그때 풀이 다시 보기</a>
+          <div className="mt-2.5 grid grid-cols-[1fr_auto_1fr] items-center gap-3 text-xs">
+            <span aria-hidden="true" />
             <button type="button" onClick={() => setHidden(true)} className="text-gray-500 underline">접어두기</button>
+            <a href="/vault" className="justify-self-end whitespace-nowrap rounded-full bg-brand-500 px-3.5 py-1.5 font-bold text-white">그때 풀이 다시 보기</a>
           </div>
         </div>
       )}
