@@ -12,11 +12,29 @@ export function sessionOf(request: Request) {
   return verifySessionToken(readCookie(request.headers.get("cookie"), SESSION_COOKIE), process.env.AUTH_SECRET);
 }
 
-/** 상담방을 열어 줄 사람: 기본은 관리자만. CHAT_OPEN=true 로 바꾸면 로그인한 모든 회원에게 열려요. */
-export function canChat(sub: string | null | undefined): boolean {
+/**
+ * 상담방을 열어 줄 사람. 단계적으로 열 수 있어요.
+ *  1) 기본: 관리자만
+ *  2) CHAT_ALLOW_IDS="id1,id2": 관리자 + 적어 둔 회원(먼저 써 볼 사람들)
+ *  3) CHAT_OPEN=true: 로그인한 모든 회원
+ * 환경변수를 바꾼 뒤에는 재배포해야 적용돼요.
+ */
+export function canChatWith(sub: string | null | undefined, env: Record<string, string | undefined>): boolean {
   if (!sub) return false;
-  if (process.env.CHAT_OPEN?.trim().toLowerCase() === "true") return true;
-  return isAdmin(sub, process.env);
+  if (env.CHAT_OPEN?.trim().toLowerCase() === "true") return true;
+  if (isAdmin(sub, env)) return true;
+  const allow = (env.CHAT_ALLOW_IDS ?? "").split(/[\s,]+/).filter(Boolean);
+  return allow.includes(sub);
+}
+
+export function canChat(sub: string | null | undefined): boolean {
+  return canChatWith(sub, process.env);
+}
+
+/** 서버 전체가 하루에 받는 상담 질문 수 상한(AI 비용 보호). CHAT_DAILY_CAP 로 바꾸고, 비우면 300. */
+export function chatServerCap(env: Record<string, string | undefined>): number {
+  const n = Number(env.CHAT_DAILY_CAP);
+  return Number.isInteger(n) && n > 0 ? n : 300;
 }
 
 export function validBirth(v: unknown): BirthInput | null {

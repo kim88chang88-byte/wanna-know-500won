@@ -6,7 +6,7 @@ import { buildDailyFacts, kstToday } from "@/lib/ai/dailyFacts";
 import { ReadingUnavailableError } from "@/lib/ai/interpret";
 import { hasAiKey } from "@/lib/ai/llm";
 import { DAY_CAP } from "@/lib/chatQuota";
-import { canChat, dbOrNull, parseCtx, quotaLeft, refundQuestion, sessionOf, takeQuestion, targetOf } from "@/lib/chatServer";
+import { canChat, chatServerCap, dbOrNull, parseCtx, quotaLeft, refundQuestion, sessionOf, takeQuestion, targetOf } from "@/lib/chatServer";
 import { enforceLimits, guardOrigin, takeLimit } from "@/lib/guard";
 import { resolveBirth } from "@/lib/saju/birthPlace";
 import { calculateSaju } from "@/lib/saju/calculate";
@@ -61,6 +61,10 @@ export async function POST(request: Request) {
 
     const gate = await takeAiBudget(process.env, db);
     if (gate !== "ok") throw new ReadingUnavailableError();
+
+    // 서버 전체가 하루에 받는 상담 질문 상한 (한꺼번에 몰려도 AI 비용이 정해진 선을 넘지 않게)
+    const all = await takeLimit("chat-all", "server", chatServerCap(process.env), 24 * 60 * 60 * 1000);
+    if (!all.ok) throw new ReadingUnavailableError();
 
     // 하루에 한 사람이 보낼 수 있는 전체 질문 수 (범위가 달라도 합쳐서)
     const day = await takeLimit("chat-day", `u:${session.sub}`, DAY_CAP, 24 * 60 * 60 * 1000);
