@@ -341,7 +341,7 @@ export function TrustSection() {
       </p>
       <div className="grid grid-cols-3 mt-3 pt-3 border-t border-sky-100">
         {TRUST_POINTS.map((t, i) => (
-          <div key={t.title} className={`min-w-0 px-2 ${i === 0 ? "pl-0" : "border-l border-sky-100"}`}>
+          <div key={t.title} className={`min-w-0 px-1.5 text-center ${i === 0 ? "" : "border-l border-sky-100"}`}>
             <div className={`font-cute text-[13.5px] sm:text-xl font-normal leading-tight ${t.titleClass}`}>{t.title}</div>
             <div className="text-[11px] sm:text-xs text-slate-600 mt-1 leading-snug">{t.desc}</div>
           </div>
