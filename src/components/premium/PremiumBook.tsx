@@ -849,7 +849,7 @@ export default function PremiumBook({ report, flush = false, finale, previewBlur
   const num = (n: number) => String(n).padStart(2, "0");
   const lockedTotal = pages.reduce((a, p) => a + p.sections.filter((x) => x.locked).length, 0);
   const lockedHere = page.sections.filter((x) => x.locked).length;
-  const won = report.compat ? "1,000원" : "9,900원";
+  const won = report.compat ? "1,000원" : "9,500원";
   const unlock = (
     <button
       type="button"

@@ -5,6 +5,8 @@ import type { ReactNode } from "react";
  */
 
 export interface WalletValues {
+  /** 10,000원 지폐 장수 (동전 20개마다 1장) */
+  tenK?: number;
   /** 결제로 산 1,000원 지폐 장수 (결제 기능이 열리면 채워져요) */
   bills: number;
   /** 결제로 산 500원 동전 개수 (결제 기능이 열리면 채워져요) */
@@ -13,10 +15,10 @@ export interface WalletValues {
   free: number;
 }
 
-/** 동전(500원) 잔액을 지폐(1,000원 = 동전 2개)와 남는 동전으로 나눠요. 예: 20개 → 지폐 10장, 19개 → 지폐 9장 + 동전 1개 */
-export function splitWallet(coinBalance: number): { bills: number; coins: number } {
+/** 동전(500원) 잔액을 만원권(동전 20개)·천원권(동전 2개)·남는 동전으로 나눠요. 예: 21개 → 만원권 1장 + 동전 1개, 19개 → 천원권 9장 + 동전 1개 */
+export function splitWallet(coinBalance: number): { tenK: number; bills: number; coins: number } {
   const n = Number.isFinite(coinBalance) && coinBalance > 0 ? Math.floor(coinBalance) : 0;
-  return { bills: Math.floor(n / 2), coins: n % 2 };
+  return { tenK: Math.floor(n / 20), bills: Math.floor((n % 20) / 2), coins: n % 2 };
 }
 
 /** 칩 안에 들어갈 숫자: 음수·소수는 0으로, 너무 크면 99+ */
@@ -43,11 +45,17 @@ function Chip({ label, count, tone, children }: { label: string; count: number; 
   );
 }
 
-export default function WalletBar({ bills, coins, free, onBuy }: WalletValues & { onBuy?: () => void }) {
-  return (
-    <div data-testid="wallet-bar" className="flex items-center justify-end gap-1.5">
-      {onBuy ? (
-        <button type="button" onClick={onBuy} aria-label="동전 충전하기 (결제 메뉴판 열기)" className="flex items-center gap-1.5 rounded-full active:scale-95">
+export default function WalletBar({ tenK = 0, bills, coins, free, onBuy }: WalletValues & { onBuy?: () => void }) {
+  const money = (
+    <>
+      {tenK > 0 && (
+        <span data-testid="wallet-tenk" className="contents">
+          <Chip label="결제한 10,000원 지폐" count={tenK} tone="border-emerald-200">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/images/bill-10000.webp" alt="" width={44} height={25} className="h-[18px] w-auto rounded-[3px] shadow-[0_1px_2px_rgba(0,0,0,0.2)]" />
+          </Chip>
+        </span>
+      )}
       <span data-testid="wallet-bills" className="contents">
         <Chip label="결제한 1,000원 지폐" count={bills} tone="border-sky-200">
           {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -60,22 +68,16 @@ export default function WalletBar({ bills, coins, free, onBuy }: WalletValues & 
           <img src="/images/coin-500.webp" alt="" width={22} height={22} className="h-[22px] w-[22px] object-contain drop-shadow-sm" />
         </Chip>
       </span>
+    </>
+  );
+  return (
+    <div data-testid="wallet-bar" className="flex flex-wrap items-center justify-end gap-1.5">
+      {onBuy ? (
+        <button type="button" onClick={onBuy} aria-label="동전 충전하기 (결제 메뉴판 열기)" className="flex flex-wrap items-center justify-end gap-1.5 rounded-full active:scale-95">
+          {money}
         </button>
       ) : (
-        <>
-      <span data-testid="wallet-bills" className="contents">
-        <Chip label="결제한 1,000원 지폐" count={bills} tone="border-sky-200">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/images/bill-1000.webp" alt="" width={44} height={25} className="h-[18px] w-auto rounded-[3px] shadow-[0_1px_2px_rgba(0,0,0,0.2)]" />
-        </Chip>
-      </span>
-      <span data-testid="wallet-coins" className="contents">
-        <Chip label="동전" count={coins} tone="border-amber-200">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/images/coin-500.webp" alt="" width={22} height={22} className="h-[22px] w-[22px] object-contain drop-shadow-sm" />
-        </Chip>
-      </span>
-        </>
+        money
       )}
       <span data-testid="wallet-free" className="contents">
         <Chip label="무료 뽑기" count={free} tone="border-pink-200">

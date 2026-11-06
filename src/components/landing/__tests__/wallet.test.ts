@@ -13,11 +13,13 @@ describe("내 주머니 숫자", () => {
 });
 
 describe("동전 잔액 → 지폐·동전", () => {
-  it("동전 2개는 지폐 1장이에요", () => {
-    expect(splitWallet(0)).toEqual({ bills: 0, coins: 0 });
-    expect(splitWallet(1)).toEqual({ bills: 0, coins: 1 });
-    expect(splitWallet(20)).toEqual({ bills: 10, coins: 0 }); // 1만원
-    expect(splitWallet(19)).toEqual({ bills: 9, coins: 1 }); // 500원 쓴 뒤
-    expect(splitWallet(-4)).toEqual({ bills: 0, coins: 0 });
+  it("동전 2개는 천원권, 20개는 만원권이에요", () => {
+    expect(splitWallet(0)).toEqual({ tenK: 0, bills: 0, coins: 0 });
+    expect(splitWallet(1)).toEqual({ tenK: 0, bills: 0, coins: 1 });
+    expect(splitWallet(19)).toEqual({ tenK: 0, bills: 9, coins: 1 });
+    expect(splitWallet(20)).toEqual({ tenK: 1, bills: 0, coins: 0 });
+    expect(splitWallet(21)).toEqual({ tenK: 1, bills: 0, coins: 1 });
+    expect(splitWallet(30)).toEqual({ tenK: 1, bills: 5, coins: 0 });
+    expect(splitWallet(-4)).toEqual({ tenK: 0, bills: 0, coins: 0 });
   });
 });

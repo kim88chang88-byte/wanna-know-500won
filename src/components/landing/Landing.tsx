@@ -150,8 +150,8 @@ export default function Landing() {
         return;
       }
       // 1,000원 카드(둘의 궁합)는 동전 대신 지폐가 들어가요.
-      // 9,900원 프리미엄 종합 사주는 만원권이 낙엽처럼 떨어져요. (1,000원 궁합은 천원권 그대로)
-      const big = price.startsWith("9,900");
+      // 9,500원 프리미엄 종합 사주는 만원권이 낙엽처럼 떨어져요. (1,000원 궁합은 천원권 그대로)
+      const big = price.startsWith("9,500");
       setRitualBig(big);
       setRitualBill(price.startsWith("1,000") || big);
       setRitual(true);

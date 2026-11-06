@@ -621,7 +621,7 @@ export default function IntakeModal({ target, wallet = null, onClose, onComplete
   }
 
   // 프리미엄 결과 화면만 미드나잇+골드 톤으로 보여줘요. (입력·로딩 화면은 기존 그대로)
-  // 둘의 궁합은 500원 풀이와 같은 밝은 템플릿으로 보여줘요. (10쪽 책·어두운 테마는 9,900원 종합 사주만)
+  // 둘의 궁합은 500원 풀이와 같은 밝은 템플릿으로 보여줘요. (10쪽 책·어두운 테마는 9,500원 종합 사주만)
   const luxe = target.premium === true && !compat && phase === "result";
   const storyMode = !luxe && premiumReport ? isStoryReport(premiumReport) : false;
   const bookMode = luxe && !!premiumReport && premiumReport.level === "full" && premiumReport.book.length > 0;

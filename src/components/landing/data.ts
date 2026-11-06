@@ -187,7 +187,7 @@ export interface PremiumCard {
   divider: string;
 }
 
-/** 9,900원 프리미엄 종합 사주 (하나만 판매해요) */
+/** 9,500원 프리미엄 종합 사주 (하나만 판매해요) */
 export const PREMIUM_CARDS: readonly PremiumCard[] = [
   {
     key: "premium-all",

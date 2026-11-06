@@ -276,8 +276,8 @@ export function PremiumSection({ onSpin }: SpinProps) {
               role="button"
               tabIndex={0}
               aria-label={`${p.title} 보기`}
-              onClick={() => onSpin(p.key, p.fortune, "9,900원", true)}
-              onKeyDown={(e) => activateOnKey(e, () => onSpin(p.key, p.fortune, "9,900원", true))}
+              onClick={() => onSpin(p.key, p.fortune, "9,500원", true)}
+              onKeyDown={(e) => activateOnKey(e, () => onSpin(p.key, p.fortune, "9,500원", true))}
               className={`scroll-mt-24 card-water-glow relative flex flex-col justify-between rounded-3xl p-3.5 h-full bg-white cursor-pointer select-none hover:shadow-lg transition-shadow group focus:outline-none focus-visible:ring-4 focus-visible:ring-brand-300 ${p.card}`}
             >
               <div>
@@ -294,7 +294,7 @@ export function PremiumSection({ onSpin }: SpinProps) {
                 <p className="text-xs text-slate-500 text-center leading-relaxed">{p.desc}</p>
               </div>
               <span className={`mt-4 block rounded-full py-3 text-center text-sm font-extrabold text-white ${p.button}`}>
-                9,900원 · 시작하기
+                <s className="mr-1 text-xs font-semibold opacity-70">10,000원</s> 9,500원 · 시작하기
               </span>
             </div>
             </div>

@@ -35,7 +35,7 @@ describe("로그인 뒤 이어서 뽑기", () => {
   });
   it("프리미엄 표시도 그대로 유지", () => {
     const s = mem();
-    savePendingDraw(s, { ...D, premium: true, price: "9,900원" }, 5);
+    savePendingDraw(s, { ...D, premium: true, price: "9,500원" }, 5);
     expect(takePendingDraw(s, 6)?.premium).toBe(true);
   });
 });

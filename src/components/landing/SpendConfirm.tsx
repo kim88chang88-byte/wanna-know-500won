@@ -11,9 +11,14 @@ function Img({ src, h }: { src: string; h: number }) {
 }
 
 function Bal({ coins }: { coins: number }) {
-  const { bills, coins: c } = splitWallet(coins);
+  const { tenK, bills, coins: c } = splitWallet(coins);
   return (
     <span className="inline-flex items-center gap-1">
+      {tenK > 0 && (
+        <>
+          <Img src="/images/bill-10000.webp" h={20} />×{tenK}
+        </>
+      )}
       {bills > 0 && (
         <>
           <Img src="/images/bill-1000.webp" h={20} />×{bills}
@@ -24,7 +29,7 @@ function Bal({ coins }: { coins: number }) {
           <Img src="/images/coin-500.webp" h={20} />×{c}
         </>
       )}
-      {bills === 0 && c === 0 && <span>0</span>}
+      {tenK === 0 && bills === 0 && c === 0 && <span>0</span>}
     </span>
   );
 }
