@@ -4,6 +4,7 @@ import StickyDrawCta from "./StickyDrawCta";
 import BirthdayTeaser from "./BirthdayTeaser";
 import BottomTabs from "./BottomTabs";
 import CoinRitual from "./CoinRitual";
+import PurchaseModal from "@/components/pay/PurchaseModal";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { dayKey, getBrowserStorage, readCounts, recordDraw, type DrawCounts } from "@/lib/drawCounter";
 import { readVisitDays, recordVisit } from "@/lib/streak";
@@ -63,6 +64,7 @@ export default function Landing() {
   const [tickets, setTickets] = useState(0);
   // 서버에 쌓인 뽑기 코인(로그인 선물 등)과, 방금 선물을 받았는지
   const [coins, setCoins] = useState(0);
+  const [payOpen, setPayOpen] = useState(false);
   const [gift, setGift] = useState(false);
   // 친구 초대 코드 적용 결과 안내
   const [notice, setNotice] = useState<string | null>(null);
@@ -354,7 +356,7 @@ export default function Landing() {
       <Header onOpenLogin={openLogin} user={user} />
 
       <main className="relative z-10 max-w-[34rem] lg:max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-5 pb-20 sm:pb-24">
-        <HeroSection visitors={visitors} tickets={tickets + coins} wallet={user ? { bills: 0, coins: 0, free: Math.max(0, FREE_PER_DAY - counts.today) + coins + tickets } : null} />
+        <HeroSection visitors={visitors} tickets={tickets + coins} onBuy={user ? () => setPayOpen(true) : undefined} wallet={user ? { bills: 0, coins: 0, free: Math.max(0, FREE_PER_DAY - counts.today) + coins + tickets } : null} />
         <ShowcaseSection />
         {!user && <BirthdayTeaser onOpenLogin={openChatLogin} />}
         {/* 도리의 소식 카드들은 첫 화면의 "뽑으러 가기" 버튼 아래로 옮겼어요. (첫 화면에서 눌러야 할 것이 하나만 보이게) */}
@@ -375,6 +377,7 @@ export default function Landing() {
       <div aria-hidden="true" className="h-24 lg:hidden" />
       <BottomTabs />
 
+      {payOpen && <PurchaseModal onClose={() => { setPayOpen(false); void refreshCoins(); }} />}
       {ritual && <CoinRitual bill={ritualBill} big={ritualBig} />}
       <StickyDrawCta hidden={Boolean(intake) || loginOpen || ritual} />
 

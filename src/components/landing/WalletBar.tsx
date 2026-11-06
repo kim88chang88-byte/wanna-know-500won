@@ -37,9 +37,11 @@ function Chip({ label, count, tone, children }: { label: string; count: number; 
   );
 }
 
-export default function WalletBar({ bills, coins, free }: WalletValues) {
+export default function WalletBar({ bills, coins, free, onBuy }: WalletValues & { onBuy?: () => void }) {
   return (
     <div data-testid="wallet-bar" className="flex items-center justify-end gap-1.5">
+      {onBuy ? (
+        <button type="button" onClick={onBuy} aria-label="동전 충전하기 (결제 메뉴판 열기)" className="flex items-center gap-1.5 rounded-full active:scale-95">
       <span data-testid="wallet-bills" className="contents">
         <Chip label="결제한 1,000원 지폐" count={bills} tone="border-sky-200">
           {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -52,6 +54,23 @@ export default function WalletBar({ bills, coins, free }: WalletValues) {
           <img src="/images/coin-500.webp" alt="" width={22} height={22} className="h-[22px] w-[22px] object-contain drop-shadow-sm" />
         </Chip>
       </span>
+        </button>
+      ) : (
+        <>
+      <span data-testid="wallet-bills" className="contents">
+        <Chip label="결제한 1,000원 지폐" count={bills} tone="border-sky-200">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/images/bill-1000.webp" alt="" width={44} height={25} className="h-[18px] w-auto rounded-[3px] shadow-[0_1px_2px_rgba(0,0,0,0.2)]" />
+        </Chip>
+      </span>
+      <span data-testid="wallet-coins" className="contents">
+        <Chip label="동전" count={coins} tone="border-amber-200">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/images/coin-500.webp" alt="" width={22} height={22} className="h-[22px] w-[22px] object-contain drop-shadow-sm" />
+        </Chip>
+      </span>
+        </>
+      )}
       <span data-testid="wallet-free" className="contents">
         <Chip label="무료 뽑기" count={free} tone="border-pink-200">
           {/* eslint-disable-next-line @next/next/no-img-element */}

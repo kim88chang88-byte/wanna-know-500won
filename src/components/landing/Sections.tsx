@@ -120,7 +120,7 @@ export function Header({ onOpenLogin, user = null }: { onOpenLogin: () => void; 
 
 /* ------------------------------------------------------------------ 히어로 */
 
-export function HeroSection({ visitors = null, tickets = 0, wallet = null }: { visitors?: { today: number; total: number } | null; tickets?: number; wallet?: WalletValues | null }) {
+export function HeroSection({ visitors = null, tickets = 0, wallet = null, onBuy }: { visitors?: { today: number; total: number } | null; tickets?: number; wallet?: WalletValues | null; onBuy?: () => void }) {
   return (
     <section className="text-left mb-3">
       {/* 방문자 수(왼쪽) + 내 지폐·동전·무료 뽑기(오른쪽, 로그인한 회원만) 한 줄 */}
@@ -140,7 +140,7 @@ export function HeroSection({ visitors = null, tickets = 0, wallet = null }: { v
         ) : (
           <span />
         )}
-        {wallet && <WalletBar {...wallet} />}
+        {wallet && <WalletBar {...wallet} onBuy={onBuy} />}
       </div>
       {tickets > 0 && (
         <p data-testid="ticket-badge" className="mt-1 text-right text-[11px] font-bold leading-tight text-rose-600">
