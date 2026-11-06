@@ -4,6 +4,7 @@ import StickyDrawCta from "./StickyDrawCta";
 import BirthdayTeaser from "./BirthdayTeaser";
 import BottomTabs from "./BottomTabs";
 import CoinRitual from "./CoinRitual";
+import { splitWallet } from "./WalletBar";
 import PurchaseModal from "@/components/pay/PurchaseModal";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { dayKey, getBrowserStorage, readCounts, recordDraw, type DrawCounts } from "@/lib/drawCounter";
@@ -356,7 +357,7 @@ export default function Landing() {
       <Header onOpenLogin={openLogin} user={user} />
 
       <main className="relative z-10 max-w-[34rem] lg:max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-5 pb-20 sm:pb-24">
-        <HeroSection visitors={visitors} tickets={tickets + coins} onBuy={user ? () => setPayOpen(true) : undefined} wallet={user ? { bills: 0, coins: 0, free: Math.max(0, FREE_PER_DAY - counts.today) + coins + tickets } : null} />
+        <HeroSection visitors={visitors} tickets={tickets + coins} onBuy={user ? () => setPayOpen(true) : undefined} wallet={user ? { ...splitWallet(coins), free: Math.max(0, FREE_PER_DAY - counts.today) + tickets } : null} />
         <ShowcaseSection />
         {!user && <BirthdayTeaser onOpenLogin={openChatLogin} />}
         {/* 도리의 소식 카드들은 첫 화면의 "뽑으러 가기" 버튼 아래로 옮겼어요. (첫 화면에서 눌러야 할 것이 하나만 보이게) */}

@@ -13,6 +13,12 @@ export interface WalletValues {
   free: number;
 }
 
+/** 동전(500원) 잔액을 지폐(1,000원 = 동전 2개)와 남는 동전으로 나눠요. 예: 20개 → 지폐 10장, 19개 → 지폐 9장 + 동전 1개 */
+export function splitWallet(coinBalance: number): { bills: number; coins: number } {
+  const n = Number.isFinite(coinBalance) && coinBalance > 0 ? Math.floor(coinBalance) : 0;
+  return { bills: Math.floor(n / 2), coins: n % 2 };
+}
+
 /** 칩 안에 들어갈 숫자: 음수·소수는 0으로, 너무 크면 99+ */
 export function capCount(n: number): string {
   const v = Number.isFinite(n) && n > 0 ? Math.floor(n) : 0;
