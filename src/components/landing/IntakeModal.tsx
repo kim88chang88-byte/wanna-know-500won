@@ -903,7 +903,7 @@ export default function IntakeModal({ target, wallet = null, onClose, onComplete
             </p>
           </div>
 
-          {savedProfile && stepIndex >= firstAfterMe && (
+          {savedProfile && stepIndex >= firstAfterMe && step !== "pdate" && step !== "ptime" && step !== "pgender" && (
             <div data-testid="saved-profile" className="mb-3 flex items-center justify-between gap-2 rounded-xl bg-brand-50 border border-brand-100 px-3 py-2">
               <span className="text-[11px] text-gray-600 leading-snug">
                 <b className="text-brand-700">기억해 둔 정보</b>
