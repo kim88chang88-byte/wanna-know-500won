@@ -1,5 +1,6 @@
 "use client";
 
+import { possessive } from "@/lib/callName";
 import type { ReactNode } from "react";
 import { useChatEnabled } from "@/components/chat/ChatEntry";
 import { BodyPicks } from "@/components/premium/BodyFigure";
@@ -232,7 +233,7 @@ export default function StoryReport({
   // 고민 칩이 아니라 질문 문장으로 고른 경우엔 미리 만든 답이 없어서, AI 요약(=답)을 고민 바로 아래로 올려요.
   const summaryFirst = Boolean(concernText && !concern?.answers[0] && summary);
   const who = (name ?? report.viewerName ?? "").trim();
-  const leadTitle = summaryFirst ? `${who ? `${who}님` : "나"}의 고민에 대한 도리의 답은...` : "요약하자면";
+  const leadTitle = summaryFirst ? `${who ? possessive(who) : "나의"} 고민에 대한 도리의 답은...` : "요약하자면";
   const summaryBlock = summary ? (
         <section data-testid="story-lead" aria-labelledby="story-lead-h" className="rounded-2xl bg-gradient-to-br from-brand-50 via-white to-amber-50/60 border border-brand-100 p-4">
           <div className="flex flex-wrap items-center justify-between gap-x-2 gap-y-1">

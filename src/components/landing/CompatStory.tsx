@@ -1,5 +1,6 @@
 "use client";
 
+import { possessive } from "@/lib/callName";
 import { useState, type ReactNode } from "react";
 import type { CompatLink, CompatPerson, CompatScore, CompatView, PremiumReportView } from "@/lib/premium/types";
 import { josa } from "@/lib/premium/josa";
@@ -188,7 +189,7 @@ export default function CompatStory({ report, intro, closing, lastWord, partnerN
   const concernText = concern?.text?.trim() || (concern?.answers.length ? concern.answers.map((a) => a.title).join(" · ") : "");
   const answer = buildCompatAnswer(c);
   const who = name?.trim();
-  const answerTitle = concernText || answer?.hasRelation ? `${who ? `${who}님` : "나"}의 고민에 대한 도리의 답은...` : "두 사람에 대한 도리의 답은...";
+  const answerTitle = concernText || answer?.hasRelation ? `${who ? possessive(who) : "나의"} 고민에 대한 도리의 답은...` : "두 사람에 대한 도리의 답은...";
   const stars = Math.max(1, Math.min(5, Math.round(c.score / 20)));
   return (
     <div data-testid="story-report" className="mt-5 space-y-5">

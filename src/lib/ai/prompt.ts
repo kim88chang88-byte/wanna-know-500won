@@ -1,4 +1,5 @@
 import { analyzeChart } from "@/lib/saju/analysis";
+import { vocative } from "@/lib/callName";
 import { concernLabel, hasConcern, type Concern } from "@/lib/concerns";
 import type { CivilDate, Gender, SajuChart } from "@/lib/saju/types";
 import type { CoreFacts } from "./coreFacts";
@@ -82,7 +83,7 @@ export function buildUserMessage(chart: SajuChart, topic: ReadingTopic, gender: 
       수: facts.elementCounts.water,
     },
     ...(extra.core ? { 사주핵심: extra.core } : {}),
-    ...(extra.name ? { 부르는이름: `${extra.name}님` } : {}),
+    ...(extra.name ? { 부르는이름: vocative(extra.name) } : {}),
     ...(extra.today ? { 오늘의일진: buildDailyFacts(chart, extra.today) } : {}),
     태어난시간: facts.hourKnown ? "알고 있음" : "모름 (시주 없이 6글자로 본 결과)",
     ...(hasConcern(concern)
