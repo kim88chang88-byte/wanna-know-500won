@@ -55,7 +55,7 @@ const Dot = () => <i data-testid="nav-dot" aria-hidden="true" className="absolut
  * 휴대폰·태블릿 아래에 붙는 4칸 메뉴. (큰 화면에서는 숨겨요)
  * page 모드(도리상담실 목록 등 다른 화면)에서는 홈·운세 뽑기가 첫 화면으로 이동하는 링크가 돼요.
  */
-export default function BottomTabs({ page = false }: { page?: "chat" | false }) {
+export default function BottomTabs({ page = false }: { page?: "chat" | "vault" | false }) {
   const [active, setActive] = useState<TabKey>("home");
   const [dots, setDots] = useState<NavDots>({ draw: false, chat: false, vault: false });
   // 도리 상담실을 열어 둔 계정인지 (아직 아니면 눌렀을 때 "곧 열려요"만 알려요)
@@ -170,7 +170,8 @@ export default function BottomTabs({ page = false }: { page?: "chat" | false }) 
             도리상담실
           </button>
         )}
-        <Link href="/vault" className={`${base} ${off}`} onClick={() => seen("vault")}>
+        <Link href="/vault" className={`${base} ${page === "vault" ? "text-brand-600" : off}`} aria-current={page === "vault" ? "page" : undefined} onClick={() => seen("vault")}>
+          {page === "vault" && <i aria-hidden="true" className="absolute -top-3 left-1/2 h-[5px] w-11 -translate-x-1/2 rounded-b-md bg-brand-600" />}
           <VaultIcon />
           {dots.vault && <Dot />}
           보관함

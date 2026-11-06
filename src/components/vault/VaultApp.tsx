@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { getBrowserStorage } from "@/lib/drawCounter";
 import { markNavSeen, pingNav } from "@/lib/navDots";
+import BottomTabs from "@/components/landing/BottomTabs";
 import LoginButtons from "@/components/landing/LoginButtons";
 import ManseReport from "@/components/premium/ManseReport";
 import { ResultHero } from "@/components/landing/PhotoCard";
@@ -174,6 +175,7 @@ export default function VaultApp() {
 
   if (view.items.length === 0)
     return (
+      <>
       <div data-testid="vault-empty" className="rounded-2xl border border-brand-100 bg-white p-6 text-center text-sm text-gray-600">
         아직 보관한 풀이가 없어요.
         <br />
@@ -182,6 +184,9 @@ export default function VaultApp() {
           <a href="/" className="text-xs font-bold text-brand-600 underline underline-offset-2">풀이 보러 가기</a>
         </div>
       </div>
+      <div aria-hidden="true" className="h-24 lg:hidden" />
+      <BottomTabs page="vault" />
+      </>
     );
 
   return (
@@ -207,6 +212,8 @@ export default function VaultApp() {
         ))}
       </ul>
       <p className="mt-4 text-center text-[11px] text-gray-400">최대 300개까지 보관할 수 있어요.</p>
+      <div aria-hidden="true" className="h-24 lg:hidden" />
+      <BottomTabs page="vault" />
     </div>
   );
 }
