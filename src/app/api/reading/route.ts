@@ -72,21 +72,23 @@ export async function POST(request: Request) {
       // DB 가 잠깐 안 되어도 서비스는 계속돼요. (횟수 제한만 건너뛰어요)
       console.error("getCounts failed:", err instanceof Error ? err.message : "unknown");
     }
-    if (counts && isDailyLimitEnforced(process.env) && counts.today >= FREE_PER_DAY + (rawBonus === true ? 1 : 0)) {
-      // 오늘 무료를 다 썼어도, 서버에 뽑기 코인(로그인 선물 등)이 있으면 한 장 써서 뽑아요. 풀이가 실제로 나간 뒤에 차감해요.
+    if (counts && counts.today >= FREE_PER_DAY + (rawBonus === true ? 1 : 0)) {
+      // 오늘 무료를 다 썼다면, 가지고 있는 동전을 써서 뽑아요. (무료가 항상 먼저예요) 풀이가 실제로 나간 뒤에 차감해요.
+      // 동전이 모자랄 때만, 무료 횟수 강제가 켜져 있으면 막고 꺼져 있으면(베타) 그대로 보여 줘요.
       let coins = 0;
       try {
         coins = await db.getCoins(userId);
       } catch {
         // 코인 기능이 아직 꺼져 있거나 DB 가 잠깐 안 되면 기존 안내로 돌아가요.
       }
-      if (coins < coinCost) {
+      if (coins >= coinCost) {
+        useCoin = true;
+      } else if (isDailyLimitEnforced(process.env)) {
         return NextResponse.json(
           { error: "오늘의 무료 뽑기는 이미 사용했어요. 결제는 아직 준비 중이에요. 내일 다시 만나요 ❄️", code: "free_used", counts },
           { status: 402 },
         );
       }
-      useCoin = true;
     }
   }
 
