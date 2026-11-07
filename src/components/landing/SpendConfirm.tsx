@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { splitWallet } from "./WalletBar";
 import type { SpendPlan } from "@/lib/spendPlan";
 
@@ -34,6 +35,71 @@ function Bal({ coins }: { coins: number }) {
   );
 }
 
+/* 쓰는 돈이 위로 떠올라 날아가고, 남은 돈 숫자가 줄어드는 장면 */
+function SpendStage({ before, after }: { before: number; after: number }) {
+  const cost = Math.max(0, before - after);
+  const [won, setWon] = useState(before * 500);
+  useEffect(() => {
+    const from = before * 500;
+    const to = after * 500;
+    if (typeof window === "undefined" || window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) {
+      setWon(to);
+      return;
+    }
+    let raf = 0;
+    const t0 = performance.now();
+    const delay = 900;
+    const dur = 700;
+    const tick = (now: number) => {
+      const k = Math.min(1, Math.max(0, (now - t0 - delay) / dur));
+      setWon(Math.round((from + (to - from) * k) / 100) * 100);
+      if (k < 1) raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [before, after]);
+  // 날아가는 돈: 천원권 우선, 홀수 동전은 동전 1개
+  const flyBills = Math.min(3, Math.floor(cost / 2));
+  const flyCoin = cost % 2 === 1 || flyBills === 0;
+  return (
+    <div className="mt-2.5 rounded-xl bg-brand-50 px-3 py-2.5" data-testid="spend-stage">
+      <style>{`
+        @keyframes spFly{0%{transform:translate(0,0) rotate(0);opacity:1}25%{transform:translate(2px,-14px) rotate(-5deg);opacity:1}100%{transform:translate(44px,-54px) rotate(22deg) scale(.55);opacity:0}}
+        @keyframes spMinus{0%{opacity:0;transform:translateY(8px) scale(.7)}35%{opacity:1;transform:translateY(0) scale(1.1)}100%{opacity:0;transform:translateY(-14px)}}
+        .sp-fly{animation:spFly 1.3s cubic-bezier(.5,0,.3,1) both}
+        .sp-minus{animation:spMinus 1.3s ease .5s both}
+        @media (prefers-reduced-motion:reduce){.sp-fly,.sp-minus{animation:none;opacity:0}}
+      `}</style>
+      <div className="flex items-end justify-between gap-2">
+        <div className="relative min-w-0 text-left">
+          <div className="text-[11px] font-bold text-slate-500">내 지갑</div>
+          <div className="mt-1 text-[12.5px] font-bold text-brand-600"><Bal coins={after} /></div>
+          <div className="pointer-events-none absolute left-0 top-3 flex gap-1">
+            {Array.from({ length: flyBills }).map((_, i) => (
+              <span key={i} className="sp-fly inline-block" style={{ animationDelay: `${0.35 + i * 0.18}s` }}>
+                <Img src="/images/bill-1000.webp" h={22} />
+              </span>
+            ))}
+            {flyCoin && (
+              <span className="sp-fly inline-block" style={{ animationDelay: `${0.35 + flyBills * 0.18}s` }}>
+                <Img src="/images/coin-500.webp" h={20} />
+              </span>
+            )}
+          </div>
+        </div>
+        <div className="relative text-right">
+          <span className="sp-minus pointer-events-none absolute -top-3 right-0 text-[12px] font-black text-red-500">−{(cost * 500).toLocaleString("ko-KR")}원</span>
+          <div className="text-[11px] font-bold text-slate-500">남은 돈</div>
+          <div className="text-[26px] font-black leading-none tabular-nums text-brand-600" aria-label={`쓰고 나면 ${(after * 500).toLocaleString("ko-KR")}원`}>
+            {won.toLocaleString("ko-KR")}
+            <span className="ml-0.5 text-[13px] font-extrabold">원</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function SpendConfirm({ plan, onCancel, onConfirm, onCharge }: { plan: SpendPlan; onCancel: () => void; onConfirm: () => void; onCharge: () => void }) {
   const short = plan.kind === "short";
   const title =
@@ -60,11 +126,7 @@ export default function SpendConfirm({ plan, onCancel, onConfirm, onCharge }: { 
             {plan.kind === "free" ? "남은 무료" : "보너스 뽑기"} {plan.before}{plan.kind === "free" ? "회" : "장"} → {plan.after}{plan.kind === "free" ? "회" : "장"}
           </div>
         )}
-        {plan.kind === "coin" && (
-          <div className="mt-2.5 flex items-center justify-center gap-1.5 rounded-xl bg-brand-50 py-2 text-[12.5px] font-bold text-brand-600">
-            <Bal coins={plan.before} /> → <Bal coins={plan.after} />
-          </div>
-        )}
+        {plan.kind === "coin" && <SpendStage before={plan.before} after={plan.after} />}
         <div className="mt-3.5 flex gap-2">
           <button type="button" onClick={onCancel} className="flex-1 rounded-full bg-brand-50 py-2.5 text-sm font-extrabold text-brand-600 active:scale-[0.98]">
             {short ? "닫기" : "취소"}
