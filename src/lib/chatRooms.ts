@@ -46,7 +46,7 @@ const topicLine = (summary: string) => /^주제: (.+)$/m.exec(summary)?.[1]?.tri
 /** 같은 풀이는 같은 방이 되게 하는 값 */
 export function roomIdFor(ctx: ChatCtx): string {
   if (ctx.kind === "daily") return "daily";
-  return `${ctx.kind}:${hash(JSON.stringify([ctx.birth ?? null, ctx.partnerBirth ?? null, ctx.topic ?? null, topicLine(ctx.summary)]))}`;
+  return `${ctx.kind}:${hash(JSON.stringify([ctx.birth ?? null, ctx.partnerBirth ?? null, ctx.topic ?? null, topicLine(ctx.summary), ...(ctx.premium ? ["premium"] : [])]))}`;
 }
 
 export function roomLook(ctx: ChatCtx): { title: string; chip: string; icon: string } {
@@ -62,6 +62,7 @@ export function roomAnimal(ctx: ChatCtx): string {
   const img = (n: string) => `/images/animal-${n}.webp`;
   if (ctx.kind === "daily") return img("otter");
   if (ctx.kind === "compat") return img("panda-couple");
+  if (ctx.premium) return img("otter-awakened");
   if (ctx.topic === "study") return img("otter-study");
   const t = topicLine(ctx.summary);
   if (/연애|결혼/.test(t)) return img("rabbit");

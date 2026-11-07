@@ -907,6 +907,7 @@ export default function IntakeModal({ target, wallet = null, onClose, onComplete
                   ...(compat && resultPartner ? { partnerBirth: resultPartner.birth, partnerName: resultPartner.name } : {}),
                   name: viewName?.trim() || null,
                   ...(target.fortune === "study" && !compat ? { topic: "study" as const } : {}),
+                  ...(luxe ? { premium: true as const } : {}),
                 }}
               />
             </div>

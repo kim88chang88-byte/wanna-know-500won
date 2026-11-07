@@ -20,6 +20,8 @@ export interface ChatCtx {
   name?: string | null;
   /** 결과서의 주제 (신년운은 "study"): 상담실도 2027년 기준으로 맞춰요 */
   topic?: "study";
+  /** 프리미엄 결과서에서 들어온 방 (각성한 도리 얼굴을 써요) */
+  premium?: boolean;
 }
 
 export interface ChatMsg {
