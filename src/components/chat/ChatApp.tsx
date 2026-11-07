@@ -106,7 +106,7 @@ function ElementPill({ el }: { el: Element }) {
 }
 
 function rich(text: string): ReactNode[] {
-  return splitElements(text).flatMap((part, k) =>
+  return splitElements(text).flatMap((part, k): ReactNode[] =>
     "el" in part ? [<ElementPill key={`p${k}`} el={part.el as Element} />] : richBold(part.text, k),
   );
 }
