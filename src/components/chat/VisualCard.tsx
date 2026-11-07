@@ -141,42 +141,34 @@ function Palette({ v }: { v: ChatVisual }) {
 }
 
 function Spots({ v }: { v: ChatVisual }) {
-  const pins = v.items.map((it, i) => ({ n: i + 1, ...(SPOTS[it.label] ?? { x: 0, y: 0 }) })).filter((p) => p.x > 0);
+  // 도리가 고른 자리는 번호 하트가 달린 밝은 말풍선, 나머지 자리는 흐릿한 말풍선으로 그림 위에 놓아요
+  const rank = new Map(v.items.map((it, i) => [it.label, i + 1]));
   return (
     <Paper title={v.title || "소품 놓을 자리"}>
-      <svg className="block w-full rounded-[10px]" viewBox="0 0 320 190" aria-hidden="true">
-        <rect width="320" height="190" fill="#f6efe3" />
-        <rect y="140" width="320" height="50" fill="#d9bf9a" />
-        <rect y="138" width="320" height="4" fill="#8d6540" opacity=".4" />
-        <rect x="22" y="22" width="62" height="64" rx="4" fill="#bfe3f5" stroke="#8d6540" strokeWidth="4" />
-        <path d="M53 22v64M22 54h62" stroke="#8d6540" strokeWidth="3" />
-        <circle cx="40" cy="38" r="9" fill="#fff" opacity=".55" />
-        <rect x="20" y="92" width="68" height="6" rx="2" fill="#b88a5a" />
-        <rect x="28" y="98" width="4" height="9" fill="#8d6540" />
-        <rect x="76" y="98" width="4" height="9" fill="#8d6540" />
-        <g transform="translate(36 78)"><rect y="6" width="12" height="8" rx="2" fill="#d9825b" /><path d="M6 6c-6-8-2-12 0-14 2 2 6 6 0 14z" fill="#4e9a5b" /></g>
-        <rect x="104" y="106" width="108" height="64" rx="8" fill="#9db4e6" />
-        <rect x="104" y="118" width="108" height="52" rx="6" fill="#7f9bd6" />
-        <rect x="108" y="100" width="34" height="20" rx="8" fill="#f6f3ec" />
-        <rect x="104" y="170" width="6" height="8" fill="#8d6540" />
-        <rect x="206" y="170" width="6" height="8" fill="#8d6540" />
-        <rect x="216" y="116" width="26" height="46" rx="3" fill="#b88a5a" />
-        <rect x="220" y="122" width="18" height="12" rx="2" fill="#8d6540" opacity=".5" />
-        <rect x="224" y="108" width="10" height="8" rx="2" fill="#f4f1ea" stroke="rgba(0,0,0,.15)" />
-        <rect x="252" y="96" width="62" height="6" rx="2" fill="#b88a5a" />
-        <rect x="258" y="102" width="5" height="68" fill="#8d6540" />
-        <rect x="304" y="102" width="5" height="68" fill="#8d6540" />
-        <rect x="262" y="84" width="22" height="12" rx="2" fill="#fff" stroke="rgba(0,0,0,.15)" />
-        <path d="M290 96l8-26" stroke="#555" strokeWidth="3" />
-        <path d="M290 70l14 4-6 8z" fill="#ffd978" />
-        {pins.map((p, i) => (
-          <g key={p.n} className="animate-[pinPop_.5s_cubic-bezier(.3,1.6,.5,1)_both]" style={{ transformBox: "fill-box", transformOrigin: "center", animationDelay: `${0.2 + i * 0.3}s` }}>
-            <circle cx={p.x} cy={p.y + 14} r="3" fill="rgba(0,0,0,.2)" />
-            <path d={`M${p.x} ${p.y + 13} L${p.x - 7} ${p.y - 3} A9 9 0 1 1 ${p.x + 7} ${p.y - 3} Z`} fill="#e8564a" />
-            <text x={p.x} y={p.y + 1} textAnchor="middle" fontSize="10" fontWeight="700" fill="#fff">{p.n}</text>
-          </g>
-        ))}
-      </svg>
+      <div className="relative aspect-[905/632] w-full overflow-hidden rounded-[14px]" style={{ containerType: "inline-size" }} aria-hidden="true">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/images/room-spots.webp" alt="" className="absolute inset-0 h-full w-full object-cover" />
+        {Object.entries(SPOTS).map(([name, p]) => {
+          const n = rank.get(name);
+          const on = n !== undefined;
+          return (
+            <span
+              key={name}
+              className={`absolute flex items-center justify-center gap-[1cqw] rounded-[3cqw] border border-white/80 bg-gradient-to-br from-[#fbf3f6] to-[#e7e3f6] px-[1.4cqw] font-bold text-[#3f3560] shadow-[0_1.2cqw_3cqw_rgba(120,90,170,0.3)] ${on ? "animate-[pinPop_.5s_cubic-bezier(.3,1.6,.5,1)_both]" : "opacity-70"}`}
+              style={{ left: `${p.left}%`, top: `${p.top}%`, width: `${p.w}%`, height: "6.6cqw", fontSize: "2.9cqw", animationDelay: on ? `${0.2 + (n - 1) * 0.3}s` : undefined, transformOrigin: "50% 100%" }}
+            >
+              <span
+                className={`grid shrink-0 place-items-center rounded-full ${on ? "bg-gradient-to-br from-[#f48fb1] to-[#a58bff] text-white" : "bg-[#c9c3dc] text-white"}`}
+                style={{ width: "3.9cqw", height: "3.9cqw", fontSize: "2.6cqw" }}
+              >
+                {on ? n : "·"}
+              </span>
+              <span className="whitespace-nowrap">{name}</span>
+              <i className="absolute left-1/2 top-full -ml-[1cqw] block h-0 w-0 border-x-[1cqw] border-t-[1.6cqw] border-x-transparent border-t-[#e9e5f6]" />
+            </span>
+          );
+        })}
+      </div>
       <ul className="mt-2.5 grid gap-1.5">
         {v.items.map((it, i) => (
           <li key={i} className="flex items-center gap-2 text-[13px]">

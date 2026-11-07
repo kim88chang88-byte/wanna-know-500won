@@ -18,9 +18,9 @@ export const PALETTE: Record<string, { hex: string; en: string }> = {
   "로열 퍼플": { hex: "#6B4FC4", en: "ROYAL PURPLE" },
 };
 
-/* 방 그림에 핀을 꽂을 수 있는 자리. 좌표는 VisualCard 의 방 그림 기준이에요. */
-export const SPOTS: Record<string, { x: number; y: number }> = {
-  "책상 위": { x: 272, y: 66 },
-  "침대 곁": { x: 224, y: 92 },
-  "창가 선반": { x: 53, y: 66 },
+/* 방 그림(room-spots.webp, 905×632)에서 말풍선이 앉는 자리. 값은 그림 크기에 대한 % 예요. */
+export const SPOTS: Record<string, { left: number; top: number; w: number }> = {
+  "책상 위": { left: 74.5, top: 17.5, w: 21 },
+  "침대 곁": { left: 34, top: 66, w: 22 },
+  "창가 선반": { left: 0.4, top: 47.2, w: 22.5 },
 };
