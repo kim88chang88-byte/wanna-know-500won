@@ -7,6 +7,7 @@ import BottomTabs from "@/components/landing/BottomTabs";
 import { markNavSeen, pingNav } from "@/lib/navDots";
 import SafeImage from "@/components/landing/SafeImage";
 import { CHAT_CTX_KEY, CHAT_LOG_KEY, readChatCtx } from "@/lib/chatContext";
+import type { BirthInput } from "@/lib/saju/types";
 import { leftLabel, loadRooms, removeRoom, roomAnimal, roomColor, saveRooms, upsertRoom, withMsgs, type ChatRoom, type RoomMsg } from "@/lib/chatRooms";
 import { getBrowserStorage } from "@/lib/drawCounter";
 
@@ -107,10 +108,23 @@ export default function ChatHome() {
     );
   }
 
-  const startDaily = () => {
-    const r = upsertRoom(ref.current, { kind: "daily", summary: "" });
+  const [starting, setStarting] = useState(false);
+  const startDaily = async () => {
+    if (starting) return;
+    setStarting(true);
+    // 저장된 내 정보를 받아 와서, 첫 화면에서 사주 기둥을 보여 줄 수 있게 해요. (못 받아도 그냥 시작해요)
+    let birth: BirthInput | null = null;
+    try {
+      const res = await fetch("/api/auth/me", { cache: "no-store" });
+      const d = res.ok ? ((await res.json()) as { profile?: BirthInput | null }) : null;
+      birth = d?.profile ?? null;
+    } catch {
+      birth = null;
+    }
+    const r = upsertRoom(ref.current, { kind: "daily", summary: "", ...(birth ? { birth } : {}) });
     commit(r.rooms);
     setOpen(r.id);
+    setStarting(false);
   };
 
   return (
@@ -145,7 +159,7 @@ export default function ChatHome() {
             <br />
             오늘의 한마디로 가볍게 시작해 보세요.
           </span>
-          <button type="button" onClick={startDaily} className="rounded-2xl bg-brand-500 px-5 py-3 text-sm font-extrabold text-white">
+          <button type="button" onClick={() => void startDaily()} className="rounded-2xl bg-brand-500 px-5 py-3 text-sm font-extrabold text-white">
             오늘의 한마디로 시작하기
           </button>
         </div>
@@ -206,7 +220,7 @@ export default function ChatHome() {
               </li>
             ))}
           </ul>
-          <button type="button" onClick={startDaily} className="mx-3.5 mb-6 mt-3 w-[calc(100%-1.75rem)] rounded-2xl border-[1.5px] border-dashed border-brand-300 py-3 text-sm font-extrabold text-brand-600">
+          <button type="button" onClick={() => void startDaily()} className="mx-3.5 mb-6 mt-3 w-[calc(100%-1.75rem)] rounded-2xl border-[1.5px] border-dashed border-brand-300 py-3 text-sm font-extrabold text-brand-600">
             ＋ 오늘의 한마디로 상담하기
           </button>
         </div>
