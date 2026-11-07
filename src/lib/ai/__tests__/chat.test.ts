@@ -54,7 +54,7 @@ describe("도리 상담방", () => {
     expect(note?.items[0].icon).toBe("");
     expect(cleanVisual({ kind: "none", title: "", items: [] })).toBeNull();
     expect(cleanVisual({ kind: "note", title: "노트", items: [it("한 줄")] })).toBeNull();
-    expect(cleanVisual({ kind: "lucky", title: "소품", items: [it("물 한 잔", "🫧", "맑은 물"), it("흰색 소품", "⚪", "쇠 기운"), it("작은 화분", "🪴", "")] })).toBeNull();
+    expect(cleanVisual({ kind: "lucky", title: "소품", items: [it("물 한 잔", "🫧", "맑은 물"), it("흰색 소품", "⚪", "쇠 기운"), it("작은 화분", "", "나무 기운")] })).toBeNull();
     expect(cleanVisual({ kind: "lucky", title: "소품", items: [it("물 한 잔", "🫧", "맑은 물"), it("흰색 소품", "⚪", "쇠 기운"), it("작은 화분", "🪴", "나무 기운")] })?.items.length).toBe(3);
     expect(cleanVisual({ kind: "checklist", title: "약속", items: [it("이혼 준비하기"), it("물 마시기")] })).toBeNull();
   });
