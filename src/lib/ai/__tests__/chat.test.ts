@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { cleanFollowups, cleanHistory, CRISIS_ANSWER, earlierQuestions, isCrisis, parseChatAnswer, parseChatReply, polishChatAnswer } from "../chat";
+import { cleanFollowups, cleanVisual, cleanHistory, CRISIS_ANSWER, earlierQuestions, isCrisis, parseChatAnswer, parseChatReply, polishChatAnswer } from "../chat";
 import { parseCtx } from "@/lib/chatServer";
 import { summarizeReport } from "@/lib/chatContext";
 
@@ -45,6 +45,29 @@ describe("도리 상담방", () => {
     const r = parseChatReply({ answer: long("연락이 뜸해지면 괜히 마음이 쓰이지. ") });
     expect(r?.followups).toEqual([]);
     expect(parseChatReply({ answer: "짧아", followups: ["물 기운은 어떻게 채워?"] })).toBeNull();
+  });
+
+  it("그림 카드: 종류·개수가 맞으면 쓰고, 어긋나면 카드만 빼요", () => {
+    const it = (label: string, icon = "", sub = "", best = false) => ({ icon, label, sub, best });
+    const note = cleanVisual({ kind: "note", title: "오늘의 노트", items: [it("마음에 남은 말 하나"), it("그때 내 기분 한 줄")] });
+    expect(note?.kind).toBe("note");
+    expect(note?.items[0].icon).toBe("");
+    expect(cleanVisual({ kind: "none", title: "", items: [] })).toBeNull();
+    expect(cleanVisual({ kind: "note", title: "노트", items: [it("한 줄")] })).toBeNull();
+    expect(cleanVisual({ kind: "lucky", title: "소품", items: [it("물 한 잔", "🫧", "맑은 물"), it("흰색 소품", "⚪", "쇠 기운"), it("작은 화분", "🪴", "")] })).toBeNull();
+    expect(cleanVisual({ kind: "lucky", title: "소품", items: [it("물 한 잔", "🫧", "맑은 물"), it("흰색 소품", "⚪", "쇠 기운"), it("작은 화분", "🪴", "나무 기운")] })?.items.length).toBe(3);
+    expect(cleanVisual({ kind: "checklist", title: "약속", items: [it("이혼 준비하기"), it("물 마시기")] })).toBeNull();
+  });
+
+  it("시간표는 추천 한 곳만 남겨요", () => {
+    const t = cleanVisual({ kind: "timeline", title: "시간표", items: [{ icon: "☀️", label: "아침", sub: "한 줄", best: true }, { icon: "🌤️", label: "오후", sub: "집중", best: true }, { icon: "🌙", label: "저녁 9시", sub: "노트", best: false }] });
+    expect(t?.items.filter((i) => i.best).length).toBe(1);
+  });
+
+  it("답과 함께 카드가 와도 통과해요", () => {
+    const r = parseChatReply({ answer: long("연락이 뜸해지면 괜히 마음이 쓰이지. "), visual: { kind: "checklist", title: "약속", items: [{ icon: "", label: "물 마시기", sub: "", best: false }, { icon: "", label: "한 줄 쓰기", sub: "", best: false }] } });
+    expect(r?.visual?.kind).toBe("checklist");
+    expect(parseChatReply({ answer: long("연락이 뜸해지면 괜히 마음이 쓰이지. ") })?.visual).toBeNull();
   });
 
   it("오래된 질문은 한 줄 요약으로 이어 붙여요", () => {

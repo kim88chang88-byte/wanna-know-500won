@@ -1,4 +1,5 @@
 import type { ChatCtx, ChatMsg } from "@/lib/chatContext";
+import type { ChatVisual } from "@/lib/ai/chat";
 
 /*
  * 도리 상담실 대화방 목록. 풀이(오늘의 한마디·결과서·궁합)마다 방이 하나씩 생겨요.
@@ -13,6 +14,8 @@ export interface RoomMsg extends ChatMsg {
   error?: boolean;
   liked?: boolean;
   follow?: string[];
+  /** 도리 답 아래에 크게 보여 주는 그림 카드 */
+  visual?: ChatVisual | null;
 }
 
 export interface ChatRoom {

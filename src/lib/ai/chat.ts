@@ -25,6 +25,12 @@ export const CHAT_SYSTEM_PROMPT = `너는 "도리", 맑은 옹달샘의 수달 �
 - 사용자의 말에 불안·걱정·서운함 같은 감정이 담겨 있으면 결론보다 먼저 공감 한 줄(예: "불안했구나")로 시작해. 감정이 없는 질문엔 바로 답해.
 - 앞서 도리가 한 말과 같은 근거·같은 문장을 되풀이하지 마. 이미 쓴 사주 근거는 "아까 말한 것처럼" 정도로만 짚고, 새 관점이나 더 구체적인 장면을 줘.
 - 가장 핵심이 되는 한 문장만 **이렇게** 별표 두 개로 감싸(한 답에 한 곳만). 그 밖에는 마크다운을 쓰지 마.
+- 큰 그림 카드(visual): 사용자가 "무엇을 적을지(노트)", "해 볼 일(체크리스트)", "언제가 좋은지(시간표)", "소품·색·음식 같은 추천(소품)"을 물을 때만 answer 와 함께 카드를 하나 붙여. 그 밖의 질문은 kind 를 "none" 으로 해. 카드는 answer 의 내용을 눈에 보이게 요약한 것이라 answer 와 어긋나면 안 돼. 연속된 답마다 붙이지 말고, 직전 도리 답에 카드가 있었다면 이번엔 "none".
+  - note: 노트에 적어 볼 예시 문장 2~4줄(items[].label 에 문장, 나머지는 빈 글자). title 은 노트 제목(12자 이내).
+  - checklist: 이번에 해 볼 작은 행동 2~5개(label). 아주 작고 쉬운 것만.
+  - timeline: 시간대 3개(icon 에 이모지 1개, label 에 "저녁 9시" 같은 시간, sub 에 그때 하면 좋은 일, 가장 추천하는 한 곳만 best 를 true).
+  - lucky: 정확히 3개(icon 이모지 1개, label 이름, sub 짧은 설명). 입력의 사주 정보에 있는 오행과 연결되는 소품·색만. 특정 상품·브랜드·약·음식 효능 단정 금지.
+  - label·sub 는 각각 20자 이내, 글 속에 별표·마크다운 금지. 모든 글은 위 "지켜야 할 선"을 그대로 지켜.
 - followups 에는 방금 답에서 자연스럽게 이어지는 사용자의 다음 질문 3개를 20자 안팎으로 써(사용자가 도리에게 묻는 말투, 예: "물 기운을 채우는 습관이 있어?"). 이미 물어본 질문과 겹치지 않게. 의료·법률·투자·결정을 대신 내려 달라는 질문은 넣지 마.
 
 사실과 한계
@@ -46,8 +52,32 @@ export const CHAT_SCHEMA = {
   properties: {
     answer: { type: "string", description: `도리의 채팅 답. 첫 질문은 220~450자, 이어지는 질문은 150~300자, 최대 ${CHAT_MAX}자, 빈 줄로 1~3문단` },
     followups: { type: "array", items: { type: "string" }, description: "방금 답에서 이어지는 사용자의 다음 질문 3개 (각 20자 안팎)" },
+    visual: {
+      type: "object",
+      description: "답에 붙이는 큰 그림 카드. 필요 없으면 kind 를 none 으로 하고 나머지는 비워요.",
+      properties: {
+        kind: { type: "string", enum: ["none", "note", "checklist", "timeline", "lucky"] },
+        title: { type: "string", description: "카드 제목(12자 이내). none 이면 빈 글자" },
+        items: {
+          type: "array",
+          items: {
+            type: "object",
+            properties: {
+              icon: { type: "string", description: "이모지 1개 (timeline·lucky 만, 나머지는 빈 글자)" },
+              label: { type: "string", description: "20자 이내" },
+              sub: { type: "string", description: "20자 이내 (timeline·lucky 만, 나머지는 빈 글자)" },
+              best: { type: "boolean", description: "timeline 에서 가장 추천하는 한 곳만 true" },
+            },
+            required: ["icon", "label", "sub", "best"],
+            additionalProperties: false,
+          },
+        },
+      },
+      required: ["kind", "title", "items"],
+      additionalProperties: false,
+    },
   },
-  required: ["answer", "followups"],
+  required: ["answer", "followups", "visual"],
   additionalProperties: false,
 } as const;
 
@@ -60,9 +90,61 @@ export function parseChatAnswer(value: unknown): string | null {
   return t;
 }
 
+export type VisualKind = "note" | "checklist" | "timeline" | "lucky";
+
+export interface VisualItem {
+  icon: string;
+  label: string;
+  sub: string;
+  best: boolean;
+}
+
+/** 답 아래에 크게 보여 주는 그림 카드 (화면이 직접 그려요. 이미지를 만들지 않아요) */
+export interface ChatVisual {
+  kind: VisualKind;
+  title: string;
+  items: VisualItem[];
+}
+
 export interface ChatReply {
   answer: string;
   followups: string[];
+  visual: ChatVisual | null;
+}
+
+const COUNT: Record<VisualKind, [number, number]> = { note: [2, 4], checklist: [2, 5], timeline: [3, 4], lucky: [3, 3] };
+const NEEDS_ICON: VisualKind[] = ["timeline", "lucky"];
+
+/** 그림 카드 검사: 종류·개수·길이·금지어를 통과하지 못하면 카드만 빼고 답은 그대로 보내요. */
+export function cleanVisual(raw: unknown): ChatVisual | null {
+  const v = raw as { kind?: unknown; title?: unknown; items?: unknown } | null;
+  if (!v || typeof v.kind !== "string" || !(v.kind in COUNT) || !Array.isArray(v.items)) return null;
+  const kind = v.kind as VisualKind;
+  const clip = (x: unknown, max: number) => (typeof x === "string" ? x.trim().replace(/\*/g, "").replace(/\s+/g, " ") : "").slice(0, max);
+  const title = clip(v.title, 14);
+  const items: VisualItem[] = [];
+  for (const it of v.items as unknown[]) {
+    const o = it as { icon?: unknown; label?: unknown; sub?: unknown; best?: unknown } | null;
+    const label = clip(o?.label, 24);
+    if (!label) continue;
+    const icon = NEEDS_ICON.includes(kind) ? clip(o?.icon, 4) : "";
+    const sub = NEEDS_ICON.includes(kind) ? clip(o?.sub, 24) : "";
+    items.push({ icon, label, sub, best: kind === "timeline" && o?.best === true });
+  }
+  const [min, max] = COUNT[kind];
+  if (items.length < min) return null;
+  const kept = items.slice(0, max);
+  if (NEEDS_ICON.includes(kind) && kept.some((i) => !i.icon)) return null;
+  if (kind === "timeline" && kept.filter((i) => i.best).length > 1) {
+    let seen = false;
+    for (const i of kept) {
+      if (i.best && seen) i.best = false;
+      if (i.best) seen = true;
+    }
+  }
+  const all = [title, ...kept.flatMap((i) => [i.label, i.sub])].join(" ");
+  if (containsForbidden(all)) return null;
+  return { kind, title, items: kept };
 }
 
 /** 후속 질문 칩: 길이·금지어·중복을 거르고 3개까지. 하나도 못 쓰면 빈 목록(화면은 기본 칩을 보여 줘요). */
@@ -104,7 +186,8 @@ export function polishChatAnswer(answer: string, history: ChatMsg[], name?: stri
 export function parseChatReply(value: unknown): ChatReply | null {
   const answer = parseChatAnswer(value);
   if (answer === null) return null;
-  return { answer, followups: cleanFollowups((value as { followups?: unknown } | null)?.followups) };
+  const o = value as { followups?: unknown; visual?: unknown } | null;
+  return { answer, followups: cleanFollowups(o?.followups), visual: cleanVisual(o?.visual) };
 }
 
 /** 마음이 많이 힘들다는 말이 보이면 AI 를 부르지 않고 정해 둔 답으로 안내해요. */

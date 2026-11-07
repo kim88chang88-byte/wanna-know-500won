@@ -1,10 +1,12 @@
 "use client";
 
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { Fragment, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import PurchaseModal from "@/components/pay/PurchaseModal";
 import { roomAnimal, roomColor } from "@/lib/chatRooms";
 import { MSG_MAX, TURN_CAP, type ChatCtx, type ChatKind, type ChatMsg } from "@/lib/chatContext";
 import type { RoomMsg } from "@/lib/chatRooms";
+import VisualCard from "@/components/chat/VisualCard";
+import type { ChatVisual } from "@/lib/ai/chat";
 import { buildIntro, type IntroBubble } from "@/lib/chatIntro";
 import { ELEMENT_BOX, EL_LABEL } from "@/lib/elementColor";
 import ElementTile from "@/components/ElementTile";
@@ -76,6 +78,8 @@ interface Bubble extends ChatMsg {
   liked?: boolean;
   /** 도리 답에서 이어지는 다음 질문 칩 */
   follow?: string[];
+  /** 답 아래에 크게 보여 주는 그림 카드 */
+  visual?: ChatVisual | null;
 }
 
 /** 도리은행 500원 동전 그림 (글 옆에 작게) */
@@ -265,7 +269,7 @@ export default function ChatApp({ initialCtx, initialMsgs, onChange, onBack }: {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ctx, messages: next.map(({ role, text: t }) => ({ role, text: t })) }),
       });
-      const data = (await res.json().catch(() => null)) as { answer?: string; followups?: unknown; error?: string; code?: string; left?: number } | null;
+      const data = (await res.json().catch(() => null)) as { answer?: string; followups?: unknown; visual?: ChatVisual | null; error?: string; code?: string; left?: number } | null;
       if (res.status === 402 && data?.code === "quota") {
         // 질문을 다 쓴 경우: 방금 보낸 말은 입력창으로 돌려놓고 "동전으로 더하기" 카드를 보여 줘요
         setLeft(0);
@@ -276,7 +280,7 @@ export default function ChatApp({ initialCtx, initialMsgs, onChange, onBack }: {
       if (!res.ok || !data?.answer) throw new Error(data?.error ?? "도리가 잠깐 물놀이하러 갔어요. 다시 보내 볼래요?");
       if (typeof data.left === "number") setLeft(data.left);
       else setLeft((l) => (l === null ? null : Math.max(0, l - 1)));
-      const all: Bubble[] = [...next, { role: "dori", text: data.answer, at: Date.now(), follow: Array.isArray(data.followups) ? data.followups.filter((f): f is string => typeof f === "string").slice(0, 3) : undefined }];
+      const all: Bubble[] = [...next, { role: "dori", text: data.answer, at: Date.now(), follow: Array.isArray(data.followups) ? data.followups.filter((f): f is string => typeof f === "string").slice(0, 3) : undefined, visual: data.visual ?? null }];
       setMsgs(all);
       if (!prefersReducedMotion()) setTyping({ idx: all.length - 1, shown: 0 });
     } catch (e) {
@@ -433,9 +437,9 @@ export default function ChatApp({ initialCtx, initialMsgs, onChange, onBack }: {
           const live = typing?.idx === i;
           const shown = live ? m.text.slice(0, typing!.shown) : m.text;
           return (
+            <Fragment key={i}>
             <DoriRow
               face={face}
-              key={i}
               text={shown}
               error={m.error}
               onSkip={live ? () => setTyping(null) : undefined}
@@ -462,6 +466,8 @@ export default function ChatApp({ initialCtx, initialMsgs, onChange, onBack }: {
               }
               at={m.error ? undefined : m.at}
             />
+            {m.visual && !live && !m.error && <VisualCard v={m.visual} />}
+            </Fragment>
           );
         })}
         {busy && (

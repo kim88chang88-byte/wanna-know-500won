@@ -89,7 +89,7 @@ export async function POST(request: Request) {
       },
       history,
     );
-    return NextResponse.json({ answer: reply.answer, followups: reply.followups, left: taken.left });
+    return NextResponse.json({ answer: reply.answer, followups: reply.followups, visual: reply.visual, left: taken.left });
   } catch (err) {
     // 답을 못 만들었으면 쓴 질문을 돌려줘요.
     if (taken && taken.left >= 0) await refundQuestion(db, target, taken.via);
