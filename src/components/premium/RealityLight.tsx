@@ -1,6 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { getBrowserStorage } from "@/lib/drawCounter";
+import { readRealityPick, saveRealityPick } from "@/lib/realityPick";
+import { useEffect, useState } from "react";
 import type { RealityCheck } from "@/lib/premium/types";
 import { ConfirmChoice } from "@/components/ConfirmChoice";
 
@@ -8,6 +10,11 @@ import { ConfirmChoice } from "@/components/ConfirmChoice";
 export function RealityLight({ rc }: { rc: RealityCheck }) {
   const [pick, setPick] = useState<number | null>(null);
   const [asking, setAsking] = useState<number | null>(null);
+  // 한 번 고른 답은 새로고침이나 다시 들어와도 그대로 잠겨 있어요.
+  useEffect(() => {
+    const saved = readRealityPick(getBrowserStorage(), rc.question, rc.options.length);
+    if (saved !== null) setPick(saved);
+  }, [rc.question, rc.options.length]);
   return (
     <div data-testid="topic-reality" className="mt-4 rounded-2xl border border-amber-200 bg-amber-50/60 px-4 py-3.5">
       <p className="text-xs font-bold text-amber-800">🔎 지금 내 현실과 견줘 보기</p>
@@ -33,6 +40,7 @@ export function RealityLight({ rc }: { rc: RealityCheck }) {
           label={rc.options[asking].label}
           onNo={() => setAsking(null)}
           onYes={() => {
+            saveRealityPick(getBrowserStorage(), rc.question, asking);
             setPick(asking);
             setAsking(null);
           }}

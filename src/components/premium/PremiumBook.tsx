@@ -1,5 +1,7 @@
 "use client";
 
+import { getBrowserStorage } from "@/lib/drawCounter";
+import { readRealityPick, saveRealityPick } from "@/lib/realityPick";
 import { ConfirmChoice } from "@/components/ConfirmChoice";
 import { PREVIEW_OPEN_PAGES } from "@/lib/premium/config";
 import ConcernCard from "./ConcernCard";
@@ -99,6 +101,11 @@ function CheckList({ items }: { items: string[] }) {
 function RealityPick({ rc }: { rc: RealityCheck }) {
   const [pick, setPick] = useState<number | null>(null);
   const [asking, setAsking] = useState<number | null>(null);
+  // 한 번 고른 답은 새로고침이나 다시 들어와도 그대로 잠겨 있어요.
+  useEffect(() => {
+    const saved = readRealityPick(getBrowserStorage(), rc.question, rc.options.length);
+    if (saved !== null) setPick(saved);
+  }, [rc.question, rc.options.length]);
   return (
     <div data-testid="book-reality" className="mt-4 rounded-xl border border-[#9a93b0]/50 bg-white/60 px-4 py-3.5">
       <p className="text-[13px] font-bold text-[#8a5f12]">🔎 지금 내 현실과 견줘 보기</p>
@@ -124,6 +131,7 @@ function RealityPick({ rc }: { rc: RealityCheck }) {
           label={rc.options[asking].label}
           onNo={() => setAsking(null)}
           onYes={() => {
+            saveRealityPick(getBrowserStorage(), rc.question, asking);
             setPick(asking);
             setAsking(null);
           }}
