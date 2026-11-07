@@ -17,6 +17,13 @@ export default function PrivacyPage() {
         &lsquo;도리운세⋅사주&rsquo;(이하 &ldquo;서비스&rdquo;)는 생년월일시로 사주를 계산하고 풀이를 보여주기 위해 꼭
         필요한 정보만 받습니다. 아래에서 무엇을, 왜, 얼마나 오래 쓰는지 안내합니다.
       </p>
+      <p className="mt-2">
+        서비스는 「개인정보 보호법」 등 관련 법령을 지키며, 이용자의 권리를 보호하기 위해 이 방침을 만들어 공개합니다. 이 방침은 서비스를 이용하는 과정에서 처리되는 모든
+        개인정보에 적용됩니다. 처리 목적이 바뀌면 관계 법령에 따라 별도의 동의를 받는 등 필요한 조치를 합니다.
+      </p>
+      <p className="mt-2">
+        서비스는 위치정보(GPS 등 현재 위치), 얼굴 사진이나 지문 같은 신체 정보, 휴대전화 번호를 받지 않습니다. 그래서 위치기반서비스는 제공하지 않습니다.
+      </p>
 
       <H2>1. 받는 정보와 사용 목적</H2>
       <div className="overflow-x-auto">
@@ -60,6 +67,16 @@ export default function PrivacyPage() {
               <td className="p-2 border border-brand-100">자동 저장 (로그인 회원이 도리 상담실을 쓸 때)</td>
               <td className="p-2 border border-brand-100">상담실 대화방: 내가 보낸 질문과 도리의 답, 풀이 요약, 그 풀이의 생년월일시·성별(상대방 정보 포함)</td>
               <td className="p-2 border border-brand-100">다시 로그인하거나 다른 기기에서도 대화를 이어 가기 위해 서버에 한 부 저장 (마지막 대화 후 30일 보관, 아래 2항)</td>
+            </tr>
+            <tr>
+              <td className="p-2 border border-brand-100">선택 (문의할 때)</td>
+              <td className="p-2 border border-brand-100">문의 내용과 답장을 받을 이메일 주소 (이름·연락처는 받지 않아요)</td>
+              <td className="p-2 border border-brand-100">문의 확인과 답변, 분쟁 처리 (처리 후 3년 보관, 아래 2항)</td>
+            </tr>
+            <tr>
+              <td className="p-2 border border-brand-100">자동 생성 (모든 이용자)</td>
+              <td className="p-2 border border-brand-100">접속 IP 주소와 요청 횟수(로그인 회원은 회원번호 포함)</td>
+              <td className="p-2 border border-brand-100">짧은 시간에 요청이 몰리는 부정 이용을 막는 속도 제한. 대부분 1분(길어도 1시간) 단위로 세고 기록은 최대 2시간 뒤 자동 정리 대상이 되며, 다른 용도로 쓰지 않습니다</td>
             </tr>
             <tr>
               <td className="p-2 border border-brand-100">선택 동의 (로그인 회원)</td>
@@ -152,6 +169,32 @@ export default function PrivacyPage() {
         </li>
       </ul>
 
+      <p className="mt-3 font-bold text-gray-800">관계 법령에 따라 보관하는 정보 (유료 결제가 시작된 뒤 적용)</p>
+      <p className="mt-1">현재는 베타 기간으로 결제가 없어 아래 정보를 보관하지 않습니다. 결제가 시작되면 법령이 정한 기간 동안 다른 정보와 분리해 보관하고, 그 목적으로만 쓰며, 기간이 끝나면 지체 없이 파기합니다.</p>
+      <div className="mt-2 overflow-x-auto">
+        <table className="w-full text-xs border border-brand-100">
+          <thead className="bg-brand-50 text-left">
+            <tr>
+              <th className="p-2 border border-brand-100">보관 항목</th>
+              <th className="p-2 border border-brand-100">근거</th>
+              <th className="p-2 border border-brand-100">기간</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td className="p-2 border border-brand-100">계약 또는 청약철회 기록</td><td className="p-2 border border-brand-100">전자상거래 등에서의 소비자보호에 관한 법률</td><td className="p-2 border border-brand-100">5년</td></tr>
+            <tr><td className="p-2 border border-brand-100">대금 결제 및 재화·서비스 공급 기록</td><td className="p-2 border border-brand-100">전자상거래 등에서의 소비자보호에 관한 법률</td><td className="p-2 border border-brand-100">5년</td></tr>
+            <tr><td className="p-2 border border-brand-100">소비자 불만 또는 분쟁 처리 기록(문의 내용 포함)</td><td className="p-2 border border-brand-100">전자상거래 등에서의 소비자보호에 관한 법률</td><td className="p-2 border border-brand-100">3년</td></tr>
+            <tr><td className="p-2 border border-brand-100">표시·광고에 관한 기록</td><td className="p-2 border border-brand-100">전자상거래 등에서의 소비자보호에 관한 법률</td><td className="p-2 border border-brand-100">6개월</td></tr>
+            <tr><td className="p-2 border border-brand-100">거래 관련 장부와 증거 서류</td><td className="p-2 border border-brand-100">국세기본법</td><td className="p-2 border border-brand-100">5년</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p className="mt-3 font-bold text-gray-800">파기 절차와 방법</p>
+      <ul className="list-disc pl-5 space-y-1">
+        <li>보관 기간이 지났거나 처리 목적이 끝나 더 필요 없어진 정보는 지체 없이 파기합니다. 회원 탈퇴를 요청받으면 법령에 따라 보관해야 하는 정보를 뺀 나머지를 지체 없이 파기합니다.</li>
+        <li>전자 파일은 복구하거나 다시 볼 수 없는 방법으로 데이터베이스에서 삭제합니다. 법령에 따라 보관하는 정보는 그 목적 외에는 쓰지 않습니다.</li>
+      </ul>
+
       <H2>3. 처리 위탁과 국외 이전</H2>
       <p>
         AI 풀이 문장을 만들 때 계산된 사주 정보(생년월일시에서 나온 간지 등)를 AI 서비스에 전달합니다. 이 기능은 아직
@@ -174,12 +217,34 @@ export default function PrivacyPage() {
         카카오 로그인을 이용하면 로그인 인증은 ㈜카카오가, 구글 로그인을 이용하면 Google LLC(미국 법인)가, 네이버 로그인을 이용하면 네이버㈜가 처리하며, 이 서비스는
         인증이 끝난 뒤 위 표의 항목만 받아요. 같은 사람이 카카오·구글·네이버로 각각 로그인하면 서로 다른 회원으로 취급돼요.
       </p>
-      <p className="mt-2">그 밖에 개인정보를 광고나 마케팅 목적으로 제3자에게 제공하지 않습니다.</p>
+      <p className="mt-2">서비스 화면과 서버를 인터넷에 올려 운영하는 데에는 아래 업체의 서비스를 이용합니다. 이 과정에서 접속 기록(IP 주소 등)이 업체의 서버 기록에 남을 수 있으며, 업체의 정책에 따른 기간 동안만 보관됩니다.</p>
+      <ul className="list-disc pl-5 space-y-1 mt-2">
+        <li>맡기는 곳: Vercel Inc. (미국 법인) — 웹사이트 호스팅</li>
+        <li>이용 목적: 서비스 화면 제공, 오류 분석, 보안 관리</li>
+      </ul>
+      <p className="mt-2">위탁할 때는 위탁하는 일의 목적과 범위, 안전하게 지키는 방법, 다시 맡기는 것의 제한, 관리·감독, 손해배상 책임을 계약 등으로 정하고 「개인정보 보호법」 제26조에 따라 관리·감독합니다.</p>
+      <p className="mt-2">
+        서비스는 이용자의 동의 없이 개인정보를 처리 목적을 넘어 쓰거나 제3자에게 제공하지 않으며, 광고나 마케팅 목적으로 제공하지 않습니다. 다만 「개인정보 보호법」 등 법령에서
+        허용하는 경우에는 예외로 합니다.
+      </p>
 
       <H2>4. 이용자의 권리</H2>
-      <p>
-        본인의 정보에 대해 열람, 정정, 삭제, 처리 정지를 요청할 수 있고, 동의는 언제든 철회할 수 있습니다. 아래 문의처로
-        연락해 주세요. 만 14세 미만 아동의 정보는 수집하지 않는 것을 원칙으로 합니다.
+      <p>이용자는 서비스에 다음 권리를 행사할 수 있습니다.</p>
+      <ul className="list-disc pl-5 space-y-1 mt-1">
+        <li>개인정보의 열람 요구</li>
+        <li>개인정보의 정정 또는 삭제 요구</li>
+        <li>개인정보 처리정지 요구</li>
+        <li>개인정보 처리에 대한 동의 철회</li>
+        <li>회원 탈퇴 (로그인 화면의 &lsquo;회원 탈퇴&rsquo;에서 직접 할 수 있어요)</li>
+      </ul>
+      <p className="mt-2">
+        권리는 아래 7항의 문의 이메일로 행사할 수 있고, 법정대리인이나 위임받은 대리인을 통해서도 할 수 있습니다(이 경우 위임장 등 필요한 서류를 요청할 수 있어요).
+        열람·정정·삭제·처리정지 요구는 「개인정보 보호법」에 따라 제한될 수 있고, 다른 법령에서 보존하도록 정한 정보는 그 기간 동안 삭제하지 못할 수 있습니다.
+        로그인하지 않고 남긴 후기·고민 통계처럼 누구의 것인지 알 수 없는 정보는 찾아서 지울 수 없습니다.
+      </p>
+      <p className="mt-2">
+        서비스는 만 14세 미만 아동의 회원가입을 받지 않으며, 아동의 정보는 수집하지 않는 것을 원칙으로 합니다. 만 14세 미만임을 알게 된 경우에는 법정대리인의 동의를 확인할 수
+        없으면 해당 정보를 지체 없이 삭제합니다. 법정대리인은 아동의 개인정보에 대해 동의 철회와 열람·정정·삭제·처리정지를 요구할 수 있으며, 방법은 위와 같습니다.
       </p>
 
       <H2>5. 안전하게 지키기 위한 조치</H2>
@@ -187,6 +252,10 @@ export default function PrivacyPage() {
         <li>모든 통신은 HTTPS로 암호화합니다.</li>
         <li>AI 서비스 접속 키는 서버에서만 사용하고 이용자 화면으로 내보내지 않습니다.</li>
         <li>필요한 최소한의 정보만 받고, 접근 권한은 운영에 필요한 사람으로 제한합니다.</li>
+        <li>회원 정보를 저장하는 데이터베이스는 서버에서만 접근하고(이용자 화면에서 직접 열 수 없도록 행 단위 접근 제한을 켜 둡니다), 접속 키는 서버 안에서만 씁니다.</li>
+        <li>로그인 상태 쿠키는 서명해서 위조할 수 없게 하고, 다른 사이트에서 오는 쓰기 요청을 막으며, 짧은 시간에 요청이 몰리면 제한합니다.</li>
+        <li>방문자 구분 값은 서버에서 한 번 더 암호화(해시)해 저장해 원래 값을 알 수 없게 합니다.</li>
+        <li>개인정보를 다루는 사람을 최소한으로 두고, 정보가 새어 나간 사실을 알게 되면 법령에 따라 지체 없이 이용자에게 알리고 필요한 조치를 합니다.</li>
       </ul>
 
       <H2>6. 쿠키와 비슷한 기술</H2>
@@ -194,13 +263,39 @@ export default function PrivacyPage() {
         서비스는 광고용 쿠키를 쓰지 않습니다. 뽑기 횟수·연속 방문 기록·고민 후속 안부·상담실 대화방(서버 사본은 위 2항)을 기억하기 위해 브라우저 저장소(localStorage)를 사용하며,
         브라우저 설정에서 차단하거나 삭제할 수 있어요. 차단해도 서비스는 이용할 수 있지만 횟수 표시는 유지되지 않습니다. 또한 방문자 수(Today/Total)를 세기 위해 브라우저가 만든 무작위 ID를 서버에서 한 번 더 암호화(해시)해 저장하며, 이름·연락처·IP 주소는 저장하지 않습니다. 같은 암호화 ID 로 어디서 방문했는지(직접 접속·친구 초대·접속 경로의 사이트 도메인)와 주요 버튼을 눌렀는지(한마디 보기, 뽑기, 로그인 버튼 등)를 이용 통계로만 기록하며, 생년월일·이름·직접 쓴 글은 담지 않고 회원 정보와도 연결하지 않습니다. 행동 기록은 90일 뒤 삭제합니다.
       </p>
-
-      <H2>7. 개인정보 보호 문의</H2>
-      <p className="mt-1">문의 이메일:</p>
-      <ContactList />
       <p className="mt-2">
-        개인정보 침해 신고나 상담은 개인정보침해신고센터(privacy.kisa.or.kr, 국번없이 118) 등에서도 받을 수 있어요.
+        서비스는 광고식별자를 수집하지 않고, 이용자를 따라다니는 맞춤형 광고에 정보를 쓰지 않으며, 방문 통계를 민감한 정보와 합치거나 특정 개인을 알아보는 데 쓰지 않습니다.
+        브라우저에서 저장소를 지우거나 막는 방법은 다음과 같습니다.
       </p>
+      <ul className="list-disc pl-5 space-y-1 mt-1">
+        <li>Chrome: 설정 → 개인정보 및 보안 → 인터넷 사용 기록 삭제(쿠키 및 기타 사이트 데이터)</li>
+        <li>Edge: 설정 → 쿠키 및 사이트 권한 → 쿠키 및 사이트 데이터 관리 및 삭제</li>
+        <li>Safari: 설정 → 개인정보 보호 → 모든 쿠키 차단 또는 웹사이트 데이터 관리</li>
+      </ul>
+
+      <H2>7. 개인정보 보호 문의와 권리침해 구제</H2>
+      <p className="mt-1">서비스는 개인정보 처리를 총괄하고 이용자의 불만을 처리하기 위해 아래와 같이 개인정보 보호책임자를 둡니다. 문의·동의 철회·열람·정정·삭제·처리정지·불만은 아래 이메일로 보내 주세요. 접수하면 지체 없이 확인하고 처리합니다.</p>
+      <p className="mt-2">개인정보 보호책임자: 서비스 운영자 · 문의 이메일:</p>
+      <ContactList />
+      <p className="mt-3 font-bold text-gray-800">권리침해 구제 기관</p>
+      <p className="mt-1">아래 기관은 서비스와 별개의 기관입니다. 서비스의 처리에 대한 불만은 위 보호책임자에게 먼저 문의해 주세요.</p>
+      <div className="mt-2 overflow-x-auto">
+        <table className="w-full text-xs border border-brand-100">
+          <thead className="bg-brand-50 text-left">
+            <tr>
+              <th className="p-2 border border-brand-100">기관</th>
+              <th className="p-2 border border-brand-100">연락처</th>
+              <th className="p-2 border border-brand-100">웹사이트</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td className="p-2 border border-brand-100">개인정보분쟁조정위원회</td><td className="p-2 border border-brand-100">1833-6972</td><td className="p-2 border border-brand-100">www.kopico.go.kr</td></tr>
+            <tr><td className="p-2 border border-brand-100">개인정보침해신고센터</td><td className="p-2 border border-brand-100">국번없이 118</td><td className="p-2 border border-brand-100">privacy.kisa.or.kr</td></tr>
+            <tr><td className="p-2 border border-brand-100">대검찰청</td><td className="p-2 border border-brand-100">국번없이 1301</td><td className="p-2 border border-brand-100">www.spo.go.kr</td></tr>
+            <tr><td className="p-2 border border-brand-100">경찰청</td><td className="p-2 border border-brand-100">국번없이 182</td><td className="p-2 border border-brand-100">ecrm.police.go.kr</td></tr>
+          </tbody>
+        </table>
+      </div>
 
       <H2>8. 방침이 바뀔 때</H2>
       <p>내용이 바뀌면 시행일을 갱신하고 이 페이지에 먼저 알립니다. 이용자에게 중요한 변경은 서비스 화면에서 따로 안내합니다.</p>
