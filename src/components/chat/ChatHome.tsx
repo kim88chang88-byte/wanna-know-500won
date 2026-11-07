@@ -31,6 +31,8 @@ export default function ChatHome() {
   const [rooms, setRooms] = useState<ChatRoom[]>([]);
   const [open, setOpen] = useState<string | null>(null);
   const [ready, setReady] = useState(false);
+  /** 서버에서 대화방을 받아 왔으면 true (서버 보관이 켜져 있다는 뜻) */
+  const [cloud, setCloud] = useState(false);
   const [left, setLeft] = useState<number | null>(null);
   const [roomLeft, setRoomLeft] = useState<Record<string, number>>({});
   const [delId, setDelId] = useState<string | null>(null);
@@ -90,6 +92,7 @@ export default function ChatHome() {
       let needPush = false;
       if (server) {
         pulled.current = true;
+        setCloud(true);
         const merged = mergeRooms(list, server, readSynced(getBrowserStorage()));
         needPush = !sameRooms(merged, server);
         list = merged;
@@ -195,7 +198,7 @@ export default function ChatHome() {
         <SafeImage src="/images/dori-icon.webp" alt="" className="h-9 w-9 rounded-full border-2 border-brand-200 bg-white object-contain" fallback="🦦" fallbackClass="text-2xl" />
         <div className="min-w-0 flex-1">
           <p className="font-bold leading-tight text-gray-900">도리 상담실</p>
-          <p className="text-[11px] text-[#8a7fa8]">대화는 이 기기에만 저장돼요</p>
+          <p className="text-[11px] text-[#8a7fa8]">{cloud ? "대화는 30일 동안 보관돼요" : "대화는 이 기기에만 저장돼요"}</p>
         </div>
       </header>
 
