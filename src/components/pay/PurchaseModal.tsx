@@ -34,7 +34,7 @@ const DemoNote = ({ className = "" }: { className?: string }) => (
 
 const won = (n: number) => `${n.toLocaleString("ko-KR")}원`;
 
-export default function PurchaseModal({ preselect, onClose, onContinue }: { preselect?: ProductId; onClose: () => void; /** 풀이를 보려다 충전하러 온 경우: 결제가 끝나면 "이어서 풀이 보기"로 바로 이어 가요 */ onContinue?: () => void }) {
+export default function PurchaseModal({ preselect, onClose, onContinue, continueLabel = "이어서 풀이 보기" }: { preselect?: ProductId; onClose: () => void; /** 이어 가기 버튼 글자 */ continueLabel?: string; /** 풀이를 보려다 충전하러 온 경우: 결제가 끝나면 "이어서 풀이 보기"로 바로 이어 가요 */ onContinue?: () => void }) {
   const [step, setStep] = useState<"buy" | "confirm" | "done" | "soon">("buy");
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<"" | "login" | "fail">("");
@@ -158,7 +158,7 @@ export default function PurchaseModal({ preselect, onClose, onContinue }: { pres
             <DemoNote />
             {balance > 0 && <p className="text-center text-[13px] text-slate-600">내 동전 <b>{balance}개</b> · 풀이 뽑기나 상담실 질문에 쓸 수 있어요</p>}
             <button type="button" data-testid={onContinue ? "pay-continue" : undefined} onClick={onContinue ?? onClose} className="w-full rounded-2xl bg-brand-500 py-3 text-sm font-extrabold text-white">
-              {onContinue ? "이어서 풀이 보기" : "확인"}
+              {onContinue ? continueLabel : "확인"}
             </button>
           </div>
         ) : (

@@ -586,7 +586,13 @@ export default function ChatApp({ initialCtx, initialMsgs, onChange, onBack }: {
       )}
       {payOpen && <PurchaseModal
           preselect="reading"
+          continueLabel="이어서 질문 더하기"
           onClose={() => {
+            setPayOpen(false);
+            void refreshCoins(true);
+          }}
+          onContinue={() => {
+            // 결제가 끝나면 "동전을 써서 질문 더하기" 확인창으로 바로 이어 가요
             setPayOpen(false);
             void refreshCoins(true);
           }}
