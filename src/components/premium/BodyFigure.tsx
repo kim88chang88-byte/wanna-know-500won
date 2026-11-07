@@ -5,6 +5,8 @@ import type { ElementView } from "@/lib/premium/types";
 const COLOR: Record<BodyEl, string> = { 목: "#3fa66b", 화: "#e5484d", 토: "#d9a21b", 금: "#8a9bb0", 수: "#3b82f6" };
 const STATE_COLOR: Record<BodyState, string> = { fill: "#1d4ed8", rest: "#be123c", ok: "#666666" };
 
+/** 작은 지도는 글 목록 높이에 맞춰 그림을 세로로 이만큼 늘려요 */
+const COMPACT_STRETCH = 1.25;
 const IMG_LEFT = 27; // 그림이 차지하는 가로 위치(%)
 const IMG_W = 46;
 const px = (x: number) => IMG_LEFT + (IMG_W * x) / BODY_IMG.w;
@@ -16,7 +18,7 @@ export default function BodyFigure({ states, focus, compact = false }: { states:
     <div
       data-testid={compact ? "body-figure-mini" : "body-figure"}
       className="relative mx-auto w-full overflow-hidden rounded-2xl bg-white"
-      style={{ aspectRatio: compact ? `${BODY_IMG.w} / ${BODY_IMG.h}` : "1000 / 908", maxWidth: compact ? 110 : 440 }}
+      style={{ aspectRatio: compact ? `${BODY_IMG.w} / ${BODY_IMG.h / COMPACT_STRETCH}` : "1000 / 908", maxWidth: compact ? 120 : 440 }}
       role="img"
       aria-label="오행 장부 지도: 기운별로 챙기면 좋은 몸의 곳"
     >
@@ -26,7 +28,7 @@ export default function BodyFigure({ states, focus, compact = false }: { states:
         alt=""
         width={BODY_IMG.w}
         height={BODY_IMG.h}
-        className="absolute top-0 h-full object-contain"
+        className={`absolute top-0 h-full ${compact ? "object-fill" : "object-contain"}`}
         style={compact ? { left: 0, width: "100%" } : { left: `${IMG_LEFT}%`, width: `${IMG_W}%` }}
       />
       {BODY_GROUPS.map((g) => {
@@ -103,7 +105,7 @@ export function BodyPicks({ states, elements }: { states: Partial<Record<BodyEl,
     <section data-testid="story-body" aria-label="내 몸 기운 지도" className="rounded-2xl border border-brand-100 bg-white p-4">
       <p className="text-xs font-bold text-brand-700">내 몸 기운 지도</p>
       <div className="mt-2.5 flex items-center gap-3.5">
-        <div className="w-[96px] shrink-0">
+        <div className="w-[112px] shrink-0">
           <BodyFigure states={states} compact />
         </div>
         <ul className="min-w-0 flex-1 space-y-2.5">
