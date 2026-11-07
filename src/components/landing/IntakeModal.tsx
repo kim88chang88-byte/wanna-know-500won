@@ -256,13 +256,13 @@ function SavedPeoplePicker({ people, onPick, title }: { people: SavedPerson[]; o
 }
 
 /** 별명을 안 적었을 때 쓰는 이름: 생년월일 */
-/** 별명 칸 바로 아래: 실명이 아니라는 확인과, 저장해도 되는 사람이라는 확인을 한 번에 받아요. */
+/** 이름 칸 바로 아래: 이름(실명 가능)과 정보를 저장해도 되는 사람이라는 확인을 받아요. */
 function PersonOkCheck({ checked, onChange }: { checked: boolean; onChange: (v: boolean) => void }) {
   return (
     <label className="flex items-start gap-2 text-xs text-gray-700 leading-relaxed">
       <input type="checkbox" name="personOk" data-testid="person-ok" className="mt-0.5" checked={checked} onChange={(e) => onChange(e.target.checked)} />
       <span>
-        실명이 아닌 별명이고, 이 정보를 저장해도 괜찮은 사람이에요. <span className="text-[11px] text-gray-500">(체크해야 저장돼요)</span>
+        실명이나 별명을 적어도 괜찮고, 이 정보를 저장해도 되는 사람이에요. <span className="text-[11px] text-gray-500">(체크해야 저장돼요)</span>
       </span>
     </label>
   );
@@ -464,7 +464,7 @@ export default function IntakeModal({ target, wallet = null, onClose, onComplete
   // 궁합이 아닌 풀이에서, 지금 적은 정보가 다른 사람 것일 때 기억해 두기 (선택 동의, 기본은 꺼짐)
   const [saveOther, setSaveOther] = useState(false);
   const [otherLabel, setOtherLabel] = useState("");
-  // 다른 사람을 기억해 둘 때: 실명이 아닌 별명이고 저장해도 괜찮은 사람이라는 확인 (둘 다 같이 써요)
+  // 다른 사람을 기억해 둘 때: 이름(실명 가능)과 정보를 저장해도 되는 사람이라는 확인 (둘 다 같이 써요)
   const [personOk, setPersonOk] = useState(false);
   /** 결과 화면에 보여 줄 상대방 정보 (궁합일 때만) */
   const [resultPartner, setResultPartner] = useState<{ birth: BirthInput; name: string } | null>(null);
@@ -1166,7 +1166,7 @@ export default function IntakeModal({ target, wallet = null, onClose, onComplete
                         value={otherLabel}
                         maxLength={MAX_LABEL}
                         onChange={(e) => setOtherLabel(e.target.value)}
-                        placeholder="별명 (선택, 예: 엄마) · 실명은 피해 주세요"
+                        placeholder="이름 또는 별명 (선택, 예: 엄마)"
                         className="w-full rounded-xl border border-brand-200 px-3 py-2 text-xs"
                       />
                     )}
@@ -1191,7 +1191,7 @@ export default function IntakeModal({ target, wallet = null, onClose, onComplete
                       value={personLabel}
                       maxLength={MAX_LABEL}
                       onChange={(e) => setPersonLabel(e.target.value)}
-                      placeholder="별명 (선택, 예: 내 짝꿍) · 실명은 피해 주세요"
+                      placeholder="이름 또는 별명 (선택, 예: 내 짝꿍)"
                       className="w-full rounded-xl border border-brand-200 px-3 py-2 text-xs"
                     />
                   )}

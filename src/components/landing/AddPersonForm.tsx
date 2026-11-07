@@ -45,7 +45,7 @@ export default function AddPersonForm({ onAdded, onCancel }: { onAdded: (p: Save
       return;
     }
     if (!agree) {
-      setError("별명 아래 확인란을 체크해 주세요. (실명이 아닌 별명이고, 저장해도 괜찮은 사람)");
+      setError("이름 아래 확인란을 체크해 주세요. (이름과 정보를 저장해도 괜찮은 사람)");
       return;
     }
     setBusy(true);
@@ -77,12 +77,12 @@ export default function AddPersonForm({ onAdded, onCancel }: { onAdded: (p: Save
         value={label}
         maxLength={MAX_LABEL}
         onChange={(e) => setLabel(e.target.value)}
-        placeholder="별명 (예: 엄마, 내 짝꿍) · 실명은 피해 주세요"
+        placeholder="이름 또는 별명 (예: 엄마, 내 짝꿍)"
         className={INPUT}
       />
       <label className="flex items-start gap-2 text-[11px] leading-relaxed text-gray-700">
         <input type="checkbox" name="addAgree" data-testid="add-person-agree" className="mt-0.5" checked={agree} onChange={(e) => setAgree(e.target.checked)} />
-        <span>실명이 아닌 별명이고, 이 정보를 저장해도 괜찮은 사람이에요.</span>
+        <span>실명이나 별명을 적어도 괜찮고, 이 정보를 저장해도 되는 사람이에요.</span>
       </label>
       <div className="flex gap-2" role="group" aria-label="양력 또는 음력">
         <Pill on={f.calendar === "solar"} onClick={() => setDate(dateText, "solar")} testId="add-cal-solar">
