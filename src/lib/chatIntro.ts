@@ -11,7 +11,10 @@ import type { ChatCtx } from "@/lib/chatContext";
 
 export interface IntroPillar {
   label: string;
+  hint: string;
   stem: string;
+  stemKo: string;
+  branchKo: string;
   branch: string;
   stemEl: Element;
   branchEl: Element;
@@ -24,7 +27,6 @@ export type IntroBubble =
   | { kind: "elements"; counts: Record<Element, number> }
   | { kind: "pair"; people: { name: string; hanja: string; hangul: string; el: Element; date: string }[] };
 
-const EL_KO: Record<Element, string> = { wood: "나무", fire: "불", earth: "땅", metal: "쇠", water: "물" };
 const EL_FEEL: Record<Element, string> = {
   wood: "곧게 뻗으며 자라는 나무 같은 기운",
   fire: "주변을 밝히고 데우는 불 같은 기운",
@@ -32,7 +34,6 @@ const EL_FEEL: Record<Element, string> = {
   metal: "다듬고 맺고 끊는 쇠 같은 기운",
   water: "깊게 흐르며 스며드는 물 같은 기운",
 };
-const ELS: Element[] = ["wood", "fire", "earth", "metal", "water"];
 
 function stemInfo(h: string) {
   return STEMS.find((s) => s.hanja === h);
@@ -102,32 +103,25 @@ export function buildIntro(ctx: ChatCtx): IntroBubble[] {
   // 풀이(500원·프리미엄)
   if (chart) {
     const facts = analyzeChart(chart);
-    const rows: Array<[string, { stem: string; branch: string } | null, boolean]> = [
-      ["시주", chart.hour, false],
-      ["일주", chart.day, true],
-      ["월주", chart.month, false],
-      ["연주", chart.year, false],
+    const rows: Array<[string, string, { stem: string; branch: string } | null, boolean]> = [
+      ["시주", "태어난 시", chart.hour, false],
+      ["일주", "나", chart.day, true],
+      ["월주", "태어난 달", chart.month, false],
+      ["연주", "태어난 해", chart.year, false],
     ];
     const pillars: IntroPillar[] = [];
-    for (const [label, p, me] of rows) {
+    for (const [label, hint, p, me] of rows) {
       if (!p) continue;
       const s = stemInfo(p.stem);
       const b = branchInfo(p.branch);
       if (!s || !b) continue;
-      pillars.push({ label, stem: p.stem, branch: p.branch, stemEl: s.element, branchEl: b.element, me });
+      pillars.push({ label, hint, stemKo: s.hangul, branchKo: b.hangul, stem: p.stem, branch: p.branch, stemEl: s.element, branchEl: b.element, me });
     }
     out.push({ kind: "text", text: `먼저 ${who}의 사주 기둥이야.${facts.hourKnown ? "" : " (태어난 시각은 몰라서 세 기둥만 봤어)"}` });
     out.push({ kind: "pillars", pillars });
     const dm = facts.dayMaster;
     out.push({ kind: "text", text: `태어난 날의 기운(일간)은 **${dm.hangul}${dm.elementKo.replace(/\(.+\)/, "")}**, ${EL_FEEL[dm.element]}이야.` });
-    const sorted = [...ELS].sort((x, y) => facts.elementCounts[y] - facts.elementCounts[x]);
-    const most = sorted[0];
-    const lack = ELS.filter((e) => facts.elementCounts[e] === 0);
     out.push({ kind: "elements", counts: facts.elementCounts });
-    out.push({
-      kind: "text",
-      text: lack.length ? `오행을 세어 보면 **${EL_KO[most]}**가 가장 많고, ${lack.map((e) => EL_KO[e]).join("·")} 기운은 보이지 않아.` : `오행을 세어 보면 **${EL_KO[most]}** 기운이 가장 두드러져.`,
-    });
   }
   const concern = pickLine(ctx.summary, "고민");
   const head = pickLine(ctx.summary, "한 줄 결론");

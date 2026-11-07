@@ -6,7 +6,8 @@ import { roomAnimal, roomColor } from "@/lib/chatRooms";
 import { MSG_MAX, TURN_CAP, type ChatCtx, type ChatKind, type ChatMsg } from "@/lib/chatContext";
 import type { RoomMsg } from "@/lib/chatRooms";
 import { buildIntro, type IntroBubble } from "@/lib/chatIntro";
-import { ELEMENT_BOX } from "@/lib/elementColor";
+import { ELEMENT_BOX, EL_LABEL } from "@/lib/elementColor";
+import ElementTile from "@/components/ElementTile";
 import type { Element } from "@/lib/saju/constants";
 
 const GREETING: Record<ChatKind, string> = {
@@ -630,41 +631,59 @@ function DoriRow({ face, text, at, error, actions, onSkip }: { face: ReactNode; 
   );
 }
 
-const EL_HEX: Record<Element, string> = { wood: "#22c55e", fire: "#f2512b", earth: "#c68a3d", metal: "#cbd5e1", water: "#312e81" };
 const EL_NAME: Record<Element, string> = { wood: "나무", fire: "불", earth: "땅", metal: "쇠", water: "물" };
+const EL_SEQ: Element[] = ["wood", "fire", "earth", "metal", "water"];
+
+/** 오행 알약 + 가장 많은 기운 한 줄 (결과서의 기둥 아래와 같은 모양) */
+function ElementsBubble({ counts }: { counts: Record<Element, number> }) {
+  const total = EL_SEQ.reduce((n, e) => n + counts[e], 0);
+  const top = EL_SEQ.reduce((m, e) => (counts[e] > counts[m] ? e : m), "wood" as Element);
+  const tops = EL_SEQ.filter((e) => counts[e] === counts[top]);
+  return (
+    <div data-testid="intro-elements">
+      <div className="flex flex-wrap items-center gap-1.5">
+        {EL_SEQ.map((e) => (
+          <span key={e} className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-bold ${ELEMENT_BOX[e]} ${counts[e] === 0 ? "opacity-40" : ""}`}>
+            {EL_LABEL[e].icon} {EL_LABEL[e].name} {counts[e]}
+          </span>
+        ))}
+      </div>
+      {total > 0 && counts[top] > 0 && (
+        <p className="mt-1.5 text-[12px] font-bold text-gray-700">
+          {tops.length >= 2
+            ? `${tops.map((e) => `${EL_LABEL[e].icon} ${EL_LABEL[e].name}`).join("과 ")}의 기운이 ${tops.length === 2 ? "똑같이 " : ""}가장 많아요 (각 ${counts[top]}/${total})`
+            : `${EL_LABEL[top].icon} ${EL_LABEL[top].name}의 기운이 가장 많아요 (${counts[top]}/${total})`}
+        </p>
+      )}
+    </div>
+  );
+}
 
 /** 첫 인사 뒤에 이어지는 정리 말풍선 (얼굴 자리는 비워 두고 위 말풍선에 이어 붙여요) */
 function IntroRow({ b }: { b: IntroBubble }) {
   return (
     <div className="flex items-start gap-2 animate-[fadeUp_.35s_ease_both]">
       <span className="w-9 shrink-0" aria-hidden="true" />
-      <div className="min-w-0 max-w-[82%] rounded-[4px_18px_18px_18px] bg-white px-3.5 py-[11px] text-[14px] leading-[1.62] text-gray-900 shadow-[0_2px_10px_#5a36a814]">
+      <div className={`min-w-0 max-w-[82%] rounded-[4px_18px_18px_18px] bg-white px-3.5 py-[11px] text-[14px] leading-[1.62] text-gray-900 shadow-[0_2px_10px_#5a36a814] ${b.kind === "pillars" ? "w-[82%]" : ""}`}>
         {b.kind === "text" && <p className="whitespace-pre-wrap">{rich(b.text)}</p>}
         {b.kind === "pillars" && (
-          <div data-testid="intro-pillars" className="grid grid-cols-4 gap-1.5 text-center">
-            {b.pillars.map((p) => (
-              <div key={p.label} className={`rounded-xl border px-1 py-1.5 ${p.me ? "border-brand-500 ring-1 ring-brand-300" : "border-brand-100"}`}>
-                <p className="text-[10px] text-gray-500">{p.label}</p>
-                <p className={`mx-auto mt-0.5 flex h-7 w-7 items-center justify-center rounded-lg text-[15px] font-bold ${ELEMENT_BOX[p.stemEl]}`}>{p.stem}</p>
-                <p className={`mx-auto mt-0.5 flex h-7 w-7 items-center justify-center rounded-lg text-[15px] font-bold ${ELEMENT_BOX[p.branchEl]}`}>{p.branch}</p>
-              </div>
-            ))}
-          </div>
-        )}
-        {b.kind === "elements" && (
-          <div data-testid="intro-elements">
-            <div className="flex h-2.5 w-52 max-w-full overflow-hidden rounded-full bg-gray-100">
-              {(Object.keys(b.counts) as Element[]).map((e) => (b.counts[e] > 0 ? <i key={e} style={{ flex: b.counts[e], background: EL_HEX[e] }} /> : null))}
-            </div>
-            <p className="mt-1.5 flex flex-wrap gap-x-2.5 text-[11.5px] text-gray-600">
-              {(Object.keys(b.counts) as Element[]).map((e) => (
-                <span key={e}>
-                  {EL_NAME[e]} {b.counts[e]}
-                </span>
+          <div data-testid="intro-pillars">
+            <div className="grid grid-cols-4 gap-1.5 text-center">
+              {b.pillars.map((p) => (
+                <div key={p.label} className="space-y-1.5">
+                  <div className="leading-tight">
+                    <div className={`text-[11px] font-bold ${p.me ? "text-brand-600" : "text-gray-500"}`}>{p.label}</div>
+                    <div className={`text-[10px] ${p.me ? "font-bold text-brand-500" : "text-gray-400"}`}>{p.hint}</div>
+                  </div>
+                  <ElementTile ch={p.stem} el={p.stemEl} reading={p.stemKo} label={`${p.label} ${p.stem}${p.branch}`} />
+                  <ElementTile ch={p.branch} el={p.branchEl} reading={p.branchKo} label={`${p.label} ${p.stem}${p.branch}`} />
+                </div>
               ))}
-            </p>
+            </div>
+            <p className="mt-2 text-[11px] leading-relaxed text-gray-500">위 칸은 겉으로 드러나는 기운, 아래 칸은 바탕이 되는 기운이에요. 색은 다섯 가지 기운을 뜻해요.</p>
           </div>
         )}
+        {b.kind === "elements" && <ElementsBubble counts={b.counts} />}
         {b.kind === "pair" && (
           <div data-testid="intro-pair" className="grid grid-cols-2 gap-1.5 text-center">
             {b.people.map((p) => (
