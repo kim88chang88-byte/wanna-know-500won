@@ -46,6 +46,11 @@ export default function ResultShareCard({ report, aiQuote }: { report: PremiumRe
   const [state, setState] = useState<"idle" | "busy" | "done" | "cancel" | "error">("idle");
   const [ready, setReady] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [linkCopied, setLinkCopied] = useState<"idle" | "ok" | "fail">("idle");
+  const [link, setLink] = useState("");
+  useEffect(() => {
+    setLink(shareOrigin());
+  }, []);
   const data = useMemo(
     () => buildPhotoCardData(report, { date: new Date(), siteLabel: typeof window === "undefined" ? "" : window.location.host, shareUrl: shareOrigin(), aiQuote }),
     [report, aiQuote],
@@ -146,9 +151,25 @@ export default function ResultShareCard({ report, aiQuote }: { report: PremiumRe
       >
         {state === "busy" ? "카드 만드는 중…" : "✨ 결과 카드 저장·공유하기"}
       </button>
+      {/* 공유 창에서 앱에 따라 글(링크)이 빠질 수 있어서, 링크를 눈에 보이게 두고 따로 복사할 수 있게 해요 */}
+      <div data-testid="share-link-row" className="mx-auto mt-2.5 flex max-w-[19rem] items-center gap-1.5 rounded-full border border-brand-100 bg-white px-3 py-1.5 text-left">
+        <span aria-hidden="true">🔗</span>
+        <span className="min-w-0 flex-1 truncate text-[11px] text-gray-600" title={link}>{link.replace(/^https?:\/\//, "")}</span>
+        <button
+          type="button"
+          onClick={async () => {
+            const ok = await copyCaption();
+            setLinkCopied(ok ? "ok" : "fail");
+            window.setTimeout(() => setLinkCopied("idle"), 2200);
+          }}
+          className="shrink-0 rounded-full bg-brand-50 px-2.5 py-1 text-[11px] font-bold text-brand-700 active:scale-95"
+        >
+          {linkCopied === "ok" ? "✓ 복사했어요" : linkCopied === "fail" ? "복사 실패" : "링크 복사"}
+        </button>
+      </div>
       <p role="status" className="mt-1.5 text-[11px] leading-relaxed text-gray-500">
         {state === "done"
-          ? copied ? "카드를 만들었어요. 링크도 복사했으니 올릴 때 붙여넣기만 하세요 ❄️" : "카드를 만들었어요. 친구에게 자랑해 보세요 ❄️"
+          ? copied ? "카드를 만들었어요. 링크도 복사했으니 올릴 때 붙여넣기만 하세요 ❄️" : "카드를 만들었어요. 보내는 앱에서 링크가 안 보이면 위 '링크 복사'를 눌러 붙여넣어 주세요 ❄️"
           : state === "cancel"
             ? copied ? "카드는 저장하지 않았어요. 링크만 복사했어요 — 친구에게 붙여넣어 보내 주세요 ❄️" : "카드는 저장하지 않았어요."
             : state === "error"
@@ -157,7 +178,7 @@ export default function ResultShareCard({ report, aiQuote }: { report: PremiumRe
                 <>
                   인스타 스토리 크기로 저장돼요 · 이 기기에서만 만들어요
                   <br />
-                  친구가 볼 수 있는 링크도 함께 복사돼요 🔗
+                  링크는 저장할 때 함께 복사되고, 위에서 따로 복사할 수도 있어요
                 </>
               )}
       </p>
