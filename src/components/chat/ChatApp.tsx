@@ -9,7 +9,8 @@ import { plainAnswer, splitElements, splitMood } from "@/lib/chatMarkup";
 import VisualCard from "@/components/chat/VisualCard";
 import type { ChatVisual } from "@/lib/ai/chat";
 import { buildIntro, type IntroBubble } from "@/lib/chatIntro";
-import { ELEMENT_BOX, EL_LABEL } from "@/lib/elementColor";
+import { ELEMENT_BOX } from "@/lib/elementColor";
+import { ElIconName } from "@/components/ElIcon";
 import ElementTile from "@/components/ElementTile";
 import type { Element } from "@/lib/saju/constants";
 
@@ -682,15 +683,27 @@ function ElementsBubble({ counts }: { counts: Record<Element, number> }) {
       <div className="flex flex-wrap items-center gap-1.5">
         {EL_SEQ.map((e) => (
           <span key={e} className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-bold ${ELEMENT_BOX[e]} ${counts[e] === 0 ? "opacity-40" : ""}`}>
-            {EL_LABEL[e].icon} {EL_LABEL[e].name} {counts[e]}
+            <ElIconName e={e} /> {counts[e]}
           </span>
         ))}
       </div>
       {total > 0 && counts[top] > 0 && (
         <p className="mt-1.5 text-[12px] font-bold text-gray-700">
-          {tops.length >= 2
-            ? `${tops.map((e) => `${EL_LABEL[e].icon} ${EL_LABEL[e].name}`).join("과 ")}의 기운이 ${tops.length === 2 ? "똑같이 " : ""}가장 많아요 (각 ${counts[top]}/${total})`
-            : `${EL_LABEL[top].icon} ${EL_LABEL[top].name}의 기운이 가장 많아요 (${counts[top]}/${total})`}
+          {tops.length >= 2 ? (
+            <>
+              {tops.map((e, i) => (
+                <span key={e}>
+                  {i > 0 && "과 "}
+                  <ElIconName e={e} />
+                </span>
+              ))}
+              의 기운이 {tops.length === 2 ? "똑같이 " : ""}가장 많아요 (각 {counts[top]}/{total})
+            </>
+          ) : (
+            <>
+              <ElIconName e={top} />의 기운이 가장 많아요 ({counts[top]}/{total})
+            </>
+          )}
         </p>
       )}
     </div>

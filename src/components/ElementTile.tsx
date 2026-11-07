@@ -1,4 +1,4 @@
-import { EL_LABEL } from "@/lib/elementColor";
+import { ElIconName } from "@/components/ElIcon";
 import type { Element } from "@/lib/saju/constants";
 
 /** 오행마다 그림에서 가장 눈에 띄는 높이(위→아래 %). 정사각형에 가깝게 잘릴 때 중심이 되게 해요. */
@@ -55,7 +55,7 @@ export default function ElementTile({
         <div aria-hidden="true" className="absolute inset-0" style={{ background: `radial-gradient(circle at 50% 50%, rgba(${t.dark},0.45) 0, rgba(${t.dark},0) 65%)` }} />
         {el && (
           <span data-testid="element-chip" className={`absolute right-1 top-1 z-10 whitespace-nowrap rounded-full px-1.5 py-0.5 font-sans ${compact ? "text-[9px]" : "text-[10px]"} font-bold leading-tight text-white`} style={{ background: `rgba(${t.dark},0.85)` }}>
-            {EL_LABEL[el].icon} {EL_LABEL[el].name}
+            <ElIconName e={el} />
           </span>
         )}
         <span
