@@ -600,6 +600,30 @@ export function createDb(config: DbConfig, fetchImpl: FetchLike = fetch) {
       });
     },
 
+    /** 상담실 대화방: 마지막 대화 후 retainMs 가 지난 방을 지우고, 남은 방을 최신순으로 돌려줘요. */
+    async listChatRooms(userId: string, retainMs: number, now: Date = new Date()): Promise<Array<{ room_id: string; data: unknown; updated_at: string }>> {
+      const cutoff = encodeURIComponent(new Date(now.getTime() - retainMs).toISOString());
+      await call(`chat_rooms?user_id=eq.${safeId(userId)}&updated_at=lt.${cutoff}`, { method: "DELETE", headers: headers({ Prefer: "return=minimal" }) });
+      const res = await call(`chat_rooms?user_id=eq.${safeId(userId)}&select=room_id,data,updated_at&order=updated_at.desc&limit=10`, { method: "GET", headers: headers() });
+      const rows = (await res.json().catch(() => [])) as Array<{ room_id: string; data: unknown; updated_at: string }>;
+      return Array.isArray(rows) ? rows : [];
+    },
+
+    /** 상담실 대화방을 통째로 맞춰요: 받은 방은 저장(덮어쓰기)하고, 목록에 없는 방은 지워요. */
+    async saveChatRooms(userId: string, rooms: Array<{ id: string; data: unknown; updatedAt: number }>): Promise<void> {
+      const uid = safeId(userId);
+      if (rooms.length > 0) {
+        await call("chat_rooms?on_conflict=user_id,room_id", {
+          method: "POST",
+          headers: headers({ Prefer: "resolution=merge-duplicates,return=minimal" }),
+          body: JSON.stringify(rooms.map((r) => ({ user_id: uid, room_id: r.id.slice(0, 80), data: r.data, updated_at: new Date(r.updatedAt).toISOString() }))),
+        });
+      }
+      const keep = rooms.map((r) => `"${r.id.slice(0, 80).replace(/["\\]/g, "")}"`).join(",");
+      const filter = rooms.length > 0 ? `&room_id=not.in.(${encodeURIComponent(keep)})` : "";
+      await call(`chat_rooms?user_id=eq.${uid}${filter}`, { method: "DELETE", headers: headers({ Prefer: "return=minimal" }) });
+    },
+
     /** 회원 탈퇴: 회원 정보와 뽑기 기록을 모두 지워요. (draws·profiles·concern_logs 의 본인 행은 users 삭제 때 함께 삭제돼요) */
     async deleteUser(userId: string): Promise<void> {
       await call(`users?id=eq.${safeId(userId)}`, {

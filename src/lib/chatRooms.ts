@@ -3,10 +3,15 @@ import type { ChatVisual } from "@/lib/ai/chat";
 
 /*
  * 도리 상담실 대화방 목록. 풀이(오늘의 한마디·결과서·궁합)마다 방이 하나씩 생겨요.
- * 대화는 이 기기(브라우저)에만 저장해요. 서버에는 저장하지 않아요. 로그아웃·탈퇴하면 지워요.
+ * 대화는 이 기기(브라우저)에 저장하고, 로그인한 회원은 서버에도 한 부 두어요(마지막 대화 후 30일 보관, chatRoomsSync.ts).
+ * 로그아웃하면 이 기기의 대화는 지우고, 다시 로그인하면 서버에서 불러와요. 탈퇴하면 서버 것도 함께 지워요.
  */
 export const CHAT_ROOMS_KEY = "wanna500:chat:rooms:v1";
 export const MAX_ROOMS = 10;
+/** 서버에는 마지막 대화 후 이 기간만 보관해요 */
+export const RETENTION_DAYS = 30;
+/** 서버와 마지막으로 맞춘 시각(ms). 이 기기에만 둬요. */
+export const CHAT_SYNCED_KEY = "wanna500:chat:synced:v1";
 export const MAX_ROOM_MSGS = 40;
 
 export interface RoomMsg extends ChatMsg {
@@ -96,24 +101,34 @@ function validMsg(m: unknown): m is RoomMsg {
   return !!v && (v.role === "user" || v.role === "dori") && typeof v.text === "string" && typeof v.at === "number";
 }
 
+/** 저장된 값(로컬 또는 서버)을 방 목록으로 바꿔요. 모양이 맞지 않는 방은 빼요. */
+export function parseRooms(raw: unknown): ChatRoom[] {
+  if (!Array.isArray(raw)) return [];
+  const out: ChatRoom[] = [];
+  for (const r of raw as Partial<ChatRoom>[]) {
+    const c = r?.ctx as ChatCtx | undefined;
+    if (!r || typeof r.id !== "string" || r.id.length > 80 || !c || (c.kind !== "daily" && c.kind !== "reading" && c.kind !== "compat") || typeof c.summary !== "string") continue;
+    out.push({
+      id: r.id,
+      ctx: c,
+      ...roomLook(c),
+      msgs: Array.isArray(r.msgs) ? r.msgs.filter(validMsg).slice(-MAX_ROOM_MSGS) : [],
+      updatedAt: typeof r.updatedAt === "number" ? r.updatedAt : 0,
+      day: typeof r.day === "string" ? r.day : "",
+    });
+  }
+  return sortRooms(out).slice(0, MAX_ROOMS);
+}
+
+/** 마지막 대화 후 30일이 지난 방을 빼요 */
+export function dropExpired(rooms: ChatRoom[], now: Date = new Date()): ChatRoom[] {
+  const limit = now.getTime() - RETENTION_DAYS * 86_400_000;
+  return rooms.filter((r) => r.updatedAt >= limit);
+}
+
 export function loadRooms(st: StoreLike | null): ChatRoom[] {
   try {
-    const raw = JSON.parse(st?.getItem(CHAT_ROOMS_KEY) ?? "[]") as unknown;
-    if (!Array.isArray(raw)) return [];
-    const out: ChatRoom[] = [];
-    for (const r of raw as Partial<ChatRoom>[]) {
-      const c = r?.ctx as ChatCtx | undefined;
-      if (!r || typeof r.id !== "string" || !c || (c.kind !== "daily" && c.kind !== "reading" && c.kind !== "compat") || typeof c.summary !== "string") continue;
-      out.push({
-        id: r.id,
-        ctx: c,
-        ...roomLook(c),
-        msgs: Array.isArray(r.msgs) ? r.msgs.filter(validMsg).slice(-MAX_ROOM_MSGS) : [],
-        updatedAt: typeof r.updatedAt === "number" ? r.updatedAt : 0,
-        day: typeof r.day === "string" ? r.day : "",
-      });
-    }
-    return sortRooms(out).slice(0, MAX_ROOMS);
+    return parseRooms(JSON.parse(st?.getItem(CHAT_ROOMS_KEY) ?? "[]") as unknown);
   } catch {
     return [];
   }
@@ -130,6 +145,7 @@ export function saveRooms(st: StoreLike | null, rooms: ChatRoom[]): void {
 export function clearRooms(st: StoreLike | null): void {
   try {
     st?.removeItem?.(CHAT_ROOMS_KEY);
+    st?.removeItem?.(CHAT_SYNCED_KEY);
   } catch {
     /* 무시 */
   }

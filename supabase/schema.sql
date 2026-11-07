@@ -721,3 +721,18 @@ $$;
 
 revoke all on function public.visit_daily(date) from public, anon, authenticated;
 grant execute on function public.visit_daily(date) to service_role;
+
+-- ─────────────────────────────────────────────────────────────────────────────
+-- 도리 상담실 대화방: 로그인한 회원의 대화방(방마다 한 줄)을 서버에 한 부 두어요. 마지막 대화 후 30일이 지나면
+-- 불러올 때 함께 지워지고, 회원을 지우면(탈퇴) 함께 지워져요. 이 파일 전체를 다시 Run 하면 추가돼요.
+-- (코드를 배포하기 '전에' Run 하세요. 없으면 이 기능만 조용히 꺼져 있고 대화는 이 기기에만 저장돼요)
+-- ─────────────────────────────────────────────────────────────────────────────
+create table if not exists public.chat_rooms (
+  user_id text not null references public.users(id) on delete cascade,
+  room_id text not null,
+  data jsonb not null,
+  updated_at timestamptz not null default now(),
+  primary key (user_id, room_id)
+);
+create index if not exists chat_rooms_updated_idx on public.chat_rooms (updated_at);
+alter table public.chat_rooms enable row level security;

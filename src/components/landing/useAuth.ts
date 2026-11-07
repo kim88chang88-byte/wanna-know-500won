@@ -3,6 +3,7 @@
 import type { SavedProfile } from "@/lib/profile";
 import { useCallback, useEffect, useState } from "react";
 import { clearRooms } from "@/lib/chatRooms";
+import { resetSync } from "@/lib/chatRoomsSync";
 import { getBrowserStorage } from "@/lib/drawCounter";
 
 export interface AuthUser {
@@ -71,7 +72,8 @@ export function useAuth() {
     } catch {
       /* 무시 */
     }
-    clearRooms(getBrowserStorage()); // 이 기기에 저장된 상담실 대화도 함께 지워요
+    clearRooms(getBrowserStorage()); // 이 기기에 저장된 상담실 대화는 지워요 (서버의 사본은 30일 보관, 다시 로그인하면 불러와요)
+    resetSync();
     setUser(null);
     setServerCounts(null);
     setProfile(null);

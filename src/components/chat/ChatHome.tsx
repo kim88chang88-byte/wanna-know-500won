@@ -8,6 +8,7 @@ import { markNavSeen, pingNav } from "@/lib/navDots";
 import SafeImage from "@/components/landing/SafeImage";
 import { CHAT_CTX_KEY, CHAT_LOG_KEY, readChatCtx } from "@/lib/chatContext";
 import type { BirthInput } from "@/lib/saju/types";
+import { pullRooms, pushRooms, mergeRooms, readSynced, sameRooms, writeSynced } from "@/lib/chatRoomsSync";
 import { leftLabel, loadRooms, removeRoom, roomAnimal, roomColor, saveRooms, upsertRoom, withMsgs, type ChatRoom, type RoomMsg } from "@/lib/chatRooms";
 import { getBrowserStorage } from "@/lib/drawCounter";
 
@@ -36,34 +37,92 @@ export default function ChatHome() {
   const [starting, setStarting] = useState(false);
   const ref = useRef<ChatRoom[]>([]);
 
+  const pushTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const dirty = useRef(false);
+  /** 서버에서 대화방을 한 번 받아 온 뒤에만 서버로 보내요. (못 받았는데 보내면 서버의 기존 방이 지워질 수 있어서) */
+  const pulled = useRef(false);
+
+  /** 로그인한 회원이면 바뀐 대화방을 서버에도 한 부 두어요 (잠깐 모아서 한 번에) */
+  const flush = (keepalive = false) => {
+    if (pushTimer.current) clearTimeout(pushTimer.current);
+    pushTimer.current = null;
+    if (!dirty.current) return;
+    dirty.current = false;
+    void pushRooms(ref.current, keepalive).then((ok) => {
+      if (ok) writeSynced(getBrowserStorage(), Date.now());
+      else dirty.current = true;
+    });
+  };
+  const schedulePush = () => {
+    if (!pulled.current) return;
+    dirty.current = true;
+    if (pushTimer.current) clearTimeout(pushTimer.current);
+    pushTimer.current = setTimeout(() => flush(), 1200);
+  };
+
   const commit = (next: ChatRoom[]) => {
     ref.current = next;
     setRooms(next);
     saveRooms(getBrowserStorage(), next);
+    schedulePush();
   };
 
+  // 화면을 떠나거나 숨길 때 아직 못 보낸 대화를 서둘러 보내요
   useEffect(() => {
-    let list = loadRooms(getBrowserStorage());
-    const c = readChatCtx();
-    if (c) {
-      // 결과서·오늘 카드에서 넘어왔어요: 그 풀이의 방을 만들거나 이어서 열어요
-      const r = upsertRoom(list, c);
-      list = r.rooms;
-      saveRooms(getBrowserStorage(), list);
-      try {
-        sessionStorage.removeItem(CHAT_CTX_KEY);
-        sessionStorage.removeItem(CHAT_LOG_KEY);
-      } catch {
-        /* 무시 */
+    const onHide = () => {
+      if (document.visibilityState === "hidden") flush(true);
+    };
+    document.addEventListener("visibilitychange", onHide);
+    return () => {
+      document.removeEventListener("visibilitychange", onHide);
+      flush(true);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    let alive = true;
+    void (async () => {
+      let list = loadRooms(getBrowserStorage());
+      // 로그인한 회원이면 서버의 대화방과 합쳐요 (다른 기기·다시 로그인한 뒤에도 이어져요). 느리면 이 기기 것만 먼저 써요.
+      const server = await pullRooms();
+      if (!alive) return;
+      let needPush = false;
+      if (server) {
+        pulled.current = true;
+        const merged = mergeRooms(list, server, readSynced(getBrowserStorage()));
+        needPush = !sameRooms(merged, server);
+        list = merged;
+        saveRooms(getBrowserStorage(), list);
+        if (!needPush) writeSynced(getBrowserStorage(), Date.now());
       }
-      setOpen(r.id);
-    }
-    ref.current = list;
-    setRooms(list);
-    setReady(true);
-    // 상담실을 열었으니 하단 메뉴의 빨간 점을 꺼요
-    markNavSeen(getBrowserStorage(), "chat", new Date());
-    pingNav();
+      const c = readChatCtx();
+      if (c) {
+        // 결과서·오늘 카드에서 넘어왔어요: 그 풀이의 방을 만들거나 이어서 열어요
+        const r = upsertRoom(list, c);
+        list = r.rooms;
+        saveRooms(getBrowserStorage(), list);
+        needPush = needPush || server !== null;
+        try {
+          sessionStorage.removeItem(CHAT_CTX_KEY);
+          sessionStorage.removeItem(CHAT_LOG_KEY);
+        } catch {
+          /* 무시 */
+        }
+        setOpen(r.id);
+      }
+      ref.current = list;
+      setRooms(list);
+      setReady(true);
+      if (needPush) schedulePush();
+      // 상담실을 열었으니 하단 메뉴의 빨간 점을 꺼요
+      markNavSeen(getBrowserStorage(), "chat", new Date());
+      pingNav();
+    })();
+    return () => {
+      alive = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // 목록에서는 오늘 남은 무료 질문 수를 보여 줘요
