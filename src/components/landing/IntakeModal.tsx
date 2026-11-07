@@ -481,6 +481,9 @@ export default function IntakeModal({ target, wallet = null, onClose, onComplete
   const [error, setError] = useState<string | null>(null);
   const [freeUsed, setFreeUsed] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
+  /** 풀이를 보려다 충전하러 간 경우: 결제가 끝나면 소모 확인창으로 바로 이어 가요 */
+  const [payForReading, setPayForReading] = useState(false);
+  const [resume, setResume] = useState<{ coins: number } | null>(null);
   const [payOpen, setPayOpen] = useState(false);
   const [phase, setPhase] = useState<"form" | "loading" | "result">("form");
   const [chart, setChart] = useState<SajuChart | null>(null);
@@ -660,6 +663,20 @@ export default function IntakeModal({ target, wallet = null, onClose, onComplete
       setPhase("form");
     }
   }
+
+  useEffect(() => {
+    if (!resume || !wallet) return;
+    if (wallet.coins !== resume.coins) {
+      setResume(null);
+      setConfirmOpen(true);
+      return;
+    }
+    const t = setTimeout(() => {
+      setResume(null);
+      setConfirmOpen(true);
+    }, 2500);
+    return () => clearTimeout(t);
+  }, [resume, wallet]);
 
   function next(e: React.FormEvent) {
     e.preventDefault();
@@ -1214,11 +1231,30 @@ export default function IntakeModal({ target, wallet = null, onClose, onComplete
               }}
               onCharge={() => {
                 setConfirmOpen(false);
+                setPayForReading(true);
                 setPayOpen(true);
               }}
             />
           )}
-          {payOpen && <PurchaseModal preselect={compat ? "compat" : "reading"} onClose={() => setPayOpen(false)} />}
+          {payOpen && (
+            <PurchaseModal
+              preselect={compat ? "compat" : target.premium === true ? "premium" : "reading"}
+              onClose={() => {
+                setPayOpen(false);
+                setPayForReading(false);
+              }}
+              onContinue={
+                payForReading && wallet
+                  ? () => {
+                      // 동전 수가 새로 불러와질 때까지 잠깐 기다렸다가 소모 확인창을 열어요
+                      setResume({ coins: wallet.coins });
+                      setPayOpen(false);
+                      setPayForReading(false);
+                    }
+                  : undefined
+              }
+            />
+          )}
 
           <div className="mt-5 flex gap-2">
             {stepIndex > 0 && (
