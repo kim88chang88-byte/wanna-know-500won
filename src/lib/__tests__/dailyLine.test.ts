@@ -1,12 +1,27 @@
 import { describe, expect, it } from "vitest";
 import type { DailyFacts } from "../ai/dailyFacts";
-import { DAILY_GODS, dailyLine, variantOf } from "../daily/line";
+import { DAILY_GODS, dailyLine, gradeOf, variantOf } from "../daily/line";
 import { pickVaultFollowup, followupPrompt, markAnswered, readAnswered } from "../vaultFollowup";
 import { summarizeVault } from "../vaultStats";
 
 const facts = (god: DailyFacts["일간과의관계"]["십성"], 합충?: string): DailyFacts => ({ 오늘일진: "丙午(병오)", 일간과의관계: { 십성: god, 분위기: "" }, ...(합충 ? { 일간합충: 합충 } : {}), 지지관계: [] });
 
 describe("오늘의 도리 한마디", () => {
+  it("행운 지수는 55~98, 같은 날엔 같고 응원 문구가 있다", () => {
+    for (const g of DAILY_GODS) for (const d of ["2026-10-21", "2026-10-22", "2026-11-07"]) for (const hc of [undefined, "오늘 글자가 내 일간과 합(끌림·어울림)", "오늘 글자가 내 일간과 충(부딪힘·자극)"]) {
+      const a = dailyLine(facts(g, hc), d);
+      expect(a.luck).toBeGreaterThanOrEqual(55);
+      expect(a.luck).toBeLessThanOrEqual(98);
+      expect(a.grade).toBe(gradeOf(a.luck));
+      expect(a.cheer.length).toBeGreaterThan(10);
+      expect(/조심|위험|불길|흉|파산|이별|사고|나쁜/.test(a.cheer)).toBe(false);
+      expect(dailyLine(facts(g, hc), d).luck).toBe(a.luck);
+    }
+    expect(gradeOf(95)).toBe("대길");
+    expect(gradeOf(80)).toBe("길");
+    expect(gradeOf(62)).toBe("소길");
+    expect(gradeOf(58)).toBe("쉬어가는 날");
+  });
   it("같은 날엔 같은 문장, 열 가지 십성 모두 문장이 있다", () => {
     for (const g of DAILY_GODS) {
       const a = dailyLine(facts(g), "2026-10-23");

@@ -75,6 +75,29 @@ const TIPS: Record<TenGod, string> = {
 const COMBINE_ADD = "오늘 글자와 내 일간이 서로 끌리는 날이라, 사람 사이가 한결 편안해질 수 있어.";
 const CLASH_ADD = "오늘은 자극이 조금 있는 날이라, 가볍게 몸을 움직이면 활력으로 바뀌어.";
 
+/** 십성별 기본 행운 점수. 합이면 올라가고 충이면 조금 내려가요. 낮아도 55점 아래로는 가지 않아요. */
+const BASE_LUCK: Record<TenGod, number> = { 식신: 82, 정인: 81, 정재: 79, 정관: 77, 편재: 75, 비견: 73, 상관: 71, 편인: 69, 겁재: 67, 편관: 65 };
+
+export type LuckGrade = "대길" | "길" | "소길" | "쉬어가는 날";
+
+/** 응원 한 줄: 점수대마다 세 문장. 점수가 낮은 날도 “쉬어 가도 괜찮다”로 따뜻하게 말해요. */
+const CHEERS: Record<LuckGrade, readonly [string, string, string]> = {
+  대길: ["오늘은 운이 반짝이는 날이야. 하고 싶던 일에 용기 내 봐, 도리가 응원할게 ✨", "좋은 기운이 가득한 날이야. 오늘의 나를 마음껏 믿어 줘 🌟", "오늘 하루가 선물 같을 거야. 웃을 일이 하나쯤은 꼭 생겨 🍀"],
+  길: ["오늘도 충분히 잘하고 있어요. 서두르지 않아도 괜찮아요 🌙", "든든한 하루가 될 거야. 작은 일 하나만 해내도 잘한 거야 🌿", "마음 가는 대로 한 걸음씩 가면 돼. 도리가 곁에 있을게 🤍"],
+  소길: ["잔잔하지만 따뜻한 날이야. 나를 위한 작은 쉼표를 하나 찍어 봐 ☕", "크게 애쓰지 않아도 괜찮은 날이야. 지금 모습 그대로 충분해 🌱", "천천히 가도 도착해. 오늘은 내 속도를 믿어 보자 🐢"],
+  "쉬어가는 날": ["오늘은 쉬어 가는 날이야. 잘 먹고 잘 쉬는 것만으로도 충분해 🫶", "힘을 빼도 괜찮은 날이야. 따뜻한 차 한 잔으로 마음을 달래 봐 🍵", "하루쯤 느리게 가도 괜찮아. 내일의 나를 위해 오늘은 충전하자 🔋"],
+};
+
+export function gradeOf(luck: number): LuckGrade {
+  return luck >= 90 ? "대길" : luck >= 75 ? "길" : luck >= 60 ? "소길" : "쉬어가는 날";
+}
+
+function hashOf(s: string): number {
+  let h = 0;
+  for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0;
+  return h;
+}
+
 export interface DailyLine {
   god: TenGod;
   /** 한마디 본문 (필요하면 합/충에 따른 한 줄이 이어져요) */
@@ -83,6 +106,11 @@ export interface DailyLine {
   tip: string;
   /** 오늘 일진 (예: 丙午(병오)) */
   ganzhi: string;
+  /** 오늘의 행운 지수 (55~98) */
+  luck: number;
+  grade: LuckGrade;
+  /** 따뜻한 응원 한 줄 */
+  cheer: string;
 }
 
 /** "YYYY-MM-DD" 로 날마다 달라지는 0~2 번호. 같은 날엔 항상 같아요. */
@@ -96,7 +124,12 @@ export function dailyLine(facts: DailyFacts, dayKey: string): DailyLine {
   const god = facts.일간과의관계.십성;
   const base = LINES[god][variantOf(dayKey)];
   const extra = facts.일간합충?.includes("합") ? COMBINE_ADD : facts.일간합충?.includes("충") ? CLASH_ADD : "";
-  return { god, line: extra ? `${base} ${extra}` : base, tip: TIPS[god], ganzhi: facts.오늘일진 };
+  const move = facts.일간합충?.includes("합") ? 6 : facts.일간합충?.includes("충") ? -4 : 0;
+  const wobble = (hashOf(`${dayKey}|${facts.오늘일진}|${god}`) % 9) - 4; // -4 ~ +4, 같은 날엔 같은 값
+  const luck = Math.max(55, Math.min(98, BASE_LUCK[god] + move + wobble));
+  const grade = gradeOf(luck);
+  const cheer = CHEERS[grade][hashOf(`${dayKey}|cheer`) % 3];
+  return { god, line: extra ? `${base} ${extra}` : base, tip: TIPS[god], ganzhi: facts.오늘일진, luck, grade, cheer };
 }
 
 export const DAILY_GODS = Object.keys(LINES) as TenGod[];
