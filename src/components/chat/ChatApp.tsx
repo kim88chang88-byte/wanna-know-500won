@@ -5,6 +5,7 @@ import PurchaseModal from "@/components/pay/PurchaseModal";
 import { roomAnimal, roomColor } from "@/lib/chatRooms";
 import { MSG_MAX, TURN_CAP, type ChatCtx, type ChatKind, type ChatMsg } from "@/lib/chatContext";
 import type { RoomMsg } from "@/lib/chatRooms";
+import { plainAnswer, splitElements, splitMood } from "@/lib/chatMarkup";
 import VisualCard from "@/components/chat/VisualCard";
 import type { ChatVisual } from "@/lib/ai/chat";
 import { buildIntro, type IntroBubble } from "@/lib/chatIntro";
@@ -91,14 +92,33 @@ function CoinIcon() {
 const timeOf = (at: number) => new Date(at).toLocaleTimeString("ko-KR", { hour: "numeric", minute: "2-digit" });
 
 /** **굵게** 를 형광펜 글씨로 바꿔요 */
+const PILL_BG: Record<Element, string> = { wood: "#2f9e55", fire: "#e2573a", earth: "#b9822f", metal: "#7d8696", water: "#2c3a8f" };
+const PILL_NAME: Record<Element, string> = { wood: "나무", fire: "불", earth: "땅", metal: "쇠", water: "물" };
+
+/** 오행 그림 알약 ([[물]] 표시가 바뀐 모양) */
+function ElementPill({ el }: { el: Element }) {
+  return (
+    <span data-testid="el-pill" className="mx-px inline-flex items-center gap-1 whitespace-nowrap rounded-full py-px pl-0.5 pr-2 align-middle text-[12px] font-extrabold text-white" style={{ background: PILL_BG[el] }}>
+      <i aria-hidden="true" className="block h-5 w-5 rounded-full bg-cover bg-center shadow-[0_0_0_1.5px_rgba(255,255,255,0.55)]" style={{ backgroundImage: `url(/images/el-${el}.webp)` }} />
+      {PILL_NAME[el]}
+    </span>
+  );
+}
+
 function rich(text: string): ReactNode[] {
+  return splitElements(text).flatMap((part, k) =>
+    "el" in part ? [<ElementPill key={`p${k}`} el={part.el as Element} />] : richBold(part.text, k),
+  );
+}
+
+function richBold(text: string, k: number): ReactNode[] {
   return text.split(/(\*\*[^*]+\*\*)/g).map((t, i) =>
     t.startsWith("**") && t.endsWith("**") && t.length > 4 ? (
-      <mark key={i} className="bg-transparent bg-[linear-gradient(transparent_62%,#f3dcff_62%)] font-extrabold text-brand-700">
+      <mark key={`${k}-${i}`} className="bg-transparent bg-[linear-gradient(transparent_62%,#f3dcff_62%)] font-extrabold text-brand-700">
         {t.slice(2, -2)}
       </mark>
     ) : (
-      <span key={i}>{t}</span>
+      <span key={`${k}-${i}`}>{t}</span>
     ),
   );
 }
@@ -341,7 +361,7 @@ export default function ChatApp({ initialCtx, initialMsgs, onChange, onBack }: {
 
   async function copyAll() {
     setMenu(false);
-    const t = msgs.filter((m) => !m.error).map((m) => `${m.role === "user" ? "나" : "도리"}: ${m.text}`).join("\n\n");
+    const t = msgs.filter((m) => !m.error).map((m) => `${m.role === "user" ? "나" : "도리"}: ${plainAnswer(m.text)}`).join("\n\n");
     try {
       await navigator.clipboard.writeText(t);
       flash("대화를 복사했어요 📋");
@@ -450,7 +470,7 @@ export default function ChatApp({ initialCtx, initialMsgs, onChange, onBack }: {
                   </button>
                 ) : live ? null : (
                   <>
-                    <button type="button" onClick={() => void copy(m.text, i)} className="rounded-full border border-brand-100 bg-white/70 px-2.5 py-1 text-[11px] text-[#8a7fa8] active:scale-95">
+                    <button type="button" onClick={() => void copy(plainAnswer(m.text), i)} className="rounded-full border border-brand-100 bg-white/70 px-2.5 py-1 text-[11px] text-[#8a7fa8] active:scale-95">
                       {copied === i ? "✓ 복사했어요" : "📋 복사"}
                     </button>
                     <button
@@ -618,7 +638,8 @@ function AnimalFace({ src, color, size }: { src: string; color: string; size: nu
 }
 
 function DoriRow({ face, text, at, error, actions, onSkip }: { face: ReactNode; text: string; at?: number; error?: boolean; actions?: ReactNode; onSkip?: () => void }) {
-  const paras = text.split(/\n{2,}/).filter(Boolean);
+  const mood = error ? { emoji: null, rest: text } : splitMood(text);
+  const paras = mood.rest.split(/\n{2,}/).filter(Boolean);
   return (
     <div className="flex items-start gap-2">
       {face}
@@ -629,6 +650,11 @@ function DoriRow({ face, text, at, error, actions, onSkip }: { face: ReactNode; 
             onClick={onSkip}
             className={`rounded-[4px_18px_18px_18px] bg-white px-3.5 py-[11px] text-[14px] leading-[1.62] shadow-[0_2px_10px_#5a36a814] ${error ? "text-amber-800" : "text-gray-900"} ${onSkip ? "cursor-pointer" : ""}`}
           >
+            {mood.emoji && (
+              <span data-testid="mood-emoji" aria-hidden="true" className="mb-1 block text-[24px] leading-none">
+                {mood.emoji}
+              </span>
+            )}
             {paras.map((p, i) => (
               <p key={i} className={`whitespace-pre-wrap ${i > 0 ? "mt-[9px]" : ""}`}>
                 {rich(p)}
