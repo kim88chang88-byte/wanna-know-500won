@@ -402,3 +402,9 @@ body {
 .coin-flip{animation:coinFlip 1.6s cubic-bezier(.4,0,.2,1) .3s both}
 .coin-glow{animation:coinGlow 1.8s ease-in-out 2s infinite}
 @media (prefers-reduced-motion:reduce){.coin-flip,.coin-glow{animation:none}}
+
+@keyframes candleGrow{from{height:0}to{height:var(--h)}}
+@keyframes candleFlick{0%,100%{transform:scaleY(1) rotate(-2deg)}50%{transform:scaleY(1.12) rotate(2deg)}}
+.candle-stick{height:var(--h);animation:candleGrow .9s cubic-bezier(.3,1.2,.5,1) both}
+.candle-flame{transform-origin:50% 100%;animation:candleFlick 1.1s ease-in-out infinite}
+@media (prefers-reduced-motion:reduce){.candle-stick,.candle-flame{animation:none}}
