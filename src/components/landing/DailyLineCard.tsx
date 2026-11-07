@@ -7,6 +7,7 @@ import { ganzhiMeaning } from "@/lib/ganzhiMeaning";
 import { useEffect, useState } from "react";
 import { ChatEntry } from "@/components/chat/ChatEntry";
 import { dayKey, getBrowserStorage } from "@/lib/drawCounter";
+import type { BirthInput } from "@/lib/saju/types";
 
 interface Daily {
   day: string;
@@ -37,7 +38,7 @@ function readOpened(day: string): Daily | null {
  * 오늘의 도리 한마디. 저장된 생년월일시가 있는 회원에게만 보여요.
  * 한 번 누르면 열리고(AI 비용 없음), 열어 본 날은 방문으로 세어 물길이 이어져요.
  */
-export function DailyLineCard({ onOpened }: { onOpened?: () => void }) {
+export function DailyLineCard({ onOpened, birth }: { onOpened?: () => void; /** 저장된 내 생년월일시: 상담실 첫 화면에서 사주 기둥을 보여 주는 데만 써요 */ birth?: BirthInput | null }) {
   const [daily, setDaily] = useState<Daily | null>(null);
   const [state, setState] = useState<"closed" | "loading" | "error">("closed");
 
@@ -71,7 +72,7 @@ export function DailyLineCard({ onOpened }: { onOpened?: () => void }) {
         <div role="status">
           <p className="text-xs font-bold text-brand-600"><DoriIcon />오늘의 도리 한마디</p>
           <div className="mt-2">
-            <DoriScene line={daily.line} tip={daily.tip} action={<ChatEntry inScene ctx={{ kind: "daily", summary: `오늘의 한마디: ${daily.line}\n오늘의 팁: ${daily.tip}\n오늘 일진: ${daily.ganzhi}` }} />} />
+            <DoriScene line={daily.line} tip={daily.tip} action={<ChatEntry inScene ctx={{ kind: "daily", ...(birth ? { birth } : {}), summary: `오늘의 한마디: ${daily.line}\n오늘의 팁: ${daily.tip}\n오늘 일진: ${daily.ganzhi}` }} />} />
           </div>
           <div data-testid="daily-ganzhi" className="mt-2 flex items-center gap-1.5">
             <span className="shrink-0 rounded-full bg-brand-50 px-2 py-0.5 text-[11px] font-bold text-brand-600">오늘 일진</span>

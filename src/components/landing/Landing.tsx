@@ -361,7 +361,7 @@ export default function Landing() {
         <ShowcaseSection />
         {!user && <BirthdayTeaser onOpenLogin={openChatLogin} />}
         {/* 도리의 소식 카드들은 첫 화면의 "뽑으러 가기" 버튼 아래로 옮겼어요. (첫 화면에서 눌러야 할 것이 하나만 보이게) */}
-        {user && profile && <DailyLineCard onOpened={() => {
+        {user && profile && <DailyLineCard birth={profile} onOpened={() => {
           recordVisit(getBrowserStorage(), dayKey(new Date()));
           syncReward();
         }} />}

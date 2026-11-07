@@ -20,6 +20,11 @@ describe("chatIntro", () => {
     const b = buildIntro({ kind: "daily", summary: "오늘의 한마디: 천천히\n오늘의 팁: 물 마시기\n오늘 일진: 병오" });
     expect(b.length).toBe(3);
   });
+  it("오늘의 한마디: 내 정보가 있으면 사주 기둥이 먼저 나와요", () => {
+    const b = buildIntro({ kind: "daily", summary: "오늘의 한마디: 천천히\n오늘 일진: 병오", birth });
+    expect(b.findIndex((x) => x.kind === "pillars")).toBeGreaterThan(-1);
+    expect(b.findIndex((x) => x.kind === "pillars")).toBeLessThan(b.findIndex((x) => x.kind === "text" && x.text.includes("일진")));
+  });
   it("궁합: 두 사람 일간과 점수", () => {
     const b = buildIntro({ kind: "compat", summary: "궁합 점수: 82점\n궁합 한 줄: 속도를 맞춰요", birth, partnerBirth: { ...birth, year: 1990 }, name: "은혁", partnerName: "원석" });
     expect(b[0].kind).toBe("pair");
