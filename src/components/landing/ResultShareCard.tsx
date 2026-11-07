@@ -167,17 +167,20 @@ export default function ResultShareCard({ report, aiQuote, shareNames }: { repor
       <div data-testid="share-link-row" className="mx-auto mt-2.5 flex max-w-[19rem] items-center gap-1.5 rounded-full border border-brand-100 bg-white px-3 py-1.5 text-left">
         <span aria-hidden="true">🔗</span>
         <span className="min-w-0 flex-1 truncate text-[11px] text-gray-600" title={link}>{link.replace(/^https?:\/\//, "")}</span>
-        <button
-          type="button"
-          onClick={async () => {
-            const ok = await copyCaption();
-            setLinkCopied(ok ? "ok" : "fail");
-            window.setTimeout(() => setLinkCopied("idle"), 2200);
-          }}
-          className="shrink-0 rounded-full bg-brand-50 px-2.5 py-1 text-[11px] font-bold text-brand-700 active:scale-95"
-        >
-          {linkCopied === "ok" ? "✓ 복사했어요" : linkCopied === "fail" ? "복사 실패" : report.compat ? "요약 복사" : "링크 복사"}
-        </button>
+        {/* 공유하기를 누르면 글이 자동으로 복사돼요. 복사가 막혔을 때만 따로 복사하는 버튼을 보여 줘요. */}
+        {(state === "done" || state === "cancel") && !copied && (
+          <button
+            type="button"
+            onClick={async () => {
+              const ok = await copyCaption();
+              setLinkCopied(ok ? "ok" : "fail");
+              window.setTimeout(() => setLinkCopied("idle"), 2200);
+            }}
+            className="shrink-0 rounded-full bg-brand-50 px-2.5 py-1 text-[11px] font-bold text-brand-700 active:scale-95"
+          >
+            {linkCopied === "ok" ? "✓ 복사했어요" : linkCopied === "fail" ? "복사 실패" : report.compat ? "요약 복사" : "링크 복사"}
+          </button>
+        )}
       </div>
       <p role="status" className="mt-1.5 text-[11px] leading-relaxed text-gray-500">
         {state === "done"
