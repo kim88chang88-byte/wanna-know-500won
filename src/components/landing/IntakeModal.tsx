@@ -200,7 +200,7 @@ function FieldTitle({ children }: { children: React.ReactNode }) {
 /** 처음 쓰는 분(비회원·저장된 정보가 없는 회원)용: 생년월일·성별·태어난 시간을 한 화면에서 직접 적어요. */
 /** 운세를 볼 사람 고르기: 나 · 기억해 둔 사람 · 새로 입력 */
 function WhoPicker({ me, people, onMe, onPerson, onNew }: { me: { name: string; summary: string } | null; people: SavedPerson[]; onMe: () => void; onPerson: (p: SavedPerson) => void; onNew: () => void }) {
-  const card = "flex w-full items-center justify-between gap-2 rounded-2xl border px-4 py-3 text-left transition-colors";
+  const card = "relative mx-auto flex w-[76%] min-w-[15rem] items-center justify-center rounded-2xl border px-7 py-3 text-center transition-colors";
   return (
     <div data-testid="who-picker" className="space-y-2">
       <div className="flex items-start gap-2.5 mb-3">
@@ -213,7 +213,7 @@ function WhoPicker({ me, people, onMe, onPerson, onNew }: { me: { name: string; 
             <b className="block text-sm text-brand-700">나{me.name ? ` (${me.name})` : ""}</b>
             <span className="text-[11px] text-gray-500">{me.summary}</span>
           </span>
-          <span aria-hidden="true" className="text-brand-500">›</span>
+          <span aria-hidden="true" className="absolute right-2.5 top-1/2 -translate-y-1/2 text-brand-500">›</span>
         </button>
       )}
       {people.map((p) => (
@@ -222,7 +222,7 @@ function WhoPicker({ me, people, onMe, onPerson, onNew }: { me: { name: string; 
             <b className="block text-sm text-gray-800">{p.label}</b>
             <span className="text-[11px] text-gray-500">{profileSummary(p.birth)}</span>
           </span>
-          <span aria-hidden="true" className="text-gray-400">›</span>
+          <span aria-hidden="true" className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400">›</span>
         </button>
       ))}
       <button type="button" data-testid="who-new" onClick={onNew} className={`${card} border-dashed border-brand-200 bg-white text-sm font-bold text-brand-600 hover:bg-brand-50`}>
