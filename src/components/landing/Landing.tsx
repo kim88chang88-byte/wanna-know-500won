@@ -14,7 +14,7 @@ import { grantTickets, readTickets, spendTicket, STREAK_FOR_TICKET } from "@/lib
 import { FREE_PER_DAY } from "@/lib/db/config";
 import { ensureVid, track } from "@/lib/track";
 import { clearPendingDraw, savePendingDraw, takePendingDraw } from "@/lib/pendingDraw";
-import { clearAfterLoginChat, saveAfterLoginChat, takeAfterLoginChat } from "@/lib/afterLoginChat";
+import { clearAfterLoginChat, saveAfterLoginChat, saveAfterLoginGoChat, takeAfterLoginChat, takeAfterLoginGoChat } from "@/lib/afterLoginChat";
 import { saveChatCtx, type ChatCtx } from "@/lib/chatContext";
 import { useRouter } from "next/navigation";
 import { clearRef, isFinalRedeem, readRef, redeemMessage, refFromSearch, saveMyCode, saveRef } from "@/lib/referral";
@@ -259,6 +259,17 @@ export default function Landing() {
         .catch(() => undefined);
       return;
     }
+    // 하단 메뉴의 "도리상담실"을 눌러 로그인했다면 상담실로 가요. (아직 안 열린 계정이면 안내만 해요)
+    if (takeAfterLoginGoChat(getBrowserStorage())) {
+      fetch("/api/chat", { cache: "no-store" })
+        .then((r) => r.json() as Promise<{ enabled?: boolean }>)
+        .then((d) => {
+          if (d.enabled === true) router.push("/chat");
+          else setNotice("도리 상담실은 곧 열려요 ❄️");
+        })
+        .catch(() => undefined);
+      return;
+    }
     const d = takePendingDraw(getBrowserStorage());
     if (!d) return;
     setLoginOpen(false);
@@ -273,8 +284,18 @@ export default function Landing() {
     track("login_click");
     setLoginOpen(true);
   }, []);
+  // 하단 메뉴 "도리상담실"을 비로그인으로 눌렀을 때: 로그인 창을 띄우고, 로그인하고 돌아오면 상담실로 보내요.
+  const openChatTabLogin = useCallback(() => {
+    clearPendingDraw(getBrowserStorage());
+    clearAfterLoginChat(getBrowserStorage());
+    saveAfterLoginGoChat(getBrowserStorage());
+    track("chat_login_click");
+    setLoginReason("도리 상담실은 로그인하고 이용할 수 있어요 ❄️");
+    setLoginOpen(true);
+  }, []);
   const openChatLogin = useCallback((chat: ChatCtx) => {
     track("chat_login_click");
+    clearAfterLoginChat(getBrowserStorage()); // 하단 메뉴로 남긴 이동 표시가 있었다면 지우고, 이 한마디로 이어가요
     saveAfterLoginChat(getBrowserStorage(), chat);
     setLoginOpen(true);
   }, []);
@@ -376,7 +397,7 @@ export default function Landing() {
 
       <Footer />
       <div aria-hidden="true" className="h-24 lg:hidden" />
-      <BottomTabs />
+      <BottomTabs onChatLogin={openChatTabLogin} />
 
       {payOpen && <PurchaseModal onClose={() => { setPayOpen(false); void refreshCoins(); }} />}
       {ritual && <CoinRitual bill={ritualBill} big={ritualBig} />}

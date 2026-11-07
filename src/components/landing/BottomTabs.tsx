@@ -55,17 +55,23 @@ const Dot = () => <i data-testid="nav-dot" aria-hidden="true" className="absolut
  * 휴대폰·태블릿 아래에 붙는 4칸 메뉴. (큰 화면에서는 숨겨요)
  * page 모드(도리상담실 목록 등 다른 화면)에서는 홈·운세 뽑기가 첫 화면으로 이동하는 링크가 돼요.
  */
-export default function BottomTabs({ page = false }: { page?: "chat" | "vault" | false }) {
+export default function BottomTabs({ page = false, onChatLogin }: { page?: "chat" | "vault" | false; onChatLogin?: () => void }) {
   const [active, setActive] = useState<TabKey>("home");
   const [dots, setDots] = useState<NavDots>({ draw: false, chat: false, vault: false });
   // 도리 상담실을 열어 둔 계정인지 (아직 아니면 눌렀을 때 "곧 열려요"만 알려요)
   const [chatOn, setChatOn] = useState(false);
+  // 로그인 상태 (서버에 물어본 뒤에야 알 수 있어서, 그 전에는 null)
+  const [loggedIn, setLoggedIn] = useState<boolean | null>(null);
   const [soon, setSoon] = useState(false);
   useEffect(() => {
     let alive = true;
     fetch("/api/chat", { cache: "no-store" })
-      .then((r) => (r.ok ? (r.json() as Promise<{ enabled?: boolean }>) : null))
-      .then((d) => alive && setChatOn(d?.enabled === true))
+      .then((r) => (r.ok ? (r.json() as Promise<{ enabled?: boolean; loggedIn?: boolean }>) : null))
+      .then((d) => {
+        if (!alive) return;
+        setChatOn(d?.enabled === true);
+        setLoggedIn(typeof d?.loggedIn === "boolean" ? d.loggedIn : null);
+      })
       .catch(() => undefined);
     return () => {
       alive = false;
@@ -165,7 +171,12 @@ export default function BottomTabs({ page = false }: { page?: "chat" | "vault" |
             도리상담실
           </Link>
         ) : (
-          <button type="button" className={`${base} ${off}`} onClick={() => setSoon(true)}>
+          <button
+            type="button"
+            className={`${base} ${off}`}
+            // 로그인하지 않았다면 로그인 창을 띄우고(로그인하고 돌아오면 상담실로 이동), 로그인했는데 아직 안 열린 계정이면 "곧 열려요"만 알려요.
+            onClick={() => (loggedIn === false && onChatLogin ? onChatLogin() : setSoon(true))}
+          >
             <ChatIcon />
             도리상담실
           </button>

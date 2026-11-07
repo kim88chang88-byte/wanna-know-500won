@@ -18,7 +18,7 @@ export const maxDuration = 60;
 /** 화면이 "도리에게 더 물어보기" 버튼을 보여 줄지 물어봐요. */
 export async function GET(request: Request) {
   const s = sessionOf(request);
-  return NextResponse.json({ enabled: canChat(s?.sub) }, { headers: { "Cache-Control": "no-store" } });
+  return NextResponse.json({ enabled: canChat(s?.sub), loggedIn: Boolean(s) }, { headers: { "Cache-Control": "no-store" } });
 }
 
 export async function POST(request: Request) {
