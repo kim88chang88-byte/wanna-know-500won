@@ -1111,29 +1111,12 @@ export default function IntakeModal({ target, wallet = null, onClose, onComplete
                   </a>
                 </span>
               </label>
-              <label className="flex items-start gap-2 text-xs text-gray-700 leading-relaxed">
-                <input
-                  type="checkbox"
-                  name="overseas"
-                  data-testid="overseas-consent"
-                  className="mt-0.5"
-                  checked={form.overseas}
-                  onChange={(e) => update({ overseas: e.target.checked })}
-                />
-                <span>
-                  (필수) AI 풀이 문장을 만들기 위해 사주 계산 결과·성별{compat ? "·상대방 정보" : ""}, 적어 둔 고민과 이름·별명이 미국의 Anthropic, PBC(Claude API)로 암호화되어 전달되는 것에 동의해요. 전달된 정보는 풀이를 만드는 데만 쓰이고, 거부하면 AI 풀이를 볼 수 없어요. 전달 항목·시점·이용 목적은{" "}
-                  <a href="/privacy#overseas" target="_blank" rel="noopener noreferrer" className="text-brand-600 underline">
-                    국외 이전 안내
-                  </a>
-                  에서 볼 수 있어요.
-                </span>
-              </label>
               <p className="text-[11px] text-gray-400">
                 {loggedIn || buildConcern(form) ? "아래 선택 항목에 동의하지 않으면, 입력한 정보는 서버에 저장하지 않아요." : "입력한 정보는 서버에 저장하지 않아요."}
               </p>
 
               {loggedIn ? (
-                savedProfile && sameBirth(savedProfile, buildBirthInput({ ...form, consent: true, overseas: true })) ? (
+                savedProfile && sameBirth(savedProfile, buildBirthInput({ ...form, consent: true })) ? (
                   <p data-testid="profile-kept" className="text-[11px] text-gray-500 leading-relaxed">
                     기억해 둔 생년월일시로 풀어요. 지우고 싶으면 로그인 창의 &lsquo;기억한 정보 지우기&rsquo;를 눌러 주세요.
                   </p>
@@ -1155,7 +1138,7 @@ export default function IntakeModal({ target, wallet = null, onClose, onComplete
               )}
 
               {!compat && loggedIn && people.length < MAX_PEOPLE && (() => {
-                const cur = buildBirthInput({ ...form, consent: true, overseas: true });
+                const cur = buildBirthInput({ ...form, consent: true });
                 if (!cur || sameBirth(savedProfile, cur) || people.some((x) => sameBirth(x.birth, cur))) return null;
                 return (
                   <div className="space-y-1.5">

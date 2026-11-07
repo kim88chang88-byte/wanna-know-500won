@@ -46,8 +46,6 @@ export interface IntakeForm {
   concernTags: ConcernId[];
   concernText: string;
   consent: boolean;
-  /** (필수) AI 풀이를 위해 정보가 미국(Anthropic)으로 전달되는 것에 대한 동의 */
-  overseas: boolean;
 }
 
 export const EMPTY_BIRTH: BirthFields = {
@@ -79,7 +77,6 @@ export const EMPTY_FORM: IntakeForm = {
   concernTags: [],
   concernText: "",
   consent: false,
-  overseas: false,
 };
 
 function toInt(v: string): number | null {
@@ -143,8 +140,7 @@ export function validateStep(step: StepId, f: IntakeForm): string | null {
       if (f.concernText.length > MAX_CONCERN_TEXT) return `고민은 ${MAX_CONCERN_TEXT}자까지 적을 수 있어요.`;
       return null;
     case "consent":
-      if (!f.consent) return "개인정보 처리에 동의해야 풀이를 볼 수 있어요.";
-      return f.overseas ? null : "국외 이전에 동의해야 AI 풀이를 볼 수 있어요.";
+      return f.consent ? null : "개인정보 처리에 동의해야 풀이를 볼 수 있어요.";
   }
 }
 
