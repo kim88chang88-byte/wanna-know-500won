@@ -1,6 +1,7 @@
 "use client";
 
 import type { ChatVisual } from "@/lib/ai/chat";
+import { PALETTE, SPOTS } from "@/lib/visualPalette";
 
 /*
  * 도리 답 아래에 크게 보여 주는 그림 카드. 이미지를 만들지 않고 화면이 직접 그려요.
@@ -75,23 +76,106 @@ function Timeline({ v }: { v: ChatVisual }) {
   );
 }
 
+function Paper({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <div className="relative my-2 ml-1 mr-2 rounded-[6px_6px_14px_14px] bg-[#fffdf6] px-3.5 pb-3.5 pt-4 text-[#4a3f2a] shadow-[0_6px_16px_rgba(58,42,10,0.18)]">
+      <span aria-hidden="true" className="absolute -top-2 left-1/2 ml-[-38px] h-5 w-[76px] -rotate-2 rounded-sm bg-[#ffd8e8]/70" />
+      <p className="mb-2.5 mt-0.5 text-center font-hand text-[22px] font-bold leading-none">{title}</p>
+      {children}
+    </div>
+  );
+}
+
 function Lucky({ v }: { v: ChatVisual }) {
   const tints = ["#e8f1ff", "#f1f1f5", "#e3f6ea"];
   return (
-    <div className="my-1 rounded-[18px] border border-brand-100 bg-white p-3.5 shadow-[0_8px_20px_rgba(90,54,168,0.12)]">
-      <p className="mb-2.5 text-[14px] font-bold text-gray-900">{v.title || "행운 세트"} 🍀</p>
-      <div className="grid grid-cols-3 gap-2 text-center">
+    <Paper title={v.title || "행운 세트"}>
+      <ul className="grid gap-2">
         {v.items.map((it, i) => (
-          <div key={i} className="rounded-[14px] border border-brand-100 bg-[#faf7ff] px-1 pb-2 pt-3">
-            <span className="mx-auto mb-1.5 grid h-[54px] w-[54px] place-items-center rounded-2xl text-[30px] shadow-[inset_0_-4px_0_rgba(0,0,0,0.1)]" style={{ background: tints[i % 3] }}>
+          <li key={i} className="flex items-center gap-3 rounded-xl bg-[#f7f2e4] px-2.5 py-2">
+            <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl text-[26px] shadow-[inset_0_-3px_0_rgba(0,0,0,0.1)]" style={{ background: tints[i % 3] }}>
               {it.icon}
             </span>
-            <b className="block text-[12.5px] text-gray-900">{it.label}</b>
-            <small className="text-[10.5px] text-gray-500">{it.sub}</small>
-          </div>
+            <span className="min-w-0">
+              <b className="block text-[13.5px] text-[#2a2540]">{it.label}</b>
+              <span className="block font-hand text-[17px] leading-tight text-[#8a5a2b]">{it.sub}</span>
+            </span>
+          </li>
         ))}
+      </ul>
+    </Paper>
+  );
+}
+
+function Palette({ v }: { v: ChatVisual }) {
+  const tilt = ["-rotate-3", "rotate-[1.5deg]", "-rotate-1"];
+  return (
+    <Paper title={v.title || "추천 색상"}>
+      <div className="flex justify-center gap-2.5 pt-1">
+        {v.items.map((it, i) => {
+          const c = PALETTE[it.label];
+          if (!c) return null;
+          return (
+            <div key={i} className={`min-w-0 max-w-[112px] flex-1 rounded-[3px] bg-white px-[5px] pb-2 pt-[5px] shadow-[0_4px_9px_rgba(0,0,0,0.25)] ${tilt[i % 3]}`}>
+              <i className="block h-[88px] rounded-sm shadow-[inset_0_0_0_1px_rgba(0,0,0,0.08)]" style={{ background: c.hex }} />
+              <b className="mt-1.5 block text-center text-[13px] text-[#2a2540]">{it.label}</b>
+              <small className="block text-center text-[10px] tracking-wide text-[#7a7590]">{c.en}</small>
+              {it.sub && <span className="mt-0.5 block text-center font-hand text-[15.5px] leading-tight text-[#8a5a2b]">{it.sub}</span>}
+            </div>
+          );
+        })}
       </div>
-    </div>
+    </Paper>
+  );
+}
+
+function Spots({ v }: { v: ChatVisual }) {
+  const pins = v.items.map((it, i) => ({ n: i + 1, ...(SPOTS[it.label] ?? { x: 0, y: 0 }) })).filter((p) => p.x > 0);
+  return (
+    <Paper title={v.title || "소품 놓을 자리"}>
+      <svg className="block w-full rounded-[10px]" viewBox="0 0 320 190" aria-hidden="true">
+        <rect width="320" height="190" fill="#f6efe3" />
+        <rect y="140" width="320" height="50" fill="#d9bf9a" />
+        <rect y="138" width="320" height="4" fill="#8d6540" opacity=".4" />
+        <rect x="22" y="22" width="62" height="64" rx="4" fill="#bfe3f5" stroke="#8d6540" strokeWidth="4" />
+        <path d="M53 22v64M22 54h62" stroke="#8d6540" strokeWidth="3" />
+        <circle cx="40" cy="38" r="9" fill="#fff" opacity=".55" />
+        <rect x="20" y="92" width="68" height="6" rx="2" fill="#b88a5a" />
+        <rect x="28" y="98" width="4" height="9" fill="#8d6540" />
+        <rect x="76" y="98" width="4" height="9" fill="#8d6540" />
+        <g transform="translate(36 78)"><rect y="6" width="12" height="8" rx="2" fill="#d9825b" /><path d="M6 6c-6-8-2-12 0-14 2 2 6 6 0 14z" fill="#4e9a5b" /></g>
+        <rect x="104" y="106" width="108" height="64" rx="8" fill="#9db4e6" />
+        <rect x="104" y="118" width="108" height="52" rx="6" fill="#7f9bd6" />
+        <rect x="108" y="100" width="34" height="20" rx="8" fill="#f6f3ec" />
+        <rect x="104" y="170" width="6" height="8" fill="#8d6540" />
+        <rect x="206" y="170" width="6" height="8" fill="#8d6540" />
+        <rect x="216" y="116" width="26" height="46" rx="3" fill="#b88a5a" />
+        <rect x="220" y="122" width="18" height="12" rx="2" fill="#8d6540" opacity=".5" />
+        <rect x="224" y="108" width="10" height="8" rx="2" fill="#f4f1ea" stroke="rgba(0,0,0,.15)" />
+        <rect x="252" y="96" width="62" height="6" rx="2" fill="#b88a5a" />
+        <rect x="258" y="102" width="5" height="68" fill="#8d6540" />
+        <rect x="304" y="102" width="5" height="68" fill="#8d6540" />
+        <rect x="262" y="84" width="22" height="12" rx="2" fill="#fff" stroke="rgba(0,0,0,.15)" />
+        <path d="M290 96l8-26" stroke="#555" strokeWidth="3" />
+        <path d="M290 70l14 4-6 8z" fill="#ffd978" />
+        {pins.map((p, i) => (
+          <g key={p.n} className="animate-[pinPop_.5s_cubic-bezier(.3,1.6,.5,1)_both]" style={{ transformBox: "fill-box", transformOrigin: "center", animationDelay: `${0.2 + i * 0.3}s` }}>
+            <circle cx={p.x} cy={p.y + 14} r="3" fill="rgba(0,0,0,.2)" />
+            <path d={`M${p.x} ${p.y + 13} L${p.x - 7} ${p.y - 3} A9 9 0 1 1 ${p.x + 7} ${p.y - 3} Z`} fill="#e8564a" />
+            <text x={p.x} y={p.y + 1} textAnchor="middle" fontSize="10" fontWeight="700" fill="#fff">{p.n}</text>
+          </g>
+        ))}
+      </svg>
+      <ul className="mt-2.5 grid gap-1.5">
+        {v.items.map((it, i) => (
+          <li key={i} className="flex items-center gap-2 text-[13px]">
+            <span className="grid h-5 w-5 shrink-0 place-items-center rounded-full bg-[#e8564a] text-[12px] font-bold text-white shadow">{i + 1}</span>
+            <b className="font-hand text-[17px]">{it.label}</b>
+            <span className="min-w-0">{it.sub}</span>
+          </li>
+        ))}
+      </ul>
+    </Paper>
   );
 }
 
@@ -103,6 +187,8 @@ export default function VisualCard({ v }: { v: ChatVisual }) {
       {v.kind === "checklist" && <Checklist v={v} />}
       {v.kind === "timeline" && <Timeline v={v} />}
       {v.kind === "lucky" && <Lucky v={v} />}
+      {v.kind === "palette" && <Palette v={v} />}
+      {v.kind === "spots" && <Spots v={v} />}
     </Wrap>
   );
 }

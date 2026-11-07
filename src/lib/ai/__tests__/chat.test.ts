@@ -52,6 +52,11 @@ describe("도리 상담방", () => {
     const note = cleanVisual({ kind: "note", title: "오늘의 노트", items: [it("마음에 남은 말 하나"), it("그때 내 기분 한 줄")] });
     expect(note?.kind).toBe("note");
     expect(note?.items[0].icon).toBe("");
+    const pal = cleanVisual({ kind: "palette", title: "색", items: [it("펄 화이트", "", "맑고 차분"), it("아무색", "", "없는 색"), it("네이비", "", "깊은 밤")] });
+    expect(pal?.items.map((i) => i.label)).toEqual(["펄 화이트", "네이비"]);
+    expect(cleanVisual({ kind: "palette", title: "색", items: [it("없는색", "", "x"), it("펄 화이트", "", "y")] })).toBeNull();
+    expect(cleanVisual({ kind: "spots", title: "자리", items: [it("책상 위", "", "노트 곁"), it("침대 곁", "", "잠들기 전"), it("화장실", "", "x")] })?.items.length).toBe(2);
+    expect(cleanVisual({ kind: "spots", title: "자리", items: [it("책상 위", "", "a"), it("책상 위", "", "b")] })?.items.length).toBe(1);
     expect(cleanVisual({ kind: "none", title: "", items: [] })).toBeNull();
     expect(cleanVisual({ kind: "note", title: "노트", items: [it("한 줄")] })).toBeNull();
     expect(cleanVisual({ kind: "lucky", title: "소품", items: [it("물 한 잔", "🫧", "맑은 물"), it("흰색 소품", "⚪", "쇠 기운"), it("작은 화분", "", "나무 기운")] })).toBeNull();
