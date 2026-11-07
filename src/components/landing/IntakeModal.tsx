@@ -801,8 +801,8 @@ export default function IntakeModal({ target, wallet = null, onClose, onComplete
                   {/* 2) 이야기 순서: 내 정보·고민 → 네 기둥 → 한마디로 → 접어 둔 풀이 → 도리의 쪽지 */}
                   <div data-testid="premium-result">
                     {compat && premiumReport.compat ? (
-                      <CompatStory report={premiumReport} intro={null} partnerName={resultPartner?.name ?? "상대"} name={nickname}
-                        lastWord={<><ResultHero report={premiumReport} aiQuote={premiumReport.compat?.ai?.last ?? null} luxe={false} hideLucky /><ResultShareCard report={premiumReport} aiQuote={premiumReport.compat?.ai?.last ?? null} /></>}
+                      <CompatStory report={premiumReport} intro={null} partnerName={resultPartner?.name ?? "상대"} name={nickname} shareInCard
+                        lastWord={<><ResultHero report={premiumReport} aiQuote={premiumReport.compat?.ai?.last ?? null} luxe={false} hideLucky /><ResultShareCard report={premiumReport} aiQuote={premiumReport.compat?.ai?.last ?? null} shareNames={{ me: nickname, partner: resultPartner?.name ?? null }} /></>}
                         closing={premiumReport.compat ? <CompatAsk compat={premiumReport.compat} /> : undefined}
                       />
                     ) : (

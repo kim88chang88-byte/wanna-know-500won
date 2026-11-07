@@ -3,7 +3,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { PremiumReportView, TopicKey } from "@/lib/premium/types";
 import { drawPhotoCard } from "@/lib/card/drawPhotoCard";
-import { buildPhotoCardData, CARD_H, CARD_SCALE, CARD_W, photoAltText, photoFileName, shareCaption } from "@/lib/card/photoData";
+import { buildShareSummary, buildTogether } from "@/lib/premium/compatAnswer";
+import { buildPhotoCardData, CARD_H, CARD_SCALE, CARD_W, photoAltText, photoFileName, shareCaption, type PhotoCardData } from "@/lib/card/photoData";
 import { IMAGES } from "./images";
 import { getBrowserStorage } from "@/lib/drawCounter";
 import { readMyCode, withRef } from "@/lib/referral";
@@ -41,7 +42,7 @@ function loadArt(topic: TopicKey): Promise<HTMLImageElement | null> {
 }
 
 /** 결과를 인스타 스토리 크기(1080×1920) 카드 한 장으로 만들어 저장·공유해요. 서버로 보내지 않고 이 기기에서만 그려요. */
-export default function ResultShareCard({ report, aiQuote }: { report: PremiumReportView; aiQuote?: string | null }) {
+export default function ResultShareCard({ report, aiQuote, shareNames }: { report: PremiumReportView; aiQuote?: string | null; /** 궁합 결과일 때 요약 글에 쓸 두 사람의 이름 */ shareNames?: { me?: string | null; partner?: string | null } }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [state, setState] = useState<"idle" | "busy" | "done" | "cancel" | "error">("idle");
   const [ready, setReady] = useState(false);
@@ -51,6 +52,17 @@ export default function ResultShareCard({ report, aiQuote }: { report: PremiumRe
   useEffect(() => {
     setLink(shareOrigin());
   }, []);
+  /** 카드와 함께 가는 글: 궁합이면 둘의 궁합 요약(질문 3개 포함), 아니면 한 줄 결론 문구 */
+  function captionOf(d: PhotoCardData, url: string): string {
+    const c = report.compat;
+    if (c) {
+      const base = buildTogether(c);
+      const together = { questions: c.ai?.questions ?? base.questions, action: c.ai?.action ?? base.action };
+      const p = shareNames?.partner?.trim();
+      return buildShareSummary(c, { me: shareNames?.me, partner: p && p !== "상대" && p !== "상대방" ? p : null }, together, url);
+    }
+    return shareCaption(d, url);
+  }
   const data = useMemo(
     () => buildPhotoCardData(report, { date: new Date(), siteLabel: typeof window === "undefined" ? "" : window.location.host, shareUrl: shareOrigin(), aiQuote }),
     [report, aiQuote],
@@ -88,7 +100,7 @@ export default function ResultShareCard({ report, aiQuote }: { report: PremiumRe
   /** 문구와 링크를 클립보드에 넣어요. 이미지만 올려도 붙여넣기로 링크를 같이 보낼 수 있어요. */
   async function copyCaption(): Promise<boolean> {
     try {
-      await navigator.clipboard.writeText(shareCaption(data, shareOrigin()));
+      await navigator.clipboard.writeText(captionOf(data, shareOrigin()));
       return true;
     } catch {
       return false;
@@ -109,7 +121,7 @@ export default function ResultShareCard({ report, aiQuote }: { report: PremiumRe
       const nav = navigator as Navigator & { canShare?: (d: ShareData) => boolean };
       if (nav.canShare?.({ files: [file] })) {
         try {
-          await nav.share({ files: [file], text: shareCaption(data, shareOrigin()) });
+          await nav.share({ files: [file], text: captionOf(data, shareOrigin()) });
           setState("done");
           return;
         } catch (e) {
@@ -164,12 +176,12 @@ export default function ResultShareCard({ report, aiQuote }: { report: PremiumRe
           }}
           className="shrink-0 rounded-full bg-brand-50 px-2.5 py-1 text-[11px] font-bold text-brand-700 active:scale-95"
         >
-          {linkCopied === "ok" ? "✓ 복사했어요" : linkCopied === "fail" ? "복사 실패" : "링크 복사"}
+          {linkCopied === "ok" ? "✓ 복사했어요" : linkCopied === "fail" ? "복사 실패" : report.compat ? "요약 복사" : "링크 복사"}
         </button>
       </div>
       <p role="status" className="mt-1.5 text-[11px] leading-relaxed text-gray-500">
         {state === "done"
-          ? copied ? "카드를 만들었어요. 링크도 복사했으니 올릴 때 붙여넣기만 하세요 ❄️" : "카드를 만들었어요. 보내는 앱에서 링크가 안 보이면 위 '링크 복사'를 눌러 붙여넣어 주세요 ❄️"
+          ? copied ? "카드를 만들었어요. 링크도 복사했으니 올릴 때 붙여넣기만 하세요 ❄️" : `카드를 만들었어요. 보내는 앱에서 링크가 안 보이면 위 '${report.compat ? "요약 복사" : "링크 복사"}'를 눌러 붙여넣어 주세요 ❄️`
           : state === "cancel"
             ? copied ? "카드는 저장하지 않았어요. 링크만 복사했어요 — 친구에게 붙여넣어 보내 주세요 ❄️" : "카드는 저장하지 않았어요."
             : state === "error"
@@ -178,7 +190,7 @@ export default function ResultShareCard({ report, aiQuote }: { report: PremiumRe
                 <>
                   인스타 스토리 크기로 저장돼요 · 이 기기에서만 만들어요
                   <br />
-                  링크는 저장할 때 함께 복사되고, 위에서 따로 복사할 수도 있어요
+                  {report.compat ? "카드와 함께 궁합 요약 글이 같이 가요. 글이 안 보이면 위 '요약 복사'로 붙여넣어 주세요" : "링크는 저장할 때 함께 복사되고, 위에서 따로 복사할 수도 있어요"}
                 </>
               )}
       </p>

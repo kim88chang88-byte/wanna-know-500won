@@ -128,7 +128,7 @@ function ScoreBars({ scores }: { scores: CompatScore[] }) {
 }
 
 /** 둘이 마주 앉아 해 볼 질문 3개 + 이번 주 작은 행동 + 상대에게 보낼 한 장 요약 */
-function TogetherCard({ c, name, partnerName }: { c: CompatView; name: string | null; partnerName: string }) {
+function TogetherCard({ c, name, partnerName, hideSend = false }: { c: CompatView; name: string | null; partnerName: string; hideSend?: boolean }) {
   const [msg, setMsg] = useState("");
   const base = buildTogether(c);
   const together = { questions: c.ai?.questions ?? base.questions, action: c.ai?.action ?? base.action };
@@ -167,15 +167,17 @@ function TogetherCard({ c, name, partnerName }: { c: CompatView; name: string | 
         <p className="text-[11px] font-bold text-amber-700">이번 주 작은 행동</p>
         <p className="mt-0.5 text-[14.5px] leading-relaxed text-gray-800 break-keep">{together.action}</p>
       </div>
-      <button type="button" data-testid="compat-send" onClick={send} className="mt-3.5 w-full rounded-full border border-brand-300 bg-white py-2.5 text-sm font-bold text-brand-700">
-        💌 상대방에게 우리 궁합 결과 보내기
-      </button>
+      {!hideSend && (
+        <button type="button" data-testid="compat-send" onClick={send} className="mt-3.5 w-full rounded-full border border-brand-300 bg-white py-2.5 text-sm font-bold text-brand-700">
+          💌 상대방에게 우리 궁합 결과 보내기
+        </button>
+      )}
       {msg && <p role="status" className="mt-2 text-center text-xs text-gray-500">{msg}</p>}
     </section>
   );
 }
 
-export default function CompatStory({ report, intro, closing, lastWord, partnerName = "상대", name = null }: { report: PremiumReportView; intro: string | null; closing?: ReactNode; lastWord?: ReactNode; partnerName?: string; name?: string | null }) {
+export default function CompatStory({ report, intro, closing, lastWord, partnerName = "상대", name = null, shareInCard = false }: { report: PremiumReportView; intro: string | null; closing?: ReactNode; lastWord?: ReactNode; partnerName?: string; name?: string | null; /** 결과 카드 공유가 같이 있는 화면: 상대에게 보내기 버튼은 그쪽으로 합쳐졌어요 */ shareInCard?: boolean }) {
   const c = report.compat;
   if (!c) return null;
   const mark = MARK.marriage;
@@ -280,7 +282,7 @@ export default function CompatStory({ report, intro, closing, lastWord, partnerN
         )}
       </section>
 
-      <TogetherCard c={c} name={who ?? null} partnerName={partnerName} />
+      <TogetherCard c={c} name={who ?? null} partnerName={partnerName} hideSend={shareInCard} />
 
       <section data-testid="story-note" aria-label="도리의 쪽지" className="relative rounded-2xl border border-amber-200 bg-[#fff9e6] p-4 shadow-sm">
         <span aria-hidden="true" className="absolute -top-2.5 left-6 h-4 w-16 -rotate-2 rounded-sm bg-amber-200/80" />
