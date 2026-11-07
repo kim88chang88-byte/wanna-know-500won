@@ -33,6 +33,7 @@ export default function ChatHome() {
   const [left, setLeft] = useState<number | null>(null);
   const [roomLeft, setRoomLeft] = useState<Record<string, number>>({});
   const [delId, setDelId] = useState<string | null>(null);
+  const [starting, setStarting] = useState(false);
   const ref = useRef<ChatRoom[]>([]);
 
   const commit = (next: ChatRoom[]) => {
@@ -108,7 +109,6 @@ export default function ChatHome() {
     );
   }
 
-  const [starting, setStarting] = useState(false);
   const startDaily = async () => {
     if (starting) return;
     setStarting(true);
