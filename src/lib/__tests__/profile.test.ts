@@ -9,7 +9,7 @@ const lunar: BirthInput = { year: 2020, month: 4, day: 8, hour: null, minute: nu
 describe("저장된 생년월일시", () => {
   it("질문지로 되돌리면 같은 입력이 다시 만들어져요 (양력·음력·시간 모름)", () => {
     for (const p of [solar, lunar]) {
-      const form = { ...EMPTY_FORM, ...profileToForm(p), consent: true };
+      const form = { ...EMPTY_FORM, ...profileToForm(p), consent: true, overseas: true };
       expect(validateStep("date", form)).toBeNull();
       expect(validateStep("time", form)).toBeNull();
       expect(buildBirthInput(form)).toEqual(p);

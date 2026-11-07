@@ -1133,7 +1133,7 @@ export default function IntakeModal({ target, wallet = null, onClose, onComplete
               </p>
 
               {loggedIn ? (
-                savedProfile && sameBirth(savedProfile, buildBirthInput({ ...form, consent: true })) ? (
+                savedProfile && sameBirth(savedProfile, buildBirthInput({ ...form, consent: true, overseas: true })) ? (
                   <p data-testid="profile-kept" className="text-[11px] text-gray-500 leading-relaxed">
                     기억해 둔 생년월일시로 풀어요. 지우고 싶으면 로그인 창의 &lsquo;기억한 정보 지우기&rsquo;를 눌러 주세요.
                   </p>
@@ -1155,7 +1155,7 @@ export default function IntakeModal({ target, wallet = null, onClose, onComplete
               )}
 
               {!compat && loggedIn && people.length < MAX_PEOPLE && (() => {
-                const cur = buildBirthInput({ ...form, consent: true });
+                const cur = buildBirthInput({ ...form, consent: true, overseas: true });
                 if (!cur || sameBirth(savedProfile, cur) || people.some((x) => sameBirth(x.birth, cur))) return null;
                 return (
                   <div className="space-y-1.5">
