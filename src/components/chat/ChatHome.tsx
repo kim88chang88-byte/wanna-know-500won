@@ -153,7 +153,7 @@ export default function ChatHome() {
         <div className="mt-3 flex-1">
           <ul className="flex flex-col gap-[7px] px-3">
             {rooms.map((r) => (
-              <li key={r.id} data-testid="room-card" className="relative flex items-center gap-1 overflow-hidden rounded-2xl border border-brand-100 bg-white pr-2.5">
+              <li key={r.id} data-testid="room-card" className="relative flex flex-wrap items-center gap-1 overflow-hidden rounded-2xl border border-brand-100 bg-white pr-2.5">
                 <i aria-hidden="true" className="absolute inset-y-0 left-0 w-1.5" style={{ background: roomColor(r.ctx) }} />
                 <button type="button" onClick={() => setOpen(r.id)} className="flex min-w-0 flex-1 items-center gap-3 py-2.5 pl-5 pr-1 text-left">
                   <span className="relative h-12 w-12 shrink-0 overflow-hidden rounded-full bg-brand-50" style={{ boxShadow: `0 0 0 2px #fff, 0 0 0 4px ${roomColor(r.ctx)}` }} aria-hidden="true">
@@ -198,6 +198,11 @@ export default function ChatHome() {
                   </svg>
                   {delId === r.id ? "정말 나갈까요?" : "나가기"}
                 </button>
+                {delId === r.id && (
+                  <p data-testid="room-leave-note" role="status" className="basis-full py-2 pl-5 pr-1 text-[11.5px] leading-snug text-red-600">
+                    대화 내용만 지워져요. 남은 질문과 동전은 그대로예요.
+                  </p>
+                )}
               </li>
             ))}
           </ul>
