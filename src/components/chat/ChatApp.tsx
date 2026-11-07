@@ -5,6 +5,9 @@ import PurchaseModal from "@/components/pay/PurchaseModal";
 import { roomAnimal, roomColor } from "@/lib/chatRooms";
 import { MSG_MAX, TURN_CAP, type ChatCtx, type ChatKind, type ChatMsg } from "@/lib/chatContext";
 import type { RoomMsg } from "@/lib/chatRooms";
+import { buildIntro, type IntroBubble } from "@/lib/chatIntro";
+import { ELEMENT_BOX } from "@/lib/elementColor";
+import type { Element } from "@/lib/saju/constants";
 
 const GREETING: Record<ChatKind, string> = {
   daily: "안녕! 오늘의 한마디 잘 받았어? 더 궁금한 거 있으면 편하게 물어봐 ❄️",
@@ -117,6 +120,9 @@ export default function ChatApp({ initialCtx, initialMsgs, onChange, onBack }: {
   const [buyOpen, setBuyOpen] = useState(false);
   const [buying, setBuying] = useState(false);
   const [payOpen, setPayOpen] = useState(false);
+  // 처음 여는 방이면, 첫 인사 뒤에 사주 정보를 말풍선으로 하나씩 이어서 보여 줘요. (이미 대화가 있는 방은 건너뛰어요)
+  const intro = useMemo<IntroBubble[]>(() => (initialMsgs.length === 0 ? buildIntro(initialCtx) : []), []); // eslint-disable-line react-hooks/exhaustive-deps
+  const [introShown, setIntroShown] = useState(0);
   const scroller = useRef<HTMLDivElement>(null);
   const field = useRef<HTMLTextAreaElement>(null);
   const nearBottom = useRef(true);
@@ -125,6 +131,16 @@ export default function ChatApp({ initialCtx, initialMsgs, onChange, onBack }: {
   useEffect(() => {
     setReady(true);
   }, []);
+
+  useEffect(() => {
+    if (intro.length === 0) return;
+    if (prefersReducedMotion()) {
+      setIntroShown(intro.length);
+      return;
+    }
+    const t = setInterval(() => setIntroShown((n) => (n >= intro.length ? n : n + 1)), 650);
+    return () => clearInterval(t);
+  }, [intro]);
 
   // 들어오자마자 남은 질문 수와 동전 수를 받아 와요
   useEffect(() => {
@@ -408,6 +424,9 @@ export default function ChatApp({ initialCtx, initialMsgs, onChange, onBack }: {
       >
         <p className="mx-auto w-fit rounded-full border border-brand-100 bg-white/60 px-3 py-1 text-[11px] text-[#8a7fa8]">오늘 · 도리의 달빛 서재에서 🌙</p>
         <DoriRow face={face} text={greetingFor(ctx)} />
+        {intro.slice(0, introShown).map((b, i) => (
+          <IntroRow key={i} b={b} />
+        ))}
         {msgs.map((m, i) => {
           if (m.role === "user") return <UserRow key={i} text={m.text} at={m.at} />;
           const live = typing?.idx === i;
@@ -606,6 +625,58 @@ function DoriRow({ face, text, at, error, actions, onSkip }: { face: ReactNode; 
           {at !== undefined && <span className="shrink-0 whitespace-nowrap text-[10px] text-[#a99bd0]">{timeOf(at)}</span>}
         </div>
         {actions && <div className="ml-0.5 mt-1.5 flex flex-wrap gap-1.5">{actions}</div>}
+      </div>
+    </div>
+  );
+}
+
+const EL_HEX: Record<Element, string> = { wood: "#22c55e", fire: "#f2512b", earth: "#c68a3d", metal: "#cbd5e1", water: "#312e81" };
+const EL_NAME: Record<Element, string> = { wood: "나무", fire: "불", earth: "땅", metal: "쇠", water: "물" };
+
+/** 첫 인사 뒤에 이어지는 정리 말풍선 (얼굴 자리는 비워 두고 위 말풍선에 이어 붙여요) */
+function IntroRow({ b }: { b: IntroBubble }) {
+  return (
+    <div className="flex items-start gap-2 animate-[fadeUp_.35s_ease_both]">
+      <span className="w-9 shrink-0" aria-hidden="true" />
+      <div className="min-w-0 max-w-[82%] rounded-[4px_18px_18px_18px] bg-white px-3.5 py-[11px] text-[14px] leading-[1.62] text-gray-900 shadow-[0_2px_10px_#5a36a814]">
+        {b.kind === "text" && <p className="whitespace-pre-wrap">{rich(b.text)}</p>}
+        {b.kind === "pillars" && (
+          <div data-testid="intro-pillars" className="grid grid-cols-4 gap-1.5 text-center">
+            {b.pillars.map((p) => (
+              <div key={p.label} className={`rounded-xl border px-1 py-1.5 ${p.me ? "border-brand-500 ring-1 ring-brand-300" : "border-brand-100"}`}>
+                <p className="text-[10px] text-gray-500">{p.label}</p>
+                <p className={`mx-auto mt-0.5 flex h-7 w-7 items-center justify-center rounded-lg text-[15px] font-bold ${ELEMENT_BOX[p.stemEl]}`}>{p.stem}</p>
+                <p className={`mx-auto mt-0.5 flex h-7 w-7 items-center justify-center rounded-lg text-[15px] font-bold ${ELEMENT_BOX[p.branchEl]}`}>{p.branch}</p>
+              </div>
+            ))}
+          </div>
+        )}
+        {b.kind === "elements" && (
+          <div data-testid="intro-elements">
+            <div className="flex h-2.5 w-52 max-w-full overflow-hidden rounded-full bg-gray-100">
+              {(Object.keys(b.counts) as Element[]).map((e) => (b.counts[e] > 0 ? <i key={e} style={{ flex: b.counts[e], background: EL_HEX[e] }} /> : null))}
+            </div>
+            <p className="mt-1.5 flex flex-wrap gap-x-2.5 text-[11.5px] text-gray-600">
+              {(Object.keys(b.counts) as Element[]).map((e) => (
+                <span key={e}>
+                  {EL_NAME[e]} {b.counts[e]}
+                </span>
+              ))}
+            </p>
+          </div>
+        )}
+        {b.kind === "pair" && (
+          <div data-testid="intro-pair" className="grid grid-cols-2 gap-1.5 text-center">
+            {b.people.map((p) => (
+              <div key={p.name} className="rounded-xl border border-brand-100 px-2 py-1.5">
+                <p className="text-[10.5px] text-gray-500">{p.name}</p>
+                <p className={`mx-auto my-0.5 flex h-8 w-8 items-center justify-center rounded-lg text-[17px] font-bold ${ELEMENT_BOX[p.el]}`}>{p.hanja}</p>
+                <p className="text-[12px] font-bold">{p.hangul}{EL_NAME[p.el]}</p>
+                <p className="text-[10px] text-gray-400">{p.date}</p>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

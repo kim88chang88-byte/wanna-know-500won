@@ -391,3 +391,5 @@ body {
 /* 내 주머니 숫자가 바뀔 때 톡 튀어 오르는 움직임 */
 @keyframes walletPop { 0% { transform: scale(1.6); } 60% { transform: scale(0.9); } 100% { transform: scale(1); } }
 @media (prefers-reduced-motion: no-preference) { .wallet-pop { display: inline-block; animation: walletPop 0.45s cubic-bezier(.2,.8,.2,1) both; } }
+
+@keyframes fadeUp { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
