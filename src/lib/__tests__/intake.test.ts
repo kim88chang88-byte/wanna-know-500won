@@ -7,6 +7,7 @@ const ok = (over: Partial<IntakeForm> = {}): IntakeForm => ({
   time: "08:30",
   gender: "female",
   consent: true,
+  overseas: true,
   ...over,
 });
 
@@ -90,7 +91,7 @@ describe("상대방(궁합) 입력", () => {
 });
 
 describe("한 화면 입력(생년월일·성별·시간)", () => {
-  const base = { ...EMPTY_FORM, consent: true };
+  const base = { ...EMPTY_FORM, consent: true, overseas: true };
   it("날짜 글자를 숫자만으로도 모양에 맞춰 줘요", async () => {
     const { formatDateInput } = await import("../intake");
     expect(formatDateInput("19881229")).toBe("1988-12-29");
