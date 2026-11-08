@@ -299,6 +299,14 @@ export function createDb(config: DbConfig, fetchImpl: FetchLike = fetch) {
       return Number.isInteger(n) && n > 0 ? n : 0;
     },
 
+    /** 지갑 내역용: 최근 조약돌 변동 (delta 0 인 가입 표시는 뺐어요). 최신순 */
+    async listCoinLog(userId: string, limit = 200): Promise<Array<{ kind: string; delta: number; created_at: string }>> {
+      const res = await call(`coin_log?user_id=eq.${safeId(userId)}&delta=neq.0&select=kind,delta,created_at&order=created_at.desc&limit=${Math.min(limit, 500)}`, { method: "GET", headers: headers() });
+      const rows = (await res.json().catch(() => [])) as Array<{ kind?: unknown; delta?: unknown; created_at?: unknown }>;
+      if (!Array.isArray(rows)) return [];
+      return rows.flatMap((r) => (typeof r.kind === "string" && typeof r.delta === "number" && typeof r.created_at === "string" ? [{ kind: r.kind, delta: r.delta, created_at: r.created_at }] : []));
+    },
+
     /** 코인 지급. 같은 (kind, ref) 는 한 번만 들어가요. 새로 지급됐으면 granted = true. DB 함수(coin_grant) 안에서 한 번에 처리해요. */
     async grantCoin(userId: string, kind: string, ref: string, amount = 1): Promise<{ granted: boolean; balance: number }> {
       const res = await call("rpc/coin_grant", {

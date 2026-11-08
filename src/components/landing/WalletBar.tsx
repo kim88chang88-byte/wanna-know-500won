@@ -58,7 +58,7 @@ export default function WalletBar({ pearls, pebbles, free, onBuy }: WalletValues
   return (
     <div data-testid="wallet-bar" className="flex flex-nowrap items-center justify-end gap-1 sm:gap-1.5">
       {onBuy ? (
-        <button type="button" onClick={onBuy} aria-label="조약돌 충전하기 (결제 메뉴판 열기)" className="flex flex-nowrap items-center justify-end gap-1 rounded-full active:scale-95 sm:gap-1.5">
+        <button type="button" onClick={onBuy} aria-label="내 지갑 열기" className="flex flex-nowrap items-center justify-end gap-1 rounded-full active:scale-95 sm:gap-1.5">
           {money}
         </button>
       ) : (

@@ -20,6 +20,7 @@ const HELP_GROUPS: readonly MenuGroup[] = [
 
 /** 도유사주에서 즐길 수 있는 자판기들. 누르면 그 자판기 카드로 스크롤해요. */
 const MACHINE_GROUPS: readonly MenuGroup[] = [
+  { items: [{ href: "/wallet", label: "내 지갑", emoji: "👛" }] },
   {
     heading: "🐾 6대 운세 카드 (매일 첫 1회 무료)",
     items: MACHINES.map((m) => ({ href: `#${m.key}`, label: m.name, emoji: m.emoji })),
