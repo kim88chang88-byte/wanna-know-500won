@@ -1,7 +1,7 @@
 /*
  * 하단 메뉴의 빨간 점(새 항목 알림). 숫자 없이 점 하나만 보이고, 그 메뉴를 열면 꺼져요.
  * 이 기기에만 기억해요. (서버에 아무것도 보내지 않아요)
- *  - 운세 뽑기: 오늘 무료 뽑기·동전이 남아 있는데 아직 메뉴를 안 열었을 때
+ *  - 운세 뽑기: 오늘 무료 뽑기·조약돌이 남아 있는데 아직 메뉴를 안 열었을 때
  *  - 도리상담실: 새로운 날이 되어 무료 질문이 채워졌는데 아직 상담실을 안 열었을 때
  *  - 보관함: 새 풀이가 저장됐는데 아직 보관함을 안 열었을 때
  */
@@ -41,7 +41,7 @@ function del(st: StorageLike | null, k: string): void {
   }
 }
 
-/** 홈 화면이 "오늘 무료 뽑기·동전이 남았는지"를 적어 둬요. key 는 날짜+동전 수라서, 새 동전을 받으면 다시 켜져요. */
+/** 홈 화면이 "오늘 무료 뽑기·조약돌이 남았는지"를 적어 둬요. key 는 날짜+조약돌 수라서, 새 조약돌을 받으면 다시 켜져요. */
 export function writeDrawAvail(st: StorageLike | null, on: boolean, coins: number, now: Date): void {
   set(st, K_DRAW_AVAIL, JSON.stringify({ on, key: `${dayKey(now)}:${coins}` }));
 }

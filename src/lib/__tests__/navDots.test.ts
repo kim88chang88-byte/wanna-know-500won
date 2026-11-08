@@ -23,7 +23,7 @@ describe("하단 메뉴 빨간 점", () => {
     expect(readNavDots(st, true, d2).chat).toBe(true);
   });
 
-  it("운세 뽑기: 무료 뽑기가 남아 있으면 켜지고, 열면 꺼지고, 새 동전을 받으면 다시 켜져요", () => {
+  it("운세 뽑기: 무료 뽑기가 남아 있으면 켜지고, 열면 꺼지고, 새 조약돌을 받으면 다시 켜져요", () => {
     const st = mem();
     writeDrawAvail(st, true, 0, d1);
     expect(readNavDots(st, false, d1).draw).toBe(true);

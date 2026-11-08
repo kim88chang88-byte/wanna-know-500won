@@ -84,7 +84,7 @@ interface Bubble extends ChatMsg {
   visual?: ChatVisual | null;
 }
 
-/** 도리은행 500원 동전 그림 (글 옆에 작게) */
+/** 도리은행 500원 조약돌 그림 (글 옆에 작게) */
 function CoinIcon() {
   // eslint-disable-next-line @next/next/no-img-element
   return <img src="/images/coin-500.webp" alt="" width={16} height={16} aria-hidden="true" className="mr-0.5 inline-block h-4 w-4 -translate-y-px object-contain align-middle" />;
@@ -140,7 +140,7 @@ export default function ChatApp({ initialCtx, initialMsgs, onChange, onBack }: {
   const [typing, setTyping] = useState<{ idx: number; shown: number } | null>(null);
   const [jump, setJump] = useState(false);
   const [vh, setVh] = useState<number | null>(null);
-  /** 서버가 알려 주는 남은 질문 수 (아직 모르면 null) 와 내 동전 수 */
+  /** 서버가 알려 주는 남은 질문 수 (아직 모르면 null) 와 내 조약돌 수 */
   const [left, setLeft] = useState<number | null>(null);
   const [coins, setCoins] = useState(0);
   const [buyOpen, setBuyOpen] = useState(false);
@@ -168,7 +168,7 @@ export default function ChatApp({ initialCtx, initialMsgs, onChange, onBack }: {
     return () => clearInterval(t);
   }, [intro]);
 
-  // 들어오자마자 남은 질문 수와 동전 수를 받아 와요
+  // 들어오자마자 남은 질문 수와 조약돌 수를 받아 와요
   useEffect(() => {
     if (!ready) return;
     let alive = true;
@@ -185,7 +185,7 @@ export default function ChatApp({ initialCtx, initialMsgs, onChange, onBack }: {
     };
   }, [ready, ctx]);
 
-  // 구매 체험·결제로 동전이 들어오면 바로 다시 불러와요. 질문이 다 떨어진 상태라면 "질문 더하기" 창을 이어서 열어요.
+  // 구매 체험·결제로 조약돌이 들어오면 바로 다시 불러와요. 질문이 다 떨어진 상태라면 "질문 더하기" 창을 이어서 열어요.
   const refreshCoins = useCallback(
     async (offerBuy: boolean) => {
       try {
@@ -198,7 +198,7 @@ export default function ChatApp({ initialCtx, initialMsgs, onChange, onBack }: {
           if (offerBuy && d.coins > 0 && (d.left ?? 0) <= 0) setBuyOpen(true);
         }
       } catch {
-        /* 동전 수는 다음에 다시 불러와요 */
+        /* 조약돌 수는 다음에 다시 불러와요 */
       }
     },
     [ctx],
@@ -292,7 +292,7 @@ export default function ChatApp({ initialCtx, initialMsgs, onChange, onBack }: {
       });
       const data = (await res.json().catch(() => null)) as { answer?: string; followups?: unknown; visual?: ChatVisual | null; error?: string; code?: string; left?: number } | null;
       if (res.status === 402 && data?.code === "quota") {
-        // 질문을 다 쓴 경우: 방금 보낸 말은 입력창으로 돌려놓고 "동전으로 더하기" 카드를 보여 줘요
+        // 질문을 다 쓴 경우: 방금 보낸 말은 입력창으로 돌려놓고 "조약돌로 더하기" 카드를 보여 줘요
         setLeft(0);
         setMsgs(next.slice(0, -1));
         setInput(text);
@@ -340,7 +340,7 @@ export default function ChatApp({ initialCtx, initialMsgs, onChange, onBack }: {
         setCoins(0);
         setPayOpen(true);
       } else {
-        flash(data?.error ?? "동전을 쓰지 못했어요. 잠시 뒤에 다시 시도해 주세요.");
+        flash(data?.error ?? "조약돌을 쓰지 못했어요. 잠시 뒤에 다시 시도해 주세요.");
       }
     } catch {
       flash("인터넷 연결을 확인해 주세요.");
@@ -507,10 +507,10 @@ export default function ChatApp({ initialCtx, initialMsgs, onChange, onBack }: {
             <p className="mt-1 text-[12.5px] leading-relaxed text-[#6a5a7a]">
               도리가 더 들여다보고 싶은 얘기가 남았다면,
               <br />
-              동전 하나로 질문을 5번 더 할 수 있어요.
+              조약돌 하나로 질문을 5번 더 할 수 있어요.
             </p>
             <button type="button" onClick={() => setBuyOpen(true)} className="mx-auto mt-3 block rounded-full bg-gradient-to-br from-brand-500 to-[#c24fe0] px-6 py-2.5 text-sm font-extrabold text-white shadow active:scale-[0.98]">
-              <CoinIcon /> 동전 하나로 5번 더 물어보기
+              <CoinIcon /> 조약돌 하나로 5번 더 물어보기
             </button>
             <button type="button" onClick={onBack} className="mt-2 text-xs font-bold text-brand-600">
               대화 목록으로
@@ -551,11 +551,11 @@ export default function ChatApp({ initialCtx, initialMsgs, onChange, onBack }: {
         <div className="mx-1 mb-2 flex flex-wrap items-center justify-between gap-x-2 gap-y-1.5 text-[11px] text-[#8a7fa8]">
           <span>
             ❄️ 질문 <b className="text-gray-800">{leftNow}번</b> 남았어요
-            <span className="ml-2 text-[#b08722]"><CoinIcon /> 동전 {coins}개</span>
+            <span className="ml-2 text-[#b08722]"><CoinIcon /> 조약돌 {coins}개</span>
           </span>
           {leftNow >= 1 && leftNow <= 2 && (
             <button type="button" onClick={() => setBuyOpen(true)} className="shrink-0 whitespace-nowrap rounded-full bg-[#fff3c9] px-2.5 py-1 font-extrabold text-[#8a5b00] active:scale-95">
-              <CoinIcon /> 동전 하나로 5번 더 물어보기
+              <CoinIcon /> 조약돌 하나로 5번 더 물어보기
             </button>
           )}
         </div>
@@ -591,16 +591,16 @@ export default function ChatApp({ initialCtx, initialMsgs, onChange, onBack }: {
       </form>
       {buyOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 px-6" onClick={() => !buying && setBuyOpen(false)}>
-          <div role="alertdialog" aria-modal="true" aria-label="동전으로 질문 더하기" onClick={(e) => e.stopPropagation()} className="w-full max-w-[320px] rounded-2xl bg-white px-5 py-5 text-center shadow-xl">
-            <p className="text-[15px] font-bold leading-relaxed text-gray-900">동전 하나로 질문 5개를 더 할까요?</p>
-            <p className="mt-1 text-xs text-slate-500">내 동전: {coins}개 {coins === 0 && "· 동전이 없어요"}</p>
+          <div role="alertdialog" aria-modal="true" aria-label="조약돌로 질문 더하기" onClick={(e) => e.stopPropagation()} className="w-full max-w-[320px] rounded-2xl bg-white px-5 py-5 text-center shadow-xl">
+            <p className="text-[15px] font-bold leading-relaxed text-gray-900">조약돌 하나로 질문 5개를 더 할까요?</p>
+            <p className="mt-1 text-xs text-slate-500">내 조약돌: {coins}개 {coins === 0 && "· 조약돌이 없어요"}</p>
             <div className="mt-4 flex gap-2">
               <button type="button" onClick={() => setBuyOpen(false)} disabled={buying} className="flex-1 rounded-full border border-slate-300 bg-white py-2.5 text-sm font-bold text-slate-600">
                 아니요
               </button>
               {coins === 0 ? (
                 <button type="button" onClick={() => { setBuyOpen(false); setPayOpen(true); }} className="flex-1 rounded-full bg-brand-500 py-2.5 text-sm font-bold text-white">
-                  동전 구매하기
+                  조약돌 구매하기
                 </button>
               ) : (
                 <button type="button" onClick={() => void buy()} disabled={buying} className="flex-1 rounded-full bg-brand-500 py-2.5 text-sm font-bold text-white disabled:opacity-50">
@@ -619,7 +619,7 @@ export default function ChatApp({ initialCtx, initialMsgs, onChange, onBack }: {
             void refreshCoins(true);
           }}
           onContinue={() => {
-            // 결제가 끝나면 "동전을 써서 질문 더하기" 확인창으로 바로 이어 가요
+            // 결제가 끝나면 "조약돌을 써서 질문 더하기" 확인창으로 바로 이어 가요
             setPayOpen(false);
             void refreshCoins(true);
           }}

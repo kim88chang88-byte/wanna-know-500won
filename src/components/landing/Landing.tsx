@@ -4,7 +4,7 @@ import StickyDrawCta from "./StickyDrawCta";
 import BirthdayTeaser from "./BirthdayTeaser";
 import BottomTabs from "./BottomTabs";
 import CoinRitual from "./CoinRitual";
-import { splitWallet } from "./WalletBar";
+import { splitPearls } from "@/lib/currency";
 import PurchaseModal from "@/components/pay/PurchaseModal";
 import PaywallPopup, { type PaywallInfo } from "./PaywallPopup";
 import { readingCoinCost } from "@/lib/spendPlan";
@@ -62,13 +62,12 @@ export default function Landing() {
   const countsRef = useRef<DrawCounts>(counts);
   const timers = useRef<number[]>([]);
   const [ritual, setRitual] = useState(false);
-  const [ritualBill, setRitualBill] = useState(false);
   const [ritualBig, setRitualBig] = useState(false);
   const [tickets, setTickets] = useState(0);
   // 서버에 쌓인 뽑기 코인(로그인 선물 등)과, 방금 선물을 받았는지
   const [coins, setCoins] = useState(0);
   const [payOpen, setPayOpen] = useState(false);
-  // 프리미엄·궁합 카드를 눌렀는데 동전이 모자랄 때 먼저 보여주는 안내창, 그리고 거기서 열린 충전 화면
+  // 프리미엄·궁합 카드를 눌렀는데 조약돌이 모자랄 때 먼저 보여주는 안내창, 그리고 거기서 열린 충전 화면
   const [paywall, setPaywall] = useState<PaywallInfo | null>(null);
   const [paywallPay, setPaywallPay] = useState<PaywallInfo | null>(null);
   const coinsRef = useRef(0);
@@ -83,7 +82,7 @@ export default function Landing() {
       const bal = typeof d.balance === "number" && d.balance > 0 ? d.balance : 0;
       coinsRef.current = bal;
       setCoins(bal);
-      // granted: 처음 로그인한 회원 (동전 선물은 없어요. 신규 가입 집계만 남겨요)
+      // granted: 처음 로그인한 회원 (조약돌 선물은 없어요. 신규 가입 집계만 남겨요)
       if (d.granted === true) track("signup");
       return bal;
     } catch {
@@ -146,12 +145,12 @@ export default function Landing() {
         setLoginOpen(true);
         return;
       }
-      // 프리미엄(종합 사주·궁합)은 동전으로만 열려요. 동전이 모자라면 입력 전에 안내창을 먼저 보여줘요.
+      // 프리미엄(종합 사주·궁합)은 조약돌로만 열려요. 조약돌이 모자라면 입력 전에 안내창을 먼저 보여줘요.
       if (premium === true) {
         const need = readingCoinCost(true, fortune.includes("궁합"));
         const info: PaywallInfo = { fortune, price, premium: true, need, have: coinsRef.current, compat: fortune.includes("궁합") };
         if (coinsRef.current < need) {
-          // 동전을 아직 못 읽었을 수 있어서, 한 번 새로 읽고 판단해요.
+          // 조약돌을 아직 못 읽었을 수 있어서, 한 번 새로 읽고 판단해요.
           void refreshCoins().then((bal) => {
             const have = bal ?? coinsRef.current;
             if (have < need) setPaywall({ ...info, have });
@@ -160,7 +159,7 @@ export default function Landing() {
           return;
         }
       }
-      // 일반 풀이(동전 1개): 오늘 무료 뽑기도, 보너스 뽑기권도, 동전도 없으면 입력 전에 "잔액이 부족해요" 안내창을 먼저 보여줘요.
+      // 일반 풀이(조약돌 1개): 오늘 무료 뽑기도, 보너스 뽑기권도, 조약돌도 없으면 입력 전에 "잔액이 부족해요" 안내창을 먼저 보여줘요.
       if (premium !== true) {
         const noFree = countsRef.current.today >= FREE_PER_DAY && readTickets(getBrowserStorage()) <= 0;
         if (noFree && coinsRef.current < 1) {
@@ -187,11 +186,9 @@ export default function Landing() {
         timers.current.push(window.setTimeout(open, MODAL_DELAY_MS));
         return;
       }
-      // 1,000원 카드(둘의 궁합)는 동전 대신 지폐가 들어가요.
-      // 프리미엄 종합 사주(동전 19개)는 만원권이 낙엽처럼 떨어져요. (1,000원 궁합은 천원권 그대로)
+      // 프리미엄 종합 사주(진주 3개 + 조약돌 1개)는 진주가, 그 밖의 풀이는 조약돌이 떨어져요.
       const big = premium === true && !fortune.includes("궁합");
       setRitualBig(big);
-      setRitualBill(price.startsWith("1,000") || big);
       setRitual(true);
       timers.current.push(
         window.setTimeout(() => {
@@ -405,7 +402,7 @@ export default function Landing() {
     else if (!user) applyCounts(readCounts(getBrowserStorage(), new Date()));
   }, [serverCounts, user, applyCounts]);
 
-  // 하단 메뉴 "운세 뽑기" 빨간 점: 오늘 무료 뽑기나 동전이 남아 있는지 적어 둬요 (메뉴를 열면 꺼져요)
+  // 하단 메뉴 "운세 뽑기" 빨간 점: 오늘 무료 뽑기나 조약돌이 남아 있는지 적어 둬요 (메뉴를 열면 꺼져요)
   useEffect(() => {
     writeDrawAvail(getBrowserStorage(), Math.max(0, FREE_PER_DAY - counts.today) + tickets + coins > 0, coins, new Date());
     pingNav();
@@ -417,7 +414,7 @@ export default function Landing() {
       <Header onOpenLogin={openLogin} user={user} />
 
       <main className="relative z-10 max-w-[34rem] lg:max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-5 pb-20 sm:pb-24">
-        <HeroSection visitors={visitors} tickets={tickets} onBuy={user ? () => setPayOpen(true) : undefined} wallet={user ? { ...splitWallet(coins), free: Math.max(0, FREE_PER_DAY - counts.today) + tickets } : null} />
+        <HeroSection visitors={visitors} tickets={tickets} onBuy={user ? () => setPayOpen(true) : undefined} wallet={user ? { ...splitPearls(coins), free: Math.max(0, FREE_PER_DAY - counts.today) + tickets } : null} />
         <ShowcaseSection />
         {!user && <BirthdayTeaser onOpenLogin={openChatLogin} />}
         {/* 도리의 소식 카드들은 첫 화면의 "뽑으러 가기" 버튼 아래로 옮겼어요. (첫 화면에서 눌러야 할 것이 하나만 보이게) */}
@@ -459,7 +456,7 @@ export default function Landing() {
           onContinue={() => {
             const ctx = paywallPay;
             setPaywallPay(null);
-            // 충전 직후 동전을 새로 읽어서, 충분하면 바로 풀이 입력으로 이어가요.
+            // 충전 직후 조약돌을 새로 읽어서, 충분하면 바로 풀이 입력으로 이어가요.
             void refreshCoins().then((bal) => {
               if ((bal ?? 0) >= ctx.need) handleSpin(`paywall-${ctx.fortune}`, ctx.fortune, ctx.price, ctx.premium);
               else setPaywall({ ...ctx, have: bal ?? 0 });
@@ -467,7 +464,7 @@ export default function Landing() {
           }}
         />
       )}
-      {ritual && <CoinRitual bill={ritualBill} big={ritualBig} />}
+      {ritual && <CoinRitual big={ritualBig} />}
       <StickyDrawCta hidden={Boolean(intake) || loginOpen || ritual} />
 
       {((justLoggedIn && user) || gift || notice) && (

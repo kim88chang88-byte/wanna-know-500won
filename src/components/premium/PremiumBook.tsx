@@ -858,7 +858,7 @@ export default function PremiumBook({ report, flush = false, finale, previewBlur
   const num = (n: number) => String(n).padStart(2, "0");
   const lockedTotal = pages.reduce((a, p) => a + p.sections.filter((x) => x.locked).length, 0);
   const lockedHere = page.sections.filter((x) => x.locked).length;
-  const won = report.compat ? "동전 2개" : "동전 19개";
+  const won = report.compat ? "조약돌 2개" : "진주 3개 + 조약돌 1개";
   const unlock = (
     <button
       type="button"

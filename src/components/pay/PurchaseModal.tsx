@@ -3,10 +3,11 @@
 import { useState } from "react";
 import { track } from "@/lib/track";
 import { DEMO_COINS, DEMO_MONTH_CAP } from "@/lib/demoBuy";
+import { pebbleText } from "@/lib/currency";
 
 /*
  * 도리 메뉴판(구매 화면). 지금은 결제창이 없어서 "베타 구매 체험"으로 이어져요.
- * 체험은 실제로 결제되지 않고, 상품에 맞는 동전만 들어와요. (한 계정 한 달 3번)
+ * 체험은 실제로 결제되지 않고, 상품에 맞는 조약돌만 들어와요. (한 계정 한 달 3번)
  * 모든 단계에 "베타 체험 · 실제 결제 없음"을 적어서, 진짜로 결제된 것처럼 보이지 않게 해요.
  * 한도(3번)를 다 쓰면 "오픈 알림 받기"로 이어지고, 알림 신청은 이름·연락처 없이 "눌렀다"는 사실만 익명으로 세요.
  */
@@ -24,9 +25,9 @@ interface Product {
 }
 
 export const PRODUCTS: Product[] = [
-  { id: "pack2", name: "동전 2개", price: 1000, line: "동전 2개", use: "일반 풀이 2회 · 궁합 1회 (또는 상담실 질문 10번)" },
-  { id: "pack7", name: "동전 7개", price: 3000, line: "동전 6개", bonus: "+ 보너스 1개", use: "합계 7개 · 일반 풀이 7회 또는 궁합 3회 + 풀이 1회", hot: true },
-  { id: "pack22", name: "동전 22개", price: 9000, line: "동전 18개", bonus: "+ 보너스 4개", use: "합계 22개 · 프리미엄 종합 사주 1회(19개) + 3개", best: true },
+  { id: "pack2", name: "조약돌 2개", price: 1000, line: "", use: "일반 풀이 2회 · 궁합 1회 (또는 상담실 질문 10번)" },
+  { id: "pack7", name: "진주 1개", price: 3000, line: "", bonus: "+ 보너스 조약돌 1개", use: "조약돌 7개 분량 · 일반 풀이 7회 또는 궁합 3회 + 풀이 1회", hot: true },
+  { id: "pack22", name: "진주 3개", price: 9000, line: "", bonus: "+ 보너스 조약돌 4개", use: "조약돌 22개 분량 · 프리미엄 종합 사주 1회(진주 3개 + 조약돌 1개) + 조약돌 3개", best: true },
 ];
 
 const DemoNote = ({ className = "" }: { className?: string }) => (
@@ -81,7 +82,7 @@ export default function PurchaseModal({ preselect, onClose, onContinue, continue
               <button type="button" onClick={onClose} aria-label="닫기" className="text-lg leading-none">✕</button>
             </div>
             <p className="border-b border-orange-200 bg-orange-50 px-4 py-2 text-center text-xs font-bold text-orange-800">🧪 베타 체험 · 실제 결제는 없어요</p>
-            <p className="bg-amber-50 px-4 py-2.5 text-center text-xs font-semibold text-amber-800">동전 1개 = 500원 · 뽑기 1회 또는 상담실 질문 5번</p>
+            <p className="bg-amber-50 px-4 py-2.5 text-center text-xs font-semibold text-amber-800">조약돌 1개 = 500원 · 진주 1개 = 3,000원(조약돌 6개) · 뽑기 1회 또는 상담실 질문 5번</p>
             <div role="radiogroup" aria-label="상품 선택">
               {PRODUCTS.map((p) => (
                 <button
@@ -92,16 +93,20 @@ export default function PurchaseModal({ preselect, onClose, onContinue, continue
                   onClick={() => setSel(p.id)}
                   className={`flex w-full items-center justify-between gap-3 border-t border-slate-100 px-4 py-3.5 text-left ${sel === p.id ? "bg-brand-50 shadow-[inset_3px_0_0_#7c3aed]" : "bg-white"}`}
                 >
-                  <div className="min-w-0">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={p.id === "pack2" ? "/images/coin-500.webp" : "/images/pearl-3000.webp"} alt="" width={44} height={44} className="h-11 w-11 shrink-0 object-contain drop-shadow-sm" />
+                  <div className="min-w-0 flex-1">
                     <p className="flex flex-wrap items-center gap-1.5 text-[15px] font-extrabold text-gray-900">
                       {p.name}
                       {p.hot && <span className="rounded-md bg-red-500 px-1.5 py-px text-[10px] font-extrabold text-white">HOT</span>}
                       {p.best && <span className="rounded-md bg-orange-500 px-1.5 py-px text-[10px] font-extrabold text-white">BEST</span>}
                     </p>
-                    <p className="mt-0.5 text-[12.5px] font-bold">
-                      <span className="text-pink-600">{p.line}</span>
-                      {p.bonus && <span className="ml-1 text-orange-600">{p.bonus}</span>}
-                    </p>
+                    {(p.line || p.bonus) && (
+                      <p className="mt-0.5 text-[12.5px] font-bold">
+                        {p.line && <span className="text-pink-600">{p.line}</span>}
+                        {p.bonus && <span className="text-orange-600">{p.bonus}</span>}
+                      </p>
+                    )}
                     <p className="text-[11.5px] text-slate-500">{p.use}</p>
                   </div>
                   <p className="shrink-0 text-base font-extrabold text-gray-900">{won(p.price)}</p>
@@ -141,7 +146,7 @@ export default function PurchaseModal({ preselect, onClose, onContinue, continue
             <p className="text-sm leading-relaxed text-slate-600">돈이 나가지 않고, 카드·계좌 정보도 받지 않아요. 구매 흐름을 미리 써 보는 베타 체험이에요.</p>
             <dl className="space-y-2 text-[13px]">
               <div className="flex justify-between border-t border-slate-100 pt-2"><dt className="text-slate-500">상품</dt><dd className="font-bold">{picked.name}</dd></div>
-              <div className="flex justify-between border-t border-slate-100 pt-2"><dt className="text-slate-500">받게 되는 것</dt><dd className="font-bold">동전 {DEMO_COINS[picked.id]}개</dd></div>
+              <div className="flex justify-between border-t border-slate-100 pt-2"><dt className="text-slate-500">받게 되는 것</dt><dd className="font-bold">{pebbleText(DEMO_COINS[picked.id])}</dd></div>
               <div className="flex justify-between border-t border-slate-100 pt-2"><dt className="text-slate-500">결제 금액</dt><dd className="font-bold">0원 (체험)</dd></div>
               <div className="flex justify-between border-t border-slate-100 pt-2"><dt className="text-slate-500">체험 한도</dt><dd className="font-bold">한 달 {DEMO_MONTH_CAP}번</dd></div>
             </dl>
@@ -155,10 +160,10 @@ export default function PurchaseModal({ preselect, onClose, onContinue, continue
         ) : step === "done" ? (
           <div className="space-y-3 p-5">
             <h2 className="text-base font-extrabold text-gray-900">구매 완료 (체험)</h2>
-            <p className="text-center text-xl font-black text-gray-900">🎉 동전 {gotCoins}개가 들어왔어요</p>
-            <p role="status" className="rounded-xl bg-emerald-50 px-3 py-2.5 text-center text-sm font-bold text-emerald-700">베타 체험으로 받은 동전이에요. 실제 결제는 없었어요.</p>
+            <p className="text-center text-xl font-black text-gray-900">🎉 {pebbleText(gotCoins)} 분량이 들어왔어요</p>
+            <p role="status" className="rounded-xl bg-emerald-50 px-3 py-2.5 text-center text-sm font-bold text-emerald-700">베타 체험으로 받은 조약돌이에요. 실제 결제는 없었어요.</p>
             <DemoNote />
-            {balance > 0 && <p className="text-center text-[13px] text-slate-600">내 동전 <b>{balance}개</b> · 풀이 뽑기나 상담실 질문에 쓸 수 있어요</p>}
+            {balance > 0 && <p className="text-center text-[13px] text-slate-600">내 잔액 <b>{pebbleText(balance)}</b> · 풀이 뽑기나 상담실 질문에 쓸 수 있어요</p>}
             <button type="button" data-testid={onContinue ? "pay-continue" : undefined} onClick={onContinue ?? onClose} className="w-full rounded-2xl bg-brand-500 py-3 text-sm font-extrabold text-white">
               {onContinue ? continueLabel : "확인"}
             </button>

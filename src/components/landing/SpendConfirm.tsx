@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { splitWallet } from "./WalletBar";
+import { pebbleText, splitPearls } from "@/lib/currency";
 import type { SpendPlan } from "@/lib/spendPlan";
 
 /* 풀이 보기 직전 확인창: 무엇이 얼마나 쓰이는지 보여주고 계속할지 물어요. */
@@ -12,25 +12,20 @@ function Img({ src, h }: { src: string; h: number }) {
 }
 
 function Bal({ coins }: { coins: number }) {
-  const { tenK, bills, coins: c } = splitWallet(coins);
+  const { pearls, pebbles } = splitPearls(coins);
   return (
     <span className="inline-flex items-center gap-1">
-      {tenK > 0 && (
+      {pearls > 0 && (
         <>
-          <Img src="/images/bill-10000.webp" h={20} />×{tenK}
+          <Img src="/images/pearl-3000.webp" h={22} />×{pearls}
         </>
       )}
-      {bills > 0 && (
+      {pebbles > 0 && (
         <>
-          <Img src="/images/bill-1000.webp" h={20} />×{bills}
+          <Img src="/images/coin-500.webp" h={22} />×{pebbles}
         </>
       )}
-      {c > 0 && (
-        <>
-          <Img src="/images/coin-500.webp" h={20} />×{c}
-        </>
-      )}
-      {tenK === 0 && bills === 0 && c === 0 && <span>0</span>}
+      {pearls === 0 && pebbles === 0 && <span>0</span>}
     </span>
   );
 }
@@ -58,9 +53,8 @@ function SpendStage({ before, after }: { before: number; after: number }) {
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
   }, [before, after]);
-  // 날아가는 돈: 천원권 우선, 홀수 동전은 동전 1개
-  const flyBills = Math.min(3, Math.floor(cost / 2));
-  const flyCoin = cost % 2 === 1 || flyBills === 0;
+  // 날아가는 돈: 쓰는 만큼의 조약돌 (최대 3개)
+  const flyCount = Math.max(1, Math.min(3, cost));
   return (
     <div className="mt-2.5 rounded-xl bg-brand-50 px-3 py-2.5" data-testid="spend-stage">
       <style>{`
@@ -75,16 +69,11 @@ function SpendStage({ before, after }: { before: number; after: number }) {
           <div className="text-[11px] font-bold text-slate-500">내 지갑</div>
           <div className="mt-1 text-[12.5px] font-bold text-brand-600"><Bal coins={after} /></div>
           <div className="pointer-events-none absolute left-0 top-3 flex gap-1">
-            {Array.from({ length: flyBills }).map((_, i) => (
+            {Array.from({ length: flyCount }).map((_, i) => (
               <span key={i} className="sp-fly inline-block" style={{ animationDelay: `${0.35 + i * 0.18}s` }}>
-                <Img src="/images/bill-1000.webp" h={22} />
+                <Img src="/images/coin-500.webp" h={22} />
               </span>
             ))}
-            {flyCoin && (
-              <span className="sp-fly inline-block" style={{ animationDelay: `${0.35 + flyBills * 0.18}s` }}>
-                <Img src="/images/coin-500.webp" h={20} />
-              </span>
-            )}
           </div>
         </div>
         <div className="relative text-right">
@@ -105,13 +94,13 @@ export default function SpendConfirm({ plan, onCancel, onConfirm, onCharge }: { 
   const title =
     plan.kind === "free" ? "오늘의 무료 뽑기 1회를 써서\n풀이를 볼까요?"
     : plan.kind === "ticket" ? "보너스 뽑기권 1장을 써서\n풀이를 볼까요?"
-    : plan.kind === "coin" ? `동전 ${plan.cost}개(${(plan.cost * 500).toLocaleString("ko-KR")}원)를 써서\n풀이를 볼까요?`
-    : "동전이 모자라요";
+    : plan.kind === "coin" ? `${pebbleText(plan.cost)}(${(plan.cost * 500).toLocaleString("ko-KR")}원)를 써서\n풀이를 볼까요?`
+    : "조약돌이 모자라요";
   const sub =
     plan.kind === "free" ? "한 번 보면 무료 횟수가 하나 줄어요."
     : plan.kind === "ticket" ? "오늘 무료는 이미 사용했어요."
     : plan.kind === "coin" ? "오늘 무료는 이미 사용했어요."
-    : `이 풀이는 동전 ${plan.cost}개가 필요한데\n지금은 ${plan.have}개가 있어요.`;
+    : `이 풀이는 ${pebbleText(plan.cost)}가 필요한데\n지금은 ${pebbleText(plan.have)}가 있어요.`;
   const icon = plan.kind === "coin" || short ? "/images/coin-500.webp" : "/images/free-tag.webp";
   return (
     <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/50 px-6" role="alertdialog" aria-modal="true" aria-label="사용 확인" onClick={onCancel}>
@@ -132,7 +121,7 @@ export default function SpendConfirm({ plan, onCancel, onConfirm, onCharge }: { 
             {short ? "닫기" : "취소"}
           </button>
           <button type="button" onClick={short ? onCharge : onConfirm} className="flex-1 rounded-full bg-brand-600 py-2.5 text-sm font-extrabold text-white active:scale-[0.98]">
-            {short ? "동전 충전하기" : plan.kind === "coin" ? "동전 쓰고 보기" : "계속하기"}
+            {short ? "충전하기" : plan.kind === "coin" ? "쓰고 보기" : "계속하기"}
           </button>
         </div>
       </div>

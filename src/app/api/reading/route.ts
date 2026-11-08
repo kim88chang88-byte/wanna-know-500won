@@ -64,10 +64,10 @@ export async function POST(request: Request) {
   const userId = session && db ? session.sub : null;
   let counts: DrawCounts | null = null;
   let useCoin = false;
-  // 궁합(1,000원)은 동전 2개, 그 밖의 뽑기는 1개
+  // 궁합(1,000원)은 조약돌 2개, 그 밖의 뽑기는 1개
   const isCompat = rawPremium === true && typeof rawTopic === "string" && isCompatFortune(rawTopic);
   const coinCost = readingCoinCost(rawPremium === true, isCompat);
-  // 프리미엄(종합 사주·둘의 궁합)은 무료·보너스 뽑기로는 볼 수 없고 동전으로만 열어요.
+  // 프리미엄(종합 사주·둘의 궁합)은 무료·보너스 뽑기로는 볼 수 없고 조약돌로만 열어요.
   const coinsOnly = rawPremium === true;
   if (userId && db) {
     try {
@@ -76,25 +76,25 @@ export async function POST(request: Request) {
       // DB 가 잠깐 안 되어도 서비스는 계속돼요. (횟수 제한만 건너뛰어요)
       console.error("getCounts failed:", err instanceof Error ? err.message : "unknown");
     }
-    // 프리미엄은 동전으로만 열어요. (동전이 모자라면 항상 막아요)
+    // 프리미엄은 조약돌로만 열어요. (조약돌이 모자라면 항상 막아요)
     if (counts && coinsOnly) {
       let coins = 0;
       try {
         coins = await db.getCoins(userId);
       } catch {
-        // 동전 조회가 안 되면 프리미엄은 열지 않아요.
+        // 조약돌 조회가 안 되면 프리미엄은 열지 않아요.
       }
       if (coins >= coinCost) {
         useCoin = true;
       } else {
         return NextResponse.json(
-          { error: `${isCompat ? "둘의 궁합" : "프리미엄 종합 사주"}는 동전 ${coinCost}개(${(coinCost * 500).toLocaleString("ko-KR")}원)로만 볼 수 있어요. 동전을 충전해 주세요.`, code: "coin_needed", counts },
+          { error: `${isCompat ? "둘의 궁합" : "프리미엄 종합 사주"}는 조약돌 ${coinCost}개(${(coinCost * 500).toLocaleString("ko-KR")}원)로만 볼 수 있어요. 조약돌을 충전해 주세요.`, code: "coin_needed", counts },
           { status: 402 },
         );
       }
     } else if (counts && counts.today >= FREE_PER_DAY + (rawBonus === true ? 1 : 0)) {
-      // 오늘 무료를 다 썼다면, 가지고 있는 동전을 써서 뽑아요. (무료가 항상 먼저예요) 풀이가 실제로 나간 뒤에 차감해요.
-      // 동전이 모자랄 때만, 무료 횟수 강제가 켜져 있으면 막고 꺼져 있으면(베타) 그대로 보여 줘요.
+      // 오늘 무료를 다 썼다면, 가지고 있는 조약돌을 써서 뽑아요. (무료가 항상 먼저예요) 풀이가 실제로 나간 뒤에 차감해요.
+      // 조약돌이 모자랄 때만, 무료 횟수 강제가 켜져 있으면 막고 꺼져 있으면(베타) 그대로 보여 줘요.
       let coins = 0;
       try {
         coins = await db.getCoins(userId);
@@ -226,7 +226,7 @@ export async function POST(request: Request) {
       : null;
     try {
       await ensureUserOnce();
-      // 동전으로 연 프리미엄은 오늘의 무료 뽑기를 쓴 것으로 세지 않아요.
+      // 조약돌로 연 프리미엄은 오늘의 무료 뽑기를 쓴 것으로 세지 않아요.
       if (!coinsOnly) await db.recordDraw(userId, normalizeTopic(rawTopic));
       // 초대받은 친구의 첫 풀이라면 두 사람에게 코인을 지급해요. (코드를 입력하지 않았거나 이미 받았으면 아무 일도 없어요)
       try {

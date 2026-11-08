@@ -38,7 +38,7 @@ function readOpened(day: string): Daily | null {
   return null;
 }
 
-/** 도리 동전이 빙글 돌며 떠올랐다가 내려앉으면 뒷면에 오늘의 행운 지수가 보이고, 옆에 응원 한 줄이 나와요. */
+/** 도리 조약돌이 빙글 돌며 떠올랐다가 내려앉으면 뒷면에 오늘의 행운 지수가 보이고, 옆에 응원 한 줄이 나와요. */
 function LuckCoin({ luck, grade, cheer }: { luck: number; grade: string; cheer: string }) {
   const high = luck >= 90;
   return (

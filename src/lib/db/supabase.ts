@@ -313,7 +313,7 @@ export function createDb(config: DbConfig, fetchImpl: FetchLike = fetch) {
     },
 
     /**
-     * 처음 로그인한 회원인지 표시해요. 처음이면 true. (신규 가입 집계용이고 동전은 주지 않아요)
+     * 처음 로그인한 회원인지 표시해요. 처음이면 true. (신규 가입 집계용이고 조약돌은 주지 않아요)
      * coin_log 에 delta 0 한 줄을 남겨서 두 번째부터는 false 가 돼요.
      */
     async markWelcome(userId: string): Promise<boolean> {

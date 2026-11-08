@@ -123,7 +123,7 @@ export function Header({ onOpenLogin, user = null }: { onOpenLogin: () => void; 
 export function HeroSection({ visitors = null, tickets = 0, wallet = null, onBuy }: { visitors?: { today: number; total: number } | null; tickets?: number; wallet?: WalletValues | null; onBuy?: () => void }) {
   return (
     <section className="text-left mb-3">
-      {/* 방문자 수(왼쪽) + 내 지폐·동전·무료 뽑기(오른쪽, 로그인한 회원만) 한 줄 */}
+      {/* 방문자 수(왼쪽) + 내 지폐·조약돌·무료 뽑기(오른쪽, 로그인한 회원만) 한 줄 */}
       <div className="flex items-center justify-between gap-2">
         {visitors ? (
           <div data-testid="visitors" className="inline-flex items-center gap-1.5 rounded-full bg-white/80 border border-brand-100 px-3 py-1.5 text-xs text-gray-500 shadow-sm shrink-0">
@@ -149,7 +149,7 @@ export function HeroSection({ visitors = null, tickets = 0, wallet = null, onBuy
       )}
       {wallet && wallet.bills + wallet.coins > 0 && (
         <p data-testid="coin-note" className="mt-1 text-right text-[11px] leading-tight text-slate-500">
-          {tickets > 0 ? "그다음 동전이 자동으로 쓰여요" : "무료 뽑기를 다 쓰면 동전이 자동으로 쓰여요"}
+          {tickets > 0 ? "그다음 조약돌이 자동으로 쓰여요" : "무료 뽑기를 다 쓰면 조약돌이 자동으로 쓰여요"}
         </p>
       )}
     </section>
@@ -290,8 +290,8 @@ export function PremiumSection({ onSpin }: SpinProps) {
               role="button"
               tabIndex={0}
               aria-label={`${p.title} 보기`}
-              onClick={() => onSpin(p.key, p.fortune, "동전 19개", true)}
-              onKeyDown={(e) => activateOnKey(e, () => onSpin(p.key, p.fortune, "동전 19개", true))}
+              onClick={() => onSpin(p.key, p.fortune, "진주 3개 + 조약돌 1개", true)}
+              onKeyDown={(e) => activateOnKey(e, () => onSpin(p.key, p.fortune, "진주 3개 + 조약돌 1개", true))}
               className={`scroll-mt-24 card-water-glow relative flex flex-col justify-between rounded-3xl p-3.5 h-full bg-white cursor-pointer select-none hover:shadow-lg transition-shadow group focus:outline-none focus-visible:ring-4 focus-visible:ring-brand-300 ${p.card}`}
             >
               <div>
@@ -308,7 +308,7 @@ export function PremiumSection({ onSpin }: SpinProps) {
                 <p className="text-xs text-slate-500 text-center leading-relaxed">{p.desc}</p>
               </div>
               <span className={`mt-4 block rounded-full py-3 text-center text-sm font-extrabold text-white ${p.button}`}>
-                동전 19개 · 시작하기
+                진주 3개 + 조약돌 1개 · 시작하기
               </span>
             </div>
             </div>
@@ -333,7 +333,7 @@ export function SampleSection() {
 /* ------------------------------------------------------------------ 소개 (후기 자리) */
 
 const TRUST_POINTS = [
-  { title: "500원", desc: "동전 하나면 한 번 봐줄게!", titleClass: "text-amber-600" },
+  { title: "500원", desc: "조약돌 하나면 한 번 봐줄게!", titleClass: "text-amber-600" },
   { title: "매일 첫 1회 무료", desc: "오늘 운은 도리가 공짜로 ❄️", titleClass: "text-brand-500" },
   { title: "내 보관함", desc: "도리가 잘 챙겨둘게!", titleClass: "text-indigo-600" },
 ] as const;
@@ -348,10 +348,10 @@ export function TrustSection() {
       <h3 className="font-cute text-xl sm:text-3xl font-normal text-gray-900 leading-snug mt-1.5">
         철학관 찾아가지 않아도,
         <br />
-        <span className="text-brand-500">동전 하나</span>로 제대로 된 사주.
+        <span className="text-brand-500">조약돌 하나</span>로 제대로 된 사주.
       </h3>
       <p className="text-xs sm:text-sm text-slate-600 leading-relaxed mt-1.5">
-        예약도 대기도 없이, 내 사주를 꼼꼼하게 풀어낸 풀이를 500원 동전 하나로 받아보세요. 마음에 드는 결과는 보관함에 남겨두고 언제든 다시 볼 수 있어요.
+        예약도 대기도 없이, 내 사주를 꼼꼼하게 풀어낸 풀이를 500원 조약돌 하나로 받아보세요. 마음에 드는 결과는 보관함에 남겨두고 언제든 다시 볼 수 있어요.
       </p>
       <div className="grid grid-cols-3 mt-3 pt-3 border-t border-sky-100">
         {TRUST_POINTS.map((t, i) => (

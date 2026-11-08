@@ -1,24 +1,17 @@
 import type { ReactNode } from "react";
+export { splitPearls } from "@/lib/currency";
 /*
- * 로그인한 회원에게만 보이는 "내 주머니": 1,000원 지폐 · 500원 동전 · 오늘 남은 무료 뽑기.
+ * 로그인한 회원에게만 보이는 "내 주머니": 진주(3,000원) · 조약돌(500원) · 오늘 남은 무료 뽑기.
  * 글자 없이 그림과 숫자로만 보여주고, 읽어 주는 설명은 aria-label/title 에 둬요.
  */
 
 export interface WalletValues {
-  /** 10,000원 지폐 장수 (동전 20개마다 1장) */
-  tenK?: number;
-  /** 결제로 산 1,000원 지폐 장수 (결제 기능이 열리면 채워져요) */
-  bills: number;
-  /** 결제로 산 500원 동전 개수 (결제 기능이 열리면 채워져요) */
-  coins: number;
+  /** 진주(3,000원) 개수: 조약돌 6개마다 1개 */
+  pearls: number;
+  /** 남는 조약돌(500원) 개수 */
+  pebbles: number;
   /** 무료로 뽑을 수 있는 횟수: 오늘 남은 무료 + 선물·도장으로 받은 뽑기권 */
   free: number;
-}
-
-/** 동전(500원) 잔액을 만원권(동전 20개)·천원권(동전 2개)·남는 동전으로 나눠요. 예: 21개 → 만원권 1장 + 동전 1개, 19개 → 천원권 9장 + 동전 1개 */
-export function splitWallet(coinBalance: number): { tenK: number; bills: number; coins: number } {
-  const n = Number.isFinite(coinBalance) && coinBalance > 0 ? Math.floor(coinBalance) : 0;
-  return { tenK: Math.floor(n / 20), bills: Math.floor((n % 20) / 2), coins: n % 2 };
 }
 
 /** 칩 안에 들어갈 숫자: 음수·소수는 0으로, 너무 크면 99+ */
@@ -45,23 +38,17 @@ function Chip({ label, count, tone, children }: { label: string; count: number; 
   );
 }
 
-export default function WalletBar({ tenK = 0, bills, coins, free, onBuy }: WalletValues & { onBuy?: () => void }) {
+export default function WalletBar({ pearls, pebbles, free, onBuy }: WalletValues & { onBuy?: () => void }) {
   const money = (
     <>
-      <span data-testid="wallet-tenk" className="contents">
-        <Chip label="결제한 10,000원 지폐" count={tenK} tone="border-emerald-200">
+      <span data-testid="wallet-pearls" className="contents">
+        <Chip label="진주" count={pearls} tone="border-violet-200">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/images/bill-10000.webp" alt="" width={44} height={25} className="h-[14px] w-auto rounded-[3px] sm:h-[18px] shadow-[0_1px_2px_rgba(0,0,0,0.2)]" />
+          <img src="/images/pearl-3000.webp" alt="" width={22} height={22} className="h-[18px] w-[18px] object-contain sm:h-[22px] sm:w-[22px] drop-shadow-sm" />
         </Chip>
       </span>
-      <span data-testid="wallet-bills" className="contents">
-        <Chip label="결제한 1,000원 지폐" count={bills} tone="border-sky-200">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/images/bill-1000.webp" alt="" width={44} height={25} className="h-[14px] w-auto rounded-[3px] sm:h-[18px] shadow-[0_1px_2px_rgba(0,0,0,0.2)]" />
-        </Chip>
-      </span>
-      <span data-testid="wallet-coins" className="contents">
-        <Chip label="동전" count={coins} tone="border-amber-200">
+      <span data-testid="wallet-pebbles" className="contents">
+        <Chip label="조약돌" count={pebbles} tone="border-sky-200">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/images/coin-500.webp" alt="" width={22} height={22} className="h-[18px] w-[18px] object-contain sm:h-[22px] sm:w-[22px] drop-shadow-sm" />
         </Chip>
@@ -71,7 +58,7 @@ export default function WalletBar({ tenK = 0, bills, coins, free, onBuy }: Walle
   return (
     <div data-testid="wallet-bar" className="flex flex-nowrap items-center justify-end gap-1 sm:gap-1.5">
       {onBuy ? (
-        <button type="button" onClick={onBuy} aria-label="동전 충전하기 (결제 메뉴판 열기)" className="flex flex-nowrap items-center justify-end gap-1 rounded-full active:scale-95 sm:gap-1.5">
+        <button type="button" onClick={onBuy} aria-label="조약돌 충전하기 (결제 메뉴판 열기)" className="flex flex-nowrap items-center justify-end gap-1 rounded-full active:scale-95 sm:gap-1.5">
           {money}
         </button>
       ) : (

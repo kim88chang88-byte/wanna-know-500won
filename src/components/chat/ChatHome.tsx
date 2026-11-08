@@ -276,7 +276,7 @@ export default function ChatHome() {
                 </button>
                 {delId === r.id && (
                   <p data-testid="room-leave-note" role="status" className="basis-full py-2 pl-5 pr-1 text-right text-[11.5px] leading-snug text-red-600">
-                    대화 내용만 지워져요. 남은 질문과 동전은 그대로예요.
+                    대화 내용만 지워져요. 남은 질문과 조약돌은 그대로예요.
                   </p>
                 )}
               </li>

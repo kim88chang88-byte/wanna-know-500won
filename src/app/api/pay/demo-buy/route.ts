@@ -13,7 +13,7 @@ const ADMIN_MONTH_CAP = 1000;
 const MAX_GRANT = 10;
 
 /**
- * 베타 구매 체험. 실제 결제는 없고, 상품에 맞는 동전만 지급해요. (한 계정 한 달에 DEMO_MONTH_CAP 번)
+ * 베타 구매 체험. 실제 결제는 없고, 상품에 맞는 조약돌만 지급해요. (한 계정 한 달에 DEMO_MONTH_CAP 번)
  * 결제 금액·카드 정보는 받지도 기록하지도 않아요.
  */
 export async function POST(request: Request) {

@@ -77,7 +77,7 @@ export interface IntakeTarget {
 
 interface Props {
   target: IntakeTarget;
-  /** 로그인 회원의 남은 무료·뽑기권·동전. 있으면 "풀이 보기" 전에 무엇이 쓰이는지 확인창을 보여줘요. */
+  /** 로그인 회원의 남은 무료·뽑기권·조약돌. 있으면 "풀이 보기" 전에 무엇이 쓰이는지 확인창을 보여줘요. */
   wallet?: SpendWallet | null;
   onClose: () => void;
   /** 풀이를 성공적으로 받았을 때 한 번 호출돼요. 로그인 회원이면 서버가 센 횟수를 함께 줘요. (뽑기 횟수 기록용) */
@@ -708,7 +708,7 @@ export default function IntakeModal({ target, wallet = null, onClose, onComplete
   }
 
   // 프리미엄 결과 화면만 미드나잇+골드 톤으로 보여줘요. (입력·로딩 화면은 기존 그대로)
-  // 둘의 궁합은 500원 풀이와 같은 밝은 템플릿으로 보여줘요. (10쪽 책·어두운 테마는 동전 19개 종합 사주만)
+  // 둘의 궁합은 500원 풀이와 같은 밝은 템플릿으로 보여줘요. (10쪽 책·어두운 테마는 조약돌 19개 종합 사주만)
   const luxe = target.premium === true && !compat && phase === "result";
   const storyMode = !luxe && premiumReport ? isStoryReport(premiumReport) : false;
   const bookMode = luxe && !!premiumReport && premiumReport.level === "full" && premiumReport.book.length > 0;
@@ -1220,7 +1220,7 @@ export default function IntakeModal({ target, wallet = null, onClose, onComplete
           )}
           {freeUsed && error && (
             <button type="button" onClick={() => setPayOpen(true)} className="mt-2 w-full rounded-full bg-brand-500 py-2.5 text-sm font-bold text-white">
-              {target.premium === true ? "동전 충전하고 보기" : "동전으로 한 번 더 뽑기"}
+              {target.premium === true ? "조약돌 충전하고 보기" : "조약돌로 한 번 더 뽑기"}
             </button>
           )}
           {confirmOpen && wallet && (
@@ -1248,7 +1248,7 @@ export default function IntakeModal({ target, wallet = null, onClose, onComplete
               onContinue={
                 payForReading && wallet
                   ? () => {
-                      // 동전 수가 새로 불러와질 때까지 잠깐 기다렸다가 소모 확인창을 열어요
+                      // 조약돌 수가 새로 불러와질 때까지 잠깐 기다렸다가 소모 확인창을 열어요
                       setResume({ coins: wallet.coins });
                       setPayOpen(false);
                       setPayForReading(false);
