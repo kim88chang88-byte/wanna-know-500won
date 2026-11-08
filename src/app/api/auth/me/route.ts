@@ -1,3 +1,4 @@
+import { createHmac } from "node:crypto";
 import { NextResponse } from "next/server";
 import { readCookie, SESSION_COOKIE, verifySessionToken } from "@/lib/auth/session";
 import type { SavedProfile } from "@/lib/profile";
@@ -41,6 +42,8 @@ export async function GET(request: Request) {
     {
       loggedIn: Boolean(session),
       nickname: session?.nick ?? null,
+      // 이 브라우저에 남긴 "지난번에 뽑았어요" 표시가 같은 계정 것인지 가리는 값. 회원번호가 아니고 되돌릴 수 없는 짧은 해시예요.
+      tag: session && process.env.AUTH_SECRET ? createHmac("sha256", process.env.AUTH_SECRET).update(`last:${session.sub}`).digest("hex").slice(0, 12) : null,
       counts,
       profile,
       db: dbStatus,

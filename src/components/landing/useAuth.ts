@@ -8,6 +8,8 @@ import { getBrowserStorage } from "@/lib/drawCounter";
 
 export interface AuthUser {
   nickname: string | null;
+  /** 이 브라우저의 기기 저장값이 같은 계정 것인지 가리는 짧은 표식 (회원번호 아님) */
+  tag?: string | null;
 }
 
 /** 서버가 센 뽑기 횟수 (로그인 + DB 연결 시) */
@@ -52,9 +54,9 @@ export function useAuth() {
     }
     fetch("/api/auth/me", { cache: "no-store" })
       .then((r) => (r.ok ? r.json() : null))
-      .then((data: { loggedIn?: boolean; nickname?: string | null; counts?: ServerCounts | null; profile?: SavedProfile | null } | null) => {
+      .then((data: { loggedIn?: boolean; nickname?: string | null; tag?: string | null; counts?: ServerCounts | null; profile?: SavedProfile | null } | null) => {
         if (!alive || !data?.loggedIn) return;
-        setUser({ nickname: data.nickname ?? null });
+        setUser({ nickname: data.nickname ?? null, tag: data.tag ?? null });
         setServerCounts(data.counts ?? null);
         setProfile(data.profile ?? null);
       })

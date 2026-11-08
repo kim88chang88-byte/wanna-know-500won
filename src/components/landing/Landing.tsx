@@ -126,11 +126,6 @@ export default function Landing() {
         // 숫자를 못 받으면 그냥 숨겨요
       }
     })();
-    try {
-      setLastKey(getBrowserStorage()?.getItem(LAST_KEY) ?? null);
-    } catch {
-      /* 읽기 실패는 무시 */
-    }
     const pending = timers.current;
     return () => pending.forEach((t) => window.clearTimeout(t));
   }, [applyCounts, syncReward]);
@@ -382,7 +377,8 @@ export default function Landing() {
       if (spinKey.current) {
         setLastKey(spinKey.current);
         try {
-          getBrowserStorage()?.setItem(LAST_KEY, spinKey.current);
+          // 계정별로 기억해요: 같은 브라우저에서 다른 계정으로 로그인하면 이 표시는 보이지 않아요
+          if (userTagRef.current) getBrowserStorage()?.setItem(LAST_KEY, `${userTagRef.current}:${spinKey.current}`);
         } catch {
           /* 저장 실패는 무시 */
         }
@@ -396,6 +392,24 @@ export default function Landing() {
     },
     [applyCounts, setServerCounts, syncReward, loggedIn, refreshCoins],
   );
+
+  // "지난번에 뽑았어요" 표시: 로그인한 계정이 직접 뽑은 것만 보여줘요 (이 브라우저에 남은 다른 사람 것은 숨겨요)
+  const userTag = user?.tag ?? null;
+  const userTagRef = useRef<string | null>(null);
+  userTagRef.current = userTag;
+  useEffect(() => {
+    if (!userTag) {
+      setLastKey(null);
+      return;
+    }
+    try {
+      const v = getBrowserStorage()?.getItem(LAST_KEY) ?? "";
+      const i = v.indexOf(":");
+      setLastKey(i > 0 && v.slice(0, i) === userTag ? v.slice(i + 1) : null);
+    } catch {
+      /* 읽기 실패는 무시 */
+    }
+  }, [userTag]);
 
   // 로그인 직후엔 서버가 센 횟수를, 로그아웃·탈퇴 후엔 이 브라우저의 횟수를 보여줘요.
   useEffect(() => {
