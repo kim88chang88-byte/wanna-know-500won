@@ -1,6 +1,36 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import EmailLogin from "./EmailLogin";
+
 /** 로그인 버튼 세 개 (카카오 · 구글 · 네이버 순서, 로그인 창과 보관함에서 같이 써요) */
 export default function LoginButtons({ className = "flex flex-col gap-2.5" }: { className?: string }) {
   const base = "w-full py-2.5 px-4 rounded-full font-bold text-xs flex items-center justify-center gap-2 shadow-sm";
+  const [emailOpen, setEmailOpen] = useState(false);
+  const [emailEnabled, setEmailEnabled] = useState(false);
+  // 메일 발송 설정이 끝났을 때만 이메일 로그인 버튼을 보여줘요.
+  useEffect(() => {
+    let alive = true;
+    fetch("/api/auth/email", { cache: "no-store" })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d: { enabled?: boolean } | null) => {
+        if (alive && d?.enabled) setEmailEnabled(true);
+      })
+      .catch(() => {
+        /* 못 읽으면 소셜 로그인만 보여요 */
+      });
+    return () => {
+      alive = false;
+    };
+  }, []);
+
+  if (emailOpen) {
+    return (
+      <div className={className}>
+        <EmailLogin onBack={() => setEmailOpen(false)} />
+      </div>
+    );
+  }
   return (
     <div className={className}>
       {/* 카카오 로그인은 서버 주소로 이동해서 진행해요 (카카오 로그인 화면 → 다시 이 서비스로) */}
@@ -19,6 +49,19 @@ export default function LoginButtons({ className = "flex flex-col gap-2.5" }: { 
       <a href="/api/auth/naver" data-testid="naver-login" className={`${base} bg-[#03C75A] text-white`}>
         <span>네이버로 로그인</span>
       </a>
+      {emailEnabled && (
+        <>
+          <div className="flex items-center gap-2 text-[10px] text-gray-400" aria-hidden="true">
+            <i className="h-px flex-1 bg-gray-200" />
+            <span>또는</span>
+            <i className="h-px flex-1 bg-gray-200" />
+          </div>
+          <button type="button" data-testid="email-login" onClick={() => setEmailOpen(true)} className={`${base} border-[1.5px] border-brand-400 bg-white text-brand-700`}>
+            <span aria-hidden="true">✉️</span>
+            <span>이메일로 로그인</span>
+          </button>
+        </>
+      )}
     </div>
   );
 }
