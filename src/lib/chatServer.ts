@@ -1,7 +1,7 @@
 import { isAdmin } from "@/lib/admin/auth";
 import { readCookie, SESSION_COOKIE, verifySessionToken } from "@/lib/auth/session";
 import type { ChatKind } from "@/lib/chatContext";
-import { freeFor, memQuota, scopeFor } from "@/lib/chatQuota";
+import { freeFor, memQuota, roomKey, scopeFor } from "@/lib/chatQuota";
 import { createDb, loadDbConfig } from "@/lib/db/supabase";
 import { resolveBirth } from "@/lib/saju/birthPlace";
 import type { BirthInput } from "@/lib/saju/types";
@@ -83,7 +83,7 @@ export interface QuotaTarget {
 }
 
 export function targetOf(user: string, ctx: ParsedCtx, now: Date = new Date()): QuotaTarget {
-  return { user, scope: scopeFor(ctx.kind, ctx.birth, ctx.partnerBirth, now), free: freeFor(ctx.kind) };
+  return { user, scope: scopeFor(ctx.kind, ctx.birth, ctx.partnerBirth, now, roomKey(ctx.summary, ctx.topic, ctx.premium)), free: freeFor(ctx.kind) };
 }
 
 /** DB 가 없거나 함수를 아직 안 만들었으면 서버 메모리로 세요. (그래도 최소한의 제한은 돼요) */

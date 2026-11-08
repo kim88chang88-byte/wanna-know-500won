@@ -6,16 +6,24 @@ import type { BirthInput } from "@/lib/saju/types";
 /*
  * 상담방 질문 횟수.
  *  - 오늘의 한마디 카드에서 들어오면: 하루(한국 시간) 3번 무료
- *  - 결과서(500원·1,000원)에서 들어오면: 그 사람(·두 사람) 결과마다 한 달에 10번 무료
+ *  - 풀이(500원·프리미엄)에서 들어오면: 풀이마다 생기는 채팅방 하나하나가 한 달에 5번씩 무료 (방끼리 나눠 쓰지 않아요)
+ *  - 궁합에서 들어오면: 두 사람 궁합 방이 한 달에 10번 무료
  *  - 뽑기 코인 1장 = 질문 5개 (무료를 다 쓴 뒤에 쓰여요)
  * 그 밖에 한 사람이 하루에 보낼 수 있는 전체 질문 수에도 위쪽 한도(DAY_CAP)를 둬요.
  */
 export const FREE_DAILY = 3;
-export const FREE_RESULT = 10;
+export const FREE_RESULT = 5;
+export const FREE_COMPAT = 10;
 export const BUY_AMOUNT = 5;
 export const DAY_CAP = 40;
 
-export const freeFor = (kind: ChatKind): number => (kind === "daily" ? FREE_DAILY : FREE_RESULT);
+export const freeFor = (kind: ChatKind): number => (kind === "daily" ? FREE_DAILY : kind === "compat" ? FREE_COMPAT : FREE_RESULT);
+
+/** 풀이 방을 가르는 주제 표시: 요약의 "주제: ○○" 줄, 신년운, 프리미엄 여부 */
+export function roomKey(summary: string | undefined, topic?: "study", premium?: boolean): string {
+  const t = /^주제: (.+)$/m.exec(summary ?? "")?.[1]?.trim() ?? "";
+  return [t.slice(0, 40), topic ?? "", premium ? "premium" : ""].join("|");
+}
 
 function birthKey(b: BirthInput | null): string {
   if (!b) return "me";
@@ -23,11 +31,11 @@ function birthKey(b: BirthInput | null): string {
 }
 
 /** 질문 횟수를 세는 범위. 같은 범위의 질문은 같은 무료 횟수를 나눠 써요. */
-export function scopeFor(kind: ChatKind, birth: BirthInput | null, partnerBirth: BirthInput | null, now: Date = new Date()): string {
+export function scopeFor(kind: ChatKind, birth: BirthInput | null, partnerBirth: BirthInput | null, now: Date = new Date(), room = ""): string {
   const day = kstDay(now);
   if (kind === "daily") return `d:${day}`;
   const h = createHash("sha256")
-    .update(kind === "compat" ? `${birthKey(birth)}|${birthKey(partnerBirth)}` : birthKey(birth))
+    .update(kind === "compat" ? `${birthKey(birth)}|${birthKey(partnerBirth)}` : `${birthKey(birth)}#${room}`)
     .digest("hex")
     .slice(0, 16);
   return `${kind === "compat" ? "c" : "r"}:${day.slice(0, 7)}:${h}`;
