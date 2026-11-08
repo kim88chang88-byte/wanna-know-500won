@@ -23,10 +23,10 @@ describe("상담실 대화방", () => {
   });
 
   it("2027 신년운 방은 topic 표시가 없어도(예전 방) 도리 수달 얼굴이에요", () => {
-    expect(roomAnimal({ ...reading(), topic: "study" })).toBe("/images/animal-otter-study.webp");
-    expect(roomAnimal(reading("주제: 2027 신년운\n한 줄 결론: 좋아요"))).toBe("/images/animal-otter-study.webp");
+    expect(roomAnimal({ ...reading(), topic: "study" })).toBe("/images/animal-otter-newyear.webp");
+    expect(roomAnimal(reading("주제: 2027 신년운\n한 줄 결론: 좋아요"))).toBe("/images/animal-otter-newyear.webp");
     expect(roomLook(reading("주제: 2027 신년운")).title).toBe("2027 신년운");
-    expect(roomAnimal(reading())).not.toBe("/images/animal-otter-study.webp");
+    expect(roomAnimal(reading())).not.toBe("/images/animal-otter-newyear.webp");
   });
 
   it("같은 풀이로 다시 들어오면 대화를 이어가요", () => {
@@ -60,12 +60,13 @@ describe("상담실 대화방", () => {
 
   it("방마다 주제에 맞는 동물 얼굴과 남은 질문 글자를 정해요", () => {
     expect(roomAnimal({ kind: "daily", summary: "" })).toBe("/images/animal-otter.webp");
-    expect(roomAnimal({ kind: "compat", summary: "" })).toBe("/images/animal-panda-couple.webp");
-    expect(roomAnimal({ kind: "reading", summary: "주제: 연애운" })).toBe("/images/animal-rabbit.webp");
+    expect(roomAnimal({ kind: "compat", summary: "" })).toBe("/images/animal-panda-wedding.webp");
+    expect(roomAnimal({ kind: "reading", summary: "주제: 연애운" })).toBe("/images/animal-panda-couple.webp");
     expect(roomAnimal({ kind: "reading", summary: "주제: 재물운" })).toBe("/images/animal-rabbit-rich.webp");
     expect(roomAnimal({ kind: "reading", summary: "주제: 건강운" })).toBe("/images/animal-fox-run.webp");
+    expect(roomAnimal({ kind: "reading", summary: "주제: 성공운" })).toBe("/images/animal-dragon.webp");
     expect(roomAnimal({ kind: "reading", summary: "주제: 종합운" })).toBe("/images/animal-dragon.webp");
-    expect(roomAnimal({ kind: "reading", summary: "", topic: "study" })).toBe("/images/animal-otter-study.webp");
+    expect(roomAnimal({ kind: "reading", summary: "", topic: "study" })).toBe("/images/animal-otter-newyear.webp");
     expect(roomColor({ kind: "daily", summary: "" })).toBe("#6d4fd8");
     expect(roomColor({ kind: "reading", summary: "주제: 재물운" })).toBe("#e0a43a");
     expect(roomColor({ kind: "reading", summary: "주제: 종합운" })).toBe("#a0714f");

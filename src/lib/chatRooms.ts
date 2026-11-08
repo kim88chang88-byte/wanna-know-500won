@@ -72,12 +72,12 @@ export function roomLook(ctx: ChatCtx): { title: string; chip: string; icon: str
 export function roomAnimal(ctx: ChatCtx): string {
   const img = (n: string) => `/images/animal-${n}.webp`;
   if (ctx.kind === "daily") return img("otter");
-  if (ctx.kind === "compat") return img("panda-couple");
+  if (ctx.kind === "compat") return img("panda-wedding");
   if (ctx.premium) return img("otter-awakened");
-  if (isStudyRoom(ctx)) return img("otter-study");
+  if (isStudyRoom(ctx)) return img("otter-newyear");
   const t = topicLine(ctx.summary);
-  if (/연애|결혼/.test(t)) return img("rabbit");
-  if (/재물|성공/.test(t)) return img("rabbit-rich");
+  if (/연애|결혼/.test(t)) return img("panda-couple");
+  if (/재물/.test(t)) return img("rabbit-rich");
   if (/건강/.test(t)) return img("fox-run");
   return img("dragon");
 }
