@@ -6,6 +6,8 @@ import BottomTabs from "./BottomTabs";
 import CoinRitual from "./CoinRitual";
 import { splitWallet } from "./WalletBar";
 import PurchaseModal from "@/components/pay/PurchaseModal";
+import PaywallPopup, { type PaywallInfo } from "./PaywallPopup";
+import { readingCoinCost } from "@/lib/spendPlan";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { dayKey, getBrowserStorage, readCounts, recordDraw, type DrawCounts } from "@/lib/drawCounter";
 import { readVisitDays, recordVisit } from "@/lib/streak";
@@ -66,21 +68,29 @@ export default function Landing() {
   // 서버에 쌓인 뽑기 코인(로그인 선물 등)과, 방금 선물을 받았는지
   const [coins, setCoins] = useState(0);
   const [payOpen, setPayOpen] = useState(false);
+  // 프리미엄·궁합 카드를 눌렀는데 동전이 모자랄 때 먼저 보여주는 안내창, 그리고 거기서 열린 충전 화면
+  const [paywall, setPaywall] = useState<PaywallInfo | null>(null);
+  const [paywallPay, setPaywallPay] = useState<PaywallInfo | null>(null);
+  const coinsRef = useRef(0);
   const [gift, setGift] = useState(false);
   // 친구 초대 코드 적용 결과 안내
   const [notice, setNotice] = useState<string | null>(null);
-  const refreshCoins = useCallback(async () => {
+  const refreshCoins = useCallback(async (): Promise<number | null> => {
     try {
       const res = await fetch("/api/coins", { method: "POST" });
-      if (!res.ok) return;
+      if (!res.ok) return null;
       const d = (await res.json()) as { balance?: unknown; granted?: unknown };
-      setCoins(typeof d.balance === "number" && d.balance > 0 ? d.balance : 0);
+      const bal = typeof d.balance === "number" && d.balance > 0 ? d.balance : 0;
+      coinsRef.current = bal;
+      setCoins(bal);
       if (d.granted === true) {
         setGift(true);
         track("signup");
       }
+      return bal;
     } catch {
       // 코인 확인이 안 돼도 뽑기는 그대로 돼요
+      return null;
     }
   }, []);
   const [visitors, setVisitors] = useState<{ today: number; total: number } | null>(null);
@@ -138,10 +148,28 @@ export default function Landing() {
         setLoginOpen(true);
         return;
       }
+      // 프리미엄(종합 사주·궁합)은 동전으로만 열려요. 동전이 모자라면 입력 전에 안내창을 먼저 보여줘요.
+      if (premium === true) {
+        const need = readingCoinCost(true, fortune.includes("궁합"));
+        const info: PaywallInfo = { fortune, price, premium: true, need, have: coinsRef.current, compat: fortune.includes("궁합") };
+        if (coinsRef.current < need) {
+          // 동전을 아직 못 읽었을 수 있어서, 한 번 새로 읽고 판단해요.
+          void refreshCoins().then((bal) => {
+            const have = bal ?? coinsRef.current;
+            if (have < need) setPaywall({ ...info, have });
+            else begin();
+          });
+          return;
+        }
+      }
+      begin();
+      return;
+      function begin() {
       spinKey.current = key;
       track("draw_start");
       // 오늘 무료 뽑기를 이미 썼고 보너스 뽑기가 있으면, 보너스로 한 번 더 뽑아요.
-      const bonus = countsRef.current.today >= FREE_PER_DAY && readTickets(getBrowserStorage()) > 0;
+      // (프리미엄·궁합은 보너스 뽑기권으로 열 수 없어서 제외해요)
+      const bonus = premium !== true && countsRef.current.today >= FREE_PER_DAY && readTickets(getBrowserStorage()) > 0;
       bonusRef.current = bonus;
       const open = () => setIntake({ fortune, price, premium: premium === true, bonus });
       const calm = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
@@ -161,8 +189,9 @@ export default function Landing() {
           open();
         }, RITUAL_MS),
       );
+      }
     },
-    [],
+    [refreshCoins],
   );
 
   // 로그인한 상태면 코인을 확인하고, 처음이면 로그인 선물을 받아요. (로그아웃하면 0장)
@@ -400,6 +429,34 @@ export default function Landing() {
       <BottomTabs onChatLogin={openChatTabLogin} />
 
       {payOpen && <PurchaseModal onClose={() => { setPayOpen(false); void refreshCoins(); }} />}
+      {paywall && (
+        <PaywallPopup
+          info={paywall}
+          onClose={() => setPaywall(null)}
+          onCharge={() => {
+            setPaywallPay(paywall);
+            setPaywall(null);
+          }}
+        />
+      )}
+      {paywallPay && (
+        <PurchaseModal
+          preselect={paywallPay.compat ? "compat" : "premium"}
+          onClose={() => {
+            setPaywallPay(null);
+            void refreshCoins();
+          }}
+          onContinue={() => {
+            const ctx = paywallPay;
+            setPaywallPay(null);
+            // 충전 직후 동전을 새로 읽어서, 충분하면 바로 풀이 입력으로 이어가요.
+            void refreshCoins().then((bal) => {
+              if ((bal ?? 0) >= ctx.need) handleSpin(`paywall-${ctx.fortune}`, ctx.fortune, ctx.price, true);
+              else setPaywall({ ...ctx, have: bal ?? 0 });
+            });
+          }}
+        />
+      )}
       {ritual && <CoinRitual bill={ritualBill} big={ritualBig} />}
       <StickyDrawCta hidden={Boolean(intake) || loginOpen || ritual} />
 
