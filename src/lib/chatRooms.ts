@@ -51,6 +51,9 @@ function hash(s: string): string {
 
 const topicLine = (summary: string) => /^주제: (.+)$/m.exec(summary)?.[1]?.trim() ?? "";
 
+/** 2027 신년운 방인지 (예전에 만든 방은 topic 표시가 없어서 요약의 "주제: 2027 신년운" 줄도 봐요) */
+const isStudyRoom = (ctx: ChatCtx) => ctx.topic === "study" || (ctx.kind === "reading" && /신년운/.test(topicLine(ctx.summary)));
+
 /** 같은 풀이는 같은 방이 되게 하는 값 */
 export function roomIdFor(ctx: ChatCtx): string {
   if (ctx.kind === "daily") return "daily";
@@ -60,7 +63,7 @@ export function roomIdFor(ctx: ChatCtx): string {
 export function roomLook(ctx: ChatCtx): { title: string; chip: string; icon: string } {
   if (ctx.kind === "daily") return { title: "오늘의 한마디", chip: "오늘", icon: "🌙" };
   if (ctx.kind === "compat") return { title: `${ctx.partnerName?.trim() || "상대"}님과의 궁합`, chip: "궁합", icon: "💞" };
-  if (ctx.topic === "study") return { title: "2027 신년운", chip: "신년운", icon: "📜" };
+  if (isStudyRoom(ctx)) return { title: "2027 신년운", chip: "신년운", icon: "📜" };
   const t = topicLine(ctx.summary);
   return { title: t || "사주 풀이", chip: t || "풀이", icon: "📜" };
 }
@@ -71,7 +74,7 @@ export function roomAnimal(ctx: ChatCtx): string {
   if (ctx.kind === "daily") return img("otter");
   if (ctx.kind === "compat") return img("panda-couple");
   if (ctx.premium) return img("otter-awakened");
-  if (ctx.topic === "study") return img("otter-study");
+  if (isStudyRoom(ctx)) return img("otter-study");
   const t = topicLine(ctx.summary);
   if (/연애|결혼/.test(t)) return img("rabbit");
   if (/재물|성공/.test(t)) return img("rabbit-rich");
@@ -83,7 +86,7 @@ export function roomAnimal(ctx: ChatCtx): string {
 export function roomColor(ctx: ChatCtx): string {
   if (ctx.kind === "daily") return "#6d4fd8";
   if (ctx.kind === "compat") return "#e5708a";
-  if (ctx.topic === "study") return "#4a90d9";
+  if (isStudyRoom(ctx)) return "#4a90d9";
   const t = topicLine(ctx.summary);
   if (/연애|결혼/.test(t)) return "#f08fb0";
   if (/재물|성공/.test(t)) return "#e0a43a";

@@ -22,6 +22,13 @@ describe("상담실 대화방", () => {
     expect(roomLook({ kind: "compat", summary: "", partnerName: "지은" }).title).toBe("지은님과의 궁합");
   });
 
+  it("2027 신년운 방은 topic 표시가 없어도(예전 방) 도리 수달 얼굴이에요", () => {
+    expect(roomAnimal({ ...reading(), topic: "study" })).toBe("/images/animal-otter-study.webp");
+    expect(roomAnimal(reading("주제: 2027 신년운\n한 줄 결론: 좋아요"))).toBe("/images/animal-otter-study.webp");
+    expect(roomLook(reading("주제: 2027 신년운")).title).toBe("2027 신년운");
+    expect(roomAnimal(reading())).not.toBe("/images/animal-otter-study.webp");
+  });
+
   it("같은 풀이로 다시 들어오면 대화를 이어가요", () => {
     const a = upsertRoom([], reading(), new Date("2026-11-04T10:00:00"));
     const withChat = withMsgs(a.rooms, a.id, [{ role: "user", text: "안녕", at: 1 }]);

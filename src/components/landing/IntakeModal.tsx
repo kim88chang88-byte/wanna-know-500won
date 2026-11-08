@@ -451,6 +451,8 @@ export default function IntakeModal({ target, wallet = null, onClose, onComplete
   const [form, setForm] = useState<IntakeForm>(() => (savedProfile ? { ...EMPTY_FORM, ...profileToForm(savedProfile) } : EMPTY_FORM));
   // 궁합 리포트면 상대방의 생년월일시·성별을 더 받아요. (상대방 정보는 계산에만 쓰고 저장하지 않아요)
   const compat = target.premium === true && isCompatFortune(target.fortune);
+  // 2027 신년운 카드(카드 이름은 "2027 신년운")인지: 상담실·질문 추천이 2027년 기준으로 열려요
+  const isStudy = !compat && target.fortune.includes("신년운");
   // 저장된 정보가 없는 분(비회원·처음 쓰는 회원)은 생년월일·성별·시간을 한 화면에서 적어요.
   const combined = !compat && !savedProfile;
   const steps: readonly AnyStepId[] = compat ? COMPAT_STEPS : combined ? COMBINED_STEPS : STEPS;
@@ -808,8 +810,8 @@ export default function IntakeModal({ target, wallet = null, onClose, onComplete
                     ) : (
                       <StoryReport report={premiumReport} reading={reading} intro={null} name={subject ? (subject.name ?? "") : nickname}
                         lastWord={<><ResultHero report={premiumReport} aiQuote={reading?.kkotgeoji ?? null} luxe={false} hideLucky /><ResultShareCard report={premiumReport} aiQuote={reading?.kkotgeoji ?? null} /></>}
-                        closing={askInput ? <AskChips input={askInput} luxe={false} topic={target.fortune} hideTitle /> : undefined}
-                        chat={askInput ? <ChatEntry ctx={{ kind: "reading", summary: summarizeReport(premiumReport), birth: askInput, name: viewName?.trim() || null, ...(target.fortune === "study" ? { topic: "study" as const } : {}) }} /> : undefined}
+                        closing={askInput ? <AskChips input={askInput} luxe={false} topic={isStudy ? "study" : target.fortune} hideTitle /> : undefined}
+                        chat={askInput ? <ChatEntry ctx={{ kind: "reading", summary: summarizeReport(premiumReport), birth: askInput, name: viewName?.trim() || null, ...(isStudy ? { topic: "study" as const } : {}) }} /> : undefined}
                       />
                     )}
                   </div>
@@ -825,7 +827,7 @@ export default function IntakeModal({ target, wallet = null, onClose, onComplete
                   </div>
 
                   {/* 3) 더 물어보기 */}
-                  {askInput && <AskChips input={askInput} luxe={luxe} topic={target.fortune} />}
+                  {askInput && <AskChips input={askInput} luxe={luxe} topic={isStudy ? "study" : target.fortune} />}
                 </>
               )}
 
@@ -923,7 +925,7 @@ export default function IntakeModal({ target, wallet = null, onClose, onComplete
                   birth: askInput,
                   ...(compat && resultPartner ? { partnerBirth: resultPartner.birth, partnerName: resultPartner.name } : {}),
                   name: viewName?.trim() || null,
-                  ...(target.fortune === "study" && !compat ? { topic: "study" as const } : {}),
+                  ...(isStudy ? { topic: "study" as const } : {}),
                   ...(luxe ? { premium: true as const } : {}),
                 }}
               />
