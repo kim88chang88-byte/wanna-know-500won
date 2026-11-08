@@ -57,7 +57,7 @@ export default function BirthdayTeaser({ onOpenLogin }: { /** 로그인하면 �
             <FitText maxPx={13} minPx={9} className="mt-1.5 text-left font-semibold text-slate-600">
               {ganzhiSentenceParts(result.ganzhi)!.map((p, i) =>
                 p.hl ? (
-                  <mark key={i} className="rounded-sm bg-transparent px-0.5 font-bold text-slate-900" style={{ backgroundImage: "linear-gradient(transparent 50%, #fde047 50%)" }}>
+                  <mark key={i} className="rounded-sm bg-transparent px-0.5 font-bold text-slate-900" style={{ backgroundImage: "linear-gradient(transparent 50%, #f3dcff 50%)" }}>
                     {p.text}
                   </mark>
                 ) : (

@@ -38,14 +38,16 @@ function stepName(key: FoldKey, name: string, topic: string): string {
 }
 
 /** 형광펜 색: 주제별 동물 그림에 맞춰요. (용 노랑 · 토끼 분홍 · 남자 팬더 연보라 · 여자 팬더 장미 · 여우 주황 · 수달 하늘색) */
+/** 강조 색: 풀이 종류와 상관없이 모두 도유사주 대표색인 분홍빛 연보라로 맞췄어요. */
+const LILAC = "#f3dcff";
 export const MARK: Record<string, string> = {
-  success: "rgba(253,224,71,0.75)",
-  money: "rgba(249,168,212,0.7)",
-  love: "rgba(196,181,253,0.75)",
-  marriage: "rgba(251,146,160,0.6)",
-  health: "rgba(253,186,116,0.7)",
-  study: "rgba(125,211,252,0.7)",
-  general: "rgba(196,181,253,0.75)",
+  success: LILAC,
+  money: LILAC,
+  love: LILAC,
+  marriage: LILAC,
+  health: LILAC,
+  study: LILAC,
+  general: LILAC,
 };
 
 export interface StoryReading {
