@@ -83,10 +83,8 @@ export default function Landing() {
       const bal = typeof d.balance === "number" && d.balance > 0 ? d.balance : 0;
       coinsRef.current = bal;
       setCoins(bal);
-      if (d.granted === true) {
-        setGift(true);
-        track("signup");
-      }
+      // granted: 처음 로그인한 회원 (동전 선물은 없어요. 신규 가입 집계만 남겨요)
+      if (d.granted === true) track("signup");
       return bal;
     } catch {
       // 코인 확인이 안 돼도 뽑기는 그대로 돼요

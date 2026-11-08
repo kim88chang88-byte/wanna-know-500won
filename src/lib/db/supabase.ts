@@ -312,6 +312,19 @@ export function createDb(config: DbConfig, fetchImpl: FetchLike = fetch) {
       return { granted: row?.out_granted === true, balance: Number.isInteger(balance) && balance > 0 ? balance : 0 };
     },
 
+    /**
+     * 처음 로그인한 회원인지 표시해요. 처음이면 true. (신규 가입 집계용이고 동전은 주지 않아요)
+     * coin_log 에 delta 0 한 줄을 남겨서 두 번째부터는 false 가 돼요.
+     */
+    async markWelcome(userId: string): Promise<boolean> {
+      const id = safeId(userId);
+      const found = await call(`coin_log?user_id=eq.${id}&kind=eq.welcome&select=id&limit=1`, { method: "GET", headers: headers() });
+      const rows = (await found.json().catch(() => [])) as unknown[];
+      if (Array.isArray(rows) && rows.length > 0) return false;
+      await call("coin_log", { method: "POST", headers: headers({ Prefer: "return=minimal" }), body: JSON.stringify({ user_id: id, kind: "welcome", ref: "v1", delta: 0 }) });
+      return true;
+    },
+
     /** 한 달에 cap 번까지만 지급하는 코인 지급. reason: ok / cap / dup */
     async grantCoinCapped(userId: string, kind: string, ref: string, cap: number, amount = 1): Promise<{ granted: boolean; balance: number; reason: string }> {
       const res = await call("rpc/coin_grant_capped", {

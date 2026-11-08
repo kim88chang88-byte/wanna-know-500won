@@ -128,7 +128,7 @@ export default function PurchaseModal({ preselect, onClose, onContinue, continue
               <p className="rounded-xl border border-dashed border-slate-300 px-3 py-2 text-xs leading-relaxed text-slate-500">
                 <b className="text-slate-700">무료로 받는 방법</b>
                 <br />
-                로그인 선물 · 정성 후기(월 2개) · 친구 초대 · 도장 3일 연속
+                정성 후기(월 2개) · 친구 초대 · 도장 3일 연속
               </p>
             </div>
           </>

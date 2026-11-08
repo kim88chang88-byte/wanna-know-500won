@@ -50,6 +50,15 @@ describe("createDb", () => {
     await createDb(cfg, r.f).upsertUser("e_abc", undefined, new Date("2026-10-17T00:00:00Z"));
     expect(JSON.parse(String(r.calls[0].init?.body))).toEqual({ id: "e_abc", last_login_at: "2026-10-17T00:00:00.000Z" });
   });
+  it("markWelcome: 처음이면 한 줄 남기고 true, 이미 있으면 false", async () => {
+    const first = recorder((u) => (String(u).includes("select=id") ? new Response("[]", { status: 200 }) : new Response(null, { status: 201 })));
+    expect(await createDb(cfg, first.f).markWelcome("e_abc")).toBe(true);
+    expect(first.calls).toHaveLength(2);
+    expect(JSON.parse(String(first.calls[1].init?.body))).toEqual({ user_id: "e_abc", kind: "welcome", ref: "v1", delta: 0 });
+    const again = recorder(() => new Response(JSON.stringify([{ id: 1 }]), { status: 200 }));
+    expect(await createDb(cfg, again.f).markWelcome("e_abc")).toBe(false);
+    expect(again.calls).toHaveLength(1);
+  });
   it("setNickname / getNickname", async () => {
     const r = recorder(() => new Response(JSON.stringify([{ nickname: "서윤" }]), { status: 200 }));
     const db = createDb(cfg, r.f);
