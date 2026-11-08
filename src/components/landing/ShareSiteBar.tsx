@@ -25,7 +25,7 @@ async function copyText(text: string): Promise<boolean> {
   }
 }
 
-/** 랜딩 하단: 도유 사주 주소를 복사해서 친구에게 붙여넣어 보내게 하는 버튼 */
+/** 랜딩 하단: 도유사주 주소를 복사해서 친구에게 붙여넣어 보내게 하는 버튼 */
 export default function ShareSiteBar() {
   const [state, setState] = useState<"idle" | "copied" | "failed">("idle");
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -43,7 +43,7 @@ export default function ShareSiteBar() {
 
   return (
     <div data-testid="share-site" className="mt-3 w-full max-w-sm">
-      <p className="font-cute text-sm font-normal text-brand-600">친구에게도 도유 사주를 알려 주세요 ❄️</p>
+      <p className="font-cute text-sm font-normal text-brand-600">친구에게도 도유사주를 알려 주세요 ❄️</p>
       <button
         type="button"
         data-testid="share-copy"
@@ -53,7 +53,7 @@ export default function ShareSiteBar() {
         }`}
       >
         <span aria-hidden="true">{state === "copied" ? "✓" : "🔗"}</span>
-        {state === "copied" ? "링크를 복사했어요" : "도유 사주 링크 복사"}
+        {state === "copied" ? "링크를 복사했어요" : "도유사주 링크 복사"}
       </button>
       <p role="status" data-testid="share-site-message" className="mt-2 min-h-[1rem] text-[11px] font-bold text-brand-600">
         {state === "copied" && "친구에게 붙여넣어 보내 주세요 ❄️"}

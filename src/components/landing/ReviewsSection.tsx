@@ -63,7 +63,7 @@ export default function ReviewsSection() {
             <Stars n={r.rating} />
           </div>
           <p className="text-sm leading-relaxed text-slate-800 break-keep">&ldquo;{r.text}&rdquo;</p>
-          <p className="mt-3 text-[11px] text-slate-400">도유 사주 이용자</p>
+          <p className="mt-3 text-[11px] text-slate-400">도유사주 이용자</p>
         </div>
       ))
     : SAMPLE_CAPSULES.map((s) => (
@@ -86,7 +86,7 @@ export default function ReviewsSection() {
             <span className="material-symbols-outlined text-[22px]">{real ? "chat_bubble" : "bubble_chart"}</span>
           </div>
           <div>
-            <h3 className="font-cute text-xl font-normal text-gray-900 sm:text-2xl">{real ? "도유 사주를 만난 분들의 이야기" : "이런 운세 풀이가 나와요"}</h3>
+            <h3 className="font-cute text-xl font-normal text-gray-900 sm:text-2xl">{real ? "도유사주를 만난 분들의 이야기" : "이런 운세 풀이가 나와요"}</h3>
             <p className="text-xs text-slate-500">{real ? "실제로 사주를 확인한 이용자들의 솔직 후기에요" : "수달 도사 '도리'가 건네는 한마디, 이런 느낌이에요"}</p>
           </div>
         </div>

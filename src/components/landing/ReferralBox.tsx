@@ -37,10 +37,10 @@ export default function ReferralBox() {
   const link = withRef(typeof window === "undefined" ? "" : window.location.origin, me.code);
 
   async function share() {
-    const text = `도유 사주에서 내 사주를 무료로 봐! 내 초대 코드로 가입하고 첫 풀이를 마치면 우리 둘 다 500원 뽑기 1회를 받아 🎁 (코드 ${me?.code})`;
+    const text = `도유사주에서 내 사주를 무료로 봐! 내 초대 코드로 가입하고 첫 풀이를 마치면 우리 둘 다 500원 뽑기 1회를 받아 🎁 (코드 ${me?.code})`;
     try {
       if (navigator.share) {
-        await navigator.share({ title: "도유 사주", text, url: link });
+        await navigator.share({ title: "도유사주", text, url: link });
         return;
       }
       await navigator.clipboard.writeText(`${text}\n${link}`);

@@ -4,7 +4,7 @@ import { LOGO_IMAGE } from "@/components/landing/images";
 import "./globals.css";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL;
-const TITLE = "도유 사주";
+const TITLE = "도유사주";
 const DESCRIPTION = "수달 도사 도리의 신비한 운세 자판기. 매일 첫 1회 무료, 그다음부터는 500원!";
 
 export const metadata: Metadata = {

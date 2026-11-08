@@ -1,6 +1,6 @@
 import type { Config } from "tailwindcss";
 
-// 도유 사주의 색상·글꼴 설정입니다. (연보라 + 핑크 파스텔, 둥글둥글 주아체 제목) DESIGN.md 와 같이 보세요.
+// 도유사주의 색상·글꼴 설정입니다. (연보라 + 핑크 파스텔, 둥글둥글 주아체 제목) DESIGN.md 와 같이 보세요.
 const otter = {
   50: "#f7f3ff",
   100: "#eee7ff",

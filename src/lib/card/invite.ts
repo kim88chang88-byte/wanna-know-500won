@@ -71,7 +71,7 @@ export function drawInviteRow(ctx: CanvasRenderingContext2D, d: PhotoCardData, c
   ctx.fillText("QR을 찍으면 무료로 볼 수 있어요", tx, y + 31);
   ctx.fillStyle = colors.muted;
   ctx.font = `500 8.5px ${SANS}`;
-  ctx.fillText(`도유 사주 · ${d.siteLabel}`, tx, y + 44);
+  ctx.fillText(`도유사주 · ${d.siteLabel}`, tx, y + 44);
   ctx.textAlign = "center";
   return true;
 }

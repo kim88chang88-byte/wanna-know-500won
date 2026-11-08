@@ -10,7 +10,7 @@ const pages: BookPage[] = [1, 2, 3].map((no) => ({
   lead: `요약${no}`,
   sections: [
     { heading: "열린 풀이", body: "열려 있는 내용이에요." },
-    { heading: "잠긴 풀이", body: "도유 사주도유 사주", locked: true },
+    { heading: "잠긴 풀이", body: "도유사주도유사주", locked: true },
   ],
   tables: [],
 }));
@@ -22,7 +22,7 @@ describe("summarizeBook", () => {
   it("잠긴 내용은 AI 에게 넘기지 않고, 고민은 데이터로 넣는다", () => {
     const t = summarizeBook(pages, "compat", { tags: ["job"], text: "이직할까" });
     expect(t).toContain("열려 있는 내용");
-    expect(t).not.toContain("도유 사주도유 사주");
+    expect(t).not.toContain("도유사주도유사주");
     expect(t).toContain("이직할까");
     expect(t).toContain("둘의 궁합 리포트");
   });

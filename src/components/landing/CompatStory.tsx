@@ -137,7 +137,7 @@ function TogetherCard({ c, name, partnerName, hideSend = false }: { c: CompatVie
     const text = buildShareSummary(c, { me: name, partner: partnerName === "상대" || partnerName === "상대방" ? null : partnerName }, together, origin);
     try {
       if (navigator.share) {
-        await navigator.share({ title: "도유 사주 · 둘의 궁합", text });
+        await navigator.share({ title: "도유사주 · 둘의 궁합", text });
         setMsg("");
         return;
       }

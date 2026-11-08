@@ -256,10 +256,10 @@ export function LoginModal({ onClose, reason = null, user = null, result = null,
       <CloseButton onClose={onClose} />
       <div className="text-center mb-5">
         <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-brand-500/40 shadow-sm bg-sky-50 flex items-center justify-center mx-auto mb-2">
-          <SafeImage src={LOGO_IMAGE} alt="도유 사주 로고" className="w-full h-full object-cover" fallback="🦦" fallbackClass="text-2xl" />
+          <SafeImage src={LOGO_IMAGE} alt="도유사주 로고" className="w-full h-full object-cover" fallback="🦦" fallbackClass="text-2xl" />
         </div>
         <h4 id="login-title" className="font-cute font-normal text-lg text-gray-900">
-          {user ? "내 정보" : "도유 사주 로그인"}
+          {user ? "내 정보" : "도유사주 로그인"}
         </h4>
         <p className="text-xs text-gray-500 mt-1 whitespace-pre-line">
           {user

@@ -1,4 +1,4 @@
-# DESIGN.md — 도유 사주 (wanna-know-500won)
+# DESIGN.md — 도유사주 (wanna-know-500won)
 
 > **Design System:** Dori Water Otter — 퐁당 수달 도사 운세자판기
 > **Device Type:** Mobile-first, Desktop 대응
@@ -21,7 +21,7 @@
 - 무드: **Fresh Water Playful** × **Retro Vending Kitsch**
 - 모티프: 물방울(bubble), 물결 빛, 조개·샘물·연못, 수달 캐릭터, 동전, 레버, 캡슐
 - 말투: 친근한 해요체. 단정적 예언 대신 "~할 수 있어요", "~해 보세요".
-- 서비스명: **도유 사주** (`SERVICE_NAME` in `src/lib/siteInfo.ts`)
+- 서비스명: **도유사주** (`SERVICE_NAME` in `src/lib/siteInfo.ts`)
 - 슬로건: "궁금하면 500원! 퐁당, 오늘의 운을 뽑아봐."
 
 ### 정직성 규칙 (디자인에도 적용)
@@ -38,7 +38,7 @@
 | # | 섹션 | 컴포넌트 | 설명 |
 |---|------|----------|------|
 | 0 | 배경 | `BubbleBackground` | 떠오르는 물방울 12개(장식, `aria-hidden`) |
-| 1 | 헤더 | `Header` | 로고 이미지 + 🌙 도유 사주 + "✨ 퐁당" 배지 + 로그인/마이페이지 |
+| 1 | 헤더 | `Header` | 로고 이미지 + 🌙 도유사주 + "✨ 퐁당" 배지 + 로그인/마이페이지 |
 | 2 | 히어로 | `HeroSection` | 오늘/이번 달 뽑은 횟수 + "퐁당퐁당 수달 '도리'의 신비한 운세 자판기 🦦" |
 | 3 | 쇼케이스 | `ShowcaseSection` | 도리 일러스트 + 속삭임 카드 |
 | 4 | 운세 자판기 | `MachinesSection` | 6종 500원 자판기 카드 (레버 돌리기) |
@@ -105,7 +105,7 @@
 cyan(성공) · amber(재물) · sky/primary(연애, BEST) · purple(결혼) · emerald(건강) · indigo(학업). 카드 배경은 해당 색 50~100, 배지는 100/700, 버튼은 500~600 계열.
 
 ### 3.5 결과 카드(캔버스, `drawCard.ts`)
-파란 양피지 톤. 브랜드 `#225EAA`, 짙은 면 `#163E72`, 문구 "도유 사주" / "도리의 한마디".
+파란 양피지 톤. 브랜드 `#225EAA`, 짙은 면 `#163E72`, 문구 "도유사주" / "도리의 한마디".
 
 ---
 

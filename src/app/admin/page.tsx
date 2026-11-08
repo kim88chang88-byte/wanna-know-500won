@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import AdminDashboard from "@/components/admin/AdminDashboard";
 
 export const metadata: Metadata = {
-  title: "관리자 · 도유 사주",
+  title: "관리자 · 도유사주",
   robots: { index: false, follow: false },
 };
 
