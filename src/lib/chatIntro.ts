@@ -26,7 +26,7 @@ export type IntroBubble =
   | { kind: "text"; text: string }
   | { kind: "pillars"; pillars: IntroPillar[] }
   | { kind: "elements"; counts: Record<Element, number> }
-  | { kind: "pair"; people: { name: string; hanja: string; hangul: string; el: Element; date: string }[] };
+  | { kind: "pair"; people: { name: string; hanja: string; hangul: string; el: Element; date: string; cells: { ch: string; el: Element; ko: string }[] }[] };
 
 const EL_FEEL: Record<Element, string> = {
   wood: "곧게 뻗으며 자라는 나무 같은 기운",
@@ -41,6 +41,13 @@ function stemInfo(h: string) {
 }
 function branchInfo(h: string) {
   return BRANCHES.find((b) => b.hanja === h);
+}
+
+/** 일주(위 칸 천간, 아래 칸 지지)를 오행 그림 타일용 값으로 바꿔요 */
+function dayCells(chart: NonNullable<ReturnType<typeof safeChart>>): { ch: string; el: Element; ko: string }[] {
+  const s = stemInfo(chart.day.stem);
+  const b = branchInfo(chart.day.branch);
+  return s && b ? [{ ch: chart.day.stem, el: s.element, ko: s.hangul }, { ch: chart.day.branch, el: b.element, ko: b.hangul }] : [];
 }
 
 function safeChart(b: BirthInput | undefined) {
@@ -124,8 +131,8 @@ export function buildIntro(ctx: ChatCtx): IntroBubble[] {
       out.push({
         kind: "pair",
         people: [
-          { name: ctx.name?.trim() || "나", hanja: a.hanja, hangul: a.hangul, el: a.element, date: shortDate(ctx.birth) },
-          { name: ctx.partnerName?.trim() || "상대", hanja: b.hanja, hangul: b.hangul, el: b.element, date: shortDate(ctx.partnerBirth) },
+          { name: ctx.name?.trim() || "나", hanja: a.hanja, hangul: a.hangul, el: a.element, date: shortDate(ctx.birth), cells: dayCells(chart) },
+          { name: ctx.partnerName?.trim() || "상대", hanja: b.hanja, hangul: b.hangul, el: b.element, date: shortDate(ctx.partnerBirth), cells: dayCells(other) },
         ],
       });
     }

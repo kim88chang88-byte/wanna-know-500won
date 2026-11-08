@@ -28,6 +28,7 @@ describe("chatIntro", () => {
   it("궁합: 두 사람 일간과 점수", () => {
     const b = buildIntro({ kind: "compat", summary: "궁합 점수: 82점\n궁합 한 줄: 속도를 맞춰요", birth, partnerBirth: { ...birth, year: 1990 }, name: "은혁", partnerName: "원석" });
     expect(b[0].kind).toBe("pair");
+    if (b[0].kind === "pair") expect(b[0].people.every((p) => p.cells.length === 2)).toBe(true);
     expect(b.length).toBe(3);
   });
   it("정보가 없으면 빈 배열", () => {

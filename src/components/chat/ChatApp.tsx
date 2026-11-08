@@ -670,7 +670,6 @@ function DoriRow({ face, text, at, error, actions, onSkip }: { face: ReactNode; 
   );
 }
 
-const EL_NAME: Record<Element, string> = { wood: "나무", fire: "불", earth: "땅", metal: "쇠", water: "물" };
 const EL_SEQ: Element[] = ["wood", "fire", "earth", "metal", "water"];
 
 /** 오행 알약 + 가장 많은 기운 한 줄 (결과서의 기둥 아래와 같은 모양) */
@@ -739,10 +738,15 @@ function IntroRow({ b }: { b: IntroBubble }) {
           <div data-testid="intro-pair" className="grid grid-cols-2 gap-1.5 text-center">
             {b.people.map((p) => (
               <div key={p.name} className="rounded-xl border border-brand-100 px-2 py-1.5">
-                <p className="text-[10.5px] text-gray-500">{p.name}</p>
-                <p className={`mx-auto my-0.5 flex h-8 w-8 items-center justify-center rounded-lg text-[17px] font-bold ${ELEMENT_BOX[p.el]}`}>{p.hanja}</p>
-                <p className="text-[12px] font-bold">{p.hangul}{EL_NAME[p.el]}</p>
-                <p className="text-[10px] text-gray-400">{p.date}</p>
+                <p className="text-[10.5px] text-gray-500">{p.name}의 일주</p>
+                <div className="mt-1 flex justify-center gap-1.5">
+                  {p.cells.map((c, i) => (
+                    <div key={i} className="w-[3.4rem]">
+                      <ElementTile ch={c.ch} el={c.el} reading={c.ko} compact sizeClass="text-[28px]" label={`${p.name}의 일주`} />
+                    </div>
+                  ))}
+                </div>
+                <p className="mt-1 text-[10px] text-gray-400">{p.date}</p>
               </div>
             ))}
           </div>
