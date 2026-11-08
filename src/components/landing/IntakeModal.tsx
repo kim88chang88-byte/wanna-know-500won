@@ -1218,12 +1218,12 @@ export default function IntakeModal({ target, wallet = null, onClose, onComplete
           )}
           {freeUsed && error && (
             <button type="button" onClick={() => setPayOpen(true)} className="mt-2 w-full rounded-full bg-brand-500 py-2.5 text-sm font-bold text-white">
-              {compat ? "동전 충전하고 보기" : "동전으로 한 번 더 뽑기"}
+              {target.premium === true ? "동전 충전하고 보기" : "동전으로 한 번 더 뽑기"}
             </button>
           )}
           {confirmOpen && wallet && (
             <SpendConfirm
-              plan={spendPlan(wallet, readingCoinCost(target.premium === true, compat), compat)}
+              plan={spendPlan(wallet, readingCoinCost(target.premium === true, compat), target.premium === true)}
               onCancel={() => setConfirmOpen(false)}
               onConfirm={() => {
                 setConfirmOpen(false);

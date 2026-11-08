@@ -25,7 +25,7 @@ export type SpendPlan =
   | { kind: "coin"; cost: number; before: number; after: number }
   | { kind: "short"; cost: number; have: number };
 
-/** coinsOnly: 둘의 궁합처럼 무료·보너스 뽑기를 쓸 수 없고 동전으로만 여는 풀이 */
+/** coinsOnly: 프리미엄(궁합·종합 사주)처럼 무료·보너스 뽑기를 쓸 수 없고 동전으로만 여는 풀이 */
 export function spendPlan(w: SpendWallet, cost: number, coinsOnly = false): SpendPlan {
   const n = (v: number) => (Number.isFinite(v) && v > 0 ? Math.floor(v) : 0);
   const free = coinsOnly ? 0 : n(w.freeLeft);
