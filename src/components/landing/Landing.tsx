@@ -439,7 +439,7 @@ export default function Landing() {
       )}
       {paywallPay && (
         <PurchaseModal
-          preselect={paywallPay.compat ? "pack2" : "pack20"}
+          preselect={paywallPay.compat ? "pack2" : "pack22"}
           onClose={() => {
             setPaywallPay(null);
             void refreshCoins();

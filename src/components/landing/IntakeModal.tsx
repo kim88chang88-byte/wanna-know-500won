@@ -1238,7 +1238,7 @@ export default function IntakeModal({ target, wallet = null, onClose, onComplete
           )}
           {payOpen && (
             <PurchaseModal
-              preselect={target.premium === true && !compat ? "pack20" : "pack2"}
+              preselect={target.premium === true && !compat ? "pack22" : "pack2"}
               onClose={() => {
                 setPayOpen(false);
                 setPayForReading(false);

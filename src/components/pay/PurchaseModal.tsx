@@ -10,7 +10,7 @@ import { DEMO_COINS, DEMO_MONTH_CAP } from "@/lib/demoBuy";
  * 모든 단계에 "베타 체험 · 실제 결제 없음"을 적어서, 진짜로 결제된 것처럼 보이지 않게 해요.
  * 한도(3번)를 다 쓰면 "오픈 알림 받기"로 이어지고, 알림 신청은 이름·연락처 없이 "눌렀다"는 사실만 익명으로 세요.
  */
-export type ProductId = "pack2" | "pack6" | "pack20";
+export type ProductId = "pack2" | "pack7" | "pack22";
 
 interface Product {
   id: ProductId;
@@ -25,8 +25,8 @@ interface Product {
 
 export const PRODUCTS: Product[] = [
   { id: "pack2", name: "동전 2개", price: 1000, line: "동전 2개", use: "일반 풀이 2회 · 궁합 1회 (또는 상담실 질문 10번)" },
-  { id: "pack6", name: "동전 6개", price: 3000, line: "동전 6개", use: "일반 풀이 6회 · 궁합 3회", hot: true },
-  { id: "pack20", name: "동전 20개", price: 9000, line: "동전 18개", bonus: "+ 보너스 2개", use: "합계 20개 = 1만 원 가치 · 프리미엄 종합 사주 1회(19개) + 1개", best: true },
+  { id: "pack7", name: "동전 7개", price: 3000, line: "동전 6개", bonus: "+ 보너스 1개", use: "합계 7개 · 일반 풀이 7회 또는 궁합 3회 + 풀이 1회", hot: true },
+  { id: "pack22", name: "동전 22개", price: 9000, line: "동전 18개", bonus: "+ 보너스 4개", use: "합계 22개 · 프리미엄 종합 사주 1회(19개) + 3개", best: true },
 ];
 
 const DemoNote = ({ className = "" }: { className?: string }) => (
