@@ -6,11 +6,11 @@
 export const DEMO_KIND = "demo_buy";
 export const DEMO_MONTH_CAP = 3;
 
-export type DemoProduct = "reading" | "compat" | "premium";
+export type DemoProduct = "pack2" | "pack6" | "pack20";
 
-/** 상품별로 들어오는 동전 수 (500원=1개, 궁합=2개, 프리미엄 9,500원=19개) */
-export const DEMO_COINS: Record<DemoProduct, number> = { reading: 1, compat: 2, premium: 19 };
+/** 상품별로 들어오는 동전 수 (11-08 개편: 1,000원=2개, 3,000원=6개, 9,000원=18개+보너스 2개=20개) */
+export const DEMO_COINS: Record<DemoProduct, number> = { pack2: 2, pack6: 6, pack20: 20 };
 
 export function parseDemoProduct(v: unknown): DemoProduct | null {
-  return v === "reading" || v === "compat" || v === "premium" ? v : null;
+  return v === "pack2" || v === "pack6" || v === "pack20" ? v : null;
 }

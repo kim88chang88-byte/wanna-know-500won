@@ -612,7 +612,7 @@ export default function ChatApp({ initialCtx, initialMsgs, onChange, onBack }: {
         </div>
       )}
       {payOpen && <PurchaseModal
-          preselect="reading"
+          preselect="pack2"
           continueLabel="이어서 질문 더하기"
           onClose={() => {
             setPayOpen(false);

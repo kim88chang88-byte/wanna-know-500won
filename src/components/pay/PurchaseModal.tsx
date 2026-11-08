@@ -10,7 +10,7 @@ import { DEMO_COINS, DEMO_MONTH_CAP } from "@/lib/demoBuy";
  * 모든 단계에 "베타 체험 · 실제 결제 없음"을 적어서, 진짜로 결제된 것처럼 보이지 않게 해요.
  * 한도(3번)를 다 쓰면 "오픈 알림 받기"로 이어지고, 알림 신청은 이름·연락처 없이 "눌렀다"는 사실만 익명으로 세요.
  */
-export type ProductId = "reading" | "compat" | "premium";
+export type ProductId = "pack2" | "pack6" | "pack20";
 
 interface Product {
   id: ProductId;
@@ -20,12 +20,13 @@ interface Product {
   bonus?: string;
   use: string;
   best?: boolean;
+  hot?: boolean;
 }
 
 export const PRODUCTS: Product[] = [
-  { id: "reading", name: "오늘의 풀이", price: 500, line: "동전 1개", use: "성공·재물·연애 등 풀이 1회 (또는 상담실 질문 5번)" },
-  { id: "compat", name: "둘의 궁합", price: 1000, line: "동전 2개", use: "궁합 결과서 1회 (또는 상담실 질문 10번)" },
-  { id: "premium", name: "프리미엄 종합 사주", price: 9500, line: "동전 19개", use: "20쪽 사주서 전체 1회 (원국·월별 12개월·10년 대운)", best: true },
+  { id: "pack2", name: "동전 2개", price: 1000, line: "동전 2개", use: "일반 풀이 2회 · 궁합 1회 (또는 상담실 질문 10번)" },
+  { id: "pack6", name: "동전 6개", price: 3000, line: "동전 6개", use: "일반 풀이 6회 · 궁합 3회", hot: true },
+  { id: "pack20", name: "동전 20개", price: 9000, line: "동전 18개", bonus: "+ 보너스 2개", use: "합계 20개 = 1만 원 가치 · 프리미엄 종합 사주 1회(19개) + 1개", best: true },
 ];
 
 const DemoNote = ({ className = "" }: { className?: string }) => (
@@ -94,6 +95,7 @@ export default function PurchaseModal({ preselect, onClose, onContinue, continue
                   <div className="min-w-0">
                     <p className="flex flex-wrap items-center gap-1.5 text-[15px] font-extrabold text-gray-900">
                       {p.name}
+                      {p.hot && <span className="rounded-md bg-red-500 px-1.5 py-px text-[10px] font-extrabold text-white">HOT</span>}
                       {p.best && <span className="rounded-md bg-orange-500 px-1.5 py-px text-[10px] font-extrabold text-white">BEST</span>}
                     </p>
                     <p className="mt-0.5 text-[12.5px] font-bold">

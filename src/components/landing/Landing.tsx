@@ -176,8 +176,8 @@ export default function Landing() {
         return;
       }
       // 1,000원 카드(둘의 궁합)는 동전 대신 지폐가 들어가요.
-      // 9,500원 프리미엄 종합 사주는 만원권이 낙엽처럼 떨어져요. (1,000원 궁합은 천원권 그대로)
-      const big = price.startsWith("9,500");
+      // 프리미엄 종합 사주(동전 19개)는 만원권이 낙엽처럼 떨어져요. (1,000원 궁합은 천원권 그대로)
+      const big = premium === true && !fortune.includes("궁합");
       setRitualBig(big);
       setRitualBill(price.startsWith("1,000") || big);
       setRitual(true);
@@ -439,7 +439,7 @@ export default function Landing() {
       )}
       {paywallPay && (
         <PurchaseModal
-          preselect={paywallPay.compat ? "compat" : "premium"}
+          preselect={paywallPay.compat ? "pack2" : "pack20"}
           onClose={() => {
             setPaywallPay(null);
             void refreshCoins();
