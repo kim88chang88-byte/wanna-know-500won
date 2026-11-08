@@ -22,7 +22,7 @@ import { useRouter } from "next/navigation";
 import { clearRef, isFinalRedeem, readRef, redeemMessage, refFromSearch, saveMyCode, saveRef } from "@/lib/referral";
 import { DailyLineCard } from "./DailyLineCard";
 import { FollowupCard } from "./FollowupCard";
-import { VaultFollowupCard } from "./VaultFollowupCard";
+import { VaultFollowupBubble } from "./VaultFollowupBubble";
 import dynamic from "next/dynamic";
 import type { IntakeTarget } from "./IntakeModal";
 
@@ -53,7 +53,8 @@ export default function Landing() {
   const [loginOpen, setLoginOpen] = useState(false);
   // 비회원이 뽑기를 누르면 로그인 창을 열면서, 왜 열렸는지 한 줄로 알려줘요.
   const [loginReason, setLoginReason] = useState<string | null>(null);
-  const [vaultAsk, setVaultAsk] = useState(false); // 보관함 안부 카드가 보이는 중이면 다른 안부 카드는 숨겨요
+  const [vaultAsk, setVaultAsk] = useState(false); // 보관함 안부 말풍선이 있으면 다른 안부 카드는 숨겨요
+  const [vaultDot, setVaultDot] = useState(false); // 말풍선을 닫았고 아직 대답 전이면 닉네임 버튼에 빨간 점
   const userRef = useRef<typeof user>(null);
   userRef.current = user;
   const [intake, setIntake] = useState<IntakeTarget | null>(null);
@@ -411,7 +412,7 @@ export default function Landing() {
   return (
     <>
       <SnowBackground />
-      <Header onOpenLogin={openLogin} user={user} />
+      <Header onOpenLogin={openLogin} user={user} dot={Boolean(user) && vaultDot} bubble={user ? <VaultFollowupBubble onShow={setVaultAsk} onDot={setVaultDot} /> : null} />
 
       <main className="relative z-10 max-w-[34rem] lg:max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-5 pb-20 sm:pb-24">
         <HeroSection visitors={visitors} tickets={tickets} onBuy={user ? () => setPayOpen(true) : undefined} wallet={user ? { ...splitPearls(coins), free: Math.max(0, FREE_PER_DAY - counts.today) + tickets } : null} />
@@ -422,7 +423,6 @@ export default function Landing() {
           recordVisit(getBrowserStorage(), dayKey(new Date()));
           syncReward();
         }} />}
-        {user && <VaultFollowupCard onShow={setVaultAsk} />}
         {!(user && vaultAsk) && <FollowupCard />}
         <MachinesSection onSpin={handleSpin} lastKey={lastKey} />
         <PremiumSection onSpin={handleSpin} />

@@ -49,7 +49,7 @@ export function firstGlyph(nickname: string | null | undefined): string {
   return Array.from((nickname ?? "").trim())[0] ?? "❄️";
 }
 
-export function Header({ onOpenLogin, user = null }: { onOpenLogin: () => void; user?: AuthUser | null }) {
+export function Header({ onOpenLogin, user = null, bubble = null, dot = false }: { onOpenLogin: () => void; user?: AuthUser | null; bubble?: React.ReactNode; dot?: boolean }) {
   return (
     <>
       <header className="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-brand-100 shadow-[0_2px_15px_rgba(128,87,224,0.06)]">
@@ -60,14 +60,18 @@ export function Header({ onOpenLogin, user = null }: { onOpenLogin: () => void; 
           </div>
 
           {/* 오른쪽 위: 로그인 전에는 "로그인" 버튼, 로그인 후에는 닉네임(마이페이지) + "?" 안내 메뉴 + 햄버거(자판기) 메뉴. 둘 다 같은 창(로그인/내 정보)을 열어요 */}
-          <div className="shrink-0 flex items-center gap-1.5 sm:gap-2">
+          <div className="relative shrink-0 flex items-center gap-1.5 sm:gap-2">
             <button
-              onClick={onOpenLogin}
+              onClick={() => {
+                // 빨간 점이 있으면 먼저 안부 말풍선을 다시 열어 줘요
+                if (user && dot) window.dispatchEvent(new Event("wanna500:vault-bubble"));
+                else onOpenLogin();
+              }}
               type="button"
               aria-haspopup="dialog"
               data-testid="mypage-button"
               data-logged-in={user ? "true" : "false"}
-              className={`group flex items-center gap-1.5 sm:gap-2 p-1 pr-2.5 sm:px-3.5 sm:py-1.5 rounded-full border transition-all text-left shadow-sm ${
+              className={`group relative flex items-center gap-1.5 sm:gap-2 p-1 pr-2.5 sm:px-3.5 sm:py-1.5 rounded-full border transition-all text-left shadow-sm ${
                 user
                   ? "bg-emerald-50 hover:bg-emerald-100/70 border-emerald-300/70"
                   : "bg-brand-600 hover:bg-brand-700 border-brand-600 text-white"
@@ -107,9 +111,11 @@ export function Header({ onOpenLogin, user = null }: { onOpenLogin: () => void; 
                   <span className="hidden sm:block text-[10px] text-brand-100 leading-tight">카카오·구글·네이버</span>
                 </div>
               )}
+              {user && dot && <span aria-hidden="true" data-testid="vault-followup-dot" className="vf-dot absolute -right-0.5 -top-0.5 h-3 w-3 rounded-full border-2 border-white bg-red-500" />}
             </button>
             <HelpMenuButton />
             <MachineMenuButton />
+            {bubble}
           </div>
         </div>
       </header>
