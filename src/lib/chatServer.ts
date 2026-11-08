@@ -54,10 +54,12 @@ export interface ParsedCtx {
   birth: BirthInput | null;
   partnerBirth: BirthInput | null;
   topic: "study" | null;
+  /** 프리미엄 결과서에서 들어온 방 (무료 질문을 일반 풀이 방과 따로 세요) */
+  premium?: boolean;
 }
 
 export function parseCtx(raw: unknown): ParsedCtx | null {
-  const c = (raw ?? {}) as { kind?: unknown; summary?: unknown; birth?: unknown; partnerBirth?: unknown; partnerName?: unknown; name?: unknown; topic?: unknown };
+  const c = (raw ?? {}) as { kind?: unknown; summary?: unknown; birth?: unknown; partnerBirth?: unknown; partnerName?: unknown; name?: unknown; topic?: unknown; premium?: unknown };
   const kind: ChatKind | null = c.kind === "daily" || c.kind === "reading" || c.kind === "compat" ? c.kind : null;
   if (!kind) return null;
   return {
@@ -68,6 +70,7 @@ export function parseCtx(raw: unknown): ParsedCtx | null {
     birth: validBirth(c.birth),
     partnerBirth: kind === "compat" ? validBirth(c.partnerBirth) : null,
     topic: kind === "reading" && c.topic === "study" ? "study" : null,
+    premium: kind === "reading" && c.premium === true,
   };
 }
 
@@ -83,7 +86,7 @@ export interface QuotaTarget {
 }
 
 export function targetOf(user: string, ctx: ParsedCtx, now: Date = new Date()): QuotaTarget {
-  return { user, scope: scopeFor(ctx.kind, ctx.birth, ctx.partnerBirth, now, roomKey(ctx.summary, ctx.topic, ctx.premium)), free: freeFor(ctx.kind) };
+  return { user, scope: scopeFor(ctx.kind, ctx.birth, ctx.partnerBirth, now, roomKey(ctx.summary, ctx.topic ?? undefined, ctx.premium)), free: freeFor(ctx.kind) };
 }
 
 /** DB 가 없거나 함수를 아직 안 만들었으면 서버 메모리로 세요. (그래도 최소한의 제한은 돼요) */
