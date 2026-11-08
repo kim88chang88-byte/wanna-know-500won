@@ -160,6 +160,18 @@ export default function Landing() {
           return;
         }
       }
+      // 일반 풀이(동전 1개): 오늘 무료 뽑기도, 보너스 뽑기권도, 동전도 없으면 입력 전에 "잔액이 부족해요" 안내창을 먼저 보여줘요.
+      if (premium !== true) {
+        const noFree = countsRef.current.today >= FREE_PER_DAY && readTickets(getBrowserStorage()) <= 0;
+        if (noFree && coinsRef.current < 1) {
+          void refreshCoins().then((bal) => {
+            const have = bal ?? coinsRef.current;
+            if (have < 1) setPaywall({ fortune, price, premium: false, need: 1, have, compat: false });
+            else begin();
+          });
+          return;
+        }
+      }
       begin();
       return;
       function begin() {
@@ -439,7 +451,7 @@ export default function Landing() {
       )}
       {paywallPay && (
         <PurchaseModal
-          preselect={paywallPay.compat ? "pack2" : "pack22"}
+          preselect={paywallPay.premium && !paywallPay.compat ? "pack22" : "pack2"}
           onClose={() => {
             setPaywallPay(null);
             void refreshCoins();
@@ -449,7 +461,7 @@ export default function Landing() {
             setPaywallPay(null);
             // 충전 직후 동전을 새로 읽어서, 충분하면 바로 풀이 입력으로 이어가요.
             void refreshCoins().then((bal) => {
-              if ((bal ?? 0) >= ctx.need) handleSpin(`paywall-${ctx.fortune}`, ctx.fortune, ctx.price, true);
+              if ((bal ?? 0) >= ctx.need) handleSpin(`paywall-${ctx.fortune}`, ctx.fortune, ctx.price, ctx.premium);
               else setPaywall({ ...ctx, have: bal ?? 0 });
             });
           }}
