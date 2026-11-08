@@ -57,6 +57,38 @@ export function iyeyo(word: string): string {
   return batchim ? "이에요" : "예요";
 }
 
+/**
+ * 목차 제목이 해요체("…네요", "…이죠", "…이에요")로 저장돼 있으면 본문과 같은 반말로 바꿔요. (예전에 만든 풀이용)
+ * 이미 반말이거나 처음 보는 끝말이면 그대로 둬요.
+ */
+export function casualHead(head: string): string {
+  const t = head.trim();
+  const rules: Array<[RegExp, string]> = [
+    [/네요[.!]?$/, "네!"],
+    [/이죠[.!]?$/, "이지!"],
+    [/죠[.!]?$/, "지!"],
+    [/이에요[.!]?$/, "이야"],
+    [/예요[.!]?$/, "야"],
+    [/(해|하|되|돼|있|없|같|좋|맞|보|주|가|나|오|쉬|서|펴|켜|써|워)요[.!]?$/, ""],
+  ];
+  for (const [re, to] of rules) {
+    if (!re.test(t)) continue;
+    if (to === "") {
+      // "~해요"→"~해", "~있어요"→"~있어"처럼 '요'만 떼요
+      return t.replace(/요[.!]?$/, "");
+    }
+    return t.replace(re, to);
+  }
+  return /어요[.!]?$|아요[.!]?$|여요[.!]?$/.test(t) ? t.replace(/요[.!]?$/, "") : t;
+}
+
+/** 받침 있으면 "이야", 없으면 "야" (반말 제목용) */
+export function iya(word: string): string {
+  const c = word.trim().slice(-1).charCodeAt(0);
+  const batchim = c >= 0xac00 && c <= 0xd7a3 && (c - 0xac00) % 28 !== 0;
+  return batchim ? "이야" : "야";
+}
+
 const escapeRe = (c: string) => c.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
 /** 글 맨 앞에 화면 제목을 그대로 따라 쓴 경우("그렇지만 이건 아쉬워요. …")만 떼어 내요. */

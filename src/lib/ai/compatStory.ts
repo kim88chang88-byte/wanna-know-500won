@@ -78,7 +78,7 @@ export const ITEMS_SCHEMA = {
         type: "object",
         properties: {
           id: { type: "string", description: "입력의 id 를 그대로" },
-          head: { type: "string", description: `이 글을 한 줄로 요약한 제목. 18~32자, 이 두 사람의 모습이 드러나는 한 문장(예: ~네요 / ~죠 / ~다). 이모지·따옴표 금지` },
+          head: { type: "string", description: `이 글을 한 줄로 요약한 제목. 18~32자, 이 두 사람의 모습이 드러나는 한 문장(예: ~네! / ~이야 / ~거든 처럼 본문과 같은 귀여운 반말로 끝내. 해요체·합쇼체 금지). 이모지·따옴표 금지` },
           body: { type: "string", description: `본문. 440~520자, 빈 줄(\\n\\n)로 3문단. ${ITEM_MAX}자 이내` },
         },
         required: ["id", "head", "body"],

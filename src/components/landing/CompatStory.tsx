@@ -4,6 +4,7 @@ import { possessive } from "@/lib/callName";
 import { useState, type ReactNode } from "react";
 import type { CompatLink, CompatPerson, CompatScore, CompatView, PremiumReportView } from "@/lib/premium/types";
 import { josa } from "@/lib/premium/josa";
+import { casualHead } from "@/lib/storyHelpers";
 import { buildCompatAnswer, buildShareSummary, buildTogether, elementNote, plainPointTitle } from "@/lib/premium/compatAnswer";
 import { getBrowserStorage } from "@/lib/drawCounter";
 import { readMyCode, withRef } from "@/lib/referral";
@@ -257,26 +258,26 @@ export default function CompatStory({ report, intro, closing, lastWord, partnerN
       </section>
 
       <section aria-label="자세한 풀이" data-testid="story-folds" className="rounded-2xl border border-brand-100 bg-white px-4">
-        <p className="pt-3.5 text-xs text-gray-500">각 제목을 누르면 풀이가 펼쳐져요</p>
+        <p className="pt-3.5 text-xs text-gray-500">각 제목을 누르면 풀이가 펼쳐져!</p>
         {groups.map((g) =>
           g.list.map((pt, n) => (
-            <Fold key={`${g.key}-${n}`} testId="story-fold" label={`${g.emoji} ${g.label}`} title={plainPointTitle(pt.title)}>
+            <Fold key={`${g.key}-${n}`} testId="story-fold" label={`${g.emoji} ${g.label}`} title={casualHead(plainPointTitle(pt.title))}>
               <Paras mark={mark} text={pt.body} />
             </Fold>
           )),
         )}
         {(c.timing ?? []).map((t) => (
-          <Fold key={t.title} testId="story-fold" label="📅 올해·내년 흐름" title={t.title}>
+          <Fold key={t.title} testId="story-fold" label="📅 올해·내년 흐름" title={casualHead(t.title)}>
             <Paras mark={mark} text={t.body} />
           </Fold>
         ))}
         {(c.tips ?? []).map((t) => (
-          <Fold key={t.title} testId="story-fold" label={`${t.emoji} 도리의 팁`} title={t.title}>
+          <Fold key={t.title} testId="story-fold" label={`${t.emoji} 도리의 팁`} title={casualHead(t.title)}>
             <Paras mark={mark} text={t.body} />
           </Fold>
         ))}
         {lastWord && (
-          <Fold testId="story-fold-last" label="마지막 한마디" title="도리가 마지막으로 전하는 말이에요" defaultOpen>
+          <Fold testId="story-fold-last" label="마지막 한마디" title="도리가 마지막으로 전하는 말이야" defaultOpen>
             {lastWord}
           </Fold>
         )}

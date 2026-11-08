@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { birthSummary, firstSentence, iyeyo, normalizeBold, splitBold, stripBold, stripSummaryLead, stripTitleEcho, tidyFold, toParagraphs, trimToLastSentence } from "@/lib/storyHelpers";
+import { birthSummary, firstSentence, casualHead, iya, iyeyo, normalizeBold, splitBold, stripBold, stripSummaryLead, stripTitleEcho, tidyFold, toParagraphs, trimToLastSentence } from "@/lib/storyHelpers";
 
 describe("StoryReport helpers", () => {
   it("firstSentence: 첫 문장만 돌려줘요", () => {
@@ -9,6 +9,16 @@ describe("StoryReport helpers", () => {
   it("birthSummary: 시간 모름/음력 표기", () => {
     expect(birthSummary({ year: 1988, month: 12, day: 29, calendar: "solar", gender: "male" } as never)).toBe("1988.12.29 (양력) 시간 모름 · 남성");
     expect(birthSummary({ year: 1990, month: 1, day: 5, hour: 7, minute: 5, calendar: "lunar", isLeapMonth: true, gender: "female" } as never)).toBe("1990.01.05 (음력 윤달) 07:05 · 여성");
+  });
+});
+
+describe("casualHead (해요체 제목 → 반말)", () => {
+  it("끝말을 반말로 바꿔요", () => {
+    expect(casualHead("깊은 물과 쇠의 기운으로 단단하게 채워진 사주 구조네요")).toBe("깊은 물과 쇠의 기운으로 단단하게 채워진 사주 구조네!");
+    expect(casualHead("2027년의 사계절 흐름 속에서 타이밍을 짚어보는 시간이죠")).toBe("2027년의 사계절 흐름 속에서 타이밍을 짚어보는 시간이지!");
+    expect(casualHead("일상 속 작은 습관으로 마음의 균형을 맞추는 법이에요")).toBe("일상 속 작은 습관으로 마음의 균형을 맞추는 법이야");
+    expect(casualHead("지나친 생각에 갇혀 행동을 미루기 쉬워요")).toBe("지나친 생각에 갇혀 행동을 미루기 쉬워");
+    expect(casualHead("이미 반말이라 그대로야")).toBe("이미 반말이라 그대로야");
   });
 });
 
@@ -28,6 +38,8 @@ describe("toParagraphs / iyeyo", () => {
   it("받침에 따라 이에요/예요", () => {
     expect(iyeyo("서쪽")).toBe("이에요");
     expect(iyeyo("화이트")).toBe("예요");
+    expect(iya("서쪽")).toBe("이야");
+    expect(iya("화이트")).toBe("야");
   });
 });
 

@@ -13,7 +13,7 @@ import { ElIconName } from "@/components/ElIcon";
 import type { Element } from "@/lib/saju/constants";
 import { Stars } from "./ReadingCard";
 import ElementTile from "@/components/ElementTile";
-import { firstSentence, iyeyo, splitBold, stripSummaryLead, tidyFold, toParagraphs, trimToLastSentence } from "@/lib/storyHelpers";
+import { firstSentence, casualHead, iya, splitBold, stripSummaryLead, tidyFold, toParagraphs, trimToLastSentence } from "@/lib/storyHelpers";
 
 
 /*
@@ -26,9 +26,9 @@ type FoldKey = "elements" | "self" | "praise" | "lack" | "flow" | "improve";
 const STEPS: Array<{ key: FoldKey; name: string }> = [
   { key: "elements", name: "오행으로 보는 사주" },
   { key: "self", name: "나는 어떤 사람인가?" },
-  { key: "praise", name: "이건 정말 칭찬해요 👏" },
-  { key: "lack", name: "그렇지만 이건 아쉬워요" },
-  { key: "improve", name: "이렇게 개선해보아요 🌱" },
+  { key: "praise", name: "이건 정말 칭찬해 줄게 👏" },
+  { key: "lack", name: "그렇지만 이건 아쉬워" },
+  { key: "improve", name: "이렇게 개선해 보자 🌱" },
   { key: "flow", name: "올해와 이번 달의 흐름" },
 ];
 
@@ -236,7 +236,7 @@ export default function StoryReport({
     lucky: rawFolds.lucky ? tidyFold("lucky", rawFolds.lucky) : undefined,
   };
   const hasFolds = Boolean(f.elements || f.self || f.praise || f.lack || f.flow || f.improve);
-  const heads = reading?.heads ?? {};
+  const heads = Object.fromEntries(Object.entries(reading?.heads ?? {}).map(([k, v]) => [k, typeof v === "string" ? casualHead(v) : v])) as Partial<Record<FoldKey | "lucky", string>>;
   // 요약하자면: 총운 한 줄 → 도리가 본 이유를 한 흐름으로 이어요. (고민에 대한 답은 고민 바로 아래 "도리의 답" 카드로 따로 보여줘요)
   const joinFlow = (parts: Array<string | undefined | null>) =>
     parts
@@ -305,7 +305,7 @@ export default function StoryReport({
 
       {/* 3) 접어 둔 풀이: 오행 → 나는 누구 → 칭찬 → 아쉬움 → 개선 → 행운 처방 → 원국 → 마지막 한마디 */}
       <section aria-label="자세한 풀이" data-testid="story-folds" className="rounded-2xl border border-brand-100 bg-white px-4">
-        <p className="pt-3.5 text-xs text-gray-500">각 제목을 누르면 풀이가 펼쳐져요</p>
+        <p className="pt-3.5 text-xs text-gray-500">각 제목을 누르면 풀이가 펼쳐져!</p>
         {hasFolds ? (
           <>
             {STEPS.map((st, n) => (
@@ -361,7 +361,7 @@ export default function StoryReport({
             )}
           </>
         )}
-        <Fold testId="story-fold-lucky" label={`STEP ${STEPS.length + 1} · 행운 처방`} title={heads.lucky || `행운 컬러는 ${t.lucky.color}, 방향은 ${t.lucky.direction}${iyeyo(t.lucky.direction)}`}>
+        <Fold testId="story-fold-lucky" label={`STEP ${STEPS.length + 1} · 행운 처방`} title={heads.lucky || `행운 컬러는 ${t.lucky.color}, 방향은 ${t.lucky.direction}${iya(t.lucky.direction)}`}>
           {f.lucky && <Paras mark={mark} text={f.lucky} className="mb-3.5" />}
           <p className="flex items-center gap-2">
             <span aria-hidden="true" className="h-4 w-4 shrink-0 rounded-full border border-black/10" style={{ backgroundColor: t.lucky.hex }} />
@@ -370,11 +370,11 @@ export default function StoryReport({
           {!f.lucky && <PendingNote />}
           {!f.lucky && <p className="mt-1 text-[13px] text-gray-500">비어 있는 {t.lucky.element} 기운을 가볍게 채워 주는 전통 오행 대응이에요. 소품이나 옷 색으로 기분 전환하듯 써 보세요.</p>}
         </Fold>
-        <Fold testId="story-fold-chart" label="내 사주 원국" title="십성·오행 분포·신강신약을 표로 자세히 볼래요">
+        <Fold testId="story-fold-chart" label="내 사주 원국" title="십성·오행 분포·신강신약을 표로 자세히 볼래?">
           <ManseReport report={report} hideHeadline parts="base" />
         </Fold>
         {lastWord && (
-          <Fold testId="story-fold-last" label="마지막 한마디" title="도리가 마지막으로 전하는 말이에요" defaultOpen>
+          <Fold testId="story-fold-last" label="마지막 한마디" title="도리가 마지막으로 전하는 말이야" defaultOpen>
             {lastWord}
           </Fold>
         )}
