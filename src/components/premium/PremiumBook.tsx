@@ -25,7 +25,7 @@ const BAR: Record<ElementKind, string> = {
   fire: "bg-rose-400",
   earth: "bg-amber-400",
   metal: "bg-slate-300",
-  water: "bg-sky-400",
+  water: "bg-blue-400",
   unknown: "bg-amber-300",
 };
 

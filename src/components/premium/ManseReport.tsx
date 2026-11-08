@@ -15,7 +15,7 @@ const ELEMENT_STYLE: Record<ElementKind, { bar: string; chip: string }> = {
   fire: { bar: "bg-rose-500", chip: "bg-rose-50 text-rose-700" },
   earth: { bar: "bg-amber-500", chip: "bg-amber-50 text-amber-700" },
   metal: { bar: "bg-slate-400", chip: "bg-slate-100 text-slate-700" },
-  water: { bar: "bg-sky-500", chip: "bg-sky-50 text-sky-700" },
+  water: { bar: "bg-blue-500", chip: "bg-blue-50 text-blue-700" },
   unknown: { bar: "bg-brand-500", chip: "bg-brand-50 text-brand-700" },
 };
 

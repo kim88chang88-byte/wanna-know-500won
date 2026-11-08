@@ -12,7 +12,7 @@ const ELEMENT_STYLE: Record<string, string> = {
   火: "bg-rose-100 text-rose-700 border-rose-300",
   土: "bg-amber-100 text-amber-700 border-amber-300",
   金: "bg-slate-100 text-slate-600 border-slate-300",
-  水: "bg-sky-100 text-sky-700 border-sky-300",
+  水: "bg-blue-100 text-blue-700 border-blue-300",
 };
 
 function Chip({ ch, className = "" }: { ch: string; className?: string }) {

@@ -63,7 +63,7 @@ function LinkStrip({ links, partnerName }: { links: CompatLink[]; partnerName: s
   );
 }
 
-const EL_BAR: Record<string, string> = { wood: "bg-emerald-500", fire: "bg-rose-500", earth: "bg-amber-500", metal: "bg-slate-400", water: "bg-sky-500", unknown: "bg-brand-500" };
+const EL_BAR: Record<string, string> = { wood: "bg-emerald-500", fire: "bg-rose-500", earth: "bg-amber-500", metal: "bg-slate-400", water: "bg-blue-500", unknown: "bg-brand-500" };
 
 /** 한 사람의 오행을 한 줄 비율 막대로 보여요. */
 function ElementStack({ person, label, tone }: { person: CompatPerson; label: string; tone: string }) {
