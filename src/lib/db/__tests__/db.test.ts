@@ -45,6 +45,18 @@ function recorder(handler: (url: string, init?: RequestInit) => Response) {
 }
 
 describe("createDb", () => {
+  it("upsertUser: 닉네임을 넘기지 않으면 기존 닉네임을 지우지 않아요", async () => {
+    const r = recorder(() => new Response(null, { status: 201 }));
+    await createDb(cfg, r.f).upsertUser("e_abc", undefined, new Date("2026-10-17T00:00:00Z"));
+    expect(JSON.parse(String(r.calls[0].init?.body))).toEqual({ id: "e_abc", last_login_at: "2026-10-17T00:00:00.000Z" });
+  });
+  it("setNickname / getNickname", async () => {
+    const r = recorder(() => new Response(JSON.stringify([{ nickname: "서윤" }]), { status: 200 }));
+    const db = createDb(cfg, r.f);
+    await db.setNickname("e_abc", "서윤");
+    expect(JSON.parse(String(r.calls[0].init?.body))).toEqual({ id: "e_abc", nickname: "서윤" });
+    expect(await db.getNickname("e_abc")).toBe("서윤");
+  });
   it("upsertUser: 병합 upsert 로 보내요", async () => {
     const r = recorder(() => new Response(null, { status: 201 }));
     await createDb(cfg, r.f).upsertUser("123", "별이", new Date("2026-10-17T00:00:00Z"));

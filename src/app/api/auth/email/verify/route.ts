@@ -54,16 +54,20 @@ export async function POST(request: Request) {
 
   const sub = emailUserId(email, secret);
   const dbConfig = loadDbConfig(process.env);
+  // 이미 정해 둔 닉네임이 있으면 로그인 쿠키에 담고, 없으면 화면이 닉네임을 한 번 물어요.
+  let nick: string | undefined;
   if (dbConfig) {
     try {
-      await createDb(dbConfig).upsertUser(sub, undefined);
+      const db = createDb(dbConfig);
+      await db.upsertUser(sub, undefined);
+      nick = (await db.getNickname(sub)) ?? undefined;
     } catch (err) {
       console.error("upsertUser failed:", err instanceof Error ? err.message : "unknown");
     }
   }
   const exp = Math.floor(Date.now() / 1000) + SESSION_MAX_AGE_SEC;
-  const res = NextResponse.json({ ok: true });
-  res.cookies.set(SESSION_COOKIE, createSessionToken({ sub, exp }, secret), {
+  const res = NextResponse.json({ ok: true, needNickname: !nick });
+  res.cookies.set(SESSION_COOKIE, createSessionToken({ sub, ...(nick ? { nick } : {}), exp }, secret), {
     httpOnly: true,
     sameSite: "lax",
     secure: process.env.NODE_ENV === "production",

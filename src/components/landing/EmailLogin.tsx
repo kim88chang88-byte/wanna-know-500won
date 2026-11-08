@@ -7,7 +7,7 @@ import { useEffect, useState } from "react";
  * 로그인에 성공하면 소셜 로그인과 똑같이 "/?login=success" 로 돌아가 로그인 상태를 새로 읽어요.
  */
 
-type Step = "email" | "code";
+type Step = "email" | "code" | "nick";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
@@ -18,6 +18,7 @@ export default function EmailLogin({ onBack }: { onBack: () => void }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [cooldown, setCooldown] = useState(0);
+  const [nick, setNick] = useState("");
 
   // 재전송 대기 시간(초)을 1초씩 줄여요.
   useEffect(() => {
@@ -63,16 +64,86 @@ export default function EmailLogin({ onBack }: { onBack: () => void }) {
     setError(null);
     try {
       const res = await fetch("/api/auth/email/verify", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email: email.trim(), code }) });
+      const data = (await res.json().catch(() => null)) as { error?: string; needNickname?: boolean } | null;
       if (res.ok) {
+        // 닉네임이 비어 있으면 한 번 물어요. (이미 있으면 바로 들어가요)
+        if (data?.needNickname) {
+          setStep("nick");
+          setBusy(false);
+          return;
+        }
         window.location.href = "/?login=success";
         return;
       }
-      const data = (await res.json().catch(() => null)) as { error?: string } | null;
       setError(data?.error ?? "로그인에 실패했어요. 잠시 뒤에 다시 시도해 주세요.");
     } catch {
       setError("로그인에 실패했어요. 잠시 뒤에 다시 시도해 주세요.");
     }
     setBusy(false);
+  }
+
+  async function saveNick() {
+    const v = nick.replace(/\s+/g, " ").trim();
+    if (v.length < 2) {
+      setError("닉네임은 2자 이상으로 써 주세요.");
+      return;
+    }
+    setBusy(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/auth/email/nickname", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ nickname: v }) });
+      if (res.ok) {
+        window.location.href = "/?login=success";
+        return;
+      }
+      const data = (await res.json().catch(() => null)) as { error?: string } | null;
+      setError(data?.error ?? "저장하지 못했어요. 잠시 뒤에 다시 시도해 주세요.");
+    } catch {
+      setError("저장하지 못했어요. 잠시 뒤에 다시 시도해 주세요.");
+    }
+    setBusy(false);
+  }
+
+  if (step === "nick") {
+    const shown = nick.replace(/\s+/g, " ").trim();
+    return (
+      <div data-testid="email-nick-form" className="flex flex-col gap-2.5">
+        <p className="text-center text-sm font-extrabold text-gray-900">도리가 뭐라고 불러드릴까요?</p>
+        <p className="text-center text-[11px] leading-relaxed text-gray-500">풀이 속에서 도리가 불러 드릴 이름이에요.<br />나중에 바꾸거나 건너뛸 수도 있어요.</p>
+        <label htmlFor="email-nick-input" className="text-xs font-bold text-gray-700">
+          닉네임
+        </label>
+        <input
+          id="email-nick-input"
+          type="text"
+          autoFocus
+          value={nick}
+          maxLength={10}
+          autoComplete="nickname"
+          onChange={(e) => {
+            setNick(e.target.value);
+            setError(null);
+          }}
+          onKeyDown={(e) => e.key === "Enter" && !busy && saveNick()}
+          placeholder="예: 서윤, 달토끼"
+          className="w-full rounded-xl border-[1.5px] border-brand-200 px-3 py-2.5 text-sm"
+        />
+        <p className="-mt-1.5 text-right text-[10px] text-gray-400">{nick.length} / 10</p>
+        {shown.length >= 2 && !error && <p className="rounded-lg bg-emerald-50 px-3 py-2 text-center text-[11px] font-bold text-emerald-700">“{shown}님, 안녕하세요!”라고 불러 드릴게요</p>}
+        {error && (
+          <p role="alert" className="rounded-lg bg-rose-50 px-3 py-2 text-center text-[11px] font-bold text-rose-700">
+            {error}
+          </p>
+        )}
+        <button type="button" onClick={saveNick} disabled={busy || shown.length < 2} className="w-full rounded-full bg-brand-600 py-2.5 text-xs font-bold text-white disabled:opacity-50">
+          {busy ? "저장하는 중…" : "정했어요"}
+        </button>
+        <button type="button" onClick={() => (window.location.href = "/?login=success")} className="text-center text-[11px] text-gray-500 underline underline-offset-2">
+          건너뛰기 (회원님으로 부를게요)
+        </button>
+        <p className="text-center text-[10px] leading-relaxed text-gray-400">한글·영문·숫자·공백만, 2~10자까지 쓸 수 있어요. 다른 사람에게 공개되는 아이디가 아니에요.</p>
+      </div>
+    );
   }
 
   return (

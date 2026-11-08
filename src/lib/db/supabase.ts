@@ -257,7 +257,25 @@ export function createDb(config: DbConfig, fetchImpl: FetchLike = fetch) {
       await call("users?on_conflict=id", {
         method: "POST",
         headers: headers({ Prefer: "resolution=merge-duplicates,return=minimal" }),
-        body: JSON.stringify({ id: safeId(id), nickname: nickname ?? null, last_login_at: now.toISOString() }),
+        // 닉네임을 넘기지 않으면(이메일 로그인) 이미 정해 둔 닉네임을 지우지 않아요.
+        body: JSON.stringify({ id: safeId(id), ...(nickname !== undefined ? { nickname } : {}), last_login_at: now.toISOString() }),
+      });
+    },
+
+    /** 저장된 닉네임 (없으면 null) */
+    async getNickname(id: string): Promise<string | null> {
+      const res = await call(`users?id=eq.${safeId(id)}&select=nickname&limit=1`, { method: "GET", headers: headers() });
+      const rows = (await res.json().catch(() => [])) as Array<{ nickname?: unknown }>;
+      const v = Array.isArray(rows) ? rows[0]?.nickname : null;
+      return typeof v === "string" && v.trim() ? v : null;
+    },
+
+    /** 이메일 로그인 회원이 직접 정한 닉네임을 저장해요. (회원 행이 없으면 만들어요) */
+    async setNickname(id: string, nickname: string): Promise<void> {
+      await call("users?on_conflict=id", {
+        method: "POST",
+        headers: headers({ Prefer: "resolution=merge-duplicates,return=minimal" }),
+        body: JSON.stringify({ id: safeId(id), nickname: nickname.slice(0, 20) }),
       });
     },
 

@@ -55,7 +55,7 @@ export default function PrivacyPage() {
             </tr>
             <tr>
               <td className="p-2 border border-brand-100">선택 (카카오·구글·네이버·이메일 로그인 시)</td>
-              <td className="p-2 border border-brand-100">카카오 회원번호·닉네임, 구글 계정 고유번호·이름 또는 네이버 회원 고유 ID·별명, 이메일 로그인 회원의 이메일 암호화 값(이메일 주소 원문은 저장하지 않아요)</td>
+              <td className="p-2 border border-brand-100">카카오 회원번호·닉네임, 구글 계정 고유번호·이름 또는 네이버 회원 고유 ID·별명, 이메일 로그인 회원의 이메일 암호화 값(이메일 주소 원문은 저장하지 않아요)과 직접 정한 닉네임(선택)</td>
               <td className="p-2 border border-brand-100">로그인 상태 유지, 인사 표시, 회원 식별 (소셜 로그인에서는 이메일·프로필 사진·연락처를 받지 않아요)</td>
             </tr>
             <tr>
