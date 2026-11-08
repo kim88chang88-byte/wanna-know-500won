@@ -1,6 +1,5 @@
 import ClickBubbles from "@/components/ClickBubbles";
 import type { Metadata, Viewport } from "next";
-import { LOGO_IMAGE } from "@/components/landing/images";
 import "./globals.css";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL;
@@ -12,7 +11,7 @@ export const metadata: Metadata = {
   ...(SITE_URL ? { metadataBase: new URL(SITE_URL) } : {}),
   title: TITLE,
   description: DESCRIPTION,
-  icons: { icon: LOGO_IMAGE, apple: LOGO_IMAGE },
+  icons: { icon: "/images/logo.png", apple: "/images/logo.png" },
   openGraph: { title: TITLE, description: DESCRIPTION, type: "website", locale: "ko_KR", images: [{ url: "/images/hero.jpg", alt: "수달 도사 도리의 운세 자판기" }] },
 };
 

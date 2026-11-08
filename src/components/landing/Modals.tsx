@@ -255,8 +255,8 @@ export function LoginModal({ onClose, reason = null, user = null, result = null,
     <ModalShell labelId="login-title" panelClass="max-w-sm p-6 sm:p-7 border border-brand-200" onClose={onClose}>
       <CloseButton onClose={onClose} />
       <div className="text-center mb-5">
-        <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-brand-500/40 shadow-sm bg-sky-50 flex items-center justify-center mx-auto mb-2">
-          <SafeImage src={LOGO_IMAGE} alt="도유사주 로고" className="w-full h-full object-cover" fallback="🦦" fallbackClass="text-2xl" />
+        <div className="w-16 h-16 flex items-center justify-center mx-auto mb-2">
+          <SafeImage src={LOGO_IMAGE} alt="도유사주 로고" className="w-full h-full object-contain" fallback="🦦" fallbackClass="text-2xl" />
         </div>
         <h4 id="login-title" className="font-cute font-normal text-lg text-gray-900">
           {user ? "내 정보" : "도유사주 로그인"}
