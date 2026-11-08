@@ -77,7 +77,7 @@ describe("buildPhotoCardData", () => {
     const alt = photoAltText(data);
     for (const s of ["연애운 포토카드", data.headline, data.quote, data.lucky.color]) expect(alt.includes(s)).toBe(true);
     const cap = shareCaption(data, "https://example.vercel.app");
-    for (const s of [data.headline, ...data.tags, "#도리운세사주", "https://example.vercel.app"]) expect(cap.includes(s)).toBe(true);
+    for (const s of [data.headline, ...data.tags, "#도유사주", "https://example.vercel.app"]) expect(cap.includes(s)).toBe(true);
   });
 });
 

@@ -63,7 +63,7 @@ export default function ReviewsSection() {
             <Stars n={r.rating} />
           </div>
           <p className="text-sm leading-relaxed text-slate-800 break-keep">&ldquo;{r.text}&rdquo;</p>
-          <p className="mt-3 text-[11px] text-slate-400">도리운세⋅사주 이용자</p>
+          <p className="mt-3 text-[11px] text-slate-400">도유 사주 이용자</p>
         </div>
       ))
     : SAMPLE_CAPSULES.map((s) => (

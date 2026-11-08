@@ -176,6 +176,20 @@ export function ShowcaseSection() {
               eager
             />
           </div>
+          {/* 도리의 첫인사: 사이트 이름 '도유'의 뜻 */}
+          <div data-testid="dori-hello" className="mx-auto flex w-full max-w-3xl items-start gap-2.5 text-left">
+            <SafeImage src="/images/dori-icon.webp" alt="" className="mt-0.5 h-10 w-10 shrink-0 rounded-full border border-brand-100 bg-white object-contain" fallback="🦦" fallbackClass="text-3xl" />
+            <div className="relative min-w-0 flex-1 rounded-2xl rounded-tl-md border border-brand-100 bg-brand-50/70 px-3.5 py-3 text-[13.5px] font-bold leading-relaxed text-slate-700" style={{ wordBreak: "keep-all" }}>
+              <p>
+                안녕, 나는 도리야. 내 옆에 있는 내 친구들처럼 나도 너랑 친구가 되고 싶어.
+                <br />
+                그래서 너랑 대화하며 가까워지는 이 놀이터의 이름은 <b className="text-brand-600">도유</b>야.
+              </p>
+              <p className="mt-1.5 font-black text-brand-600">
+                도리 with you, 도유. <span aria-hidden="true">🫧</span>
+              </p>
+            </div>
+          </div>
         </div>
       </div>
 

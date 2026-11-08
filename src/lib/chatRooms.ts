@@ -65,7 +65,7 @@ export function roomLook(ctx: ChatCtx): { title: string; chip: string; icon: str
   return { title: t || "사주 풀이", chip: t || "풀이", icon: "📜" };
 }
 
-/** 방 목록 맨 왼쪽에 보여 줄 도리사주 동물 얼굴 (주제로 정해요) */
+/** 방 목록 맨 왼쪽에 보여 줄 도유 사주 동물 얼굴 (주제로 정해요) */
 export function roomAnimal(ctx: ChatCtx): string {
   const img = (n: string) => `/images/animal-${n}.webp`;
   if (ctx.kind === "daily") return img("otter");
