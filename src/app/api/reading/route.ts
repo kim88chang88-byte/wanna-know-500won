@@ -65,7 +65,8 @@ export async function POST(request: Request) {
   let counts: DrawCounts | null = null;
   let useCoin = false;
   // 궁합(1,000원)은 동전 2개, 그 밖의 뽑기는 1개
-  const coinCost = readingCoinCost(rawPremium === true, typeof rawTopic === "string" && isCompatFortune(rawTopic));
+  const isCompat = rawPremium === true && typeof rawTopic === "string" && isCompatFortune(rawTopic);
+  const coinCost = readingCoinCost(rawPremium === true, isCompat);
   if (userId && db) {
     try {
       counts = await db.getCounts(userId);
@@ -73,7 +74,23 @@ export async function POST(request: Request) {
       // DB 가 잠깐 안 되어도 서비스는 계속돼요. (횟수 제한만 건너뛰어요)
       console.error("getCounts failed:", err instanceof Error ? err.message : "unknown");
     }
-    if (counts && counts.today >= FREE_PER_DAY + (rawBonus === true ? 1 : 0)) {
+    // 둘의 궁합은 무료·보너스 뽑기로는 볼 수 없고, 동전으로만 열어요. (동전이 모자라면 항상 막아요)
+    if (counts && isCompat) {
+      let coins = 0;
+      try {
+        coins = await db.getCoins(userId);
+      } catch {
+        // 동전 조회가 안 되면 궁합은 열지 않아요.
+      }
+      if (coins >= coinCost) {
+        useCoin = true;
+      } else {
+        return NextResponse.json(
+          { error: "둘의 궁합은 동전 2개(1,000원)로만 볼 수 있어요. 동전을 충전해 주세요.", code: "coin_needed", counts },
+          { status: 402 },
+        );
+      }
+    } else if (counts && counts.today >= FREE_PER_DAY + (rawBonus === true ? 1 : 0)) {
       // 오늘 무료를 다 썼다면, 가지고 있는 동전을 써서 뽑아요. (무료가 항상 먼저예요) 풀이가 실제로 나간 뒤에 차감해요.
       // 동전이 모자랄 때만, 무료 횟수 강제가 켜져 있으면 막고 꺼져 있으면(베타) 그대로 보여 줘요.
       let coins = 0;
@@ -207,7 +224,8 @@ export async function POST(request: Request) {
       : null;
     try {
       await ensureUserOnce();
-      await db.recordDraw(userId, normalizeTopic(rawTopic));
+      // 동전으로 연 궁합은 오늘의 무료 뽑기를 쓴 것으로 세지 않아요.
+      if (!isCompat) await db.recordDraw(userId, normalizeTopic(rawTopic));
       // 초대받은 친구의 첫 풀이라면 두 사람에게 코인을 지급해요. (코드를 입력하지 않았거나 이미 받았으면 아무 일도 없어요)
       try {
         await db.completeReferral(userId);

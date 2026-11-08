@@ -25,10 +25,11 @@ export type SpendPlan =
   | { kind: "coin"; cost: number; before: number; after: number }
   | { kind: "short"; cost: number; have: number };
 
-export function spendPlan(w: SpendWallet, cost: number): SpendPlan {
+/** coinsOnly: 둘의 궁합처럼 무료·보너스 뽑기를 쓸 수 없고 동전으로만 여는 풀이 */
+export function spendPlan(w: SpendWallet, cost: number, coinsOnly = false): SpendPlan {
   const n = (v: number) => (Number.isFinite(v) && v > 0 ? Math.floor(v) : 0);
-  const free = n(w.freeLeft);
-  const tickets = n(w.tickets);
+  const free = coinsOnly ? 0 : n(w.freeLeft);
+  const tickets = coinsOnly ? 0 : n(w.tickets);
   const coins = n(w.coins);
   const c = Math.max(1, Math.floor(cost));
   if (free > 0) return { kind: "free", before: free, after: free - 1 };

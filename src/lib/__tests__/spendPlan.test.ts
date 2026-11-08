@@ -16,6 +16,10 @@ describe("spendPlan", () => {
     expect(spendPlan({ freeLeft: 0, tickets: 0, coins: 1 }, 2)).toEqual({ kind: "short", cost: 2, have: 1 });
     expect(spendPlan({ freeLeft: 0, tickets: 0, coins: 0 }, 1)).toEqual({ kind: "short", cost: 1, have: 0 });
   });
+  it("coinsOnly(궁합)는 무료·뽑기권이 있어도 동전만 봐요", () => {
+    expect(spendPlan({ freeLeft: 1, tickets: 3, coins: 5 }, 2, true)).toEqual({ kind: "coin", cost: 2, before: 5, after: 3 });
+    expect(spendPlan({ freeLeft: 1, tickets: 3, coins: 1 }, 2, true)).toEqual({ kind: "short", cost: 2, have: 1 });
+  });
   it("이상한 값은 0으로 봐요", () => {
     expect(spendPlan({ freeLeft: Number.NaN, tickets: -1, coins: 2.9 }, 1)).toEqual({ kind: "coin", cost: 1, before: 2, after: 1 });
   });
