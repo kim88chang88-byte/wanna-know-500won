@@ -34,11 +34,11 @@ function Chip({ label, count, tone, children }: { label: string; count: number; 
       role="img"
       aria-label={`${label} ${text}`}
       title={`${label} ${text}`}
-      className={`inline-flex h-7 items-center gap-1 rounded-full border bg-white/95 pl-1 pr-2 shadow-sm ${tone} ${count > 0 ? "" : "opacity-60 grayscale-[35%]"}`}
+      className={`inline-flex h-6 shrink-0 items-center gap-0.5 rounded-full border bg-white/95 pl-0.5 pr-1.5 shadow-sm sm:h-7 sm:gap-1 sm:pl-1 sm:pr-2 ${tone} ${count > 0 ? "" : "opacity-60 grayscale-[35%]"}`}
     >
       {children}
       {/* 숫자가 바뀔 때 톡 튀어 오르도록 key 에 숫자를 넣어요 */}
-      <span key={text} aria-hidden="true" className="wallet-pop min-w-[0.75rem] text-center text-[13px] font-extrabold leading-none text-gray-800">
+      <span key={text} aria-hidden="true" className="wallet-pop min-w-[0.65rem] text-center text-[12px] sm:min-w-[0.75rem] sm:text-[13px] font-extrabold leading-none text-gray-800">
         {text}
       </span>
     </span>
@@ -51,27 +51,27 @@ export default function WalletBar({ tenK = 0, bills, coins, free, onBuy }: Walle
       <span data-testid="wallet-tenk" className="contents">
         <Chip label="결제한 10,000원 지폐" count={tenK} tone="border-emerald-200">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/images/bill-10000.webp" alt="" width={44} height={25} className="h-[18px] w-auto rounded-[3px] shadow-[0_1px_2px_rgba(0,0,0,0.2)]" />
+          <img src="/images/bill-10000.webp" alt="" width={44} height={25} className="h-[14px] w-auto rounded-[3px] sm:h-[18px] shadow-[0_1px_2px_rgba(0,0,0,0.2)]" />
         </Chip>
       </span>
       <span data-testid="wallet-bills" className="contents">
         <Chip label="결제한 1,000원 지폐" count={bills} tone="border-sky-200">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/images/bill-1000.webp" alt="" width={44} height={25} className="h-[18px] w-auto rounded-[3px] shadow-[0_1px_2px_rgba(0,0,0,0.2)]" />
+          <img src="/images/bill-1000.webp" alt="" width={44} height={25} className="h-[14px] w-auto rounded-[3px] sm:h-[18px] shadow-[0_1px_2px_rgba(0,0,0,0.2)]" />
         </Chip>
       </span>
       <span data-testid="wallet-coins" className="contents">
         <Chip label="동전" count={coins} tone="border-amber-200">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/images/coin-500.webp" alt="" width={22} height={22} className="h-[22px] w-[22px] object-contain drop-shadow-sm" />
+          <img src="/images/coin-500.webp" alt="" width={22} height={22} className="h-[18px] w-[18px] object-contain sm:h-[22px] sm:w-[22px] drop-shadow-sm" />
         </Chip>
       </span>
     </>
   );
   return (
-    <div data-testid="wallet-bar" className="flex flex-wrap items-center justify-end gap-1.5">
+    <div data-testid="wallet-bar" className="flex flex-nowrap items-center justify-end gap-1 sm:gap-1.5">
       {onBuy ? (
-        <button type="button" onClick={onBuy} aria-label="동전 충전하기 (결제 메뉴판 열기)" className="flex flex-wrap items-center justify-end gap-1.5 rounded-full active:scale-95">
+        <button type="button" onClick={onBuy} aria-label="동전 충전하기 (결제 메뉴판 열기)" className="flex flex-nowrap items-center justify-end gap-1 rounded-full active:scale-95 sm:gap-1.5">
           {money}
         </button>
       ) : (
@@ -80,7 +80,7 @@ export default function WalletBar({ tenK = 0, bills, coins, free, onBuy }: Walle
       <span data-testid="wallet-free" className="contents">
         <Chip label="무료 뽑기" count={free} tone="border-pink-200">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/images/free-tag.webp" alt="" width={40} height={20} className="h-[18px] w-auto object-contain drop-shadow-sm" />
+          <img src="/images/free-tag.webp" alt="" width={40} height={20} className="h-[14px] w-auto object-contain drop-shadow-sm sm:h-[18px]" />
         </Chip>
       </span>
     </div>
