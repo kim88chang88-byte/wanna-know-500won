@@ -110,7 +110,7 @@ export default function AdminDashboard() {
       <div className="mx-auto max-w-4xl">
         <header className="flex flex-wrap items-center justify-between gap-3 mb-5">
           <div>
-            <h1 className="font-serifKr font-black text-xl text-gray-900">🫧 도리 관리자</h1>
+            <h1 className="font-serifKr font-black text-xl text-gray-900">🫧 도유 관리자</h1>
             <p className="text-[11px] text-gray-500">개인 식별 정보(회원번호·생년월일)는 이 화면에 나오지 않아요.</p>
           </div>
           <a href="/" className="text-xs font-bold text-brand-600 underline underline-offset-2">

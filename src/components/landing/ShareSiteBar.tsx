@@ -43,7 +43,7 @@ export default function ShareSiteBar() {
 
   return (
     <div data-testid="share-site" className="mt-3 w-full max-w-sm">
-      <p className="font-cute text-sm font-normal text-brand-600">친구에게도 도리를 알려 주세요 ❄️</p>
+      <p className="font-cute text-sm font-normal text-brand-600">친구에게도 도유 사주를 알려 주세요 ❄️</p>
       <button
         type="button"
         data-testid="share-copy"
