@@ -79,27 +79,51 @@ body {
   will-change: transform, opacity;
 }
 
-/* 화면을 누르면 눈꽃송이가 살짝 튀어 올랐다가 가볍게 떨어져요 (JS 가 잠깐 만들었다가 지워요) */
-.click-snow {
+/* 화면을 누르면 물방울이 톡 튀어 올랐다가 떨어지고, 누른 자리에 물결이 번져요 (JS 가 잠깐 만들었다가 지워요) */
+.click-drop {
   position: fixed;
   pointer-events: none;
   z-index: 9999;
-  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='-12 -12 24 24' fill='none' stroke-linecap='round'%3E%3Cg stroke='%239ec3ff' stroke-width='3'%3E%3Cpath d='M0 0V-10M0 -5.5L-3.2 -8.4M0 -5.5L3.2 -8.4' transform='rotate(0)'/%3E%3Cpath d='M0 0V-10M0 -5.5L-3.2 -8.4M0 -5.5L3.2 -8.4' transform='rotate(60)'/%3E%3Cpath d='M0 0V-10M0 -5.5L-3.2 -8.4M0 -5.5L3.2 -8.4' transform='rotate(120)'/%3E%3Cpath d='M0 0V-10M0 -5.5L-3.2 -8.4M0 -5.5L3.2 -8.4' transform='rotate(180)'/%3E%3Cpath d='M0 0V-10M0 -5.5L-3.2 -8.4M0 -5.5L3.2 -8.4' transform='rotate(240)'/%3E%3Cpath d='M0 0V-10M0 -5.5L-3.2 -8.4M0 -5.5L3.2 -8.4' transform='rotate(300)'/%3E%3C/g%3E%3Cg stroke='%23ffffff' stroke-width='1.4'%3E%3Cpath d='M0 0V-10M0 -5.5L-3.2 -8.4M0 -5.5L3.2 -8.4' transform='rotate(0)'/%3E%3Cpath d='M0 0V-10M0 -5.5L-3.2 -8.4M0 -5.5L3.2 -8.4' transform='rotate(60)'/%3E%3Cpath d='M0 0V-10M0 -5.5L-3.2 -8.4M0 -5.5L3.2 -8.4' transform='rotate(120)'/%3E%3Cpath d='M0 0V-10M0 -5.5L-3.2 -8.4M0 -5.5L3.2 -8.4' transform='rotate(180)'/%3E%3Cpath d='M0 0V-10M0 -5.5L-3.2 -8.4M0 -5.5L3.2 -8.4' transform='rotate(240)'/%3E%3Cpath d='M0 0V-10M0 -5.5L-3.2 -8.4M0 -5.5L3.2 -8.4' transform='rotate(300)'/%3E%3C/g%3E%3C/svg%3E") center / contain no-repeat;
-  filter: drop-shadow(0 0 3px rgba(120, 165, 255, 0.6));
-  animation: snowPop 0.9s cubic-bezier(0.2, 0.8, 0.3, 1) forwards;
+  border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+  background: radial-gradient(circle at 32% 28%, #ffffff 0 14%, rgba(255, 255, 255, 0) 38%), radial-gradient(circle at 50% 60%, #8ec9ff, #3f8ff0);
+  box-shadow: inset 0 -1px 2px rgba(20, 80, 190, 0.35);
+  opacity: 0.9;
+  animation: dropPop 0.8s cubic-bezier(0.25, 0.7, 0.35, 1) forwards;
 }
 
-@keyframes snowPop {
+.click-ripple {
+  position: fixed;
+  pointer-events: none;
+  z-index: 9998;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 2px solid rgba(80, 150, 240, 0.7);
+  animation: ripplePop 0.65s ease-out forwards;
+}
+
+@keyframes dropPop {
   0% {
-    transform: translate(-50%, -50%) scale(0.3) rotate(0deg);
-    opacity: 1;
+    transform: translate(-50%, -50%) scale(0.4);
+    opacity: 0.95;
   }
   40% {
-    transform: translate(calc(-50% + var(--dx, 0px)), calc(-50% + var(--dy, -30px))) scale(1) rotate(calc(var(--rot, 90deg) * 0.5));
-    opacity: 1;
+    transform: translate(calc(-50% + var(--dx, 0px)), calc(-50% + var(--dy, -30px))) scale(1);
+    opacity: 0.95;
   }
   100% {
-    transform: translate(calc(-50% + var(--dx, 0px) * 1.25), calc(-50% + var(--dy, -30px) + 46px)) scale(0.45) rotate(var(--rot, 180deg));
+    transform: translate(calc(-50% + var(--dx, 0px) * 1.3), calc(-50% + var(--dy, -30px) + 54px)) scale(0.6, 0.9);
+    opacity: 0;
+  }
+}
+
+@keyframes ripplePop {
+  0% {
+    transform: translate(-50%, -50%) scale(0.3);
+    opacity: 0.9;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(3.2);
     opacity: 0;
   }
 }
@@ -165,7 +189,8 @@ body {
   .lever-rotating,
   .floating-anim,
   .snow-item,
-  .click-snow,
+  .click-drop,
+  .click-ripple,
   .otter-bubble-aura {
     animation: none !important;
   }
