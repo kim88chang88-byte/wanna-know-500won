@@ -7,18 +7,24 @@ const STATE_COLOR: Record<BodyState, string> = { fill: "#1d4ed8", rest: "#be123c
 
 /** 작은 지도는 글 목록 높이에 맞춰 그림을 세로로 이만큼 늘려요 */
 const COMPACT_STRETCH = 1.25;
+/** 글 목록 높이에 맞춰 세로로 채우는 작은 지도의 폭 */
+const FILL_W = 128;
 const IMG_LEFT = 27; // 그림이 차지하는 가로 위치(%)
 const IMG_W = 46;
 const px = (x: number) => IMG_LEFT + (IMG_W * x) / BODY_IMG.w;
 const py = (y: number) => (100 * y) / BODY_IMG.h;
 
 /** 인체 그림 위에 오행 장부를 표시하는 지도. compact 이면 라벨 없이 색 점만 그려요. */
-export default function BodyFigure({ states, focus, compact = false }: { states: Partial<Record<BodyEl, BodyState>>; focus?: BodyEl | null; compact?: boolean }) {
+export default function BodyFigure({ states, focus, compact = false, fill = false }: { states: Partial<Record<BodyEl, BodyState>>; focus?: BodyEl | null; compact?: boolean; fill?: boolean }) {
   return (
     <div
       data-testid={compact ? "body-figure-mini" : "body-figure"}
       className="relative mx-auto w-full overflow-hidden rounded-2xl bg-white"
-      style={{ aspectRatio: compact ? `${BODY_IMG.w} / ${BODY_IMG.h / COMPACT_STRETCH}` : "1000 / 908", maxWidth: compact ? 120 : 440 }}
+      style={
+        compact && fill
+          ? { height: "100%", minHeight: Math.round((FILL_W * BODY_IMG.h) / BODY_IMG.w), maxWidth: FILL_W }
+          : { aspectRatio: compact ? `${BODY_IMG.w} / ${BODY_IMG.h / COMPACT_STRETCH}` : "1000 / 908", maxWidth: compact ? 120 : 440 }
+      }
       role="img"
       aria-label="오행 장부 지도: 기운별로 챙기면 좋은 몸의 곳"
     >
@@ -104,9 +110,9 @@ export function BodyPicks({ states, elements }: { states: Partial<Record<BodyEl,
   return (
     <section data-testid="story-body" aria-label="내 몸 기운 지도" className="rounded-2xl border border-brand-100 bg-white p-4">
       <p className="text-xs font-bold text-brand-700">내 몸 기운 지도</p>
-      <div className="mt-2.5 flex items-center gap-3.5">
-        <div className="w-[112px] shrink-0">
-          <BodyFigure states={states} compact />
+      <div className="mt-2.5 flex items-stretch gap-3.5">
+        <div className="flex w-[128px] shrink-0 flex-col">
+          <BodyFigure states={states} compact fill />
         </div>
         <ul className="min-w-0 flex-1 space-y-2.5">
           {picks.map(({ group: g, state }) => (
