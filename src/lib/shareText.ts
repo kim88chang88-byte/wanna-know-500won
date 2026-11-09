@@ -11,8 +11,8 @@ export interface ShareReading {
   kkotgeoji?: string | null;
   reason?: string | null;
   story?: string | null;
-  folds?: Record<string, string> | null;
-  heads?: Record<string, string> | null;
+  folds?: object | null;
+  heads?: object | null;
 }
 
 export type ShareMode = "full" | "short";
@@ -61,8 +61,10 @@ export function buildShareText(report: PremiumReportView, reading: ShareReading 
   if (full) {
     if (reading?.reason) out.push(`\n📖 이유\n${clean(reading.reason)}`);
     if (reading?.story) out.push(`\n📖 요약하자면\n${clean(reading.story)}`);
-    for (const [k, v] of Object.entries(reading?.folds ?? {})) {
-      if (clean(v)) out.push(`\n▪ ${reading?.heads?.[k] ?? k}\n${clean(v)}`);
+    const heads = (reading?.heads ?? {}) as Record<string, unknown>;
+    for (const [k, v] of Object.entries((reading?.folds ?? {}) as Record<string, unknown>)) {
+      if (typeof v !== "string" || !clean(v)) continue;
+      out.push(`\n▪ ${typeof heads[k] === "string" ? heads[k] : k}\n${clean(v)}`);
     }
     if (report.concern) for (const a of report.concern.answers) out.push(`\n${a.emoji} ${a.title}\n${clean(a.body)}`);
     if (c) {
