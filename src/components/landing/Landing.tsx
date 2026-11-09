@@ -137,8 +137,8 @@ export default function Landing() {
 
   const handleSpin = useCallback(
     (key: string, fortune: string, price: string, premium?: boolean) => {
-      // 프리미엄은 아직 공개 전이라 "준비 중" 안내만 보여줘요. (로그인·조약돌·입력창 모두 건너뛰어요)
-      if (premium === true && PREMIUM_SOON) {
+      // 프리미엄 종합 사주는 아직 공개 전이라 "준비 중" 안내만 보여줘요. (궁합은 그대로 열려 있어요)
+      if (premium === true && PREMIUM_SOON && !fortune.includes("궁합")) {
         setPremiumSoon(true);
         return;
       }
