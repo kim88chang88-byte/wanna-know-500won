@@ -42,6 +42,14 @@ function pageLines(p: BookPage): string[] {
   return out;
 }
 
+const JOSA: Record<string, string> = { 은: "는", 는: "는", 이: "가", 가: "가", 을: "를", 를: "를", 과: "와", 와: "와", 으로: "로", 로: "로" };
+
+/** 이름을 "친구"·"상대"로 바꾸고, 뒤에 붙은 조사도 받침에 맞게 고쳐요. (예: 은혁님은 → 친구는) */
+function swapName(text: string, name: string, to: string): string {
+  const esc = name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  return text.replace(new RegExp(`${esc}(?:님)?(으로|은|는|이|가|을|를|과|와|로)?`, "g"), (_m, j?: string) => to + (j ? JOSA[j] : ""));
+}
+
 export function buildShareText(report: PremiumReportView, reading: ShareReading | null, o: ShareTextOptions): string {
   const full = o.mode === "full";
   const who = o.withName && o.name ? `${o.name}님의 ` : "";
@@ -80,7 +88,7 @@ export function buildShareText(report: PremiumReportView, reading: ShareReading 
 
   out.push("\n━━━━━━━━━━", "✨ 나도 내 사주 보기 (매일 첫 1회 무료)", `👉 ${o.url}`);
   let text = out.join("\n").replace(/\n{3,}/g, "\n\n").trim();
-  if (!o.withName && o.name) text = text.split(`${o.name}님`).join("친구").split(o.name).join("친구");
-  if (!o.withName && o.partnerName) text = text.split(`${o.partnerName}님`).join("상대").split(o.partnerName).join("상대");
+  if (!o.withName && o.name) text = swapName(text, o.name, "친구");
+  if (!o.withName && o.partnerName) text = swapName(text, o.partnerName, "상대");
   return text;
 }
