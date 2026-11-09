@@ -303,13 +303,13 @@ export default function Landing() {
         .catch(() => undefined);
       return;
     }
-    // 하단 메뉴의 "도리상담실"을 눌러 로그인했다면 상담실로 가요. (아직 안 열린 계정이면 안내만 해요)
+    // 하단 메뉴의 "도유상담실"을 눌러 로그인했다면 상담실로 가요. (아직 안 열린 계정이면 안내만 해요)
     if (takeAfterLoginGoChat(getBrowserStorage())) {
       fetch("/api/chat", { cache: "no-store" })
         .then((r) => r.json() as Promise<{ enabled?: boolean }>)
         .then((d) => {
           if (d.enabled === true) router.push("/chat");
-          else setNotice("도리 상담실은 곧 열려요 ❄️");
+          else setNotice("도유 상담실은 곧 열려요 ❄️");
         })
         .catch(() => undefined);
       return;
@@ -328,13 +328,13 @@ export default function Landing() {
     track("login_click");
     setLoginOpen(true);
   }, []);
-  // 하단 메뉴 "도리상담실"을 비로그인으로 눌렀을 때: 로그인 창을 띄우고, 로그인하고 돌아오면 상담실로 보내요.
+  // 하단 메뉴 "도유상담실"을 비로그인으로 눌렀을 때: 로그인 창을 띄우고, 로그인하고 돌아오면 상담실로 보내요.
   const openChatTabLogin = useCallback(() => {
     clearPendingDraw(getBrowserStorage());
     clearAfterLoginChat(getBrowserStorage());
     saveAfterLoginGoChat(getBrowserStorage());
     track("chat_login_click");
-    setLoginReason("도리 상담실은 로그인하고 이용할 수 있어요 ❄️");
+    setLoginReason("도유 상담실은 로그인하고 이용할 수 있어요 ❄️");
     setLoginOpen(true);
   }, []);
   const openChatLogin = useCallback((chat: ChatCtx) => {

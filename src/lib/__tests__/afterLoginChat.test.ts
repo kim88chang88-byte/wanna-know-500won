@@ -25,7 +25,7 @@ describe("로그인 뒤 상담실 이어가기", () => {
   });
 });
 
-describe("하단 메뉴 도리상담실로 로그인한 뒤 이동", () => {
+describe("하단 메뉴 도유상담실로 로그인한 뒤 이동", () => {
   it("표시를 한 번만 꺼낼 수 있다", () => {
     const s = mem();
     saveAfterLoginGoChat(s, 1000);

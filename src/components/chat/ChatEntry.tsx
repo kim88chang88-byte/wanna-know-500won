@@ -45,7 +45,7 @@ export function ChatEntry({ ctx, luxe = false, className = "", inScene = false }
       style={inScene ? { fontSize: "3cqw", padding: "2cqw 0", width: "100%" } : undefined}
       className={`rounded-full font-bold shadow-sm active:scale-95 ${inScene ? "" : "px-4 py-2 text-xs"} ${luxe ? "bg-[#e6c887] text-[#1b1824]" : "bg-brand-500 text-white"} ${className}`}
     >
-      💬 도리 상담실에서 이어 묻기
+      💬 도유 상담실에서 이어 묻기
     </button>
   );
 }

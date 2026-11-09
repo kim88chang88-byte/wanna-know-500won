@@ -10,7 +10,7 @@ export async function POST(request: Request) {
   if (denied) return denied;
   const session = sessionOf(request);
   if (!session) return NextResponse.json({ error: "로그인이 필요해요." }, { status: 401 });
-  if (!canChat(session.sub)) return NextResponse.json({ error: "도리 상담방은 곧 열려요." }, { status: 403 });
+  if (!canChat(session.sub)) return NextResponse.json({ error: "도유 상담방은 곧 열려요." }, { status: 403 });
   const body = (await request.json().catch(() => null)) as { ctx?: unknown; ctxs?: unknown } | null;
   const ctx = parseCtx(body?.ctx ?? { kind: "daily" });
   if (!ctx) return NextResponse.json({ error: "요청이 올바르지 않아요. 다시 한 번 확인해 주세요." }, { status: 400 });

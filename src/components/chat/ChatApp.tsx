@@ -402,7 +402,7 @@ export default function ChatApp({ initialCtx, initialMsgs, onChange, onBack }: {
           <i aria-hidden="true" className="absolute -bottom-px -right-px h-[11px] w-[11px] rounded-full border-2 border-white bg-emerald-400" />
         </div>
         <div className="min-w-0 flex-1">
-          <p className="font-bold leading-tight text-gray-900">도리 상담실</p>
+          <p className="font-bold leading-tight text-gray-900">도유 상담실</p>
           <p className="text-[11px] text-[#8a7fa8]">초승달 아래 고민 상담 중</p>
         </div>
         <div className="relative">

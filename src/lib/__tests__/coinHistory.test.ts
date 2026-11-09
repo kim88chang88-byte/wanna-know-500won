@@ -29,7 +29,7 @@ describe("지갑 내역 묶기", () => {
       { kind: "spend", delta: -2, created_at: t(-900) },
       { kind: "x", delta: 3, created_at: "bad" },
     ]);
-    expect(g.map((x) => x.label)).toEqual(["정성 후기", "도리 상담실 질문 더하기", "둘의 궁합"]);
+    expect(g.map((x) => x.label)).toEqual(["정성 후기", "도유 상담실 질문 더하기", "둘의 궁합"]);
   });
   it("최대 20줄까지만 돌려줘요", () => {
     const rows = Array.from({ length: 50 }, (_, i) => ({ kind: "review", delta: 1, created_at: t(-i * 100) }));

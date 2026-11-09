@@ -12,7 +12,7 @@ import { pullRooms, pushRooms, mergeRooms, readSynced, sameRooms, writeSynced } 
 import { leftLabel, loadRooms, removeRoom, roomAnimal, roomColor, saveRooms, upsertRoom, withMsgs, type ChatRoom, type RoomMsg } from "@/lib/chatRooms";
 import { getBrowserStorage } from "@/lib/drawCounter";
 
-/** 도리 상담실 첫 화면: 대화방 목록. 결과서에서 넘어오면 그 풀이의 방으로 바로 들어가요. */
+/** 도유 상담실 첫 화면: 대화방 목록. 결과서에서 넘어오면 그 풀이의 방으로 바로 들어가요. */
 function whenLabel(at: number, now = new Date()): string {
   const d = new Date(at);
   const day = (x: Date) => Math.floor(new Date(x.getFullYear(), x.getMonth(), x.getDate()).getTime() / 86_400_000);
@@ -197,7 +197,7 @@ export default function ChatHome() {
         </Link>
         <SafeImage src="/images/dori-icon.webp" alt="" className="h-9 w-9 rounded-full border-2 border-brand-200 bg-white object-contain" fallback="🦦" fallbackClass="text-2xl" />
         <div className="min-w-0 flex-1">
-          <p className="font-bold leading-tight text-gray-900">도리 상담실</p>
+          <p className="font-bold leading-tight text-gray-900">도유 상담실</p>
           <p className="text-[11px] text-[#8a7fa8]">{cloud ? "대화는 30일 동안 보관돼요" : "대화는 이 기기에만 저장돼요"}</p>
         </div>
       </header>
@@ -211,7 +211,7 @@ export default function ChatHome() {
           <SafeImage src="/images/dori-icon.webp" alt="" className="h-[72px] w-[72px] rounded-full border-2 border-brand-200 bg-white object-contain" fallback="🦦" fallbackClass="text-4xl" />
           <b className="text-gray-900">아직 나눈 대화가 없어요</b>
           <span className="leading-relaxed">
-            풀이를 본 뒤 &ldquo;도리 상담실에서 이어 묻기&rdquo;를 누르거나,
+            풀이를 본 뒤 &ldquo;도유 상담실에서 이어 묻기&rdquo;를 누르거나,
             <br />
             오늘의 한마디로 가볍게 시작해 보세요.
           </span>

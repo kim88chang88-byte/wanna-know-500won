@@ -5,7 +5,7 @@ import { summarizeReport } from "@/lib/chatContext";
 
 const long = (s: string) => s.repeat(12);
 
-describe("도리 상담방", () => {
+describe("도유 상담방", () => {
   it("대화 기록은 마지막이 사용자의 말이어야 해요", () => {
     expect(cleanHistory([{ role: "user", text: "안녕" }])).toHaveLength(1);
     expect(cleanHistory([{ role: "user", text: "안녕" }, { role: "dori", text: "응" }])).toBeNull();

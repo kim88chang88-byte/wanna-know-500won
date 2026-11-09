@@ -27,7 +27,7 @@ export async function POST(request: Request) {
   if (denied) return denied;
   const session = sessionOf(request);
   if (!session) return NextResponse.json({ error: "로그인이 필요해요." }, { status: 401 });
-  if (!canChat(session.sub)) return NextResponse.json({ error: "도리 상담방은 곧 열려요. 조금만 기다려 주세요 ❄️" }, { status: 403 });
+  if (!canChat(session.sub)) return NextResponse.json({ error: "도유 상담방은 곧 열려요. 조금만 기다려 주세요 ❄️" }, { status: 403 });
 
   let body: { ctx?: unknown; messages?: unknown } | null;
   try {

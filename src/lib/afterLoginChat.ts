@@ -2,12 +2,12 @@ import type { ChatCtx } from "@/lib/chatContext";
 
 /**
  * 비회원이 "로그인하고 도리에게 더 물어보기"를 눌러 로그인 창으로 갔을 때, 로그인하고 돌아오면
- * 곧바로 도리 상담실로 보내려고 "어떤 한마디를 보고 있었는지"만 잠깐 이 기기에 적어 둬요.
+ * 곧바로 도유 상담실로 보내려고 "어떤 한마디를 보고 있었는지"만 잠깐 이 기기에 적어 둬요.
  * (이름·생일은 넣지 않아요.) 20분이 지나거나 로그인 창을 그냥 닫으면 지워요.
  */
 export const AFTER_LOGIN_CHAT_KEY = "wanna500:after-login-chat:v1";
 export const AFTER_LOGIN_CHAT_TTL_MS = 20 * 60 * 1000;
-/** 하단 메뉴의 "도리상담실"을 비로그인으로 눌러 로그인 창으로 갔다는 표시예요. (로그인하고 돌아오면 상담실로 보내요) */
+/** 하단 메뉴의 "도유상담실"을 비로그인으로 눌러 로그인 창으로 갔다는 표시예요. (로그인하고 돌아오면 상담실로 보내요) */
 export const AFTER_LOGIN_GO_CHAT_KEY = "wanna500:after-login-go-chat:v1";
 
 type Store = { getItem(key: string): string | null; setItem(key: string, value: string): void; removeItem?(key: string): void };
@@ -36,7 +36,7 @@ export function clearAfterLoginChat(store: Store | null): void {
   removeKey(store, AFTER_LOGIN_GO_CHAT_KEY);
 }
 
-/** 하단 메뉴 "도리상담실"로 로그인하러 갈 때: 로그인하고 돌아오면 상담실로 가도록 표시해 둬요. */
+/** 하단 메뉴 "도유상담실"로 로그인하러 갈 때: 로그인하고 돌아오면 상담실로 가도록 표시해 둬요. */
 export function saveAfterLoginGoChat(store: Store | null, now: number = Date.now()): void {
   try {
     store?.setItem(AFTER_LOGIN_GO_CHAT_KEY, JSON.stringify({ at: now }));

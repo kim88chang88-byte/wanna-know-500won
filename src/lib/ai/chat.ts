@@ -11,7 +11,7 @@ import { containsForbidden, isGeneric } from "./reading";
 import { tidyMarkup } from "@/lib/chatMarkup";
 
 /*
- * 도리 상담방: 방금 본 풀이를 이어서 물어보는 대화. 사실은 계산된 사주 정보에서만 가져와요.
+ * 도유 상담방: 방금 본 풀이를 이어서 물어보는 대화. 사실은 계산된 사주 정보에서만 가져와요.
  * 안전: 금지어 검사, 마음이 많이 힘든 말은 AI 를 부르지 않고 정해 둔 답으로 안내해요.
  */
 

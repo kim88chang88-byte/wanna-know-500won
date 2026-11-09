@@ -2,7 +2,7 @@ import ChatHome from "@/components/chat/ChatHome";
 import { SERVICE_NAME } from "@/lib/siteInfo";
 
 export const metadata = {
-  title: `도리 상담실 · ${SERVICE_NAME}`,
+  title: `도유 상담실 · ${SERVICE_NAME}`,
   description: "방금 본 풀이를 도리에게 이어서 물어보세요",
   robots: { index: false, follow: false },
 };

@@ -53,12 +53,12 @@ const Dot = () => <i data-testid="nav-dot" aria-hidden="true" className="absolut
 
 /**
  * 휴대폰·태블릿 아래에 붙는 4칸 메뉴. (큰 화면에서는 숨겨요)
- * page 모드(도리상담실 목록 등 다른 화면)에서는 홈·운세 뽑기가 첫 화면으로 이동하는 링크가 돼요.
+ * page 모드(도유상담실 목록 등 다른 화면)에서는 홈·운세 뽑기가 첫 화면으로 이동하는 링크가 돼요.
  */
 export default function BottomTabs({ page = false, onChatLogin }: { page?: "chat" | "vault" | false; onChatLogin?: () => void }) {
   const [active, setActive] = useState<TabKey>("home");
   const [dots, setDots] = useState<NavDots>({ draw: false, chat: false, vault: false });
-  // 도리 상담실을 열어 둔 계정인지 (아직 아니면 눌렀을 때 "곧 열려요"만 알려요)
+  // 도유 상담실을 열어 둔 계정인지 (아직 아니면 눌렀을 때 "곧 열려요"만 알려요)
   const [chatOn, setChatOn] = useState(false);
   // 로그인 상태 (서버에 물어본 뒤에야 알 수 있어서, 그 전에는 null)
   const [loggedIn, setLoggedIn] = useState<boolean | null>(null);
@@ -168,7 +168,7 @@ export default function BottomTabs({ page = false, onChatLogin }: { page?: "chat
             {page === "chat" && <i aria-hidden="true" className="absolute -top-3 left-1/2 h-[5px] w-11 -translate-x-1/2 rounded-b-md bg-brand-600" />}
             <ChatIcon />
             {dots.chat && <Dot />}
-            도리상담실
+            도유상담실
           </Link>
         ) : (
           <button
@@ -178,7 +178,7 @@ export default function BottomTabs({ page = false, onChatLogin }: { page?: "chat
             onClick={() => (loggedIn === false && onChatLogin ? onChatLogin() : setSoon(true))}
           >
             <ChatIcon />
-            도리상담실
+            도유상담실
           </button>
         )}
         <Link href="/vault" className={`${base} ${page === "vault" ? "text-brand-600" : off}`} aria-current={page === "vault" ? "page" : undefined} onClick={() => seen("vault")}>
@@ -190,7 +190,7 @@ export default function BottomTabs({ page = false, onChatLogin }: { page?: "chat
       </div>
       {soon && (
         <p role="status" className="absolute -top-11 left-1/2 w-max -translate-x-1/2 rounded-full bg-gray-900/90 px-4 py-2 text-xs text-white shadow-lg">
-          도리 상담실은 곧 열려요 ❄️
+          도유 상담실은 곧 열려요 ❄️
         </p>
       )}
     </nav>
