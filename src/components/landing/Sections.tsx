@@ -7,6 +7,7 @@ import { FREE_PRICE_LABEL, MACHINES, PREMIUM_CARDS } from "./data";
 import { HelpMenuButton, MachineMenuButton } from "./MenuButton";
 import { HERO_IMAGE, IMAGES, LOGO_IMAGE } from "./images";
 import SafeImage from "./SafeImage";
+import FreeCountdown from "./FreeCountdown";
 import WalletBar, { type WalletValues } from "./WalletBar";
 import BrandLink from "./BrandLink";
 import DoriIcon from "./DoriIcon";
@@ -126,7 +127,7 @@ export function Header({ onOpenLogin, user = null, bubble = null, dot = false }:
 
 /* ------------------------------------------------------------------ 히어로 */
 
-export function HeroSection({ visitors = null, tickets = 0, wallet = null, onBuy }: { visitors?: { today: number; total: number } | null; tickets?: number; wallet?: WalletValues | null; onBuy?: () => void }) {
+export function HeroSection({ visitors = null, tickets = 0, wallet = null, onBuy, onRefill }: { visitors?: { today: number; total: number } | null; tickets?: number; wallet?: WalletValues | null; onBuy?: () => void; onRefill?: () => void }) {
   return (
     <section className="text-left mb-3">
       {/* 방문자 수(왼쪽) + 내 지폐·조약돌·무료 뽑기(오른쪽, 로그인한 회원만) 한 줄 */}
@@ -153,10 +154,15 @@ export function HeroSection({ visitors = null, tickets = 0, wallet = null, onBuy
           🎟 보너스 뽑기 {tickets}장 <span className="hidden text-[10px] font-medium text-rose-400 min-[420px]:inline">· 무료 소진 후 자동 사용</span>
         </p>
       )}
-      {wallet && wallet.pearls + wallet.pebbles > 0 && (
-        <p data-testid="coin-note" className="mt-1 text-right text-[11px] leading-tight text-slate-500">
-          {tickets > 0 ? "그다음 조약돌이 자동으로 쓰여요" : "무료 뽑기를 다 쓰면 조약돌이 자동으로 쓰여요"}
-        </p>
+      {wallet && wallet.free <= 0 ? (
+        // 무료 뽑기를 다 썼을 때: 다음 충전(한국 시간 00시)까지 남은 시간
+        <FreeCountdown onElapsed={onRefill} />
+      ) : (
+        wallet && wallet.pearls + wallet.pebbles > 0 && (
+          <p data-testid="coin-note" className="mt-1 text-right text-[11px] leading-tight text-slate-500">
+            {tickets > 0 ? "그다음 조약돌이 자동으로 쓰여요" : "무료 뽑기를 다 쓰면 조약돌이 자동으로 쓰여요"}
+          </p>
+        )
       )}
     </section>
   );

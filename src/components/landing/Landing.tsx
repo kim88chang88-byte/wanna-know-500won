@@ -13,6 +13,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { dayKey, getBrowserStorage, readCounts, recordDraw, type DrawCounts } from "@/lib/drawCounter";
 import { readVisitDays, recordVisit } from "@/lib/streak";
 import { pingNav, writeDrawAvail } from "@/lib/navDots";
+import { REFILL_KEY, checkRefill, kstDayOf, parseRefill } from "@/lib/freeRefill";
 import { grantTickets, readTickets, spendTicket, STREAK_FOR_TICKET } from "@/lib/stampReward";
 import { FREE_PER_DAY } from "@/lib/db/config";
 import { ensureVid, track } from "@/lib/track";
@@ -418,11 +419,35 @@ export default function Landing() {
     else if (!user) applyCounts(readCounts(getBrowserStorage(), new Date()));
   }, [serverCounts, user, applyCounts]);
 
+  // 어제 무료 뽑기를 다 쓰고 간 회원이 새 날에 다시 들어오면 "충전됐어요" 알림을 한 번만 보여줘요 (이 기기에만 기억)
+  useEffect(() => {
+    if (!user || !serverCounts) return;
+    const st = getBrowserStorage();
+    let raw: string | null = null;
+    try {
+      raw = st?.getItem(REFILL_KEY) ?? null;
+    } catch {
+      /* 읽기 실패는 알림만 건너뛰어요 */
+    }
+    const r = checkRefill(parseRefill(raw), user.tag ?? "me", kstDayOf(Date.now()), serverCounts.today >= FREE_PER_DAY);
+    try {
+      st?.setItem(REFILL_KEY, JSON.stringify(r.next));
+    } catch {
+      /* 저장이 막힌 환경이면 알림만 안 기억해요 */
+    }
+    if (r.show) setNotice("🎁 무료 뽑기 1회가 충전됐어요! 오늘의 운세, 지금 뽑아볼까요?");
+  }, [user, serverCounts]);
+
   // 하단 메뉴 "운세 뽑기" 빨간 점: 오늘 무료 뽑기나 조약돌이 남아 있는지 적어 둬요 (메뉴를 열면 꺼져요)
   useEffect(() => {
     writeDrawAvail(getBrowserStorage(), Math.max(0, FREE_PER_DAY - counts.today) + tickets + coins > 0, coins, new Date());
     pingNav();
   }, [counts.today, tickets, coins]);
+
+  // 한국 시간 00시를 넘겼을 때: 모달을 보고 있지 않으면 새 날의 횟수를 받으려고 화면을 새로 불러와요
+  const onFreeElapsed = useCallback(() => {
+    if (!intake && !loginOpen && !ritual && !payOpen && !paywall && !paywallPay) window.location.reload();
+  }, [intake, loginOpen, ritual, payOpen, paywall, paywallPay]);
 
   return (
     <>
@@ -430,7 +455,7 @@ export default function Landing() {
       <Header onOpenLogin={openLogin} user={user} dot={Boolean(user) && vaultDot} bubble={user ? <VaultFollowupBubble onShow={setVaultAsk} onDot={setVaultDot} /> : null} />
 
       <main className="relative z-10 max-w-[34rem] lg:max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-5 pb-20 sm:pb-24">
-        <HeroSection visitors={visitors} tickets={tickets} onBuy={user ? () => router.push("/wallet") : undefined} wallet={user ? { ...splitPearls(coins), free: Math.max(0, FREE_PER_DAY - counts.today) + tickets } : null} />
+        <HeroSection visitors={visitors} tickets={tickets} onBuy={user ? () => router.push("/wallet") : undefined} onRefill={onFreeElapsed} wallet={user ? { ...splitPearls(coins), free: Math.max(0, FREE_PER_DAY - counts.today) + tickets } : null} />
         <ShowcaseSection />
         {!user && <BirthdayTeaser onOpenLogin={openChatLogin} />}
         {/* 도리의 소식 카드들은 첫 화면의 "뽑으러 가기" 버튼 아래로 옮겼어요. (첫 화면에서 눌러야 할 것이 하나만 보이게) */}
