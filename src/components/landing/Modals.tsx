@@ -296,7 +296,6 @@ export function LoginModal({ onClose, reason = null, user = null, result = null,
               </button>
             </div>
           )}
-          <ReferralBox />
           <SavedPeopleBox />
           <a
             href="/vault"
@@ -305,6 +304,7 @@ export function LoginModal({ onClose, reason = null, user = null, result = null,
           >
             📚 내 보관함 (봤던 풀이 다시 보기)
           </a>
+          <ReferralBox />
           <button
             onClick={async () => {
               await onLogout?.();
