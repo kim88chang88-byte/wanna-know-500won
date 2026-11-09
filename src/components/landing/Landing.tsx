@@ -7,6 +7,8 @@ import CoinRitual from "./CoinRitual";
 import { splitPearls } from "@/lib/currency";
 import PurchaseModal from "@/components/pay/PurchaseModal";
 import BetaOpenPopup from "./BetaOpenPopup";
+import PremiumSoonPopup from "./PremiumSoonPopup";
+import { PREMIUM_SOON } from "@/lib/premiumSoon";
 import PaywallPopup, { type PaywallInfo } from "./PaywallPopup";
 import { readingCoinCost } from "@/lib/spendPlan";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -71,6 +73,7 @@ export default function Landing() {
   const [coins, setCoins] = useState(0);
   const [payOpen, setPayOpen] = useState(false);
   // 프리미엄·궁합 카드를 눌렀는데 조약돌이 모자랄 때 먼저 보여주는 안내창, 그리고 거기서 열린 충전 화면
+  const [premiumSoon, setPremiumSoon] = useState(false);
   const [paywall, setPaywall] = useState<PaywallInfo | null>(null);
   const [paywallPay, setPaywallPay] = useState<PaywallInfo | null>(null);
   const coinsRef = useRef(0);
@@ -134,6 +137,11 @@ export default function Landing() {
 
   const handleSpin = useCallback(
     (key: string, fortune: string, price: string, premium?: boolean) => {
+      // 프리미엄은 아직 공개 전이라 "준비 중" 안내만 보여줘요. (로그인·조약돌·입력창 모두 건너뛰어요)
+      if (premium === true && PREMIUM_SOON) {
+        setPremiumSoon(true);
+        return;
+      }
       // 운세 뽑기는 로그인한 회원만 할 수 있어요. 비회원은 로그인 창으로 안내해요.
       if (!userRef.current) {
         track("login_click");
@@ -476,6 +484,7 @@ export default function Landing() {
       <BottomTabs onChatLogin={openChatTabLogin} />
 
       <BetaOpenPopup />
+      {premiumSoon && <PremiumSoonPopup onClose={() => setPremiumSoon(false)} />}
       {payOpen && <PurchaseModal onClose={() => { setPayOpen(false); void refreshCoins(); }} />}
       {paywall && (
         <PaywallPopup
