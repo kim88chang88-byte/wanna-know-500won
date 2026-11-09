@@ -50,7 +50,7 @@ export function monthGanzhi(year: number, month: number): string {
   return `${STEMS[stem].hanja}${BRANCHES[branchIdx].hanja}`;
 }
 
-function elKoOfStem(h: string): string {
+export function elKoOfStem(h: string): string {
   const s = STEMS.find((x) => x.hanja === h);
   return s ? (EL_KO[s.element] ?? "") : "";
 }

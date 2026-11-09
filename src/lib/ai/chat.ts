@@ -5,6 +5,7 @@ import type { ChatKind, ChatMsg } from "@/lib/chatContext";
 import { HISTORY_MAX, MSG_MAX, SUMMARY_MAX } from "@/lib/chatContext";
 import { callJson } from "./callJson";
 import type { CoreFacts } from "./coreFacts";
+import type { ChatMemo } from "./chatMemo";
 import type { DailyFacts } from "./dailyFacts";
 import { modelFor } from "./llm";
 import { containsForbidden, isGeneric } from "./reading";
@@ -41,6 +42,7 @@ export const CHAT_SYSTEM_PROMPT = `너는 "도리", 맑은 옹달샘의 수달 �
 - followups 에는 방금 답에서 자연스럽게 이어지는 사용자의 다음 질문 3개를 20자 안팎으로 써(사용자가 도리에게 묻는 말투, 예: "물 기운을 채우는 습관이 있어?"). 이미 물어본 질문과 겹치지 않게. 의료·법률·투자·결정을 대신 내려 달라는 질문은 넣지 마.
 
 사실과 한계
+- 입력에 "도리메모"가 있으면 화면에 같은 내용이 포스트잇 카드로 먼저 보이는 거야. 카드의 항목을 그대로 되풀이해 적지 말고, "메모에 적은 것처럼"처럼 짚으면서 그 근거(달·합충·십성)를 답의 이유로 써. 메모에 없는 달·글자·점수는 지어내지 마. 지수는 참고용이라 단정하지 마.
 - 사실은 입력의 "계산된 사주 정보", "방금 본 풀이", "대화 기록"에 있는 것만 써. 없는 글자·합충·신살·사건은 지어내지 마. 근거가 부족하면 "이건 사주만으로 단정하기 어려워"라고 솔직히 말해.
 - 방금 본 풀이와 앞뒤가 어긋나는 말은 하지 마. 그 풀이의 결론을 이어서 더 구체적으로 풀어 줘.
 - 사주 근거는 입력에 있는 글자·오행·풀이와만 연결해. "하체에 기운이 몰려 순환이…"처럼 입력에 없는 원리를 지어 설명하지 마. 사주와 직접 이어지지 않는 생활 질문(운동·수면·식사 등)은 근거를 억지로 붙이지 말고 일반적인 짧은 팁 한두 문장만 줘.
@@ -251,6 +253,8 @@ export interface ChatFactsInput {
   core: CoreFacts | null;
   daily?: DailyFacts | null;
   partnerChart?: SajuChart | null;
+  /** 화면에 카드로 먼저 보이는 "도리 메모" (첫 질문에만) */
+  memo?: ChatMemo | null;
 }
 
 function chartFacts(chart: SajuChart) {
@@ -282,6 +286,7 @@ export function buildChatPrompt(i: ChatFactsInput, history: ChatMsg[]): string {
     ...(i.core ? { 사주핵심: i.core } : {}),
     ...(i.kind === "compat" && i.partnerChart ? { 상대: chartFacts(i.partnerChart) } : {}),
     ...(i.daily ? { 오늘의흐름: i.daily } : {}),
+    ...(i.memo ? { 도리메모: { 제목: i.memo.title, 항목: Object.fromEntries(i.memo.rows), [i.memo.scoreLabel]: `${i.memo.score} (${i.memo.tone})`, 한줄결론: i.memo.line } } : {}),
   };
   const log = history
     .slice(-HISTORY_MAX)

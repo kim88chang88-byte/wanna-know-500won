@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { takeAiBudget } from "@/lib/ai/budget";
 import { chatDori, cleanHistory, CRISIS_ANSWER, isCrisis } from "@/lib/ai/chat";
 import { buildCoreFacts, factsNowFor } from "@/lib/ai/coreFacts";
-import { buildChatMemo } from "@/lib/ai/chatMemo";
+import { buildChatMemo, buildCompatMemo, buildReadingMemo, type ChatMemo } from "@/lib/ai/chatMemo";
 import { buildDailyFacts, kstToday } from "@/lib/ai/dailyFacts";
 import { ReadingUnavailableError } from "@/lib/ai/interpret";
 import { hasAiKey } from "@/lib/ai/llm";
@@ -77,6 +77,16 @@ export async function POST(request: Request) {
     }
 
     const now = new Date();
+    const core = buildCoreFacts(birth, factsNowFor(ctx.topic, now), true);
+    const daily = ctx.kind === "daily" ? buildDailyFacts(chart, kstToday(now)) : null;
+    // 첫 질문에는 들어온 곳에 맞는 "도리 메모"를 붙여요 (코드 계산, AI 비용 없음). 답도 이 메모를 근거로 삼아요.
+    const firstAsk = !history.some((m) => m.role === "dori");
+    let memo: ChatMemo | null = null;
+    if (firstAsk) {
+      if (ctx.kind === "daily" && daily) memo = buildChatMemo(daily, kstToday(now));
+      else if (ctx.kind === "compat" && partnerChart) memo = buildCompatMemo(chart, partnerChart, { me: ctx.name, partner: ctx.partnerName });
+      else if (ctx.kind === "reading") memo = buildReadingMemo(chart, core, factsNowFor(ctx.topic, now));
+    }
     const reply = await chatDori(
       {
         kind: ctx.kind,
@@ -84,15 +94,13 @@ export async function POST(request: Request) {
         partnerName: ctx.partnerName,
         summary: ctx.summary,
         chart,
-        core: buildCoreFacts(birth, factsNowFor(ctx.topic, now), true),
-        daily: ctx.kind === "daily" ? buildDailyFacts(chart, kstToday(now)) : null,
+        core,
+        daily,
         partnerChart,
+        memo,
       },
       history,
     );
-    // 오늘의 한마디에서 들어온 첫 질문에는 오늘 일진과 내 사주가 만나는 모습을 "도리 메모"로 붙여요 (코드 계산, AI 비용 없음)
-    const firstAsk = !history.some((m) => m.role === "dori");
-    const memo = ctx.kind === "daily" && firstAsk ? buildChatMemo(buildDailyFacts(chart, kstToday(now)), kstToday(now)) : null;
     return NextResponse.json({ answer: reply.answer, followups: reply.followups, choices: reply.choices, visual: reply.visual, memo, left: taken.left });
   } catch (err) {
     // 답을 못 만들었으면 쓴 질문을 돌려줘요.

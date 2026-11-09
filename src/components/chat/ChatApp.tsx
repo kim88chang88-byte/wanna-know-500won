@@ -659,29 +659,23 @@ function AnimalFace({ src, color, size }: { src: string; color: string; size: nu
 
 /** 포스트잇 모양 "도리 메모": 오늘 일진과 내 사주가 만나는 모습 (코드로 계산한 값) */
 function MemoCard({ memo }: { memo: ChatMemo }) {
-  const rows: Array<[string, string]> = [
-    ["보는 날", memo.date],
-    ["오늘 일진", memo.ilJin],
-    ["나와의 관계", memo.relation],
-    ["내 글자와 만나면", memo.meet],
-  ];
   return (
     <div data-testid="chat-memo" className="relative mb-1.5 w-full rounded-[10px] bg-[#fffdf3] px-3.5 pb-3 pt-3.5 shadow-[0_4px_14px_rgba(120,90,10,0.15)]">
       <span aria-hidden="true" className="absolute -top-2 left-1/2 h-4 w-[62px] -translate-x-1/2 -rotate-2 rounded-sm bg-[rgba(250,214,100,0.75)]" />
-      <p className="mb-2 text-[11.5px] font-extrabold tracking-[0.02em] text-[#a2761a]">📌 도리 메모 · 오늘의 흐름</p>
-      {rows.map(([k, v]) => (
+      <p className="mb-2 text-[11.5px] font-extrabold tracking-[0.02em] text-[#a2761a]">📌 도리 메모 · {memo.title}</p>
+      {memo.rows.map(([k, v]) => (
         <div key={k} className="flex justify-between gap-2.5 border-b border-dashed border-[#eadfb8] py-[3px] text-[12.5px]">
           <span className="shrink-0 text-[#8a7a52]">{k}</span>
           <em className="text-right font-extrabold not-italic text-[#2b2350]">{v}</em>
         </div>
       ))}
       <div className="flex justify-between gap-2.5 py-[3px] text-[12.5px]">
-        <span className="shrink-0 text-[#8a7a52]">오늘의 흐름 지수</span>
+        <span className="shrink-0 text-[#8a7a52]">{memo.scoreLabel}</span>
         <em className="text-right font-extrabold not-italic text-[#2b2350]">
           {memo.score} · {memo.tone}
         </em>
       </div>
-      <div className="h-[7px] overflow-hidden rounded-full bg-[#efe6c2]" role="img" aria-label={`흐름 지수 ${memo.score}`}>
+      <div className="h-[7px] overflow-hidden rounded-full bg-[#efe6c2]" role="img" aria-label={`${memo.scoreLabel} ${memo.score}`}>
         <i className="block h-full rounded-full bg-gradient-to-r from-[#f6b73c] to-[#ee8a4a]" style={{ width: `${memo.score}%` }} />
       </div>
       <p className="mt-2.5 border-t border-[#eadfb8] pt-2 text-[12.5px] font-extrabold leading-snug text-[#4a3a1a]">{memo.line}</p>
