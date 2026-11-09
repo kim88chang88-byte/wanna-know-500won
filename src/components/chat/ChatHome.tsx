@@ -33,7 +33,7 @@ export default function ChatHome() {
   const [ready, setReady] = useState(false);
   /** 서버에서 대화방을 받아 왔으면 true (서버 보관이 켜져 있다는 뜻) */
   const [cloud, setCloud] = useState(false);
-  const [left, setLeft] = useState<number | null>(null);
+  const [, setLeft] = useState<number | null>(null);
   const [roomLeft, setRoomLeft] = useState<Record<string, number>>({});
   const [delId, setDelId] = useState<string | null>(null);
   const [starting, setStarting] = useState(false);
@@ -202,15 +202,9 @@ export default function ChatHome() {
         </div>
       </header>
 
-      {left !== null && (
-        <div className="mx-3 mt-3 flex items-center justify-between rounded-2xl border border-amber-200 bg-amber-50 px-3.5 py-3">
-          <div>
-            <p className="text-[13px] font-bold text-gray-900">오늘의 무료 질문</p>
-            <p className="text-[11.5px] text-amber-800">자정에 다시 채워져요</p>
-          </div>
-          <p className="text-[15px] font-extrabold text-brand-600">{left}번 남음</p>
-        </div>
-      )}
+      <p data-testid="chat-free-hint" className="mx-4 mt-3 text-[12px] leading-relaxed text-[#8a7fa8]">
+        💬 질문은 <b className="text-brand-600">방마다 따로</b> 세요. 풀이 방은 이번 달 5번, 궁합 방은 10번, 오늘의 한마디는 하루 3번이 무료예요.
+      </p>
 
       {ready && rooms.length === 0 ? (
         <div className="m-auto flex flex-col items-center gap-3 px-6 py-16 text-center text-sm text-[#8a7fa8]">
