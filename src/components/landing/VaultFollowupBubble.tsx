@@ -95,7 +95,7 @@ export function VaultFollowupBubble({ onShow, onDot }: { onShow?: (shown: boolea
   };
 
   return (
-    <div className="vf-bubble absolute right-0 top-full z-50 mt-3 w-[min(22rem,calc(100vw-1.5rem))]" data-testid="vault-followup" role="region" aria-label="지난 풀이 안부">
+    <div className="vf-bubble absolute right-0 top-full z-50 mt-3 w-[min(18rem,calc(100vw-1.5rem))]" data-testid="vault-followup" role="region" aria-label="지난 풀이 안부">
       <span aria-hidden="true" className="absolute -top-[7px] right-[5.4rem] h-3.5 w-3.5 rotate-45 border-l border-t border-amber-300 bg-amber-50 sm:right-[6.4rem]" />
       <div className="relative rounded-2xl border border-amber-300 bg-amber-50 px-3.5 py-3 shadow-[0_8px_22px_rgba(124,90,10,0.18)]">
         <div className="flex items-start gap-1">
@@ -131,9 +131,9 @@ export function VaultFollowupBubble({ onShow, onDot }: { onShow?: (shown: boolea
         )}
         {chosen !== null && (
           <div role="status" className="mt-2.5">
-            <p data-testid="vault-followup-reply" className="text-[13px] leading-relaxed text-gray-800">
+            <p data-testid="vault-followup-reply" className="flow-root text-[13px] leading-relaxed text-gray-800">
               {check.options[chosen].message}{" "}
-              <a href="/vault" className="ml-1 inline-block whitespace-nowrap rounded-full bg-brand-500 px-3.5 py-1.5 text-xs font-bold text-white">그때 풀이 다시 보기</a>
+              <a href="/vault" className="float-right ml-1.5 inline-block whitespace-nowrap rounded-full bg-brand-500 px-3.5 py-1.5 text-xs font-bold text-white">그때 풀이 다시 보기</a>
             </p>
             <div className="mt-2 text-right text-xs">
               <button type="button" onClick={close} className="text-gray-500 underline">닫기</button>
