@@ -75,7 +75,7 @@ function rulesFor(page: BookPage, year: number): { sec: SecRule; row?: (r: BookR
         },
         row: (r, i, rows) => {
           const cur = rows.findIndex((x) => x.highlight);
-          return cur >= 0 && i > cur;
+          return (cur >= 0 && i > cur) || r.label.startsWith("지난 대운");
         },
       };
     }

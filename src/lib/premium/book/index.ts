@@ -4,7 +4,6 @@ import { josa } from "../josa";
 import {
   careerSections,
   comboSections,
-  GOD_MONTH_LINE,
   hiddenGods,
   hiddenSummary,
   interactionLine,
@@ -20,6 +19,7 @@ import { buildLookBack, buildTraits } from "./resonance";
 import { ELEMENT_INFO, FLOW_LINE, GROUP_TRAIT, GROUPS, groupOf, type Group } from "../topic";
 import type { BookPage, BookRow, BookSection, ElementView, PillarView, TopicInsight, TopicKey } from "../types";
 import { realityCheck } from "./reality";
+import { buildMonthTimeline, daeunCompareRows, timelineRows } from "./timeline";
 import {
   ELEMENT_DOMAIN,
   ELEMENT_EXCESS,
@@ -35,7 +35,6 @@ import {
   ELEMENT_LACK,
   GEUKGUK_TEXT,
   GROUP_LONG,
-  MONTH_LINE,
   PILLAR_MEANING,
   RELATION_TEXT,
   SAL12_TEXT,
@@ -135,7 +134,6 @@ export function buildBook(r: SajuResult, ctx: BookContext): BookPage[] {
   const natal: Partial<Record<PosKey, string>> = { year: r.pillars.year, month: r.pillars.month, day: r.pillars.day };
   if (!hourUnknown) natal.hour = r.pillars.hour;
   const hidden = hiddenGods(dayStem, natal);
-  const kstNow = new Date((ctx.now ?? new Date()).getTime() + 9 * 3600 * 1000);
 
   // ── 1. 한눈에 보기
   add(
@@ -429,6 +427,10 @@ export function buildBook(r: SajuResult, ctx: BookContext): BookPage[] {
           highlight: cur !== null && d.startAge === cur.startAge,
         })),
       },
+      ...(() => {
+        const cmp = daeunCompareRows({ natal, dayStem, yongsinEls, list: dl, currentIdx: idx });
+        return cmp.length ? [{ title: "지난·지금·다음 대운 비교", rows: cmp }] : [];
+      })(),
     ],
   );
 
@@ -436,30 +438,14 @@ export function buildBook(r: SajuResult, ctx: BookContext): BookPage[] {
   const yearRows: BookRow[] = r.seyun
     .filter((s) => s.year >= year - 1 && s.year <= year + 3)
     .map((s) => ({ label: `${s.year}년`, value: s.ganzhi, note: groupLabel(s.tenGodStem, s.tenGodBranch), highlight: s.year === year, bar: flowScore(topicGroup, s.tenGodStem, s.tenGodBranch), current: s.year === year }));
-  // 지금이 몇 번째 달인지(절기가 대략 매달 7일 무렵 바뀌어서, 그 전이면 지난달로 봐요)
-  const curMonth = (() => {
-    const d = kstNow.getUTCDate();
-    const m = kstNow.getUTCMonth() + 1;
-    return d >= 7 ? m : m === 1 ? 12 : m - 1;
-  })();
-  const monthRows: BookRow[] = r.wolun.map((m) => {
-    const gs = groupsOf(m.stemTenGod, m.branchTenGod);
-    const hit = gs.includes(topicGroup);
-    const solarMonth = (m.month % 12) + 1;
-    return { label: `${solarMonth}월경 · ${m.ganzhi}`, value: GOD_MONTH_LINE[m.stemTenGod] ?? (gs[0] ? MONTH_LINE[gs[0]] : "-"), note: hit ? `${insight.label} 포인트` : undefined, highlight: hit, bar: flowScore(topicGroup, m.stemTenGod, m.branchTenGod), current: solarMonth === curMonth };
-  });
-  const hitMonths = r.wolun.filter((m) => groupsOf(m.stemTenGod, m.branchTenGod).includes(topicGroup)).map((m) => `${(m.month % 12) + 1}월경`);
+  // 지금부터 12개월 시기표: 월운 간지·십성·원국 합충·용신 관계를 코드로 계산해요(올해 2~1월이 아니라 지금 달부터 12개월).
+  const plans = buildMonthTimeline({ natal, dayStem, yongsinEls, now: ctx.now ?? new Date(), count: 12 });
+  const monthRows: BookRow[] = timelineRows(plans, { hit: (p) => groupsOf(p.stemGod, p.branchGod).includes(topicGroup), label: insight.label });
+  const hitMonths = plans.filter((p) => groupsOf(p.stemGod, p.branchGod).includes(topicGroup)).map((p) => `${p.month}월경`);
   const yearSections: BookSection[] = [];
-  // 이번 달과 다가오는 두 달: 월운이 원국과 만나는 모습 (절기가 대략 매달 7일 무렵 바뀌어서, 그 전이면 지난달로 봐요)
+  // 이번 달과 다가오는 두 달: 월운이 원국과 만나는 모습
   {
-    const day = kstNow.getUTCDate();
-    const solar = kstNow.getUTCMonth() + 1;
-    const eff = day >= 7 ? solar : solar === 1 ? 12 : solar - 1;
-    const startIdx = eff >= 2 ? eff - 2 : 11; // r.wolun[0] 이 양력 2월경(寅월)
-    const upcoming = [0, 1, 2]
-      .map((n) => ({ w: r.wolun[startIdx + n], n }))
-      .filter((x) => x.w !== undefined)
-      .map((x) => ({ label: `${(x.w.month % 12) + 1}월경${x.n === 0 ? "(이번 달)" : ""}`, ganzhi: x.w.ganzhi, stemGod: x.w.stemTenGod }));
+    const upcoming = plans.slice(0, 3).map((p) => ({ label: `${p.month}월경${p.index === 0 ? "(이번 달)" : ""}`, ganzhi: p.ganzhi, stemGod: p.stemGod }));
     const ms = monthSection(natal, upcoming);
     if (ms) yearSections.push(ms);
   }
@@ -486,18 +472,14 @@ export function buildBook(r: SajuResult, ctx: BookContext): BookPage[] {
     const g = groupsOf(f.tenGodStem, f.tenGodBranch)[0] ?? dominant;
     yearSections.push({ heading: `${year + off}년 미리 보기 · ${f.ganzhi}`, body: `${GROUP_LONG[g].name}이 주제가 되는 해예요. ${STAGE12_TEXT[f.stage12] ?? ""}` });
   }
-  const quarters = [
-    [0, 3, "2~4월경"],
-    [3, 6, "5~7월경"],
-    [6, 9, "8~10월경"],
-    [9, 12, "11~1월경"],
-  ] as const;
-  quarters.forEach(([a, b, label], q) => {
-    const part = r.wolun.slice(a, b);
+  [0, 3, 6, 9].forEach((a, q) => {
+    const part = plans.slice(a, a + 3);
+    if (part.length === 0) return;
+    const label = `${part[0].month}~${part[part.length - 1].month}월경`;
     const tally: Record<Group, number> = { 비겁: 0, 식상: 0, 재성: 0, 관성: 0, 인성: 0 };
-    for (const m of part) for (const gg of groupsOf(m.stemTenGod, m.branchTenGod)) tally[gg]++;
+    for (const m of part) for (const gg of groupsOf(m.stemGod, m.branchGod)) tally[gg]++;
     const top = GROUPS.reduce((x, y) => (tally[y] > tally[x] ? y : x), GROUPS[0]);
-    yearSections.push({ heading: `${q + 1}분기 (${label}) · ${GROUP_LONG[top].name}`, body: `${QUARTER_TEXT[top]} 이 시기 월운: ${part.map((m) => `${m.ganzhi}(${m.stemTenGod})`).join("·")}.` });
+    yearSections.push({ heading: `${q + 1}분기 (${label}) · ${GROUP_LONG[top].name}`, body: `${QUARTER_TEXT[top]} 이 시기 월운: ${part.map((m) => `${m.ganzhi}(${m.stemGod})`).join("·")}.` });
   });
   yearSections.push({
     heading: `${insight.label} 포인트 달`,
@@ -506,7 +488,7 @@ export function buildBook(r: SajuResult, ctx: BookContext): BookPage[] {
   yearSections.push({ heading: "월별 흐름 읽는 법", body: "월별 간지는 절기 기준이라 양력 날짜와 며칠 차이가 있을 수 있어요(표의 '○월경'). 참고용 힌트로 가볍게 활용해 주세요." });
   add("years", `${year}년 · ${year + 1}년과 월별 흐름`, "THIS YEAR & MONTHS · 09", `${year}년은 ${sy?.ganzhi ?? ""} 해예요.`, yearSections, [
     { title: "연도별 흐름", rows: yearRows },
-    { title: `${year}년 월별 흐름`, rows: monthRows },
+    { title: "지금부터 12개월 월별 시기표", rows: monthRows },
   ]);
 
   // ── 10. 신살과 행운 처방전
