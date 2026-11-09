@@ -94,7 +94,7 @@ export default function PurchaseModal({ preselect, onClose, onContinue, continue
                   className={`flex w-full items-center justify-between gap-3 border-t border-slate-100 px-4 py-3.5 text-left ${sel === p.id ? "bg-brand-50 shadow-[inset_3px_0_0_#7c3aed]" : "bg-white"}`}
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={p.id === "pack2" ? "/images/coin-500.webp" : "/images/pearl-3000.webp"} alt="" width={44} height={44} className="h-11 w-11 shrink-0 object-contain drop-shadow-sm" />
+                  <img src={p.id === "pack2" ? "/images/pack-pebble2.webp" : p.id === "pack7" ? "/images/pack-pearl1.webp" : "/images/pack-pearl3.webp"} alt="" width={72} height={72} className="h-[4.5rem] w-[4.5rem] shrink-0 object-contain drop-shadow-sm" />
                   <div className="min-w-0 flex-1">
                     <p className="flex flex-wrap items-center gap-1.5 text-[15px] font-extrabold text-gray-900">
                       {p.name}
