@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { clientKey, guardOrigin, takeLimit } from "@/lib/guard";
+import { clientKey, guardOrigin, takeLimitStrict } from "@/lib/guard";
 import {
   createOtpToken,
   EMAIL_OTP_COOKIE,
@@ -36,10 +36,10 @@ export async function POST(request: Request) {
   const eh = emailHash(email, secret);
   // 같은 주소 60초에 1번, 같은 주소·같은 접속지 1시간 한도, 서버 전체 하루 한도 (남용과 메일 요금 보호)
   const checks = await Promise.all([
-    takeLimit("email-send-min", `e:${eh}`, 1, EMAIL_RESEND_SEC * 1000),
-    takeLimit("email-send-hour", `e:${eh}`, 5, HOUR),
-    takeLimit("email-send-ip", `ip:${clientKey(request)}`, 10, HOUR),
-    takeLimit("email-send-all", "server", emailDailyCap(process.env), 24 * HOUR),
+    takeLimitStrict("email-send-min", `e:${eh}`, 1, EMAIL_RESEND_SEC * 1000),
+    takeLimitStrict("email-send-hour", `e:${eh}`, 5, HOUR),
+    takeLimitStrict("email-send-ip", `ip:${clientKey(request)}`, 10, HOUR),
+    takeLimitStrict("email-send-all", "server", emailDailyCap(process.env), 24 * HOUR),
   ]);
   const blocked = checks.find((c) => !c.ok);
   if (blocked && !blocked.ok) {

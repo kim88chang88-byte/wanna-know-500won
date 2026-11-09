@@ -80,6 +80,30 @@ export async function takeLimit(name: string, subject: string, limit: number, wi
   return { ok: true };
 }
 
+const STRICT_DB_TIMEOUT_MS = 3000;
+
+/**
+ * 엄격한 제한 확인(로그인·인증번호용). DB 가 설정돼 있는데 답이 없거나 오류이면 통과시키지 않고 막아요.
+ * (보통의 takeLimit 은 DB 가 안 되면 서버별 메모리 제한만 남는데, 여러 서버에 나눠 시도하면 제한이 풀리기 때문이에요.)
+ * DB 설정 자체가 없는 환경(개발·테스트)에서는 메모리 제한만 써요.
+ */
+export async function takeLimitStrict(name: string, subject: string, limit: number, windowMs: number): Promise<Limit> {
+  const mem = memoryLimiter(name, limit, windowMs).check(subject);
+  if (!mem.ok) return mem;
+  const config = loadDbConfig(process.env);
+  if (!config) return mem;
+  try {
+    const retry = await Promise.race([
+      createDb(config).takeRateLimit(`${name}:${subject}`, Math.ceil(windowMs / 1000), limit),
+      new Promise<null>((r) => setTimeout(() => r(null), STRICT_DB_TIMEOUT_MS)),
+    ]);
+    if (typeof retry === "number") return retry > 0 ? { ok: false, retryAfterSec: retry } : { ok: true };
+  } catch {
+    // 아래에서 막아요
+  }
+  return { ok: false, retryAfterSec: 30 };
+}
+
 export interface LimitSpec {
   /** 제한 이름 (엔드포인트별로 따로 세요) */
   name: string;

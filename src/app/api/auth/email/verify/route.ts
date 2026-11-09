@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { clientKey, guardOrigin, takeLimit } from "@/lib/guard";
+import { clientKey, guardOrigin, takeLimitStrict } from "@/lib/guard";
 import { checkOtpToken, EMAIL_OTP_COOKIE, EMAIL_OTP_TTL_SEC, emailHash, emailLoginConfigured, emailUserId, normalizeEmail } from "@/lib/auth/emailLogin";
 import { createSessionToken, readCookie, SESSION_COOKIE, SESSION_MAX_AGE_SEC } from "@/lib/auth/session";
 import { createDb, loadDbConfig } from "@/lib/db/supabase";
@@ -28,8 +28,8 @@ export async function POST(request: Request) {
   // 번호를 무작정 대입하지 못하게: 같은 주소 10분에 6번, 같은 접속지 10분에 20번까지만 확인해요.
   const eh = emailHash(email, secret);
   const limits = await Promise.all([
-    takeLimit("email-verify", `e:${eh}`, 6, WINDOW),
-    takeLimit("email-verify-ip", `ip:${clientKey(request)}`, 20, WINDOW),
+    takeLimitStrict("email-verify", `e:${eh}`, 6, WINDOW),
+    takeLimitStrict("email-verify-ip", `ip:${clientKey(request)}`, 20, WINDOW),
   ]);
   const blocked = limits.find((l) => !l.ok);
   if (blocked && !blocked.ok) {
@@ -49,7 +49,7 @@ export async function POST(request: Request) {
     );
   }
   // 한 번 쓴 번호는 다시 못 써요.
-  const used = await takeLimit("email-used", check.sig, 1, WINDOW);
+  const used = await takeLimitStrict("email-used", check.sig, 1, WINDOW);
   if (!used.ok) return NextResponse.json({ error: "이미 쓴 인증번호예요. 새 인증번호를 받아 주세요.", code: "expired" }, { status: 400 });
 
   const sub = emailUserId(email, secret);
