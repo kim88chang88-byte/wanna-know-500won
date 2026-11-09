@@ -56,7 +56,7 @@ describe("시기표", () => {
     for (const r of rows) {
       expect(r.bar).toBeGreaterThanOrEqual(20);
       expect(r.bar).toBeLessThanOrEqual(95);
-      expect(r.label).toMatch(/^\d{1,2}월경 · [甲-癸][子-亥]$/);
+      expect(r.label).toMatch(/^\d{1,2}월경 · [甲乙丙丁戊己庚辛壬癸][子丑寅卯辰巳午未申酉戌亥]$/);
     }
   });
 
