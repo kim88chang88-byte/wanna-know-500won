@@ -6,6 +6,7 @@ import BottomTabs from "./BottomTabs";
 import CoinRitual from "./CoinRitual";
 import { splitPearls } from "@/lib/currency";
 import PurchaseModal from "@/components/pay/PurchaseModal";
+import BetaOpenPopup from "./BetaOpenPopup";
 import PaywallPopup, { type PaywallInfo } from "./PaywallPopup";
 import { readingCoinCost } from "@/lib/spendPlan";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -449,6 +450,7 @@ export default function Landing() {
       <div aria-hidden="true" className="h-24 lg:hidden" />
       <BottomTabs onChatLogin={openChatTabLogin} />
 
+      <BetaOpenPopup />
       {payOpen && <PurchaseModal onClose={() => { setPayOpen(false); void refreshCoins(); }} />}
       {paywall && (
         <PaywallPopup

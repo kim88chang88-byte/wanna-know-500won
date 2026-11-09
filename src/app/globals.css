@@ -9,6 +9,9 @@ body {
 }
 
 /* ------------------------------------------------------------------ 랜딩 애니메이션 */
+@keyframes betaPop {
+  from { transform: scale(0.88); opacity: 0; }
+}
 @keyframes leverTurn {
   0% {
     transform: rotate(0deg) scale(1);
