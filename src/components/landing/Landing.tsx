@@ -68,6 +68,7 @@ export default function Landing() {
   const timers = useRef<number[]>([]);
   const [ritual, setRitual] = useState(false);
   const [ritualBig, setRitualBig] = useState(false);
+  const [ritualTwo, setRitualTwo] = useState(false);
   const [tickets, setTickets] = useState(0);
   // 서버에 쌓인 뽑기 코인(로그인 선물 등)과, 방금 선물을 받았는지
   const [coins, setCoins] = useState(0);
@@ -195,6 +196,7 @@ export default function Landing() {
       // 프리미엄 종합 사주(진주 3개 + 조약돌 1개)는 진주가, 그 밖의 풀이는 조약돌이 떨어져요.
       const big = premium === true && !fortune.includes("궁합");
       setRitualBig(big);
+      setRitualTwo(premium === true && fortune.includes("궁합")); // 궁합은 조약돌 2개가 떨어져요
       setRitual(true);
       timers.current.push(
         window.setTimeout(() => {
@@ -514,7 +516,7 @@ export default function Landing() {
           }}
         />
       )}
-      {ritual && <CoinRitual big={ritualBig} />}
+      {ritual && <CoinRitual big={ritualBig} two={ritualTwo} />}
       <StickyDrawCta hidden={Boolean(intake) || loginOpen || ritual} />
 
       {((justLoggedIn && user) || gift || notice) && (
