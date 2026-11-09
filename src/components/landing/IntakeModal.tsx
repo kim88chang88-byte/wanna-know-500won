@@ -1113,24 +1113,16 @@ export default function IntakeModal({ target, wallet = null, onClose, onComplete
                   </a>
                 </span>
               </label>
-              <p className="text-[11px] text-gray-400">
-                {loggedIn || buildConcern(form) ? "아래 선택 항목에 동의하지 않으면, 입력한 정보는 서버에 저장하지 않아요." : "입력한 정보는 서버에 저장하지 않아요."}
-              </p>
+              {!(loggedIn || buildConcern(form)) && <p className="text-[11px] text-gray-400">입력한 정보는 서버에 저장하지 않아요.</p>}
 
-              {loggedIn ? (
-                savedProfile && sameBirth(savedProfile, buildBirthInput({ ...form, consent: true })) ? (
-                  <p data-testid="profile-kept" className="text-[11px] text-gray-500 leading-relaxed">
-                    기억해 둔 생년월일시로 풀어요. 지우고 싶으면 로그인 창의 &lsquo;기억한 정보 지우기&rsquo;를 눌러 주세요.
-                  </p>
-                ) : (
-                  <label className="flex items-start gap-2 text-xs text-gray-700 leading-relaxed">
-                    <input type="checkbox" name="saveProfile" className="mt-0.5" checked={saveProfile} onChange={(e) => { setSaveProfile(e.target.checked); if (e.target.checked) setSaveOther(false); }} />
-                    <span>
-                      (선택) 도리가 생년월일시·성별을 기억하게 저장해요. 다음부터 다시 입력하지 않아도 돼요. 로그인 창에서 언제든 지울 수 있고, 탈퇴하면 함께 삭제돼요.
-                    </span>
-                  </label>
-                )
-              ) : null}
+              {loggedIn && !(savedProfile && sameBirth(savedProfile, buildBirthInput({ ...form, consent: true }))) && (
+                <label className="flex items-start gap-2 text-xs text-gray-700 leading-relaxed">
+                  <input type="checkbox" name="saveProfile" className="mt-0.5" checked={saveProfile} onChange={(e) => { setSaveProfile(e.target.checked); if (e.target.checked) setSaveOther(false); }} />
+                  <span>
+                    (선택) 도리가 생년월일시·성별을 기억하게 저장해요. 다음부터 다시 입력하지 않아도 돼요. 로그인 창에서 언제든 지울 수 있고, 탈퇴하면 함께 삭제돼요.
+                  </span>
+                </label>
+              )}
 
               {loggedIn && (
                 <label className="flex items-start gap-2 text-xs text-gray-700 leading-relaxed">
