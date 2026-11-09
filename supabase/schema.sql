@@ -559,6 +559,8 @@ declare
   month_start timestamptz;
   r record;
 begin
+  -- 같은 사람·같은 종류는 한 번에 하나씩만 처리해요. (동시에 여러 번 눌러도 "이번 달 몇 번" 세기가 틀어지지 않게)
+  perform pg_advisory_xact_lock(hashtext('cap:' || p_user || ':' || p_kind));
   month_start := date_trunc('month', now() at time zone 'Asia/Seoul') at time zone 'Asia/Seoul';
   select count(*) into cnt from public.coin_log
     where user_id = p_user and kind = p_kind and delta > 0 and created_at >= month_start;
