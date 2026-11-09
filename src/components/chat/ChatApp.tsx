@@ -372,7 +372,11 @@ export default function ChatApp({ initialCtx, initialMsgs, onChange, onBack }: {
   }
 
   const label = CTX_LABEL[ctx.kind];
-  const summaryLines = ctx.summary.split("\n").map((l) => l.trim()).filter(Boolean);
+  // 저장된 요약의 "주제: 성공·재물운"은 카드 이름대로 "성공운"으로 보여줘요 (저장값은 그대로)
+  const summaryLines = ctx.summary
+    .split("\n")
+    .map((l) => l.trim().replace(/^(주제: )성공\s*[·⋅・]\s*재물운$/, "$1성공운"))
+    .filter(Boolean);
   const showEnd = leftNow === 0 && !busy && !typingNow;
 
   return (
