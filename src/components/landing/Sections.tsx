@@ -4,7 +4,7 @@ import { SERVICE_NAME } from "@/lib/siteInfo";
 import type { AuthUser } from "./useAuth";
 import { FAQ_ITEMS } from "./faq";
 import { FREE_PRICE_LABEL, MACHINES, PREMIUM_CARDS } from "./data";
-import { HelpMenuButton, MachineMenuButton } from "./MenuButton";
+import { MachineMenuButton } from "./MenuButton";
 import { HERO_IMAGE, IMAGES, LOGO_IMAGE } from "./images";
 import SafeImage from "./SafeImage";
 import FreeCountdown from "./FreeCountdown";
@@ -114,7 +114,6 @@ export function Header({ onOpenLogin, user = null, bubble = null, dot = false }:
               )}
               {user && dot && <span aria-hidden="true" data-testid="vault-followup-dot" className="vf-dot absolute -right-0.5 -top-0.5 h-3 w-3 rounded-full border-2 border-white bg-red-500" />}
             </button>
-            <HelpMenuButton />
             <MachineMenuButton />
             {bubble}
           </div>

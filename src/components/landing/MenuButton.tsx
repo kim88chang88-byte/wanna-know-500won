@@ -6,20 +6,24 @@ import { MACHINES, PREMIUM_CARDS } from "./data";
 // 개발용 계산 화면(/saju)은 배포(production)에서는 메뉴에도, 주소로도 열리지 않아요.
 const SHOW_DEV_LINKS = process.env.NODE_ENV === "development";
 
-const HELP_GROUPS: readonly MenuGroup[] = [
-  {
-    items: [
-      { href: "/", label: "처음으로" },
-      ...(SHOW_DEV_LINKS ? [{ href: "/saju", label: "사주 계산해보기 (개발용)" }] : []),
-      { href: "/terms", label: "이용약관" },
-      { href: "/privacy", label: "개인정보처리방침" },
-      { href: "/refund", label: "환불 안내" },
-    ],
-  },
-];
+const HOME_GROUP: MenuGroup = {
+  items: [
+    { href: "/", label: "처음으로", emoji: "🏠" },
+    ...(SHOW_DEV_LINKS ? [{ href: "/saju", label: "사주 계산해보기 (개발용)" }] : []),
+  ],
+};
+
+const POLICY_GROUP: MenuGroup = {
+  items: [
+    { href: "/terms", label: "이용약관" },
+    { href: "/privacy", label: "개인정보처리방침" },
+    { href: "/refund", label: "환불 안내" },
+  ],
+};
 
 /** 도유사주에서 즐길 수 있는 자판기들. 누르면 그 자판기 카드로 스크롤해요. */
 const MACHINE_GROUPS: readonly MenuGroup[] = [
+  HOME_GROUP,
   { items: [{ href: "/wallet", label: "내 지갑", emoji: "👛" }] },
   {
     heading: "🐾 6대 운세 카드 (매일 첫 1회 무료)",
@@ -29,23 +33,10 @@ const MACHINE_GROUPS: readonly MenuGroup[] = [
     heading: "👑 프리미엄 심층 리포트",
     items: PREMIUM_CARDS.map((p) => ({ href: `#${p.key}`, label: p.title, emoji: p.emoji })),
   },
+  POLICY_GROUP,
 ];
 
-/** 헤더의 '?' 안내 메뉴 (처음으로·이용약관·개인정보처리방침·환불 안내) */
-export function HelpMenuButton() {
-  return (
-    <HeaderMenu
-      id="site-menu"
-      testId="help-menu-button"
-      buttonLabel="안내 메뉴 열기"
-      panelLabel="안내 메뉴"
-      groups={HELP_GROUPS}
-      icon={<span aria-hidden="true" className="font-black text-lg leading-none">?</span>}
-    />
-  );
-}
-
-/** 헤더의 햄버거(≡) 메뉴: 즐길 수 있는 자판기 목록 */
+/** 헤더의 햄버거(≡) 메뉴: 즐길 수 있는 처음으로·자판기 목록·약관 안내 */
 export function MachineMenuButton() {
   return (
     <HeaderMenu
