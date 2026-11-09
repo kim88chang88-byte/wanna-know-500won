@@ -318,6 +318,102 @@ begin
 end;
 $$;
 
+-- 여러 개 한 번에 사용 (11-09): 풀이를 만들기 전에 먼저 차감해서, 같은 요청을 동시에 여러 번 보내도 잔액만큼만 통과해요.
+-- 잔액이 모자라면 -1, 되면 남은 개수. 주문 번호(p_ref)로 coin_log 에 -p_cost 한 줄을 남겨요. (실패하면 coin_refund 로 돌려줘요)
+create or replace function public.coin_spend_n(p_user text, p_cost int, p_ref text)
+returns int
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  bal int;
+begin
+  if p_cost is null or p_cost < 1 or p_cost > 100 then
+    return -1;
+  end if;
+  update public.user_coins set balance = balance - p_cost, updated_at = now()
+    where user_id = p_user and balance >= p_cost
+    returning balance into bal;
+  if bal is null then
+    return -1;
+  end if;
+  insert into public.coin_log (user_id, kind, ref, delta) values (p_user, 'spend', left(p_ref, 80), -p_cost);
+  return bal;
+end;
+$$;
+
+-- 돌려주기: 같은 주문 번호의 사용분을 한 번만 돌려줘요. 돌려줬으면 남은 개수, 이미 돌려줬거나 사용 기록이 없으면 -1.
+create or replace function public.coin_refund(p_user text, p_ref text)
+returns int
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  amt int;
+  bal int;
+  n int;
+begin
+  select -delta into amt from public.coin_log
+    where user_id = p_user and kind = 'spend' and ref = left(p_ref, 80) and delta < 0
+    limit 1;
+  if amt is null or amt < 1 then
+    return -1;
+  end if;
+  insert into public.coin_log (user_id, kind, ref, delta) values (p_user, 'refund', left(p_ref, 80), amt)
+    on conflict (user_id, kind, ref) where delta > 0 do nothing;
+  get diagnostics n = row_count;
+  if n = 0 then
+    return -1;
+  end if;
+  update public.user_coins set balance = balance + amt, updated_at = now()
+    where user_id = p_user
+    returning balance into bal;
+  return coalesce(bal, -1);
+end;
+$$;
+
+-- 오늘 무료 뽑기 자리 잡기: 사람별로 잠가서 세고, 한도(p_limit, 비우면 한도 없음)가 차 있으면 -1, 아니면 기록을 남기고 그 번호를 돌려줘요.
+create or replace function public.draw_take(p_user text, p_day date, p_topic text, p_limit int)
+returns bigint
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  n int;
+  new_id bigint;
+begin
+  perform pg_advisory_xact_lock(hashtext('draw:' || p_user));
+  select count(*) into n from public.draws where user_id = p_user and day = p_day;
+  if p_limit is not null and n >= p_limit then
+    return -1;
+  end if;
+  insert into public.draws (user_id, day, topic) values (p_user, p_day, left(p_topic, 40)) returning id into new_id;
+  return new_id;
+end;
+$$;
+
+-- 풀이가 실패했을 때 잡아 둔 자리를 지워요. (본인 것만)
+create or replace function public.draw_cancel(p_user text, p_id bigint)
+returns void
+language sql
+security definer
+set search_path = public
+as $$
+  delete from public.draws where id = p_id and user_id = p_user;
+$$;
+
+revoke all on function public.coin_spend_n(text, int, text) from public, anon, authenticated;
+grant execute on function public.coin_spend_n(text, int, text) to service_role;
+revoke all on function public.coin_refund(text, text) from public, anon, authenticated;
+grant execute on function public.coin_refund(text, text) to service_role;
+revoke all on function public.draw_take(text, date, text, int) from public, anon, authenticated;
+grant execute on function public.draw_take(text, date, text, int) to service_role;
+revoke all on function public.draw_cancel(text, bigint) from public, anon, authenticated;
+grant execute on function public.draw_cancel(text, bigint) to service_role;
+
 revoke all on function public.coin_grant(text, text, text, int) from public, anon, authenticated;
 grant execute on function public.coin_grant(text, text, text, int) to service_role;
 revoke all on function public.coin_spend(text) from public, anon, authenticated;

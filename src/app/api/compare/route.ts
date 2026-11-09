@@ -7,6 +7,7 @@ import { ReadingUnavailableError } from "@/lib/ai/interpret";
 import { createDb, loadDbConfig } from "@/lib/db/supabase";
 import { enforceLimits, guardOrigin } from "@/lib/guard";
 import { requireLogin } from "@/lib/auth/requireLogin";
+import { checkUserAiCap } from "@/lib/userAiCap";
 import { resolveBirth } from "@/lib/saju/birthPlace";
 import { calculateSaju } from "@/lib/saju/calculate";
 import { SajuInputError } from "@/lib/saju/errors";
@@ -19,6 +20,8 @@ export async function POST(request: Request) {
   if (loginNeeded) return loginNeeded;
   const denied = guardOrigin(request) ?? (await enforceLimits(request, { name: "compare", windowMs: 60000, ip: 4, user: 8 }, "요청이 너무 빨라요. 잠시 뒤에 다시 해 주세요."));
   if (denied) return denied;
+  const capped = await checkUserAiCap(request, "normal");
+  if (capped) return capped;
   let body: (BirthInput & { a?: unknown; b?: unknown }) | null;
   try {
     body = (await request.json()) as BirthInput & { a?: unknown; b?: unknown };

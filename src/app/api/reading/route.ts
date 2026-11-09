@@ -8,14 +8,16 @@ import { buildCoreFacts, factsNowFor } from "@/lib/ai/coreFacts";
 import { kstToday } from "@/lib/ai/dailyFacts";
 import { interpretDetail } from "@/lib/ai/detail";
 import { interpretSaju, ReadingUnavailableError } from "@/lib/ai/interpret";
-import { hasEntitlement, ENTITLEMENT_COOKIE } from "@/lib/premium/entitlement";
+import { hasEntitlement, issueEntitlement, ENTITLEMENT_COOKIE } from "@/lib/premium/entitlement";
 import { isPremiumLocked } from "@/lib/premium/config";
 import { isCompatFortune } from "@/lib/premium/compat";
 import { readingCoinCost } from "@/lib/spendPlan";
 import { normalizeTopic, toPublicReading, type PublicReading } from "@/lib/ai/reading";
 import { hasConcern, parseConcern } from "@/lib/concerns";
 import { ageBand } from "@/lib/profile";
-import { readCookie, SESSION_COOKIE, verifySessionToken } from "@/lib/auth/session";
+import { isSecretValid, readCookie, SESSION_COOKIE, verifySessionToken } from "@/lib/auth/session";
+import { releaseReservation, reserveCoins, reserveDraw, type Reservation } from "@/lib/reserve";
+import { checkUserAiCap } from "@/lib/userAiCap";
 import { FREE_PER_DAY, isDailyLimitEnforced } from "@/lib/db/config";
 import { createDb, loadDbConfig, type DrawCounts } from "@/lib/db/supabase";
 import { enforceLimits, guardOrigin } from "@/lib/guard";
@@ -62,6 +64,11 @@ export async function POST(request: Request) {
   const dbConfig = loadDbConfig(process.env);
   const db = dbConfig ? createDb(dbConfig) : null;
   const userId = session && db ? session.sub : null;
+  // 한 사람이 하루에 부를 수 있는 일반 풀이 수 (프리미엄·궁합은 조약돌로 막고, 책 쓰기는 /api/premium 에서 따로 세요)
+  if (rawPremium !== true) {
+    const capped = await checkUserAiCap(request, "normal");
+    if (capped) return capped;
+  }
   let counts: DrawCounts | null = null;
   let useCoin = false;
   // 궁합(1,000원)은 조약돌 2개, 그 밖의 뽑기는 1개
@@ -76,8 +83,8 @@ export async function POST(request: Request) {
       // DB 가 잠깐 안 되어도 서비스는 계속돼요. (횟수 제한만 건너뛰어요)
       console.error("getCounts failed:", err instanceof Error ? err.message : "unknown");
     }
-    // 프리미엄은 조약돌로만 열어요. (조약돌이 모자라면 항상 막아요)
-    if (counts && coinsOnly) {
+    // 프리미엄은 조약돌로만 열어요. (조약돌이 모자라거나 확인이 안 되면 항상 막아요)
+    if (coinsOnly) {
       let coins = 0;
       try {
         coins = await db.getCoins(userId);
@@ -139,6 +146,33 @@ export async function POST(request: Request) {
     }
     console.error("calculateSaju failed", err);
     return NextResponse.json({ error: "사주 계산 중 오류가 발생했어요." }, { status: 500 });
+  }
+
+  // 풀이를 만들기 전에 먼저 차감(예약)해요. 같은 요청을 동시에 여러 번 보내도 잔액·무료 횟수만큼만 통과해요.
+  // 풀이가 실패하면 아래에서 되돌려요. (입력 오류로 막힌 요청은 여기까지 오지 않아서 차감되지 않아요)
+  let reservation: Reservation = { kind: "none" };
+  if (userId && db) {
+    if (useCoin) {
+      const r = await reserveCoins(db, userId, coinCost);
+      if (!r.ok) {
+        if (r.reason === "error") return NextResponse.json({ error: "지금은 조약돌을 확인하지 못했어요. 잠시 뒤에 다시 시도해 주세요." }, { status: 503 });
+        return NextResponse.json(
+          coinsOnly
+            ? { error: `${isCompat ? "둘의 궁합" : "프리미엄 종합 사주"}는 조약돌 ${coinCost}개(${(coinCost * 500).toLocaleString("ko-KR")}원)로만 볼 수 있어요. 조약돌을 충전해 주세요.`, code: "coin_needed", counts }
+            : { error: "오늘의 무료 뽑기는 이미 사용했어요. 결제는 아직 준비 중이에요. 내일 다시 만나요 ❄️", code: "free_used", counts },
+          { status: 402 },
+        );
+      }
+      reservation = r.reservation;
+    } else if (counts && !coinsOnly) {
+      await ensureUserOnce().catch(() => undefined); // 뽑기 기록은 회원이 먼저 있어야 해서
+      const limit = isDailyLimitEnforced(process.env) ? FREE_PER_DAY + (rawBonus === true ? 1 : 0) : null;
+      const r = await reserveDraw(db, userId, normalizeTopic(rawTopic), limit);
+      if (!r.ok) {
+        return NextResponse.json({ error: "오늘의 무료 뽑기는 이미 사용했어요. 결제는 아직 준비 중이에요. 내일 다시 만나요 ❄️", code: "free_used", counts }, { status: 402 });
+      }
+      reservation = r.reservation;
+    }
   }
 
   // 이용자가 직접 동의(선택)한 경우에만 저장해요. 둘 다 풀이와 별개라서, 저장이 실패해도 풀이는 그대로 나가요.
@@ -215,9 +249,13 @@ export async function POST(request: Request) {
   //  - AI 키가 없어서 한마디를 아예 안 쓰는 상태(unavailable)일 때: 이때는 사주 리포트가 서비스 본체라서 그대로 센다
   // AI 호출이 일시적으로 실패한 요청(failed)은 세지 않아요.
   const countable = readingStatus === "unavailable" || (readingStatus === "ok" && reading !== null);
+  if (userId && db && !countable) {
+    // 풀이가 나가지 못했어요: 먼저 차감한 조약돌·무료 뽑기 자리를 되돌려요.
+    await releaseReservation(db, userId, reservation);
+  }
   if (userId && db && countable) {
-    // 코인 차감은 뽑기 기록과 동시에 해요. (서로 기다릴 필요가 없어요)
-    const spend = useCoin
+    // 옛 방식(DB 함수가 아직 없을 때)에서만 풀이 뒤에 조약돌을 차감해요.
+    const spend = useCoin && reservation.kind === "legacy"
       ? (async () => {
           for (let i = 0; i < coinCost; i++) await db.spendCoin(userId);
         })().catch((err) => {
@@ -226,8 +264,8 @@ export async function POST(request: Request) {
       : null;
     try {
       await ensureUserOnce();
-      // 조약돌로 연 프리미엄은 오늘의 무료 뽑기를 쓴 것으로 세지 않아요.
-      if (!coinsOnly) await db.recordDraw(userId, normalizeTopic(rawTopic));
+      // 조약돌로 연 프리미엄은 오늘의 무료 뽑기를 쓴 것으로 세지 않아요. (무료 뽑기 자리는 위에서 이미 기록했어요)
+      if (!coinsOnly && reservation.kind !== "draw") await db.recordDraw(userId, normalizeTopic(rawTopic));
       // 초대받은 친구의 첫 풀이라면 두 사람에게 코인을 지급해요. (코드를 입력하지 않았거나 이미 받았으면 아무 일도 없어요)
       try {
         await db.completeReferral(userId);
@@ -238,8 +276,22 @@ export async function POST(request: Request) {
     } catch (err) {
       console.error("recordDraw failed:", err instanceof Error ? err.message : "unknown");
     }
-    await spend;
+    if (spend) await spend;
   }
 
-  return NextResponse.json({ chart, reading, readingStatus, detailInfo, counts, profileSaved, birthAdjust, birthAdjustNote: birthAdjust ? adjustNote(birthAdjust) : null, boundaryNote: boundaryNote(input as BirthInput) });
+  const res = NextResponse.json({ chart, reading, readingStatus, detailInfo, counts, profileSaved, birthAdjust, birthAdjustNote: birthAdjust ? adjustNote(birthAdjust) : null, boundaryNote: boundaryNote(input as BirthInput) });
+  // 조약돌을 내고 연 프리미엄·궁합이면, 이 회원에게만 2시간 동안 /api/premium 의 AI 장 풀이를 열어 주는 이용권을 내려요.
+  const secret = process.env.AUTH_SECRET;
+  if (userId && coinsOnly && countable && reservation.kind !== "none" && isSecretValid(secret)) {
+    const ref = reservation.kind === "coin" ? reservation.ref : "legacy";
+    res.cookies.set(ENTITLEMENT_COOKIE, issueEntitlement({ sub: userId, ref, exp: Math.floor(Date.now() / 1000) + 2 * 60 * 60 }, secret), {
+      httpOnly: true,
+      sameSite: "lax",
+      secure: process.env.NODE_ENV === "production",
+      path: "/",
+      maxAge: 2 * 60 * 60,
+    });
+  }
+  return res;
 }
+

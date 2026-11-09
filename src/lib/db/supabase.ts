@@ -353,6 +353,32 @@ export function createDb(config: DbConfig, fetchImpl: FetchLike = fetch) {
       return typeof n === "number" && Number.isInteger(n) ? n : -1;
     },
 
+    /** 조약돌 여러 개를 한 번에 사용(풀이 전에 먼저 차감). 남은 개수, 모자라면 -1. DB 함수(coin_spend_n) */
+    async spendCoins(userId: string, cost: number, ref: string): Promise<number> {
+      const res = await call("rpc/coin_spend_n", { method: "POST", headers: headers(), body: JSON.stringify({ p_user: safeId(userId), p_cost: cost, p_ref: ref.slice(0, 80) }) });
+      const n = await res.json().catch(() => -1);
+      return typeof n === "number" && Number.isInteger(n) ? n : -1;
+    },
+
+    /** 같은 주문 번호로 쓴 조약돌을 한 번만 돌려줘요. 돌려줬으면 남은 개수, 아니면 -1. DB 함수(coin_refund) */
+    async refundCoins(userId: string, ref: string): Promise<number> {
+      const res = await call("rpc/coin_refund", { method: "POST", headers: headers(), body: JSON.stringify({ p_user: safeId(userId), p_ref: ref.slice(0, 80) }) });
+      const n = await res.json().catch(() => -1);
+      return typeof n === "number" && Number.isInteger(n) ? n : -1;
+    },
+
+    /** 오늘 뽑기 자리를 잡고 기록 번호를 돌려줘요. 한도(limit)가 차 있으면 -1, limit 이 null 이면 한도 없이 기록만. DB 함수(draw_take) */
+    async takeDraw(userId: string, topic: string, limit: number | null, now: Date = new Date()): Promise<number> {
+      const res = await call("rpc/draw_take", { method: "POST", headers: headers(), body: JSON.stringify({ p_user: safeId(userId), p_day: kstDay(now), p_topic: topic.slice(0, 40), p_limit: limit }) });
+      const n = await res.json().catch(() => -1);
+      return typeof n === "number" && Number.isInteger(n) ? n : -1;
+    },
+
+    /** 풀이가 실패했을 때 잡아 둔 뽑기 자리를 지워요. DB 함수(draw_cancel) */
+    async cancelDraw(userId: string, id: number): Promise<void> {
+      await call("rpc/draw_cancel", { method: "POST", headers: headers(), body: JSON.stringify({ p_user: safeId(userId), p_id: id }) });
+    },
+
     /** 상담방 남은 질문 수 (처음이면 무료 free 개). DB 함수(chat_quota) */
     async chatQuota(userId: string, scope: string, free: number): Promise<number> {
       const res = await call("rpc/chat_quota", { method: "POST", headers: headers(), body: JSON.stringify({ p_user: safeId(userId), p_scope: scope.slice(0, 120), p_free: free }) });

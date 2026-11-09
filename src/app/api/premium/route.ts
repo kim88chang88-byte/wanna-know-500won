@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { hasEntitlement, ENTITLEMENT_COOKIE } from "@/lib/premium/entitlement";
 import { readCookie, SESSION_COOKIE, verifySessionToken } from "@/lib/auth/session";
 import { requireLogin } from "@/lib/auth/requireLogin";
+import { checkUserAiCap } from "@/lib/userAiCap";
 import { isPremiumLocked } from "@/lib/premium/config";
 import { readingFirstDeep } from "@/lib/hanjaReading";
 import { buildPremiumReport, validatePremiumInput } from "@/lib/premium/report";
@@ -63,6 +64,11 @@ export async function POST(request: Request) {
     if (isAdmin(session?.sub, process.env)) enableAdminAiCache();
     // PREMIUM_AI_GATE=true 이면 AI 장 풀이(비용이 드는 부분)는 이용권이 있거나 관리자(ADMIN_USER_IDS)인 요청에만 줘요. 꺼 두면 지금처럼 모두에게 줘요.
     const aiGated = process.env.PREMIUM_AI_GATE?.trim().toLowerCase() === "true" && !entitled && !isAdmin(session?.sub, process.env);
+    // 책 한 권(첫 요청)당 한 번만 세요. 한 사람이 하루에 여러 권을 만들어 서버 전체 상한을 혼자 쓰지 못하게 해요.
+    if (!preview && !second && !aiGated && hasAiKey() && parsed.level === "full") {
+      const capped = await checkUserAiCap(request, "premium");
+      if (capped) return capped;
+    }
     const report = buildPremiumReport(parsed.value, new Date(), parsed.level, parsed.topic, lock, parsed.concern, parsed.partner);
     // 프리미엄(전체) 리포트에는 쪽마다 AI 가 쓴 '도리의 한 줄'을 붙이고, 재물운 장은 AI 가 이 사람 이야기로 다시 써요.
     // 키가 없거나 한도를 넘거나 실패하면 그 부분만 빠지고 기존 풀이가 그대로 나가요.
