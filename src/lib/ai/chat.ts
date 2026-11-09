@@ -37,6 +37,7 @@ export const CHAT_SYSTEM_PROMPT = `너는 "도리", 맑은 옹달샘의 수달 �
   - palette: 어울리는 색 2~3개. label 은 반드시 다음 중 하나만: ${Object.keys(PALETTE).join(", ")}. sub 는 그 색이 주는 느낌 한 줄(icon 은 빈 글자). 입력의 사주 정보에 있는 오행과 연결되는 색만.
   - spots: 물건을 두면 좋은 자리 1~3곳. label 은 반드시 다음 중 하나만: ${Object.keys(SPOTS).join(", ")}. sub 는 왜 그 자리인지 짧게(icon 은 빈 글자). 가장 좋은 자리부터 순서대로.
   - label·sub 는 각각 20자 이내, 글 속에 별표·마크다운 금지. 모든 글은 위 "지켜야 할 선"을 그대로 지켜.
+- choices: 답 끝에서 도리가 사용자에게 되묻는 질문이 있고 그 대답이 두세 가지로 나뉠 때만, 사용자가 눌러서 답할 선택지 2개를 써(각 12자 이내, 예: "편한 사이야", "아직 어려워"). 되묻는 질문이 없거나 열린 질문이면 빈 배열.
 - followups 에는 방금 답에서 자연스럽게 이어지는 사용자의 다음 질문 3개를 20자 안팎으로 써(사용자가 도리에게 묻는 말투, 예: "물 기운을 채우는 습관이 있어?"). 이미 물어본 질문과 겹치지 않게. 의료·법률·투자·결정을 대신 내려 달라는 질문은 넣지 마.
 
 사실과 한계
@@ -58,6 +59,7 @@ export const CHAT_SCHEMA = {
   properties: {
     answer: { type: "string", description: `도리의 채팅 답. 첫 질문은 220~450자, 이어지는 질문은 150~300자, 최대 ${CHAT_MAX}자, 빈 줄로 1~3문단` },
     followups: { type: "array", items: { type: "string" }, description: "방금 답에서 이어지는 사용자의 다음 질문 3개 (각 20자 안팎)" },
+    choices: { type: "array", items: { type: "string" }, description: "도리의 되묻는 질문에 눌러서 답할 선택지 2개(각 12자 이내). 없으면 빈 배열" },
     visual: {
       type: "object",
       description: "답에 붙이는 큰 그림 카드. 필요 없으면 kind 를 none 으로 하고 나머지는 비워요.",
@@ -83,7 +85,7 @@ export const CHAT_SCHEMA = {
       additionalProperties: false,
     },
   },
-  required: ["answer", "followups", "visual"],
+  required: ["answer", "followups", "choices", "visual"],
   additionalProperties: false,
 } as const;
 
@@ -115,6 +117,8 @@ export interface ChatVisual {
 export interface ChatReply {
   answer: string;
   followups: string[];
+  /** 도리가 되물은 질문에 눌러서 답하는 선택지 (없으면 빈 목록) */
+  choices: string[];
   visual: ChatVisual | null;
 }
 
@@ -171,6 +175,19 @@ export function cleanFollowups(raw: unknown): string[] {
   return out;
 }
 
+/** 선택지 칩: 딱 2개, 짧은 글, 금지어 없음. 조건에 안 맞으면 빈 목록. */
+export function cleanChoices(raw: unknown): string[] {
+  if (!Array.isArray(raw)) return [];
+  const out: string[] = [];
+  for (const v of raw) {
+    if (typeof v !== "string") continue;
+    const t = v.trim().replace(/\s+/g, " ");
+    if (t.length < 2 || t.length > 16 || containsForbidden(t) || out.includes(t)) continue;
+    out.push(t);
+  }
+  return out.length === 2 ? out : [];
+}
+
 const SYMPTOM = /저림|저려|붓기|부어|붓는|통증|아파|아픈|아프|쑤시|결리|어지러|두통|두근|소화|불면|못\s?자|피로|시리/;
 const PRO_NOTE = "몸이 계속 불편하면 전문가와 꼭 이야기해 봐.";
 
@@ -196,8 +213,8 @@ export function polishChatAnswer(answer: string, history: ChatMsg[], name?: stri
 export function parseChatReply(value: unknown): ChatReply | null {
   const answer = parseChatAnswer(value);
   if (answer === null) return null;
-  const o = value as { followups?: unknown; visual?: unknown } | null;
-  return { answer, followups: cleanFollowups(o?.followups), visual: cleanVisual(o?.visual) };
+  const o = value as { followups?: unknown; choices?: unknown; visual?: unknown } | null;
+  return { answer, followups: cleanFollowups(o?.followups), choices: cleanChoices(o?.choices), visual: cleanVisual(o?.visual) };
 }
 
 /** 마음이 많이 힘들다는 말이 보이면 AI 를 부르지 않고 정해 둔 답으로 안내해요. */

@@ -48,3 +48,34 @@ export function tidyMarkup(text: string): string {
     return inner;
   });
 }
+
+/**
+ * 도리의 답을 카톡 말풍선처럼 나눠요. 빈 줄로 문단을 나누고, 110자가 넘는 문단은 문장 끝에서 다시 나눠요.
+ * **굵게** 표시가 두 조각에 걸치면 다음 조각과 합쳐 표시가 깨지지 않게 해요.
+ */
+export function chunkAnswer(text: string, max = 110): string[] {
+  const out: string[] = [];
+  for (const para of text.split(/\n{2,}/).map((s) => s.trim()).filter(Boolean)) {
+    if (para.length <= max) {
+      out.push(para);
+      continue;
+    }
+    const sents = para.match(/[^\n]*?[.!?。…]+(?:\s+|$)|[^\n]+$/g) ?? [para];
+    let cur = "";
+    for (const s of sents) {
+      if (cur && (cur + s).trim().length > max) {
+        out.push(cur.trim());
+        cur = s;
+      } else cur += s;
+    }
+    if (cur.trim()) out.push(cur.trim());
+  }
+  const odd = (s: string) => (s.match(/\*\*/g)?.length ?? 0) % 2 === 1;
+  const merged: string[] = [];
+  for (const c of out) {
+    const last = merged[merged.length - 1];
+    if (last !== undefined && odd(last)) merged[merged.length - 1] = `${last} ${c}`;
+    else merged.push(c);
+  }
+  return merged.length ? merged : [text.trim()];
+}

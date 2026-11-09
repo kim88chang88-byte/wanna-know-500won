@@ -5,7 +5,8 @@ import PurchaseModal from "@/components/pay/PurchaseModal";
 import { roomAnimal, roomColor } from "@/lib/chatRooms";
 import { MSG_MAX, TURN_CAP, type ChatCtx, type ChatKind, type ChatMsg } from "@/lib/chatContext";
 import type { RoomMsg } from "@/lib/chatRooms";
-import { plainAnswer, splitElements, splitMood } from "@/lib/chatMarkup";
+import { chunkAnswer, plainAnswer, splitElements, splitMood } from "@/lib/chatMarkup";
+import type { ChatMemo } from "@/lib/ai/chatMemo";
 import VisualCard from "@/components/chat/VisualCard";
 import type { ChatVisual } from "@/lib/ai/chat";
 import { buildIntro, type IntroBubble } from "@/lib/chatIntro";
@@ -82,6 +83,10 @@ interface Bubble extends ChatMsg {
   follow?: string[];
   /** 답 아래에 크게 보여 주는 그림 카드 */
   visual?: ChatVisual | null;
+  /** 도리가 되물은 질문에 눌러서 답하는 선택지 */
+  choices?: string[];
+  /** 답 앞에 붙는 "도리 메모" 카드 (오늘 일진과 내 사주) */
+  memo?: ChatMemo | null;
 }
 
 /** 도리은행 500원 조약돌 그림 (글 옆에 작게) */
@@ -240,15 +245,15 @@ export default function ChatApp({ initialCtx, initialMsgs, onChange, onBack }: {
     else setJump(true);
   }, [msgs, busy, typing?.shown, ready, toBottom]);
 
-  // 한 글자씩 쓰이는 효과
+  // 말풍선이 하나씩 올라오는 효과 (shown = 지금까지 보이는 말풍선 수)
   useEffect(() => {
     if (!typing) return;
-    const len = msgs[typing.idx]?.text.length ?? 0;
+    const len = chunkAnswer(splitMood(msgs[typing.idx]?.text ?? "").rest).length;
     if (typing.shown >= len) {
       setTyping(null);
       return;
     }
-    const id = setTimeout(() => setTyping((t) => (t ? { ...t, shown: Math.min(len, t.shown + 3) } : t)), 28);
+    const id = setTimeout(() => setTyping((t) => (t ? { ...t, shown: Math.min(len, t.shown + 1) } : t)), 750);
     return () => clearTimeout(id);
   }, [typing, msgs]);
 
@@ -290,7 +295,7 @@ export default function ChatApp({ initialCtx, initialMsgs, onChange, onBack }: {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ctx, messages: next.map(({ role, text: t }) => ({ role, text: t })) }),
       });
-      const data = (await res.json().catch(() => null)) as { answer?: string; followups?: unknown; visual?: ChatVisual | null; error?: string; code?: string; left?: number } | null;
+      const data = (await res.json().catch(() => null)) as { answer?: string; followups?: unknown; visual?: ChatVisual | null; choices?: unknown; memo?: ChatMemo | null; error?: string; code?: string; left?: number } | null;
       if (res.status === 402 && data?.code === "quota") {
         // 질문을 다 쓴 경우: 방금 보낸 말은 입력창으로 돌려놓고 "조약돌로 더하기" 카드를 보여 줘요
         setLeft(0);
@@ -301,9 +306,9 @@ export default function ChatApp({ initialCtx, initialMsgs, onChange, onBack }: {
       if (!res.ok || !data?.answer) throw new Error(data?.error ?? "도리가 잠깐 물놀이하러 갔어요. 다시 보내 볼래요?");
       if (typeof data.left === "number") setLeft(data.left);
       else setLeft((l) => (l === null ? null : Math.max(0, l - 1)));
-      const all: Bubble[] = [...next, { role: "dori", text: data.answer, at: Date.now(), follow: Array.isArray(data.followups) ? data.followups.filter((f): f is string => typeof f === "string").slice(0, 3) : undefined, visual: data.visual ?? null }];
+      const all: Bubble[] = [...next, { role: "dori", text: data.answer, at: Date.now(), follow: Array.isArray(data.followups) ? data.followups.filter((f): f is string => typeof f === "string").slice(0, 3) : undefined, visual: data.visual ?? null, choices: Array.isArray(data.choices) ? data.choices.filter((c): c is string => typeof c === "string").slice(0, 2) : undefined, memo: data.memo ?? null }];
       setMsgs(all);
-      if (!prefersReducedMotion()) setTyping({ idx: all.length - 1, shown: 0 });
+      if (!prefersReducedMotion()) setTyping({ idx: all.length - 1, shown: 1 });
     } catch (e) {
       setMsgs([...next, { role: "dori", text: e instanceof Error ? e.message : "답을 받지 못했어요.", at: Date.now(), error: true }]);
     } finally {
@@ -460,12 +465,13 @@ export default function ChatApp({ initialCtx, initialMsgs, onChange, onBack }: {
         {msgs.map((m, i) => {
           if (m.role === "user") return <UserRow key={i} text={m.text} at={m.at} />;
           const live = typing?.idx === i;
-          const shown = live ? m.text.slice(0, typing!.shown) : m.text;
           return (
             <Fragment key={i}>
             <DoriRow
               face={face}
-              text={shown}
+              text={m.text}
+              count={live ? typing!.shown : undefined}
+              memo={m.memo}
               error={m.error}
               onSkip={live ? () => setTyping(null) : undefined}
               actions={
@@ -492,6 +498,15 @@ export default function ChatApp({ initialCtx, initialMsgs, onChange, onBack }: {
               at={m.error ? undefined : m.at}
             />
             {m.visual && !live && !m.error && <VisualCard v={m.visual} />}
+            {!live && !m.error && !busy && i === msgs.length - 1 && leftNow > 0 && m.choices && m.choices.length === 2 && (
+              <div className="ml-11 flex flex-wrap gap-1.5" aria-label="도리 질문에 답하기" data-testid="reply-choices">
+                {m.choices.map((c) => (
+                  <button key={c} type="button" onClick={() => void send(c)} className="rounded-full border border-brand-200 bg-white px-3.5 py-1.5 text-[12.5px] font-bold text-brand-700 shadow-sm active:scale-95">
+                    {c}
+                  </button>
+                ))}
+              </div>
+            )}
             </Fragment>
           );
         })}
@@ -642,33 +657,72 @@ function AnimalFace({ src, color, size }: { src: string; color: string; size: nu
   );
 }
 
-function DoriRow({ face, text, at, error, actions, onSkip }: { face: ReactNode; text: string; at?: number; error?: boolean; actions?: ReactNode; onSkip?: () => void }) {
+/** 포스트잇 모양 "도리 메모": 오늘 일진과 내 사주가 만나는 모습 (코드로 계산한 값) */
+function MemoCard({ memo }: { memo: ChatMemo }) {
+  const rows: Array<[string, string]> = [
+    ["보는 날", memo.date],
+    ["오늘 일진", memo.ilJin],
+    ["나와의 관계", memo.relation],
+    ["내 글자와 만나면", memo.meet],
+  ];
+  return (
+    <div data-testid="chat-memo" className="relative mb-1.5 w-full rounded-[10px] bg-[#fffdf3] px-3.5 pb-3 pt-3.5 shadow-[0_4px_14px_rgba(120,90,10,0.15)]">
+      <span aria-hidden="true" className="absolute -top-2 left-1/2 h-4 w-[62px] -translate-x-1/2 -rotate-2 rounded-sm bg-[rgba(250,214,100,0.75)]" />
+      <p className="mb-2 text-[11.5px] font-extrabold tracking-[0.02em] text-[#a2761a]">📌 도리 메모 · 오늘의 흐름</p>
+      {rows.map(([k, v]) => (
+        <div key={k} className="flex justify-between gap-2.5 border-b border-dashed border-[#eadfb8] py-[3px] text-[12.5px]">
+          <span className="shrink-0 text-[#8a7a52]">{k}</span>
+          <em className="text-right font-extrabold not-italic text-[#2b2350]">{v}</em>
+        </div>
+      ))}
+      <div className="flex justify-between gap-2.5 py-[3px] text-[12.5px]">
+        <span className="shrink-0 text-[#8a7a52]">오늘의 흐름 지수</span>
+        <em className="text-right font-extrabold not-italic text-[#2b2350]">
+          {memo.score} · {memo.tone}
+        </em>
+      </div>
+      <div className="h-[7px] overflow-hidden rounded-full bg-[#efe6c2]" role="img" aria-label={`흐름 지수 ${memo.score}`}>
+        <i className="block h-full rounded-full bg-gradient-to-r from-[#f6b73c] to-[#ee8a4a]" style={{ width: `${memo.score}%` }} />
+      </div>
+      <p className="mt-2.5 border-t border-[#eadfb8] pt-2 text-[12.5px] font-extrabold leading-snug text-[#4a3a1a]">{memo.line}</p>
+      <p className="mt-1.5 text-[10.5px] text-[#a2956b]">※ 지수는 흐름의 높낮이를 보는 참고용이에요.</p>
+    </div>
+  );
+}
+
+function DoriRow({ face, text, at, error, actions, onSkip, count, memo }: { face: ReactNode; text: string; at?: number; error?: boolean; actions?: ReactNode; onSkip?: () => void; count?: number; memo?: ChatMemo | null }) {
   const mood = error ? { emoji: null, rest: text } : splitMood(text);
-  const paras = mood.rest.split(/\n{2,}/).filter(Boolean);
+  const all = error ? [mood.rest] : chunkAnswer(mood.rest);
+  const chunks = count === undefined ? all : all.slice(0, Math.max(1, count));
+  const done = chunks.length === all.length;
   return (
     <div className="flex items-start gap-2">
       {face}
       <div className="min-w-0 max-w-[82%]">
         <p className="mb-[3px] ml-0.5 text-[11px] font-extrabold text-[#7a6e99]">도리</p>
-        <div className="flex items-end gap-1.5">
-          <div
-            onClick={onSkip}
-            className={`rounded-[4px_18px_18px_18px] bg-white px-3.5 py-[11px] text-[14px] leading-[1.62] shadow-[0_2px_10px_#5a36a814] ${error ? "text-amber-800" : "text-gray-900"} ${onSkip ? "cursor-pointer" : ""}`}
-          >
-            {mood.emoji && (
-              <span data-testid="mood-emoji" aria-hidden="true" className="mb-1 block text-[24px] leading-none">
-                {mood.emoji}
-              </span>
-            )}
-            {paras.map((p, i) => (
-              <p key={i} className={`whitespace-pre-wrap ${i > 0 ? "mt-[9px]" : ""}`}>
-                {rich(p)}
-              </p>
-            ))}
-          </div>
-          {at !== undefined && <span className="shrink-0 whitespace-nowrap text-[10px] text-[#a99bd0]">{timeOf(at)}</span>}
+        {memo && <MemoCard memo={memo} />}
+        <div className="flex flex-col items-start gap-[5px]">
+          {chunks.map((c, i) => {
+            const last = i === chunks.length - 1;
+            return (
+              <div key={i} className="flex items-end gap-1.5 motion-safe:animate-[betaPop_.3s_ease_both]">
+                <div
+                  onClick={onSkip}
+                  className={`${i === 0 ? "rounded-[4px_18px_18px_18px]" : "rounded-[18px]"} bg-white px-3.5 py-[10px] text-[14px] leading-[1.62] shadow-[0_2px_10px_#5a36a814] ${error ? "text-amber-800" : "text-gray-900"} ${onSkip ? "cursor-pointer" : ""}`}
+                >
+                  {i === 0 && mood.emoji && (
+                    <span data-testid="mood-emoji" aria-hidden="true" className="mb-1 block text-[24px] leading-none">
+                      {mood.emoji}
+                    </span>
+                  )}
+                  <p className="whitespace-pre-wrap">{rich(c)}</p>
+                </div>
+                {last && done && at !== undefined && <span className="shrink-0 whitespace-nowrap text-[10px] text-[#a99bd0]">{timeOf(at)}</span>}
+              </div>
+            );
+          })}
         </div>
-        {actions && <div className="ml-0.5 mt-1.5 flex flex-wrap gap-1.5">{actions}</div>}
+        {done && actions && <div className="ml-0.5 mt-1.5 flex flex-wrap gap-1.5">{actions}</div>}
       </div>
     </div>
   );

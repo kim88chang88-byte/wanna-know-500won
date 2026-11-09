@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { takeAiBudget } from "@/lib/ai/budget";
 import { chatDori, cleanHistory, CRISIS_ANSWER, isCrisis } from "@/lib/ai/chat";
 import { buildCoreFacts, factsNowFor } from "@/lib/ai/coreFacts";
+import { buildChatMemo } from "@/lib/ai/chatMemo";
 import { buildDailyFacts, kstToday } from "@/lib/ai/dailyFacts";
 import { ReadingUnavailableError } from "@/lib/ai/interpret";
 import { hasAiKey } from "@/lib/ai/llm";
@@ -89,7 +90,10 @@ export async function POST(request: Request) {
       },
       history,
     );
-    return NextResponse.json({ answer: reply.answer, followups: reply.followups, visual: reply.visual, left: taken.left });
+    // 오늘의 한마디에서 들어온 첫 질문에는 오늘 일진과 내 사주가 만나는 모습을 "도리 메모"로 붙여요 (코드 계산, AI 비용 없음)
+    const firstAsk = !history.some((m) => m.role === "dori");
+    const memo = ctx.kind === "daily" && firstAsk ? buildChatMemo(buildDailyFacts(chart, kstToday(now)), kstToday(now)) : null;
+    return NextResponse.json({ answer: reply.answer, followups: reply.followups, choices: reply.choices, visual: reply.visual, memo, left: taken.left });
   } catch (err) {
     // 답을 못 만들었으면 쓴 질문을 돌려줘요.
     if (taken && taken.left >= 0) await refundQuestion(db, target, taken.via);
