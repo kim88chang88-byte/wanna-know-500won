@@ -804,12 +804,12 @@ export default function IntakeModal({ target, wallet = null, onClose, onComplete
                   <div data-testid="premium-result">
                     {compat && premiumReport.compat ? (
                       <CompatStory report={premiumReport} intro={null} partnerName={resultPartner?.name ?? "상대"} name={nickname} shareInCard
-                        lastWord={<><ResultHero report={premiumReport} aiQuote={premiumReport.compat?.ai?.last ?? null} luxe={false} hideLucky /><ResultShareCard report={premiumReport} aiQuote={premiumReport.compat?.ai?.last ?? null} shareNames={{ me: nickname, partner: resultPartner?.name ?? null }} /></>}
+                        lastWord={<><ResultHero report={premiumReport} aiQuote={premiumReport.compat?.ai?.last ?? null} luxe={false} hideLucky /><ResultShareCard report={premiumReport} aiQuote={premiumReport.compat?.ai?.last ?? null} shareNames={{ me: nickname, partner: resultPartner?.name ?? null }} reading={reading} /></>}
                         closing={premiumReport.compat ? <CompatAsk compat={premiumReport.compat} /> : undefined}
                       />
                     ) : (
                       <StoryReport report={premiumReport} reading={reading} intro={null} name={subject ? (subject.name ?? "") : nickname}
-                        lastWord={<><ResultHero report={premiumReport} aiQuote={reading?.kkotgeoji ?? null} luxe={false} hideLucky /><ResultShareCard report={premiumReport} aiQuote={reading?.kkotgeoji ?? null} /></>}
+                        lastWord={<><ResultHero report={premiumReport} aiQuote={reading?.kkotgeoji ?? null} luxe={false} hideLucky /><ResultShareCard report={premiumReport} aiQuote={reading?.kkotgeoji ?? null} reading={reading} /></>}
                         closing={askInput ? <AskChips input={askInput} luxe={false} topic={isStudy ? "study" : target.fortune} hideTitle /> : undefined}
                         chat={askInput ? <ChatEntry ctx={{ kind: "reading", summary: summarizeReport(premiumReport), birth: askInput, name: viewName?.trim() || null, ...(isStudy ? { topic: "study" as const } : {}) }} /> : undefined}
                       />
@@ -823,7 +823,7 @@ export default function IntakeModal({ target, wallet = null, onClose, onComplete
                   {reading && !luxe && <ReadingCard reading={reading} luxe={luxe} />}
 
                   <div data-testid="premium-result" className="mt-6">
-                    <ManseReport report={premiumReport} hideHeadline flush={luxe} finale={bookMode ? <><ResultHero report={premiumReport} aiQuote={reading?.kkotgeoji ?? null} luxe /><ResultShareCard report={premiumReport} aiQuote={reading?.kkotgeoji ?? null} /></> : undefined} />
+                    <ManseReport report={premiumReport} hideHeadline flush={luxe} finale={bookMode ? <><ResultHero report={premiumReport} aiQuote={reading?.kkotgeoji ?? null} luxe /><ResultShareCard report={premiumReport} aiQuote={reading?.kkotgeoji ?? null} reading={reading} /></> : undefined} />
                   </div>
 
                   {/* 3) 더 물어보기 */}

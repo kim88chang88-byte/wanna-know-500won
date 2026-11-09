@@ -8,6 +8,8 @@ import { buildPhotoCardData, CARD_H, CARD_SCALE, CARD_W, photoAltText, photoFile
 import { IMAGES } from "./images";
 import { getBrowserStorage } from "@/lib/drawCounter";
 import { readMyCode, withRef } from "@/lib/referral";
+import ShareFullButton from "./ShareFullButton";
+import type { ShareReading } from "@/lib/shareText";
 
 /** 공유 주소: 로그인한 회원이면 내 추천 코드가 붙어, 친구가 로그인할 때 자동으로 적용돼요. */
 function shareOrigin(): string {
@@ -42,7 +44,7 @@ function loadArt(topic: TopicKey): Promise<HTMLImageElement | null> {
 }
 
 /** 결과를 인스타 스토리 크기(1080×1920) 카드 한 장으로 만들어 저장·공유해요. 서버로 보내지 않고 이 기기에서만 그려요. */
-export default function ResultShareCard({ report, aiQuote, shareNames }: { report: PremiumReportView; aiQuote?: string | null; /** 궁합 결과일 때 요약 글에 쓸 두 사람의 이름 */ shareNames?: { me?: string | null; partner?: string | null } }) {
+export default function ResultShareCard({ report, aiQuote, shareNames, reading }: { report: PremiumReportView; aiQuote?: string | null; /** 풀이 전체 공유에 쓸 일반 풀이 글 */ reading?: ShareReading | null; /** 궁합 결과일 때 요약 글에 쓸 두 사람의 이름 */ shareNames?: { me?: string | null; partner?: string | null } }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [state, setState] = useState<"idle" | "busy" | "done" | "cancel" | "error">("idle");
   const [ready, setReady] = useState(false);
@@ -163,6 +165,7 @@ export default function ResultShareCard({ report, aiQuote, shareNames }: { repor
       >
         {state === "busy" ? "카드 만드는 중…" : "✨ 결과 카드 저장·공유하기"}
       </button>
+      <ShareFullButton className="mt-2" report={report} reading={reading ?? null} topic={report.topic?.label ?? "사주"} name={shareNames?.me ?? null} partnerName={shareNames?.partner ?? null} />
       {/* 공유 창에서 앱에 따라 글(링크)이 빠질 수 있어서, 링크를 눈에 보이게 두고 따로 복사할 수 있게 해요 */}
       <div data-testid="share-link-row" className="mx-auto mt-2.5 flex max-w-[19rem] items-center gap-1.5 rounded-full border border-brand-100 bg-white px-3 py-1.5 text-left">
         <span aria-hidden="true">🔗</span>

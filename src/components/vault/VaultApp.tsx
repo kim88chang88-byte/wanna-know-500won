@@ -10,6 +10,7 @@ import { ResultHero } from "@/components/landing/PhotoCard";
 import { ReadingCard } from "@/components/landing/ReadingCard";
 import CompatStory from "@/components/landing/CompatStory";
 import StoryReport from "@/components/landing/StoryReport";
+import ShareFullButton from "@/components/landing/ShareFullButton";
 import { isStoryReport } from "@/lib/storyHelpers";
 import type { VaultSnapshot } from "@/lib/vault";
 import { summarizeVault } from "@/lib/vaultStats";
@@ -110,6 +111,12 @@ export default function VaultApp() {
         <p className="mt-2 text-xs text-gray-500">
           {stripDate(detail.title)} · {day(detail.created_at)}에 저장
         </p>
+        <ShareFullButton
+          className="mt-2"
+          report={s.report}
+          topic={stripDate(detail.title)}
+          reading={{ keyword: s.card?.keyword, total: s.card ? { summary: s.card.summary } : undefined, kkotgeoji: s.kkotgeoji, reason: s.reason, story: s.story, folds: s.folds, heads: s.heads }}
+        />
         <div className={luxe ? "mt-3 rounded-3xl border border-[#e6c887]/40 bg-gradient-to-b from-[#1d1a28] via-[#171520] to-[#12101a] p-5 sm:p-6 text-[#f5efe0] shadow-[0_20px_60px_rgba(20,16,34,0.35)]" : "mt-3"}>
         {!(!luxe && isStoryReport(s.report)) && !(luxe && s.report.level === "full" && s.report.book.length > 0) && <ResultHero report={s.report} aiQuote={s.kkotgeoji} luxe={luxe} />}
         {s.note && <p className={`mt-4 p-3 rounded-2xl border text-xs leading-relaxed ${luxe ? "bg-white/[0.04] border-[#e6c887]/25 text-[#e8dfca]/80" : "bg-brand-50 border-brand-100 text-gray-700"}`}>{s.note}</p>}
