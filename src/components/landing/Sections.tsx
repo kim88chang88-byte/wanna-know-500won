@@ -187,12 +187,12 @@ export function ShowcaseSection() {
             <SafeImage src="/images/dori-icon.webp" alt="" className="mt-0.5 h-10 w-10 shrink-0 rounded-full border border-brand-100 bg-white object-contain" fallback="🦦" fallbackClass="text-3xl" />
             <div className="relative min-w-0 flex-1 rounded-2xl rounded-tl-md border border-brand-100 bg-brand-50/70 px-3.5 py-3 text-[13.5px] font-bold leading-relaxed text-slate-700" style={{ wordBreak: "keep-all" }}>
               <p>
-                안녕, 나는 도리야. 내 옆에 있는 내 친구들처럼 나도 너랑 친구가 되고 싶어.
+                안녕, 나는 도리야. 너랑 친구 하고 싶어서 왔어.
                 <br />
-                그래서 너랑 대화하며 가까워지는 이 놀이터의 이름은 <b className="text-brand-600">도유</b>야.
+                이 놀이터 이름은 <b className="text-brand-600">도유</b>, 도리 with <b className="text-brand-600">you</b>야.
               </p>
               <p className="mt-1.5 font-black text-brand-600">
-                도리 with you, 도유. <span aria-hidden="true">🫧</span>
+                우리, 같이 놀자. <span aria-hidden="true">🫧</span>
               </p>
             </div>
           </div>
