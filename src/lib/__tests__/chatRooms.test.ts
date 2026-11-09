@@ -18,6 +18,7 @@ describe("상담실 대화방", () => {
 
   it("방 이름은 풀이에 맞게 붙어요", () => {
     expect(roomLook(reading()).title).toBe("성공운");
+    expect(roomLook({ ...reading(), summary: "주제: 성공·재물운\n결론" })).toMatchObject({ title: "성공운", chip: "성공운" });
     expect(roomLook({ ...reading(), topic: "study" }).title).toBe("2027 신년운");
     expect(roomLook({ kind: "compat", summary: "", partnerName: "지은" }).title).toBe("지은님과의 궁합");
   });

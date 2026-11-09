@@ -64,7 +64,8 @@ export function roomLook(ctx: ChatCtx): { title: string; chip: string; icon: str
   if (ctx.kind === "daily") return { title: "오늘의 한마디", chip: "오늘", icon: "🌙" };
   if (ctx.kind === "compat") return { title: `${ctx.partnerName?.trim() || "상대"}님과의 궁합`, chip: "궁합", icon: "💞" };
   if (isStudyRoom(ctx)) return { title: "2027 신년운", chip: "신년운", icon: "📜" };
-  const t = topicLine(ctx.summary);
+  // 풀이 결과에 "성공·재물운"으로 저장된 이름도 카드 이름대로 "성공운"으로 보여요 (예전에 만든 방도 같이)
+  const t = topicLine(ctx.summary).replace(/^성공\s*[·⋅・]\s*재물운$/, "성공운");
   return { title: t || "사주 풀이", chip: t || "풀이", icon: "📜" };
 }
 
