@@ -1,9 +1,9 @@
 "use client";
 
-/** 조약돌(프리미엄 종합 사주는 진주, 궁합은 조약돌 2개)이 톡 떨어지는 짧은 연출. 끝나면 부모가 입력창을 열어요. (움직임 줄이기 설정이면 아예 만들지 않아요) */
+/** 조약돌(프리미엄 종합 사주는 진주 3개+조약돌 1개, 궁합은 조약돌 2개)이 톡 떨어지는 짧은 연출. 끝나면 부모가 입력창을 열어요. (움직임 줄이기 설정이면 아예 만들지 않아요) */
 export default function CoinRitual({ big = false, two = false }: { big?: boolean; two?: boolean }) {
   return (
-    <div className={`coin-ritual${two ? " coin-ritual-two" : ""}`} aria-hidden="true" data-testid="coin-ritual">
+    <div className={`coin-ritual${two ? " coin-ritual-two" : ""}${big && !two ? " coin-ritual-premium" : ""}`} aria-hidden="true" data-testid="coin-ritual">
       <div className="coin-ritual-slot" />
       {two ? (
         <>
@@ -12,9 +12,19 @@ export default function CoinRitual({ big = false, two = false }: { big?: boolean
           <img src="/images/coin-500.webp" alt="" width={96} height={96} className="coin-ritual-coin coin-ritual-b" />
           {/* eslint-enable @next/next/no-img-element */}
         </>
+      ) : big ? (
+        <>
+          {/* 프리미엄은 진주 3개와 조약돌 1개가 시간 간격 없이 한꺼번에 떨어져요 */}
+          {/* eslint-disable @next/next/no-img-element */}
+          {[0, 1, 2].map((i) => (
+            <img key={i} src="/images/pearl-3000.webp" alt="" width={76} height={76} className={`coin-ritual-coin coin-ritual-p${i}`} />
+          ))}
+          <img src="/images/coin-500.webp" alt="" width={62} height={62} className="coin-ritual-coin coin-ritual-p3" />
+          {/* eslint-enable @next/next/no-img-element */}
+        </>
       ) : (
         // eslint-disable-next-line @next/next/no-img-element
-        <img src={big ? "/images/pearl-3000.webp" : "/images/coin-500.webp"} alt="" width={96} height={96} className="coin-ritual-coin" />
+        <img src="/images/coin-500.webp" alt="" width={96} height={96} className="coin-ritual-coin" />
       )}
       <p className="coin-ritual-text">도리가 운세를 꺼내는 중… ❄️</p>
     </div>
