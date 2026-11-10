@@ -1,5 +1,6 @@
 "use client";
 
+import { scentSrc } from "@/lib/scents";
 import type { ChatVisual } from "@/lib/ai/chat";
 import { PALETTE, SPOTS } from "@/lib/visualPalette";
 
@@ -118,6 +119,28 @@ function Lucky({ v }: { v: ChatVisual }) {
   );
 }
 
+function Scent({ v }: { v: ChatVisual }) {
+  const tilt = ["-rotate-2", "rotate-1", "-rotate-1"];
+  return (
+    <Paper title={v.title || "어울리는 향"}>
+      <div className="flex justify-center gap-2.5 pt-1">
+        {v.items.map((it, i) => {
+          const src = scentSrc(it.label);
+          if (!src) return null;
+          return (
+            <div key={i} className={`min-w-0 max-w-[118px] flex-1 rounded-[3px] bg-white px-[5px] pb-2 pt-[5px] shadow-[0_4px_9px_rgba(0,0,0,0.25)] ${tilt[i % 3]}`}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={src} alt={it.label} loading="lazy" className="block aspect-square w-full rounded-sm object-cover" />
+              <b className="mt-1.5 block text-center text-[13px] text-[#2a2540]">{it.label}</b>
+              {it.sub && <span className="mt-0.5 block text-center font-hand text-[15px] leading-tight text-[#8a5a2b]">{it.sub}</span>}
+            </div>
+          );
+        })}
+      </div>
+    </Paper>
+  );
+}
+
 function Palette({ v }: { v: ChatVisual }) {
   const tilt = ["-rotate-3", "rotate-[1.5deg]", "-rotate-1"];
   return (
@@ -192,6 +215,7 @@ export default function VisualCard({ v }: { v: ChatVisual }) {
       {v.kind === "lucky" && <Lucky v={v} />}
       {v.kind === "palette" && <Palette v={v} />}
       {v.kind === "spots" && <Spots v={v} />}
+      {v.kind === "scent" && <Scent v={v} />}
     </Wrap>
   );
 }
