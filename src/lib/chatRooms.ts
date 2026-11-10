@@ -1,3 +1,4 @@
+import type { OutfitPick } from "@/lib/outfits";
 import type { ChatCtx, ChatMsg } from "@/lib/chatContext";
 import type { ChatVisual } from "@/lib/ai/chat";
 
@@ -23,6 +24,8 @@ export interface RoomMsg extends ChatMsg {
   follow?: string[];
   /** 도리 답 아래에 크게 보여 주는 그림 카드 */
   visual?: ChatVisual | null;
+  /** 옷 질문에 붙는 착장 카드 */
+  outfit?: OutfitPick | null;
 }
 
 export interface ChatRoom {

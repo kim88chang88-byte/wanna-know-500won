@@ -1,5 +1,6 @@
 "use client";
 
+import { outfitByKey, outfitSrc, type OutfitPick } from "@/lib/outfits";
 import { Fragment, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import PurchaseModal from "@/components/pay/PurchaseModal";
 import { roomAnimal, roomColor } from "@/lib/chatRooms";
@@ -85,6 +86,8 @@ interface Bubble extends ChatMsg {
   follow?: string[];
   /** 답 아래에 크게 보여 주는 그림 카드 */
   visual?: ChatVisual | null;
+  /** 옷 질문에 붙는 착장 카드 */
+  outfit?: OutfitPick | null;
   /** 도리가 되물은 질문에 눌러서 답하는 선택지 */
   choices?: string[];
   /** 답 앞에 붙는 "도리 메모" 카드 (오늘 일진과 내 사주) */
@@ -132,6 +135,35 @@ function richBold(text: string, k: number): ReactNode[] {
 }
 
 const prefersReducedMotion = () => typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches === true;
+
+/** 코디 카드: 질문한 색에 맞는 착장 이미지 (여러 개면 작은 그림을 눌러 바꿔 봐요) */
+function OutfitCard({ pick }: { pick: OutfitPick }) {
+  const list = pick.keys.map((k) => outfitByKey(k)).filter((o): o is NonNullable<ReturnType<typeof outfitByKey>> => o !== null);
+  const [sel, setSel] = useState(0);
+  if (list.length === 0) return null;
+  const cur = list[Math.min(sel, list.length - 1)];
+  return (
+    <figure data-testid="outfit-card" className="mx-auto mt-2 w-full max-w-[300px] rounded-2xl bg-[#fffdf6] p-3 text-center shadow-[0_2px_12px_rgba(0,0,0,0.08)]">
+      <p className="mb-2 text-[15px] font-bold text-gray-900">이렇게 입어 보면 어때요?</p>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src={outfitSrc(cur.key)} alt={cur.name} className="mx-auto w-full max-w-[250px] rounded-[14px]" loading="lazy" />
+      <figcaption className="mt-2 text-[13px] font-bold leading-snug text-gray-900">{cur.name}</figcaption>
+      <p className="mt-0.5 text-[11.5px] text-[#8a7fa8]">{cur.cols} · {cur.mood}</p>
+      {!pick.exact && pick.near && <p className="mt-1 text-[11.5px] text-[#7a4fd6]">&lsquo;{pick.fam}&rsquo; 코디는 없어서 비슷한 &lsquo;{pick.near}&rsquo; 계열로 보여 드려요</p>}
+      {list.length > 1 && (
+        <div className="mt-2 flex justify-center gap-2" role="group" aria-label="다른 코디 보기">
+          {list.map((o, i) => (
+            <button key={o.key} type="button" aria-pressed={i === sel} aria-label={o.name} onClick={() => setSel(i)} className={`overflow-hidden rounded-[10px] border-2 ${i === sel ? "border-[#7a4fd6]" : "border-transparent opacity-75"}`}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={outfitSrc(o.key)} alt="" className="h-[84px] w-[62px] object-cover" loading="lazy" />
+            </button>
+          ))}
+        </div>
+      )}
+      <p className="mt-2 text-[11px] text-[#8a7fa8]">예시 이미지는 도리가 입혀 본 모습이에요. 실제 옷 색은 조금 다를 수 있어요.</p>
+    </figure>
+  );
+}
 
 export default function ChatApp({ initialCtx, initialMsgs, onChange, onBack }: { initialCtx: ChatCtx; initialMsgs: RoomMsg[]; onChange: (msgs: RoomMsg[]) => void; onBack: () => void }) {
   const [ctx] = useState<ChatCtx>(initialCtx);
@@ -298,7 +330,7 @@ export default function ChatApp({ initialCtx, initialMsgs, onChange, onBack }: {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ctx, messages: next.filter((m) => !m.log).map(({ role, text: t }) => ({ role, text: t })) }),
       });
-      const data = (await res.json().catch(() => null)) as { answer?: string; followups?: unknown; visual?: ChatVisual | null; choices?: unknown; memo?: ChatMemo | null; error?: string; code?: string; left?: number } | null;
+      const data = (await res.json().catch(() => null)) as { answer?: string; followups?: unknown; visual?: ChatVisual | null; outfit?: OutfitPick | null; choices?: unknown; memo?: ChatMemo | null; error?: string; code?: string; left?: number } | null;
       if (res.status === 402 && data?.code === "quota") {
         // 질문을 다 쓴 경우: 방금 보낸 말은 입력창으로 돌려놓고 "조약돌로 더하기" 카드를 보여 줘요
         setLeft(0);
@@ -309,7 +341,7 @@ export default function ChatApp({ initialCtx, initialMsgs, onChange, onBack }: {
       if (!res.ok || !data?.answer) throw new Error(data?.error ?? "도리가 잠깐 물놀이하러 갔어요. 다시 보내 볼래요?");
       if (typeof data.left === "number") setLeft(data.left);
       else setLeft((l) => (l === null ? null : Math.max(0, l - 1)));
-      const all: Bubble[] = [...next, { role: "dori", text: data.answer, at: Date.now(), follow: Array.isArray(data.followups) ? data.followups.filter((f): f is string => typeof f === "string").slice(0, 3) : undefined, visual: data.visual ?? null, choices: Array.isArray(data.choices) ? data.choices.filter((c): c is string => typeof c === "string").slice(0, 2) : undefined, memo: data.memo ?? null }];
+      const all: Bubble[] = [...next, { role: "dori", text: data.answer, at: Date.now(), follow: Array.isArray(data.followups) ? data.followups.filter((f): f is string => typeof f === "string").slice(0, 3) : undefined, visual: data.visual ?? null, outfit: data.outfit ?? null, choices: Array.isArray(data.choices) ? data.choices.filter((c): c is string => typeof c === "string").slice(0, 2) : undefined, memo: data.memo ?? null }];
       setMsgs(all);
       if (!prefersReducedMotion()) setTyping({ idx: all.length - 1, shown: 1 });
     } catch (e) {
@@ -508,6 +540,7 @@ export default function ChatApp({ initialCtx, initialMsgs, onChange, onBack }: {
               at={m.error ? undefined : m.at}
             />
             {m.visual && !live && !m.error && <VisualCard v={m.visual} />}
+            {m.outfit && !live && !m.error && <OutfitCard pick={m.outfit} />}
             {!live && !m.error && !busy && i === msgs.length - 1 && leftNow > 0 && m.choices && m.choices.length === 2 && (
               <div className="ml-11 flex flex-wrap gap-1.5" aria-label="도리 질문에 답하기" data-testid="reply-choices">
                 {m.choices.map((c) => (
