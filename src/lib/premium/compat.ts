@@ -27,22 +27,22 @@ const STEM_COMBINE: ReadonlyArray<[string, string]> = [["甲", "己"], ["乙", "
 
 /** 일간 기준으로 상대 글자가 어떤 십성인지에 따른 관계 풀이 (겁주는 말은 쓰지 않아요) */
 export const GOD_MEANING: Record<TenGod, { text: string; good: boolean }> = {
-  비견: { text: "친구처럼 편하고 대등한 사이예요. 서로의 페이스를 존중하면 오래가요.", good: true },
-  겁재: { text: "서로 지지 않으려는 승부욕이 있는 사이예요. 경쟁 대신 응원으로 바꾸면 든든해져요.", good: false },
-  식신: { text: "함께 있으면 여유롭고 즐거운 사이예요. 맛집, 취미, 수다가 잘 어울려요.", good: true },
-  상관: { text: "재치가 통하고 솔직한 대화가 오가는 사이예요. 말은 부드럽게 고르면 더 좋아져요.", good: false },
-  편재: { text: "새로운 경험을 함께 즐기는 활동적인 사이예요. 같이 움직일수록 재미가 커져요.", good: true },
-  정재: { text: "차분하게 아끼고 챙기게 되는 사이예요. 작은 약속을 잘 지키면 믿음이 쌓여요.", good: true },
-  편관: { text: "설렘과 약간의 긴장이 함께 있는 사이예요. 서로의 영역을 존중하면 자극이 힘이 돼요.", good: false },
-  정관: { text: "믿음직하고 예의를 지키는 안정적인 사이예요. 서로를 존중하는 마음이 큰 힘이에요.", good: true },
-  편인: { text: "서로의 생각을 자극하는 개성 있는 사이예요. 각자 시간을 인정하면 편안해져요.", good: false },
-  정인: { text: "기대고 챙김받는 포근한 사이예요. 서로에게 마음의 쉼터가 되어 줘요.", good: true },
+  비견: { text: "친구처럼 편하고 대등한 사이야. 서로의 페이스를 존중하면 오래가.", good: true },
+  겁재: { text: "서로 지지 않으려는 승부욕이 있는 사이야. 경쟁 대신 응원으로 바꾸면 든든해져.", good: false },
+  식신: { text: "함께 있으면 여유롭고 즐거운 사이야. 맛집, 취미, 수다가 잘 어울려.", good: true },
+  상관: { text: "재치가 통하고 솔직한 대화가 오가는 사이야. 말은 부드럽게 고르면 더 좋아져.", good: false },
+  편재: { text: "새로운 경험을 함께 즐기는 활동적인 사이야. 같이 움직일수록 재미가 커져.", good: true },
+  정재: { text: "차분하게 아끼고 챙기게 되는 사이야. 작은 약속을 잘 지키면 믿음이 쌓여.", good: true },
+  편관: { text: "설렘과 약간의 긴장이 함께 있는 사이야. 서로의 영역을 존중하면 자극이 힘이 돼.", good: false },
+  정관: { text: "믿음직하고 예의를 지키는 안정적인 사이야. 서로를 존중하는 마음이 큰 힘이야.", good: true },
+  편인: { text: "서로의 생각을 자극하는 개성 있는 사이야. 각자 시간을 인정하면 편안해져.", good: false },
+  정인: { text: "기대고 챙김받는 포근한 사이야. 서로에게 마음의 쉼터가 되어 줘.", good: true },
 };
 
 export const RELATION_TEXT = {
-  합: "서로 끌어당겨 어울리는 사이예요. 손발이 잘 맞고 편안해요.",
-  충: "서로 부딪혀 움직임이 생기는 사이예요. 변화와 활력이 있지만, 의견이 다를 땐 한 박자 쉬어 가면 좋아요.",
-  해: "사소한 엇박자가 생길 수 있는 사이예요. 오해가 생기면 바로 풀면 가볍게 지나가요.",
+  합: "서로 끌어당겨 어울리는 사이야. 손발이 잘 맞고 편안해.",
+  충: "서로 부딪혀 움직임이 생기는 사이야. 변화와 활력이 있지만, 의견이 다를 땐 한 박자 쉬어 가면 좋아.",
+  해: "사소한 엇박자가 생길 수 있는 사이야. 오해가 생기면 바로 풀면 가볍게 지나가.",
 } as const;
 
 export const stemOf = (pillar: string) => pillar.charAt(0);
@@ -94,23 +94,23 @@ export function isStemClash(a: string, b: string): boolean {
 const clamp = (n: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, n));
 
 function headlineFor(score: number): string {
-  if (score >= 85) return "서로의 결이 자연스럽게 어우러지는 사이예요";
-  if (score >= 75) return "닮은 듯 다르고, 균형이 좋은 사이예요";
-  if (score >= 65) return "서로 맞춰 가며 더 빛나는 사이예요";
-  return "다른 점이 서로에게 새로운 자극이 되는 사이예요";
+  if (score >= 85) return "서로의 결이 자연스럽게 어우러지는 사이야";
+  if (score >= 75) return "닮은 듯 다르고, 균형이 좋은 사이야";
+  if (score >= 65) return "서로 맞춰 가며 더 빛나는 사이야";
+  return "다른 점이 서로에게 새로운 자극이 되는 사이야";
 }
 
 /** 두 사람의 계산 결과를 이어서 요약 문단을 만들어요. (같은 점수여도 관계가 다르면 다른 글이 나와요) */
 function buildSummary(f: { headline: string; god: TenGod; godBack: TenGod; combine: boolean; clash: boolean; dayRel: string | null; filled: boolean; goods: number; tips: number }): string {
   const parts: string[] = [`${f.headline}.`];
-  parts.push(`내가 보는 상대는 ${f.god}의 기운, 상대가 보는 나는 ${f.godBack}의 기운이에요. ${GOD_MEANING[f.god].text}`);
-  if (f.combine) parts.push("두 사람의 중심 글자(일간)가 서로 합을 이뤄서, 처음부터 마음이 가는 끌림이 있어요.");
-  else if (f.clash) parts.push("두 사람의 중심 글자(일간)가 정면으로 마주쳐서, 솔직한 만큼 말투만 부드럽게 맞추면 서로에게 좋은 자극이 돼요.");
-  if (f.dayRel === "합") parts.push("가장 가까운 마음 자리(일지)가 합을 이뤄서, 함께 있을 때 편안함이 커요.");
-  else if (f.dayRel === "충") parts.push("가장 가까운 마음 자리(일지)가 부딪혀서, 의견이 다를 땐 한 박자 쉬어 가면 훨씬 부드러워져요.");
-  else if (f.dayRel === "해") parts.push("가장 가까운 마음 자리(일지)에 작은 엇박자가 있어서, 오해는 바로 풀어 주면 가볍게 지나가요.");
-  if (f.filled) parts.push("한 사람에게 모자란 기운을 다른 사람이 채워 주는 구석도 있어요.");
-  parts.push(f.goods >= f.tips ? "잘 맞는 부분이 더 많으니, 아래 풀이에서 맞춰 가면 좋은 점만 살짝 챙겨 보세요." : "다른 점이 많은 만큼 서로에게 배울 것도 많아요. 아래 풀이를 보며 다름을 보완으로 바꿔 보세요.");
+  parts.push(`내가 보는 상대는 ${f.god}의 기운, 상대가 보는 나는 ${f.godBack}의 기운이야. ${GOD_MEANING[f.god].text}`);
+  if (f.combine) parts.push("두 사람의 중심 글자(일간)가 서로 합을 이뤄서, 처음부터 마음이 가는 끌림이 있어.");
+  else if (f.clash) parts.push("두 사람의 중심 글자(일간)가 정면으로 마주쳐서, 솔직한 만큼 말투만 부드럽게 맞추면 서로에게 좋은 자극이 돼.");
+  if (f.dayRel === "합") parts.push("가장 가까운 마음 자리(일지)가 합을 이뤄서, 함께 있을 때 편안함이 커.");
+  else if (f.dayRel === "충") parts.push("가장 가까운 마음 자리(일지)가 부딪혀서, 의견이 다를 땐 한 박자 쉬어 가면 훨씬 부드러워져.");
+  else if (f.dayRel === "해") parts.push("가장 가까운 마음 자리(일지)에 작은 엇박자가 있어서, 오해는 바로 풀어 주면 가볍게 지나가.");
+  if (f.filled) parts.push("한 사람에게 모자란 기운을 다른 사람이 채워 주는 구석도 있어.");
+  parts.push(f.goods >= f.tips ? "잘 맞는 부분이 더 많으니, 아래 풀이에서 맞춰 가면 좋은 점만 살짝 챙겨 봐." : "다른 점이 많은 만큼 서로에게 배울 것도 많아. 아래 풀이를 보며 다름을 보완으로 바꿔 봐.");
   return parts.join("\n\n");
 }
 
@@ -137,17 +137,17 @@ export function buildCompat(me: SsajuForCompat, other: SsajuForCompat, meHourKno
   const clash = isStemClash(meStem, otStem);
   if (combine) {
     score += 10;
-    points.push({ title: "일간의 합 · 끌림", body: `나의 ${meStem}(${hangulStem(meStem)})과 상대의 ${otStem}(${hangulStem(otStem)})이 서로 합을 이뤄요. 처음부터 마음이 가는 인연의 결이 있어요.`, tone: "good" });
+    points.push({ title: "일간의 합 · 끌림", body: `나의 ${meStem}(${hangulStem(meStem)})과 상대의 ${otStem}(${hangulStem(otStem)})이 서로 합을 이뤄. 처음부터 마음이 가는 인연의 결이 있어.`, tone: "good" });
   } else if (clash) {
     score -= 4;
-    points.push({ title: "일간의 충 · 자극", body: "서로의 중심 기운이 정면으로 만나 자극이 되는 사이예요. 솔직함이 장점이니, 말투만 부드럽게 맞추면 서로를 단단하게 키워 줘요.", tone: "tip" });
+    points.push({ title: "일간의 충 · 자극", body: "서로의 중심 기운이 정면으로 만나 자극이 되는 사이야. 솔직함이 장점이니, 말투만 부드럽게 맞추면 서로를 단단하게 키워 줘.", tone: "tip" });
   }
 
   // 3) 지지 관계: 일지(가까운 마음), 월지(생활 방식), 연지(띠, 집안·주변)
   const pairs: { key: "day" | "month" | "year"; label: string; good: string; weight: { 합: number; 충: number; 해: number } }[] = [
-    { key: "day", label: "일지 · 마음의 거리", good: "가장 가까운 자리라서 연인 사이의 편안함에 크게 닿아요.", weight: { 합: 8, 충: -6, 해: -3 } },
-    { key: "month", label: "월지 · 생활 방식", good: "일과 생활 리듬에서 서로에게 힘이 돼요.", weight: { 합: 3, 충: -2, 해: -1 } },
-    { key: "year", label: "연지 · 띠 궁합", good: "주변과 가족, 큰 흐름에서 서로를 편하게 받아 줘요.", weight: { 합: 3, 충: -2, 해: -1 } },
+    { key: "day", label: "일지 · 마음의 거리", good: "가장 가까운 자리라서 연인 사이의 편안함에 크게 닿아.", weight: { 합: 8, 충: -6, 해: -3 } },
+    { key: "month", label: "월지 · 생활 방식", good: "일과 생활 리듬에서 서로에게 힘이 돼.", weight: { 합: 3, 충: -2, 해: -1 } },
+    { key: "year", label: "연지 · 띠 궁합", good: "주변과 가족, 큰 흐름에서 서로를 편하게 받아 줘.", weight: { 합: 3, 충: -2, 해: -1 } },
   ];
   let dayRel: string | null = null;
   for (const p of pairs) {
@@ -171,10 +171,10 @@ export function buildCompat(me: SsajuForCompat, other: SsajuForCompat, meHourKno
     const b = otEl.find((x) => x.name === e.name)?.count ?? 0;
     if (a === 0 && b >= 2 && fillBonus < 9) {
       fillBonus += 3;
-      points.push({ title: `오행 보완 · ${e.name}`, body: `나에게 부족한 ${e.name} 기운을 상대가 넉넉히 가지고 있어요. 곁에 있으면 빈자리가 채워지는 느낌이 들 수 있어요.`, tone: "good" });
+      points.push({ title: `오행 보완 · ${e.name}`, body: `나에게 부족한 ${e.name} 기운을 상대가 넉넉히 가지고 있어. 곁에 있으면 빈자리가 채워지는 느낌이 들 수 있어.`, tone: "good" });
     } else if (b === 0 && a >= 2 && fillBonus < 9) {
       fillBonus += 3;
-      points.push({ title: `오행 보완 · ${e.name}`, body: `상대에게 부족한 ${e.name} 기운을 내가 넉넉히 가지고 있어요. 내가 곁에서 든든한 힘이 되어 줄 수 있어요.`, tone: "good" });
+      points.push({ title: `오행 보완 · ${e.name}`, body: `상대에게 부족한 ${e.name} 기운을 내가 넉넉히 가지고 있어. 내가 곁에서 든든한 힘이 되어 줄 수 있어.`, tone: "good" });
     }
   }
   score += fillBonus;
@@ -211,10 +211,10 @@ export function buildCompat(me: SsajuForCompat, other: SsajuForCompat, meHourKno
     summary: buildSummary({ headline: headlineFor(final), god, godBack, combine, clash, dayRel, filled, goods, tips }),
     closing:
       tips === 0
-        ? "큰 어긋남 없이 편안하게 어울리는 조합이에요. 지금의 편안함을 소중히 가꿔 보세요."
+        ? "큰 어긋남 없이 편안하게 어울리는 조합이야. 지금의 편안함을 소중히 가꿔 봐."
         : goods >= tips
-          ? "잘 맞는 부분이 더 많아요. 맞춰 가면 좋은 부분만 서로 알고 있으면 더 오래 편안할 거예요."
-          : "다른 점이 많은 만큼 서로에게 배울 것도 많아요. 다름을 틀림이 아니라 보완으로 읽어 보세요.",
+          ? "잘 맞는 부분이 더 많아. 맞춰 가면 좋은 부분만 서로 알고 있으면 더 오래 편안할 거야."
+          : "다른 점이 많은 만큼 서로에게 배울 것도 많아. 다름을 틀림이 아니라 보완으로 읽어 봐.",
   };
 }
 

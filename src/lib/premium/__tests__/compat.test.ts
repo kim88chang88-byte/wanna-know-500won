@@ -138,7 +138,7 @@ describe("궁합 덧붙임(항목 점수·자리별 만남·팁·흐름)", () =>
     const c = buildCompat(me, other, true, true, { year: 2026 });
     const qs = compatQuestions(c);
     expect(qs.map((q) => q.id)).toEqual(["marriage", "fight", "talk", "date", "year", "who"]);
-    expect(qs[0].answer).toContain("정할 수는 없어요");
+    expect(qs[0].answer).toContain("정할 수는 없어");
   });
 });
 

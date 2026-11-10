@@ -118,7 +118,7 @@ export function Pillars({ report, pillars, owner = "내", hint }: { report?: Pre
           );
         })}
       </div>
-      <p className="mt-2 text-[11px] leading-relaxed text-gray-500">{hint ?? "위 칸은 겉으로 드러나는 기운(하늘 글자), 아래 칸은 바탕이 되는 기운(뿌리 글자)이에요. 색은 다섯 가지 기운을 뜻해요."}</p>
+      <p className="mt-2 text-[11px] leading-relaxed text-gray-500">{hint ?? "위 칸은 겉으로 드러나는 기운(하늘 글자), 아래 칸은 바탕이 되는 기운(뿌리 글자)이야. 색은 다섯 가지 기운을 뜻해."}</p>
       <div data-testid="element-legend" className="mt-2 flex flex-wrap items-center gap-1.5">
         {EL_ORDER.map((e) => (
           <span key={e} className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-bold ${ELEMENT_BOX[e]} ${counts[e] === 0 ? "opacity-40" : ""}`}>
@@ -137,11 +137,11 @@ export function Pillars({ report, pillars, owner = "내", hint }: { report?: Pre
                   <ElIconName e={e} />
                 </span>
               ))}
-              의 기운이 {tops.length === 2 ? "똑같이 " : ""}가장 많아요 (각 {counts[top]}/{total})
+              의 기운이 {tops.length === 2 ? "똑같이 " : ""}가장 많아 (각 {counts[top]}/{total})
             </>
           ) : (
             <>
-              {owner} 사주엔 <ElIconName e={top} />의 기운이 가장 많아요 ({counts[top]}/{total})
+              {owner} 사주엔 <ElIconName e={top} />의 기운이 가장 많아 ({counts[top]}/{total})
             </>
           )}
         </p>
@@ -177,7 +177,7 @@ export function Paras({ text, className = "", mark }: { text: string; className?
 function PendingNote() {
   return (
     <p data-testid="fold-pending" className="mt-3 rounded-xl border border-amber-200 bg-amber-50 px-3.5 py-2.5 text-[14px] font-bold leading-relaxed text-amber-800">
-      풀이를 준비 중이에요. 잠시 뒤에 다시 시도해 주세요.
+      풀이를 준비 중이야. 잠시 뒤에 다시 시도해 줘.
     </p>
   );
 }
@@ -268,7 +268,7 @@ export default function StoryReport({
     <>
       <p className="mt-3.5 text-[11px] font-bold text-gray-500">나의 사주 네 기둥</p>
       <Pillars report={report} />
-      {report.hourUnknown && <p className="mt-2 text-[11px] leading-relaxed text-amber-700">태어난 시간을 몰라 정오(12시) 기준으로 계산했어요. 시주는 비워 뒀어요.</p>}
+      {report.hourUnknown && <p className="mt-2 text-[11px] leading-relaxed text-amber-700">태어난 시간을 몰라 정오(12시) 기준으로 계산했어. 시주는 비워 뒀어.</p>}
     </>
   );
   return (
@@ -368,7 +368,7 @@ export default function StoryReport({
             행운 컬러 <b className="text-gray-900">{t.lucky.color}</b> · 행운 방향 <b className="text-gray-900">{t.lucky.direction}</b>
           </p>
           {!f.lucky && <PendingNote />}
-          {!f.lucky && <p className="mt-1 text-[13px] text-gray-500">비어 있는 {t.lucky.element} 기운을 가볍게 채워 주는 전통 오행 대응이에요. 소품이나 옷 색으로 기분 전환하듯 써 보세요.</p>}
+          {!f.lucky && <p className="mt-1 text-[13px] text-gray-500">비어 있는 {t.lucky.element} 기운을 가볍게 채워 주는 전통 오행 대응이야. 소품이나 옷 색으로 기분 전환하듯 써 봐.</p>}
         </Fold>
         <Fold testId="story-fold-chart" label="내 사주 원국" title="십성·오행 분포·신강신약을 표로 자세히 볼래?">
           <ManseReport report={report} hideHeadline parts="base" />
@@ -383,11 +383,11 @@ export default function StoryReport({
       {/* 현실 견주기: 도리의 쪽지 바로 위 */}
       {t.reality && <RealityLight rc={t.reality} />}
 
-      {/* 도유 상담실이 열려 있으면: 현실 견주기 바로 아래에서 상담실로 안내하고, 쪽지(질문 칩)는 숨겨요 */}
+      {/* 도유 상담실이 열려 있으면: 현실 견주기 바로 아래에서 상담실로 안내하고, 쪽지(질문 칩)는 숨겨 */}
       {chatOn && (
         <section data-testid="story-chat-cta" aria-label="도유 상담실" className="rounded-2xl border border-brand-300 bg-gradient-to-br from-brand-50 to-white p-4 text-center shadow-sm">
           <p className="text-[14.5px] font-bold text-gray-900">🦦 읽다가 더 궁금한 게 생겼어?</p>
-          <p className="mt-1 text-xs text-gray-500">도리가 방금 본 풀이를 기억하고 있어요. 편하게 이야기해 봐요 ❄️</p>
+          <p className="mt-1 text-xs text-gray-500">도리가 방금 본 풀이를 기억하고 있어. 편하게 이야기해 봐 ❄️</p>
           <div className="mt-3">{chat}</div>
         </section>
       )}

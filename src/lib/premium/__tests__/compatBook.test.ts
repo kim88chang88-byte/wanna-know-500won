@@ -71,7 +71,7 @@ describe("궁합 10페이지 리포트", () => {
 
   it("태어난 시간을 모르면 시주를 비교하지 않았다고 알려 준다", () => {
     const { pages } = book(false);
-    expect(pages[4].sections.some((s) => s.body.includes("시주는 비교하지 않았어요"))).toBe(true);
+    expect(pages[4].sections.some((s) => s.body.includes("시주는 비교하지 않았어"))).toBe(true);
     expect(pages[0].sections.some((s) => s.body.includes("시간을 모르는 사람"))).toBe(true);
   });
 

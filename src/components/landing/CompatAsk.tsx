@@ -17,10 +17,10 @@ interface Q {
 export function compatQuestions(c: CompatView): Q[] {
   const best = c.scores && c.scores.length ? [...c.scores].sort((a, b) => b.score - a.score)[0] : null;
   const marriage = [
-    "사주만으로 결혼 여부를 정할 수는 없어요. 다만 두 사람의 흐름을 보면",
-    best ? `‘${best.label}’ 쪽이 가장 든든한 강점이에요.` : "서로 맞는 구석이 분명히 있어요.",
+    "사주만으로 결혼 여부를 정할 수는 없어. 다만 두 사람의 흐름을 보면",
+    best ? `‘${best.label}’ 쪽이 가장 든든한 강점이야.` : "서로 맞는 구석이 분명히 있어.",
     c.closing,
-    "결혼처럼 큰 결정은 가치관, 돈, 생활 습관을 편안할 때 미리 이야기해 보는 게 가장 중요해요.",
+    "결혼처럼 큰 결정은 가치관, 돈, 생활 습관을 편안할 때 미리 이야기해 보는 게 가장 중요해.",
   ].join(" ");
   return [
     { id: "marriage", label: "이 사람과 결혼해도 될까?", answer: marriage },

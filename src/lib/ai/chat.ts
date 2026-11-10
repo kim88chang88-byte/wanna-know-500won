@@ -4,6 +4,7 @@ import { analyzeChart } from "@/lib/saju/analysis";
 import type { SajuChart } from "@/lib/saju/types";
 import type { ChatKind, ChatMsg } from "@/lib/chatContext";
 import { HISTORY_MAX, MSG_MAX, SUMMARY_MAX } from "@/lib/chatContext";
+import { callName } from "./nameRepair";
 import { callJson } from "./callJson";
 import type { CoreFacts } from "./coreFacts";
 import type { ChatMemo } from "./chatMemo";
@@ -23,7 +24,7 @@ export const CHAT_MAX = 700;
 export const CHAT_SYSTEM_PROMPT = `너는 "도리", 맑은 옹달샘의 수달 도사야. 지금은 사용자가 방금 본 사주 풀이를 이어서 물어보는 채팅 상담이야.
 
 말투
-- 친구에게 카톡하듯 다정한 반말. 이름은 대화의 첫 답에서만 "○○님"으로 한 번 부르고, 이어지는 답에서는 이름으로 시작하지 마(부르더라도 가끔). 반말 사이에 "~님"이 섞여 어색하지 않게.
+- 친구에게 카톡하듯 다정한 반말. 이름은 대화의 첫 답에서만 성을 뗀 이름으로 "은혁아"처럼 한 번 부르고(받침 없으면 "하나야", "님" 금지, 실제 이름 사용), 이어지는 답에서는 이름으로 시작하지 마(부르더라도 가끔).
 - 대화의 첫 질문에는 220~450자, 빈 줄(\\n\\n)로 2~3문단. 첫 문단은 질문에 바로 답하는 결론, 둘째는 사주 근거를 쉬운 말로, 셋째는 이번 주에 해 볼 작은 행동이나 도리가 되묻는 질문 하나.
 - 이어지는 질문(대화 기록에 도리의 답이 이미 있을 때)에는 150~300자, 1~2문단으로 더 짧게. 되묻는 질문은 매번 붙이지 말고, 필요할 때만 가끔. 가벼운 질문(예/아니오, 짧은 확인)에는 1~2문장으로만 답해. 매번 "결론 → 아까 말한 근거 → ~해보는 건 어때?" 순서로 끝내지 말고 답의 모양을 바꿔.
 - 사용자의 말에 불안·걱정·서운함 같은 감정이 담겨 있으면 결론보다 먼저 공감 한 줄(예: "불안했구나")로 시작해. 감정이 없는 질문엔 바로 답해.
@@ -203,8 +204,10 @@ export function polishChatAnswer(answer: string, history: ChatMsg[], name?: stri
   const lastUser = [...history].reverse().find((m) => m.role === "user")?.text ?? "";
   const prevDori = history.filter((m) => m.role === "dori").slice(-2);
   if (n && prevDori.length > 0) {
-    const lead = new RegExp(`^${n.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\s?님[,，]?\\s*`);
-    if (lead.test(a) && prevDori.some((m) => m.text.includes(`${n}님`))) {
+    const esc = (x: string) => x.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const forms = [`${n}님`, callName(n)];
+    const lead = new RegExp(`^(?:${forms.map(esc).join("|")})[,，]?\\s*`);
+    if (lead.test(a) && prevDori.some((m) => forms.some((f) => m.text.includes(f)))) {
       const rest = a.replace(lead, "").trim();
       if (rest.length >= CHAT_MIN) a = rest;
     }

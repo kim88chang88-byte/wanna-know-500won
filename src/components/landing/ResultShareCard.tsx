@@ -166,11 +166,11 @@ export default function ResultShareCard({ report, aiQuote, shareNames, reading }
         {state === "busy" ? "카드 만드는 중…" : "✨ 결과 카드 저장·공유하기"}
       </button>
       <ShareFullButton className="mt-2" report={report} reading={reading ?? null} topic={report.topic?.label ?? "사주"} name={shareNames?.me ?? null} partnerName={shareNames?.partner ?? null} />
-      {/* 공유 창에서 앱에 따라 글(링크)이 빠질 수 있어서, 링크를 눈에 보이게 두고 따로 복사할 수 있게 해요 */}
+      {/* 공유 창에서 앱에 따라 글(링크)이 빠질 수 있어서, 링크를 눈에 보이게 두고 따로 복사할 수 있게 해 */}
       <div data-testid="share-link-row" className="mx-auto mt-2.5 flex max-w-[19rem] items-center gap-1.5 rounded-full border border-brand-100 bg-white px-3 py-1.5 text-left">
         <span aria-hidden="true">🔗</span>
         <span className="min-w-0 flex-1 truncate text-[11px] text-gray-600" title={link}>{link.replace(/^https?:\/\//, "")}</span>
-        {/* 공유하기를 누르면 글이 자동으로 복사돼요. 복사가 막혔을 때만 따로 복사하는 버튼을 보여 줘요. */}
+        {/* 공유하기를 누르면 글이 자동으로 복사돼. 복사가 막혔을 때만 따로 복사하는 버튼을 보여 줘. */}
         {(state === "done" || state === "cancel") && !copied && (
           <button
             type="button"
@@ -181,22 +181,22 @@ export default function ResultShareCard({ report, aiQuote, shareNames, reading }
             }}
             className="shrink-0 rounded-full bg-brand-50 px-2.5 py-1 text-[11px] font-bold text-brand-700 active:scale-95"
           >
-            {linkCopied === "ok" ? "✓ 복사했어요" : linkCopied === "fail" ? "복사 실패" : report.compat ? "요약 복사" : "링크 복사"}
+            {linkCopied === "ok" ? "✓ 복사했어" : linkCopied === "fail" ? "복사 실패" : report.compat ? "요약 복사" : "링크 복사"}
           </button>
         )}
       </div>
       <p role="status" className="mt-1.5 text-[11px] leading-relaxed text-gray-500">
         {state === "done"
-          ? copied ? (report.compat ? "카드를 만들었어요. 궁합 요약 글도 복사했으니 보낼 때 붙여넣기만 하세요 ❄️" : "카드를 만들었어요. 링크도 복사했으니 올릴 때 붙여넣기만 하세요 ❄️") : `카드를 만들었어요. 보내는 앱에서 링크가 안 보이면 위 '${report.compat ? "요약 복사" : "링크 복사"}'를 눌러 붙여넣어 주세요 ❄️`
+          ? copied ? (report.compat ? "카드를 만들었어. 궁합 요약 글도 복사했으니 보낼 때 붙여넣기만 해 ❄️" : "카드를 만들었어. 링크도 복사했으니 올릴 때 붙여넣기만 해 ❄️") : `카드를 만들었어. 보내는 앱에서 링크가 안 보이면 위 '${report.compat ? "요약 복사" : "링크 복사"}'를 눌러 붙여넣어 줘 ❄️`
           : state === "cancel"
-            ? copied ? (report.compat ? "카드는 저장하지 않았어요. 궁합 요약 글만 복사했어요 — 친구에게 붙여넣어 보내 주세요 ❄️" : "카드는 저장하지 않았어요. 링크만 복사했어요 — 친구에게 붙여넣어 보내 주세요 ❄️") : "카드는 저장하지 않았어요."
+            ? copied ? (report.compat ? "카드는 저장하지 않았어. 궁합 요약 글만 복사했어 — 친구에게 붙여넣어 보내 줘 ❄️" : "카드는 저장하지 않았어. 링크만 복사했어 — 친구에게 붙여넣어 보내 줘 ❄️") : "카드는 저장하지 않았어."
             : state === "error"
-              ? "지금은 카드를 만들 수 없어요. 잠시 뒤에 다시 눌러 주세요."
+              ? "지금은 카드를 만들 수 없어. 잠시 뒤에 다시 눌러 줘."
               : (
                 <>
-                  인스타 스토리 크기로 저장돼요 · 이 기기에서만 만들어요
+                  인스타 스토리 크기로 저장돼 · 이 기기에서만 만들어
                   <br />
-                  {report.compat ? "버튼을 누르면 카드와 함께 궁합 요약 글도 자동으로 복사돼요. 보내는 앱에서 글이 비어 있으면 붙여넣기만 하세요" : "링크는 저장할 때 함께 복사되고, 위에서 따로 복사할 수도 있어요"}
+                  {report.compat ? "버튼을 누르면 카드와 함께 궁합 요약 글도 자동으로 복사돼. 보내는 앱에서 글이 비어 있으면 붙여넣기만 해" : "링크는 저장할 때 함께 복사되고, 위에서 따로 복사할 수도 있어"}
                 </>
               )}
       </p>

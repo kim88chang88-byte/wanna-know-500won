@@ -48,7 +48,7 @@ describe("buildTogether / buildShareSummary", () => {
   it("질문은 항상 3개고, 가장 낮은 항목에 맞는 질문·행동이 들어가요", () => {
     const t = buildTogether(c);
     expect(t.questions).toHaveLength(3);
-    expect(t.questions[0]).toContain("힘이 돼요");
+    expect(t.questions[0]).toContain("힘이 돼");
     expect(t.action).toContain("조언 대신");
   });
 
@@ -71,9 +71,9 @@ describe("buildTogether / buildShareSummary", () => {
 describe("plainPointTitle", () => {
   it("용어 제목을 일상 말로 바꾸고, 모르는 제목은 그대로 둬요", () => {
     expect(plainPointTitle("내가 보는 상대 · 편재의 기운")).toBe("내가 보는 상대 · 새로운 경험을 함께하는 느낌");
-    expect(plainPointTitle("연지 · 띠 궁합 · 충")).toBe("띠 자리(주변·가족): 서로 부딪혀요");
-    expect(plainPointTitle("일지 · 마음의 거리 · 합")).toBe("마음이 가장 가까운 자리: 서로 끌어당겨요");
-    expect(plainPointTitle("오행 보완 · 금")).toBe("빈 쇠 기운을 채워 줘요");
+    expect(plainPointTitle("연지 · 띠 궁합 · 충")).toBe("띠 자리(주변·가족): 서로 부딪혀");
+    expect(plainPointTitle("일지 · 마음의 거리 · 합")).toBe("마음이 가장 가까운 자리: 서로 끌어당겨");
+    expect(plainPointTitle("오행 보완 · 금")).toBe("빈 쇠 기운을 채워 줘");
     expect(plainPointTitle("일간의 합 · 끌림")).toBe("처음부터 마음이 끌리는 사이");
     expect(plainPointTitle("처음 보는 제목")).toBe("처음 보는 제목");
   });

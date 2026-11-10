@@ -98,6 +98,14 @@ describe("polishChatAnswer", () => {
     ];
     expect(polishChatAnswer(`은혁님, ${body}`, h, "은혁")).toBe(body);
   });
+  it("반말 호칭(은혁아)도 앞선 답에서 불렀으면 뗀다", () => {
+    const h = [
+      { role: "user" as const, text: "요즘 어때?" },
+      { role: "dori" as const, text: "은혁아, 요즘 흐름이 좋아." },
+      { role: "user" as const, text: "또 물어볼게" },
+    ];
+    expect(polishChatAnswer(`은혁아, ${body}`, h, "은혁")).toBe(body);
+  });
   it("첫 답에서는 이름을 그대로 둔다", () => {
     const h = [{ role: "user" as const, text: "처음 질문" }];
     expect(polishChatAnswer(`은혁님, ${body}`, h, "은혁")).toBe(`은혁님, ${body}`);

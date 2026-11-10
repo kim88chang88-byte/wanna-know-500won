@@ -27,7 +27,7 @@ function PersonBox({ p }: { p: CompatPerson }) {
           </div>
         ))}
       </div>
-      {p.hourUnknown && <div className="mt-2 text-[10px] text-slate-400">태어난 시간을 몰라 시주는 뺐어요</div>}
+      {p.hourUnknown && <div className="mt-2 text-[10px] text-slate-400">태어난 시간을 몰라 시주는 뺐어</div>}
     </div>
   );
 }

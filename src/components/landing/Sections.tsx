@@ -60,7 +60,7 @@ export function Header({ onOpenLogin, user = null, bubble = null, dot = false }:
             <BrandLink overlayBeta />
           </div>
 
-          {/* 오른쪽 위: 로그인 전에는 "로그인" 버튼, 로그인 후에는 닉네임(마이페이지) + "?" 안내 메뉴 + 햄버거(자판기) 메뉴. 둘 다 같은 창(로그인/내 정보)을 열어요 */}
+          {/* 오른쪽 위: 로그인 전에는 "로그인" 버튼, 로그인 후에는 닉네임(마이페이지) + "?" 안내 메뉴 + 햄버거(자판기) 메뉴. 둘 다 같은 창(로그인/내 정보)을 열어 */}
           <div className="relative shrink-0 flex items-center gap-1.5 sm:gap-2">
             <button
               onClick={() => {
@@ -159,7 +159,7 @@ export function HeroSection({ visitors = null, tickets = 0, wallet = null, onBuy
       ) : (
         wallet && wallet.pearls + wallet.pebbles > 0 && (
           <p data-testid="coin-note" className="mt-1 text-right text-[11px] leading-tight text-slate-500">
-            {tickets > 0 ? "그다음 조약돌이 자동으로 쓰여요" : "무료 뽑기를 다 쓰면 조약돌이 자동으로 쓰여요"}
+            {tickets > 0 ? "그다음 조약돌이 자동으로 쓰여" : "무료 뽑기를 다 쓰면 조약돌이 자동으로 쓰여"}
           </p>
         )
       )}
@@ -180,7 +180,7 @@ export function ShowcaseSection() {
           <div className="relative w-full max-w-3xl lg:max-w-4xl mx-auto aspect-[16/9] rounded-2xl overflow-hidden bg-sky-50 flex items-center justify-center border border-sky-100 shadow-sm">
             <SafeImage
               src={HERO_IMAGE}
-              alt="수달 도사 도리와 오행 친구들이 말해요: 궁금행? 궁금하면 500원!!"
+              alt="수달 도사 도리와 오행 친구들이 말해: 궁금행? 궁금하면 500원!!"
               className="w-full h-full object-cover"
               fallback="🦦"
               fallbackClass="text-8xl"
@@ -224,7 +224,7 @@ export function MachinesSection({ onSpin, lastKey = null }: SpinProps & { lastKe
         <span className="shrink-0 rounded-full bg-gray-100 px-2.5 py-0.5 text-[11px] text-gray-500">이후 500원 · 궁합 1,000원</span>
       </div>
 
-      {/* 옆으로 밀어서 넘기는 카드예요. (큰 화면에서는 한눈에 펼쳐져요) */}
+      {/* 옆으로 밀어서 넘기는 카드야. (큰 화면에서는 한눈에 펼쳐져) */}
       <div
         data-testid="machine-scroller"
         className="-mx-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-4 pt-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:-mx-6 sm:px-6 lg:mx-0 lg:grid lg:grid-cols-3 lg:gap-4 lg:overflow-visible lg:px-0"
@@ -234,7 +234,7 @@ export function MachinesSection({ onSpin, lastKey = null }: SpinProps & { lastKe
             {m.sticker && <Sticker text={m.sticker} testId="machine-sticker" />}
             {lastKey === m.key && (
               <span data-testid="last-drawn" className="absolute -top-2 left-3 z-10 rounded-full bg-white border border-sky-300 px-2 py-0.5 text-[10px] font-bold text-sky-700 shadow-sm">
-                지난번에 뽑았어요
+                지난번에 뽑았어
               </span>
             )}
             <div
@@ -362,7 +362,7 @@ export function TrustSection() {
         <span className="text-brand-500">조약돌 하나</span>로 제대로 된 사주.
       </h3>
       <p className="text-xs sm:text-sm text-slate-600 leading-relaxed mt-1.5">
-        예약도 대기도 없이, 내 사주를 꼼꼼하게 풀어낸 풀이를 500원 조약돌 하나로 받아보세요. 마음에 드는 결과는 보관함에 남겨두고 언제든 다시 볼 수 있어요.
+        예약도 대기도 없이, 내 사주를 꼼꼼하게 풀어낸 풀이를 500원 조약돌 하나로 받아봐. 마음에 드는 결과는 보관함에 남겨두고 언제든 다시 볼 수 있어.
       </p>
       <div className="grid grid-cols-3 mt-3 pt-3 border-t border-sky-100">
         {TRUST_POINTS.map((t, i) => (
@@ -372,7 +372,7 @@ export function TrustSection() {
           </div>
         ))}
       </div>
-      {/* 실제 이용 후기가 쌓이면 이 자리에 보여주세요. (지어낸 후기나 만족도·적중률 수치는 넣지 않아요) */}
+      {/* 실제 이용 후기가 쌓이면 이 자리에 보여줘. (지어낸 후기나 만족도·적중률 수치는 넣지 않아) */}
     </section>
   );
 }

@@ -90,7 +90,7 @@ export const MACHINES: readonly MachineCard[] = [
     badge: "둘의 궁합",
     name: "둘의 궁합",
     fortune: "둘의 궁합",
-    desc: "둘의 사주를 겹쳐 보고 잘 맞는 점과 조심할 점을 알려줘요",
+    desc: "둘의 사주를 겹쳐 보고 잘 맞는 점과 조심할 점을 알려줘",
     tag: "매일 첫 1회 무료",
     best: false,
     sticker: "HOT",
@@ -133,7 +133,7 @@ export const MACHINES: readonly MachineCard[] = [
     badge: "연애·결혼운",
     name: "연애·결혼운",
     fortune: "연애·결혼운",
-    desc: "설레는 썸부터 결혼까지, 인연이 오는 시기와 흐름을 짚어줘요",
+    desc: "설레는 썸부터 결혼까지, 인연이 오는 시기와 흐름을 짚어줘",
     tag: "매일 첫 1회 무료",
     best: true,
     sticker: "HOT",
@@ -197,7 +197,7 @@ export const PREMIUM_CARDS: readonly PremiumCard[] = [
     tag: "👑 종합 사주",
     tagClass: "bg-amber-100 text-amber-900 border border-amber-200",
     title: "프리미엄 종합 사주",
-    desc: "고민의 결론을 먼저, 타고난 성향부터 올해 흐름까지 20쪽으로 풀어 드려요.",
+    desc: "고민의 결론을 먼저, 타고난 성향부터 올해 흐름까지 20쪽으로 풀어 줘.",
     card: "border-2 border-amber-300 shadow-md",
     imageBox: "bg-white border-amber-300 ring-2 ring-amber-100 ring-offset-2 ring-offset-white",
     button: "bg-gradient-to-r from-amber-400 to-orange-400 hover:brightness-105",
@@ -233,8 +233,8 @@ export const SAMPLE_CAPSULES: readonly SampleCapsule[] = [
     border: "border-brand-200",
     parts: [
       { text: "“달빛이 수면 위로 맑게 부서지듯, 이번 주말엔 좋아하는 사람이 " },
-      { text: "'같이 산책할래요?'", strong: true },
-      { text: " 하고 먼저 연락할지도 몰라요. 하늘빛 옷이 행운 아이템!”" },
+      { text: "'같이 산책할래?'", strong: true },
+      { text: " 하고 먼저 연락할지도 몰라. 하늘빛 옷이 행운 아이템!”" },
     ],
   },
   {
@@ -243,7 +243,7 @@ export const SAMPLE_CAPSULES: readonly SampleCapsule[] = [
     tagClass: "bg-amber-100 text-amber-800",
     border: "border-amber-200",
     parts: [
-      { text: "“새로운 물길이 슬쩍 열려 있어요. 미뤄 둔 지원서, 오늘은 한 줄만 써봐요. " },
+      { text: "“새로운 물길이 슬쩍 열려 있어. 미뤄 둔 지원서, 오늘은 한 줄만 써봐. " },
       { text: "500원짜리 작은 용기!", strong: true },
       { text: "”" },
     ],
@@ -255,7 +255,7 @@ export const SAMPLE_CAPSULES: readonly SampleCapsule[] = [
     border: "border-emerald-200",
     parts: [
       {
-        text: "“어깨에 얹힌 짐이 무거웠죠? 오늘 밤은 따뜻한 물 한 잔 마시고 옹달샘처럼 맑게 푹 자도 괜찮아요. 내일은 몸도 마음도 한결 가벼울 거예요.”",
+        text: "“어깨에 얹힌 짐이 무거웠지? 오늘 밤은 따뜻한 물 한 잔 마시고 옹달샘처럼 맑게 푹 자도 괜찮아. 내일은 몸도 마음도 한결 가벼울 거야.”",
       },
     ],
   },

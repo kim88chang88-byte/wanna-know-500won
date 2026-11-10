@@ -47,7 +47,7 @@ const REL_STYLE: Record<string, string> = {
 function LinkStrip({ links, partnerName }: { links: CompatLink[]; partnerName: string }) {
   return (
     <div data-testid="compat-links" className="mt-3.5">
-      <p className="text-[11px] font-bold text-gray-500">같은 자리끼리 이렇게 만나요</p>
+      <p className="text-[11px] font-bold text-gray-500">같은 자리끼리 이렇게 만나</p>
       <ul className="mt-1.5 space-y-1.5">
         {links.map((l) => (
           <li key={l.place} className="flex items-center gap-2 rounded-xl bg-brand-50/60 px-3 py-2 text-[12.5px]">
@@ -104,7 +104,7 @@ function ElementBars({ me, partner, partnerName }: { me: CompatPerson; partner: 
           );
         })}
       </ul>
-      <p className="mt-1.5 text-[10.5px] text-gray-400">숫자는 나 · {partnerName} 순서예요.</p>
+      <p className="mt-1.5 text-[10.5px] text-gray-400">숫자는 나 · {partnerName} 순서야.</p>
       <p data-testid="compat-elnote" className="mt-2 text-[12.5px] leading-relaxed text-gray-600 break-keep">{elementNote(me, partner, partnerName)}</p>
     </div>
   );
@@ -147,15 +147,15 @@ function TogetherCard({ c, name, partnerName, hideSend = false }: { c: CompatVie
     }
     try {
       await navigator.clipboard.writeText(text);
-      setMsg("요약을 복사했어요. 상대에게 붙여넣어 보내 주세요 ❄️");
+      setMsg("요약을 복사했어. 상대에게 붙여넣어 보내 줘 ❄️");
     } catch {
-      setMsg("복사하지 못했어요. 글을 길게 눌러 직접 복사해 주세요.");
+      setMsg("복사하지 못했어. 글을 길게 눌러 직접 복사해 줘.");
     }
   }
   return (
     <section data-testid="compat-together" aria-label="둘이 같이 해 보기" className="rounded-2xl border border-brand-100 bg-white p-4">
       <p className="text-[11px] font-bold text-brand-500">💞 둘이 같이 해 보기</p>
-      <p className="mt-1 text-[15px] font-bold leading-snug text-gray-900">마주 앉아 서로에게 물어보세요</p>
+      <p className="mt-1 text-[15px] font-bold leading-snug text-gray-900">마주 앉아 서로에게 물어봐</p>
       <ol className="mt-2.5 space-y-2">
         {together.questions.map((q, i) => (
           <li key={i} className="flex gap-2 rounded-xl bg-brand-50/60 px-3 py-2 text-[14.5px] leading-relaxed text-gray-800 break-keep">
@@ -178,7 +178,7 @@ function TogetherCard({ c, name, partnerName, hideSend = false }: { c: CompatVie
   );
 }
 
-export default function CompatStory({ report, intro, closing, lastWord, partnerName = "상대", name = null, shareInCard = false }: { report: PremiumReportView; intro: string | null; closing?: ReactNode; lastWord?: ReactNode; partnerName?: string; name?: string | null; /** 결과 카드 공유가 같이 있는 화면: 상대에게 보내기 버튼은 그쪽으로 합쳐졌어요 */ shareInCard?: boolean }) {
+export default function CompatStory({ report, intro, closing, lastWord, partnerName = "상대", name = null, shareInCard = false }: { report: PremiumReportView; intro: string | null; closing?: ReactNode; lastWord?: ReactNode; partnerName?: string; name?: string | null; /** 결과 카드 공유가 같이 있는 화면: 상대에게 보내기 버튼은 그쪽으로 합쳐졌어 */ shareInCard?: boolean }) {
   const c = report.compat;
   if (!c) return null;
   const mark = MARK.marriage;
@@ -222,7 +222,7 @@ export default function CompatStory({ report, intro, closing, lastWord, partnerN
         </div>
         <Paras mark={mark} text={c.ai?.summary ?? c.summary ?? `${c.headline}\n\n${c.closing}`} className="mt-3 text-[16px] leading-[1.85] text-gray-800 break-keep" />
         {c.scores && <ScoreBars scores={c.scores} />}
-        <p className="mt-2 text-[11px] text-gray-500">점수는 재미로 보는 참고 지수예요.</p>
+        <p className="mt-2 text-[11px] text-gray-500">점수는 재미로 보는 참고 지수야.</p>
       </section>
 
       <section aria-label="두 사람 정보" className="rounded-2xl border border-brand-100 bg-white p-4">
@@ -235,7 +235,7 @@ export default function CompatStory({ report, intro, closing, lastWord, partnerN
         <ElementBars me={c.me} partner={c.partner} partnerName={partnerName} />
         {c.partnerTrait?.body && (
           <div data-testid="compat-trait" className="mt-3.5 rounded-xl bg-pink-50/70 px-3.5 py-2.5">
-            <p className="text-[11px] font-bold text-gray-500">{josa(partnerName, "은/는")} 이런 사람이에요</p>
+            <p className="text-[11px] font-bold text-gray-500">{josa(partnerName, "은/는")} 이런 사람이야</p>
             <p className="mt-0.5 text-[13.5px] leading-relaxed text-gray-800 break-keep">{c.partnerTrait.body}</p>
           </div>
         )}
@@ -246,11 +246,11 @@ export default function CompatStory({ report, intro, closing, lastWord, partnerN
           </summary>
           <div className="px-3.5 pb-3.5">
             <p className="mt-3.5 text-[11px] font-bold text-gray-500">나의 사주 네 기둥</p>
-            <Pillars report={report} pillars={c.me.pillars} owner="내" hint="위 칸은 겉으로 드러나는 기운(하늘 글자), 아래 칸은 바탕이 되는 기운(뿌리 글자)이에요. 두 사람의 같은 자리(특히 일주)를 견주어 보세요." />
+            <Pillars report={report} pillars={c.me.pillars} owner="내" hint="위 칸은 겉으로 드러나는 기운(하늘 글자), 아래 칸은 바탕이 되는 기운(뿌리 글자)이야. 두 사람의 같은 자리(특히 일주)를 견주어 봐." />
             {c.partner.pillars && (
               <>
                 <p className="mt-5 text-[11px] font-bold text-gray-500">{partnerName}의 사주 네 기둥</p>
-                <Pillars pillars={c.partner.pillars} owner={`${partnerName}의`} hint="같은 자리끼리 글자가 어울리면 합, 부딪히면 충이에요. 어떤 자리가 어떻게 만나는지는 아래 풀이에서 풀어 드려요." />
+                <Pillars pillars={c.partner.pillars} owner={`${partnerName}의`} hint="같은 자리끼리 글자가 어울리면 합, 부딪히면 충이야. 어떤 자리가 어떻게 만나는지는 아래 풀이에서 풀어 줘." />
               </>
             )}
           </div>
