@@ -469,3 +469,43 @@ body {
 @media (prefers-reduced-motion: reduce) {
   [data-testid="refill-cheer"] { animation: none !important; }
 }
+
+/* 결과서 본문 종이: 한지 질감 + 모서리가 살짝 말려 올라간 입체감 */
+.hanji-wrap {
+  position: relative;
+  filter: drop-shadow(0 8px 10px rgba(0, 0, 0, 0.42)) drop-shadow(0 1px 1px rgba(0, 0, 0, 0.4));
+}
+.hanji-page {
+  position: relative;
+  background: #f6efe0;
+  border: 3px double #2a3260;
+  border-radius: 6px;
+  /* 오른쪽·왼쪽 아래 모서리를 비스듬히 잘라서 접힌 자리를 만들어요 */
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 26px), calc(100% - 26px) 100%, 26px 100%, 0 calc(100% - 26px));
+}
+.hanji-page > * { position: relative; z-index: 1; }
+.hanji-tex { position: absolute !important; inset: 0; z-index: 0 !important; pointer-events: none; }
+.hanji-tex::before,
+.hanji-tex::after { content: ""; position: absolute; inset: 0; }
+.hanji-tex::before {
+  opacity: 0.32;
+  mix-blend-mode: multiply;
+  background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='260' height='260'><filter id='f'><feTurbulence type='fractalNoise' baseFrequency='0.035 0.22' numOctaves='4' seed='4'/><feColorMatrix values='0 0 0 0 0.45  0 0 0 0 0.36  0 0 0 0 0.2  0 0 0 1.6 -0.62'/></filter><rect width='260' height='260' filter='url(%23f)'/></svg>");
+}
+.hanji-tex::after {
+  opacity: 0.5;
+  background:
+    radial-gradient(ellipse at 50% 40%, transparent 62%, rgba(201, 180, 138, 0.35) 100%),
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' seed='9'/><feColorMatrix values='0 0 0 0 0.5  0 0 0 0 0.4  0 0 0 0 0.25  0 0 0 0.5 -0.1'/></filter><rect width='180' height='180' filter='url(%23n)'/></svg>");
+}
+/* 말려 올라간 모서리(접힌 뒷면): 잘린 선 안쪽에 더 밝은 삼각형 */
+.hanji-curl {
+  position: absolute !important;
+  bottom: 0;
+  width: 26px;
+  height: 26px;
+  z-index: 2 !important;
+  pointer-events: none;
+}
+.hanji-curl.br { right: 0; clip-path: polygon(100% 0, 0 100%, 0 0); background: linear-gradient(135deg, #fbf6e8 0%, #e7dabb 100%); }
+.hanji-curl.bl { left: 0; clip-path: polygon(0 0, 100% 100%, 100% 0); background: linear-gradient(225deg, #fbf6e8 0%, #e7dabb 100%); }

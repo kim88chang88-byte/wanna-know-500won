@@ -1114,7 +1114,11 @@ export default function PremiumBook({ report, flush = false, finale, previewBlur
         {groups.map((g, gi) => (
           <div key={`${gi}-${g[0]?.heading}`} className="flex flex-col gap-[18px]">
             {gi > 0 && <BubbleRow text={`이어서 ‘${g[0].heading.replace(/ · .*$/, "")}’ 이야기를 들려드릴게요.`} img={pic} right={gi % 2 === 1} />}
-            <div className="rounded-md border-[3px] border-double border-[#2a3260] bg-[#f3ecdc] px-5 pb-[18px] pt-[22px] text-[#26233a] shadow-[0_2px_0_#00000040]">
+            <div className="hanji-wrap">
+            <div className="hanji-page px-5 pb-[18px] pt-[22px] text-[#26233a]">
+              <span aria-hidden="true" className="hanji-tex" />
+              <i aria-hidden="true" className="hanji-curl bl" />
+              <i aria-hidden="true" className="hanji-curl br" />
               {gi === 0 && (
                 <>
                   <p className="text-center text-[11px] tracking-[0.3em] text-[#5b5670]">사 주 풀 이</p>
@@ -1143,6 +1147,7 @@ export default function PremiumBook({ report, flush = false, finale, previewBlur
                   </section>
                 ))}
               </div>
+            </div>
             </div>
           </div>
         ))}
