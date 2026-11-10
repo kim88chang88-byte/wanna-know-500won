@@ -54,6 +54,7 @@ import type { Pillar, SajuChart } from "@/lib/saju/types";
 import { CloseButton, ModalShell } from "./Modals";
 import { ResultHero } from "./PhotoCard";
 import ResultShareCard from "./ResultShareCard";
+import SajuGuide from "./SajuGuide";
 import ResultBurst from "./ResultBurst";
 import ReviewBox from "./ReviewBox";
 import ScrollHint from "./ScrollHint";
@@ -797,6 +798,8 @@ export default function IntakeModal({ target, wallet = null, onClose, onComplete
               )}
 
               {(aiNotice || aiGated) && <AiNotice dark={luxe} gated={aiGated} />}
+
+              <SajuGuide dark={luxe} />
 
               {storyMode ? (
                 <>

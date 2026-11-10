@@ -11,6 +11,7 @@ import { ReadingCard } from "@/components/landing/ReadingCard";
 import CompatStory from "@/components/landing/CompatStory";
 import StoryReport from "@/components/landing/StoryReport";
 import ShareFullButton from "@/components/landing/ShareFullButton";
+import SajuGuide from "@/components/landing/SajuGuide";
 import { isStoryReport } from "@/lib/storyHelpers";
 import type { VaultSnapshot } from "@/lib/vault";
 import { summarizeVault } from "@/lib/vaultStats";
@@ -119,6 +120,7 @@ export default function VaultApp() {
         />
         <div className={luxe ? "mt-3 rounded-3xl border border-[#e6c887]/40 bg-gradient-to-b from-[#1d1a28] via-[#171520] to-[#12101a] p-5 sm:p-6 text-[#f5efe0] shadow-[0_20px_60px_rgba(20,16,34,0.35)]" : "mt-3"}>
         {!(!luxe && isStoryReport(s.report)) && !(luxe && s.report.level === "full" && s.report.book.length > 0) && <ResultHero report={s.report} aiQuote={s.kkotgeoji} luxe={luxe} />}
+        <div className="mt-4"><SajuGuide dark={luxe} /></div>
         {s.note && <p className={`mt-4 p-3 rounded-2xl border text-xs leading-relaxed ${luxe ? "bg-white/[0.04] border-[#e6c887]/25 text-[#e8dfca]/80" : "bg-brand-50 border-brand-100 text-gray-700"}`}>{s.note}</p>}
         {!luxe && isStoryReport(s.report) && s.report.compat ? (
           <CompatStory report={s.report} intro={null} lastWord={<ResultHero report={s.report} aiQuote={s.report.compat?.ai?.last ?? null} luxe={false} hideLucky />} />
