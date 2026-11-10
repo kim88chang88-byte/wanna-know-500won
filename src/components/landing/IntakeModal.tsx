@@ -1155,7 +1155,7 @@ export default function IntakeModal({ target, wallet = null, onClose, onComplete
               {loggedIn && (
                 <label className="flex items-start gap-2 text-xs text-gray-700 leading-relaxed">
                   <input type="checkbox" name="saveVault" className="mt-0.5" checked={saveVault} onChange={(e) => setSaveVault(e.target.checked)} />
-                  <span>(선택) 본 풀이를 내 보관함에 저장해요. 언제든 다시 볼 수 있고, 다시 볼 때는 추가 비용이 없어요. 보관함에서 지울 수 있고 탈퇴하면 함께 삭제돼요.</span>
+                  <span>(선택) 풀이를 내 보관함에 저장해요. 다시 볼 때 추가 비용이 없고, 직접 지우거나 탈퇴하면 함께 삭제돼요.</span>
                 </label>
               )}
 
@@ -1187,8 +1187,8 @@ export default function IntakeModal({ target, wallet = null, onClose, onComplete
                 <label className="flex items-start gap-2 text-xs text-gray-700 leading-relaxed">
                   <input type="checkbox" name="shareConcern" className="mt-0.5" checked={shareConcern} onChange={(e) => setShareConcern(e.target.checked)} />
                   <span>
-                    (선택) 적어 준 고민을 서비스 개선을 위한 통계에 써도 좋아요. 생년월일은 남기지 않고 나이대·성별만 함께 저장해요.
-                    {loggedIn ? " 로그인 상태에서 동의하면 탈퇴할 때 함께 삭제돼요." : " 로그인하지 않으면 누구의 것인지 알 수 없는 형태로 저장돼서 나중에 지우기 어려워요."}
+                    (선택) 적어 준 고민을 서비스 개선 통계에 써도 좋아요. 생년월일은 빼고 나이대·성별만 저장해요.
+                    {loggedIn ? " 로그인 후 동의하면 탈퇴 시 함께 삭제돼요." : " 로그인하지 않으면 누구 것인지 알 수 없게 저장돼 나중에 지우기 어려워요."}
                   </span>
                 </label>
               )}
