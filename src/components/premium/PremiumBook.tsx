@@ -532,13 +532,66 @@ function DailyRoutine({ states }: { states: Partial<Record<BodyEl, BodyState>> }
   );
 }
 
+/** 서문: 네 기둥 이름표 + "왜 해마다/매일 다시 보나" + 도유사주 이용 안내. 모두에게 같은 글이라 AI 를 쓰지 않아요. */
+function PrefaceExtras() {
+  const lane: Array<[string, string]> = [
+    ["타고난 집", "내 여덟 글자 (1~3장)"],
+    ["10년의 계절", "대운"],
+    ["한 해의 날씨", "세운"],
+    ["달마다의 분위기", "월운"],
+    ["오늘 하루의 기분", "일운"],
+  ];
+  return (
+    <div data-testid="preface-extras" className="mt-4 space-y-3">
+      <div className="flex flex-wrap justify-between gap-x-3 gap-y-1 text-[12px] text-[#e8dfca]/70">
+        <span>네 기둥 = <b className={GOLD}>사주 四柱</b></span>
+        <span>여덟 글자 = <b className={GOLD}>팔자 八字</b></span>
+      </div>
+      <p className="text-[13px] leading-relaxed text-[#e8dfca]/85">
+        여덟 글자는 따로 놀지 않고 서로 돕고, 부딪히고, 어울려요. 그 어울림으로 타고난 바탕과 힘이 나는 때를 읽어요.
+      </p>
+      <div className={`rounded-xl border-l-4 border-[#e6c887] bg-white/[0.05] px-3 py-2.5 text-[14px] font-bold leading-snug ${GOLD}`}>
+        기둥은 태어날 때 한 번 세워졌는데, 왜 해마다 (그리고 매일) 운세를 다시 볼까요?
+      </div>
+      <p className="text-[13px] leading-relaxed text-[#e8dfca]/85">
+        집은 그대로여도 계절과 날씨는 바뀌기 때문이에요. 같은 집에서도 봄엔 창을 열고 겨울엔 난방을 하듯, 같은 사람도 지나는 때에 따라 힘을 쓸 곳이 달라져요.
+      </p>
+      <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-[13px]">
+        {lane.map(([a, b]) => (
+          <div key={b} className="contents">
+            <dt className={`font-bold ${GOLD}`}>{a}</dt>
+            <dd className="text-[#e8dfca]/85">{b}</dd>
+          </div>
+        ))}
+      </dl>
+      <p className="text-[13px] leading-relaxed text-[#e8dfca]/85">
+        그중 <b>일운</b>은 날마다 바뀌는 하루치 기운이에요. 오늘 하루의 일기예보 같아서, 중요한 약속이나 마음 쓸 일을 고를 때 가볍게 참고하면 좋아요. 그래서 매일 다시 봐도 의미가 있어요.
+      </p>
+      <div className="rounded-xl bg-white/[0.06] px-3 py-3 text-[13px] leading-relaxed text-[#e8dfca]/90">
+        <b className={GOLD}>🐾 매일 곁에 있는 친구가 필요하다면</b>
+        <ul className="mt-1.5 space-y-1">
+          <li>🪙 <b>오늘의 풀이는 조약돌 하나(500원)</b>예요. 커피 한 모금 값으로 오늘 날씨를 알 수 있어요.</li>
+          <li>💬 <b>도유 상담실</b>에서는 도리가 편하게 말 걸어 주고, 궁금한 걸 물어볼 수 있어요.</li>
+          <li>🎁 <b>매일 무료 1회</b>는 로그인만 하면 조약돌이 채워져 있어요. 부담 없이 놀러 오세요!</li>
+        </ul>
+      </div>
+    </div>
+  );
+}
+
 function Visual({ page, report }: { page: BookPage; report: PremiumReportView }) {
   if (page.chart) return <LifeChart chart={page.chart} />;
   const max = Math.max(1, ...report.elements.map((e) => e.count));
   switch (page.key) {
+    case "preface":
     case "pillars":
       return (
         <div className="mb-6">
+          {page.key === "preface" && (
+            <p className="mb-3 text-[13px] leading-relaxed text-[#e8dfca]/85">
+              태어난 <b className={GOLD}>해·달·날·시간</b>, 이 네 때마다 글자를 위아래 두 개씩 적어요. 위는 하늘의 기운(천간), 아래는 땅의 기운(지지)이에요.
+            </p>
+          )}
           <div className="grid grid-cols-4 gap-2">
             {report.pillars.map((p) => {
               const [stem, branch] = p.full ? Array.from(p.full) : [null, null];
@@ -568,6 +621,7 @@ function Visual({ page, report }: { page: BookPage; report: PremiumReportView })
               태어난 시간을 몰라 정오(12시)를 기준으로 계산했어요. 신강·신약, 격국, 용신은 태어난 시간에 따라 달라질 수 있어요.
             </p>
           )}
+          {page.key === "preface" && <PrefaceExtras />}
         </div>
       );
     case "c-overview":
