@@ -56,7 +56,7 @@ describe("장 구성", () => {
   it("모든 장은 마무리 소제목 두 개로 끝나고 소제목마다 역할이 있어요", () => {
     for (const [k, spec] of Object.entries(CHAPTER_SPECS)) {
       const heads = spec.parts.flatMap((p) => p.headings);
-      expect(heads.slice(-2), k).toEqual(k === "concernTop" ? ["가장 먼저 해볼 일", "이제 차근차근 풀어 드릴게요"] : ["이렇게 해보세요", "한 줄 마무리"]);
+      expect(heads.slice(-2), k).toEqual(k === "concernTop" ? ["가장 먼저 해볼 일", "이제 차근차근 풀어 줄게"] : ["이렇게 해보자", "한 줄 마무리"]);
       expect(spec.roles.map(([h]) => h), k).toEqual(heads);
     }
   });

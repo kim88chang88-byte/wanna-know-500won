@@ -85,7 +85,7 @@ describe("주제별 맞춤 분석", () => {
   });
   it("건강운은 의학적 진단이 아니라는 안내를 담는다", () => {
     const t = buildPremiumReport(base, NOW, "basic", "건강운").topic;
-    expect(JSON.stringify(t)).toContain("의학적 진단이 아니에요");
+    expect(JSON.stringify(t)).toContain("의학적 진단이 아니야");
   });
   it("성별에 따라 연애운의 '끌리는 사람' 문장이 달라질 수 있다", () => {
     const f = buildPremiumReport({ ...base, gender: "female" }, NOW, "basic", "연애운").topic.points[1].body;

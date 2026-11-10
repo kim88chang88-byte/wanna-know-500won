@@ -33,9 +33,9 @@ export const BODY_GROUPS: BodyGroup[] = [
   { el: "토", label: "위", area: "소화 · 위장", habit: "식사 시간을 하루 중 같은 때로 맞추기", side: "R", y: 540, marks: [[305, 490]] },
 ];
 
-export const STATE_TEXT: Record<BodyState, string> = { fill: "채워 주면 좋아요", rest: "쉬어 가며 써요", ok: "무난해요" };
+export const STATE_TEXT: Record<BodyState, string> = { fill: "채워 주면 좋아", rest: "쉬어 가며 써", ok: "무난해" };
 /** 그림 옆 라벨용 짧은 말 (좁은 화면에서도 한 줄) */
-export const STATE_SHORT: Record<BodyState, string> = { fill: "채워 주기", rest: "쉬어 가기", ok: "무난해요" };
+export const STATE_SHORT: Record<BodyState, string> = { fill: "채워 주기", rest: "쉬어 가기", ok: "무난해" };
 
 /** 오행별 많고 적음으로 상태를 정해요. (적으면 채우기, 많으면 쉬어 가며 쓰기) */
 export function bodyStates(elements: ElementView[]): Partial<Record<BodyEl, BodyState>> {
@@ -81,9 +81,9 @@ export function bodyWhy(el: BodyEl, state: BodyState, elements: ElementView[]): 
   const n = elements.find((e) => e.name === el)?.count ?? 0;
   const avg = f1(avgOf(elements));
   const nm = NAME[el];
-  if (state === "rest") return `${nm} 기운이 ${n}개로 평균(${avg}개)보다 많아요. ${TOPIC[el]} 쪽에 힘이 몰리기 쉬운 편이라 쉬어 가며 쓰면 좋아요.`;
-  if (state === "fill") return `${nm} 기운이 ${n}개로 적어요(평균 ${avg}개). ${TOPIC[el]}을 채워 주는 습관이 도움이 돼요.`;
-  return `${nm} 기운이 ${n}개로 평균과 비슷해요. 지금 습관을 이어 가면 돼요.`;
+  if (state === "rest") return `${nm} 기운이 ${n}개로 평균(${avg}개)보다 많아. ${TOPIC[el]} 쪽에 힘이 몰리기 쉬운 편이라 쉬어 가며 쓰면 좋아.`;
+  if (state === "fill") return `${nm} 기운이 ${n}개로 적어(평균 ${avg}개). ${TOPIC[el]}을 채워 주는 습관이 도움이 돼.`;
+  return `${nm} 기운이 ${n}개로 평균과 비슷해. 지금 습관을 이어 가면 돼.`;
 }
 
 const STEM_EL: Record<string, BodyEl> = { 甲: "목", 乙: "목", 丙: "화", 丁: "화", 戊: "토", 己: "토", 庚: "금", 辛: "금", 壬: "수", 癸: "수" };
@@ -123,10 +123,10 @@ export function monthlyCondition(
     const nm = NAME[el];
     const text =
       state === "fill"
-        ? `${label} ${nm} 기운이 들어와요. 평소 적은 기운이라 ${group.area}을 채우기 좋은 달이에요. ${group.habit}`
+        ? `${label} ${nm} 기운이 들어와. 평소 적은 기운이라 ${group.area}을 채우기 좋은 달이야. ${group.habit}`
         : state === "rest"
-          ? `${label} ${nm} 기운이 더해져요. 이미 많은 기운이라 ${group.area}은 쉬어 가는 달로 잡아요. ${group.habit}`
-          : `${label} ${nm} 기운이 들어와요. ${group.area}은 가볍게 챙기면 충분해요. ${group.habit}`;
+          ? `${label} ${nm} 기운이 더해져. 이미 많은 기운이라 ${group.area}은 쉬어 가는 달로 잡아. ${group.habit}`
+          : `${label} ${nm} 기운이 들어와. ${group.area}은 가볍게 챙기면 충분해. ${group.habit}`;
     out.push({ label, el, group, state, text, current: i === nowIdx });
   });
   return out;

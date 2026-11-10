@@ -31,9 +31,9 @@ describe("건강운 오행 장부 지도", () => {
 
   const EL = [el("목", 4), el("화", 0), el("토", 1), el("금", 1), el("수", 2)];
   it("부위마다 오행 개수로 근거 한 줄을 만들어요", () => {
-    expect(bodyWhy("목", "rest", EL)).toContain("4개로 평균(1.6개)보다 많아요");
-    expect(bodyWhy("화", "fill", EL)).toContain("0개로 적어요");
-    expect(bodyWhy("수", "ok", EL)).toContain("평균과 비슷해요");
+    expect(bodyWhy("목", "rest", EL)).toContain("4개로 평균(1.6개)보다 많아");
+    expect(bodyWhy("화", "fill", EL)).toContain("0개로 적어");
+    expect(bodyWhy("수", "ok", EL)).toContain("평균과 비슷해");
   });
 
   it("월운 천간 오행으로 12칸 달력을 만들고 이번 달을 표시해요", () => {

@@ -30,26 +30,26 @@ function weightsFor(kind: ChartKind, female: boolean): { w: Weights; focus: Grou
     : { w: { 재성: 26, 식상: 5, 관성: 2, 인성: 0, 비겁: -8 }, focus: "재성" };
 }
 
-const ASSET_CAPTION = "10년 단위 대운마다 재물 기운이 얼마나 힘을 받는지를 바탕으로, 20세부터 쌓여 가는 자산을 가상으로 그려 본 재미 시나리오예요. 금액은 사주 흐름의 높낮이를 비율로 바꾼 참고 값이고, 실제 수입·재산이나 투자 결과를 예측하는 것이 아니에요.";
+const ASSET_CAPTION = "10년 단위 대운마다 재물 기운이 얼마나 힘을 받는지를 바탕으로, 20세부터 쌓여 가는 자산을 가상으로 그려 본 재미 시나리오야. 금액은 사주 흐름의 높낮이를 비율로 바꾼 참고 값이고, 실제 수입·재산이나 투자 결과를 예측하는 것이 아니야.";
 
 const TEXT: Record<ChartKind, { title: string; caption: string; peak1: string; peak2: string; now: string }> = {
   money: {
     title: "나이별 재물 기운 흐름",
-    caption: "10년 단위 대운마다 재물 기운이 얼마나 힘을 받는지 보여 주는 상대 지수예요. 실제 금액이 아니라 흐름의 높낮이를 읽는 참고용 그림이에요.",
+    caption: "10년 단위 대운마다 재물 기운이 얼마나 힘을 받는지 보여 주는 상대 지수야. 실제 금액이 아니라 흐름의 높낮이를 읽는 참고용 그림이야.",
     peak1: "재물 기운이 가장 힘을 받는 시기",
     peak2: "그다음으로 힘이 실리는 시기",
     now: "지금 시기",
   },
   love: {
     title: "나이별 인연 기운 흐름",
-    caption: "10년 단위 대운마다 인연(만남·결혼)의 기운이 얼마나 짙어지는지 보여 주는 상대 지수예요. 그 시기에 꼭 만난다는 뜻이 아니라, 인연 이야기가 가까워지기 쉬운 때를 가늠하는 참고용 그림이에요.",
+    caption: "10년 단위 대운마다 인연(만남·결혼)의 기운이 얼마나 짙어지는지 보여 주는 상대 지수야. 그 시기에 꼭 만난다는 뜻이 아니라, 인연 이야기가 가까워지기 쉬운 때를 가늠하는 참고용 그림이야.",
     peak1: "인연의 기운이 가장 짙은 시기",
     peak2: "그다음으로 인연이 짙은 시기",
     now: "지금 시기",
   },
   career: {
     title: "나이별 일 기운 흐름",
-    caption: "10년 단위 대운마다 일·성취의 기운이 얼마나 힘을 받는지 보여 주는 상대 지수예요. 성공을 장담하는 숫자가 아니라, 힘을 쏟기 좋은 때를 가늠하는 참고용 그림이에요.",
+    caption: "10년 단위 대운마다 일·성취의 기운이 얼마나 힘을 받는지 보여 주는 상대 지수야. 성공을 장담하는 숫자가 아니라, 힘을 쏟기 좋은 때를 가늠하는 참고용 그림이야.",
     peak1: "일의 기운이 가장 힘을 받는 시기",
     peak2: "그다음으로 힘이 실리는 시기",
     now: "지금 시기",
@@ -114,7 +114,7 @@ export function buildLifeChart(r: SajuResult, kind: ChartKind): BookChart | null
   const hasAsset = asset && points.some((p) => (p.amount ?? 0) > 0);
   const range = (p: BookChartPoint) => `${p.age}~${p.endAge}세 (${p.ganzhi} 대운)`;
   const gain = (i: number) => (points[i].amount ?? 0) - (i > 0 ? (points[i - 1].amount ?? 0) : 0);
-  const peakText = (i: number) => (hasAsset ? `${range(points[i])} · 이 시기에 약 ${formatWon(gain(i))} 늘어요` : range(points[i]));
+  const peakText = (i: number) => (hasAsset ? `${range(points[i])} · 이 시기에 약 ${formatWon(gain(i))} 늘어` : range(points[i]));
   const callouts = [{ label: t.peak1, text: peakText(first.i) }];
   if (second) callouts.push({ label: t.peak2, text: peakText(second.i) });
   const curP = points.find((p) => p.current);

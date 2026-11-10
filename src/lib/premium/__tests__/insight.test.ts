@@ -159,12 +159,12 @@ describe("사주 vs 현실 3갈래", () => {
     for (const k of ["money", "career", "love"] as const) {
       const rc = realityCheck(k);
       expect(rc.options.length).toBe(3);
-      expect(rc.options.map((o) => o.label)).toEqual(["아직 못 미쳐요", "딱 맞아요", "이미 넘어섰어요"]);
+      expect(rc.options.map((o) => o.label)).toEqual(["아직 못 미쳐", "딱 맞아", "이미 넘어섰어"]);
       for (const o of rc.options) {
         expect(/[0-9]+\s?(억|원|만원|세)/.test(o.message)).toBe(false);
         expect(/(망|불행|파산|이혼|위험)/.test(o.message)).toBe(false);
       }
-      expect(rc.options[0].message).toContain("이 운을 잡아 봐요");
+      expect(rc.options[0].message).toContain("이 운을 잡아 봐");
       expect(rc.options[1].message).toContain("맞죠");
     }
   });
@@ -182,7 +182,7 @@ describe("사주 vs 현실 — 학업·컨디션·시기", () => {
         expect(o.message.length > 40).toBe(true);
       }
     }
-    expect(realityCheck("health").options[0].label).toBe("요즘 좀 지쳐요");
-    expect(realityCheck("flow").options[0].message).toContain("이 운을 잡아 봐요");
+    expect(realityCheck("health").options[0].label).toBe("요즘 좀 지쳐");
+    expect(realityCheck("flow").options[0].message).toContain("이 운을 잡아 봐");
   });
 });

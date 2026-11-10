@@ -172,8 +172,8 @@ const KIND_SHORT: Record<"합" | "충" | "형" | "해", string> = { 합: "어울
 export function monthEvidence(p: MonthPlan): string {
   const parts: string[] = [p.tone];
   parts.push(`천간 ${p.stemGod} · 지지 ${p.branchGod}`);
-  for (const y of p.yongsinIn) parts.push(`용신 ${y.el}(${y.where})이 들어와요`);
-  if (p.fills.length) parts.push(`원국에 적은 ${p.fills.join("·")} 기운이 채워져요`);
+  for (const y of p.yongsinIn) parts.push(`용신 ${y.el}(${y.where})이 들어와`);
+  if (p.fills.length) parts.push(`원국에 적은 ${p.fills.join("·")} 기운이 채워져`);
   for (const r of p.relations.slice(0, 3)) parts.push(`${r.name} ${KIND_SHORT[r.kind]}(${r.area})`);
   return parts.join(" · ");
 }
@@ -183,7 +183,7 @@ export function monthLine(p: MonthPlan): string {
   const base = GOD_MONTH_LINE[p.stemGod] ?? "";
   const clash = p.relations.find((r) => r.kind === "충");
   const combine = p.relations.find((r) => r.kind === "합");
-  const extra = clash ? ` ${clash.area}에서 변화가 있을 수 있어 속도를 조절해요.` : combine ? ` ${combine.area}에서 손발이 맞아요.` : "";
+  const extra = clash ? ` ${clash.area}에서 변화가 있을 수 있어 속도를 조절해.` : combine ? ` ${combine.area}에서 손발이 맞아.` : "";
   return `${base}${extra}`.trim();
 }
 
@@ -251,10 +251,10 @@ export function daeunCompareRows(input: DaeunCompareInput): BookRow[] {
     const yong = [...new Set([el1, el2])].filter((e) => e && yongsinEls.includes(e));
     const parts: string[] = [];
     if (g) parts.push(`주제 ${GROUP_PLAIN[g]}(${g})`);
-    if (pg && g && pg !== g) parts.push(`앞 대운(${GROUP_PLAIN[pg]})에서 ${GROUP_PLAIN[g]} 쪽으로 무게가 옮겨가요`);
-    if (yong.length) parts.push(`용신 ${yong.join("·")} 기운이 함께 들어와요`);
+    if (pg && g && pg !== g) parts.push(`앞 대운(${GROUP_PLAIN[pg]})에서 ${GROUP_PLAIN[g]} 쪽으로 무게가 옮겨가`);
+    if (yong.length) parts.push(`용신 ${yong.join("·")} 기운이 함께 들어와`);
     if (rel.length) parts.push(`원국과 ${rel.join(", ")}`);
-    else parts.push("원국과 눈에 띄는 합충은 없어요");
+    else parts.push("원국과 눈에 띄는 합충은 없어");
     rows.push({
       label: `${tag} · ${d.startAge}~${d.endAge}세`,
       value: d.ganzhi,

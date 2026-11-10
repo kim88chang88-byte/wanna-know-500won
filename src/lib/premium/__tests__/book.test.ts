@@ -70,7 +70,7 @@ describe("프리미엄 20페이지 리포트", () => {
   it("시간을 모르면 시주를 풀이하지 않고 안내한다", () => {
     const r = buildPremiumReport({ ...base, hour: null, minute: null }, NOW, "full", RAW.love);
     const all = JSON.stringify(r.book[3]);
-    expect(all.includes("시주는 비워 두었어요")).toBe(true);
+    expect(all.includes("시주는 비워 두었어")).toBe(true);
     expect(r.book[3].tables[0].rows[3].value).toBe("시간 미상");
   });
 

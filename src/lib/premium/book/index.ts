@@ -142,18 +142,18 @@ export function buildBook(r: SajuResult, ctx: BookContext): BookPage[] {
     "PREMIUM REPORT · 01",
     `${dayPillar} 일주 · ${profile.image}`,
     [
-      { heading: "나를 한 문장으로", body: `${profile.core.split(". ")[0]}. ${strength.head}이고, ${geuk.head.split(" · ")[1]}로 풀이돼요.` },
+      { heading: "나를 한 문장으로", body: `${profile.core.split(". ")[0]}. ${strength.head}이고, ${geuk.head.split(" · ")[1]}로 풀이돼.` },
       {
         heading: "핵심 3줄 요약",
-        body: `① 강점: ${profile.strength} ② 채우면 좋은 기운: ${lowest.name}(${lucky.color}) — ${ELEMENT_LACK[lowest.name]} ③ 지금의 계절: ${cur ? `${cur.ganzhi} 대운(${cur.startAge}~${cur.endAge}세) — ${FLOW_LINE[groupsOf(cur.stemTenGod, cur.branchTenGod)[0] ?? dominant]}` : "10년 단위의 큰 흐름은 부록의 대운 풀이에서 확인해 보세요."}`,
+        body: `① 강점: ${profile.strength} ② 채우면 좋은 기운: ${lowest.name}(${lucky.color}) — ${ELEMENT_LACK[lowest.name]} ③ 지금의 계절: ${cur ? `${cur.ganzhi} 대운(${cur.startAge}~${cur.endAge}세) — ${FLOW_LINE[groupsOf(cur.stemTenGod, cur.branchTenGod)[0] ?? dominant]}` : "10년 단위의 큰 흐름은 부록의 대운 풀이에서 확인해 봐."}`,
       },
       {
         heading: "이 리포트 읽는 법",
-        body: `사주는 '정해진 결과'가 아니라 '타고난 날씨와 지도'에 가까워요. 10페이지에 걸쳐 타고난 기질(1~6쪽), ${insight.label} 심층 분석(7쪽), 시간의 흐름(8~9쪽), 행운 처방(10쪽)을 차례로 풀어 드려요. 재미와 참고용으로 편하게 읽어 주세요.${hourUnknown ? " 태어난 시간을 몰라 시주(네 번째 기둥)를 빼고 계산해서, 신강·신약과 용신은 달라질 수 있어요." : ""}`,
+        body: `사주는 '정해진 결과'가 아니라 '타고난 날씨와 지도'에 가까워. 10페이지에 걸쳐 타고난 기질(1~6쪽), ${insight.label} 심층 분석(7쪽), 시간의 흐름(8~9쪽), 행운 처방(10쪽)을 차례로 풀어 줘. 재미와 참고용으로 편하게 읽어 줘.${hourUnknown ? " 태어난 시간을 몰라 시주(네 번째 기둥)를 빼고 계산해서, 신강·신약과 용신은 달라질 수 있어." : ""}`,
       },
       {
         heading: `${year}년의 한 줄`,
-        body: sy ? `${sy.ganzhi}년은 ${FLOW_LINE[groupsOf(sy.tenGodStem, sy.tenGodBranch)[0] ?? dominant]}` : "올해의 흐름은 부록의 올해·내년 풀이에서 자세히 볼 수 있어요.",
+        body: sy ? `${sy.ganzhi}년은 ${FLOW_LINE[groupsOf(sy.tenGodStem, sy.tenGodBranch)[0] ?? dominant]}` : "올해의 흐름은 부록의 올해·내년 풀이에서 자세히 볼 수 있어.",
       },
     ],
     [
@@ -194,17 +194,17 @@ export function buildBook(r: SajuResult, ctx: BookContext): BookPage[] {
   // 기둥 사이의 합·충·형·해·원진을 '어느 자리끼리 만났는지'로 풀어요. (제목이 관계 이름으로 시작해야 잠금 규칙에 걸려요)
   const relationRows: BookSection[] = natalRelations(natal).slice(0, 5).map((x) => ({ heading: x.heading, body: x.body }));
   for (const rel of r.stemRelations) {
-    relationRows.push({ heading: `천간 ${rel.type} · ${rel.desc} — ${rel.type === "합" ? "마음이 잘 맞물려요" : "생각이 엇갈리기 쉬워요"}`, body: rel.type === "합" ? "하늘의 기운이 서로 어울려 새로운 기운으로 바뀌는 흐름이에요. 협력과 조화의 힌트로 읽어요." : "하늘의 기운이 부딪히는 흐름이에요. 생각과 방향이 달라질 수 있어 대화로 맞추면 좋아요." });
+    relationRows.push({ heading: `천간 ${rel.type} · ${rel.desc} — ${rel.type === "합" ? "마음이 잘 맞물려" : "생각이 엇갈리기 쉬워"}`, body: rel.type === "합" ? "하늘의 기운이 서로 어울려 새로운 기운으로 바뀌는 흐름이야. 협력과 조화의 힌트로 읽어." : "하늘의 기운이 부딪히는 흐름이야. 생각과 방향이 달라질 수 있어 대화로 맞추면 좋아." });
   }
   add(
     "pillars",
     "나의 명식 풀이",
     "FOUR PILLARS · 02",
-    `${ctx.pillars.filter((p) => p.full).map((p) => p.full).join(" ")} — 네 개의 기둥이 만드는 나의 지도예요.`,
+    `${ctx.pillars.filter((p) => p.full).map((p) => p.full).join(" ")} — 네 개의 기둥이 만드는 나의 지도야.`,
     [
       ...(["year", "month", "day", "hour"] as const)
         .filter((k) => !(k === "hour" && hourUnknown))
-        .map((k) => ({ heading: PILLAR_MEANING[k].title, body: `${PILLAR_MEANING[k].body} 이 자리의 간지는 ${r.pillars[k]}(${r.pillarDetails[k].stemKo}${r.pillarDetails[k].branchKo})예요.` })),
+        .map((k) => ({ heading: PILLAR_MEANING[k].title, body: `${PILLAR_MEANING[k].body} 이 자리의 간지는 ${r.pillars[k]}(${r.pillarDetails[k].stemKo}${r.pillarDetails[k].branchKo})야.` })),
       ...(["year", "month", "day", "hour"] as const)
         .filter((k) => !(k === "hour" && hourUnknown))
         .map((k) => {
@@ -216,15 +216,15 @@ export function buildBook(r: SajuResult, ctx: BookContext): BookPage[] {
           const gStem = stemGod ? groupsOf(stemGod)[0] : undefined;
           const placeText = (gStem && gStem === gBranch ? PLACE_GROUP[k][gStem] : gBranch ? PLACE_GROUP[k][gBranch] : "") ?? "";
           let body: string;
-          if (!stemGod) body = `천간은 나 자신(일간)이에요. 지지 ${branchGod}: ${TENGOD_TEXT[branchGod] ?? ""}`;
-          else if (stemGod === branchGod) body = `천간과 지지가 모두 ${branchGod}이에요(같은 기운이 겹쳐 힘이 커요). ${TENGOD_TEXT[branchGod] ?? ""}`;
+          if (!stemGod) body = `천간은 나 자신(일간)이야. 지지 ${branchGod}: ${TENGOD_TEXT[branchGod] ?? ""}`;
+          else if (stemGod === branchGod) body = `천간과 지지가 모두 ${branchGod}이야(같은 기운이 겹쳐 힘이 커). ${TENGOD_TEXT[branchGod] ?? ""}`;
           else body = `천간 ${stemGod}: ${TENGOD_TEXT[stemGod] ?? ""} 지지 ${branchGod}: ${TENGOD_TEXT[branchGod] ?? ""}`;
           return { heading: `십성으로 읽는 ${place}`, body: `${body} ${placeText}`.trim() };
         }),
-      ...(hourUnknown ? [{ heading: "시주는 비워 두었어요", body: "태어난 시간을 모르면 시주는 풀이하지 않아요. 시간을 알게 되면 꿈과 말년 이야기까지 더 정확히 볼 수 있어요." }] : []),
+      ...(hourUnknown ? [{ heading: "시주는 비워 두었어", body: "태어난 시간을 모르면 시주는 풀이하지 않아. 시간을 알게 되면 꿈과 말년 이야기까지 더 정확히 볼 수 있어." }] : []),
       ...(relationRows.length
         ? relationRows.slice(0, 6)
-        : [{ heading: "기둥 사이의 어울림", body: "기둥들 사이에 두드러진 합·충은 보이지 않아요. 한쪽으로 크게 치우치지 않고 차분하게 흘러가는 구조예요." }]),
+        : [{ heading: "기둥 사이의 어울림", body: "기둥들 사이에 두드러진 합·충은 보이지 않아. 한쪽으로 크게 치우치지 않고 차분하게 흘러가는 구조야." }]),
     ],
     [
       {
@@ -263,14 +263,14 @@ export function buildBook(r: SajuResult, ctx: BookContext): BookPage[] {
     "오행 균형",
     "FIVE ELEMENTS · 04",
     topEls.length > 1
-      ? `가장 많은 기운은 ${topEls.map((e) => e.name).join("·")}(각 ${highest.count}개), 가장 적은 기운은 ${lowest.name}(${lowest.count})예요.`
-      : `가장 많은 기운은 ${highest.name}(${highest.count}), 가장 적은 기운은 ${lowest.name}(${lowest.count})예요.`,
+      ? `가장 많은 기운은 ${topEls.map((e) => e.name).join("·")}(각 ${highest.count}개), 가장 적은 기운은 ${lowest.name}(${lowest.count})야.`
+      : `가장 많은 기운은 ${highest.name}(${highest.count}), 가장 적은 기운은 ${lowest.name}(${lowest.count})야.`,
     [
       ...topEls.slice(0, 2).map((e) => ({ heading: `넘치는 ${e.name} 기운`, body: ELEMENT_EXCESS[e.name] })),
       { heading: `비어 있는 ${lowest.name} 기운`, body: ELEMENT_LACK[lowest.name] },
-      { heading: "균형 맞추는 생활 팁", body: `${lowest.name} 기운을 채우는 기분 전환 팁이에요. 추천 습관: ${habit.habit}. 곁에 두면 좋은 것: ${habit.item}. 행운의 색은 ${lucky.color}, 방향은 ${lucky.direction}이에요.` },
+      { heading: "균형 맞추는 생활 팁", body: `${lowest.name} 기운을 채우는 기분 전환 팁이야. 추천 습관: ${habit.habit}. 곁에 두면 좋은 것: ${habit.item}. 행운의 색은 ${lucky.color}, 방향은 ${lucky.direction}이야.` },
       ...elements.map((e) => ({ heading: `${ELEMENT_DOMAIN[e.name].title} — ${e.count}개`, body: ELEMENT_DOMAIN[e.name].body })),
-      { heading: "오행은 '좋고 나쁨'이 아니에요", body: "많다고 나쁘고 적다고 부족한 사람이 아니라, 나의 개성이 드러나는 방식이에요. 균형을 의식하면 같은 강점도 더 부드럽게 쓸 수 있어요." },
+      { heading: "오행은 '좋고 나쁨'이 아니야", body: "많다고 나쁘고 적다고 부족한 사람이 아니라, 나의 개성이 드러나는 방식이야. 균형을 의식하면 같은 강점도 더 부드럽게 쓸 수 있어." },
     ],
     [{ title: "오행 분포", rows: elements.map((e) => ({ label: e.name, value: `${e.count}개`, highlight: e.name === highest.name || e.name === lowest.name, note: e.name === highest.name ? "가장 많음" : e.name === lowest.name ? "가장 적음" : undefined })) }],
   );
@@ -281,20 +281,20 @@ export function buildBook(r: SajuResult, ctx: BookContext): BookPage[] {
     "tengods",
     "십성으로 보는 나의 재능",
     "TEN GODS · 05",
-    `가장 두드러진 기운은 ${GROUP_LONG[dominant].name}이에요.`,
+    `가장 두드러진 기운은 ${GROUP_LONG[dominant].name}이야.`,
     [
       { heading: `${GROUP_LONG[dominant].name} — 나의 주력`, body: `${GROUP_LONG[dominant].talent} ${GROUP_LONG[dominant].work}` },
       { heading: "사람들과의 관계", body: `${GROUP_LONG[dominant].relation} ${GROUP_LONG[dominant].care}` },
-      { heading: `사회적 얼굴 — ${GROUP_TRAIT[monthGroup]}`, body: `월주(사회·직업 자리)에 ${monthGroup} 기운이 있어서, 일터와 사회에서는 ${josa(GROUP_TRAIT[monthGroup], "이/가")} 먼저 드러나기 쉬워요.` },
-      { heading: `어울리는 분야`, body: `${GROUP_JOBS[dominant]}에서 강점이 잘 드러나요.` },
+      { heading: `사회적 얼굴 — ${GROUP_TRAIT[monthGroup]}`, body: `월주(사회·직업 자리)에 ${monthGroup} 기운이 있어서, 일터와 사회에서는 ${josa(GROUP_TRAIT[monthGroup], "이/가")} 먼저 드러나기 쉬워.` },
+      { heading: `어울리는 분야`, body: `${GROUP_JOBS[dominant]}에서 강점이 잘 드러나.` },
       ...GROUPS.filter((g) => g !== dominant).map((g) => {
         if (counts[g] > 0) return { heading: `${GROUP_LONG[g].name} — ${counts[g]}개`, body: `${GROUP_LONG[g].talent} ${GROUP_LONG[g].care}` };
         const where = hiddenSummary(hidden, g);
         return {
           heading: `${GROUP_LONG[g].name} — 겉으로는 0개`,
           body: where
-            ? `겉으로 드러난 글자에는 없지만, 지지 속에 숨은 천간(지장간)에 ${where}이 숨어 있어요. 평소엔 잘 보이지 않다가 필요할 때 꺼내 쓰는 힘이에요. ${GROUP_LONG[g].empty}`
-            : `원국에는 이 기운이 보이지 않아요. 약점이라기보다 의식해서 채워 갈 부분이에요. ${GROUP_LONG[g].empty}`,
+            ? `겉으로 드러난 글자에는 없지만, 지지 속에 숨은 천간(지장간)에 ${where}이 숨어 있어. 평소엔 잘 보이지 않다가 필요할 때 꺼내 쓰는 힘이야. ${GROUP_LONG[g].empty}`
+            : `원국에는 이 기운이 보이지 않아. 약점이라기보다 의식해서 채워 갈 부분이야. ${GROUP_LONG[g].empty}`,
         };
       }),
       ...comboSections(
@@ -311,7 +311,7 @@ export function buildBook(r: SajuResult, ctx: BookContext): BookPage[] {
   // ── 6. 격국과 용신
   const yongsinSections: BookSection[] = yongsinEls.map((el) => ({
     heading: `나를 돕는 기운 · ${el} (용신) — ${ELEMENT_INFO[el].color}`,
-    body: `${el} 기운은 나의 균형을 돕는 힘이에요. 추천 습관: ${ELEMENT_HABIT[el].habit}. 분위기 아이템: ${ELEMENT_HABIT[el].item}. 행운 방향은 ${ELEMENT_INFO[el].direction}, 숫자는 ${ELEMENT_HABIT[el].number}이에요.`,
+    body: `${el} 기운은 나의 균형을 돕는 힘이야. 추천 습관: ${ELEMENT_HABIT[el].habit}. 분위기 아이템: ${ELEMENT_HABIT[el].item}. 행운 방향은 ${ELEMENT_INFO[el].direction}, 숫자는 ${ELEMENT_HABIT[el].number}이야.`,
   }));
   add(
     "geukguk",
@@ -323,10 +323,10 @@ export function buildBook(r: SajuResult, ctx: BookContext): BookPage[] {
       { heading: "신강·신약과의 조합", body: `${strength.head}에 ${r.advanced.geukguk} 구조이니, ${strength.advice}` },
       ...(johuSection(dayStem, r.pillars.month[1]) ? [johuSection(dayStem, r.pillars.month[1]) as BookSection] : []),
       ...(yongsinRoleSection(dayStem, yongsinEls, ctx.gradeLabel) ? [yongsinRoleSection(dayStem, yongsinEls, ctx.gradeLabel) as BookSection] : []),
-      ...(yongsinSections.length ? yongsinSections : [{ heading: "용신", body: "균형을 돕는 기운은 2장의 오행 분석에 나온 생활 팁을 참고해 주세요." }]),
+      ...(yongsinSections.length ? yongsinSections : [{ heading: "용신", body: "균형을 돕는 기운은 2장의 오행 분석에 나온 생활 팁을 참고해 줘." }]),
       { heading: "잘 맞는 성장의 길", body: GEUKGUK_CAREER[r.advanced.geukguk] ?? GEUKGUK_CAREER["기타"] },
       { heading: `${ctx.gradeLabel} 사주의 인생 전략`, body: (STRATEGY[ctx.gradeLabel] ?? STRATEGY["중화"]).map((t, n) => `${["①", "②", "③"][n]} ${t}`).join(" ") },
-      { heading: "용신 활용법", body: "용신은 '꼭 지켜야 할 규칙'이 아니라 '기분과 컨디션이 좋아지는 방향'이에요. 부담 없이 색, 공간, 습관 중 한 가지만 골라 가볍게 시작해 보세요." },
+      { heading: "용신 활용법", body: "용신은 '꼭 지켜야 할 규칙'이 아니라 '기분과 컨디션이 좋아지는 방향'이야. 부담 없이 색, 공간, 습관 중 한 가지만 골라 가볍게 시작해 봐." },
     ],
   );
 
@@ -394,28 +394,28 @@ export function buildBook(r: SajuResult, ctx: BookContext): BookPage[] {
   }
   if (cur) {
     const line = interactionLine(natal, { label: "대운", ganzhi: cur.ganzhi });
-    if (line) daeunSections.push({ heading: "지금 대운이 내 사주와 만나는 방식", body: `${line} 대운은 10년 동안 배경이 되는 흐름이라, 한 번에 오는 사건이 아니라 서서히 쌓이는 분위기로 읽어 주세요.` });
+    if (line) daeunSections.push({ heading: "지금 대운이 내 사주와 만나는 방식", body: `${line} 대운은 10년 동안 배경이 되는 흐름이라, 한 번에 오는 사건이 아니라 서서히 쌓이는 분위기로 읽어 줘.` });
   }
   if (idx >= 0 && dl[idx + 1]) {
     const nx = dl[idx + 1];
     const g = groupsOf(nx.stemTenGod, nx.branchTenGod)[0] ?? dominant;
-    daeunSections.push({ heading: `다음 대운 · ${nx.ganzhi} (${nx.startAge}세~)`, body: `${nx.startAge}세부터는 분위기가 달라져요. ${FLOW_LINE[g]} ${STAGE12_TEXT[nx["12unsung"]] ?? ""}` });
+    daeunSections.push({ heading: `다음 대운 · ${nx.ganzhi} (${nx.startAge}세~)`, body: `${nx.startAge}세부터는 분위기가 달라져. ${FLOW_LINE[g]} ${STAGE12_TEXT[nx["12unsung"]] ?? ""}` });
   }
   if (idx > 0) {
     const pv = dl[idx - 1];
     const g = groupsOf(pv.stemTenGod, pv.branchTenGod)[0] ?? dominant;
-    daeunSections.push({ heading: `지난 대운 돌아보기 · ${pv.ganzhi}`, body: `${pv.startAge}~${pv.endAge}세에는 ${GROUP_LONG[g].name}이 크게 작용했어요. ${STAGE12_TEXT[pv["12unsung"]] ?? ""} 그 시기에 쌓은 경험이 지금의 바탕이 돼요.` });
+    daeunSections.push({ heading: `지난 대운 돌아보기 · ${pv.ganzhi}`, body: `${pv.startAge}~${pv.endAge}세에는 ${GROUP_LONG[g].name}이 크게 작용했어. ${STAGE12_TEXT[pv["12unsung"]] ?? ""} 그 시기에 쌓은 경험이 지금의 바탕이 돼.` });
   }
   for (const d of dl) {
     const g = groupsOf(d.stemTenGod, d.branchTenGod)[0] ?? dominant;
-    daeunSections.push({ heading: `${d.startAge}~${d.endAge}세 · ${d.ganzhi}`, body: `${josa(GROUP_TRAIT[g], "이/가")} 주제가 되는 시기예요. ${STAGE12_TEXT[d["12unsung"]] ?? ""}` });
+    daeunSections.push({ heading: `${d.startAge}~${d.endAge}세 · ${d.ganzhi}`, body: `${josa(GROUP_TRAIT[g], "이/가")} 주제가 되는 시기야. ${STAGE12_TEXT[d["12unsung"]] ?? ""}` });
   }
-  daeunSections.push({ heading: "대운이란?", body: "10년 단위로 바뀌는 큰 계절이에요. 나쁜 계절은 없고, 계절마다 어울리는 옷과 할 일이 달라요. 지금 계절에 맞게 움직이는 것이 핵심이에요." });
+  daeunSections.push({ heading: "대운이란?", body: "10년 단위로 바뀌는 큰 계절이야. 나쁜 계절은 없고, 계절마다 어울리는 옷과 할 일이 달라. 지금 계절에 맞게 움직이는 것이 핵심이야." });
   add(
     "daeun",
     "대운 — 10년 단위의 큰 흐름",
     "LUCK CYCLES · 08",
-    cur ? `지금은 ${cur.ganzhi} 대운, ${cur.startAge}~${cur.endAge}세의 계절이에요.` : "10년 단위로 바뀌는 인생의 큰 계절을 살펴봐요.",
+    cur ? `지금은 ${cur.ganzhi} 대운, ${cur.startAge}~${cur.endAge}세의 계절이야.` : "10년 단위로 바뀌는 인생의 큰 계절을 살펴봐.",
     daeunSections,
     [
       {
@@ -451,26 +451,26 @@ export function buildBook(r: SajuResult, ctx: BookContext): BookPage[] {
   }
   if (sy) {
     const line = interactionLine(natal, { label: `${year}년 세운`, ganzhi: sy.ganzhi });
-    if (line) yearSections.push({ heading: `${year}년 세운이 내 사주와 만나는 방식`, body: `${line} 올해 흐름이 왜 이런지 읽는 근거로 참고해 주세요.` });
+    if (line) yearSections.push({ heading: `${year}년 세운이 내 사주와 만나는 방식`, body: `${line} 올해 흐름이 왜 이런지 읽는 근거로 참고해 줘.` });
   }
   if (sy) {
     const g = groupsOf(sy.tenGodStem, sy.tenGodBranch)[0] ?? dominant;
-    yearSections.push({ heading: `${year}년 · ${sy.ganzhi}`, reality: realityCheck("flow"), body: `${FLOW_LINE[g]} ${STAGE12_TEXT[sy.stage12] ?? ""} ${cur ? `${cur.ganzhi} 대운 속의 한 해로 읽어요.` : ""}` });
+    yearSections.push({ heading: `${year}년 · ${sy.ganzhi}`, reality: realityCheck("flow"), body: `${FLOW_LINE[g]} ${STAGE12_TEXT[sy.stage12] ?? ""} ${cur ? `${cur.ganzhi} 대운 속의 한 해로 읽어.` : ""}` });
   }
   if (syNext) {
     const g = groupsOf(syNext.tenGodStem, syNext.tenGodBranch)[0] ?? dominant;
-    yearSections.push({ heading: `${year + 1}년 · ${syNext.ganzhi}`, body: `${FLOW_LINE[g]} ${STAGE12_TEXT[syNext.stage12] ?? ""} 올해 준비한 것이 내년에 모양을 갖추기 좋아요.` });
+    yearSections.push({ heading: `${year + 1}년 · ${syNext.ganzhi}`, body: `${FLOW_LINE[g]} ${STAGE12_TEXT[syNext.stage12] ?? ""} 올해 준비한 것이 내년에 모양을 갖추기 좋아.` });
   }
   const prevY = r.seyun.find((x) => x.year === year - 1);
   if (prevY) {
     const g = groupsOf(prevY.tenGodStem, prevY.tenGodBranch)[0] ?? dominant;
-    yearSections.push({ heading: `${year - 1}년 돌아보기 · ${prevY.ganzhi}`, body: `${GROUP_LONG[g].name}이 주제였던 해예요. ${STAGE12_TEXT[prevY.stage12] ?? ""} 지난해의 경험이 올해의 밑거름이 돼요.` });
+    yearSections.push({ heading: `${year - 1}년 돌아보기 · ${prevY.ganzhi}`, body: `${GROUP_LONG[g].name}이 주제였던 해야. ${STAGE12_TEXT[prevY.stage12] ?? ""} 지난해의 경험이 올해의 밑거름이 돼.` });
   }
   for (const off of [2, 3]) {
     const f = r.seyun.find((x) => x.year === year + off);
     if (!f) continue;
     const g = groupsOf(f.tenGodStem, f.tenGodBranch)[0] ?? dominant;
-    yearSections.push({ heading: `${year + off}년 미리 보기 · ${f.ganzhi}`, body: `${GROUP_LONG[g].name}이 주제가 되는 해예요. ${STAGE12_TEXT[f.stage12] ?? ""}` });
+    yearSections.push({ heading: `${year + off}년 미리 보기 · ${f.ganzhi}`, body: `${GROUP_LONG[g].name}이 주제가 되는 해야. ${STAGE12_TEXT[f.stage12] ?? ""}` });
   }
   [0, 3, 6, 9].forEach((a, q) => {
     const part = plans.slice(a, a + 3);
@@ -483,10 +483,10 @@ export function buildBook(r: SajuResult, ctx: BookContext): BookPage[] {
   });
   yearSections.push({
     heading: `${insight.label} 포인트 달`,
-    body: hitMonths.length ? `${hitMonths.join(", ")}에 ${insight.label}과 닿는 기운이 들어와요. 이 시기에 중요한 계획이나 만남, 결정을 배치해 보세요.` : `올해는 특정 달에 쏠리기보다 꾸준히 이어지는 흐름이에요. 매달 작은 실천을 쌓아 가면 좋아요.`,
+    body: hitMonths.length ? `${hitMonths.join(", ")}에 ${insight.label}과 닿는 기운이 들어와. 이 시기에 중요한 계획이나 만남, 결정을 배치해 봐.` : `올해는 특정 달에 쏠리기보다 꾸준히 이어지는 흐름이야. 매달 작은 실천을 쌓아 가면 좋아.`,
   });
-  yearSections.push({ heading: "월별 흐름 읽는 법", body: "월별 간지는 절기 기준이라 양력 날짜와 며칠 차이가 있을 수 있어요(표의 '○월경'). 참고용 힌트로 가볍게 활용해 주세요." });
-  add("years", `${year}년 · ${year + 1}년과 월별 흐름`, "THIS YEAR & MONTHS · 09", `${year}년은 ${sy?.ganzhi ?? ""} 해예요.`, yearSections, [
+  yearSections.push({ heading: "월별 흐름 읽는 법", body: "월별 간지는 절기 기준이라 양력 날짜와 며칠 차이가 있을 수 있어(표의 '○월경'). 참고용 힌트로 가볍게 활용해 줘." });
+  add("years", `${year}년 · ${year + 1}년과 월별 흐름`, "THIS YEAR & MONTHS · 09", `${year}년은 ${sy?.ganzhi ?? ""} 해야.`, yearSections, [
     { title: "연도별 흐름", rows: yearRows },
     { title: "지금부터 12개월 월별 시기표", rows: monthRows },
   ]);
@@ -500,16 +500,16 @@ export function buildBook(r: SajuResult, ctx: BookContext): BookPage[] {
     for (const s of r.sals[k].specialSals) specials.add(s);
   }
   const sinSections: BookSection[] = [];
-  for (const g of gil) sinSections.push({ heading: `길한 기운 · ${g}`, body: SINSAL_TEXT[g] ?? "나를 돕는 좋은 기운이에요." });
+  for (const g of gil) sinSections.push({ heading: `길한 기운 · ${g}`, body: SINSAL_TEXT[g] ?? "나를 돕는 좋은 기운이야." });
   for (const s of specials) if (!gil.includes(s) && SINSAL_TEXT[s]) sinSections.push({ heading: `특별한 기운 · ${s}`, body: SINSAL_TEXT[s] });
-  for (const h of hyung) sinSections.push({ heading: `알아 두면 좋은 기운 · ${h}`, body: SINSAL_TEXT[h] ?? "속도를 조절하면 오히려 힘이 되는 기운이에요." });
-  if (sinSections.length === 0) sinSections.push({ heading: "신살", body: "두드러진 신살은 없어요. 특정 기운에 휘둘리지 않고 안정적으로 흘러가는 구조예요." });
+  for (const h of hyung) sinSections.push({ heading: `알아 두면 좋은 기운 · ${h}`, body: SINSAL_TEXT[h] ?? "속도를 조절하면 오히려 힘이 되는 기운이야." });
+  if (sinSections.length === 0) sinSections.push({ heading: "신살", body: "두드러진 신살은 없어. 특정 기운에 휘둘리지 않고 안정적으로 흘러가는 구조야." });
   const dayTwelve = r.sals.day.twelveSal;
-  if (SAL12_TEXT[dayTwelve]) sinSections.push({ heading: `일주의 12신살 · ${dayTwelve}`, body: `나 자신의 자리에 ${SAL12_TEXT[dayTwelve]}의 기운이 있어요.` });
+  if (SAL12_TEXT[dayTwelve]) sinSections.push({ heading: `일주의 12신살 · ${dayTwelve}`, body: `나 자신의 자리에 ${SAL12_TEXT[dayTwelve]}의 기운이 있어.` });
   for (const k of ["year", "month", "hour"] as const) {
     if (k === "hour" && hourUnknown) continue;
     const t = r.sals[k].twelveSal;
-    if (SAL12_TEXT[t]) sinSections.push({ heading: `${PILLAR_MEANING[k].title.split(" · ")[0]}의 12신살 · ${t}`, body: `${PILLAR_MEANING[k].title.split(" · ")[1]} 자리에 ${SAL12_TEXT[t]}의 기운이 있어요.` });
+    if (SAL12_TEXT[t]) sinSections.push({ heading: `${PILLAR_MEANING[k].title.split(" · ")[0]}의 12신살 · ${t}`, body: `${PILLAR_MEANING[k].title.split(" · ")[1]} 자리에 ${SAL12_TEXT[t]}의 기운이 있어.` });
   }
   const gen = ELEMENT_GENERATES[dayEl];
   if (gen) {
@@ -520,8 +520,8 @@ export function buildBook(r: SajuResult, ctx: BookContext): BookPage[] {
     heading: "한 달 행운 처방전",
     body: `① ${lucky.color} 포인트 아이템 하나 곁에 두기 ② 추천 습관(${habit.habit}) 주 3회 ③ ${lucky.direction} 방향으로 산책하거나 자리를 잡아 보기 ④ 하루 한 줄 감사 기록 ⑤ 일요일 밤, 다음 주 우선순위 세 가지 적기.`,
   });
-  sinSections.push({ heading: "마무리 편지", body: `${insight.quote.replace(" ✦", "")}. 사주는 정해진 답이 아니라 나를 이해하는 따뜻한 거울이에요. 이 리포트에서 마음에 닿은 한 문장만 오늘 하루에 가져가 보세요.` });
-  add("lucky", "신살과 행운 처방전", "LUCKY GUIDE · 10", `행운의 색은 ${lucky.color}, 방향은 ${lucky.direction}이에요.`, sinSections, [
+  sinSections.push({ heading: "마무리 편지", body: `${insight.quote.replace(" ✦", "")}. 사주는 정해진 답이 아니라 나를 이해하는 따뜻한 거울이야. 이 리포트에서 마음에 닿은 한 문장만 오늘 하루에 가져가 봐.` });
+  add("lucky", "신살과 행운 처방전", "LUCKY GUIDE · 10", `행운의 색은 ${lucky.color}, 방향은 ${lucky.direction}이야.`, sinSections, [
     {
       title: "나의 행운 가이드",
       rows: [

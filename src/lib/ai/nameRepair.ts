@@ -21,3 +21,21 @@ export function repairName(text: string, name: string | null | undefined): strin
     return whole;
   });
 }
+
+/** 반말로 부를 이름: 성을 떼고(한글 3~4자) 받침에 따라 아/야. */
+export function givenName(name: string): string {
+  const n = name.trim();
+  return /^[가-힣]{3,4}$/.test(n) ? n.slice(n.length - 2) : n;
+}
+export function hasBatchim(word: string): boolean {
+  const c = word.charCodeAt(word.length - 1);
+  return c >= 0xac00 && c <= 0xd7a3 && (c - 0xac00) % 28 !== 0;
+}
+export function callName(name: string): string {
+  const g = givenName(name);
+  return g + (hasBatchim(g) ? "아" : "야");
+}
+export function subjName(name: string): string {
+  const g = givenName(name);
+  return g + (hasBatchim(g) ? "이는" : "는");
+}

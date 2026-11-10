@@ -13,6 +13,7 @@ import { elementOfChar, elName } from "@/lib/elementColor";
 import ElementTile from "@/components/ElementTile";
 import { DAYMASTER_BRIEF, MBTI_BRIEF, cleanMbti } from "@/lib/mbtiBrief";
 import { formatWon } from "@/lib/premium/book/charts";
+import { callName } from "@/lib/ai/nameRepair";
 import BodyFigure from "./BodyFigure";
 import { BODY_GROUPS, STATE_SHORT, STATE_TEXT, bodyElName, bodyStates, bodyWhy, dailyRoutine, monthlyCondition, monthlySummary, yearFocus, type BodyEl, type BodyState } from "@/lib/premium/bodyMap";
 
@@ -92,7 +93,7 @@ function CheckList({ items }: { items: string[] }) {
         </button>
       ))}
       <p role="status" data-testid="book-checks-result" className="min-h-[1.25rem] pt-0.5 text-[12.5px] font-bold text-[#8a5f12]">
-        {touched ? `${items.length}개 중 ${hit}개가 나와 비슷해요. ${checkMessage(hit, items.length)}` : ""}
+        {touched ? `${items.length}개 중 ${hit}개가 나와 비슷해. ${checkMessage(hit, items.length)}` : ""}
       </p>
     </div>
   );
@@ -158,7 +159,7 @@ function Evidence({ rows }: { rows: BookRow[] }) {
           </li>
         ))}
       </ul>
-      <p className="mt-2.5 text-[11.5px] leading-relaxed text-[#e8dfca]/60">입력하신 생년월일시로 계산한 값이에요. 풀이는 재미와 참고용이에요.</p>
+      <p className="mt-2.5 text-[11.5px] leading-relaxed text-[#e8dfca]/60">입력한 생년월일시로 계산한 값이야. 풀이는 재미와 참고용이야.</p>
     </details>
   );
 }
@@ -179,7 +180,7 @@ function Table({ t }: { t: BookTable }) {
               ) : (
                 row.value
               )}
-              {row.locked && <span className="sr-only">잠긴 칸이에요</span>}
+              {row.locked && <span className="sr-only">잠긴 칸이야</span>}
               {row.note && (
                 <span className={`ml-2 text-[11px] text-[#e6c887] ${row.locked ? "select-none blur-[4px]" : ""}`} aria-hidden={row.locked ? "true" : undefined}>
                   {row.note}
@@ -300,7 +301,7 @@ function MonthBars({ table }: { table: BookTable }) {
         <span><b aria-hidden="true" className="mr-1 inline-block h-2 w-2 rounded-sm bg-[#e6c887]/40" />잔잔한 달</span>
         <span>흰 테두리 = 지금</span>
       </p>
-      <p className="mt-2 text-[11px] leading-relaxed text-[#e8dfca]/60">달마다 이 주제와 닿는 기운이 얼마나 힘을 받는지 보여 주는 상대 지수예요. 높다고 꼭 좋은 일이 생긴다는 뜻은 아니고, 힘을 쏟기 좋은 때를 읽는 참고용 그림이에요.</p>
+      <p className="mt-2 text-[11px] leading-relaxed text-[#e8dfca]/60">달마다 이 주제와 닿는 기운이 얼마나 힘을 받는지 보여 주는 상대 지수야. 높다고 꼭 좋은 일이 생긴다는 뜻은 아니고, 힘을 쏟기 좋은 때를 읽는 참고용 그림이야.</p>
     </div>
   );
 }
@@ -323,7 +324,7 @@ function GodBars({ table }: { table: BookTable }) {
               </div>
               <span className="w-6 text-right text-sm font-bold tabular-nums text-[#f5efe0]">{r.locked ? "🔒" : r.n}</span>
             </div>
-            {r.highlight && !r.locked && r.note && <p className="ml-[3.75rem] mt-1 text-[11px] text-[#e8dfca]/70">{r.note} · 가장 두드러져요</p>}
+            {r.highlight && !r.locked && r.note && <p className="ml-[3.75rem] mt-1 text-[11px] text-[#e8dfca]/70">{r.note} · 가장 두드러져</p>}
           </li>
         ))}
       </ul>
@@ -363,7 +364,7 @@ function YearStrip({ table }: { table: BookTable }) {
           </li>
         ))}
       </ol>
-      <p className="mt-2 text-[11px] leading-relaxed text-[#e8dfca]/60">점이 크고 밝을수록 그 해에 이 주제의 기운이 힘을 받아요. 흐름의 높낮이를 보는 참고용이에요.</p>
+      <p className="mt-2 text-[11px] leading-relaxed text-[#e8dfca]/60">점이 크고 밝을수록 그 해에 이 주제의 기운이 힘을 받아. 흐름의 높낮이를 보는 참고용이야.</p>
     </div>
   );
 }
@@ -406,7 +407,7 @@ function StageCurve({ table }: { table: BookTable }) {
           );
         })}
       </svg>
-      <p className="mt-1 text-[11px] leading-relaxed text-[#e8dfca]/60">높은 때는 힘이 차오르는 시기, 낮은 때는 쉬며 준비하는 시기예요. 낮다고 나쁜 때가 아니고 &lsquo;지금 어울리는 속도&rsquo;를 보는 참고용 그림이에요. 흰 점이 지금이에요.</p>
+      <p className="mt-1 text-[11px] leading-relaxed text-[#e8dfca]/60">높은 때는 힘이 차오르는 시기, 낮은 때는 쉬며 준비하는 시기야. 낮다고 나쁜 때가 아니고 &lsquo;지금 어울리는 속도&rsquo;를 보는 참고용 그림이야. 흰 점이 지금이야.</p>
     </div>
   );
 }
@@ -427,7 +428,7 @@ function BodyMap({ report }: { report: PremiumReportView }) {
       </div>
       {focusGroup && report.seyun && (
         <p data-testid="body-year" className={`mt-3 rounded-2xl border ${HAIR} bg-white/[0.04] px-3 py-2.5 text-[12.5px] leading-relaxed text-[#f3ecdc]`}>
-          <b className={GOLD}>올해 살펴볼 곳</b> · {report.seyun.year}년은 {elName(focusGroup.el)} 기운이 들어오는 해예요. {focusGroup.area} 쪽을 한 번 더 챙겨 보세요. (그림에서 노란 물결로 반짝여요)
+          <b className={GOLD}>올해 살펴볼 곳</b> · {report.seyun.year}년은 {elName(focusGroup.el)} 기운이 들어오는 해야. {focusGroup.area} 쪽을 한 번 더 챙겨 봐. (그림에서 노란 물결로 반짝여)
         </p>
       )}
       <ul className="mt-3 space-y-2">
@@ -450,7 +451,7 @@ function BodyMap({ report }: { report: PremiumReportView }) {
       </ul>
       <MonthCalendar report={report} states={states} />
       <DailyRoutine states={states} />
-      <p className="mt-2 text-[11px] leading-relaxed text-[#e8dfca]/60">병이나 증상을 알려 주는 그림이 아니에요. 생활 습관을 정할 때 참고하는 전통 오행 대응이고, 몸이 불편하면 꼭 전문가와 상담해 주세요.</p>
+      <p className="mt-2 text-[11px] leading-relaxed text-[#e8dfca]/60">병이나 증상을 알려 주는 그림이 아니야. 생활 습관을 정할 때 참고하는 전통 오행 대응이고, 몸이 불편하면 꼭 전문가와 상담해 줘.</p>
     </div>
   );
 }
@@ -468,7 +469,7 @@ function MonthCalendar({ report, states }: { report: PremiumReportView; states: 
   return (
     <div data-testid="body-calendar" className="mt-6">
       <p className={`text-[12px] font-bold tracking-[0.12em] ${GOLD}`}>월별 컨디션 달력</p>
-      <p className="mt-1 text-[11.5px] leading-relaxed text-[#e8dfca]/70">올해 달마다 어느 부위를 챙기면 좋은지 보여 줘요. 칸을 눌러 보세요.</p>
+      <p className="mt-1 text-[11.5px] leading-relaxed text-[#e8dfca]/70">올해 달마다 어느 부위를 챙기면 좋은지 보여 줘. 칸을 눌러 봐.</p>
       <div className="mt-3 grid grid-cols-4 gap-1.5">
         {cal.map((c, i) => (
           <button
@@ -507,7 +508,7 @@ function DailyRoutine({ states }: { states: Partial<Record<BodyEl, BodyState>> }
   return (
     <div data-testid="body-routine" className="mt-6">
       <p className={`text-[12px] font-bold tracking-[0.12em] ${GOLD}`}>하루 루틴 처방</p>
-      <p className="mt-1 text-[11.5px] leading-relaxed text-[#e8dfca]/70">내 기운 상태를 하루 시간표로 옮겼어요. 점 색은 어느 부위를 위한 습관인지 알려 줘요.</p>
+      <p className="mt-1 text-[11.5px] leading-relaxed text-[#e8dfca]/70">내 기운 상태를 하루 시간표로 옮겼어. 점 색은 어느 부위를 위한 습관인지 알려 줘.</p>
       <div className="mt-3 space-y-2">
         {slots.map((sl) => (
           <div key={sl.time} className={`flex gap-3 rounded-2xl border ${HAIR} bg-white/[0.04] px-3 py-2.5`}>
@@ -552,7 +553,7 @@ function PrefaceExtras({ report }: { report: PremiumReportView }) {
             <span>나의 일간 <b className={GOLD}>{dayStem}</b></span>
             <span>MBTI <b className={GOLD}>{mbti}</b></span>
           </div>
-          <p className="mt-1 text-[11.5px] text-[#e8dfca]/65">MBTI는 곁에 놓고 보는 참고예요. 네 글자로 사람 속을 다 알 수는 없어서, 사주와 나란히 놓고 같은 말을 하는 곳을 살펴봐요.</p>
+          <p className="mt-1 text-[11.5px] text-[#e8dfca]/65">MBTI는 곁에 놓고 보는 참고야. 네 글자로 사람 속을 다 알 수는 없어서, 사주와 나란히 놓고 같은 말을 하는 곳을 살펴봐.</p>
         </div>
       )}
       <div className="flex flex-wrap justify-between gap-x-3 gap-y-1 text-[12px] text-[#e8dfca]/70">
@@ -560,13 +561,13 @@ function PrefaceExtras({ report }: { report: PremiumReportView }) {
         <span>여덟 글자 = <b className={GOLD}>팔자 八字</b></span>
       </div>
       <p className="text-[13px] leading-relaxed text-[#e8dfca]/85">
-        여덟 글자는 따로 놀지 않고 서로 돕고, 부딪히고, 어울려요. 그 어울림으로 타고난 바탕과 힘이 나는 때를 읽어요.
+        여덟 글자는 따로 놀지 않고 서로 돕고, 부딪히고, 어울려. 그 어울림으로 타고난 바탕과 힘이 나는 때를 읽어.
       </p>
       <div className={`rounded-xl border-l-4 border-[#e6c887] bg-white/[0.05] px-3 py-2.5 text-[14px] font-bold leading-snug ${GOLD}`}>
-        기둥은 태어날 때 한 번 세워졌는데, 왜 해마다 (그리고 매일) 운세를 다시 볼까요?
+        기둥은 태어날 때 한 번 세워졌는데, 왜 해마다 (그리고 매일) 운세를 다시 볼까?
       </div>
       <p className="text-[13px] leading-relaxed text-[#e8dfca]/85">
-        집은 그대로여도 계절과 날씨는 바뀌기 때문이에요. 같은 집에서도 봄엔 창을 열고 겨울엔 난방을 하듯, 같은 사람도 지나는 때에 따라 힘을 쓸 곳이 달라져요.
+        집은 그대로여도 계절과 날씨는 바뀌기 때문이야. 같은 집에서도 봄엔 창을 열고 겨울엔 난방을 하듯, 같은 사람도 지나는 때에 따라 힘을 쓸 곳이 달라져.
       </p>
       <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-[13px]">
         {lane.map(([a, b]) => (
@@ -577,14 +578,14 @@ function PrefaceExtras({ report }: { report: PremiumReportView }) {
         ))}
       </dl>
       <p className="text-[13px] leading-relaxed text-[#e8dfca]/85">
-        그중 <b>일운</b>은 날마다 바뀌는 하루치 기운이에요. 오늘 하루의 일기예보 같아서, 중요한 약속이나 마음 쓸 일을 고를 때 가볍게 참고하면 좋아요. 그래서 매일 다시 봐도 의미가 있어요.
+        그중 <b>일운</b>은 날마다 바뀌는 하루치 기운이야. 오늘 하루의 일기예보 같아서, 중요한 약속이나 마음 쓸 일을 고를 때 가볍게 참고하면 좋아. 그래서 매일 다시 봐도 의미가 있어.
       </p>
       <div className="rounded-xl bg-white/[0.06] px-3 py-3 text-[13px] leading-relaxed text-[#e8dfca]/90">
         <b className={GOLD}>🐾 매일 곁에 있는 친구가 필요하다면</b>
         <ul className="mt-1.5 space-y-1">
-          <li>🪙 <b>오늘의 풀이는 조약돌 하나(500원)</b>예요. 커피 한 모금 값으로 오늘 날씨를 알 수 있어요.</li>
-          <li>💬 <b>도유 상담실</b>에서는 도리가 편하게 말 걸어 주고, 궁금한 걸 물어볼 수 있어요.</li>
-          <li>🎁 <b>매일 무료 1회</b>는 로그인만 하면 조약돌이 채워져 있어요. 부담 없이 놀러 오세요!</li>
+          <li>🪙 <b>오늘의 풀이는 조약돌 하나(500원)</b>야. 커피 한 모금 값으로 오늘 날씨를 알 수 있어.</li>
+          <li>💬 <b>도유 상담실</b>에서는 도리가 편하게 말 걸어 주고, 궁금한 걸 물어볼 수 있어.</li>
+          <li>🎁 <b>매일 무료 1회</b>는 로그인만 하면 조약돌이 채워져 있어. 부담 없이 놀러 와!</li>
         </ul>
       </div>
     </div>
@@ -601,7 +602,7 @@ function Visual({ page, report }: { page: BookPage; report: PremiumReportView })
         <div className="mb-6">
           {page.key === "preface" && (
             <p className="mb-3 text-[13px] leading-relaxed text-[#e8dfca]/85">
-              태어난 <b className={GOLD}>해·달·날·시간</b>, 이 네 때마다 글자를 위아래 두 개씩 적어요. 위는 하늘의 기운(천간), 아래는 땅의 기운(지지)이에요.
+              태어난 <b className={GOLD}>해·달·날·시간</b>, 이 네 때마다 글자를 위아래 두 개씩 적어. 위는 하늘의 기운(천간), 아래는 땅의 기운(지지)이야.
             </p>
           )}
           <div className="grid grid-cols-4 gap-2">
@@ -630,7 +631,7 @@ function Visual({ page, report }: { page: BookPage; report: PremiumReportView })
           </div>
           {report.hourUnknown && (
             <p data-testid="hour-unknown-note" className="mt-3 text-[11px] leading-relaxed text-[#e6c887]">
-              태어난 시간을 몰라 정오(12시)를 기준으로 계산했어요. 신강·신약, 격국, 용신은 태어난 시간에 따라 달라질 수 있어요.
+              태어난 시간을 몰라 정오(12시)를 기준으로 계산했어. 신강·신약, 격국, 용신은 태어난 시간에 따라 달라질 수 있어.
             </p>
           )}
           {page.key === "preface" && <PrefaceExtras report={report} />}
@@ -664,7 +665,7 @@ function Visual({ page, report }: { page: BookPage; report: PremiumReportView })
             <div className="mx-auto mt-3 h-2 max-w-[16rem] rounded-full bg-white/10 overflow-hidden" role="img" aria-label={`궁합 지수 ${report.compat.score}점`}>
               <div className="h-full rounded-full bg-gradient-to-r from-[#f0d9a0] to-[#d3ac62]" style={{ width: `${report.compat.score}%` }} />
             </div>
-            <p className="mt-3 text-[12px] text-[#e8dfca]/60">재미로 보는 참고 점수예요</p>
+            <p className="mt-3 text-[12px] text-[#e8dfca]/60">재미로 보는 참고 점수야</p>
           </div>
         </div>
       ) : null;
@@ -718,7 +719,7 @@ function Visual({ page, report }: { page: BookPage; report: PremiumReportView })
                 <b className={GOLD}>사주와 MBTI, 나란히 보면</b>
                 <div className="mt-1">🔮 사주가 말하는 나: {DAYMASTER_BRIEF[el]}</div>
                 <div>🧩 MBTI({mbti})가 말하는 나: {MBTI_BRIEF[mbti]}</div>
-                <p className="mt-1 text-[11.5px] text-[#e8dfca]/65">두 가지가 같은 말을 하는 곳은 진짜 내 모습일 가능성이 높고, 다른 말을 하는 곳은 상황에 따라 달라지는 모습일 수 있어요.</p>
+                <p className="mt-1 text-[11.5px] text-[#e8dfca]/65">두 가지가 같은 말을 하는 곳은 진짜 내 모습일 가능성이 높고, 다른 말을 하는 곳은 상황에 따라 달라지는 모습일 수 있어.</p>
               </div>
             );
           })()}
@@ -752,7 +753,7 @@ function Visual({ page, report }: { page: BookPage; report: PremiumReportView })
                 <span className="select-none blur-[5px]" aria-hidden="true">
                   丙(병) · 癸(계)
                 </span>
-                <span className="sr-only">잠긴 칸이에요</span>
+                <span className="sr-only">잠긴 칸이야</span>
               </>
             ) : report.yongsin.length ? (
               report.yongsin.join(" · ")
@@ -826,8 +827,8 @@ function titleParts(title: string): { small: string; main: string; sub: string }
 }
 
 /** 맨 앞 "먼저 결론부터" 쪽의 도리 말풍선(고정 문구) */
-export const openingBubble = (name?: string | null) => `안녕하세요, ${name ? `${name}님, ` : ""}너무 반가워요! ${OPENING_BODY}`;
-const OPENING_BODY = "도유사주는 다른 사주 서비스와는 다르게 빙빙 돌려 말하지 않고 핵심 결론부터 먼저 말씀드리는 차별점이 있어요. 자, 그럼 지금부터 당신의 고민을 어떻게 해결하면 좋을지 그 해답을 알아볼까요?";
+export const openingBubble = (name?: string | null) => `안녕, ${name ? `${callName(name)}, ` : ""}너무 반가워! ${OPENING_BODY}`;
+const OPENING_BODY = "도유사주는 다른 사주 서비스와는 다르게 빙빙 돌려 말하지 않고 핵심 결론부터 먼저 말해 주는 차별점이 있어. 자, 그럼 지금부터 네 고민을 어떻게 해결하면 좋을지 그 해답을 알아볼까?";
 
 const BUBBLE =
   "relative max-w-[78%] rounded-[22px] border-2 border-[#20203a] bg-[#fffdf7] px-4 py-3.5 text-[15px] font-medium leading-[1.55] text-[#26233a] after:absolute after:bottom-3.5 after:h-3.5 after:w-3.5 after:bg-[#fffdf7] after:content-['']";
@@ -870,9 +871,9 @@ function ChapterCover({ page }: { page: BookPage }) {
 }
 
 const NEXT_PRODUCTS = [
-  { t: "올해 월별 운세 한눈에", d: "달마다 조심할 일과 기회를 짚어드려요", h: "/" },
+  { t: "올해 월별 운세 한눈에", d: "달마다 조심할 일과 기회를 짚어줘", h: "/" },
   { t: "궁합이 궁금하다면", d: "둘의 사주를 겹쳐 보는 1,000원 풀이", h: "/" },
-  { t: "요즘 고민, 한 가지만 콕", d: "500원으로 고민에 맞춘 한 줄 답을 받아요", h: "/" },
+  { t: "요즘 고민, 한 가지만 콕", d: "500원으로 고민에 맞춘 한 줄 답을 받아", h: "/" },
 ];
 
 /** 장 끝: 다음 장 예고(말풍선 박스). 다음 상품 배너는 결과 맨 끝(별점 후기 위)에 한 번만 보여요. */
@@ -883,9 +884,9 @@ function ChapterEnd({ cur, next }: { cur: BookPage; next?: BookPage }) {
   return (
     <div className="mt-9 flex flex-col items-center gap-4">
       <div data-testid="next-teaser" className="border-2 border-[#20203a] bg-[#fffdf7] px-[18px] py-3 text-center text-[15px] font-bold leading-[1.5] text-[#26233a] shadow-[4px_4px_0_#b98a2f]">
-        지금까지 ‘{here}’{josa(here, "을/를").slice(here.length)} 살펴봤어요.
+        지금까지 ‘{here}’{josa(here, "을/를").slice(here.length)} 살펴봤어.
         <br />
-        다음 장에서는 ‘{there}’{josa(there, "을/를").slice(there.length)} 함께 볼게요!
+        다음 장에서는 ‘{there}’{josa(there, "을/를").slice(there.length)} 함께 볼게!
       </div>
     </div>
   );
@@ -914,7 +915,7 @@ export function NextProductBanner({ report }: { report: PremiumReportView }) {
 }
 
 /** flush: 이미 미드나잇 톤의 틀 안에 들어갈 때 바깥 테두리·배경을 빼고 내용만 보여요. */
-export default function PremiumBook({ report, flush = false, finale, previewBlur = false }: { report: PremiumReportView; flush?: boolean; /** 프리미엄 "미리 보기" 화면에서만 true: 5쪽부터 핵심 풀이를 흐리게 가려요 */ previewBlur?: boolean; /** 마지막 쪽 끝에 붙는 마무리(한 줄 결론 등) */ finale?: ReactNode }) {
+export default function PremiumBook({ report, flush = false, finale, previewBlur = false }: { report: PremiumReportView; flush?: boolean; /** 프리미엄 "미리 보기" 화면에서만 true: 5쪽부터 핵심 풀이를 흐리게 가려 */ previewBlur?: boolean; /** 마지막 쪽 끝에 붙는 마무리(한 줄 결론 등) */ finale?: ReactNode }) {
   const pages = report.book;
   const [i, setI] = useState(0);
   const [unlockMsg, setUnlockMsg] = useState(false);
@@ -1038,18 +1039,18 @@ export default function PremiumBook({ report, flush = false, finale, previewBlur
             <span aria-hidden="true">🔒 </span>
             {previewBlur ? (
               <>
-                미리보기에서는 전체 {pages.length}쪽 중 <b className={GOLD}>앞 {PREVIEW_OPEN_PAGES - 1}쪽</b>만 볼 수 있어요. {PREVIEW_OPEN_PAGES}쪽부터는 풀이가 가려져 있어요.
+                미리보기에서는 전체 {pages.length}쪽 중 <b className={GOLD}>앞 {PREVIEW_OPEN_PAGES - 1}쪽</b>만 볼 수 있어. {PREVIEW_OPEN_PAGES}쪽부터는 풀이가 가려져 있어.
               </>
             ) : (
               <>
-                전체 {pages.length}쪽 중 <b className={GOLD}>{lockedTotal}개 풀이</b>가 잠겨 있어요. 흐리게 보이는 부분이 가장 궁금한 ‘언제’와 ‘어떻게’예요.
+                전체 {pages.length}쪽 중 <b className={GOLD}>{lockedTotal}개 풀이</b>가 잠겨 있어. 흐리게 보이는 부분이 가장 궁금한 ‘언제’와 ‘어떻게’야.
               </>
             )}
           </p>
           {unlock}
           {unlockMsg && (
             <p role="status" data-testid="unlock-message" className="mt-2 text-center text-[11.5px] font-bold text-[#f6dfa8]">
-              지금은 베타 테스트 중이라 결제를 받지 않아요. 정식 오픈하면 여기서 전체 사주서를 열 수 있어요 ❄️
+              지금은 베타 테스트 중이라 결제를 받지 않아. 정식 오픈하면 여기서 전체 사주서를 열 수 있어 ❄️
             </p>
           )}
         </div>
@@ -1061,15 +1062,15 @@ export default function PremiumBook({ report, flush = false, finale, previewBlur
         </h3>
         <ChapterCover page={page} />
 
-        {/* 도리 한 마리에 말풍선 하나: AI 한 줄이 있으면 그것을, 없으면 쪽 첫 문장을 보여요. */}
+        {/* 도리 한 마리에 말풍선 하나: AI 한 줄이 있으면 그것을, 없으면 쪽 첫 문장을 보여. */}
         <div data-testid={page.key === "concernTop" ? "book-opening" : page.note ? "book-note" : "book-lead"}>
           <BubbleRow text={page.key === "concernTop" ? openingBubble(report.viewerName) : page.note ? `도리의 한 줄 · ${page.note}` : page.lead} img={pic} />
         </div>
 
-        {/* 손님이 고른 고민에 대한 답은 첫 쪽 위가 아니라, 같은 주제를 다루는 '요즘 고민 맞춤 풀이' 쪽에 둬요. */}
+        {/* 손님이 고른 고민에 대한 답은 첫 쪽 위가 아니라, 같은 주제를 다루는 '요즘 고민 맞춤 풀이' 쪽에 둬. */}
         {page.key === "concern" && report.concern && <ConcernCard concern={report.concern} dark />}
 
-        {/* 미리보기에서 가려진 쪽은 계산 값을 서버가 비워 보내서, 그림도 보여주지 않아요. */}
+        {/* 미리보기에서 가려진 쪽은 계산 값을 서버가 비워 보내서, 그림도 보여주지 않아. */}
         {!blurred && (
           <div className="rounded-[14px] border border-[#2c3260] bg-[#1a1f40] p-4 empty:hidden">
             <Visual page={page} report={report} />
@@ -1100,7 +1101,7 @@ export default function PremiumBook({ report, flush = false, finale, previewBlur
                 </div>
               ))}
             </dl>
-            <p className="mt-3 text-[11px] text-[#e8dfca]/50">사주로 가볍게 그려 본 재미용 상상이에요.</p>
+            <p className="mt-3 text-[11px] text-[#e8dfca]/50">사주로 가볍게 그려 본 재미용 상상이야.</p>
           </figure>
         )}
 
@@ -1113,7 +1114,7 @@ export default function PremiumBook({ report, flush = false, finale, previewBlur
 
         {groups.map((g, gi) => (
           <div key={`${gi}-${g[0]?.heading}`} className="flex flex-col gap-[18px]">
-            {gi > 0 && <BubbleRow text={`이어서 ‘${g[0].heading.replace(/ · .*$/, "")}’ 이야기를 들려드릴게요.`} img={pic} right={gi % 2 === 1} />}
+            {gi > 0 && <BubbleRow text={`이어서 ‘${g[0].heading.replace(/ · .*$/, "")}’ 이야기를 들려줄게.`} img={pic} right={gi % 2 === 1} />}
             <div className="hanji-wrap">
             <div className="hanji-page px-5 pb-[18px] pt-[22px] text-[#26233a]">
               <span aria-hidden="true" className="hanji-tex" />
@@ -1137,7 +1138,7 @@ export default function PremiumBook({ report, flush = false, finale, previewBlur
                         <p aria-hidden="true" className="select-none text-[15px] leading-[1.85] text-[#322f47] blur-[6px]">
                           {s.body}
                         </p>
-                        <span className="sr-only">잠긴 풀이예요. 전체 열기를 누르면 볼 수 있어요.</span>
+                        <span className="sr-only">잠긴 풀이야. 전체 열기를 누르면 볼 수 있어.</span>
                       </div>
                     ) : (
                       <RichBody text={s.body} />
@@ -1173,8 +1174,8 @@ export default function PremiumBook({ report, flush = false, finale, previewBlur
 
         {blurred && (
           <div data-testid="preview-blur-note" className={`rounded-2xl border ${HAIR} bg-[#e6c887]/[0.06] px-4 py-4 text-center`}>
-            <p className={`text-[13px] font-bold ${GOLD}`}>🔒 핵심 풀이는 흐리게 가려져 있어요</p>
-            <p className="mt-1 text-[12px] leading-relaxed text-[#e8dfca]/80">미리 보기에서는 1~4쪽만 전부 볼 수 있어요. 내 사주의 진짜 이야기는 프리미엄 사주서에서 확인해 보세요.</p>
+            <p className={`text-[13px] font-bold ${GOLD}`}>🔒 핵심 풀이는 흐리게 가려져 있어</p>
+            <p className="mt-1 text-[12px] leading-relaxed text-[#e8dfca]/80">미리 보기에서는 1~4쪽만 전부 볼 수 있어. 내 사주의 진짜 이야기는 프리미엄 사주서에서 확인해 봐.</p>
           </div>
         )}
       </article>
@@ -1188,7 +1189,7 @@ export default function PremiumBook({ report, flush = false, finale, previewBlur
 
       {lockedHere > 0 && !blurred && (
         <p data-testid="page-lock-hint" className="mt-6 text-center text-[12px] text-[#e6c887]">
-          이 페이지에 잠긴 풀이 {lockedHere}개 · 위의 ‘전체 열기’로 볼 수 있어요
+          이 페이지에 잠긴 풀이 {lockedHere}개 · 위의 ‘전체 열기’로 볼 수 있어
         </p>
       )}
 
@@ -1214,7 +1215,7 @@ export default function PremiumBook({ report, flush = false, finale, previewBlur
           다음 ›
         </button>
       </div>
-      <p className="mt-4 text-center text-[11px] leading-relaxed text-[#8f95c0]">명리학의 일반적인 관점으로 풀어 쓴 재미와 참고용 해석이에요.</p>
+      <p className="mt-4 text-center text-[11px] leading-relaxed text-[#8f95c0]">명리학의 일반적인 관점으로 풀어 쓴 재미와 참고용 해석이야.</p>
     </div>
   );
 }
