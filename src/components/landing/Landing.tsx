@@ -75,6 +75,8 @@ export default function Landing() {
   const [payOpen, setPayOpen] = useState(false);
   // 프리미엄·궁합 카드를 눌렀는데 조약돌이 모자랄 때 먼저 보여주는 안내창, 그리고 거기서 열린 충전 화면
   const [premiumSoon, setPremiumSoon] = useState(false);
+  // 관리자는 "준비 중" 안내 없이 프리미엄을 열어 볼 수 있어요
+  const adminRef = useRef(false);
   const [paywall, setPaywall] = useState<PaywallInfo | null>(null);
   const [paywallPay, setPaywallPay] = useState<PaywallInfo | null>(null);
   const coinsRef = useRef(0);
@@ -139,7 +141,7 @@ export default function Landing() {
   const handleSpin = useCallback(
     (key: string, fortune: string, price: string, premium?: boolean) => {
       // 프리미엄 종합 사주는 아직 공개 전이라 "준비 중" 안내만 보여줘요. (궁합은 그대로 열려 있어요)
-      if (premium === true && PREMIUM_SOON && !fortune.includes("궁합")) {
+      if (premium === true && PREMIUM_SOON && !adminRef.current && !fortune.includes("궁합")) {
         setPremiumSoon(true);
         return;
       }
@@ -211,6 +213,20 @@ export default function Landing() {
 
   // 로그인한 상태면 코인을 확인하고, 처음이면 로그인 선물을 받아요. (로그아웃하면 0장)
   const loggedIn = Boolean(user);
+  useEffect(() => {
+    adminRef.current = false;
+    if (!loggedIn) return;
+    let alive = true;
+    fetch("/api/admin/me", { cache: "no-store" })
+      .then((r) => r.json() as Promise<{ admin?: boolean }>)
+      .then((d) => {
+        if (alive) adminRef.current = d.admin === true;
+      })
+      .catch(() => undefined);
+    return () => {
+      alive = false;
+    };
+  }, [loggedIn]);
   useEffect(() => {
     if (loggedIn) void refreshCoins();
     else {
