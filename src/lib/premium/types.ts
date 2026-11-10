@@ -159,6 +159,8 @@ export type ReportLevel = "basic" | "full";
 /** 결과창에 그릴 리포트. ssaju 계산 결과에서 필요한 것만 추렸어요. */
 export interface PremiumReportView {
   level: ReportLevel;
+  /** 이용자가 고른 MBTI (선택). 서문·성향 장에서 사주와 나란히 보여 줘요 */
+  mbti?: string;
   pillars: PillarView[];
   elements: ElementView[];
   strength: StrengthView;

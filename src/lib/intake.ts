@@ -45,6 +45,8 @@ export interface IntakeForm {
   /** 요즘 고민 (선택): 추천 버튼 + 직접 적기 */
   concernTags: ConcernId[];
   concernText: string;
+  /** MBTI (선택, 프리미엄 사주만). 빈 문자열이면 안 고른 거예요 */
+  mbti: string;
   consent: boolean;
 }
 
@@ -76,6 +78,7 @@ export const EMPTY_FORM: IntakeForm = {
   gender: null,
   concernTags: [],
   concernText: "",
+  mbti: "",
   consent: false,
 };
 

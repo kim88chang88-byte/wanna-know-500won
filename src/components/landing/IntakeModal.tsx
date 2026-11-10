@@ -35,6 +35,8 @@ import { summarizeReport } from "@/lib/chatContext";
 import { CompareCard } from "./CompareCard";
 import { HoursCard } from "./HoursCard";
 import { MbtiCard } from "./MbtiCard";
+import { MBTI_TYPES } from "@/lib/ai/mbtiTypes";
+import { cleanMbti } from "@/lib/mbtiBrief";
 import { UpsellTeaser } from "./UpsellTeaser";
 import { chipsForFortune, MAX_CONCERN_TAGS, MAX_CONCERN_TEXT, type Concern, type ConcernId } from "@/lib/concerns";
 import { MACHINES } from "./data";
@@ -447,6 +449,27 @@ function BirthStepFields({ kind, f, patch }: { kind: "date" | "time" | "gender";
   );
 }
 
+/** 프리미엄 사주 입력 화면의 MBTI 고르기 (선택). 곁에 놓고 보는 참고라는 안내와 함께 보여요. */
+function MbtiPicker({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  return (
+    <div data-testid="mbti-picker" className="mt-4">
+      <div className="mb-1.5 text-xs font-bold text-gray-700">
+        MBTI <span className="font-normal text-gray-500">(선택 · 몰라도 괜찮아요)</span>
+      </div>
+      <div className="grid grid-cols-4 gap-1.5" role="group" aria-label="MBTI 고르기">
+        {MBTI_TYPES.map((t) => (
+          <button key={t} type="button" data-testid={`mbti-chip-${t}`} aria-pressed={value === t} onClick={() => onChange(value === t ? "" : t)} className={`rounded-full border py-1.5 text-xs font-bold transition-colors ${value === t ? CHOICE_ON : CHOICE_OFF}`}>
+            {t}
+          </button>
+        ))}
+      </div>
+      <p className="mt-2 rounded-xl bg-brand-50 px-3 py-2 text-[11px] leading-relaxed text-gray-600">
+        <b className="text-gray-800">MBTI는 사주를 읽을 때 곁에 놓고 보는 참고예요.</b> 네 글자로 사람 속을 다 알 수는 없어서, 내가 알려준 성향을 사주와 나란히 놓고 같은 말을 하는 곳, 다른 말을 하는 곳을 살펴봐요.
+      </p>
+    </div>
+  );
+}
+
 export default function IntakeModal({ target, wallet = null, onClose, onComplete, loggedIn = false, nickname = null, savedProfile = null, onRequestLogin, onProfileSaved }: Props) {
   // 저장된 생년월일시가 있으면 미리 채우고, 이미 입력한 질문(생년월일·시간·성별)은 건너뛰어 고민 단계에서 시작해요.
   const [form, setForm] = useState<IntakeForm>(() => (savedProfile ? { ...EMPTY_FORM, ...profileToForm(savedProfile) } : EMPTY_FORM));
@@ -631,7 +654,7 @@ export default function IntakeModal({ target, wallet = null, onClose, onComplete
       const status: ReadingStatus = data.readingStatus ?? "failed";
       const p = await premiumPromise;
       if (ctrl.signal.aborted) return;
-      setPremiumReport(p.report);
+      setPremiumReport(p.report && cleanMbti(form.mbti) && target.premium === true && !compat ? { ...p.report, mbti: cleanMbti(form.mbti) } : p.report);
       setPremiumError(p.error);
       // 나머지 장은 이어서 받아 와서 끼워 넣어요.
       setRestPending(!!p.rest);
@@ -1037,6 +1060,7 @@ export default function IntakeModal({ target, wallet = null, onClose, onComplete
           )}
 
           {step === "birth" && <CombinedBirthFields key={meKey} f={form} patch={update} />}
+          {step === "birth" && target.premium === true && !compat && <MbtiPicker value={form.mbti} onChange={(v) => update({ mbti: v })} />}
           {(step === "date" || step === "time" || step === "gender") && <BirthStepFields kind={step} f={form} patch={update} />}
           {step === "pdate" && people.length > 0 && <SavedPeoplePicker people={people} onPick={pickPerson} title="기억해 둔 사람 (눌러서 바로 불러와요)" />}
           {step === "pdate" && !loggedIn && (
@@ -1050,6 +1074,7 @@ export default function IntakeModal({ target, wallet = null, onClose, onComplete
 
           {step === "concern" && (
             <div className="space-y-3">
+              {!combined && target.premium === true && !compat && <MbtiPicker value={form.mbti} onChange={(v) => update({ mbti: v })} />}
               <div className="flex items-center justify-between text-[11px] text-gray-500">
                 <span>최대 {MAX_CONCERN_TAGS}개까지 고를 수 있어요 (건너뛰어도 돼요)</span>
                 <span data-testid="concern-count" className="font-bold text-brand-600">

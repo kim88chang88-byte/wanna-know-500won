@@ -11,6 +11,7 @@ import { checkMessage } from "@/lib/premium/book/resonance";
 import type { BookChart, BookPage, BookRow, BookTable, ElementKind, PremiumReportView, RealityCheck } from "@/lib/premium/types";
 import { elementOfChar, elName } from "@/lib/elementColor";
 import ElementTile from "@/components/ElementTile";
+import { DAYMASTER_BRIEF, MBTI_BRIEF, cleanMbti } from "@/lib/mbtiBrief";
 import { formatWon } from "@/lib/premium/book/charts";
 import BodyFigure from "./BodyFigure";
 import { BODY_GROUPS, STATE_SHORT, STATE_TEXT, bodyElName, bodyStates, bodyWhy, dailyRoutine, monthlyCondition, monthlySummary, yearFocus, type BodyEl, type BodyState } from "@/lib/premium/bodyMap";
@@ -533,7 +534,9 @@ function DailyRoutine({ states }: { states: Partial<Record<BodyEl, BodyState>> }
 }
 
 /** 서문: 네 기둥 이름표 + "왜 해마다/매일 다시 보나" + 도유사주 이용 안내. 모두에게 같은 글이라 AI 를 쓰지 않아요. */
-function PrefaceExtras() {
+function PrefaceExtras({ report }: { report: PremiumReportView }) {
+  const mbti = cleanMbti(report.mbti);
+  const dayStem = report.pillars.find((p) => p.key === "day")?.full?.[0] ?? null;
   const lane: Array<[string, string]> = [
     ["타고난 집", "내 여덟 글자 (1~3장)"],
     ["10년의 계절", "대운"],
@@ -543,6 +546,15 @@ function PrefaceExtras() {
   ];
   return (
     <div data-testid="preface-extras" className="mt-4 space-y-3">
+      {mbti && dayStem && (
+        <div data-testid="preface-mbti" className="rounded-xl bg-white/[0.06] px-3 py-2.5 text-[12.5px] leading-relaxed text-[#e8dfca]/90">
+          <div className="flex gap-4">
+            <span>나의 일간 <b className={GOLD}>{dayStem}</b></span>
+            <span>MBTI <b className={GOLD}>{mbti}</b></span>
+          </div>
+          <p className="mt-1 text-[11.5px] text-[#e8dfca]/65">MBTI는 곁에 놓고 보는 참고예요. 네 글자로 사람 속을 다 알 수는 없어서, 사주와 나란히 놓고 같은 말을 하는 곳을 살펴봐요.</p>
+        </div>
+      )}
       <div className="flex flex-wrap justify-between gap-x-3 gap-y-1 text-[12px] text-[#e8dfca]/70">
         <span>네 기둥 = <b className={GOLD}>사주 四柱</b></span>
         <span>여덟 글자 = <b className={GOLD}>팔자 八字</b></span>
@@ -621,7 +633,7 @@ function Visual({ page, report }: { page: BookPage; report: PremiumReportView })
               태어난 시간을 몰라 정오(12시)를 기준으로 계산했어요. 신강·신약, 격국, 용신은 태어난 시간에 따라 달라질 수 있어요.
             </p>
           )}
-          {page.key === "preface" && <PrefaceExtras />}
+          {page.key === "preface" && <PrefaceExtras report={report} />}
         </div>
       );
     case "c-overview":
@@ -696,6 +708,20 @@ function Visual({ page, report }: { page: BookPage; report: PremiumReportView })
         <div data-testid="strength-box" className="mb-6 flex flex-wrap items-center gap-2">
           <span className="rounded-full bg-[#e6c887] text-[#1b1824] font-bold text-sm px-4 py-1.5">{report.strength.grade}</span>
           <span className="text-xs text-[#e8dfca]/70">강도 점수 {report.strength.score}</span>
+          {(() => {
+            const mbti = cleanMbti(report.mbti);
+            const stem = report.pillars.find((p) => p.key === "day")?.full?.[0] ?? null;
+            const el = stem ? elementOfChar(stem, false) : null;
+            if (!mbti || !el || !DAYMASTER_BRIEF[el]) return null;
+            return (
+              <div data-testid="nature-mbti" className="mt-3 w-full rounded-xl bg-white/[0.06] px-3 py-2.5 text-[12.5px] leading-relaxed text-[#e8dfca]/90">
+                <b className={GOLD}>사주와 MBTI, 나란히 보면</b>
+                <div className="mt-1">🔮 사주가 말하는 나: {DAYMASTER_BRIEF[el]}</div>
+                <div>🧩 MBTI({mbti})가 말하는 나: {MBTI_BRIEF[mbti]}</div>
+                <p className="mt-1 text-[11.5px] text-[#e8dfca]/65">두 가지가 같은 말을 하는 곳은 진짜 내 모습일 가능성이 높고, 다른 말을 하는 곳은 상황에 따라 달라지는 모습일 수 있어요.</p>
+              </div>
+            );
+          })()}
         </div>
       );
     case "elements":
