@@ -165,7 +165,7 @@ describe("사주 vs 현실 3갈래", () => {
         expect(/(망|불행|파산|이혼|위험)/.test(o.message)).toBe(false);
       }
       expect(rc.options[0].message).toContain("이 운을 잡아 봐");
-      expect(rc.options[1].message).toContain("맞죠");
+      expect(rc.options[1].message).toContain("맞지");
     }
   });
 });
