@@ -18,6 +18,8 @@ export interface RoomMsg extends ChatMsg {
   at: number;
   error?: boolean;
   liked?: boolean;
+  /** 조약돌 충전처럼 대화 중간에 남기는 안내 한 줄 (질문 수·AI 대화·복사에는 넣지 않아요) */
+  log?: boolean;
   follow?: string[];
   /** 도리 답 아래에 크게 보여 주는 그림 카드 */
   visual?: ChatVisual | null;

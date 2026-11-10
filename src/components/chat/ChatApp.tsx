@@ -79,6 +79,8 @@ interface Bubble extends ChatMsg {
   at: number;
   error?: boolean;
   liked?: boolean;
+  /** 충전 안내 같은 기록 한 줄 (대화가 아니에요) */
+  log?: boolean;
   /** 도리 답에서 이어지는 다음 질문 칩 */
   follow?: string[];
   /** 답 아래에 크게 보여 주는 그림 카드 */
@@ -141,6 +143,7 @@ export default function ChatApp({ initialCtx, initialMsgs, onChange, onBack }: {
   const [menu, setMenu] = useState(false);
   const [ctxOpen, setCtxOpen] = useState(false);
   const [note, setNote] = useState<string | null>(null);
+  const [cheer, setCheer] = useState<number | null>(null); // 질문 충전 축하 카드 (더해진 개수)
   const [copied, setCopied] = useState<number | null>(null);
   const [typing, setTyping] = useState<{ idx: number; shown: number } | null>(null);
   const [jump, setJump] = useState(false);
@@ -271,7 +274,7 @@ export default function ChatApp({ initialCtx, initialMsgs, onChange, onBack }: {
   const chips = useMemo(() => {
     const done = new Set(msgs.filter((m) => m.role === "user").map((m) => m.text));
     // 방금 도리 답에 후속 질문이 있으면 그것부터, 없으면 기본 칩
-    const lastMsg = msgs[msgs.length - 1];
+    const lastMsg = msgs.filter((m) => !m.log).slice(-1)[0];
     const follow = lastMsg?.role === "dori" && !lastMsg.error ? (lastMsg.follow ?? []).filter((c) => !done.has(c)) : [];
     if (follow.length > 0) return follow.slice(0, 3);
     const pool = ctx.kind === "reading" && ctx.topic === "study" ? STUDY_CHIPS : CHIP_POOL[ctx.kind];
@@ -293,7 +296,7 @@ export default function ChatApp({ initialCtx, initialMsgs, onChange, onBack }: {
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ctx, messages: next.map(({ role, text: t }) => ({ role, text: t })) }),
+        body: JSON.stringify({ ctx, messages: next.filter((m) => !m.log).map(({ role, text: t }) => ({ role, text: t })) }),
       });
       const data = (await res.json().catch(() => null)) as { answer?: string; followups?: unknown; visual?: ChatVisual | null; choices?: unknown; memo?: ChatMemo | null; error?: string; code?: string; left?: number } | null;
       if (res.status === 402 && data?.code === "quota") {
@@ -340,7 +343,10 @@ export default function ChatApp({ initialCtx, initialMsgs, onChange, onBack }: {
       if (res.ok && typeof data?.left === "number") {
         setLeft(data.left);
         setCoins(data.coins ?? 0);
-        flash(`질문 ${data.added ?? 5}개가 더해졌어요 ❄️`);
+        const added = data.added ?? 5;
+        setMsgs((m) => [...m, { role: "dori", text: `🪙 조약돌 1개로 질문 ${added}개를 충전했어요`, at: Date.now(), log: true }]);
+        setCheer(added);
+        setTimeout(() => setCheer(null), 4200);
       } else if (data?.code === "no_coin") {
         setCoins(0);
         setPayOpen(true);
@@ -367,7 +373,7 @@ export default function ChatApp({ initialCtx, initialMsgs, onChange, onBack }: {
 
   async function copyAll() {
     setMenu(false);
-    const t = msgs.filter((m) => !m.error).map((m) => `${m.role === "user" ? "나" : "도리"}: ${plainAnswer(m.text)}`).join("\n\n");
+    const t = msgs.filter((m) => !m.error && !m.log).map((m) => `${m.role === "user" ? "나" : "도리"}: ${plainAnswer(m.text)}`).join("\n\n");
     try {
       await navigator.clipboard.writeText(t);
       flash("대화를 복사했어요 📋");
@@ -463,6 +469,10 @@ export default function ChatApp({ initialCtx, initialMsgs, onChange, onBack }: {
           <IntroRow key={i} b={b} />
         ))}
         {msgs.map((m, i) => {
+          if (m.log) {
+            const t = new Date(m.at).toLocaleTimeString("ko-KR", { hour: "numeric", minute: "2-digit", hour12: true });
+            return <p key={i} data-testid="chat-log" className="mx-auto w-fit rounded-full bg-[#8a7fa8]/10 px-3 py-1 text-[11.5px] text-[#8a7fa8]">{m.text} · {t}</p>;
+          }
           if (m.role === "user") return <UserRow key={i} text={m.text} at={m.at} />;
           const live = typing?.idx === i;
           return (
@@ -542,6 +552,15 @@ export default function ChatApp({ initialCtx, initialMsgs, onChange, onBack }: {
         <button type="button" onClick={() => toBottom()} className="absolute bottom-[8.5rem] left-1/2 z-20 -translate-x-1/2 rounded-full bg-brand-600 px-4 py-2 text-xs font-bold text-white shadow-lg active:scale-95">
           새 답변 ↓
         </button>
+      )}
+      {cheer !== null && (
+        <div role="status" data-testid="refill-cheer" className="absolute left-3 right-3 top-3 z-40 flex animate-[cheerIn_.45s_ease-out] items-center gap-3 rounded-2xl bg-white px-3.5 py-3 shadow-[0_6px_24px_rgba(0,0,0,0.22)]">
+          <span aria-hidden="true" className="text-[26px]">🎉</span>
+          <div>
+            <b className="block text-[13px] text-gray-900">질문 {cheer}개가 충전됐어요!</b>
+            <span className="text-xs text-slate-500">조약돌 1개로 도리에게 {cheer}번 더 물어볼 수 있어요</span>
+          </div>
+        </div>
       )}
       {note && (
         <p role="status" className="absolute bottom-[8.5rem] left-1/2 z-30 w-max max-w-[88%] -translate-x-1/2 rounded-full bg-gray-900/90 px-4 py-2 text-center text-xs text-white shadow-lg">
