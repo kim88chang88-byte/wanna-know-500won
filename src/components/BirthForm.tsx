@@ -57,7 +57,7 @@ function ChartView({ chart }: { chart: SajuChart }) {
       </p>
       {chart.uncertainPillars.length > 0 && (
         <p className="notice">
-          이 날은 절기가 바뀌는 날이라, 태어난 시각을 알아야 연주/월주를 정확히 알 수 있어요.
+          이 날은 절기가 바뀌는 날이라, 태어난 시각을 알아야 연주/월주를 정확히 알 수 있어.
         </p>
       )}
       {chart.warnings.map((w) => (
@@ -112,11 +112,11 @@ export default function BirthForm() {
         body: JSON.stringify(input),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? "요청에 실패했어요.");
+      if (!res.ok) throw new Error(data.error ?? "요청에 실패했어.");
       setChart(data.chart);
       setReading(data.reading ?? null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "알 수 없는 오류가 발생했어요.");
+      setError(err instanceof Error ? err.message : "알 수 없는 오류가 발생했어.");
     } finally {
       setLoading(false);
     }
@@ -154,7 +154,7 @@ export default function BirthForm() {
               </label>
             </div>
             <label className="check">
-              <input type="checkbox" name="leap" /> 윤달이에요
+              <input type="checkbox" name="leap" /> 윤달이야
             </label>
           </>
         )}
@@ -193,7 +193,7 @@ export default function BirthForm() {
 
       {error && <p className="error">{error}</p>}
       {chart && <ChartView chart={chart} />}
-      {chart && !reading && <p className="meta">AI 풀이는 준비 중이에요.</p>}
+      {chart && !reading && <p className="meta">AI 풀이는 준비 중이야.</p>}
       {reading && <div className="result">{reading}</div>}
     </>
   );

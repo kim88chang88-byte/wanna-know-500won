@@ -31,7 +31,7 @@ export async function POST(request: Request) {
     body = null;
   }
   const email = normalizeEmail(body?.email);
-  if (!email) return NextResponse.json({ error: "이메일 주소를 다시 확인해 주세요." }, { status: 400 });
+  if (!email) return NextResponse.json({ error: "이메일 주소를 다시 확인해 줘." }, { status: 400 });
 
   const eh = emailHash(email, secret);
   // 같은 주소 60초에 1번, 같은 주소·같은 접속지 1시간 한도, 서버 전체 하루 한도 (남용과 메일 요금 보호)
@@ -44,14 +44,14 @@ export async function POST(request: Request) {
   const blocked = checks.find((c) => !c.ok);
   if (blocked && !blocked.ok) {
     return NextResponse.json(
-      { error: "인증번호를 너무 자주 요청했어요. 잠시 뒤에 다시 시도해 주세요.", retryAfterSec: blocked.retryAfterSec },
+      { error: "인증번호를 너무 자주 요청했어. 잠시 뒤에 다시 시도해 줘.", retryAfterSec: blocked.retryAfterSec },
       { status: 429, headers: { "Retry-After": String(blocked.retryAfterSec) } },
     );
   }
 
   const code = generateCode();
   const sent = await sendOtpMail(process.env, email, code);
-  if (!sent) return NextResponse.json({ error: "메일을 보내지 못했어요. 잠시 뒤에 다시 시도해 주세요." }, { status: 502 });
+  if (!sent) return NextResponse.json({ error: "메일을 보내지 못했어. 잠시 뒤에 다시 시도해 줘." }, { status: 502 });
 
   const res = NextResponse.json({ ok: true, resendAfterSec: EMAIL_RESEND_SEC });
   res.cookies.set(EMAIL_OTP_COOKIE, createOtpToken(email, code, secret), {

@@ -17,7 +17,7 @@ export default function DoriScene({ line, tip, action }: { line: string; tip: st
       className="relative mx-auto aspect-[856/412] w-full max-w-xl overflow-hidden rounded-3xl bg-[#f6eef0] bg-cover bg-center shadow-[0_8px_24px_rgba(128,87,224,0.12)]"
       style={{ backgroundImage: "url(/images/daily-scene.webp)", containerType: "inline-size" }}
       role="img"
-      aria-label={`도리가 말해요: ${line} ${tip}`}
+      aria-label={`도리가 말해: ${line} ${tip}`}
     >
       <div
         className="absolute flex flex-col border border-white/70 shadow-[0_6px_18px_rgba(150,130,190,0.22)]"

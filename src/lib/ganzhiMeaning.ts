@@ -37,8 +37,8 @@ export function ganzhiMeaning(ganzhi: string, short = false): string | null {
   const b = BRANCH_ANIMAL[branch ?? ""];
   if (!s || !b) return null;
   const j = withBatchim(s) ? "과" : "와";
-  if (short) return `${s}(${stem})${j} ${b}(${branch})의 기운이 만나는 날이래요`;
-  return `오늘 하루의 기운 이름이에요. ${s}(${stem})${withBatchim(s) ? "과" : "와"} ${b}(${branch})의 기운이 만나는 날이래요.`;
+  if (short) return `${s}(${stem})${j} ${b}(${branch})의 기운이 만나는 날이래`;
+  return `오늘 하루의 기운 이름이야. ${s}(${stem})${withBatchim(s) ? "과" : "와"} ${b}(${branch})의 기운이 만나는 날이래.`;
 }
 
 /** 오늘의 일진 문장을 조각으로 돌려줘요. hl 이 true 인 조각(일진·그림 두 가지)은 형광펜으로 강조해요. 모르는 글자면 null */
@@ -55,7 +55,7 @@ export function ganzhiSentenceParts(ganzhi: string): Array<{ text: string; hl: b
     { text: `${b}(${branch})`, hl: true },
     { text: "의 기운이 만나는 ", hl: false },
     { text: `${readingFirst(`${stem}${branch}`)}일`, hl: true },
-    { text: "이에요.", hl: false },
+    { text: "이야.", hl: false },
   ];
 }
 

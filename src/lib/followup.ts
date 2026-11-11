@@ -27,18 +27,18 @@ const dayNum = (d: string): number => {
 export type Mood = "better" | "same" | "heavier";
 
 export const MOODS: Array<{ id: Mood; label: string }> = [
-  { id: "better", label: "나아졌어요" },
-  { id: "same", label: "그대로예요" },
-  { id: "heavier", label: "더 무거워졌어요" },
+  { id: "better", label: "나아졌어" },
+  { id: "same", label: "그대로야" },
+  { id: "heavier", label: "더 무거워졌어" },
 ];
 
 const REPLY: Record<Mood, string> = {
   better:
-    "다행이에요! 마음이 가벼워진 데에는 분명 내가 해낸 작은 노력이 있었을 거예요. 이 흐름을 이어서, 오늘의 쪽지에서 또 하나 힌트를 가져가 볼까요?",
+    "다행이야! 마음이 가벼워진 데에는 분명 내가 해낸 작은 노력이 있었을 거야. 이 흐름을 이어서, 오늘의 쪽지에서 또 하나 힌트를 가져가 볼까?",
   same:
-    "괜찮아요. 고민은 하루아침에 풀리지 않는 게 보통이에요. 그래도 마음에 두고 계속 살펴보고 있다는 것 자체가 이미 한 걸음이에요. 오늘의 쪽지에서 작은 힌트 하나만 가져가 볼까요?",
+    "괜찮아. 고민은 하루아침에 풀리지 않는 게 보통이야. 그래도 마음에 두고 계속 살펴보고 있다는 것 자체가 이미 한 걸음이야. 오늘의 쪽지에서 작은 힌트 하나만 가져가 볼까?",
   heavier:
-    "마음이 무거운 날이 이어지고 있군요. 도리가 곁에 있을게요. 혼자 감당하기 버거울 땐 가까운 사람이나 전문가와 이야기해 보는 것도 좋아요. 오늘은 물 한 잔 마시고 5분만 쉬어 가요 ❄️",
+    "마음이 무거운 날이 이어지고 있구나. 도리가 곁에 있을게. 혼자 감당하기 버거울 땐 가까운 사람이나 전문가와 이야기해 보는 것도 좋아. 오늘은 물 한 잔 마시고 5분만 쉬어 가 ❄️",
 };
 
 export function followupReply(m: Mood): string {
@@ -46,7 +46,7 @@ export function followupReply(m: Mood): string {
 }
 
 export function followupQuestion(tag: ConcernId): string {
-  return `지난번에 ‘${concernLabel(tag)}’ 고민을 적으셨죠? 요즘은 어때요?`;
+  return `지난번에 ‘${concernLabel(tag)}’ 고민을 적으셨지? 요즘은 어때?`;
 }
 
 /** 지금 물어볼 차례인지. 며칠 지났고, 아직 대답하지 않았고, 너무 오래되지 않았을 때만 true */

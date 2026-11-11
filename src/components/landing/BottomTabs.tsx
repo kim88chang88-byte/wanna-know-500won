@@ -190,7 +190,7 @@ export default function BottomTabs({ page = false, onChatLogin }: { page?: "chat
       </div>
       {soon && (
         <p role="status" className="absolute -top-11 left-1/2 w-max -translate-x-1/2 rounded-full bg-gray-900/90 px-4 py-2 text-xs text-white shadow-lg">
-          도유 상담실은 곧 열려요 ❄️
+          도유 상담실은 곧 열려 ❄️
         </p>
       )}
     </nav>

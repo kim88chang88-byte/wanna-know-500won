@@ -28,9 +28,9 @@ export default function ShareFullButton({ report, reading, topic, name, partnerN
     }
     try {
       await navigator.clipboard.writeText(text);
-      setMsg("풀이와 링크를 복사했어요. 보낼 곳에 붙여넣어 주세요 ❄️");
+      setMsg("풀이와 링크를 복사했어. 보낼 곳에 붙여넣어 줘 ❄️");
     } catch {
-      setMsg("복사하지 못했어요. 잠시 뒤에 다시 시도해 주세요.");
+      setMsg("복사하지 못했어. 잠시 뒤에 다시 시도해 줘.");
     }
     setOpen(false);
   }
@@ -44,9 +44,9 @@ export default function ShareFullButton({ report, reading, topic, name, partnerN
       {open && (
         <div className="fixed inset-0 z-[140] flex items-end justify-center bg-black/40" role="dialog" aria-modal="true" aria-label="공유 방식 고르기" onClick={() => setOpen(false)}>
           <div className="w-full max-w-md rounded-t-[22px] bg-white px-4 pb-5 pt-4 text-left shadow-2xl" onClick={(e) => e.stopPropagation()}>
-            <p className="text-center text-[14px] font-extrabold text-gray-900">어떻게 보낼까요?</p>
+            <p className="text-center text-[14px] font-extrabold text-gray-900">어떻게 보낼까?</p>
             {([
-              ["full", "📜 풀이 전체", "소제목별 풀이 글 전부 + 도유사주 링크 (잠긴 풀이는 빠져요)"],
+              ["full", "📜 풀이 전체", "소제목별 풀이 글 전부 + 도유사주 링크 (잠긴 풀이는 빠져)"],
               ["short", "✨ 핵심만 요약", "한 줄 결론과 핵심 + 링크 (짧게)"],
             ] as const).map(([k, t, d]) => (
               <button key={k} type="button" aria-pressed={mode === k} onClick={() => setMode(k)} className={`mt-2 block w-full rounded-2xl border-[1.5px] px-3 py-2.5 text-left ${mode === k ? "border-brand-500 bg-brand-50" : "border-brand-100 bg-white"}`}>
@@ -57,7 +57,7 @@ export default function ShareFullButton({ report, reading, topic, name, partnerN
             {myName && (
               <label className="mt-3 flex cursor-pointer items-center gap-2 text-[12px] text-gray-700">
                 <input type="checkbox" checked={withName} onChange={(e) => setWithName(e.target.checked)} className="h-4 w-4 accent-brand-600" />
-                내 이름 넣기 (끄면 &ldquo;친구&rdquo;로 보내요)
+                내 이름 넣기 (끄면 &ldquo;친구&rdquo;로 보내)
               </label>
             )}
             <button type="button" onClick={() => void send()} className="mt-3 w-full rounded-full bg-gradient-to-r from-brand-500 to-fuchsia-500 py-2.5 text-sm font-extrabold text-white active:scale-[0.98]">

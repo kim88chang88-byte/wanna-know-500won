@@ -144,12 +144,12 @@ function OutfitCard({ pick }: { pick: OutfitPick }) {
   const cur = list[Math.min(sel, list.length - 1)];
   return (
     <figure data-testid="outfit-card" className="mx-auto mt-2 w-full max-w-[300px] rounded-2xl bg-[#fffdf6] p-3 text-center shadow-[0_2px_12px_rgba(0,0,0,0.08)]">
-      <p className="mb-2 text-[15px] font-bold text-gray-900">이렇게 입어 보면 어때요?</p>
+      <p className="mb-2 text-[15px] font-bold text-gray-900">이렇게 입어 보면 어때?</p>
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img src={outfitSrc(cur.key)} alt={cur.name} className="mx-auto w-full max-w-[250px] rounded-[14px]" loading="lazy" />
       <figcaption className="mt-2 text-[13px] font-bold leading-snug text-gray-900">{cur.name}</figcaption>
       <p className="mt-0.5 text-[11.5px] text-[#8a7fa8]">{cur.cols} · {cur.mood}</p>
-      {!pick.exact && pick.near && <p className="mt-1 text-[11.5px] text-[#7a4fd6]">&lsquo;{pick.fam}&rsquo; 코디는 없어서 비슷한 &lsquo;{pick.near}&rsquo; 계열로 보여 드려요</p>}
+      {!pick.exact && pick.near && <p className="mt-1 text-[11.5px] text-[#7a4fd6]">&lsquo;{pick.fam}&rsquo; 코디는 없어서 비슷한 &lsquo;{pick.near}&rsquo; 계열로 보여 줘</p>}
       {list.length > 1 && (
         <div className="mt-2 flex justify-center gap-2" role="group" aria-label="다른 코디 보기">
           {list.map((o, i) => (
@@ -160,7 +160,7 @@ function OutfitCard({ pick }: { pick: OutfitPick }) {
           ))}
         </div>
       )}
-      <p className="mt-2 text-[11px] text-[#8a7fa8]">예시 이미지는 도리가 입혀 본 모습이에요. 실제 옷 색은 조금 다를 수 있어요.</p>
+      <p className="mt-2 text-[11px] text-[#8a7fa8]">예시 이미지는 도리가 입혀 본 모습이야. 실제 옷 색은 조금 다를 수 있어.</p>
     </figure>
   );
 }
@@ -338,14 +338,14 @@ export default function ChatApp({ initialCtx, initialMsgs, onChange, onBack }: {
         setInput(text);
         return;
       }
-      if (!res.ok || !data?.answer) throw new Error(data?.error ?? "도리가 잠깐 물놀이하러 갔어요. 다시 보내 볼래요?");
+      if (!res.ok || !data?.answer) throw new Error(data?.error ?? "도리가 잠깐 물놀이하러 갔어. 다시 보내 볼래?");
       if (typeof data.left === "number") setLeft(data.left);
       else setLeft((l) => (l === null ? null : Math.max(0, l - 1)));
       const all: Bubble[] = [...next, { role: "dori", text: data.answer, at: Date.now(), follow: Array.isArray(data.followups) ? data.followups.filter((f): f is string => typeof f === "string").slice(0, 3) : undefined, visual: data.visual ?? null, outfit: data.outfit ?? null, choices: Array.isArray(data.choices) ? data.choices.filter((c): c is string => typeof c === "string").slice(0, 2) : undefined, memo: data.memo ?? null }];
       setMsgs(all);
       if (!prefersReducedMotion()) setTyping({ idx: all.length - 1, shown: 1 });
     } catch (e) {
-      setMsgs([...next, { role: "dori", text: e instanceof Error ? e.message : "답을 받지 못했어요.", at: Date.now(), error: true }]);
+      setMsgs([...next, { role: "dori", text: e instanceof Error ? e.message : "답을 받지 못했어.", at: Date.now(), error: true }]);
     } finally {
       inflight.current = false;
       setBusy(false);
@@ -376,17 +376,17 @@ export default function ChatApp({ initialCtx, initialMsgs, onChange, onBack }: {
         setLeft(data.left);
         setCoins(data.coins ?? 0);
         const added = data.added ?? 5;
-        setMsgs((m) => [...m, { role: "dori", text: `🪙 조약돌 1개로 질문 ${added}개를 충전했어요`, at: Date.now(), log: true }]);
+        setMsgs((m) => [...m, { role: "dori", text: `🪙 조약돌 1개로 질문 ${added}개를 충전했어`, at: Date.now(), log: true }]);
         setCheer(added);
         setTimeout(() => setCheer(null), 4200);
       } else if (data?.code === "no_coin") {
         setCoins(0);
         setPayOpen(true);
       } else {
-        flash(data?.error ?? "조약돌을 쓰지 못했어요. 잠시 뒤에 다시 시도해 주세요.");
+        flash(data?.error ?? "조약돌을 쓰지 못했어. 잠시 뒤에 다시 시도해 줘.");
       }
     } catch {
-      flash("인터넷 연결을 확인해 주세요.");
+      flash("인터넷 연결을 확인해 줘.");
     } finally {
       setBuying(false);
       setBuyOpen(false);
@@ -399,7 +399,7 @@ export default function ChatApp({ initialCtx, initialMsgs, onChange, onBack }: {
       setCopied(i);
       setTimeout(() => setCopied((c) => (c === i ? null : c)), 1600);
     } catch {
-      flash("복사하지 못했어요. 글을 길게 눌러 복사해 주세요.");
+      flash("복사하지 못했어. 글을 길게 눌러 복사해 줘.");
     }
   }
 
@@ -408,9 +408,9 @@ export default function ChatApp({ initialCtx, initialMsgs, onChange, onBack }: {
     const t = msgs.filter((m) => !m.error && !m.log).map((m) => `${m.role === "user" ? "나" : "도리"}: ${plainAnswer(m.text)}`).join("\n\n");
     try {
       await navigator.clipboard.writeText(t);
-      flash("대화를 복사했어요 📋");
+      flash("대화를 복사했어 📋");
     } catch {
-      flash("복사하지 못했어요.");
+      flash("복사하지 못했어.");
     }
   }
 
@@ -470,7 +470,7 @@ export default function ChatApp({ initialCtx, initialMsgs, onChange, onBack }: {
         >
           <span aria-hidden="true">{label.icon}</span>
           <span className="flex-1">
-            <b className="font-extrabold">{label.name}</b>를 기억하고 있어요
+            <b className="font-extrabold">{label.name}</b>를 기억하고 있어
           </span>
           {summaryLines.length > 0 && <span aria-hidden="true" className={`text-[#a99bd0] transition-transform ${ctxOpen ? "rotate-180" : ""}`}>⌄</span>}
         </button>
@@ -524,7 +524,7 @@ export default function ChatApp({ initialCtx, initialMsgs, onChange, onBack }: {
                 ) : live ? null : (
                   <>
                     <button type="button" onClick={() => void copy(plainAnswer(m.text), i)} className="rounded-full border border-brand-100 bg-white/70 px-2.5 py-1 text-[11px] text-[#8a7fa8] active:scale-95">
-                      {copied === i ? "✓ 복사했어요" : "📋 복사"}
+                      {copied === i ? "✓ 복사했어" : "📋 복사"}
                     </button>
                     <button
                       type="button"
@@ -532,7 +532,7 @@ export default function ChatApp({ initialCtx, initialMsgs, onChange, onBack }: {
                       onClick={() => setMsgs((all) => all.map((x, k) => (k === i ? { ...x, liked: !x.liked } : x)))}
                       className={`rounded-full border px-2.5 py-1 text-[11px] active:scale-95 ${m.liked ? "border-brand-300 bg-brand-100 font-bold text-brand-700" : "border-brand-100 bg-white/70 text-[#8a7fa8]"}`}
                     >
-                      👍 도움 됐어요
+                      👍 도움 됐어
                     </button>
                   </>
                 )
@@ -564,12 +564,12 @@ export default function ChatApp({ initialCtx, initialMsgs, onChange, onBack }: {
           </div>
         )}
         {showEnd && (
-          <section className="rounded-[20px] border-[1.5px] border-sky-200 bg-gradient-to-br from-[#fff7e0] to-[#ffeaf5] p-4 text-center" aria-label="질문을 모두 사용했어요">
-            <p className="text-[15px] font-bold text-gray-900">오늘의 무료 질문은 여기까지예요 🌙</p>
+          <section className="rounded-[20px] border-[1.5px] border-sky-200 bg-gradient-to-br from-[#fff7e0] to-[#ffeaf5] p-4 text-center" aria-label="질문을 모두 사용했어">
+            <p className="text-[15px] font-bold text-gray-900">오늘의 무료 질문은 여기까지야 🌙</p>
             <p className="mt-1 text-[12.5px] leading-relaxed text-[#6a5a7a]">
               도리가 더 들여다보고 싶은 얘기가 남았다면,
               <br />
-              조약돌 하나로 질문을 5번 더 할 수 있어요.
+              조약돌 하나로 질문을 5번 더 할 수 있어.
             </p>
             <button type="button" onClick={() => setBuyOpen(true)} className="mx-auto mt-3 block rounded-full bg-gradient-to-br from-brand-500 to-[#c24fe0] px-6 py-2.5 text-sm font-extrabold text-white shadow active:scale-[0.98]">
               <CoinIcon /> 조약돌 하나로 5번 더 물어보기
@@ -590,8 +590,8 @@ export default function ChatApp({ initialCtx, initialMsgs, onChange, onBack }: {
         <div role="status" data-testid="refill-cheer" className="absolute left-3 right-3 top-3 z-40 flex animate-[cheerIn_.45s_ease-out] items-center gap-3 rounded-2xl bg-white px-3.5 py-3 shadow-[0_6px_24px_rgba(0,0,0,0.22)]">
           <span aria-hidden="true" className="text-[26px]">🎉</span>
           <div>
-            <b className="block text-[13px] text-gray-900">질문 {cheer}개가 충전됐어요!</b>
-            <span className="text-xs text-slate-500">조약돌 1개로 도리에게 {cheer}번 더 물어볼 수 있어요</span>
+            <b className="block text-[13px] text-gray-900">질문 {cheer}개가 충전됐어!</b>
+            <span className="text-xs text-slate-500">조약돌 1개로 도리에게 {cheer}번 더 물어볼 수 있어</span>
           </div>
         </div>
       )}
@@ -621,7 +621,7 @@ export default function ChatApp({ initialCtx, initialMsgs, onChange, onBack }: {
       >
         <div className="mx-1 mb-2 flex flex-wrap items-center justify-between gap-x-2 gap-y-1.5 text-[11px] text-[#8a7fa8]">
           <span>
-            ❄️ 질문 <b className="text-gray-800">{leftNow}번</b> 남았어요
+            ❄️ 질문 <b className="text-gray-800">{leftNow}번</b> 남았어
             <span className="ml-2 text-[#b08722]"><CoinIcon /> 조약돌 {coins}개</span>
           </span>
           {leftNow >= 1 && leftNow <= 2 && (
@@ -643,7 +643,7 @@ export default function ChatApp({ initialCtx, initialMsgs, onChange, onBack }: {
             }}
             rows={1}
             disabled={leftNow === 0}
-            placeholder={leftNow === 0 ? "오늘 대화는 여기까지예요" : "도리에게 고민을 적어봐요…"}
+            placeholder={leftNow === 0 ? "오늘 대화는 여기까지야" : "도리에게 고민을 적어봐…"}
             aria-label="도리에게 보낼 질문"
             className="max-h-[120px] min-h-[42px] flex-1 resize-none rounded-[22px] border-[1.5px] border-brand-200 bg-white px-4 py-[10px] text-[14px] leading-snug outline-none focus:border-brand-400 disabled:bg-[#f3f0fa]"
           />
@@ -663,11 +663,11 @@ export default function ChatApp({ initialCtx, initialMsgs, onChange, onBack }: {
       {buyOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 px-6" onClick={() => !buying && setBuyOpen(false)}>
           <div role="alertdialog" aria-modal="true" aria-label="조약돌로 질문 더하기" onClick={(e) => e.stopPropagation()} className="w-full max-w-[320px] rounded-2xl bg-white px-5 py-5 text-center shadow-xl">
-            <p className="text-[15px] font-bold leading-relaxed text-gray-900">조약돌 하나로 질문 5개를 더 할까요?</p>
-            <p className="mt-1 text-xs text-slate-500">내 조약돌: {coins}개 {coins === 0 && "· 조약돌이 없어요"}</p>
+            <p className="text-[15px] font-bold leading-relaxed text-gray-900">조약돌 하나로 질문 5개를 더 할까?</p>
+            <p className="mt-1 text-xs text-slate-500">내 조약돌: {coins}개 {coins === 0 && "· 조약돌이 없어"}</p>
             <div className="mt-4 flex gap-2">
               <button type="button" onClick={() => setBuyOpen(false)} disabled={buying} className="flex-1 rounded-full border border-slate-300 bg-white py-2.5 text-sm font-bold text-slate-600">
-                아니요
+                아니
               </button>
               {coins === 0 ? (
                 <button type="button" onClick={() => { setBuyOpen(false); setPayOpen(true); }} className="flex-1 rounded-full bg-brand-500 py-2.5 text-sm font-bold text-white">
@@ -675,7 +675,7 @@ export default function ChatApp({ initialCtx, initialMsgs, onChange, onBack }: {
                 </button>
               ) : (
                 <button type="button" onClick={() => void buy()} disabled={buying} className="flex-1 rounded-full bg-brand-500 py-2.5 text-sm font-bold text-white disabled:opacity-50">
-                  {buying ? "쓰는 중…" : "네, 더할게요"}
+                  {buying ? "쓰는 중…" : "네, 더할게"}
                 </button>
               )}
             </div>
@@ -731,7 +731,7 @@ function MemoCard({ memo }: { memo: ChatMemo }) {
         <i className="block h-full rounded-full bg-gradient-to-r from-[#f6b73c] to-[#ee8a4a]" style={{ width: `${memo.score}%` }} />
       </div>
       <p className="mt-2.5 border-t border-[#eadfb8] pt-2 text-[12.5px] font-extrabold leading-snug text-[#4a3a1a]">{memo.line}</p>
-      <p className="mt-1.5 text-[10.5px] text-[#a2956b]">※ 지수는 흐름의 높낮이를 보는 참고용이에요.</p>
+      <p className="mt-1.5 text-[10.5px] text-[#a2956b]">※ 지수는 흐름의 높낮이를 보는 참고용이야.</p>
     </div>
   );
 }
@@ -800,11 +800,11 @@ function ElementsBubble({ counts }: { counts: Record<Element, number> }) {
                   <ElIconName e={e} />
                 </span>
               ))}
-              의 기운이 {tops.length === 2 ? "똑같이 " : ""}가장 많아요 (각 {counts[top]}/{total})
+              의 기운이 {tops.length === 2 ? "똑같이 " : ""}가장 많아 (각 {counts[top]}/{total})
             </>
           ) : (
             <>
-              <ElIconName e={top} />의 기운이 가장 많아요 ({counts[top]}/{total})
+              <ElIconName e={top} />의 기운이 가장 많아 ({counts[top]}/{total})
             </>
           )}
         </p>
@@ -834,7 +834,7 @@ function IntroRow({ b }: { b: IntroBubble }) {
                 </div>
               ))}
             </div>
-            <p className="mt-2 text-[11px] leading-relaxed text-gray-500">위 칸은 겉으로 드러나는 기운, 아래 칸은 바탕이 되는 기운이에요. 색은 다섯 가지 기운을 뜻해요.</p>
+            <p className="mt-2 text-[11px] leading-relaxed text-gray-500">위 칸은 겉으로 드러나는 기운, 아래 칸은 바탕이 되는 기운이야. 색은 다섯 가지 기운을 뜻해.</p>
           </div>
         )}
         {b.kind === "elements" && <ElementsBubble counts={b.counts} />}

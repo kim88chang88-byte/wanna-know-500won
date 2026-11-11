@@ -92,15 +92,15 @@ function SpendStage({ before, after }: { before: number; after: number }) {
 export default function SpendConfirm({ plan, onCancel, onConfirm, onCharge }: { plan: SpendPlan; onCancel: () => void; onConfirm: () => void; onCharge: () => void }) {
   const short = plan.kind === "short";
   const title =
-    plan.kind === "free" ? "오늘의 무료 뽑기 1회를 써서\n풀이를 볼까요?"
-    : plan.kind === "ticket" ? "보너스 뽑기권 1장을 써서\n풀이를 볼까요?"
-    : plan.kind === "coin" ? `${pebbleText(plan.cost)}(${(plan.cost * 500).toLocaleString("ko-KR")}원)를 써서\n풀이를 볼까요?`
-    : "조약돌이 모자라요";
+    plan.kind === "free" ? "오늘의 무료 뽑기 1회를 써서\n풀이를 볼까?"
+    : plan.kind === "ticket" ? "보너스 뽑기권 1장을 써서\n풀이를 볼까?"
+    : plan.kind === "coin" ? `${pebbleText(plan.cost)}(${(plan.cost * 500).toLocaleString("ko-KR")}원)를 써서\n풀이를 볼까?`
+    : "조약돌이 모자라";
   const sub =
-    plan.kind === "free" ? "한 번 보면 무료 횟수가 하나 줄어요."
-    : plan.kind === "ticket" ? "오늘 무료는 이미 사용했어요."
-    : plan.kind === "coin" ? "오늘 무료는 이미 사용했어요."
-    : `이 풀이는 ${pebbleText(plan.cost)}가 필요한데\n지금은 ${pebbleText(plan.have)}가 있어요.`;
+    plan.kind === "free" ? "한 번 보면 무료 횟수가 하나 줄어."
+    : plan.kind === "ticket" ? "오늘 무료는 이미 사용했어."
+    : plan.kind === "coin" ? "오늘 무료는 이미 사용했어."
+    : `이 풀이는 ${pebbleText(plan.cost)}가 필요한데\n지금은 ${pebbleText(plan.have)}가 있어.`;
   const icon = plan.kind === "coin" || short ? "/images/coin-500.webp" : "/images/free-tag.webp";
   return (
     <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/50 px-6" role="alertdialog" aria-modal="true" aria-label="사용 확인" onClick={onCancel}>

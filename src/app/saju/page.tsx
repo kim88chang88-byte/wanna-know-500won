@@ -16,7 +16,7 @@ export default function SajuPage() {
     <div className="legacy">
       <main className="legacy-container">
         <h1>500원 사주</h1>
-        <p className="lead">생년월일시를 입력하면 사주를 풀어드려요.</p>
+        <p className="lead">생년월일시를 입력하면 사주를 풀어줘.</p>
         <BirthForm />
       </main>
     </div>

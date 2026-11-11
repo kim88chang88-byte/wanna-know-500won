@@ -7,7 +7,7 @@ import { askQuestionsFor } from "@/lib/ai/askQuestions";
 import type { BirthInput } from "@/lib/saju/types";
 
 /** 결과 아래 "도리에게 더 물어보기" 칩. 눌러 보면 그 사람 사주 근거로 짧게 답해요. */
-export function AskChips({ input, luxe = false, topic, hideTitle = false }: { input: BirthInput; luxe?: boolean; topic?: string; /** 도리의 쪽지 안처럼 위에 같은 제목이 이미 있으면 제목을 빼요 */ hideTitle?: boolean }) {
+export function AskChips({ input, luxe = false, topic, hideTitle = false }: { input: BirthInput; luxe?: boolean; topic?: string; /** 도리의 쪽지 안처럼 위에 같은 제목이 이미 있으면 제목을 빼 */ hideTitle?: boolean }) {
   const [active, setActive] = useState<string | null>(null);
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState<string | null>(null);
@@ -24,14 +24,14 @@ export function AskChips({ input, luxe = false, topic, hideTitle = false }: { in
     try {
       const res = await fetchRetry("/api/ask", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...input, q: id, ...(topic === "study" ? { topic } : {}) }) });
       const data = (await res.json().catch(() => null)) as { answer?: string; error?: string } | null;
-      if (!res.ok || !data?.answer) throw new Error(data?.error ?? "도리가 잠깐 물놀이하러 갔어요. 다시 눌러 볼래요?");
+      if (!res.ok || !data?.answer) throw new Error(data?.error ?? "도리가 잠깐 물놀이하러 갔어. 다시 눌러 볼래?");
       const answer = data.answer;
       setAnswers((a) => ({ ...a, [id]: answer }));
       // 답이 왔으면 막대를 100% 로 채운 뒤 잠깐 보여 주고 답으로 바꿔요.
       setDone(true);
       await new Promise((r) => setTimeout(r, 450));
     } catch (e) {
-      setError(e instanceof Error ? e.message : "답을 받지 못했어요.");
+      setError(e instanceof Error ? e.message : "답을 받지 못했어.");
     } finally {
       inflight.current = false;
       setDone(false);
@@ -43,7 +43,7 @@ export function AskChips({ input, luxe = false, topic, hideTitle = false }: { in
   return (
     <section data-testid="ask-chips" aria-label="도리에게 더 물어보기" className="mt-6">
       {!hideTitle && <p className={`text-sm font-bold ${luxe ? "text-[#fbf3de]" : "text-gray-900"}`}>🦦 도리에게 더 물어보기</p>}
-      <p className={`mt-0.5 text-xs ${luxe ? "text-[#e8dfca]/70" : "text-gray-500"}`}>궁금한 걸 눌러 보세요. 내 사주 근거로 짧게 답해줄게요.</p>
+      <p className={`mt-0.5 text-xs ${luxe ? "text-[#e8dfca]/70" : "text-gray-500"}`}>궁금한 걸 눌러 봐. 내 사주 근거로 짧게 답해줄게.</p>
       <div className="mt-3 flex flex-wrap gap-2">
         {askQuestionsFor(topic).map((q) => (
           <button

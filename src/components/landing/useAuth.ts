@@ -24,9 +24,9 @@ export type LoginResult = "unavailable" | "cancelled" | "error";
 const RESULTS: LoginResult[] = ["unavailable", "cancelled", "error"];
 
 export const LOGIN_RESULT_MESSAGE: Record<LoginResult, string> = {
-  unavailable: "이 로그인 방식이 아직 열리지 않았어요. 곧 열릴 예정이에요 ❄️",
-  cancelled: "로그인을 취소했어요. 언제든 다시 해볼 수 있어요.",
-  error: "로그인에 실패했어요. 잠시 뒤에 다시 시도해 주세요.",
+  unavailable: "이 로그인 방식이 아직 열리지 않았어. 곧 열릴 예정이야 ❄️",
+  cancelled: "로그인을 취소했어. 언제든 다시 해볼 수 있어.",
+  error: "로그인에 실패했어. 잠시 뒤에 다시 시도해 줘.",
 };
 
 /** 서버에 로그인 상태를 물어보고(쿠키는 서버만 읽어요), 로그아웃을 요청해요. */

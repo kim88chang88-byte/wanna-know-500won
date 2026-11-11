@@ -44,14 +44,14 @@ export default function ElementTile({
   return (
     <div className="text-center" aria-label={label}>
       <div className="relative aspect-[1/1.05] overflow-hidden rounded-xl shadow-[0_1px_3px_rgba(0,0,0,0.25)]">
-        {/* 그림: 채도를 올리고 오행 색을 덧입혀서, 불은 빨갛게·물은 파랗게 한눈에 보이게 해요 */}
+        {/* 그림: 채도를 올리고 오행 색을 덧입혀서, 불은 빨갛게·물은 파랗게 한눈에 보이게 해 */}
         <div
           aria-hidden="true"
           className="absolute inset-0 bg-cover [filter:saturate(1.3)_contrast(1.05)]"
           style={{ backgroundImage: `url(/images/el-${kind}.webp)`, backgroundPosition: `50% ${FOCUS[kind]}` }}
         />
         <div aria-hidden="true" className="absolute inset-0 mix-blend-soft-light" style={{ background: `rgb(${t.tint})`, opacity: t.strength }} />
-        {/* 한자 뒤만 오행의 짙은 색으로 살짝 눌러서 밝은 그림에서도 글자가 묻히지 않게 해요 */}
+        {/* 한자 뒤만 오행의 짙은 색으로 살짝 눌러서 밝은 그림에서도 글자가 묻히지 않게 해 */}
         <div aria-hidden="true" className="absolute inset-0" style={{ background: `radial-gradient(circle at 50% 50%, rgba(${t.dark},0.45) 0, rgba(${t.dark},0) 65%)` }} />
         {el && (
           <span data-testid="element-chip" className={`absolute right-1 top-1 z-10 whitespace-nowrap rounded-full px-1.5 py-0.5 font-sans ${compact ? "text-[9px]" : "text-[10px]"} font-bold leading-tight text-white`} style={{ background: `rgba(${t.dark},0.85)` }}>

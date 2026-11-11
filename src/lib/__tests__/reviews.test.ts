@@ -19,7 +19,7 @@ describe("후기 입력 검사", () => {
     expect(r!.text.length).toBeLessThanOrEqual(MAX_REVIEW_TEXT);
   });
   it("칩 이름", () => {
-    expect(reasonLabel("wrong")).toBe("풀이가 나랑 안 맞아요");
+    expect(reasonLabel("wrong")).toBe("풀이가 나랑 안 맞아");
   });
 });
 
@@ -35,7 +35,7 @@ describe("후기 집계", () => {
     expect(s.reviews.count).toBe(2);
     expect(s.reviews.average).toBe(3.5);
     expect(s.reviews.distribution).toEqual([0, 1, 0, 0, 1]);
-    expect(s.reviews.reasons[0]).toEqual({ id: "wrong", label: "풀이가 나랑 안 맞아요", count: 1 });
+    expect(s.reviews.reasons[0]).toEqual({ id: "wrong", label: "풀이가 나랑 안 맞아", count: 1 });
     expect(s.reviews.list.map((r) => [r.id, r.hidden])).toEqual([[5, false], [4, false], [3, true]]);
     expect(s.reviews.list[1].day).toBe("2026-10-18"); // UTC 15:30 = KST 다음 날 00:30
     expect(JSON.stringify(s)).not.toMatch(/user_id/);

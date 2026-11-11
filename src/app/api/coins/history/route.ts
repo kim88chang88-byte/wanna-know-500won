@@ -12,7 +12,7 @@ export async function GET(request: Request) {
   const denied = guardOrigin(request) ?? (await enforceLimits(request, { name: "coins-history", windowMs: 60_000, ip: 30, user: 20 }));
   if (denied) return denied;
   const session = verifySessionToken(readCookie(request.headers.get("cookie"), SESSION_COOKIE), process.env.AUTH_SECRET);
-  if (!session) return NextResponse.json({ error: "로그인이 필요해요." }, { status: 401, headers: NO_STORE });
+  if (!session) return NextResponse.json({ error: "로그인이 필요해." }, { status: 401, headers: NO_STORE });
   const config = loadDbConfig(process.env);
   if (!config) return NextResponse.json({ balance: 0, items: [] }, { headers: NO_STORE });
   const db = createDb(config);
@@ -21,6 +21,6 @@ export async function GET(request: Request) {
     return NextResponse.json({ balance, items: groupCoinLog(rows) }, { headers: NO_STORE });
   } catch (err) {
     console.error("coin history failed:", err instanceof Error ? err.message : "unknown");
-    return NextResponse.json({ error: "지갑을 불러오지 못했어요. 잠시 뒤에 다시 시도해 주세요." }, { status: 502, headers: NO_STORE });
+    return NextResponse.json({ error: "지갑을 불러오지 못했어. 잠시 뒤에 다시 시도해 줘." }, { status: 502, headers: NO_STORE });
   }
 }

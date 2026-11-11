@@ -121,7 +121,7 @@ function SavedPeopleBox() {
   return (
     <div data-testid="saved-people-box" className="rounded-2xl bg-brand-50 border border-brand-100 p-3">
       <p className="text-[11px] font-bold text-brand-700 text-center">도리가 기억하고 있는 다른 사람</p>
-      {people.length === 0 && !adding && <p className="mt-1 text-center text-[11px] text-gray-500">아직 없어요. 가족·친구·연인을 추가해 두면 눌러서 바로 풀이할 수 있어요.</p>}
+      {people.length === 0 && !adding && <p className="mt-1 text-center text-[11px] text-gray-500">아직 없어. 가족·친구·연인을 추가해 두면 눌러서 바로 풀이할 수 있어.</p>}
       <ul className="mt-1.5 space-y-1">
         {people.map((p) => (
           <li key={p.id} className="flex items-center justify-between gap-2 text-xs text-gray-700">
@@ -153,7 +153,7 @@ function SavedPeopleBox() {
       </ul>
       {failed && (
         <p role="alert" className="text-[11px] font-bold text-brand-600 mt-1 text-center">
-          지우지 못했어요. 잠시 뒤에 다시 시도해 주세요.
+          지우지 못했어. 잠시 뒤에 다시 시도해 줘.
         </p>
       )}
       {adding ? (
@@ -174,7 +174,7 @@ function SavedPeopleBox() {
           + 다른 사람 추가하기
         </button>
       ) : (
-        <p className="mt-2 text-center text-[11px] text-gray-500">가득 찼어요. (최대 {MAX_PEOPLE}명) 안 쓰는 사람을 지우면 새로 추가할 수 있어요.</p>
+        <p className="mt-2 text-center text-[11px] text-gray-500">가득 찼어. (최대 {MAX_PEOPLE}명) 안 쓰는 사람을 지우면 새로 추가할 수 있어.</p>
       )}
     </div>
   );
@@ -191,7 +191,7 @@ function RefCodeEntry() {
   function save() {
     const code = cleanRefCode(input);
     if (!code) {
-      setMsg("코드는 영문 대문자와 숫자 8자리예요. 다시 확인해 주세요.");
+      setMsg("코드는 영문 대문자와 숫자 8자리야. 다시 확인해 줘.");
       return;
     }
     saveRef(getBrowserStorage(), code);
@@ -201,11 +201,11 @@ function RefCodeEntry() {
   }
   return (
     <details data-testid="ref-entry" open={saved !== null} className="mb-3 rounded-2xl border border-amber-200 bg-amber-50 px-3.5 py-2.5 text-left">
-      <summary className="cursor-pointer list-none text-xs font-bold text-amber-900">🎁 친구에게 받은 초대 코드가 있나요? (선택)</summary>
+      <summary className="cursor-pointer list-none text-xs font-bold text-amber-900">🎁 친구에게 받은 초대 코드가 있나? (선택)</summary>
       {saved ? (
         <div className="mt-2">
           <p data-testid="ref-entry-saved" className="text-[11.5px] leading-relaxed text-amber-900">
-            초대 코드 <b className="font-mono tracking-widest">{saved}</b>를 저장해 뒀어요. 아래에서 가입하고 첫 풀이를 마치면 두 분 모두 500원 뽑기 1회를 받아요 🎁
+            초대 코드 <b className="font-mono tracking-widest">{saved}</b>를 저장해 뒀어. 아래에서 가입하고 첫 풀이를 마치면 두 분 모두 500원 뽑기 1회를 받아 🎁
           </p>
           <button
             type="button"
@@ -236,7 +236,7 @@ function RefCodeEntry() {
               저장
             </button>
           </div>
-          <p className="mt-1.5 text-[11px] leading-relaxed text-amber-800">코드를 적어 두고 아래에서 가입하면 자동으로 적용돼요.</p>
+          <p className="mt-1.5 text-[11px] leading-relaxed text-amber-800">코드를 적어 두고 아래에서 가입하면 자동으로 적용돼.</p>
           {msg && <p role="status" className="mt-1 text-[11px] text-rose-600">{msg}</p>}
         </div>
       )}
@@ -263,8 +263,8 @@ export function LoginModal({ onClose, reason = null, user = null, result = null,
         </h4>
         <p className="text-xs text-gray-500 mt-1 whitespace-pre-line">
           {user
-            ? `${user.nickname ? `${user.nickname}님, ` : ""}어서 와요! 로그인되어 있어요.`
-            : `${reason ? `${reason}\n` : ""}간편 가입하고 매일 첫 1회 무료 뽑기를 챙기세요!\n로그인하면 도리가 생년월일시를 기억해서 다시 입력할 필요가 없어요!`}
+            ? `${user.nickname ? `${user.nickname}님, ` : ""}어서 와! 로그인되어 있어.`
+            : `${reason ? `${reason}\n` : ""}간편 가입하고 매일 첫 1회 무료 뽑기를 챙겨!\n로그인하면 도리가 생년월일시를 기억해서 다시 입력할 필요가 없어!`}
         </p>
       </div>
 
@@ -276,7 +276,7 @@ export function LoginModal({ onClose, reason = null, user = null, result = null,
               <p className="text-xs text-gray-700 mt-1">{profileSummary(profile)}</p>
               {profileError && (
                 <p role="alert" className="text-[11px] font-bold text-brand-600 mt-1">
-                  지우지 못했어요. 잠시 뒤에 다시 시도해 주세요.
+                  지우지 못했어. 잠시 뒤에 다시 시도해 줘.
                 </p>
               )}
               <button

@@ -27,13 +27,13 @@ export function HoursCard({ input }: { input: BirthInput }) {
     try {
       const res = await fetchRetry("/api/hours", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...input, start, end }) });
       const data = (await res.json().catch(() => null)) as { result?: HourResult; error?: string } | null;
-      if (!res.ok || !data?.result) throw new Error(data?.error ?? "도리가 잠깐 물놀이하러 갔어요. 다시 눌러 볼래요?");
+      if (!res.ok || !data?.result) throw new Error(data?.error ?? "도리가 잠깐 물놀이하러 갔어. 다시 눌러 볼래?");
       setResult(data.result);
       // 답이 왔으면 막대를 100% 로 채운 뒤 잠깐 보여 주고 결과로 바꿔요.
       setDone(true);
       await new Promise((r) => setTimeout(r, 450));
     } catch (err) {
-      setError(err instanceof Error ? err.message : "답을 받지 못했어요.");
+      setError(err instanceof Error ? err.message : "답을 받지 못했어.");
     } finally {
       setDone(false);
       setLoading(false);
@@ -44,7 +44,7 @@ export function HoursCard({ input }: { input: BirthInput }) {
     <section data-testid="hours-card" aria-label="태어난 시간이 애매할 때" className="mt-3">
       <button type="button" onClick={() => setOpen((v) => !v)} aria-expanded={open} className="w-full text-left px-4 py-3 rounded-2xl bg-white border border-brand-200 hover:bg-brand-50 transition">
         <span className="text-sm font-bold text-gray-900">🕰 태어난 시간이 애매하다면?</span>
-        <span className="block text-xs text-gray-500 mt-0.5">&ldquo;아침쯤&rdquo;처럼 대략만 알아도, 시간대별로 사주가 어떻게 달라지는지 비교해 줘요.</span>
+        <span className="block text-xs text-gray-500 mt-0.5">&ldquo;아침쯤&rdquo;처럼 대략만 알아도, 시간대별로 사주가 어떻게 달라지는지 비교해 줘.</span>
       </button>
       {open && (
         <form onSubmit={run} className="mt-2 p-4 rounded-2xl bg-brand-50/50 border border-brand-100 space-y-3">
@@ -63,11 +63,11 @@ export function HoursCard({ input }: { input: BirthInput }) {
               </select>
             </label>
           </div>
-          <p className="text-[11px] text-gray-500">4시간 이내로 골라 주세요. 자정을 넘는 범위는 나눠서 따로 봐 주세요.</p>
+          <p className="text-[11px] text-gray-500">4시간 이내로 골라 줘. 자정을 넘는 범위는 나눠서 따로 봐 줘.</p>
           <button type="submit" disabled={loading} className="w-full py-2.5 rounded-xl bg-brand-500 text-white text-sm font-bold disabled:opacity-50">
             시간대별로 비교하기
           </button>
-          {loading && <InlineProgress label="도리가 시간대를 비교하는 중이에요" done={done} />}
+          {loading && <InlineProgress label="도리가 시간대를 비교하는 중이야" done={done} />}
         </form>
       )}
       <div role="status" aria-live="polite">
@@ -85,7 +85,7 @@ export function HoursCard({ input }: { input: BirthInput }) {
             <p><span className="font-semibold">🔒 변하지 않는 핵심</span><br />{result.common}</p>
             <p><span className="font-semibold">🔀 달라지는 부분</span><br />{result.differ}</p>
             <p><span className="font-semibold">🔎 정확히 확인하려면</span><br />{result.howToCheck}</p>
-            <p className="text-[11px] text-gray-500">정확한 시간을 알게 되면 처음부터 다시 뽑아 보세요.</p>
+            <p className="text-[11px] text-gray-500">정확한 시간을 알게 되면 처음부터 다시 뽑아 봐.</p>
           </div>
         )}
       </div>

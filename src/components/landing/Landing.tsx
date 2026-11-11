@@ -150,7 +150,7 @@ export default function Landing() {
         track("login_click");
         // 로그인하고 돌아오면 이 카드를 이어서 열어 주려고, 어떤 카드였는지만 적어 둬요.
         savePendingDraw(getBrowserStorage(), { key, fortune, price, premium: premium === true });
-        setLoginReason(`${fortune} 뽑기는 로그인하고 이용할 수 있어요 ❄️`);
+        setLoginReason(`${fortune} 뽑기는 로그인하고 이용할 수 있어 ❄️`);
         setLoginOpen(true);
         return;
       }
@@ -325,7 +325,7 @@ export default function Landing() {
         .then((r) => r.json() as Promise<{ enabled?: boolean }>)
         .then((d) => {
           if (d.enabled === true) router.push("/chat");
-          else setNotice("도유 상담실은 곧 열려요 ❄️");
+          else setNotice("도유 상담실은 곧 열려 ❄️");
         })
         .catch(() => undefined);
       return;
@@ -350,7 +350,7 @@ export default function Landing() {
     clearAfterLoginChat(getBrowserStorage());
     saveAfterLoginGoChat(getBrowserStorage());
     track("chat_login_click");
-    setLoginReason("도유 상담실은 로그인하고 이용할 수 있어요 ❄️");
+    setLoginReason("도유 상담실은 로그인하고 이용할 수 있어 ❄️");
     setLoginOpen(true);
   }, []);
   const openChatLogin = useCallback((chat: ChatCtx) => {
@@ -461,7 +461,7 @@ export default function Landing() {
     } catch {
       /* 저장이 막힌 환경이면 알림만 안 기억해요 */
     }
-    if (r.show) setNotice("🎁 무료 뽑기 1회가 충전됐어요! 오늘의 운세, 지금 뽑아볼까요?");
+    if (r.show) setNotice("🎁 무료 뽑기 1회가 충전됐어! 오늘의 운세, 지금 뽑아볼까?");
   }, [user, serverCounts]);
 
   // 하단 메뉴 "운세 뽑기" 빨간 점: 오늘 무료 뽑기나 조약돌이 남아 있는지 적어 둬요 (메뉴를 열면 꺼져요)
@@ -484,7 +484,7 @@ export default function Landing() {
         <HeroSection visitors={visitors} tickets={tickets} onBuy={user ? () => router.push("/wallet") : undefined} onRefill={onFreeElapsed} wallet={user ? { ...splitPearls(coins), free: Math.max(0, FREE_PER_DAY - counts.today) + tickets } : null} />
         <ShowcaseSection />
         {!user && <BirthdayTeaser onOpenLogin={openChatLogin} />}
-        {/* 도리의 소식 카드들은 첫 화면의 "뽑으러 가기" 버튼 아래로 옮겼어요. (첫 화면에서 눌러야 할 것이 하나만 보이게) */}
+        {/* 도리의 소식 카드들은 첫 화면의 "뽑으러 가기" 버튼 아래로 옮겼어. (첫 화면에서 눌러야 할 것이 하나만 보이게) */}
         {user && profile && <DailyLineCard birth={profile} onOpened={() => {
           recordVisit(getBrowserStorage(), dayKey(new Date()));
           syncReward();
@@ -545,8 +545,8 @@ export default function Landing() {
             {notice
               ? notice
               : gift
-              ? `🎁 ${user?.nickname ? `${user.nickname}님, ` : ""}로그인 선물로 500원 무료 뽑기 1회가 도착했어요!`
-              : `❄️ ${user?.nickname ? `${user.nickname}님, ` : ""}로그인됐어요! 매일 첫 1회는 무료예요.`}
+              ? `🎁 ${user?.nickname ? `${user.nickname}님, ` : ""}로그인 선물로 500원 무료 뽑기 1회가 도착했어!`
+              : `❄️ ${user?.nickname ? `${user.nickname}님, ` : ""}로그인됐어! 매일 첫 1회는 무료야.`}
           </span>
           <button type="button" onClick={() => { clearWelcome(); setGift(false); setNotice(null); }} aria-label="알림 닫기" className="shrink-0 text-white/80 hover:text-white">
             <span className="material-symbols-outlined text-[18px]">close</span>

@@ -11,12 +11,12 @@ const BLOCKED = ["운영자", "관리자", "도유사주", "도리", "admin", "a
 export type NickCheck = { ok: true; nick: string } | { ok: false; error: string };
 
 export function checkNickname(raw: unknown): NickCheck {
-  if (typeof raw !== "string") return { ok: false, error: "닉네임을 입력해 주세요." };
+  if (typeof raw !== "string") return { ok: false, error: "닉네임을 입력해 줘." };
   const nick = raw.normalize("NFC").replace(/\s+/g, " ").trim();
-  if (nick.length < NICK_MIN) return { ok: false, error: `닉네임은 ${NICK_MIN}자 이상으로 써 주세요.` };
-  if (nick.length > NICK_MAX) return { ok: false, error: `닉네임은 ${NICK_MAX}자까지 쓸 수 있어요.` };
-  if (!/^[0-9A-Za-z가-힣 ]+$/.test(nick)) return { ok: false, error: "닉네임에는 한글·영문·숫자·공백만 쓸 수 있어요. (이모지·특수문자는 안 돼요)" };
+  if (nick.length < NICK_MIN) return { ok: false, error: `닉네임은 ${NICK_MIN}자 이상으로 써 줘.` };
+  if (nick.length > NICK_MAX) return { ok: false, error: `닉네임은 ${NICK_MAX}자까지 쓸 수 있어.` };
+  if (!/^[0-9A-Za-z가-힣 ]+$/.test(nick)) return { ok: false, error: "닉네임에는 한글·영문·숫자·공백만 쓸 수 있어. (이모지·특수문자는 안 돼)" };
   const flat = nick.replace(/ /g, "").toLowerCase();
-  if (BLOCKED.some((w) => flat.includes(w))) return { ok: false, error: "쓸 수 없는 이름이에요. 다른 이름으로 정해 주세요." };
+  if (BLOCKED.some((w) => flat.includes(w))) return { ok: false, error: "쓸 수 없는 이름이야. 다른 이름으로 정해 줘." };
   return { ok: true, nick };
 }

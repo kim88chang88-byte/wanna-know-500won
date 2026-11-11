@@ -52,9 +52,9 @@ export default function BetaOpenPopup() {
           <br />
           수달 도사 도리와 함께하는
           <br />
-          신묘한 사주풀이가 찾아왔어요!
+          신묘한 사주풀이가 찾아왔어!
           <br />
-          지금 바로 첫 1회 무료 뽑기를 체험해보세요 ✨
+          지금 바로 첫 1회 무료 뽑기를 체험해봐 ✨
         </p>
         <div className="mt-3.5 flex items-center gap-2">
           <label className="flex shrink-0 cursor-pointer items-center gap-1.5 text-[11.5px] font-bold text-gray-500">

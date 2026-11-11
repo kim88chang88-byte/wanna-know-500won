@@ -33,7 +33,7 @@ export default function ConcernCard({ concern, dark = false }: { concern: Concer
         </ul>
       ) : (
         <p className={`mt-3 text-xs leading-relaxed ${dark ? "text-[#e8dfca]/70" : "text-gray-500"}`}>
-          직접 적어 준 마음은 도리가 잘 들었어요. 위의 풀이를 읽으며 가볍게 참고해 봐요. 고민 버튼을 고르면 더 맞춤으로 풀어 줄 수 있어요.
+          직접 적어 준 마음은 도리가 잘 들었어. 위의 풀이를 읽으며 가볍게 참고해 봐. 고민 버튼을 고르면 더 맞춤으로 풀어 줄 수 있어.
         </p>
       )}
     </section>

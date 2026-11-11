@@ -69,7 +69,7 @@ function LuckCoin({ luck, grade, cheer }: { luck: number; grade: string; cheer: 
  * 오늘의 도리 한마디. 저장된 생년월일시가 있는 회원에게만 보여요.
  * 한 번 누르면 열리고(AI 비용 없음), 열어 본 날은 방문으로 세어 물길이 이어져요.
  */
-export function DailyLineCard({ onOpened, birth }: { onOpened?: () => void; /** 저장된 내 생년월일시: 상담실 첫 화면에서 사주 기둥을 보여 주는 데만 써요 */ birth?: BirthInput | null }) {
+export function DailyLineCard({ onOpened, birth }: { onOpened?: () => void; /** 저장된 내 생년월일시: 상담실 첫 화면에서 사주 기둥을 보여 주는 데만 써 */ birth?: BirthInput | null }) {
   const [daily, setDaily] = useState<Daily | null>(null);
   const [state, setState] = useState<"closed" | "loading" | "error">("closed");
 
@@ -117,7 +117,7 @@ export function DailyLineCard({ onOpened, birth }: { onOpened?: () => void; /** 
         </div>
       ) : (
         <div className="flex items-center justify-between gap-3">
-          <p className="text-sm font-bold text-gray-900"><DoriIcon />오늘의 도리 한마디가 도착했어요</p>
+          <p className="text-sm font-bold text-gray-900"><DoriIcon />오늘의 도리 한마디가 도착했어</p>
           <button
             type="button"
             data-testid="daily-line-open"
@@ -129,7 +129,7 @@ export function DailyLineCard({ onOpened, birth }: { onOpened?: () => void; /** 
           </button>
         </div>
       )}
-      {state === "error" && <p role="alert" className="mt-2 text-xs text-amber-800">지금은 열지 못했어요. 잠시 뒤에 다시 눌러 주세요.</p>}
+      {state === "error" && <p role="alert" className="mt-2 text-xs text-amber-800">지금은 열지 못했어. 잠시 뒤에 다시 눌러 줘.</p>}
     </section>
   );
 }

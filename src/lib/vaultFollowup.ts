@@ -63,7 +63,7 @@ export function pickVaultFollowup(rows: VaultRowLite[], now: Date, answered: str
 }
 
 export function followupPrompt(p: FollowupPick) {
-  return { title: `${p.daysAgo}일 전에 본 ‘${p.topicName}’ 풀이, 요즘은 어때요?`, check: realityCheck(p.kind) };
+  return { title: `${p.daysAgo}일 전에 본 ‘${p.topicName}’ 풀이, 요즘은 어때?`, check: realityCheck(p.kind) };
 }
 
 export function readAnswered(storage: StorageLike | null): string[] {

@@ -86,8 +86,8 @@ export default function ReviewsSection() {
             <span className="material-symbols-outlined text-[22px]">{real ? "chat_bubble" : "bubble_chart"}</span>
           </div>
           <div>
-            <h3 className="font-cute text-xl font-normal text-gray-900 sm:text-2xl">{real ? "도유사주를 만난 분들의 이야기" : "이런 운세 풀이가 나와요"}</h3>
-            <p className="text-xs text-slate-500">{real ? "실제로 사주를 확인한 이용자들의 솔직 후기에요" : "수달 도사 '도리'가 건네는 한마디, 이런 느낌이에요"}</p>
+            <h3 className="font-cute text-xl font-normal text-gray-900 sm:text-2xl">{real ? "도유사주를 만난 분들의 이야기" : "이런 운세 풀이가 나와"}</h3>
+            <p className="text-xs text-slate-500">{real ? "실제로 사주를 확인한 이용자들의 솔직 후기에" : "수달 도사 '도리'가 건네는 한마디, 이런 느낌이야"}</p>
           </div>
         </div>
         {!real && (
@@ -95,15 +95,15 @@ export default function ReviewsSection() {
         )}
       </div>
 
-      {/* 카드를 왼쪽에서 오른쪽으로 흘려요. 같은 줄을 두 번 이어 붙여 끊김 없이 반복하고, 마우스를 올리면 멈춰요.
-          움직임 줄이기 설정이면 움직이지 않고 옆으로 밀어서 볼 수 있어요. */}
+      {/* 카드를 왼쪽에서 오른쪽으로 흘려. 같은 줄을 두 번 이어 붙여 끊김 없이 반복하고, 마우스를 올리면 멈춰.
+          움직임 줄이기 설정이면 움직이지 않고 옆으로 밀어서 볼 수 있어. */}
       <AutoMarquee testId="sample-marquee" speed={48} className="py-2">
         {() => <>{cards}</>}
       </AutoMarquee>
       <p className="mt-3 text-center text-[11px] text-slate-400">
         {real
           ? "* 이용자가 직접 공개에 동의한 후기만 이름 없이 보여 드려요. 풀이는 사람마다 달라질 수 있어요."
-          : "* 예시 문구예요. 실제 이용자의 기록이 아니며, 실제 풀이는 입력한 정보에 따라 달라져요."}
+          : "* 예시 문구야. 실제 이용자의 기록이 아니며, 실제 풀이는 입력한 정보에 따라 달라져."}
       </p>
     </section>
   );

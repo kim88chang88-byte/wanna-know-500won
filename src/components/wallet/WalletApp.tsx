@@ -41,10 +41,10 @@ export default function WalletApp() {
       const res = await fetch("/api/coins/history", { cache: "no-store" });
       if (res.status === 401) return setView({ kind: "login" });
       const data = (await res.json().catch(() => null)) as { balance?: number; items?: HistoryItem[]; error?: string } | null;
-      if (!res.ok || typeof data?.balance !== "number") return setView({ kind: "error", message: data?.error ?? "지갑을 불러오지 못했어요." });
+      if (!res.ok || typeof data?.balance !== "number") return setView({ kind: "error", message: data?.error ?? "지갑을 불러오지 못했어." });
       setView({ kind: "ready", balance: data.balance, items: data.items ?? [] });
     } catch {
-      setView({ kind: "error", message: "지갑을 불러오지 못했어요. 인터넷 연결을 확인해 주세요." });
+      setView({ kind: "error", message: "지갑을 불러오지 못했어. 인터넷 연결을 확인해 줘." });
     }
   }, []);
 
@@ -71,11 +71,11 @@ export default function WalletApp() {
     };
   }, []);
 
-  if (view.kind === "loading") return <p className="text-sm text-slate-500">지갑을 열고 있어요…</p>;
+  if (view.kind === "loading") return <p className="text-sm text-slate-500">지갑을 열고 있어…</p>;
   if (view.kind === "login")
     return (
       <div className="rounded-2xl border border-brand-100 bg-white p-5 space-y-3">
-        <p className="text-sm text-slate-600">로그인하면 내 조약돌과 진주를 볼 수 있어요.</p>
+        <p className="text-sm text-slate-600">로그인하면 내 조약돌과 진주를 볼 수 있어.</p>
         <LoginButtons className="flex flex-col gap-2.5" />
       </div>
     );
@@ -88,7 +88,7 @@ export default function WalletApp() {
         <p className="text-xs font-bold text-slate-500">내 잔액</p>
         <p className="font-serifKr font-black text-3xl text-brand-700" data-testid="wallet-total">{pebbleText(balance)}</p>
         <p className="text-sm text-slate-600">{(balance * 500).toLocaleString("ko-KR")}원 어치</p>
-        <p className="text-xs text-slate-400">조약돌 6개가 모이면 진주 1개로 묶어서 보여줘요</p>
+        <p className="text-xs text-slate-400">조약돌 6개가 모이면 진주 1개로 묶어서 보여줘</p>
         <button type="button" onClick={() => setPayOpen(true)} className="mt-3 rounded-full bg-brand-600 px-6 py-2.5 text-sm font-black text-white active:scale-95">
           충전하기
         </button>
@@ -113,7 +113,7 @@ export default function WalletApp() {
       <section className="space-y-2">
         <h2 className="text-sm font-black text-slate-700">최근 내역</h2>
         {items.length === 0 ? (
-          <p className="rounded-xl bg-white border border-brand-100 p-4 text-sm text-slate-500">아직 내역이 없어요.</p>
+          <p className="rounded-xl bg-white border border-brand-100 p-4 text-sm text-slate-500">아직 내역이 없어.</p>
         ) : (
           <ul className="divide-y divide-brand-100 rounded-xl border border-brand-100 bg-white">
             {items.map((it, i) => (

@@ -30,7 +30,7 @@ export function useChatEnabled(): boolean {
 }
 
 /** "도리에게 더 물어보기" 버튼: 맥락을 담아 상담방으로 가요. 열려 있지 않은 사람에게는 보이지 않아요. */
-export function ChatEntry({ ctx, luxe = false, className = "", inScene = false }: { ctx: ChatCtx; luxe?: boolean; className?: string; /** 오늘 카드 말풍선 안에 넣을 때: 글자·여백을 장면 너비(cqw)에 맞춰요 */ inScene?: boolean }) {
+export function ChatEntry({ ctx, luxe = false, className = "", inScene = false }: { ctx: ChatCtx; luxe?: boolean; className?: string; /** 오늘 카드 말풍선 안에 넣을 때: 글자·여백을 장면 너비(cqw)에 맞춰 */ inScene?: boolean }) {
   const enabled = useChatEnabled();
   const router = useRouter();
   if (!enabled) return null;

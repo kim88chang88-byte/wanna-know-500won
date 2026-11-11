@@ -8,11 +8,11 @@ export const runtime = "nodejs";
 
 /** 이메일 로그인 직후 닉네임 정하기: 이메일로 로그인한 회원(e_…)만, 닉네임이 비어 있을 때 한 번 정해요. */
 export async function POST(request: Request) {
-  const denied = guardOrigin(request) ?? (await enforceLimits(request, { name: "email-nick", windowMs: 60000, ip: 10, user: 10 }, "잠시 뒤에 다시 시도해 주세요."));
+  const denied = guardOrigin(request) ?? (await enforceLimits(request, { name: "email-nick", windowMs: 60000, ip: 10, user: 10 }, "잠시 뒤에 다시 시도해 줘."));
   if (denied) return denied;
   const secret = process.env.AUTH_SECRET;
   const session = verifySessionToken(readCookie(request.headers.get("cookie"), SESSION_COOKIE), secret);
-  if (!secret || !session || !session.sub.startsWith("e_")) return NextResponse.json({ error: "로그인이 필요해요." }, { status: 401 });
+  if (!secret || !session || !session.sub.startsWith("e_")) return NextResponse.json({ error: "로그인이 필요해." }, { status: 401 });
 
   let body: { nickname?: unknown } | null = null;
   try {

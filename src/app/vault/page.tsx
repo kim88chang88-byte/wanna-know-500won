@@ -23,7 +23,7 @@ export default function VaultPage() {
       <main className="max-w-2xl mx-auto px-4 py-8 space-y-5">
         <div>
           <h1 className="font-serifKr font-black text-2xl sm:text-3xl text-brand-700">내 보관함 📚</h1>
-          <p className="mt-2 text-sm text-slate-600">봤던 풀이가 여기에 모여요. 다시 열어 볼 때는 추가 비용이 없어요.</p>
+          <p className="mt-2 text-sm text-slate-600">봤던 풀이가 여기에 모여. 다시 열어 볼 때는 추가 비용이 없어.</p>
         </div>
         <VaultApp />
       </main>

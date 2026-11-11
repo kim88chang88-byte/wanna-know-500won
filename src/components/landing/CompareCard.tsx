@@ -6,7 +6,7 @@ import { useState } from "react";
 import type { CompareResult } from "@/lib/ai/compare";
 import type { BirthInput } from "@/lib/saju/types";
 
-const LEAN_TEXT: Record<CompareResult["lean"], string> = { A: "A 쪽이 조금 더 결이 맞아요", B: "B 쪽이 조금 더 결이 맞아요", 비슷해요: "두 쪽이 비슷하게 팽팽해요" };
+const LEAN_TEXT: Record<CompareResult["lean"], string> = { A: "A 쪽이 조금 더 결이 맞아", B: "B 쪽이 조금 더 결이 맞아", 비슷해: "두 쪽이 비슷하게 팽팽해" };
 
 /** "A냐 B냐" 비교 카드. 결정은 내가 하고, 도리는 판단 재료만 정리해 줘요. */
 export function CompareCard({ input }: { input: BirthInput }) {
@@ -26,13 +26,13 @@ export function CompareCard({ input }: { input: BirthInput }) {
     try {
       const res = await fetchRetry("/api/compare", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...input, a, b }) });
       const data = (await res.json().catch(() => null)) as { result?: CompareResult; error?: string } | null;
-      if (!res.ok || !data?.result) throw new Error(data?.error ?? "도리가 잠깐 물놀이하러 갔어요. 다시 눌러 볼래요?");
+      if (!res.ok || !data?.result) throw new Error(data?.error ?? "도리가 잠깐 물놀이하러 갔어. 다시 눌러 볼래?");
       setResult(data.result);
       // 답이 왔으면 막대를 100% 로 채운 뒤 잠깐 보여 주고 결과로 바꿔요.
       setDone(true);
       await new Promise((r) => setTimeout(r, 450));
     } catch (err) {
-      setError(err instanceof Error ? err.message : "답을 받지 못했어요.");
+      setError(err instanceof Error ? err.message : "답을 받지 못했어.");
     } finally {
       setDone(false);
       setLoading(false);
@@ -48,7 +48,7 @@ export function CompareCard({ input }: { input: BirthInput }) {
         className="w-full text-left px-4 py-3 rounded-2xl bg-white border border-brand-200 hover:bg-brand-50 transition"
       >
         <span className="text-sm font-bold text-gray-900">⚖️ A냐 B냐, 고민될 땐?</span>
-        <span className="block text-xs text-gray-500 mt-0.5">두 선택지를 적으면 내 사주 결에 맞춰 판단 재료를 정리해 줘요. 결정은 내가 해요.</span>
+        <span className="block text-xs text-gray-500 mt-0.5">두 선택지를 적으면 내 사주 결에 맞춰 판단 재료를 정리해 줘. 결정은 내가 해.</span>
       </button>
       {open && (
         <form onSubmit={run} className="mt-2 p-4 rounded-2xl bg-brand-50/50 border border-brand-100 space-y-3">
@@ -60,11 +60,11 @@ export function CompareCard({ input }: { input: BirthInput }) {
             선택지 B
             <input value={b} onChange={(e) => setB(e.target.value)} maxLength={40} placeholder="예: 다른 업계 회사로 옮긴다" className="mt-1 w-full rounded-xl border border-brand-200 bg-white px-3 py-2 text-sm font-normal" />
           </label>
-          <p className="text-[11px] text-gray-500">이름·회사명 같은 개인 정보는 적지 않아도 돼요. 건강·법률·투자 판단은 도리가 도와줄 수 없어요.</p>
+          <p className="text-[11px] text-gray-500">이름·회사명 같은 개인 정보는 적지 않아도 돼. 건강·법률·투자 판단은 도리가 도와줄 수 없어.</p>
           <button type="submit" disabled={loading || a.trim().length < 2 || b.trim().length < 2} className="w-full py-2.5 rounded-xl bg-brand-500 text-white text-sm font-bold disabled:opacity-50">
             비교해 보기
           </button>
-          {loading && <InlineProgress label="도리가 저울에 올려보는 중이에요" done={done} />}
+          {loading && <InlineProgress label="도리가 저울에 올려보는 중이야" done={done} />}
         </form>
       )}
       <div role="status" aria-live="polite">

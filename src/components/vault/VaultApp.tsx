@@ -64,10 +64,10 @@ export default function VaultApp() {
       const res = await fetch("/api/vault", { cache: "no-store" });
       if (res.status === 401) return setView({ kind: "login" });
       const data = (await res.json().catch(() => null)) as { items?: Row[]; error?: string } | null;
-      if (!res.ok || !data?.items) return setView({ kind: "error", message: data?.error ?? "보관함을 불러오지 못했어요." });
+      if (!res.ok || !data?.items) return setView({ kind: "error", message: data?.error ?? "보관함을 불러오지 못했어." });
       setView({ kind: "list", items: data.items });
     } catch {
-      setView({ kind: "error", message: "보관함을 불러오지 못했어요. 인터넷 연결을 확인해 주세요." });
+      setView({ kind: "error", message: "보관함을 불러오지 못했어. 인터넷 연결을 확인해 줘." });
     }
   }, []);
 
@@ -81,10 +81,10 @@ export default function VaultApp() {
     try {
       const res = await fetch(`/api/vault/${id}`, { cache: "no-store" });
       const data = (await res.json().catch(() => null)) as { item?: Detail; error?: string } | null;
-      if (!res.ok || !data?.item) setNotice(data?.error ?? "열지 못했어요.");
+      if (!res.ok || !data?.item) setNotice(data?.error ?? "열지 못했어.");
       else { setConfirmDelete(false); setDetail(data.item); }
     } catch {
-      setNotice("열지 못했어요. 인터넷 연결을 확인해 주세요.");
+      setNotice("열지 못했어. 인터넷 연결을 확인해 줘.");
     }
     setOpening(null);
   }
@@ -97,7 +97,7 @@ export default function VaultApp() {
       setDetail(null);
       await load();
     } catch {
-      setNotice("지우지 못했어요. 잠시 뒤에 다시 시도해 주세요.");
+      setNotice("지우지 못했어. 잠시 뒤에 다시 시도해 줘.");
     }
   }
 
@@ -128,7 +128,7 @@ export default function VaultApp() {
           <StoryReport report={s.report} intro={null} lastWord={<ResultHero report={s.report} aiQuote={s.kkotgeoji} luxe={false} hideLucky />} reading={s.card ? { keyword: s.card.keyword, total: { score: s.card.score, summary: s.card.summary }, indicators: s.card.indicators.map((i) => ({ label: i.label, score: i.score, comment: i.comment })), reason: s.reason ?? undefined, story: s.story ?? undefined, folds: s.folds ?? undefined, heads: s.heads ?? undefined } : null} />
         ) : (
           <>
-        {/* 프리미엄 사주서에는 하루짜리 풀이 카드를 넣지 않아요 */}
+        {/* 프리미엄 사주서에는 하루짜리 풀이 카드를 넣지 않아 */}
         {!luxe && s.card && (
           <ReadingCard
             reading={{
@@ -159,8 +159,8 @@ export default function VaultApp() {
           </button>
         ) : (
           <div role="group" aria-label="풀이 삭제 확인" className="mt-6 rounded-2xl border border-sky-200 bg-sky-50 p-3 text-center">
-            <p className="text-xs font-bold text-gray-800">이 풀이를 보관함에서 지울까요?</p>
-            <p className="mt-1 text-[11px] leading-relaxed text-gray-600">지우면 되돌릴 수 없어요.</p>
+            <p className="text-xs font-bold text-gray-800">이 풀이를 보관함에서 지울까?</p>
+            <p className="mt-1 text-[11px] leading-relaxed text-gray-600">지우면 되돌릴 수 없어.</p>
             <div className="mt-2.5 flex justify-center gap-2 text-xs font-bold">
               <button type="button" onClick={() => setConfirmDelete(false)} className="rounded-full border border-gray-300 bg-white px-4 py-1.5 text-gray-700">취소</button>
               <button type="button" onClick={() => void remove(detail.id)} className="rounded-full bg-rose-500 px-4 py-1.5 text-white">지우기</button>
@@ -175,8 +175,8 @@ export default function VaultApp() {
   if (view.kind === "login")
     return (
       <div data-testid="vault-login" className="rounded-2xl border border-brand-100 bg-white p-5 text-center">
-        <p className="text-sm font-bold text-gray-900">로그인하면 보관함을 볼 수 있어요</p>
-        <p className="mt-1 text-xs text-gray-500">로그인한 상태로 본 풀이만 보관함에 저장돼요.</p>
+        <p className="text-sm font-bold text-gray-900">로그인하면 보관함을 볼 수 있어</p>
+        <p className="mt-1 text-xs text-gray-500">로그인한 상태로 본 풀이만 보관함에 저장돼.</p>
         <LoginButtons className="mx-auto mt-3 flex max-w-xs flex-col gap-2.5" />
       </div>
     );
@@ -186,9 +186,9 @@ export default function VaultApp() {
     return (
       <>
       <div data-testid="vault-empty" className="rounded-2xl border border-brand-100 bg-white p-6 text-center text-sm text-gray-600">
-        아직 보관한 풀이가 없어요.
+        아직 보관한 풀이가 없어.
         <br />
-        풀이를 보고 &lsquo;내 보관함에 저장&rsquo;을 누르면 여기에 모여요.
+        풀이를 보고 &lsquo;내 보관함에 저장&rsquo;을 누르면 여기에 모여.
         <div className="mt-3">
           <a href="/" className="text-xs font-bold text-brand-600 underline underline-offset-2">풀이 보러 가기</a>
         </div>
@@ -220,7 +220,7 @@ export default function VaultApp() {
           </li>
         ))}
       </ul>
-      <p className="mt-4 text-center text-[11px] text-gray-400">최대 300개까지 보관할 수 있어요.</p>
+      <p className="mt-4 text-center text-[11px] text-gray-400">최대 300개까지 보관할 수 있어.</p>
       <div aria-hidden="true" className="h-24 lg:hidden" />
       <BottomTabs page="vault" />
     </div>
@@ -233,7 +233,7 @@ function VaultSummaryBar({ items }: { items: Row[] }) {
   return (
     <div data-testid="vault-summary" className="mb-3 rounded-2xl border border-brand-100 bg-white px-4 py-3">
       <p className="text-sm font-bold text-gray-900">
-        {s.month > 0 ? `이번 달 ${s.month}개의 풀이가 모였어요 🌱` : "이번 달엔 아직 새 풀이가 없어요. 천천히 모아 봐요 🌱"}
+        {s.month > 0 ? `이번 달 ${s.month}개의 풀이가 모였어 🌱` : "이번 달엔 아직 새 풀이가 없어. 천천히 모아 봐 🌱"}
         <span className="ml-2 text-[11px] font-medium text-gray-400">지금까지 모두 {s.total}개</span>
       </p>
       {s.byTopic.length > 0 && (

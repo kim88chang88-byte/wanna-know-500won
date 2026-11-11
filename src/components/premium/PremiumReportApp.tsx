@@ -15,11 +15,11 @@ const seg = (active: boolean) =>
   `flex-1 rounded-full py-2.5 text-sm font-bold border transition-colors ${active ? "bg-[#e6c887] text-[#1b1824] border-[#e6c887]" : "bg-transparent text-[#e6c887] border-[#e6c887]/40"}`;
 
 const STAGES = [
-  { at: 0, text: "사주 여덟 글자를 세우고 있어요" },
-  { at: 20, text: "오행의 균형을 살펴보고 있어요" },
-  { at: 40, text: "신강·신약과 용신을 가늠하고 있어요" },
-  { at: 60, text: "올해와 대운의 흐름을 보고 있어요" },
-  { at: 80, text: "도리가 20쪽 풀이를 정리하고 있어요" },
+  { at: 0, text: "사주 여덟 글자를 세우고 있어" },
+  { at: 20, text: "오행의 균형을 살펴보고 있어" },
+  { at: 40, text: "신강·신약과 용신을 가늠하고 있어" },
+  { at: 60, text: "올해와 대운의 흐름을 보고 있어" },
+  { at: 80, text: "도리가 20쪽 풀이를 정리하고 있어" },
 ];
 
 /** 풀이를 만드는 동안의 진행 막대. 서버가 진행률을 주지 않아서, 처음엔 빠르게 뒤로 갈수록 천천히 차올라요. (1분 안팎 걸려요) */
@@ -44,7 +44,7 @@ function PremiumProgress() {
       <p className="mt-2 text-center text-xs text-[#e8dfca]/80">
         {stage.text} · {Math.round(pct)}%
       </p>
-      <p className="mt-1 text-center text-[11px] text-[#e8dfca]/50">미리보기를 만드는 중이에요. 잠깐만 기다려 주세요 ❄️</p>
+      <p className="mt-1 text-center text-[11px] text-[#e8dfca]/50">미리보기를 만드는 중이야. 잠깐만 기다려 줘 ❄️</p>
       <span className="sr-only">{Math.floor(sec)}초 경과</span>
     </div>
   );
@@ -98,9 +98,9 @@ export default function PremiumReportApp() {
     e.preventDefault();
     setError(null);
     const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(date);
-    if (!m) return setError("생년월일을 입력해 주세요.");
-    if (isFemale === null) return setError("성별을 선택해 주세요.");
-    if (!timeUnknown && !time) return setError("태어난 시간을 고르거나 '태어난 시간 모름'을 체크해 주세요.");
+    if (!m) return setError("생년월일을 입력해 줘.");
+    if (isFemale === null) return setError("성별을 선택해 줘.");
+    if (!timeUnknown && !time) return setError("태어난 시간을 고르거나 '태어난 시간 모름'을 체크해 줘.");
     const [hh, mm] = time.split(":").map(Number);
     const body: BirthInput = {
       year: Number(m[1]),
@@ -117,7 +117,7 @@ export default function PremiumReportApp() {
       const res = await fetch("/api/premium", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ ...body, level: "full", preview: true, topic: "프리미엄 사주 원국 리포트" }) });
       const json = (await res.json()) as { report?: PremiumReportView } & Partial<PremiumErrorBody>;
       if (!res.ok || !json.report) {
-        setError(json.error ?? "리포트를 만들지 못했어요. 잠시 뒤에 다시 시도해 주세요.");
+        setError(json.error ?? "리포트를 만들지 못했어. 잠시 뒤에 다시 시도해 줘.");
         return;
       }
       setReport(json.report);
@@ -132,7 +132,7 @@ export default function PremiumReportApp() {
         });
       }
     } catch {
-      setError("네트워크 연결을 확인하고 다시 시도해 주세요.");
+      setError("네트워크 연결을 확인하고 다시 시도해 줘.");
     } finally {
       setBusy(false);
     }
@@ -152,7 +152,7 @@ export default function PremiumReportApp() {
 
   return (
     <form onSubmit={onSubmit} noValidate className="space-y-5 rounded-3xl bg-white/[0.04] border border-[#e6c887]/30 p-5 sm:p-7 shadow-[0_20px_60px_rgba(0,0,0,0.35)]">
-      {remembered && <p data-testid="remembered-note" className="rounded-2xl bg-[#e6c887]/10 border border-[#e6c887]/30 px-4 py-2.5 text-xs text-[#e8dfca]">기억해 둔 내 정보를 불러왔어요. 바꾸고 싶으면 아래에서 고쳐 주세요.</p>}
+      {remembered && <p data-testid="remembered-note" className="rounded-2xl bg-[#e6c887]/10 border border-[#e6c887]/30 px-4 py-2.5 text-xs text-[#e8dfca]">기억해 둔 내 정보를 불러왔어. 바꾸고 싶으면 아래에서 고쳐 줘.</p>}
       <div>
         <label htmlFor="birth-date" className="block text-sm font-bold text-[#e6c887] mb-1.5">
           생년월일
@@ -169,7 +169,7 @@ export default function PremiumReportApp() {
           onChange={(e) => setDate(formatDateInput(e.target.value))}
           className={`${field} placeholder:text-[#fbf3de]/40`}
         />
-        <p className="mt-1.5 text-xs text-[#e8dfca]/60">숫자만 적어도 돼요. (예: 20000101)</p>
+        <p className="mt-1.5 text-xs text-[#e8dfca]/60">숫자만 적어도 돼. (예: 20000101)</p>
         <div className="mt-2 flex gap-2" role="group" aria-label="음양력">
           <button type="button" aria-pressed={!isLunar} onClick={() => setIsLunar(false)} className={seg(!isLunar)}>
             양력
@@ -181,7 +181,7 @@ export default function PremiumReportApp() {
         {isLunar && (
           <label className="mt-2 flex items-center gap-2 text-sm text-[#e8dfca]/80">
             <input type="checkbox" checked={isLeap} onChange={(e) => setIsLeap(e.target.checked)} className="h-4 w-4 accent-[#e6c887]" />
-            윤달이에요
+            윤달이야
           </label>
         )}
       </div>

@@ -11,19 +11,19 @@ export const runtime = "nodejs";
 
 /** 사용후기 저장. 로그인하지 않아도 남길 수 있고, 로그인했다면 회원과 연결해서 탈퇴 때 함께 지워요. */
 export async function POST(request: Request) {
-  const denied = guardOrigin(request) ?? (await enforceLimits(request, { name: "reviews", windowMs: 3600000, ip: 10, user: 10 }, "후기를 너무 자주 남기고 있어요. 잠시 뒤에 다시 시도해 주세요."));
+  const denied = guardOrigin(request) ?? (await enforceLimits(request, { name: "reviews", windowMs: 3600000, ip: 10, user: 10 }, "후기를 너무 자주 남기고 있어. 잠시 뒤에 다시 시도해 줘."));
   if (denied) return denied;
   let body: unknown;
   try {
     body = await request.json();
   } catch {
-    return NextResponse.json({ error: "요청이 올바르지 않아요. 다시 한 번 확인해 주세요." }, { status: 400 });
+    return NextResponse.json({ error: "요청이 올바르지 않아. 다시 한 번 확인해 줘." }, { status: 400 });
   }
   const review = parseReview(body);
-  if (!review) return NextResponse.json({ error: "별점을 골라 주세요." }, { status: 400 });
+  if (!review) return NextResponse.json({ error: "별점을 골라 줘." }, { status: 400 });
 
   const dbConfig = loadDbConfig(process.env);
-  if (!dbConfig) return NextResponse.json({ error: "지금은 후기를 받을 수 없어요." }, { status: 503 });
+  if (!dbConfig) return NextResponse.json({ error: "지금은 후기를 받을 수 없어." }, { status: 503 });
 
   const o = body as Record<string, unknown>;
   const session = verifySessionToken(readCookie(request.headers.get("cookie"), SESSION_COOKIE), process.env.AUTH_SECRET);

@@ -23,7 +23,7 @@ export async function POST(request: Request) {
   }
   const email = normalizeEmail(body?.email);
   const code = typeof body?.code === "string" ? body.code.trim() : "";
-  if (!email || !/^\d{6}$/.test(code)) return NextResponse.json({ error: "인증번호 6자리를 확인해 주세요." }, { status: 400 });
+  if (!email || !/^\d{6}$/.test(code)) return NextResponse.json({ error: "인증번호 6자리를 확인해 줘." }, { status: 400 });
 
   // 번호를 무작정 대입하지 못하게: 같은 주소 10분에 6번, 같은 접속지 10분에 20번까지만 확인해요.
   const eh = emailHash(email, secret);
@@ -34,7 +34,7 @@ export async function POST(request: Request) {
   const blocked = limits.find((l) => !l.ok);
   if (blocked && !blocked.ok) {
     return NextResponse.json(
-      { error: "인증번호를 너무 많이 틀렸어요. 새 인증번호를 받아 주세요.", code: "too_many", retryAfterSec: blocked.retryAfterSec },
+      { error: "인증번호를 너무 많이 틀렸어. 새 인증번호를 받아 줘.", code: "too_many", retryAfterSec: blocked.retryAfterSec },
       { status: 429, headers: { "Retry-After": String(blocked.retryAfterSec) } },
     );
   }
@@ -43,14 +43,14 @@ export async function POST(request: Request) {
   if (!check.ok) {
     return NextResponse.json(
       check.reason === "expired"
-        ? { error: "인증번호 시간이 지났어요. 새 인증번호를 받아 주세요.", code: "expired" }
-        : { error: "인증번호가 맞지 않아요.", code: "wrong" },
+        ? { error: "인증번호 시간이 지났어. 새 인증번호를 받아 줘.", code: "expired" }
+        : { error: "인증번호가 맞지 않아.", code: "wrong" },
       { status: 400 },
     );
   }
   // 한 번 쓴 번호는 다시 못 써요.
   const used = await takeLimitStrict("email-used", check.sig, 1, WINDOW);
-  if (!used.ok) return NextResponse.json({ error: "이미 쓴 인증번호예요. 새 인증번호를 받아 주세요.", code: "expired" }, { status: 400 });
+  if (!used.ok) return NextResponse.json({ error: "이미 쓴 인증번호야. 새 인증번호를 받아 줘.", code: "expired" }, { status: 400 });
 
   const sub = emailUserId(email, secret);
   const dbConfig = loadDbConfig(process.env);

@@ -24,14 +24,14 @@ export const maxDuration = 60;
 const KEEP_HANJA: ReadonlySet<string> = new Set(["pillars", "dayPillar", "full"]);
 
 export async function POST(request: Request) {
-  const denied = guardOrigin(request) ?? (await enforceLimits(request, { name: "premium", windowMs: 60000, ip: 20, user: 40 }, "요청이 너무 빨라요. 잠시 뒤에 다시 시도해 주세요."));
+  const denied = guardOrigin(request) ?? (await enforceLimits(request, { name: "premium", windowMs: 60000, ip: 20, user: 40 }, "요청이 너무 빨라. 잠시 뒤에 다시 시도해 줘."));
   if (denied) return denied;
 
   let raw: unknown;
   try {
     raw = await request.json();
   } catch {
-    return NextResponse.json({ code: "bad_request", error: "요청이 올바르지 않아요. 다시 한 번 확인해 주세요." }, { status: 400 });
+    return NextResponse.json({ code: "bad_request", error: "요청이 올바르지 않아. 다시 한 번 확인해 줘." }, { status: 400 });
   }
   // 두 번째 요청: 나머지 장만 AI 로 다시 써서 받아 가요. (장을 두 번에 나눠야 AI 요청 한도에 안 걸려요)
   // chapterBatch: 2~4 이면 그 묶음의 장만 써서 받아 가요. (1은 첫 요청이라 따로 지정하지 않아요)
@@ -161,7 +161,7 @@ export async function POST(request: Request) {
     // 없는 날짜(예: 윤달이 없는 해의 윤달)처럼 계산할 수 없는 입력이에요.
     console.error("premium report failed:", err instanceof Error ? err.message : "unknown");
     return NextResponse.json(
-      { code: "bad_request", error: "입력한 날짜로는 리포트를 만들 수 없어요. 생년월일(음력·윤달 포함, 궁합이면 상대방 것도)을 다시 확인해 주세요." },
+      { code: "bad_request", error: "입력한 날짜로는 리포트를 만들 수 없어. 생년월일(음력·윤달 포함, 궁합이면 상대방 것도)을 다시 확인해 줘." },
       { status: 400 },
     );
   }

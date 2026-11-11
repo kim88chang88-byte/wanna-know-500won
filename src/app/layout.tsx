@@ -30,7 +30,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Noto+Serif+KR:wght@500;600;700;900&family=Jua&family=Gaegu:wght@400;700&display=swap"
           rel="stylesheet"
         />
-        {/* 쓰는 아이콘 15개만 받아요. 새 아이콘을 쓰면 아래 주소의 icon_names(가나다 순)에 이름을 추가해야 보여요. */}
+        {/* 쓰는 아이콘 15개만 받아. 새 아이콘을 쓰면 아래 주소의 icon_names(가나다 순)에 이름을 추가해야 보여. */}
         <link
           href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined&icon_names=arrow_downward,bubble_chart,calendar_today,chat_bubble,close,folder_special,home,keyboard_arrow_down,lock,magic_button,menu_book,person,verified,wb_sunny,workspace_premium"
           rel="stylesheet"

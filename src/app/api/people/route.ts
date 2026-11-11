@@ -14,7 +14,7 @@ function who(request: Request) {
 /** 내가 기억해 둔 다른 사람 목록 (로그인한 본인만). 표가 아직 없으면 빈 목록 + enabled:false */
 export async function GET(request: Request) {
   const session = who(request);
-  if (!session) return NextResponse.json({ error: "로그인이 필요해요." }, { status: 401, headers: NO_STORE });
+  if (!session) return NextResponse.json({ error: "로그인이 필요해." }, { status: 401, headers: NO_STORE });
   const config = loadDbConfig(process.env);
   if (!config) return NextResponse.json({ people: [], enabled: false }, { headers: NO_STORE });
   try {
@@ -31,18 +31,18 @@ export async function POST(request: Request) {
   const denied = guardOrigin(request) ?? (await enforceLimits(request, { name: "people", windowMs: 60_000, ip: 20, user: 20 }));
   if (denied) return denied;
   const session = who(request);
-  if (!session) return NextResponse.json({ error: "로그인이 필요해요." }, { status: 401, headers: NO_STORE });
+  if (!session) return NextResponse.json({ error: "로그인이 필요해." }, { status: 401, headers: NO_STORE });
   const config = loadDbConfig(process.env);
-  if (!config) return NextResponse.json({ error: "아직 기억해 둘 수 없어요." }, { status: 503, headers: NO_STORE });
+  if (!config) return NextResponse.json({ error: "아직 기억해 둘 수 없어." }, { status: 503, headers: NO_STORE });
 
   let body: unknown;
   try {
     body = await request.json();
   } catch {
-    return NextResponse.json({ error: "요청이 올바르지 않아요. 다시 한 번 확인해 주세요." }, { status: 400 });
+    return NextResponse.json({ error: "요청이 올바르지 않아. 다시 한 번 확인해 줘." }, { status: 400 });
   }
   const parsed = parsePersonBody(body);
-  if (!parsed) return NextResponse.json({ error: "저장할 수 없는 내용이에요." }, { status: 400 });
+  if (!parsed) return NextResponse.json({ error: "저장할 수 없는 내용이야." }, { status: 400 });
 
   const db = createDb(config);
   try {
@@ -50,7 +50,7 @@ export async function POST(request: Request) {
     const dup = existing.find((p) => samePerson(p, parsed.birth));
     if (dup) return NextResponse.json({ person: dup, duplicate: true }, { headers: NO_STORE });
     if (existing.length >= MAX_PEOPLE) {
-      return NextResponse.json({ error: `기억해 둔 사람이 가득 찼어요. (최대 ${MAX_PEOPLE}명) 안 쓰는 사람을 지우고 다시 저장해 주세요.`, code: "full" }, { status: 409, headers: NO_STORE });
+      return NextResponse.json({ error: `기억해 둔 사람이 가득 찼어. (최대 ${MAX_PEOPLE}명) 안 쓰는 사람을 지우고 다시 저장해 줘.`, code: "full" }, { status: 409, headers: NO_STORE });
     }
     await db.ensureUser(session.sub, session.nick);
     const id = await db.insertPerson(session.sub, parsed.label, parsed.birth);

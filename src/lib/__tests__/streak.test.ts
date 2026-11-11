@@ -54,7 +54,7 @@ describe("연속 방문 물길", () => {
     expect(recordVisit(null, "2026-10-21").count).toBe(1);
   });
   it("문구는 부담을 주지 않는다", () => {
-    expect(streakLine(computeStreak(["2026-10-20"], "2026-10-21"))).toContain("괜찮아요");
+    expect(streakLine(computeStreak(["2026-10-20"], "2026-10-21"))).toContain("괜찮아");
     expect(streakLine(computeStreak([], "2026-10-21"))).toBeNull();
     const seven = Array.from({ length: 7 }, (_, i) => `2026-10-${String(15 + i).padStart(2, "0")}`);
     expect(streakLine(computeStreak(seven, "2026-10-21"))).toContain("7일 연속");

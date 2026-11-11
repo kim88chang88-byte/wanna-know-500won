@@ -8,7 +8,7 @@ export default function AiNotice({ dark = false, gated = false }: { dark?: boole
         dark ? "border-[#e6c887]/40 bg-[#e6c887]/10 text-[#f3e7c9]" : "border-amber-200 bg-amber-50 text-amber-800"
       }`}
     >
-      {gated ? "AI 상세 풀이는 이용권이 있을 때 볼 수 있어요. 지금은 기본 풀이를 보여 드려요." : "풀이를 준비 중이에요. 잠시 뒤에 다시 시도해 주세요."}
+      {gated ? "AI 상세 풀이는 이용권이 있을 때 볼 수 있어. 지금은 기본 풀이를 보여 줘." : "풀이를 준비 중이야. 잠시 뒤에 다시 시도해 줘."}
     </p>
   );
 }

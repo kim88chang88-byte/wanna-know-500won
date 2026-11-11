@@ -54,7 +54,7 @@ export default function ReferralBox() {
   async function redeem() {
     const code = cleanRefCode(input);
     if (!code) {
-      setMsg({ ok: false, text: "코드는 영문 대문자와 숫자 8자리예요." });
+      setMsg({ ok: false, text: "코드는 영문 대문자와 숫자 8자리야." });
       return;
     }
     setBusy(true);
@@ -75,14 +75,14 @@ export default function ReferralBox() {
     <div data-testid="referral-box" className="rounded-2xl bg-amber-50 border border-amber-200 p-3 text-left">
       <p className="text-xs font-bold text-amber-900">🎁 친구 초대</p>
       <p className="mt-1 text-[11px] leading-relaxed text-amber-800">
-        친구가 내 코드로 가입하고 첫 풀이를 마치면, 두 사람 모두 500원 뽑기 1회를 받아요. (초대 보상은 한 달에 3번까지)
+        친구가 내 코드로 가입하고 첫 풀이를 마치면, 두 사람 모두 500원 뽑기 1회를 받아. (초대 보상은 한 달에 3번까지)
       </p>
       <div className="mt-2 flex items-center gap-2">
         <span data-testid="my-ref-code" className="rounded-lg bg-white border border-amber-200 px-3 py-1.5 font-mono text-sm font-bold tracking-widest text-gray-900">
           {me.code}
         </span>
         <button type="button" onClick={share} className="rounded-full bg-amber-400 px-3 py-1.5 text-xs font-bold text-amber-950 hover:brightness-105">
-          {copied ? "복사했어요" : "초대 링크 보내기"}
+          {copied ? "복사했어" : "초대 링크 보내기"}
         </button>
       </div>
       <p className="mt-1.5 text-[11px] text-amber-800">

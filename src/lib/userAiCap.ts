@@ -25,7 +25,7 @@ export async function checkUserAiCap(request: Request, bucket: CapBucket, now: D
   const r = await takeLimit(`ai-day-${bucket}`, `u:${session.sub}:${kstDay(now)}`, userCapFor(bucket), 24 * 60 * 60);
   if (r.ok) return null;
   return NextResponse.json(
-    { error: "오늘은 풀이를 많이 하셨어요. 내일 다시 만나요 ❄️", code: "user_day_cap" },
+    { error: "오늘은 풀이를 많이 하셨어. 내일 다시 만나 ❄️", code: "user_day_cap" },
     { status: 429, headers: { "Retry-After": String(r.retryAfterSec) } },
   );
 }

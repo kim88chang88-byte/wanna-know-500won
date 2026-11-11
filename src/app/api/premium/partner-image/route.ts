@@ -81,7 +81,7 @@ export async function POST(request: Request) {
 
   // 그림은 비용이 드니까 요청 횟수를 제한해요. (관리자는 테스트하기 쉽게 제외)
   if (!admin) {
-    const limited = await enforceLimits(request, { name: "partner-image", windowMs: 600_000, ip: 4, user: 8 }, "이미지 요청이 너무 많아요. 잠시 뒤에 다시 시도해 주세요.");
+    const limited = await enforceLimits(request, { name: "partner-image", windowMs: 600_000, ip: 4, user: 8 }, "이미지 요청이 너무 많아. 잠시 뒤에 다시 시도해 줘.");
     if (limited) return noImage("rate");
   }
   const apiKey = process.env.GEMINI_API_KEY?.trim();

@@ -51,15 +51,15 @@ export const CONCERN_CHIPS: readonly ConcernChip[] = [
   { id: "independence", label: "경제적 독립·내 몫 만들기", emoji: "🌱", topic: "money" },
   { id: "moneyrel", label: "돈 문제로 생기는 관계 고민", emoji: "🪢", topic: "money" },
   // ── 성공·직장
-  { id: "promotion", label: "승진·평가·인정받고 싶어요", emoji: "🏅", topic: "success" },
+  { id: "promotion", label: "승진·평가·인정받고 싶어", emoji: "🏅", topic: "success" },
   { id: "startup", label: "창업·독립해서 일하기 고민", emoji: "🚀", topic: "success" },
   { id: "skill", label: "성장이 정체된 느낌", emoji: "🪜", topic: "success" },
-  { id: "jobsearch", label: "취업·이직 준비가 막막해요", emoji: "🗺️", topic: "success" },
+  { id: "jobsearch", label: "취업·이직 준비가 막막해", emoji: "🗺️", topic: "success" },
   // ── 연애
-  { id: "meet", label: "새로운 인연을 만나고 싶어요", emoji: "✨", topic: "love" },
-  { id: "express", label: "내 마음 표현이 서툴러요", emoji: "💌", topic: "love" },
-  { id: "pattern", label: "비슷한 연애가 반복돼요", emoji: "🔁", topic: "love" },
-  { id: "doubt", label: "상대 마음을 모르겠어요", emoji: "🔍", topic: "love" },
+  { id: "meet", label: "새로운 인연을 만나고 싶어", emoji: "✨", topic: "love" },
+  { id: "express", label: "내 마음 표현이 서툴러", emoji: "💌", topic: "love" },
+  { id: "pattern", label: "비슷한 연애가 반복돼", emoji: "🔁", topic: "love" },
+  { id: "doubt", label: "상대 마음을 모르겠어", emoji: "🔍", topic: "love" },
   // ── 결혼
   { id: "partner", label: "이 사람과 결혼해도 될까", emoji: "🕊️", topic: "marriage" },
   { id: "family", label: "상견례·양가 관계 걱정", emoji: "🏡", topic: "marriage" },
@@ -68,17 +68,17 @@ export const CONCERN_CHIPS: readonly ConcernChip[] = [
   { id: "kids", label: "아이 계획·육아 고민", emoji: "🍼", topic: "marriage" },
   // ── 건강(컨디션·마음)
   { id: "sleep", label: "잠·피로·컨디션 관리", emoji: "😴", topic: "health" },
-  { id: "stress", label: "스트레스를 풀고 싶어요", emoji: "🌊", topic: "health" },
-  { id: "routine", label: "생활 리듬이 무너졌어요", emoji: "⏰", topic: "health" },
+  { id: "stress", label: "스트레스를 풀고 싶어", emoji: "🌊", topic: "health" },
+  { id: "routine", label: "생활 리듬이 무너졌어", emoji: "⏰", topic: "health" },
   { id: "loneliness", label: "외로움·공허한 마음", emoji: "🍃", topic: "health" },
   { id: "habit", label: "운동·식습관 바꾸기", emoji: "🥗", topic: "health" },
   // ── 학업
-  { id: "studyfocus", label: "올해 꼭 이루고 싶은 목표가 있어요", emoji: "🎯", topic: "study" },
-  { id: "slump", label: "작심삼일이 걱정돼요", emoji: "🔁", topic: "study" },
-  { id: "major", label: "새해엔 일·진로를 바꿔 볼까 해요", emoji: "🧭", topic: "study" },
-  { id: "abroad", label: "이사·이직 등 환경을 바꿀지 고민이에요", emoji: "🚚", topic: "study" },
-  { id: "pace", label: "올해 재물 흐름이 궁금해요", emoji: "💰", topic: "study" },
-  { id: "motivation", label: "올해 인연·관계 흐름이 궁금해요", emoji: "💞", topic: "study" },
+  { id: "studyfocus", label: "올해 꼭 이루고 싶은 목표가 있어", emoji: "🎯", topic: "study" },
+  { id: "slump", label: "작심삼일이 걱정돼", emoji: "🔁", topic: "study" },
+  { id: "major", label: "새해엔 일·진로를 바꿔 볼까 해", emoji: "🧭", topic: "study" },
+  { id: "abroad", label: "이사·이직 등 환경을 바꿀지 고민이야", emoji: "🚚", topic: "study" },
+  { id: "pace", label: "올해 재물 흐름이 궁금해", emoji: "💰", topic: "study" },
+  { id: "motivation", label: "올해 인연·관계 흐름이 궁금해", emoji: "💞", topic: "study" },
 ];
 
 /** 풀이 종류(자판기·프리미엄 카드)마다 보여 줄 고민 항목. 이미 고른 종류와 상관없는 항목은 다시 보여주지 않아요. */

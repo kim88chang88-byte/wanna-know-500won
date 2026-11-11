@@ -65,7 +65,7 @@ export default function ManseReport({ report, hideHeadline = false, flush = fals
           </div>
         )}
         {report.level === "basic" && (
-          <p className="mt-4 text-[11px] text-slate-500">올해·대운 흐름과 더 깊은 분석은 프리미엄 리포트에서 볼 수 있어요.</p>
+          <p className="mt-4 text-[11px] text-slate-500">올해·대운 흐름과 더 깊은 분석은 프리미엄 리포트에서 볼 수 있어.</p>
         )}
       </section>}
 
@@ -74,7 +74,7 @@ export default function ManseReport({ report, hideHeadline = false, flush = fals
           사주 원국
         </h2>
         <div className="grid grid-cols-4 gap-2 sm:gap-4">
-          {/* 한국식 만세력 순서(시·일·월·연): 위쪽 "나의 사주 네 기둥"과 같아요 */}
+          {/* 한국식 만세력 순서(시·일·월·연): 위쪽 "나의 사주 네 기둥"과 같아 */}
           {[...report.pillars].sort((x, y) => ["hour", "day", "month", "year"].indexOf(x.key) - ["hour", "day", "month", "year"].indexOf(y.key)).map((p) => {
             const [stem, branch] = p.full ? Array.from(p.full) : [null, null];
             return (
@@ -104,7 +104,7 @@ export default function ManseReport({ report, hideHeadline = false, flush = fals
         <h2 id="elements-h" className={H2}>
           오행 분포
         </h2>
-        {/* 한 줄 비율 막대 + 이름·개수 범례. 0개인 기운은 흐리게 보여요. */}
+        {/* 한 줄 비율 막대 + 이름·개수 범례. 0개인 기운은 흐리게 보여. */}
         <div role="img" aria-label={report.elements.map((e) => `${elName(e.name)} ${e.count}`).join(", ")} data-testid="element-stack" className="flex h-4 gap-0.5 overflow-hidden rounded-full">
           {report.elements.filter((e) => e.count > 0).map((e) => (
             <span key={e.name} className={`${ELEMENT_STYLE[e.kind].bar} first:rounded-l-full last:rounded-r-full`} style={{ flexGrow: e.count, flexBasis: 0 }} />
@@ -122,7 +122,7 @@ export default function ManseReport({ report, hideHeadline = false, flush = fals
           const tops = report.elements.filter((e) => e.count === max && max > 0);
           return tops.length > 0 && tops.length < report.elements.length ? (
             <p data-testid="element-top" className="mt-2.5 text-[13px] font-bold text-slate-800">
-              {tops.map((e) => elName(e.name)).join("과 ")}의 기운이 {tops.length >= 2 ? "똑같이 " : ""}가장 많아요
+              {tops.map((e) => elName(e.name)).join("과 ")}의 기운이 {tops.length >= 2 ? "똑같이 " : ""}가장 많아
             </p>
           ) : null;
         })()}
@@ -164,12 +164,12 @@ export default function ManseReport({ report, hideHeadline = false, flush = fals
           {report.summary && <p className="mt-4 text-sm leading-relaxed text-slate-700 whitespace-pre-line">{report.summary}</p>}
           {report.level === "basic" && (
             <p data-testid="basic-upsell" className="mt-4 text-[11px] text-slate-500">
-              격국·용신·대운 흐름은 프리미엄 리포트에서 볼 수 있어요.
+              격국·용신·대운 흐름은 프리미엄 리포트에서 볼 수 있어.
             </p>
           )}
           {report.hourUnknown && (
             <p data-testid="hour-unknown-note" className="mt-3 text-[11px] leading-relaxed text-amber-700">
-              태어난 시간을 몰라 정오(12시)를 기준으로 계산했어요. 신강·신약{report.level === "full" ? ", 격국, 용신" : ""}은 태어난 시간에 따라 달라질 수 있어요.
+              태어난 시간을 몰라 정오(12시)를 기준으로 계산했어. 신강·신약{report.level === "full" ? ", 격국, 용신" : ""}은 태어난 시간에 따라 달라질 수 있어.
             </p>
           )}
         </div>

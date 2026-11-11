@@ -18,7 +18,7 @@ export async function POST(request: Request) {
 
   const session = verifySessionToken(readCookie(request.headers.get("cookie"), SESSION_COOKIE), process.env.AUTH_SECRET);
   const config = loadDbConfig(process.env);
-  if (!session) return NextResponse.json({ error: "로그인이 필요해요." }, { status: 401 });
+  if (!session) return NextResponse.json({ error: "로그인이 필요해." }, { status: 401 });
   if (!config) return NextResponse.json({ error: "unavailable" }, { status: 503 });
 
   const body = (await request.json().catch(() => null)) as { code?: unknown } | null;

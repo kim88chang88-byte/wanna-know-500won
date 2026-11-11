@@ -5,7 +5,7 @@ import { SERVICE_NAME } from "@/lib/siteInfo";
 
 export const metadata = {
   title: `프리미엄 종합 사주 미리보기 · ${SERVICE_NAME}`,
-  description: "생년월일시를 넣으면 20쪽 프리미엄 종합 사주 중 앞 4쪽을 미리 볼 수 있어요",
+  description: "생년월일시를 넣으면 20쪽 프리미엄 종합 사주 중 앞 4쪽을 미리 볼 수 있어",
 };
 
 export default function PremiumPage() {
@@ -28,10 +28,10 @@ export default function PremiumPage() {
             <span className="h-px w-12 bg-gradient-to-l from-transparent to-[#e6c887]/70" />
           </div>
           <h1 className="mt-4 font-serifKr font-bold text-2xl sm:text-3xl text-[#fbf3de]">프리미엄 종합 사주 미리보기</h1>
-          <p className="mt-3 text-sm leading-relaxed text-[#e8dfca]/80">생년월일시를 입력하면 20쪽 사주서 중 앞 4쪽(사주 원국, 나의 성향 등)을 미리 볼 수 있어요. 5쪽부터는 가려져 있어요.</p>
+          <p className="mt-3 text-sm leading-relaxed text-[#e8dfca]/80">생년월일시를 입력하면 20쪽 사주서 중 앞 4쪽(사주 원국, 나의 성향 등)을 미리 볼 수 있어. 5쪽부터는 가려져 있어.</p>
         </div>
         <PremiumReportApp />
-        <p className="text-xs text-[#e8dfca]/50 text-center">참고용 풀이이며, 중요한 결정은 스스로 판단해 주세요.</p>
+        <p className="text-xs text-[#e8dfca]/50 text-center">참고용 풀이이며, 중요한 결정은 스스로 판단해 줘.</p>
       </main>
     </div>
   );

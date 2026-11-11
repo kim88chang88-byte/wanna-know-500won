@@ -33,7 +33,7 @@ export default function LoginButtons({ className = "flex flex-col gap-2.5" }: { 
   }
   return (
     <div className={className}>
-      {/* 카카오 로그인은 서버 주소로 이동해서 진행해요 (카카오 로그인 화면 → 다시 이 서비스로) */}
+      {/* 카카오 로그인은 서버 주소로 이동해서 진행해 (카카오 로그인 화면 → 다시 이 서비스로) */}
       <a href="/api/auth/kakao" data-testid="kakao-login" className={`${base} bg-[#FEE500] text-[#191919]`}>
         <span>카카오로 로그인</span>
       </a>

@@ -14,7 +14,7 @@ export default function CoinRitual({ big = false, two = false }: { big?: boolean
         </>
       ) : big ? (
         <>
-          {/* 프리미엄은 진주 3개와 조약돌 1개가 시간 간격 없이 한꺼번에 떨어져요 */}
+          {/* 프리미엄은 진주 3개와 조약돌 1개가 시간 간격 없이 한꺼번에 떨어져 */}
           {/* eslint-disable @next/next/no-img-element */}
           {[0, 1, 2].map((i) => (
             <img key={i} src="/images/pearl-3000.webp" alt="" width={76} height={76} className={`coin-ritual-coin coin-ritual-p${i}`} />

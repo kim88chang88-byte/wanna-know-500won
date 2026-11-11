@@ -24,7 +24,7 @@ function whenLabel(at: number, now = new Date()): string {
 
 function lastText(r: ChatRoom): string {
   const m = [...r.msgs].reverse().find((x) => !x.error);
-  return m ? m.text.replace(/\*\*/g, "").replace(/\s+/g, " ") : "아직 나눈 말이 없어요";
+  return m ? m.text.replace(/\*\*/g, "").replace(/\s+/g, " ") : "아직 나눈 말이 없어";
 }
 
 export default function ChatHome() {
@@ -198,22 +198,22 @@ export default function ChatHome() {
         <SafeImage src="/images/dori-icon.webp" alt="" className="h-9 w-9 rounded-full border-2 border-brand-200 bg-white object-contain" fallback="🦦" fallbackClass="text-2xl" />
         <div className="min-w-0 flex-1">
           <p className="font-bold leading-tight text-gray-900">도유 상담실</p>
-          <p className="text-[11px] text-[#8a7fa8]">{cloud ? "대화는 30일 동안 보관돼요" : "대화는 이 기기에만 저장돼요"}</p>
+          <p className="text-[11px] text-[#8a7fa8]">{cloud ? "대화는 30일 동안 보관돼" : "대화는 이 기기에만 저장돼"}</p>
         </div>
       </header>
 
       <p data-testid="chat-free-hint" className="mx-4 mt-3 text-[12px] leading-relaxed text-[#8a7fa8]">
-        💬 질문은 <b className="text-brand-600">방마다 따로</b> 세요. 풀이 방은 이번 달 5번, 궁합 방은 10번, 오늘의 한마디는 하루 3번이 무료예요.
+        💬 질문은 <b className="text-brand-600">방마다 따로</b> 세. 풀이 방은 이번 달 5번, 궁합 방은 10번, 오늘의 한마디는 하루 3번이 무료야.
       </p>
 
       {ready && rooms.length === 0 ? (
         <div className="m-auto flex flex-col items-center gap-3 px-6 py-16 text-center text-sm text-[#8a7fa8]">
           <SafeImage src="/images/dori-icon.webp" alt="" className="h-[72px] w-[72px] rounded-full border-2 border-brand-200 bg-white object-contain" fallback="🦦" fallbackClass="text-4xl" />
-          <b className="text-gray-900">아직 나눈 대화가 없어요</b>
+          <b className="text-gray-900">아직 나눈 대화가 없어</b>
           <span className="leading-relaxed">
             풀이를 본 뒤 &ldquo;도유 상담실에서 이어 묻기&rdquo;를 누르거나,
             <br />
-            오늘의 한마디로 가볍게 시작해 보세요.
+            오늘의 한마디로 가볍게 시작해 봐.
           </span>
           <button type="button" onClick={() => void startDaily()} className="rounded-2xl bg-brand-500 px-5 py-3 text-sm font-extrabold text-white">
             오늘의 한마디로 시작하기
@@ -266,11 +266,11 @@ export default function ChatHome() {
                     <path d="M16 17l5-5-5-5" />
                     <path d="M21 12H9" />
                   </svg>
-                  {delId === r.id ? "정말 나갈까요?" : "나가기"}
+                  {delId === r.id ? "정말 나갈까?" : "나가기"}
                 </button>
                 {delId === r.id && (
                   <p data-testid="room-leave-note" role="status" className="basis-full py-2 pl-5 pr-1 text-right text-[11.5px] leading-snug text-red-600">
-                    대화 내용만 지워져요. 남은 질문과 조약돌은 그대로예요.
+                    대화 내용만 지워져. 남은 질문과 조약돌은 그대로야.
                   </p>
                 )}
               </li>

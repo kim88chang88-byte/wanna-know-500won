@@ -112,25 +112,25 @@ export function validateStep(step: StepId, f: IntakeForm): string | null {
     case "date": {
       if (f.calendar === "solar") {
         const p = parseSolar(f.solarDate);
-        if (!p) return "생년월일을 입력해 주세요. (예: 2000-01-01)";
-        if (p.y < MIN_YEAR || p.y > MAX_YEAR) return `${MIN_YEAR}년부터 ${MAX_YEAR}년까지만 볼 수 있어요.`;
-        if (!isRealSolarDate(p.y, p.m, p.d)) return "없는 날짜예요. 다시 확인해 주세요.";
+        if (!p) return "생년월일을 입력해 줘. (예: 2000-01-01)";
+        if (p.y < MIN_YEAR || p.y > MAX_YEAR) return `${MIN_YEAR}년부터 ${MAX_YEAR}년까지만 볼 수 있어.`;
+        if (!isRealSolarDate(p.y, p.m, p.d)) return "없는 날짜야. 다시 확인해 줘.";
         return null;
       }
       const y = toInt(f.lunarYear);
       const m = toInt(f.lunarMonth);
       const d = toInt(f.lunarDay);
-      if (y === null || m === null || d === null) return "음력 연·월·일을 모두 숫자로 적어 주세요.";
-      if (y < MIN_YEAR || y > MAX_YEAR) return `${MIN_YEAR}년부터 ${MAX_YEAR}년까지만 볼 수 있어요.`;
-      if (m < 1 || m > 12) return "음력 월은 1~12 사이예요.";
-      if (d < 1 || d > 30) return "음력 일은 1~30 사이예요.";
+      if (y === null || m === null || d === null) return "음력 연·월·일을 모두 숫자로 적어 줘.";
+      if (y < MIN_YEAR || y > MAX_YEAR) return `${MIN_YEAR}년부터 ${MAX_YEAR}년까지만 볼 수 있어.`;
+      if (m < 1 || m > 12) return "음력 월은 1~12 사이야.";
+      if (d < 1 || d > 30) return "음력 일은 1~30 사이야.";
       return null;
     }
     case "time":
       if (!f.timeKnown) return null;
-      return parseTime(f.time) ? null : "태어난 시간을 골라 주세요. 모르면 '태어난 시간 모름'을 체크해 주세요.";
+      return parseTime(f.time) ? null : "태어난 시간을 골라 줘. 모르면 '태어난 시간 모름'을 체크해 줘.";
     case "gender":
-      return f.gender ? null : "성별을 골라 주세요.";
+      return f.gender ? null : "성별을 골라 줘.";
     case "birth": {
       const d = validateStep("date", f);
       if (d) return d;
@@ -139,8 +139,8 @@ export function validateStep(step: StepId, f: IntakeForm): string | null {
       return validateStep("time", f);
     }
     case "concern":
-      if (f.concernTags.length > MAX_CONCERN_TAGS) return `고민 버튼은 ${MAX_CONCERN_TAGS}개까지 고를 수 있어요.`;
-      if (f.concernText.length > MAX_CONCERN_TEXT) return `고민은 ${MAX_CONCERN_TEXT}자까지 적을 수 있어요.`;
+      if (f.concernTags.length > MAX_CONCERN_TAGS) return `고민 버튼은 ${MAX_CONCERN_TAGS}개까지 고를 수 있어.`;
+      if (f.concernText.length > MAX_CONCERN_TEXT) return `고민은 ${MAX_CONCERN_TEXT}자까지 적을 수 있어.`;
       return null;
     case "consent":
       return f.consent ? null : "개인정보 처리에 동의해야 풀이를 볼 수 있어요.";

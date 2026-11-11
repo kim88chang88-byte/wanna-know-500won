@@ -8,8 +8,8 @@ export default function NotFound() {
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img src={LOGO_IMAGE} alt="도유사주 로고" className="h-24 w-24 object-contain" />
       <p className="text-xs tracking-[0.12em] text-gray-500">404</p>
-      <h1 className="font-cute text-2xl text-gray-900">앗, 길을 잃었어요</h1>
-      <p className="text-sm text-gray-600">찾는 페이지가 없어요. 도리가 처음으로 데려다줄게요.</p>
+      <h1 className="font-cute text-2xl text-gray-900">앗, 길을 잃었어</h1>
+      <p className="text-sm text-gray-600">찾는 페이지가 없어. 도리가 처음으로 데려다줄게.</p>
       <Link href="/" className="mt-2 rounded-full bg-brand-500 px-6 py-2.5 text-sm font-bold text-white">처음으로 가기</Link>
     </main>
   );

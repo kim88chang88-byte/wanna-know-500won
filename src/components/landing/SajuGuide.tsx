@@ -29,7 +29,7 @@ export default function SajuGuide({ dark = false }: { dark?: boolean }) {
     <section data-testid="saju-guide" aria-label="사주 읽는 법" className={`mb-4 overflow-hidden rounded-2xl border ${dark ? "border-[#e6c887]/25 bg-white/[0.04] text-[#efe7d3]" : "border-brand-100 bg-white text-gray-800 shadow-sm"}`}>
       <button type="button" aria-expanded={open} onClick={() => setOpen((v) => !v)} className="flex w-full items-center gap-2 px-4 py-3 text-left text-[13.5px] font-extrabold">
         <span aria-hidden="true">🗺️</span>
-        <span className={dark ? "text-[#f0d9a0]" : "text-brand-700"}>사주, 이렇게 읽어 봐요</span>
+        <span className={dark ? "text-[#f0d9a0]" : "text-brand-700"}>사주, 이렇게 읽어 봐</span>
         <span aria-hidden="true" className="ml-auto text-[12px] opacity-60">{open ? "접기 ▲" : "펼치기 ▼"}</span>
       </button>
       {open && (

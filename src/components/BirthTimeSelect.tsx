@@ -38,7 +38,7 @@ export default function BirthTimeSelect({
           onChange={(e) => onChange({ time: e.target.value, known: true })}
           className={`${selectClassName} mt-1 disabled:opacity-40`}
         >
-          <option value="">시간대를 골라 주세요</option>
+          <option value="">시간대를 골라 줘</option>
           {TIME_BLOCKS.map((b) => (
             <option key={b.time} value={b.time}>
               {b.label} ({b.range})
@@ -55,7 +55,7 @@ export default function BirthTimeSelect({
         />
         태어난 시간 모름
       </label>
-      <p className={noteClassName}>시간을 몰라도 괜찮아요. 시주(시간 기둥)만 빼고 풀이해 드려요.</p>
+      <p className={noteClassName}>시간을 몰라도 괜찮아. 시주(시간 기둥)만 빼고 풀이해 줘.</p>
     </div>
   );
 }

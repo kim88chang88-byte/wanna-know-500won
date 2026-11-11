@@ -8,7 +8,7 @@ export default function CloseLink() {
   function onClick(e: React.MouseEvent) {
     e.preventDefault();
     const reading = typeof document !== "undefined" && document.querySelector('[data-testid="book-page"]') !== null;
-    if (reading && !window.confirm("미리보기를 닫고 홈으로 갈까요? 지금 보던 풀이는 저장되지 않아요.")) return;
+    if (reading && !window.confirm("미리보기를 닫고 홈으로 갈까? 지금 보던 풀이는 저장되지 않아.")) return;
     router.push("/");
   }
   return (

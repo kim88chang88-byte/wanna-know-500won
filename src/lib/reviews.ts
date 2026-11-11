@@ -3,11 +3,11 @@
 export type ReviewReasonId = "wrong" | "long" | "hard" | "slow" | "price";
 
 export const REVIEW_REASONS: ReadonlyArray<{ id: ReviewReasonId; label: string }> = [
-  { id: "wrong", label: "풀이가 나랑 안 맞아요" },
-  { id: "long", label: "내용이 너무 길어요" },
-  { id: "hard", label: "화면·입력이 불편해요" },
-  { id: "slow", label: "너무 느려요" },
-  { id: "price", label: "가격이 아까워요" },
+  { id: "wrong", label: "풀이가 나랑 안 맞아" },
+  { id: "long", label: "내용이 너무 길어" },
+  { id: "hard", label: "화면·입력이 불편해" },
+  { id: "slow", label: "너무 느려" },
+  { id: "price", label: "가격이 아까워" },
 ];
 
 export const MAX_REVIEW_TEXT = 200;

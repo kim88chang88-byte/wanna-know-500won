@@ -16,7 +16,7 @@ interface Teaser {
 }
 
 /** 가입 없이 생년월일만 넣으면 바로 보이는 '오늘의 도리 한마디'. 입력값은 저장하지 않아요. */
-export default function BirthdayTeaser({ onOpenLogin }: { /** 로그인하면 이 한마디를 들고 곧바로 상담실로 가요 */ onOpenLogin?: (chat: ChatCtx) => void } = {}) {
+export default function BirthdayTeaser({ onOpenLogin }: { /** 로그인하면 이 한마디를 들고 곧바로 상담실로 가 */ onOpenLogin?: (chat: ChatCtx) => void } = {}) {
   const [value, setValue] = useState("");
   const [state, setState] = useState<"idle" | "loading" | "error">("idle");
   const [error, setError] = useState("");
@@ -27,7 +27,7 @@ export default function BirthdayTeaser({ onOpenLogin }: { /** 로그인하면 �
     const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
     if (!m) {
       setState("error");
-      setError("생년월일을 입력해 주세요. (예: 2000-01-01)");
+      setError("생년월일을 입력해 줘. (예: 2000-01-01)");
       return;
     }
     setState("loading");
@@ -44,7 +44,7 @@ export default function BirthdayTeaser({ onOpenLogin }: { /** 로그인하면 �
       track("bday_read");
     } catch (err) {
       setState("error");
-      setError(err instanceof Error && err.message ? err.message : "지금은 열 수 없어요. 잠시 뒤에 다시 시도해 주세요.");
+      setError(err instanceof Error && err.message ? err.message : "지금은 열 수 없어. 잠시 뒤에 다시 시도해 줘.");
     }
   }
 
@@ -91,7 +91,7 @@ export default function BirthdayTeaser({ onOpenLogin }: { /** 로그인하면 �
         </div>
       ) : (
         <form onSubmit={submit} className="flex flex-col items-center gap-2">
-          <p className="text-sm font-bold text-slate-700">생일만 알려주면 오늘의 도리 한마디를 바로 보여줄게요 <DoriIcon className="!mr-0 ml-1" /></p>
+          <p className="text-sm font-bold text-slate-700">생일만 알려주면 오늘의 도리 한마디를 바로 보여줄게 <DoriIcon className="!mr-0 ml-1" /></p>
           <div className="flex w-full max-w-sm gap-2">
             <div className="relative min-w-0 flex-1">
               <span aria-hidden="true" className="material-symbols-outlined pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-[20px] text-brand-500">

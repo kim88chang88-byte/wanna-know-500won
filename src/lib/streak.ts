@@ -72,21 +72,21 @@ export function computeStreak(visitDays: string[], today: string): StreakState {
 export const MILESTONES = [3, 7, 14, 30, 50, 100] as const;
 
 const MILESTONE_COPY: Record<number, string> = {
-  3: "3일째! 물길이 슬슬 이어지고 있어요 💧",
-  7: "7일 연속! 도리가 칭찬 도장을 꾹 찍어 줬어요 ✦",
-  14: "14일 연속! 도리와 어느새 단짝이 됐네요 🦦",
-  30: "30일 연속! 한 달 내내 물길을 이어 온 정성이 멋져요 ✨",
-  50: "50일 연속! 도리가 박수를 보내고 있어요 👏",
-  100: "100일 연속! 도리 옹달샘의 명예 단골이에요 🏅",
+  3: "3일째! 물길이 슬슬 이어지고 있어 💧",
+  7: "7일 연속! 도리가 칭찬 도장을 꾹 찍어 줬어 ✦",
+  14: "14일 연속! 도리와 어느새 단짝이 됐네 🦦",
+  30: "30일 연속! 한 달 내내 물길을 이어 온 정성이 멋져 ✨",
+  50: "50일 연속! 도리가 박수를 보내고 있어 👏",
+  100: "100일 연속! 도리 옹달샘의 명예 단골이야 🏅",
 };
 
 /** 오늘 화면에 보여 줄 한 줄. 부담 주지 않는 말투로. */
 export function streakLine(s: StreakState): string | null {
   if (s.count === 0) return null;
   if (s.doneToday && (MILESTONES as readonly number[]).includes(s.count)) return MILESTONE_COPY[s.count];
-  if (s.resting) return "어제는 쉬어 갔지만 물길은 그대로 이어져 있어요. 오늘 오면 계속 이어져요 💧";
-  if (!s.doneToday) return `오늘 운세를 뽑으면 ${s.count + 1}일째가 돼요. 못 오는 날이 있어도 괜찮아요 ❄️`;
-  if (s.count >= 2) return `${s.count}일째 물길을 이어 가는 중이에요. 내일 또 만나요 💧`;
+  if (s.resting) return "어제는 쉬어 갔지만 물길은 그대로 이어져 있어. 오늘 오면 계속 이어져 💧";
+  if (!s.doneToday) return `오늘 운세를 뽑으면 ${s.count + 1}일째가 돼. 못 오는 날이 있어도 괜찮아 ❄️`;
+  if (s.count >= 2) return `${s.count}일째 물길을 이어 가는 중이야. 내일 또 만나 💧`;
   return null;
 }
 

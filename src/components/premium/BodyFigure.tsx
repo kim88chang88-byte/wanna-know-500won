@@ -130,7 +130,7 @@ export function BodyPicks({ states, elements }: { states: Partial<Record<BodyEl,
           ))}
         </ul>
       </div>
-      <p className="mt-3 text-[11px] leading-relaxed text-gray-400">병이나 증상을 알려 주는 그림이 아니에요. 생활 습관을 정할 때 참고하는 전통 오행 대응이고, 몸이 불편하면 꼭 전문가와 상담해 주세요.</p>
+      <p className="mt-3 text-[11px] leading-relaxed text-gray-400">병이나 증상을 알려 주는 그림이 아니야. 생활 습관을 정할 때 참고하는 전통 오행 대응이고, 몸이 불편하면 꼭 전문가와 상담해 줘.</p>
     </section>
   );
 }

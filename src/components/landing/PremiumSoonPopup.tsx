@@ -11,19 +11,19 @@ export default function PremiumSoonPopup({ onClose }: { onClose: () => void }) {
         <h4 className="mt-2 text-[18px] font-black leading-snug text-[#1f2a55]">
           프리미엄 사주는
           <br />
-          아직 준비 중이에요
+          아직 준비 중이야
         </h4>
         <p className="mt-2 text-[12.5px] leading-relaxed text-[#8a6a62]">
-          도리가 더 정성껏 다듬고 있어요.
+          도리가 더 정성껏 다듬고 있어.
           <br />
           조금만 기다려 주시면
           <br />
-          멋진 모습으로 찾아올게요 ✨
+          멋진 모습으로 찾아올게 ✨
           <br />
-          그동안은 매일 무료 운세로 만나요!
+          그동안은 매일 무료 운세로 만나!
         </p>
         <button type="button" onClick={onClose} data-testid="premium-soon-close" className="mt-3.5 w-full rounded-full bg-gradient-to-r from-[#8fb0f6] to-[#eaa1b8] py-2.5 text-[13.5px] font-black text-white active:scale-[0.98]">
-          알겠어요
+          알겠어
         </button>
       </div>
     </div>

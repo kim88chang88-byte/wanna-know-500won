@@ -41,17 +41,17 @@ export async function POST(request: Request) {
   // 운세 뽑기는 로그인한 회원만 쓸 수 있어요.
   const loginNeeded = guardOrigin(request) ?? requireLogin(request);
   if (loginNeeded) return loginNeeded;
-  const denied = guardOrigin(request) ?? (await enforceLimits(request, { name: "reading", windowMs: 60000, ip: 6, user: 12 }, "뽑기가 너무 빨라요. 잠시 뒤에 다시 시도해 주세요."));
+  const denied = guardOrigin(request) ?? (await enforceLimits(request, { name: "reading", windowMs: 60000, ip: 6, user: 12 }, "뽑기가 너무 빨라. 잠시 뒤에 다시 시도해 줘."));
   if (denied) return denied;
 
   let body: (BirthInput & { topic?: unknown; concern?: unknown; saveProfile?: unknown; shareConcern?: unknown; premium?: unknown; bonus?: unknown; callAs?: unknown }) | null;
   try {
     body = (await request.json()) as BirthInput & { topic?: unknown; concern?: unknown; saveProfile?: unknown; shareConcern?: unknown; premium?: unknown; bonus?: unknown; callAs?: unknown };
   } catch {
-    return NextResponse.json({ error: "요청이 올바르지 않아요. 다시 한 번 확인해 주세요." }, { status: 400 });
+    return NextResponse.json({ error: "요청이 올바르지 않아. 다시 한 번 확인해 줘." }, { status: 400 });
   }
   if (typeof body !== "object" || body === null) {
-    return NextResponse.json({ error: "요청이 올바르지 않아요. 다시 한 번 확인해 주세요." }, { status: 400 });
+    return NextResponse.json({ error: "요청이 올바르지 않아. 다시 한 번 확인해 줘." }, { status: 400 });
   }
   const { topic: rawTopic, concern: rawConcern, saveProfile, shareConcern, premium: rawPremium, bonus: rawBonus, callAs: rawCallAs, ...input } = body;
   // 프리미엄 책은 "긴 풀이"(요약하자면·접이식)를 화면에 쓰지 않아서, 그 호출 4번은 건너뛰어 비용을 아껴요.
@@ -95,7 +95,7 @@ export async function POST(request: Request) {
         useCoin = true;
       } else {
         return NextResponse.json(
-          { error: `${isCompat ? "둘의 궁합" : "프리미엄 종합 사주"}는 조약돌 ${coinCost}개(${(coinCost * 500).toLocaleString("ko-KR")}원)로만 볼 수 있어요. 조약돌을 충전해 주세요.`, code: "coin_needed", counts },
+          { error: `${isCompat ? "둘의 궁합" : "프리미엄 종합 사주"}는 조약돌 ${coinCost}개(${(coinCost * 500).toLocaleString("ko-KR")}원)로만 볼 수 있어. 조약돌을 충전해 줘.`, code: "coin_needed", counts },
           { status: 402 },
         );
       }
@@ -112,7 +112,7 @@ export async function POST(request: Request) {
         useCoin = true;
       } else if (isDailyLimitEnforced(process.env)) {
         return NextResponse.json(
-          { error: "오늘의 무료 뽑기는 이미 사용했어요. 결제는 아직 준비 중이에요. 내일 다시 만나요 ❄️", code: "free_used", counts },
+          { error: "오늘의 무료 뽑기는 이미 사용했어. 결제는 아직 준비 중이야. 내일 다시 만나 ❄️", code: "free_used", counts },
           { status: 402 },
         );
       }
@@ -145,7 +145,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: err.message }, { status: 400 });
     }
     console.error("calculateSaju failed", err);
-    return NextResponse.json({ error: "사주 계산 중 오류가 발생했어요." }, { status: 500 });
+    return NextResponse.json({ error: "사주 계산 중 오류가 발생했어." }, { status: 500 });
   }
 
   // 풀이를 만들기 전에 먼저 차감(예약)해요. 같은 요청을 동시에 여러 번 보내도 잔액·무료 횟수만큼만 통과해요.
@@ -155,11 +155,11 @@ export async function POST(request: Request) {
     if (useCoin) {
       const r = await reserveCoins(db, userId, coinCost);
       if (!r.ok) {
-        if (r.reason === "error") return NextResponse.json({ error: "지금은 조약돌을 확인하지 못했어요. 잠시 뒤에 다시 시도해 주세요." }, { status: 503 });
+        if (r.reason === "error") return NextResponse.json({ error: "지금은 조약돌을 확인하지 못했어. 잠시 뒤에 다시 시도해 줘." }, { status: 503 });
         return NextResponse.json(
           coinsOnly
-            ? { error: `${isCompat ? "둘의 궁합" : "프리미엄 종합 사주"}는 조약돌 ${coinCost}개(${(coinCost * 500).toLocaleString("ko-KR")}원)로만 볼 수 있어요. 조약돌을 충전해 주세요.`, code: "coin_needed", counts }
-            : { error: "오늘의 무료 뽑기는 이미 사용했어요. 결제는 아직 준비 중이에요. 내일 다시 만나요 ❄️", code: "free_used", counts },
+            ? { error: `${isCompat ? "둘의 궁합" : "프리미엄 종합 사주"}는 조약돌 ${coinCost}개(${(coinCost * 500).toLocaleString("ko-KR")}원)로만 볼 수 있어. 조약돌을 충전해 줘.`, code: "coin_needed", counts }
+            : { error: "오늘의 무료 뽑기는 이미 사용했어. 결제는 아직 준비 중이야. 내일 다시 만나 ❄️", code: "free_used", counts },
           { status: 402 },
         );
       }
@@ -169,7 +169,7 @@ export async function POST(request: Request) {
       const limit = isDailyLimitEnforced(process.env) ? FREE_PER_DAY + (rawBonus === true ? 1 : 0) : null;
       const r = await reserveDraw(db, userId, normalizeTopic(rawTopic), limit);
       if (!r.ok) {
-        return NextResponse.json({ error: "오늘의 무료 뽑기는 이미 사용했어요. 결제는 아직 준비 중이에요. 내일 다시 만나요 ❄️", code: "free_used", counts }, { status: 402 });
+        return NextResponse.json({ error: "오늘의 무료 뽑기는 이미 사용했어. 결제는 아직 준비 중이야. 내일 다시 만나 ❄️", code: "free_used", counts }, { status: 402 });
       }
       reservation = r.reservation;
     }

@@ -10,7 +10,7 @@ export async function POST(request: Request) {
   const denied = guardOrigin(request);
   if (denied) return denied;
   const session = verifySessionToken(readCookie(request.headers.get("cookie"), SESSION_COOKIE), process.env.AUTH_SECRET);
-  if (!session) return NextResponse.json({ error: "로그인이 필요해요." }, { status: 401 });
+  if (!session) return NextResponse.json({ error: "로그인이 필요해." }, { status: 401 });
 
   const dbConfig = loadDbConfig(process.env);
   if (dbConfig) {

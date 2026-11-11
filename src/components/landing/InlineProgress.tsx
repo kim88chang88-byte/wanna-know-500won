@@ -8,7 +8,7 @@ export function inlinePct(sec: number): number {
 }
 
 /** 작은 답변용 진행 표시: "도리가 물결을 읽는 중이에요 37%" + 막대. done 이 되면 100% 로 채워요. */
-export default function InlineProgress({ label = "도리가 물결을 읽는 중이에요", done = false, luxe = false }: { label?: string; done?: boolean; luxe?: boolean }) {
+export default function InlineProgress({ label = "도리가 물결을 읽는 중이야", done = false, luxe = false }: { label?: string; done?: boolean; luxe?: boolean }) {
   const [pct, setPct] = useState(1);
   useEffect(() => {
     if (done) return;

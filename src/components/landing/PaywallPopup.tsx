@@ -21,12 +21,12 @@ export default function PaywallPopup({ info, onClose, onCharge }: { info: Paywal
   const name = info.compat ? "둘의 궁합" : "프리미엄 종합 사주";
   const some = info.have > 0;
   // 일반 500원 풀이: 오늘 무료를 다 쓰고 조약돌도 없을 때
-  const title = !info.premium ? "잔액이 부족해요" : some ? "조약돌이 모자라요" : `${name}은\n무료 뽑기로는 볼 수 없어요`;
+  const title = !info.premium ? "잔액이 부족해" : some ? "조약돌이 모자라" : `${name}은\n무료 뽑기로는 볼 수 없어`;
   const sub = !info.premium
-    ? `${info.fortune} 풀이를 보려면 ${pebbleText(info.need)}가 필요한데\n오늘의 무료 뽑기는 이미 썼고\n지금은 ${pebbleText(info.have)}가 있어요.\n충전해서 이어서 볼까요?`
+    ? `${info.fortune} 풀이를 보려면 ${pebbleText(info.need)}가 필요한데\n오늘의 무료 뽑기는 이미 썼고\n지금은 ${pebbleText(info.have)}가 있어.\n충전해서 이어서 볼까?`
     : some
-      ? `${name}은 ${pebbleText(info.need)}가 필요한데\n지금은 ${pebbleText(info.have)}가 있어요.\n부족한 만큼 충전해서 이어서 볼까요?`
-      : "오늘의 무료 뽑기와 보너스 뽑기권으로는\n열 수 없는 풀이예요.\n조약돌을 충전해서 이어서 볼까요?";
+      ? `${name}은 ${pebbleText(info.need)}가 필요한데\n지금은 ${pebbleText(info.have)}가 있어.\n부족한 만큼 충전해서 이어서 볼까?`
+      : "오늘의 무료 뽑기와 보너스 뽑기권으로는\n열 수 없는 풀이야.\n조약돌을 충전해서 이어서 볼까?";
   return (
     <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/50 px-6" role="alertdialog" aria-modal="true" aria-label="유료 풀이 안내" data-testid="paywall-popup" onClick={onClose}>
       <div className="w-full max-w-[300px] rounded-[22px] bg-white p-5 pb-4 text-center shadow-2xl" onClick={(e) => e.stopPropagation()}>
@@ -54,7 +54,7 @@ export default function PaywallPopup({ info, onClose, onCharge }: { info: Paywal
             조약돌 충전하기
           </button>
         </div>
-        <p className="mt-2.5 text-[10.5px] text-gray-400">* 베타 기간이라 실제 결제는 발생하지 않아요.</p>
+        <p className="mt-2.5 text-[10.5px] text-gray-400">* 베타 기간이라 실제 결제는 발생하지 않아.</p>
       </div>
     </div>
   );

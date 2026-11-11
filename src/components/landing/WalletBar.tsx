@@ -30,7 +30,7 @@ function Chip({ label, count, tone, children }: { label: string; count: number; 
       className={`inline-flex h-6 shrink-0 items-center gap-0.5 rounded-full border bg-white/95 pl-0.5 pr-1.5 shadow-sm sm:h-7 sm:gap-1 sm:pl-1 sm:pr-2 ${tone} ${count > 0 ? "" : "opacity-60 grayscale-[35%]"}`}
     >
       {children}
-      {/* 숫자가 바뀔 때 톡 튀어 오르도록 key 에 숫자를 넣어요 */}
+      {/* 숫자가 바뀔 때 톡 튀어 오르도록 key 에 숫자를 넣어 */}
       <span key={text} aria-hidden="true" className="wallet-pop min-w-[0.65rem] text-center text-[12px] sm:min-w-[0.75rem] sm:text-[13px] font-extrabold leading-none text-gray-800">
         {text}
       </span>

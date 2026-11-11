@@ -80,19 +80,19 @@ export function withRef(url: string, code: string | null): string {
 export function redeemMessage(result: string): { ok: boolean; text: string } {
   switch (result) {
     case "ok":
-      return { ok: true, text: "친구 초대 코드가 적용됐어요! 풀이를 한 번 마치면 두 분 모두 500원 뽑기 1회를 받아요 🎁" };
+      return { ok: true, text: "친구 초대 코드가 적용됐어! 풀이를 한 번 마치면 두 분 모두 500원 뽑기 1회를 받아 🎁" };
     case "bad_code":
-      return { ok: false, text: "없는 코드예요. 친구에게 코드를 다시 확인해 보세요." };
+      return { ok: false, text: "없는 코드야. 친구에게 코드를 다시 확인해 봐." };
     case "self":
-      return { ok: false, text: "내 코드는 내가 입력할 수 없어요. 친구에게 공유해 주세요." };
+      return { ok: false, text: "내 코드는 내가 입력할 수 없어. 친구에게 공유해 줘." };
     case "already":
-      return { ok: false, text: "이미 친구 초대 코드를 입력하셨어요." };
+      return { ok: false, text: "이미 친구 초대 코드를 입력하셨어." };
     case "too_old":
-      return { ok: false, text: "초대 코드는 가입 후 7일 안에만 입력할 수 있어요." };
+      return { ok: false, text: "초대 코드는 가입 후 7일 안에만 입력할 수 있어." };
     case "used_draw":
-      return { ok: false, text: "이미 뽑기를 해 보신 계정은 입력할 수 없어요. 새로 가입한 친구에게 공유해 주세요." };
+      return { ok: false, text: "이미 뽑기를 해 보신 계정은 입력할 수 없어. 새로 가입한 친구에게 공유해 줘." };
     default:
-      return { ok: false, text: "지금은 코드를 확인하지 못했어요. 잠시 뒤에 다시 해 주세요." };
+      return { ok: false, text: "지금은 코드를 확인하지 못했어. 잠시 뒤에 다시 해 줘." };
   }
 }
 

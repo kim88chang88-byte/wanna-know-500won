@@ -100,7 +100,7 @@ interface Props {
 }
 
 /** 로그인 안내 문구 (질문지 첫 화면·결과 화면에서 써요) */
-export const LOGIN_NUDGE = "로그인하면 도리가 생년월일시를 기억해서 다시 입력할 필요가 없어요!";
+export const LOGIN_NUDGE = "로그인하면 도리가 생년월일시를 기억해서 다시 입력할 필요가 없어!";
 
 const BUBBLE: Record<AnyStepId, string> = {
   birth: "먼저 생년월일, 성별, 태어난 시간을 알려줄래? (시간은 몰라도 괜찮아!) ❄️",
@@ -156,10 +156,10 @@ async function fetchPremiumReport(input: BirthInput, level: "basic" | "full", to
     });
     const data = (await res.json().catch(() => null)) as { report?: PremiumReportView; error?: string; pendingChapters?: string[]; aiNotice?: boolean; aiGated?: boolean } | null;
     if (res.ok && data?.report) return { report: data.report, error: null, aiNotice: data.aiNotice === true, aiGated: data.aiGated === true, rest: data.pendingChapters?.length ? reqBody : undefined };
-    return { report: null, error: data?.error ?? "사주 리포트를 불러오지 못했어요. 잠시 뒤에 다시 시도해 주세요." };
+    return { report: null, error: data?.error ?? "사주 리포트를 불러오지 못했어. 잠시 뒤에 다시 시도해 줘." };
   } catch {
     if (signal.aborted) return { report: null, error: null };
-    return { report: null, error: "사주 리포트를 불러오지 못했어요. 잠시 뒤에 다시 시도해 주세요." };
+    return { report: null, error: "사주 리포트를 불러오지 못했어. 잠시 뒤에 다시 시도해 줘." };
   }
 }
 
@@ -275,7 +275,7 @@ function PersonOkCheck({ checked, onChange }: { checked: boolean; onChange: (v: 
     <label className="flex items-start gap-2 text-xs text-gray-700 leading-relaxed">
       <input type="checkbox" name="personOk" data-testid="person-ok" className="mt-0.5" checked={checked} onChange={(e) => onChange(e.target.checked)} />
       <span>
-        실명이나 별명을 적어도 괜찮고, 이 정보를 저장해도 되는 사람이에요. <span className="text-[11px] text-gray-500">(체크해야 저장돼요)</span>
+        실명이나 별명을 적어도 괜찮고, 이 정보를 저장해도 되는 사람이야. <span className="text-[11px] text-gray-500">(체크해야 저장돼)</span>
       </span>
     </label>
   );
@@ -320,11 +320,11 @@ function CombinedBirthFields({ f, patch }: { f: IntakeForm; patch: (p: Partial<I
           onChange={(e) => onDate(e.target.value)}
           className={INPUT}
         />
-        <p className="text-[11px] text-gray-500">숫자만 적어도 돼요. (예: 20000101)</p>
+        <p className="text-[11px] text-gray-500">숫자만 적어도 돼. (예: 20000101)</p>
         {f.calendar === "lunar" && (
           <label className="flex items-center gap-2 text-xs text-gray-600">
             <input type="checkbox" checked={f.isLeapMonth} onChange={(e) => patch({ isLeapMonth: e.target.checked })} />
-            윤달이에요
+            윤달이야
           </label>
         )}
       </div>
@@ -429,7 +429,7 @@ function BirthStepFields({ kind, f, patch }: { kind: "date" | "time" | "gender";
                 checked={f.isLeapMonth}
                 onChange={(e) => patch({ isLeapMonth: e.target.checked })}
               />
-              윤달이에요
+              윤달이야
             </label>
           </>
         )}
@@ -464,7 +464,7 @@ function MbtiPicker({ value, onChange }: { value: string; onChange: (v: string) 
   return (
     <div data-testid="mbti-picker" className="mt-4">
       <div className="mb-1.5 text-xs font-bold text-gray-700">
-        MBTI <span className="font-normal text-gray-500">(선택 · 모르면 건너뛰어도 돼요)</span>
+        MBTI <span className="font-normal text-gray-500">(선택 · 모르면 건너뛰어도 돼)</span>
       </div>
       <div className="grid grid-cols-4 gap-1.5" role="group" aria-label="MBTI 고르기">
         {MBTI_TYPES.map((t) => (
@@ -474,7 +474,7 @@ function MbtiPicker({ value, onChange }: { value: string; onChange: (v: string) 
         ))}
       </div>
       <p className="mt-2 rounded-xl bg-brand-50 px-3 py-2 text-[11px] leading-relaxed text-gray-600">
-        <b className="text-gray-800">MBTI는 사주를 읽을 때 곁에 놓고 보는 참고예요.</b> 네 글자로 사람 속을 다 알 수는 없어서, 내가 알려준 성향을 사주와 나란히 놓고 같은 말을 하는 곳, 다른 말을 하는 곳을 살펴봐요.
+        <b className="text-gray-800">MBTI는 사주를 읽을 때 곁에 놓고 보는 참고야.</b> 네 글자로 사람 속을 다 알 수는 없어서, 내가 알려준 성향을 사주와 나란히 놓고 같은 말을 하는 곳, 다른 말을 하는 곳을 살펴봐.
       </p>
     </div>
   );
@@ -660,7 +660,7 @@ export default function IntakeModal({ target, wallet = null, onClose, onComplete
         error?: string;
       } | null;
       if (res.status === 402 && ["free_used", "coin_needed"].includes((data as { code?: string } | null)?.code ?? "")) setFreeUsed(true);
-      if (!res.ok || !data?.chart) throw new Error(data?.error ?? "풀이를 만들지 못했어요. 잠시 뒤에 다시 해볼래요?");
+      if (!res.ok || !data?.chart) throw new Error(data?.error ?? "풀이를 만들지 못했어. 잠시 뒤에 다시 해볼래?");
       const status: ReadingStatus = data.readingStatus ?? "failed";
       const p = await premiumPromise;
       if (ctrl.signal.aborted) return;
@@ -694,7 +694,7 @@ export default function IntakeModal({ target, wallet = null, onClose, onComplete
       else if (p.report) onComplete(null);
     } catch (err) {
       if (ctrl.signal.aborted) return;
-      setError(err instanceof Error ? err.message : "알 수 없는 오류가 생겼어요.");
+      setError(err instanceof Error ? err.message : "알 수 없는 오류가 생겼어.");
       setStepIndex(0); // 날짜가 잘못됐을 가능성이 가장 커서 처음 질문으로 돌아가요.
       setPhase("form");
     }
@@ -808,7 +808,7 @@ export default function IntakeModal({ target, wallet = null, onClose, onComplete
           {premiumReport ? (
             <>
               {/* 1) 한 줄 결론(카드 틀 없이 글자로) */}
-              {/* 프리미엄 책에서는 한 줄 결론을 맨 위가 아니라 20쪽 사주서의 마지막 쪽 끝에 둬요. */}
+              {/* 프리미엄 책에서는 한 줄 결론을 맨 위가 아니라 20쪽 사주서의 마지막 쪽 끝에 둬. */}
               {!storyMode && !bookMode && <ResultHero report={premiumReport} aiQuote={reading?.kkotgeoji ?? null} luxe={luxe} />}
 
               {loggedIn && (
@@ -855,7 +855,7 @@ export default function IntakeModal({ target, wallet = null, onClose, onComplete
               ) : (
                 <>
                   {/* 2) 오늘 도리의 풀이 → 주제별 맞춤 분석 + 사주 리포트 */}
-                  {/* 프리미엄 결과에서는 500원 풀이와 겹치는 "오늘 도리의 풀이"를 빼고 20쪽 사주서로 바로 이어가요. */}
+                  {/* 프리미엄 결과에서는 500원 풀이와 겹치는 "오늘 도리의 풀이"를 빼고 20쪽 사주서로 바로 이어가. */}
                   {reading && !luxe && <ReadingCard reading={reading} luxe={luxe} />}
 
                   <div data-testid="premium-result" className="mt-6">
@@ -893,7 +893,7 @@ export default function IntakeModal({ target, wallet = null, onClose, onComplete
           ) : (
             <>
               <p role="status" data-testid="premium-error" className="p-4 rounded-2xl bg-amber-50 border border-amber-200 text-center text-sm text-amber-800">
-                {premiumError ?? "사주 리포트를 불러오지 못했어요."}
+                {premiumError ?? "사주 리포트를 불러오지 못했어."}
               </p>
               {reading?.kkotgeoji && (
                 <p data-testid="reading-quote" className="mt-3 p-4 rounded-2xl bg-brand-50/60 border border-brand-100 text-center text-sm text-gray-800 leading-relaxed">
@@ -902,7 +902,7 @@ export default function IntakeModal({ target, wallet = null, onClose, onComplete
               )}
               {!reading && readingStatus !== "unavailable" && (
                 <p data-testid="reading-missing" className="mt-3 text-center text-xs text-gray-500">
-                  도리가 잠깐 물놀이하러 갔어요. 잠시 뒤에 다시 뽑아볼래요?
+                  도리가 잠깐 물놀이하러 갔어. 잠시 뒤에 다시 뽑아볼래?
                 </p>
               )}
             </>
@@ -934,7 +934,7 @@ export default function IntakeModal({ target, wallet = null, onClose, onComplete
             </table>
             {chart.uncertainPillars.length > 0 && (
               <p className="mt-3 text-[11px] text-amber-700">
-                이 날은 절기가 바뀌는 날이라, 태어난 시간을 알아야 연·월 기둥이 정확해져요.
+                이 날은 절기가 바뀌는 날이라, 태어난 시간을 알아야 연·월 기둥이 정확해져.
               </p>
             )}
             {chart.warnings.map((w) => (
@@ -1071,10 +1071,10 @@ export default function IntakeModal({ target, wallet = null, onClose, onComplete
           {step === "birth" && <CombinedBirthFields key={meKey} f={form} patch={update} />}
           {step === "birth" && target.premium === true && !compat && <MbtiPicker value={form.mbti} onChange={(v) => update({ mbti: v })} />}
           {(step === "date" || step === "time" || step === "gender") && <BirthStepFields kind={step} f={form} patch={update} />}
-          {step === "pdate" && people.length > 0 && <SavedPeoplePicker people={people} onPick={pickPerson} title="기억해 둔 사람 (눌러서 바로 불러와요)" />}
+          {step === "pdate" && people.length > 0 && <SavedPeoplePicker people={people} onPick={pickPerson} title="기억해 둔 사람 (눌러서 바로 불러와)" />}
           {step === "pdate" && !loggedIn && (
             <p data-testid="people-nudge" className="mb-3 rounded-xl bg-amber-50 border border-amber-200 px-3 py-2 text-center text-[11px] font-bold text-amber-900">
-              ❄️ 로그인하면 상대방 정보를 기억해 두고, 다음에 눌러서 바로 고를 수 있어요
+              ❄️ 로그인하면 상대방 정보를 기억해 두고, 다음에 눌러서 바로 고를 수 있어
             </p>
           )}
           {(step === "pdate" || step === "ptime" || step === "pgender") && (
@@ -1085,7 +1085,7 @@ export default function IntakeModal({ target, wallet = null, onClose, onComplete
             <div className="space-y-3">
               {!combined && target.premium === true && !compat && <MbtiPicker value={form.mbti} onChange={(v) => update({ mbti: v })} />}
               <div className="flex items-center justify-between text-[11px] text-gray-500">
-                <span>최대 {MAX_CONCERN_TAGS}개까지 고를 수 있어요 (건너뛰어도 돼요)</span>
+                <span>최대 {MAX_CONCERN_TAGS}개까지 고를 수 있어 (건너뛰어도 돼)</span>
                 <span data-testid="concern-count" className="font-bold text-brand-600">
                   {form.concernTags.length}/{MAX_CONCERN_TAGS}
                 </span>
@@ -1120,7 +1120,7 @@ export default function IntakeModal({ target, wallet = null, onClose, onComplete
                   maxLength={MAX_CONCERN_TEXT}
                   value={form.concernText}
                   onChange={(e) => update({ concernText: e.target.value })}
-                  placeholder="예) 3년 다닌 회사를 옮길지 고민이에요"
+                  placeholder="예) 3년 다닌 회사를 옮길지 고민이야"
                   className={`${INPUT} resize-none`}
                 />
                 <div className="mt-1 text-right text-[10px] text-gray-400" data-testid="concern-text-count">
@@ -1196,7 +1196,7 @@ export default function IntakeModal({ target, wallet = null, onClose, onComplete
                 <label className="flex items-start gap-2 text-xs text-gray-700 leading-relaxed">
                   <input type="checkbox" name="shareConcern" className="mt-0.5" checked={shareConcern} onChange={(e) => setShareConcern(e.target.checked)} />
                   <span>
-                    (선택) 적어 준 고민을 서비스 개선 통계에 써도 좋아요. 생년월일은 빼고 나이대·성별만 저장해요.
+                    (선택) 적어 준 고민을 서비스 개선 통계에 써도 좋아. 생년월일은 빼고 나이대·성별만 저장해.
                     {loggedIn ? " 로그인 후 동의하면 탈퇴 시 함께 삭제돼요." : " 로그인하지 않으면 누구 것인지 알 수 없게 저장돼 나중에 지우기 어려워요."}
                   </span>
                 </label>
@@ -1266,11 +1266,11 @@ export default function IntakeModal({ target, wallet = null, onClose, onComplete
               {isLast ? "풀이 보기 ✧" : step === "concern" && form.concernTags.length === 0 && !form.concernText.trim() ? "건너뛰기" : "다음"}
             </button>
           </div>
-          <p className="mt-3 text-center text-[10px] text-gray-400">* 베타 기간이라 결제는 발생하지 않아요.</p>
+          <p className="mt-3 text-center text-[10px] text-gray-400">* 베타 기간이라 결제는 발생하지 않아.</p>
         </form>
       )}
       {/* 창이 길어서 아래에 더 볼 내용이 있을 때만 보이는 안내 */}
-      {phase !== "loading" && <ScrollHint luxe={luxe} label={phase === "result" ? "아래로 스크롤하면 사주 리포트가 더 있어요" : "아래로 스크롤해 주세요"} />}
+      {phase !== "loading" && <ScrollHint luxe={luxe} label={phase === "result" ? "아래로 스크롤하면 사주 리포트가 더 있어" : "아래로 스크롤해 줘"} />}
     </ModalShell>
   );
 }

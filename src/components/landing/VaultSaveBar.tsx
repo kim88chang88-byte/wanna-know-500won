@@ -42,7 +42,7 @@ async function shrinkImage(src: string, maxW = 480): Promise<string | null> {
   }
 }
 
-export function VaultSaveBar({ snapshot, autoSave, luxe = false, ready = true }: { snapshot: VaultSnapshotInput; autoSave: boolean; luxe?: boolean; /** false 면 아직 풀이를 받는 중이라 자동 저장을 미뤄요 */ ready?: boolean }) {
+export function VaultSaveBar({ snapshot, autoSave, luxe = false, ready = true }: { snapshot: VaultSnapshotInput; autoSave: boolean; luxe?: boolean; /** false 면 아직 풀이를 받는 중이라 자동 저장을 미뤄 */ ready?: boolean }) {
   const [status, setStatus] = useState<Status>("idle");
   const [message, setMessage] = useState<string | null>(null);
   const tried = useRef(false);
@@ -89,9 +89,9 @@ export function VaultSaveBar({ snapshot, autoSave, luxe = false, ready = true }:
   return (
     <div data-testid="vault-save-bar" className={`mt-4 flex items-center justify-between gap-2 rounded-2xl border px-3.5 py-2.5 text-xs ${luxe ? "border-[#e6c887]/25 bg-white/[0.03]" : "border-brand-100 bg-white"}`}>
       <span className={`leading-snug ${luxe ? "text-[#efe7d3]" : "text-gray-700"}`}>
-        {status === "saved" && <>📚 내 보관함에 저장했어요. 언제든 다시 볼 수 있어요.</>}
+        {status === "saved" && <>📚 내 보관함에 저장했어. 언제든 다시 볼 수 있어.</>}
         {status === "saving" && <>📚 보관함에 저장하는 중…</>}
-        {status === "idle" && (autoSave && !ready ? <>📚 풀이를 끝까지 받으면 보관함에 자동으로 저장할게요.</> : <>📚 이 풀이를 내 보관함에 넣어 둘까요?</>)}
+        {status === "idle" && (autoSave && !ready ? <>📚 풀이를 끝까지 받으면 보관함에 자동으로 저장할게.</> : <>📚 이 풀이를 내 보관함에 넣어 둘까?</>)}
         {(status === "error" || status === "full") && <span className={luxe ? "text-[#f6dfa8]" : "text-amber-800"}>{message}</span>}
       </span>
       {status === "saved" ? (

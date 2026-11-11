@@ -24,21 +24,21 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
-  const denied = guardOrigin(request) ?? (await enforceLimits(request, { name: "chat", windowMs: 60000, ip: 10, user: 12 }, "질문이 너무 빨라요. 잠시 뒤에 다시 물어봐 주세요."));
+  const denied = guardOrigin(request) ?? (await enforceLimits(request, { name: "chat", windowMs: 60000, ip: 10, user: 12 }, "질문이 너무 빨라. 잠시 뒤에 다시 물어봐 줘."));
   if (denied) return denied;
   const session = sessionOf(request);
-  if (!session) return NextResponse.json({ error: "로그인이 필요해요." }, { status: 401 });
-  if (!canChat(session.sub)) return NextResponse.json({ error: "도유 상담방은 곧 열려요. 조금만 기다려 주세요 ❄️" }, { status: 403 });
+  if (!session) return NextResponse.json({ error: "로그인이 필요해." }, { status: 401 });
+  if (!canChat(session.sub)) return NextResponse.json({ error: "도유 상담방은 곧 열려. 조금만 기다려 줘 ❄️" }, { status: 403 });
 
   let body: { ctx?: unknown; messages?: unknown } | null;
   try {
     body = (await request.json()) as { ctx?: unknown; messages?: unknown };
   } catch {
-    return NextResponse.json({ error: "요청이 올바르지 않아요. 다시 한 번 확인해 주세요." }, { status: 400 });
+    return NextResponse.json({ error: "요청이 올바르지 않아. 다시 한 번 확인해 줘." }, { status: 400 });
   }
   const ctx = parseCtx(body?.ctx);
   const history = cleanHistory(body?.messages);
-  if (!ctx || !history) return NextResponse.json({ error: "요청이 올바르지 않아요. 다시 한 번 확인해 주세요." }, { status: 400 });
+  if (!ctx || !history) return NextResponse.json({ error: "요청이 올바르지 않아. 다시 한 번 확인해 줘." }, { status: 400 });
 
   const db = dbOrNull();
   const target = targetOf(session.sub, ctx);
@@ -47,7 +47,7 @@ export async function POST(request: Request) {
   const last = history[history.length - 1].text;
   if (isCrisis(last)) return NextResponse.json({ answer: CRISIS_ANSWER, safe: true, left: await quotaLeft(db, target) });
 
-  if (!hasAiKey()) return NextResponse.json({ error: "지금은 도리가 답을 준비하지 못했어요." }, { status: 503 });
+  if (!hasAiKey()) return NextResponse.json({ error: "지금은 도리가 답을 준비하지 못했어." }, { status: 503 });
 
   let taken: { left: number; via: "db" | "mem" } | null = null;
   try {
@@ -55,7 +55,7 @@ export async function POST(request: Request) {
     let birth = ctx.birth;
     if (ctx.kind === "daily" || !birth) {
       const profile = db ? await db.getProfile(session.sub) : null;
-      if (!profile) return NextResponse.json({ error: "내 정보를 먼저 저장해 주세요." }, { status: 404 });
+      if (!profile) return NextResponse.json({ error: "내 정보를 먼저 저장해 줘." }, { status: 404 });
       birth = resolveBirth(profile).input;
     }
     const chart = calculateSaju(birth);
@@ -70,11 +70,11 @@ export async function POST(request: Request) {
 
     // 하루에 한 사람이 보낼 수 있는 전체 질문 수 (범위가 달라도 합쳐서)
     const day = await takeLimit("chat-day", `u:${session.sub}`, DAY_CAP, 24 * 60 * 60 * 1000);
-    if (!day.ok) return NextResponse.json({ error: "오늘은 도리가 질문을 많이 받았어요. 내일 다시 물어봐 주세요 ❄️", code: "day_cap", left: 0 }, { status: 429 });
+    if (!day.ok) return NextResponse.json({ error: "오늘은 도리가 질문을 많이 받았어. 내일 다시 물어봐 줘 ❄️", code: "day_cap", left: 0 }, { status: 429 });
 
     taken = await takeQuestion(db, target);
     if (taken.left < 0) {
-      return NextResponse.json({ error: "질문을 모두 사용했어요. 조약돌 하나로 질문을 5번 더 할 수 있어요.", code: "quota", left: 0 }, { status: 402 });
+      return NextResponse.json({ error: "질문을 모두 사용했어. 조약돌 하나로 질문을 5번 더 할 수 있어.", code: "quota", left: 0 }, { status: 402 });
     }
 
     const now = new Date();
@@ -111,8 +111,8 @@ export async function POST(request: Request) {
     // 답을 못 만들었으면 쓴 질문을 돌려줘요.
     if (taken && taken.left >= 0) await refundQuestion(db, target, taken.via);
     if (err instanceof SajuInputError) return NextResponse.json({ error: err.message }, { status: 400 });
-    if (err instanceof ReadingUnavailableError) return NextResponse.json({ error: "오늘은 도리가 많이 답해서 잠깐 쉬고 있어요. 내일 다시 물어봐 주세요 ❄️" }, { status: 503 });
+    if (err instanceof ReadingUnavailableError) return NextResponse.json({ error: "오늘은 도리가 많이 답해서 잠깐 쉬고 있어. 내일 다시 물어봐 줘 ❄️" }, { status: 503 });
     console.error("chat failed:", err instanceof Error ? err.message : "unknown");
-    return NextResponse.json({ error: "도리가 잠깐 물놀이하러 갔어요. 다시 보내 볼래요?" }, { status: 502 });
+    return NextResponse.json({ error: "도리가 잠깐 물놀이하러 갔어. 다시 보내 볼래?" }, { status: 502 });
   }
 }
