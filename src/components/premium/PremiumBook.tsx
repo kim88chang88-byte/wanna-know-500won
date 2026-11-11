@@ -826,9 +826,9 @@ function titleParts(title: string): { small: string; main: string; sub: string }
   return b ? { small, main: b, sub: a } : { small, main: a, sub: "" };
 }
 
-/** 맨 앞 "먼저 결론부터" 쪽의 도리 말풍선(고정 문구) */
-export const openingBubble = (name?: string | null) => `안녕, ${name ? `${callName(name)}, ` : ""}너무 반가워! ${OPENING_BODY}`;
-const OPENING_BODY = "도유사주는 다른 사주 서비스와는 다르게 빙빙 돌려 말하지 않고 핵심 결론부터 먼저 말해 주는 차별점이 있어. 자, 그럼 지금부터 네 고민을 어떻게 해결하면 좋을지 그 해답을 알아볼까?";
+/** 3쪽 "먼저 결론부터" 쪽의 도리 말풍선(고정 문구). 서문에서 사주 기본을 본 뒤 이어지는 말이야. */
+export const openingBubble = (name?: string | null) => `${name ? `${callName(name)}, ` : ""}${OPENING_BODY}`;
+const OPENING_BODY = "여기까지 사주가 뭔지, 네 사주가 어떻게 생겼는지 한눈에 봤어. 이제 네 고민부터 얘기해 볼게. 먼저 결론부터 말하고, 그다음에 분야별로 하나씩 깊게 들어가 보자. 자, 렛츠 시작! 🚀";
 
 const BUBBLE =
   "relative max-w-[78%] rounded-[22px] border-2 border-[#20203a] bg-[#fffdf7] px-4 py-3.5 text-[15px] font-medium leading-[1.55] text-[#26233a] after:absolute after:bottom-3.5 after:h-3.5 after:w-3.5 after:bg-[#fffdf7] after:content-['']";

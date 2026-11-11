@@ -179,8 +179,9 @@ export function buildBook(r: SajuResult, ctx: BookContext): BookPage[] {
       return { year: y, ganzhi: s?.ganzhi ?? "", group: s ? (groupsOf(s.tenGodStem, s.tenGodBranch)[0] ?? null) : null, god: s?.tenGodStem };
     }).filter((y) => y.ganzhi),
   );
-  pages[0].sections.splice(1, 0, resonance.traits, ...(lookBack ? [lookBack] : []));
-  pages[0].evidence = [
+  const topPage = pages.find((p) => p.key === "concernTop") ?? pages[0];
+  topPage.sections.splice(1, 0, resonance.traits, ...(lookBack ? [lookBack] : []));
+  topPage.evidence = [
     ...resonance.traitBasis,
     { label: "일주", value: `${dayPillar} · ${profile.image}` },
     { label: "에너지", value: `${ctx.gradeLabel} (${r.advanced.dayStrength.score}점) · ${r.advanced.geukguk}` },

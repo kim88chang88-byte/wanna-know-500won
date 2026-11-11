@@ -7,8 +7,8 @@ import { buildLifeChart, type ChartKind } from "./charts";
 
 /*
  * 프리미엄 20쪽 리포트. 기존 규칙 기반 10쪽 빌더(buildBook)의 내용을 장 구성에 맞게 다시 묶어요.
- * 맨 앞 결론 1 · 서문 2 · 1장 1 · 2장 2 · 3장 1 · 4~6장 각 1 · 7~10장 각 1 · 부록 6
- * 맨 앞 쪽은 이용자가 가장 궁금해하는 고민의 "결론"을 먼저 보여 주고, 그 이유를 알려면 사주 원리를 이해해야 한다며 서문으로 이어 가요.
+ * 서문 2 · 결론 1 · 1장 1 · 2장 2 · 3장 1 · 4~6장 각 1 · 7~10장 각 1 · 부록 6
+ * 서문 두 장(사주가 뭔지 · 내 사주 한눈에)으로 기본을 잡은 뒤, 3쪽에서 이용자가 가장 궁금해하는 고민의 "결론"을 먼저 말하고 분야별 장으로 들어가요.
  * 자세한 고민 답은 맨 뒤 부록에 있어요.
  */
 
@@ -37,7 +37,7 @@ export const EXPLAINERS: Record<string, { title: string; body: string }> = {
   "years:2": { title: "월운 활용법", body: "달마다 달라지는 기운은 ‘이 달엔 꼭 이래야 한다’는 규칙이 아니라 계획을 세울 때 참고하는 달력이야. 중요한 만남이나 시작은 기운이 받쳐 주는 달에, 정리와 휴식은 느긋한 달에 놓아 봐." },
 };
 
-/** 맨 앞 쪽에서 사주 원리 설명으로 이어 주는 소제목. (잠금 규칙에서도 이 이름을 써요) */
+/** 결론 쪽(3쪽)에서 분야별 장으로 들어가는 소제목. (잠금 규칙에서도 이 이름을 써요) */
 export const CONCERN_TOP_BRIDGE = "이제 차근차근 풀어 줄게";
 
 function half<T>(list: T[]): [T[], T[]] {
@@ -55,7 +55,7 @@ const PREFACE: BookSection[] = [
 const PREFACE2: BookSection[] = [
   { heading: "십성: 나와 세상의 관계", body: "일간(나)을 기준으로 다른 글자들이 나와 어떤 관계인지 열 가지로 나눈 것이 십성이야. 나와 같은 편(비겁), 내가 표현하는 것(식상), 내가 얻는 것(재성), 나를 다스리는 것(관성), 나를 돕는 것(인성) 다섯 묶음으로 보면 쉬워." },
   { heading: "대운과 세운: 시간의 흐름", body: "대운은 10년 단위로 바뀌는 큰 계절, 세운은 매년 바뀌는 한 해의 날씨, 월운은 달마다의 분위기, 일운은 하루하루의 기운이야. 타고난 지도(원국)는 그대로이지만, 어느 계절을 지나는지에 따라 같은 사람도 다른 모습으로 살아가." },
-  { heading: "이 리포트는 이렇게 읽어 줘", body: "맨 앞 1쪽의 결론이 왜 그렇게 나왔는지 서문과 1~3장에서 나의 타고난 모습부터 차근차근 보고, 4~6장에서 운과 기운의 흐름을 살펴. 7~10장은 재물·연애·직업·건강을 하나씩 깊이 풀고, 부록에서 큰 흐름과 올해·내년의 달별 흐름, 요즘 고민에 대한 길고 자세한 답, 행운 처방을 정리해. 재미와 참고용으로 편하게 읽어 줘." },
+  { heading: "이 리포트는 이렇게 읽어 줘", body: "서문에서 사주가 뭔지와 내 사주의 큰 그림을 먼저 보고, 3쪽에서 네 고민의 결론부터 말해 줘. 이어서 1~3장에서 나의 타고난 모습을 차근차근 보고, 4~6장에서 운과 기운의 흐름을 살펴. 7~10장은 재물·연애·직업·건강을 하나씩 깊이 풀고, 부록에서 큰 흐름과 올해·내년의 달별 흐름, 요즘 고민에 대한 길고 자세한 답, 행운 처방을 정리해. 재미와 참고용으로 편하게 읽어 줘." },
 ];
 
 function stageTimeline(r: SajuResult): { sections: BookSection[]; rows: BookRow[] } {
@@ -121,17 +121,17 @@ export function buildBook20(r: SajuResult, ctx: BookContext): BookPage[] {
   const stage = stageTimeline(r);
   const cur = r.daeun.current;
 
-  // 맨 앞 "먼저 결론부터" 쪽의 기본(규칙 기반) 본문. AI 가 쓰면 이 쪽 전체가 이 사람의 고민에 맞춘 글로 바뀌어요.
+  // 3쪽 "먼저 결론부터" 쪽의 기본(규칙 기반) 본문. AI 가 쓰면 이 쪽 전체가 이 사람의 고민에 맞춘 글로 바뀌어요.
   const topPoints = ctx.insight.points.slice(0, 2).map((x) => ({ heading: x.title, body: x.body }));
   const concernTopSections: BookSection[] = [
     { heading: "한 줄 결론", body: `${ctx.insight.headline}.` },
     ...topPoints,
-    { heading: CONCERN_TOP_BRIDGE, body: `이 결론은 갑자기 나온 말이 아니라, 타고난 사주 구조에서 나온 거야. 그래서 먼저 사주팔자가 무엇인지, 내 여덟 글자는 어떻게 생겼는지, 어떤 기질로 어떤 흐름을 지나는지를 차근차근 설명해 줄게. 원리를 알고 나면 이 결론이 훨씬 또렷하게 와닿을 거야. 그리고 맨 뒤 19쪽에서는 이 고민에 대한 더 길고 자세한 답을 다시 이어서 줄게.` },
+    { heading: CONCERN_TOP_BRIDGE, body: `사주가 뭔지, 내 사주가 어떻게 생겼는지는 앞에서 봤고, 이 결론도 거기서 나온 거야. 이제 이 결론이 어디서 왔는지, 내 기질·운의 흐름·분야별(재물·연애·직업·건강) 이야기로 하나씩 깊게 들어가 보자. 그리고 맨 뒤 19쪽에서는 이 고민에 대한 더 길고 자세한 답을 다시 이어서 줄게. 렛츠 시작!` },
   ];
   const seq: Array<{ key: string; title: string; subtitle: string; lead: string; sections: BookSection[]; tables: BookPage["tables"]; extra?: Partial<BookPage> }> = [
-    { key: "concernTop", title: "먼저 결론부터 · 네 고민에 대한 해답", subtitle: "OPENING", lead: ctx.insight.headline, sections: concernTopSections, tables: [] },
     { key: "preface", title: "서문 · 사주팔자, 쉽게 알아보기", subtitle: "PREFACE · 01", lead: "여덟 글자가 말해 주는 것, 일상의 말로 풀어 줘.", sections: PREFACE, tables: [] },
     { ...overview, title: "서문 · 나의 사주 한눈에 보기", subtitle: "PREFACE · 02", sections: [...overview.sections, ...PREFACE2], tables: overview.tables, extra: { evidence: overview.evidence } },
+    { key: "concernTop", title: "먼저 결론부터 · 네 고민에 대한 해답", subtitle: "OPENING", lead: ctx.insight.headline, sections: concernTopSections, tables: [] },
     { ...pillars, title: "제1장 · 나의 사주팔자", subtitle: "CHAPTER 1", tables: pillars.tables },
     { ...nature, title: "제2장 · 나는 어떤 사람인가? - 일주 분석", subtitle: "CHAPTER 2-1", tables: [] },
     { ...elements, title: "제2장 · 나는 어떤 사람인가? - 오행 분석", subtitle: "CHAPTER 2-2", tables: elements.tables },
