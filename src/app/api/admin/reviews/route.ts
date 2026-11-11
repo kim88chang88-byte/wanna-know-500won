@@ -12,8 +12,8 @@ const NO_STORE = { "Cache-Control": "no-store" };
 
 function adminOnly(request: Request): NextResponse | null {
   const session = verifySessionToken(readCookie(request.headers.get("cookie"), SESSION_COOKIE), process.env.AUTH_SECRET);
-  if (!session) return NextResponse.json({ error: "로그인이 필요해요." }, { status: 401, headers: NO_STORE });
-  if (!isAdmin(session.sub, process.env)) return NextResponse.json({ error: "관리자 권한이 없어요." }, { status: 403, headers: NO_STORE });
+  if (!session) return NextResponse.json({ error: "로그인이 필요해." }, { status: 401, headers: NO_STORE });
+  if (!isAdmin(session.sub, process.env)) return NextResponse.json({ error: "관리자 권한이 없어." }, { status: 403, headers: NO_STORE });
   return null;
 }
 
@@ -22,7 +22,7 @@ export async function GET(request: Request) {
   const denied = adminOnly(request);
   if (denied) return denied;
   const dbConfig = loadDbConfig(process.env);
-  if (!dbConfig) return NextResponse.json({ error: "DB 가 연결되어 있지 않아요." }, { status: 503, headers: NO_STORE });
+  if (!dbConfig) return NextResponse.json({ error: "DB 가 연결되어 있지 않아." }, { status: 503, headers: NO_STORE });
   const q = new URL(request.url).searchParams.get("days");
   const since = q === "all" ? "2000-01-01" : sinceDayFor([7, 30, 90].includes(Number(q)) ? Number(q) : 30);
   try {
@@ -32,7 +32,7 @@ export async function GET(request: Request) {
     });
   } catch (err) {
     console.error("admin reviews csv failed:", err instanceof Error ? err.message : "unknown");
-    return NextResponse.json({ error: "내려받지 못했어요." }, { status: 502, headers: NO_STORE });
+    return NextResponse.json({ error: "내려받지 못했어." }, { status: 502, headers: NO_STORE });
   }
 }
 
@@ -46,18 +46,18 @@ export async function POST(request: Request) {
   try {
     body = (await request.json()) as { id?: unknown; hidden?: unknown };
   } catch {
-    return NextResponse.json({ error: "요청이 올바르지 않아요. 다시 한 번 확인해 주세요." }, { status: 400, headers: NO_STORE });
+    return NextResponse.json({ error: "요청이 올바르지 않아. 다시 한 번 확인해 줘." }, { status: 400, headers: NO_STORE });
   }
   if (typeof body?.id !== "number" || !Number.isInteger(body.id) || body.id < 1 || typeof body.hidden !== "boolean") {
-    return NextResponse.json({ error: "요청이 올바르지 않아요. 다시 한 번 확인해 주세요." }, { status: 400, headers: NO_STORE });
+    return NextResponse.json({ error: "요청이 올바르지 않아. 다시 한 번 확인해 줘." }, { status: 400, headers: NO_STORE });
   }
   const dbConfig = loadDbConfig(process.env);
-  if (!dbConfig) return NextResponse.json({ error: "DB 가 연결되어 있지 않아요." }, { status: 503, headers: NO_STORE });
+  if (!dbConfig) return NextResponse.json({ error: "DB 가 연결되어 있지 않아." }, { status: 503, headers: NO_STORE });
   try {
     await createDb(dbConfig).setReviewHidden(body.id, body.hidden);
   } catch (err) {
     console.error("admin review hide failed:", err instanceof Error ? err.message : "unknown");
-    return NextResponse.json({ error: "처리하지 못했어요." }, { status: 502, headers: NO_STORE });
+    return NextResponse.json({ error: "처리하지 못했어." }, { status: 502, headers: NO_STORE });
   }
   return NextResponse.json({ ok: true }, { headers: NO_STORE });
 }

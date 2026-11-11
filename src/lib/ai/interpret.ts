@@ -9,7 +9,7 @@ export { DEFAULT_MODEL, PAID_MODEL };
 /** API 키가 설정되지 않은 경우 (개발 중에는 정상 상황이에요) */
 export class ReadingUnavailableError extends Error {
   constructor() {
-    super("AI API 키(ANTHROPIC_API_KEY 또는 GEMINI_API_KEY)가 설정되지 않았어요.");
+    super("AI API 키(ANTHROPIC_API_KEY 또는 GEMINI_API_KEY)가 설정되지 않았어.");
     this.name = "ReadingUnavailableError";
   }
 }

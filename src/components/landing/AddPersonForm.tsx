@@ -61,9 +61,9 @@ export default function AddPersonForm({ onAdded, onCancel }: { onAdded: (p: Save
         onAdded(j.person);
         return;
       }
-      setError(j?.error ?? "저장하지 못했어요. 잠시 뒤에 다시 시도해 주세요.");
+      setError(j?.error ?? "저장하지 못했어. 잠시 뒤에 다시 시도해 줘.");
     } catch {
-      setError("저장하지 못했어요. 잠시 뒤에 다시 시도해 주세요.");
+      setError("저장하지 못했어. 잠시 뒤에 다시 시도해 줘.");
     }
     setBusy(false);
   }
@@ -120,7 +120,7 @@ export default function AddPersonForm({ onAdded, onCancel }: { onAdded: (p: Save
         </Pill>
       </div>
       <BirthTimeSelect time={f.time} known={f.timeKnown} onChange={(n) => patch({ time: n.time, timeKnown: n.known })} selectClassName={INPUT} />
-      <p className="text-[11px] leading-relaxed text-gray-500">이 목록에서 언제든 지울 수 있고, 탈퇴하면 함께 삭제돼요.</p>
+      <p className="text-[11px] leading-relaxed text-gray-500">이 목록에서 언제든 지울 수 있고, 탈퇴하면 함께 삭제돼.</p>
       {error && (
         <p role="alert" className="text-[11px] font-bold text-brand-600">
           {error}

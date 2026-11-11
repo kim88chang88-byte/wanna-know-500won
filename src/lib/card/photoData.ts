@@ -83,7 +83,7 @@ export function photoAltText(c: PhotoCardData): string {
 
 /** SNS에 같이 올릴 문구(해시태그 포함) */
 export function shareCaption(c: PhotoCardData, url: string): string {
-  return `${c.topicLabel} · ${c.headline}\n“${c.quote}”\n${c.tags.join(" ")} #도유사주 ${c.tier === "premium" ? "#프리미엄사주" : "#오늘의운세"}\n\n들어와서 어서 무료로 운세를 보세요! 👉 ${url}`;
+  return `${c.topicLabel} · ${c.headline}\n“${c.quote}”\n${c.tags.join(" ")} #도유사주 ${c.tier === "premium" ? "#프리미엄사주" : "#오늘의운세"}\n\n들어와서 어서 무료로 운세를 봐! 👉 ${url}`;
 }
 
 /** 파일 이름은 영문으로 해요. 일부 브라우저/환경에서 한글 이름이 "download" 로 바뀌는 경우가 있어서요. */

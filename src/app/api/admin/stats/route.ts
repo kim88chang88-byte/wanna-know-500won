@@ -17,18 +17,18 @@ const NO_STORE = { "Cache-Control": "no-store" };
  */
 export async function GET(request: Request) {
   const session = verifySessionToken(readCookie(request.headers.get("cookie"), SESSION_COOKIE), process.env.AUTH_SECRET);
-  if (!session) return NextResponse.json({ error: "로그인이 필요해요." }, { status: 401, headers: NO_STORE });
+  if (!session) return NextResponse.json({ error: "로그인이 필요해." }, { status: 401, headers: NO_STORE });
   if (!isAdmin(session.sub, process.env)) {
     return NextResponse.json(
-      { error: "관리자 권한이 없어요.", yourId: session.sub, adminConfigured: adminIds(process.env).length > 0 },
+      { error: "관리자 권한이 없어.", yourId: session.sub, adminConfigured: adminIds(process.env).length > 0 },
       { status: 403, headers: NO_STORE },
     );
   }
   const key = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "admin";
-  if (!limiter.check(key).ok) return NextResponse.json({ error: "요청이 너무 빨라요." }, { status: 429, headers: NO_STORE });
+  if (!limiter.check(key).ok) return NextResponse.json({ error: "요청이 너무 빨라." }, { status: 429, headers: NO_STORE });
 
   const dbConfig = loadDbConfig(process.env);
-  if (!dbConfig) return NextResponse.json({ error: "DB 가 연결되어 있지 않아요. (SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY)" }, { status: 503, headers: NO_STORE });
+  if (!dbConfig) return NextResponse.json({ error: "DB 가 연결되어 있지 않아. (SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY)" }, { status: 503, headers: NO_STORE });
 
   const raw = Number(new URL(request.url).searchParams.get("days"));
   const days = [7, 30, 90].includes(raw) ? raw : 30;
@@ -46,6 +46,6 @@ export async function GET(request: Request) {
     return NextResponse.json({ stats: buildStats({ days, now, totals, draws, signups, concerns, reviews }) }, { headers: NO_STORE });
   } catch (err) {
     console.error("admin stats failed:", err instanceof Error ? err.message : "unknown");
-    return NextResponse.json({ error: "통계를 불러오지 못했어요. (concern_logs / profiles 테이블을 만들었는지 확인해 주세요)" }, { status: 502, headers: NO_STORE });
+    return NextResponse.json({ error: "통계를 불러오지 못했어. (concern_logs / profiles 테이블을 만들었는지 확인해 줘)" }, { status: 502, headers: NO_STORE });
   }
 }

@@ -64,6 +64,6 @@ export async function PUT(request: Request) {
     return NextResponse.json({ ok: true, count: rooms.length }, { headers: NO_STORE });
   } catch (err) {
     console.error("saveChatRooms failed:", err instanceof Error ? err.message : "unknown");
-    return NextResponse.json({ error: "대화방을 저장하지 못했어요." }, { status: 502, headers: NO_STORE });
+    return NextResponse.json({ error: "대화방을 저장하지 못했어." }, { status: 502, headers: NO_STORE });
   }
 }

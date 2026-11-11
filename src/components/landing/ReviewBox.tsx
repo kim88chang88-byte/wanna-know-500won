@@ -34,7 +34,7 @@ export default function ReviewBox({ topic, premium, loggedIn = false }: { topic:
       });
       if (!res.ok) {
         const data = (await res.json().catch(() => null)) as { error?: string } | null;
-        throw new Error(data?.error ?? "후기를 저장하지 못했어요. 잠시 뒤에 다시 시도해 주세요.");
+        throw new Error(data?.error ?? "후기를 저장하지 못했어. 잠시 뒤에 다시 시도해 줘.");
       }
       const data = (await res.json().catch(() => null)) as { reward?: RewardResult } | null;
       const got = data?.reward ?? "none";
@@ -43,7 +43,7 @@ export default function ReviewBox({ topic, premium, loggedIn = false }: { topic:
       if (got === "granted") window.dispatchEvent(new Event("wanna500:coins"));
       setPhase("done");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "후기를 저장하지 못했어요.");
+      setError(err instanceof Error ? err.message : "후기를 저장하지 못했어.");
       setPhase("idle");
     }
   }
@@ -138,7 +138,7 @@ export default function ReviewBox({ topic, premium, loggedIn = false }: { topic:
               className="w-full rounded-xl border border-brand-200 bg-white px-3 py-2 text-sm text-gray-800 resize-none focus:outline-none focus:ring-2 focus:ring-brand-300"
             />
             <p className="mt-1 text-[10px] text-gray-400">
-              {text.length}/{MAX_REVIEW_TEXT} · 이름·연락처 같은 개인정보는 적지 말아 주세요. 후기는 서비스 개선에 써요.
+              {text.length}/{MAX_REVIEW_TEXT} · 이름·연락처 같은 개인정보는 적지 말아 줘. 후기는 서비스 개선에 써.
             </p>
           </div>
           <p data-testid="review-reward-hint" className={`rounded-xl px-3 py-2 text-[11px] leading-relaxed ${loggedIn && isRewardableText(text) ? "bg-emerald-50 text-emerald-800" : "bg-amber-50 text-amber-800"}`}>

@@ -97,9 +97,9 @@ export default function EmailLogin({ onBack }: { onBack: () => void }) {
         return;
       }
       const data = (await res.json().catch(() => null)) as { error?: string } | null;
-      setError(data?.error ?? "저장하지 못했어요. 잠시 뒤에 다시 시도해 주세요.");
+      setError(data?.error ?? "저장하지 못했어. 잠시 뒤에 다시 시도해 줘.");
     } catch {
-      setError("저장하지 못했어요. 잠시 뒤에 다시 시도해 주세요.");
+      setError("저장하지 못했어. 잠시 뒤에 다시 시도해 줘.");
     }
     setBusy(false);
   }
@@ -109,7 +109,7 @@ export default function EmailLogin({ onBack }: { onBack: () => void }) {
     return (
       <div data-testid="email-nick-form" className="flex flex-col gap-2.5">
         <p className="text-center text-sm font-extrabold text-gray-900">도리가 뭐라고 불러줄까?</p>
-        <p className="text-center text-[11px] leading-relaxed text-gray-500">풀이 속에서 도리가 불러 드릴 이름이야.<br />나중에 바꾸거나 건너뛸 수도 있어.</p>
+        <p className="text-center text-[11px] leading-relaxed text-gray-500">풀이 속에서 도리가 불러 줄 이름이야.<br />나중에 바꾸거나 건너뛸 수도 있어.</p>
         <label htmlFor="email-nick-input" className="text-xs font-bold text-gray-700">
           닉네임
         </label>
@@ -226,7 +226,7 @@ export default function EmailLogin({ onBack }: { onBack: () => void }) {
       >
         {step === "code" ? "← 이메일 다시 입력" : "← 다른 방법으로 로그인"}
       </button>
-      <p className="text-center text-[10px] leading-relaxed text-gray-400">이메일 주소는 인증번호를 보내는 데만 쓰고, 원문은 저장하지 않아요.</p>
+      <p className="text-center text-[10px] leading-relaxed text-gray-400">이메일 주소는 인증번호를 보내는 데만 쓰고, 원문은 저장하지 않아.</p>
     </div>
   );
 }

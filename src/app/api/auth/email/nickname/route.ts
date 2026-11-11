@@ -29,7 +29,7 @@ export async function POST(request: Request) {
       await createDb(dbConfig).setNickname(session.sub, check.nick);
     } catch (err) {
       console.error("setNickname failed:", err instanceof Error ? err.message : "unknown");
-      return NextResponse.json({ error: "저장하지 못했어요. 잠시 뒤에 다시 시도해 주세요." }, { status: 500 });
+      return NextResponse.json({ error: "저장하지 못했어. 잠시 뒤에 다시 시도해 줘." }, { status: 500 });
     }
   }
   const exp = Math.floor(Date.now() / 1000) + SESSION_MAX_AGE_SEC;

@@ -73,7 +73,7 @@ export function buildChatMemo(daily: DailyFacts, today: CivilDate): ChatMemo {
       ["보는 날", `${today.year}-${p2(today.month)}-${p2(today.day)} (${dow})`],
       ["오늘 일진", daily.오늘일진],
       ["나와의 관계", `${god} · ${TEN_GOD_MOOD[god].split(". ")[0]}`],
-      ["내 글자와 만나면", meets.length ? meets.slice(0, 2).join(", ") : "눈에 띄는 합충은 없어요"],
+      ["내 글자와 만나면", meets.length ? meets.slice(0, 2).join(", ") : "눈에 띄는 합충은 없어"],
     ],
     scoreLabel: "오늘의 흐름 지수",
     score,
@@ -100,7 +100,7 @@ export function buildReadingMemo(chart: SajuChart, core: CoreFacts | null, at: D
   const meet = (core?.세운과원국 ?? []).slice(0, 2).map((m) => shorten(m, 30));
   const rows: Array<[string, string]> = [["보는 해", `${k.getUTCFullYear()}년${sy?.간지 ? ` ${sy.간지}` : ""}`]];
   if (god && TEN_GOD_MOOD[god]) rows.push(["나와의 관계", `${god} · ${TEN_GOD_MOOD[god].split(". ")[0]}`]);
-  rows.push(["내 글자와 만나면", meet.length ? meet.join(", ") : "눈에 띄는 합충은 없어요"]);
+  rows.push(["내 글자와 만나면", meet.length ? meet.join(", ") : "눈에 띄는 합충은 없어"]);
   rows.push(["힘이 붙는 달", good.join(" · ")], ["천천히 가는 달", slow.join(" · ")]);
   return {
     title: `${k.getUTCFullYear()}년의 흐름`,
@@ -127,7 +127,7 @@ export function buildCompatMemo(me: SajuChart, partner: SajuChart, names: { me?:
   if (GOOD.includes(godAB)) score += 6;
   if (GOOD.includes(godBA)) score += 6;
   score = clamp(score);
-  const relText = rel ? `${me.day.branch}${partner.day.branch} ${rel}(${REL_WORD[rel]})` : "눈에 띄는 합충은 없어요";
+  const relText = rel ? `${me.day.branch}${partner.day.branch} ${rel}(${REL_WORD[rel]})` : "눈에 띄는 합충은 없어";
   const tone = score >= 72 ? "아주 잘 어울리는 편" : score >= 58 ? "편안하게 맞는 편" : score >= 44 ? "맞춰 가며 어울리는 편" : "서로 배려가 더 필요한 편";
   return {
     title: "두 사람의 흐름",

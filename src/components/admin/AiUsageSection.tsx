@@ -21,9 +21,9 @@ export default function AiUsageSection() {
         const j = await res.json().catch(() => null);
         if (!alive) return;
         if (res.ok && j && j.today && j.total && Array.isArray(j.rows)) setU(j as Usage);
-        else setErr(typeof j?.error === "string" ? j.error : "불러오지 못했어요.");
+        else setErr(typeof j?.error === "string" ? j.error : "불러오지 못했어.");
       })
-      .catch(() => alive && setErr("불러오지 못했어요."));
+      .catch(() => alive && setErr("불러오지 못했어."));
     return () => {
       alive = false;
     };
@@ -32,8 +32,8 @@ export default function AiUsageSection() {
   return (
     <section className={CARD} data-testid="ai-usage-section">
       <h2 className="font-serifKr font-bold text-base text-brand-700 mb-1">AI 호출·추정 비용</h2>
-      <p className="text-[11px] text-gray-400 mb-3">금액은 모델별 단가로 계산한 대략치예요. 정확한 청구액은 Google AI Studio / Anthropic 콘솔의 Billing 을 확인하세요.</p>
-      {err && <p className="text-xs text-gray-500" data-testid="ai-usage-error">{err} (supabase/schema.sql 을 다시 Run 해야 기록이 쌓여요)</p>}
+      <p className="text-[11px] text-gray-400 mb-3">금액은 모델별 단가로 계산한 대략치야. 정확한 청구액은 Google AI Studio / Anthropic 콘솔의 Billing 을 확인해.</p>
+      {err && <p className="text-xs text-gray-500" data-testid="ai-usage-error">{err} (supabase/schema.sql 을 다시 Run 해야 기록이 쌓여)</p>}
       {u && (
         <>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
@@ -42,9 +42,9 @@ export default function AiUsageSection() {
             <div><div className="text-[11px] font-bold text-gray-500">최근 14일 호출 / 비용</div><div className="font-serifKr text-base font-black text-brand-700 tabular-nums">{u.total.calls.toLocaleString("ko-KR")}회 · {won(u.total.krw)}</div></div>
             <div><div className="text-[11px] font-bold text-gray-500">캐시로 아낀 호출(14일)</div><div className="font-serifKr text-xl font-black text-emerald-600 tabular-nums" data-testid="ai-cache-hits">{u.total.cacheHits.toLocaleString("ko-KR")}회</div></div>
           </div>
-          {u.total.unknownPrice && <p className="text-[11px] text-amber-600 mb-2">단가를 모르는 모델이 있어 그 비용은 합계에서 빠졌어요.</p>}
+          {u.total.unknownPrice && <p className="text-[11px] text-amber-600 mb-2">단가를 모르는 모델이 있어 그 비용은 합계에서 빠졌어.</p>}
           {u.rows.length === 0 ? (
-            <p className="text-xs text-gray-400">아직 기록이 없어요. 이 기능을 배포한 뒤부터 쌓여요.</p>
+            <p className="text-xs text-gray-400">아직 기록이 없어. 이 기능을 배포한 뒤부터 쌓여.</p>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-xs tabular-nums" data-testid="ai-usage-table">

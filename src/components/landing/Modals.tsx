@@ -326,13 +326,13 @@ export function LoginModal({ onClose, reason = null, user = null, result = null,
           )}
           {onWithdraw && confirmWithdraw && (
             <div role="group" aria-label="회원 탈퇴 확인" className="rounded-2xl bg-sky-50 border border-sky-200 p-3 text-center">
-              <p className="text-xs font-bold text-gray-800">정말 탈퇴할까요?</p>
+              <p className="text-xs font-bold text-gray-800">정말 탈퇴할까?</p>
               <p className="text-[11px] text-gray-600 mt-1">
-                저장된 회원 정보(회원번호·닉네임), 뽑기 기록, 기억해 둔 생년월일시, 동의해서 남긴 고민 통계, 로그인해서 남긴 후기가 모두 삭제되고 되돌릴 수 없어요.
+                저장된 회원 정보(회원번호·닉네임), 뽑기 기록, 기억해 둔 생년월일시, 동의해서 남긴 고민 통계, 로그인해서 남긴 후기가 모두 삭제되고 되돌릴 수 없어.
               </p>
               {withdrawError && (
                 <p role="alert" className="text-[11px] font-bold text-brand-600 mt-1">
-                  탈퇴 처리에 실패했어요. 잠시 뒤에 다시 시도해 주세요.
+                  탈퇴 처리에 실패했어. 잠시 뒤에 다시 시도해 줘.
                 </p>
               )}
               <div className="flex gap-2 mt-2">
@@ -381,7 +381,7 @@ export function LoginModal({ onClose, reason = null, user = null, result = null,
 
       {!user && (
         <p className="text-center text-[10px] text-gray-400 mb-1">
-          로그인하면 카카오·구글·네이버 계정의 고유번호와 닉네임(이름)만 받아요. 자세한 내용은 개인정보처리방침을 확인해 주세요.
+          로그인하면 카카오·구글·네이버 계정의 고유번호와 닉네임(이름)만 받아. 자세한 내용은 개인정보처리방침을 확인해 줘.
         </p>
       )}
       <div className="text-center text-[10px] text-gray-400 mt-3">

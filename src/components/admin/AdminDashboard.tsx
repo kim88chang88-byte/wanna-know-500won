@@ -18,7 +18,7 @@ const H2 = "font-serifKr font-bold text-base text-brand-700 mb-3";
 
 function Bars({ rows, testId }: { rows: Array<{ label: string; count: number }>; testId: string }) {
   const max = Math.max(1, ...rows.map((r) => r.count));
-  if (rows.length === 0) return <p className="text-xs text-gray-400">아직 데이터가 없어요.</p>;
+  if (rows.length === 0) return <p className="text-xs text-gray-400">아직 데이터가 없어.</p>;
   return (
     <ul data-testid={testId} className="space-y-1.5">
       {rows.map((r) => (
@@ -79,10 +79,10 @@ export default function AdminDashboard() {
       const data = (await res.json().catch(() => null)) as { stats?: AdminStats; error?: string; yourId?: string; adminConfigured?: boolean } | null;
       if (res.status === 401) return setState({ kind: "login" });
       if (res.status === 403) return setState({ kind: "forbidden", yourId: data?.yourId ?? null, configured: data?.adminConfigured === true });
-      if (!res.ok || !data?.stats) return setState({ kind: "error", message: data?.error ?? "통계를 불러오지 못했어요." });
+      if (!res.ok || !data?.stats) return setState({ kind: "error", message: data?.error ?? "통계를 불러오지 못했어." });
       setState({ kind: "ok", stats: data.stats });
     } catch {
-      setState({ kind: "error", message: "네트워크 오류가 났어요. 잠시 뒤에 다시 시도해 주세요." });
+      setState({ kind: "error", message: "네트워크 오류가 났어. 잠시 뒤에 다시 시도해 줘." });
     }
   }, []);
 
@@ -97,7 +97,7 @@ export default function AdminDashboard() {
         return { kind: "ok", stats: { ...cur.stats, reviews: { ...cur.stats.reviews, list } } };
       });
     } catch {
-      setHideError("처리하지 못했어요. 잠시 뒤에 다시 시도해 주세요.");
+      setHideError("처리하지 못했어. 잠시 뒤에 다시 시도해 줘.");
     }
   }
 
@@ -111,7 +111,7 @@ export default function AdminDashboard() {
         <header className="flex flex-wrap items-center justify-between gap-3 mb-5">
           <div>
             <h1 className="font-serifKr font-black text-xl text-gray-900">🫧 도유 관리자</h1>
-            <p className="text-[11px] text-gray-500">개인 식별 정보(회원번호·생년월일)는 이 화면에 나오지 않아요.</p>
+            <p className="text-[11px] text-gray-500">개인 식별 정보(회원번호·생년월일)는 이 화면에 나오지 않아.</p>
           </div>
           <a href="/" className="text-xs font-bold text-brand-600 underline underline-offset-2">
             사이트로 돌아가기
@@ -126,8 +126,8 @@ export default function AdminDashboard() {
 
         {state.kind === "login" && (
           <div data-testid="admin-login" className={`${CARD} text-center`}>
-            <p className="font-bold text-gray-800">로그인이 필요해요</p>
-            <p className="mt-1 text-xs text-gray-500">사이트에서 평소처럼 로그인한 뒤 이 주소로 다시 들어와 주세요.</p>
+            <p className="font-bold text-gray-800">로그인이 필요해</p>
+            <p className="mt-1 text-xs text-gray-500">사이트에서 평소처럼 로그인한 뒤 이 주소로 다시 들어와 줘.</p>
             <a href="/" className="mt-3 inline-block px-4 py-2 rounded-full bg-brand-600 text-white text-xs font-bold">
               사이트에서 로그인하기
             </a>
@@ -136,15 +136,15 @@ export default function AdminDashboard() {
 
         {state.kind === "forbidden" && (
           <div data-testid="admin-forbidden" className={`${CARD}`}>
-            <p className="font-bold text-gray-800 text-center">관리자 권한이 없어요</p>
+            <p className="font-bold text-gray-800 text-center">관리자 권한이 없어</p>
             {state.yourId ? (
               <div className="mt-3 text-xs text-gray-600 leading-relaxed">
-                {state.configured ? "이 계정은 관리자 목록에 없어요." : "관리자 목록(ADMIN_USER_IDS)이 아직 설정되지 않았어요."} 내 계정으로 관리자가 되려면 Vercel 환경변수{" "}
-                <code className="px-1 rounded bg-brand-50">ADMIN_USER_IDS</code> 에 아래 값을 넣고 다시 배포해 주세요. (여러 명이면 쉼표로 구분)
+                {state.configured ? "이 계정은 관리자 목록에 없어." : "관리자 목록(ADMIN_USER_IDS)이 아직 설정되지 않았어."} 내 계정으로 관리자가 되려면 Vercel 환경변수{" "}
+                <code className="px-1 rounded bg-brand-50">ADMIN_USER_IDS</code> 에 아래 값을 넣고 다시 배포해 줘. (여러 명이면 쉼표로 구분)
                 <p data-testid="admin-your-id" className="mt-2 select-all rounded-lg bg-gray-100 px-3 py-2 font-mono text-[13px] text-gray-800 break-all">
                   {state.yourId}
                 </p>
-                <p className="mt-2 text-[11px] text-gray-400">이 값은 로그인한 본인의 고유번호예요. 남에게 공유하지 마세요.</p>
+                <p className="mt-2 text-[11px] text-gray-400">이 값은 로그인한 본인의 고유번호야. 남에게 공유하지 마.</p>
               </div>
             ) : null}
           </div>
@@ -223,7 +223,7 @@ export default function AdminDashboard() {
                 </p>
               )}
               {state.stats.reviews.list.length === 0 ? (
-                <p className="mt-3 text-xs text-gray-400">아직 후기가 없어요.</p>
+                <p className="mt-3 text-xs text-gray-400">아직 후기가 없어.</p>
               ) : (
                 <ul data-testid="review-list" className="mt-3 divide-y divide-brand-100">
                   {state.stats.reviews.list.map((r) => (
@@ -255,13 +255,13 @@ export default function AdminDashboard() {
                   ))}
                 </ul>
               )}
-              <p className="mt-2 text-[10px] text-gray-400">숨긴 후기는 평균과 분포에서 빠져요. 글에 개인정보가 있으면 외부에 공유하지 마세요.</p>
+              <p className="mt-2 text-[10px] text-gray-400">숨긴 후기는 평균과 분포에서 빠져. 글에 개인정보가 있으면 외부에 공유하지 마.</p>
             </section>
 
             <section className={CARD}>
               <h2 className={H2}>로그인 회원의 뽑기 (최근 {state.stats.days}일)</h2>
               <DayChart rows={state.stats.drawsByDay} testId="chart-draws" label="뽑기" />
-              <p className="mt-2 text-[10px] text-gray-400">로그인하지 않은 사람의 뽑기는 서버에 기록되지 않아서 포함되지 않아요.</p>
+              <p className="mt-2 text-[10px] text-gray-400">로그인하지 않은 사람의 뽑기는 서버에 기록되지 않아서 포함되지 않아.</p>
             </section>
 
             <div className="grid sm:grid-cols-2 gap-4">
@@ -286,7 +286,7 @@ export default function AdminDashboard() {
               <section className={CARD}>
                 <h2 className={H2}>나이대별 상위 고민</h2>
                 {state.stats.concernByAge.length === 0 ? (
-                  <p className="text-xs text-gray-400">아직 데이터가 없어요.</p>
+                  <p className="text-xs text-gray-400">아직 데이터가 없어.</p>
                 ) : (
                   <ul data-testid="age-list" className="space-y-3">
                     {state.stats.concernByAge.map((a) => (
@@ -317,7 +317,7 @@ export default function AdminDashboard() {
                 직접 쓴 고민 <span className="text-[11px] font-normal text-gray-400">(최신 {state.stats.recentTexts.length}건)</span>
               </h2>
               {state.stats.recentTexts.length === 0 ? (
-                <p className="text-xs text-gray-400">아직 직접 쓴 글이 없어요.</p>
+                <p className="text-xs text-gray-400">아직 직접 쓴 글이 없어.</p>
               ) : (
                 <ul data-testid="text-list" className="divide-y divide-brand-100">
                   {state.stats.recentTexts.map((t, i) => (
@@ -326,13 +326,13 @@ export default function AdminDashboard() {
                         {t.day} · {t.ageBand} · {t.gender} · {t.topic}
                         {t.tags.length > 0 ? ` · ${t.tags.join(", ")}` : ""}
                       </div>
-                      {/* 글은 항상 문자열로만 그려요 (HTML 로 해석하지 않아요) */}
+                      {/* 글은 항상 문자열로만 그려 (HTML 로 해석하지 않아) */}
                       <p className="mt-0.5 text-gray-800 whitespace-pre-wrap break-words">{t.text}</p>
                     </li>
                   ))}
                 </ul>
               )}
-              <p className="mt-2 text-[10px] text-gray-400">이름·연락처 같은 개인정보가 적혀 있으면 이 글을 외부에 공유하지 마세요.</p>
+              <p className="mt-2 text-[10px] text-gray-400">이름·연락처 같은 개인정보가 적혀 있으면 이 글을 외부에 공유하지 마.</p>
             </section>
           </div>
         )}

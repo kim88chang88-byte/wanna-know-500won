@@ -30,8 +30,8 @@ button.go{background:#4338ca;color:#fff;border-color:#4338ca}button.ok{backgroun
 .card{border:1px solid #ddd;border-radius:12px;padding:8px;text-align:center}.card img{width:100%;border-radius:8px}.ph{aspect-ratio:3/4;display:flex;align-items:center;justify-content:center;background:#f3f3f3;border-radius:8px;color:#888;font-size:13px}
 .tag{font-size:12px;color:#059669;font-weight:700}small{color:#666}#log{font-size:12px;color:#444;white-space:pre-wrap}</style></head><body>
 <h2>운명의 상대 이미지 갤러리 (관리자)</h2>
-<p><small>조합마다 변형 3장씩 서버에 저장해요(총 540장). 같은 조건이어도 사람(생년월일시)마다 다른 변형이 나와요. 저장된 이미지는 결과서에서 AI 호출 없이 그대로 쓰여요. 이미지 1장 생성은 약 100원이에요.</small></p>
-${base ? "" : '<p style="color:#b91c1c">SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY 가 없어서 저장은 못 해요.</p>'}
+<p><small>조합마다 변형 3장씩 서버에 저장해(총 540장). 같은 조건이어도 사람(생년월일시)마다 다른 변형이 나와. 저장된 이미지는 결과서에서 AI 호출 없이 그대로 쓰여. 이미지 1장 생성은 약 100원이야.</small></p>
+${base ? "" : '<p style="color:#b91c1c">SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY 가 없어서 저장은 못 해.</p>'}
 <div class="bar">
 <select id="user"><option value="male">이용자 남성 → 상대 여성</option><option value="female">이용자 여성 → 상대 남성</option></select>
 <select id="age">${ages}</select>
@@ -58,9 +58,9 @@ async function genFetch(q,onWait){const MAX=6;
   if(r&&j&&j.ok)return j;
   const tooFast=r&&r.status===429;const msg=(j&&j.error)||'네트워크 오류';
   if(stopFlag)return {ok:false,error:'멈춤'};
-  if(/spending|billing|quota|monthly/i.test(msg))return {ok:false,error:'Google 사용 한도에 걸렸어요 (결제 한도 확인 필요): '+msg,fatal:true};
+  if(/spending|billing|quota|monthly/i.test(msg))return {ok:false,error:'Google 사용 한도에 걸렸어 (결제 한도 확인 필요): '+msg,fatal:true};
   if(t===MAX-1)return {ok:false,error:msg};
-  const wait=tooFast?20000:8000*(t+1);if(onWait)onWait('잠시 쉬었다가 다시 시도해요 ('+Math.round(wait/1000)+'초) · '+msg);await sleep(wait)}
+  const wait=tooFast?20000:8000*(t+1);if(onWait)onWait('잠시 쉬었다가 다시 시도해 ('+Math.round(wait/1000)+'초) · '+msg);await sleep(wait)}
  return {ok:false,error:'실패'}}
 const cur=(v,x)=>({u:$('user').value,a:$('age').value,e:$('el').value,v,x:x==null?Number($('var').value):x});
 function render(){const g=$('grid');g.innerHTML='';for(let v=0;v<6;v++){const c=document.createElement('div');c.className='card';c.dataset.v=v;
@@ -87,18 +87,18 @@ async function save(v,c){const s=cur(v),k=keyOf(s.u,s.a,s.e,v),e=cache[k];if(!e|
   if(!j.ok){b.textContent='저장 실패: '+(j.error||r.status);b.disabled=false;return false}
   cache[k]={src:e.src,saved:true};mark(c,true);b.disabled=false;b.textContent='서버에 저장';return true}
  catch(err){b.textContent='저장 오류';b.disabled=false;return false}}
-async function fillRange(items){stopFlag=false;let done=0;for(const it of items){if(stopFlag){$('log').textContent+='\\n멈췄어요.';return}
+async function fillRange(items){stopFlag=false;let done=0;for(const it of items){if(stopFlag){$('log').textContent+='\\n멈췄어.';return}
   const k=keyOf(it.u,it.a,it.e,it.v,it.x);$('log').textContent='진행: '+(++done)+'/'+items.length+' · '+k;
   if(it.u===$('user').value&&it.a===$('age').value&&it.e===$('el').value&&it.x===Number($('var').value)){const c=document.querySelector('.card[data-v="'+it.v+'"]');if(await gen(it.v,c))await save(it.v,c)}
   else{ // 화면에 없는 조합은 화면 없이 처리
-   try{const q=new URLSearchParams({gen:'1',user:it.u,age:it.a,el:it.e,v:String(it.v),var:String(it.x)});const j=await genFetch(q,m=>{$('log').textContent='진행: '+done+'/'+items.length+' · '+k+'\\n'+m});if(!j.ok){$('log').textContent+='\\n실패 '+k+': '+j.error;if(j.fatal){$('log').textContent+='\\n자동 생성을 멈췄어요. 한도를 해결한 뒤 다시 눌러 주세요.';return}continue}
+   try{const q=new URLSearchParams({gen:'1',user:it.u,age:it.a,el:it.e,v:String(it.v),var:String(it.x)});const j=await genFetch(q,m=>{$('log').textContent='진행: '+done+'/'+items.length+' · '+k+'\\n'+m});if(!j.ok){$('log').textContent+='\\n실패 '+k+': '+j.error;if(j.fatal){$('log').textContent+='\\n자동 생성을 멈췄어. 한도를 해결한 뒤 다시 눌러 줘.';return}continue}
     total+=j.krw;$('sum').textContent=' 이번 방문 누적 약 '+total.toLocaleString()+'원';const blob=await toWebp('data:'+j.mime+';base64,'+j.base64);
     const r2=await fetch('?save='+encodeURIComponent(k),{method:'POST',headers:{'Content-Type':'image/webp'},body:blob});const j2=await r2.json();if(!j2.ok)$('log').textContent+='\\n저장 실패 '+k}catch(e){$('log').textContent+='\\n오류 '+k}}}
-  $('log').textContent+='\\n끝났어요.';render()}
+  $('log').textContent+='\\n끝났어.';render()}
 async function missingKeys(){const r=await fetch('?status=1');return await r.json()}
 $('status').onclick=async()=>{$('log').textContent='확인 중…';const j=await missingKeys();$('log').textContent='저장됨 '+j.saved.length+' / 540장 (비어 있음 '+j.missing.length+'장)'};
 $('fill').onclick=async()=>{const items=[];for(let v=0;v<6;v++){const s=cur(v),k=keyOf(s.u,s.a,s.e,v);if(!(cache[k]&&cache[k].saved))items.push(s)}await fillRange(items)};
-$('fillAll').onclick=async()=>{if(!confirm('비어 있는 칸을 모두 만들어 저장할까요? 장당 약 100원이 들어요.'))return;const j=await missingKeys();const items=j.missing.map(k=>{const p=k.split('/');const f=p[3].split('.')[0].split('-');return {u:p[0]==='female'?'male':'female',a:p[1].replace('-',' '),e:p[2],v:Number(f[0]),x:Number(f[1]||0)}});await fillRange(items)};
+$('fillAll').onclick=async()=>{if(!confirm('비어 있는 칸을 모두 만들어 저장할까? 장당 약 100원이 들어.'))return;const j=await missingKeys();const items=j.missing.map(k=>{const p=k.split('/');const f=p[3].split('.')[0].split('-');return {u:p[0]==='female'?'male':'female',a:p[1].replace('-',' '),e:p[2],v:Number(f[0]),x:Number(f[1]||0)}});await fillRange(items)};
 $('stop').onclick=()=>{stopFlag=true};
 ['user','age','el','var'].forEach(i=>$(i).onchange=render);render();
 </script></body></html>`;
@@ -106,7 +106,7 @@ $('stop').onclick=()=>{stopFlag=true};
 
 export async function GET(request: Request) {
   const s = session(request);
-  if (!s) return new Response("관리자 로그인이 필요해요.", { status: 403, headers: { "Content-Type": "text/plain; charset=utf-8" } });
+  if (!s) return new Response("관리자 로그인이 필요해.", { status: 403, headers: { "Content-Type": "text/plain; charset=utf-8" } });
   const sp = new URL(request.url).searchParams;
   const json = (o: object, status = 200) => Response.json(o, { status, headers: { "Cache-Control": "no-store" } });
   const cfg = loadDbConfig(process.env);
@@ -120,7 +120,7 @@ export async function GET(request: Request) {
   if (sp.get("gen") !== "1") return new Response(pageHtml(cfg ? cfg.url.replace(/\/+$/, "") : null), { headers: { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store" } });
 
   const rl = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "admin";
-  if (!limiter.check(rl).ok) return json({ ok: false, error: "요청이 너무 빨라요" }, 429);
+  if (!limiter.check(rl).ok) return json({ ok: false, error: "요청이 너무 빨라" }, 429);
   const apiKey = process.env.GEMINI_API_KEY?.trim();
   if (!apiKey) return json({ ok: false, error: "GEMINI_API_KEY 없음" }, 503);
 
@@ -142,12 +142,12 @@ export async function POST(request: Request) {
   const key = new URL(request.url).searchParams.get("save") ?? "";
   if (!isPartnerKey(key)) return Response.json({ ok: false, error: "잘못된 이름" }, { status: 400 });
   const cfg = loadDbConfig(process.env);
-  if (!cfg) return Response.json({ ok: false, error: "Supabase 설정이 없어요" }, { status: 503 });
+  if (!cfg) return Response.json({ ok: false, error: "Supabase 설정이 없어" }, { status: 503 });
   const bytes = new Uint8Array(await request.arrayBuffer());
-  if (bytes.length === 0 || bytes.length > MAX_STORED_BYTES) return Response.json({ ok: false, error: "이미지 크기가 맞지 않아요" }, { status: 400 });
+  if (bytes.length === 0 || bytes.length > MAX_STORED_BYTES) return Response.json({ ok: false, error: "이미지 크기가 맞지 않아" }, { status: 400 });
   // webp 파일 머리(RIFF....WEBP)인지 확인해요.
   const head = String.fromCharCode(...bytes.slice(0, 4)) + String.fromCharCode(...bytes.slice(8, 12));
-  if (head !== "RIFFWEBP") return Response.json({ ok: false, error: "webp 가 아니에요" }, { status: 400 });
+  if (head !== "RIFFWEBP") return Response.json({ ok: false, error: "webp 가 아니야" }, { status: 400 });
   const r = await savePartnerImage(cfg, key, bytes);
   return Response.json({ ok: r.ok, error: r.ok ? undefined : `저장 실패(${r.status})`, url: r.ok ? partnerPublicUrl(cfg.url, key) : undefined }, { status: r.ok ? 200 : 502 });
 }

@@ -127,10 +127,10 @@ export async function generateImage(prompt: string, apiKey: string, opts: { mode
           return { ok: false, error: lastErr };
         }
         const data = (await res.json()) as GenResponse;
-        if (data.promptFeedback?.blockReason) return { ok: false, error: `요청이 안전 필터에 걸렸어요(${data.promptFeedback.blockReason})` };
+        if (data.promptFeedback?.blockReason) return { ok: false, error: `요청이 안전 필터에 걸렸어(${data.promptFeedback.blockReason})` };
         const part = data.candidates?.[0]?.content?.parts?.find((p) => p.inlineData?.data);
         if (!part?.inlineData?.data) {
-          lastErr = `${model}: 이미지가 응답에 없어요(${data.candidates?.[0]?.finishReason ?? "?"})`;
+          lastErr = `${model}: 이미지가 응답에 없어(${data.candidates?.[0]?.finishReason ?? "?"})`;
           continue;
         }
         return { ok: true, model, mime: part.inlineData.mimeType ?? "image/png", base64: part.inlineData.data, usage: usageOf(data) };

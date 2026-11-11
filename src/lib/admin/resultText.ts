@@ -15,7 +15,7 @@ function pageText(p: BookPage): string {
   for (const s of p.sections) {
     if (s.locked) continue;
     out.push(`### ${s.heading}`, s.body);
-    if (s.checks?.length) out.push(...s.checks.map((c) => `- (나와 비슷해요) ${c}`));
+    if (s.checks?.length) out.push(...s.checks.map((c) => `- (나와 비슷해) ${c}`));
   }
   for (const t of p.tables) {
     const rows = t.rows.filter((r) => !r.locked).map((r) => `- ${r.label}: ${r.value}${r.note ? ` (${r.note})` : ""}`);

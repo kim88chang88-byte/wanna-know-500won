@@ -118,7 +118,7 @@ export default function BirthdayTeaser({ onOpenLogin }: { /** 로그인하면 �
             </button>
           </div>
           {state === "error" && <p role="alert" className="text-xs text-rose-600">{error}</p>}
-          <p className="flex items-center justify-center gap-1 text-center text-[11px] leading-relaxed text-gray-400"><span aria-hidden="true" className="material-symbols-outlined text-[14px]">lock</span>생년월일은 사주풀이 계산에만 쓰고 저장하지 않아요!</p>
+          <p className="flex items-center justify-center gap-1 text-center text-[11px] leading-relaxed text-gray-400"><span aria-hidden="true" className="material-symbols-outlined text-[14px]">lock</span>생년월일은 사주풀이 계산에만 쓰고 저장하지 않아!</p>
         </form>
       )}
     </section>

@@ -17,12 +17,12 @@ export type OptionCheck = { ok: true; value: string } | { ok: false; error: stri
 
 /** 선택지 글을 정리하고 검사해요. 줄바꿈·연속 공백은 한 칸으로, 길이 제한, 무거운 주제는 정중히 거절. */
 export function cleanOption(raw: unknown): OptionCheck {
-  if (typeof raw !== "string") return { ok: false, error: "선택지를 적어 주세요." };
+  if (typeof raw !== "string") return { ok: false, error: "선택지를 적어 줘." };
   const v = raw.replace(/\s+/g, " ").trim();
-  if (v.length < OPTION_MIN) return { ok: false, error: "선택지를 조금 더 적어 주세요." };
-  if (v.length > OPTION_MAX) return { ok: false, error: `선택지는 ${OPTION_MAX}자 이내로 짧게 적어 주세요.` };
+  if (v.length < OPTION_MIN) return { ok: false, error: "선택지를 조금 더 적어 줘." };
+  if (v.length > OPTION_MAX) return { ok: false, error: `선택지는 ${OPTION_MAX}자 이내로 짧게 적어 줘.` };
   if (containsForbidden(v) || /(수술|진단|약\s?복용|대출|투자\s?종목|코인|주식|소송|고소)/.test(v)) {
-    return { ok: false, error: "건강·법률·투자처럼 무거운 주제는 도리가 답하기 어려워요. 전문가와 이야기해 보는 걸 권해요." };
+    return { ok: false, error: "건강·법률·투자처럼 무거운 주제는 도리가 답하기 어려워. 전문가와 이야기해 보는 걸 권할게." };
   }
   return { ok: true, value: v };
 }

@@ -77,7 +77,7 @@ export function emailDailyCap(env: Record<string, string | undefined>): number {
 export function buildOtpMail(code: string): { subject: string; text: string; html: string } {
   const minutes = EMAIL_OTP_TTL_SEC / 60;
   const subject = `[도유사주] 로그인 인증번호 ${code}`;
-  const text = `도유사주 로그인 인증번호는 ${code} 입니다.\n${minutes}분 동안만 쓸 수 있어.\n\n본인이 요청하지 않았다면 이 메일은 무시해 줘.`;
+  const text = `도유사주 로그인 인증번호는 ${code} 이야.\n${minutes}분 동안만 쓸 수 있어.\n\n본인이 요청하지 않았다면 이 메일은 무시해 줘.`;
   const html = `<div style="font-family:-apple-system,'Apple SD Gothic Neo','Malgun Gothic',sans-serif;max-width:420px;margin:0 auto;padding:24px;color:#222">
 <p style="font-size:15px;margin:0 0 12px">도유사주 로그인 인증번호야.</p>
 <p style="font-size:34px;font-weight:800;letter-spacing:8px;margin:0 0 12px;color:#5b3fc4">${code}</p>

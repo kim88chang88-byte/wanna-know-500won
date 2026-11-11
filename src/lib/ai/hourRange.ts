@@ -19,9 +19,9 @@ export type RangeCheck = { ok: true; start: number; end: number } | { ok: false;
 export function parseRange(rawStart: unknown, rawEnd: unknown): RangeCheck {
   const s = typeof rawStart === "number" ? rawStart : NaN;
   const e = typeof rawEnd === "number" ? rawEnd : NaN;
-  if (!Number.isInteger(s) || !Number.isInteger(e) || s < 0 || s > 23 || e < 1 || e > 24) return { ok: false, error: "시간 범위를 다시 골라 주세요." };
-  if (e <= s) return { ok: false, error: "끝나는 시간은 시작 시간보다 뒤여야 해요. (자정을 넘는 범위는 나눠서 따로 봐 주세요)" };
-  if (e - s > MAX_SPAN_HOURS) return { ok: false, error: `범위는 ${MAX_SPAN_HOURS}시간 이내로 좁혀 주세요.` };
+  if (!Number.isInteger(s) || !Number.isInteger(e) || s < 0 || s > 23 || e < 1 || e > 24) return { ok: false, error: "시간 범위를 다시 골라 줘." };
+  if (e <= s) return { ok: false, error: "끝나는 시간은 시작 시간보다 뒤여야 해. (자정을 넘는 범위는 나눠서 따로 봐 줘)" };
+  if (e - s > MAX_SPAN_HOURS) return { ok: false, error: `범위는 ${MAX_SPAN_HOURS}시간 이내로 좁혀 줘.` };
   return { ok: true, start: s, end: e };
 }
 
@@ -118,10 +118,10 @@ export async function compareHours(o: { base: BirthInput; start: number; end: nu
     const c = cands[0];
     return {
       same: true,
-      candidates: c ? [{ window: c.window, pillars: c.pillars, feel: "이 시간대 안에서는 사주가 바뀌지 않아요." }] : [],
-      common: "고른 범위 안에서는 시주가 같아서, 어느 시각에 태어났어도 풀이가 달라지지 않아요.",
-      differ: "달라지는 부분이 없어요. 안심하고 지금 풀이를 보셔도 돼요.",
-      howToCheck: "더 정확히 알고 싶다면 부모님이나 출생증명서, 산모수첩의 시간을 확인해 보세요.",
+      candidates: c ? [{ window: c.window, pillars: c.pillars, feel: "이 시간대 안에서는 사주가 바뀌지 않아." }] : [],
+      common: "고른 범위 안에서는 시주가 같아서, 어느 시각에 태어났어도 풀이가 달라지지 않아.",
+      differ: "달라지는 부분이 없어. 안심하고 지금 풀이를 보셔도 돼.",
+      howToCheck: "더 정확히 알고 싶다면 부모님이나 출생증명서, 산모수첩의 시간을 확인해 봐.",
     };
   }
   const ai = await callJson({

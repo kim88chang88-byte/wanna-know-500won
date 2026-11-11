@@ -70,11 +70,11 @@ export function VaultSaveBar({ snapshot, autoSave, luxe = false, ready = true }:
         setMessage(data.error ?? null);
       } else {
         setStatus("error");
-        setMessage(data?.error ?? "보관함에 저장하지 못했어요.");
+        setMessage(data?.error ?? "보관함에 저장하지 못했어.");
       }
     } catch {
       setStatus("error");
-      setMessage("보관함에 저장하지 못했어요. 인터넷 연결을 확인해 주세요.");
+      setMessage("보관함에 저장하지 못했어. 인터넷 연결을 확인해 줘.");
     }
   }
 

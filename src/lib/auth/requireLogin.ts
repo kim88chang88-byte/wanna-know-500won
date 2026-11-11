@@ -10,5 +10,5 @@ export function checkLogin(cookieHeader: string | null | undefined, secret: stri
 export function requireLogin(request: Request): NextResponse | null {
   const r = checkLogin(request.headers.get("cookie"), process.env.AUTH_SECRET);
   if (r.ok) return null;
-  return NextResponse.json({ error: "로그인하고 이용해 주세요.", code: "login_required" }, { status: 401, headers: { "Cache-Control": "no-store" } });
+  return NextResponse.json({ error: "로그인하고 이용해 줘.", code: "login_required" }, { status: 401, headers: { "Cache-Control": "no-store" } });
 }

@@ -6,7 +6,7 @@ import { useState } from "react";
 import type { CompareResult } from "@/lib/ai/compare";
 import type { BirthInput } from "@/lib/saju/types";
 
-const LEAN_TEXT: Record<CompareResult["lean"], string> = { A: "A 쪽이 조금 더 결이 맞아", B: "B 쪽이 조금 더 결이 맞아", 비슷해요: "두 쪽이 비슷하게 팽팽해" };
+const LEAN_TEXT: Record<CompareResult["lean"], string> = { A: "A 쪽이 조금 더 결이 맞아", B: "B 쪽이 조금 더 결이 맞아", 비슷해: "두 쪽이 비슷하게 팽팽해" };
 
 /** "A냐 B냐" 비교 카드. 결정은 내가 하고, 도리는 판단 재료만 정리해 줘요. */
 export function CompareCard({ input }: { input: BirthInput }) {

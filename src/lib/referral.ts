@@ -90,7 +90,7 @@ export function redeemMessage(result: string): { ok: boolean; text: string } {
     case "too_old":
       return { ok: false, text: "초대 코드는 가입 후 7일 안에만 입력할 수 있어." };
     case "used_draw":
-      return { ok: false, text: "이미 뽑기를 해 보신 계정은 입력할 수 없어. 새로 가입한 친구에게 공유해 줘." };
+      return { ok: false, text: "이미 뽑기를 해 본 계정은 입력할 수 없어. 새로 가입한 친구에게 공유해 줘." };
     default:
       return { ok: false, text: "지금은 코드를 확인하지 못했어. 잠시 뒤에 다시 해 줘." };
   }

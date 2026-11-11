@@ -29,9 +29,9 @@ export default function FunnelSection({ days }: { days: number }) {
           setRows(j.rows as Row[]);
           setDaily(Array.isArray(j.daily) ? (j.daily as Daily[]) : []);
         }
-        else setErr(typeof j?.error === "string" ? j.error : "불러오지 못했어요.");
+        else setErr(typeof j?.error === "string" ? j.error : "불러오지 못했어.");
       })
-      .catch(() => alive && setErr("불러오지 못했어요."));
+      .catch(() => alive && setErr("불러오지 못했어."));
     return () => {
       alive = false;
     };
@@ -54,7 +54,7 @@ export default function FunnelSection({ days }: { days: number }) {
   return (
     <section className={CARD} data-testid="funnel-section">
       <h2 className="font-serifKr font-bold text-base text-brand-700 mb-1">방문 → 행동 퍼널 (최근 {days}일)</h2>
-      <p className="text-[11px] text-gray-400 mb-3">익명 ID 기준 사람 수예요. 같은 사람이 같은 날 여러 번 해도 한 번으로 세고, 회원 번호와는 연결하지 않아요.</p>
+      <p className="text-[11px] text-gray-400 mb-3">익명 ID 기준 사람 수야. 같은 사람이 같은 날 여러 번 해도 한 번으로 세고, 회원 번호와는 연결하지 않아.</p>
       {err && <p className="text-xs text-gray-500">{err}</p>}
       {!err && rows === null && <p className="text-xs text-gray-400">불러오는 중…</p>}
       {rows && (
@@ -101,7 +101,7 @@ export default function FunnelSection({ days }: { days: number }) {
           )}
           <h3 className="mb-1 text-xs font-bold text-gray-600">처음 온 경로별</h3>
           {srcList.length === 0 ? (
-            <p className="text-xs text-gray-400">아직 기록이 없어요.</p>
+            <p className="text-xs text-gray-400">아직 기록이 없어.</p>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-xs tabular-nums" data-testid="funnel-src-table">
@@ -136,7 +136,7 @@ export default function FunnelSection({ days }: { days: number }) {
           )}
           <div className="mt-4 rounded-xl bg-brand-50/60 p-3" data-testid="utm-maker">
             <h3 className="mb-1 text-xs font-bold text-gray-600">홍보 링크 만들기</h3>
-            <p className="mb-2 text-[10px] text-gray-400">인스타·블로그·카톡 등에 올릴 링크에 이름표를 붙여요. 영문·숫자만 쓰세요. (예: insta, blog1, kakao)</p>
+            <p className="mb-2 text-[10px] text-gray-400">인스타·블로그·카톡 등에 올릴 링크에 이름표를 붙여. 영문·숫자만 써. (예: insta, blog1, kakao)</p>
             <div className="flex gap-2">
               <input
                 value={utm}
@@ -161,7 +161,7 @@ export default function FunnelSection({ days }: { days: number }) {
             </div>
             <p className="mt-1.5 break-all text-[10px] text-gray-500">{typeof window !== "undefined" ? `${window.location.origin}/?utm_source=${utm || "이름표"}` : ""}</p>
           </div>
-          <p className="mt-2 text-[10px] text-gray-400">경로: direct=직접 접속, friend=친구 초대 링크, utm:이름=주소의 utm_source, web:도메인=다른 사이트에서 이동. 이 기능을 켠 이후 처음 온 사람부터 기록돼요.</p>
+          <p className="mt-2 text-[10px] text-gray-400">경로: direct=직접 접속, friend=친구 초대 링크, utm:이름=주소의 utm_source, web:도메인=다른 사이트에서 이동. 이 기능을 켠 이후 처음 온 사람부터 기록돼.</p>
         </>
       )}
     </section>

@@ -12,10 +12,10 @@ export const maxDuration = 30;
 export async function GET(request: Request) {
   const session = verifySessionToken(readCookie(request.headers.get("cookie"), SESSION_COOKIE), process.env.AUTH_SECRET);
   if (!session || !isAdmin(session.sub, process.env)) {
-    return NextResponse.json({ error: session ? "관리자 권한이 없어요." : "로그인이 필요해요." }, { status: session ? 403 : 401, headers: { "Cache-Control": "no-store" } });
+    return NextResponse.json({ error: session ? "관리자 권한이 없어." : "로그인이 필요해." }, { status: session ? 403 : 401, headers: { "Cache-Control": "no-store" } });
   }
   const dbConfig = loadDbConfig(process.env);
-  if (!dbConfig) return NextResponse.json({ error: "DB 가 연결되어 있지 않아요." }, { status: 503 });
+  if (!dbConfig) return NextResponse.json({ error: "DB 가 연결되어 있지 않아." }, { status: 503 });
 
   const q = new URL(request.url).searchParams.get("days");
   const since = q === "all" ? "2000-01-01" : sinceDayFor([7, 30, 90].includes(Number(q)) ? Number(q) : 30);
@@ -30,6 +30,6 @@ export async function GET(request: Request) {
     });
   } catch (err) {
     console.error("admin concerns csv failed:", err instanceof Error ? err.message : "unknown");
-    return NextResponse.json({ error: "내려받지 못했어요." }, { status: 502 });
+    return NextResponse.json({ error: "내려받지 못했어." }, { status: 502 });
   }
 }

@@ -27,10 +27,10 @@ export function calculateSaju(input: BirthInput, options: CalcOptions = {}): Saj
   const offset = options.timeOffsetMinutes ?? 0;
 
   if (lateZiHour !== "sameDay" && lateZiHour !== "nextDay") {
-    throw new SajuInputError("야자시 옵션 값이 올바르지 않아요.");
+    throw new SajuInputError("야자시 옵션 값이 올바르지 않아.");
   }
   if (!Number.isFinite(offset) || Math.abs(offset) > 180) {
-    throw new SajuInputError("시간 보정 값이 올바르지 않아요.");
+    throw new SajuInputError("시간 보정 값이 올바르지 않아.");
   }
 
   const timeKnown = input.hour !== undefined && input.hour !== null;
@@ -80,7 +80,7 @@ function yearAndMonthPillars(kst: WallTime): { year: Pillar; month: Pillar } {
 
 function validateInt(value: unknown, label: string, min: number, max: number): number {
   if (typeof value !== "number" || !Number.isInteger(value) || value < min || value > max) {
-    throw new SajuInputError(`${label} 값이 올바르지 않아요.`);
+    throw new SajuInputError(`${label} 값이 올바르지 않아.`);
   }
   return value;
 }
@@ -90,7 +90,7 @@ function validateSolarDate(input: BirthInput): CivilDate {
   const month = validateInt(input.month, "월", 1, 12);
   const day = validateInt(input.day, "일", 1, 31);
   if (!isValidDate(year, month, day)) {
-    throw new SajuInputError("존재하지 않는 날짜예요.");
+    throw new SajuInputError("존재하지 않는 날짜야.");
   }
   return { year, month, day };
 }
@@ -102,7 +102,7 @@ function lunarToSolarDate(input: BirthInput): CivilDate {
 
   // lunar-typescript 에서 윤달은 음수 월로 표현합니다. (윤2월 = -2)
   const monthArg = input.isLeapMonth ? -month : month;
-  const notFound = new SajuInputError("존재하지 않는 음력 날짜예요. (윤달 여부와 그 달의 말일을 확인해 주세요)");
+  const notFound = new SajuInputError("존재하지 않는 음력 날짜야. (윤달 여부와 그 달의 말일을 확인해 줘)");
 
   try {
     const lunar = Lunar.fromYmd(year, monthArg, day);

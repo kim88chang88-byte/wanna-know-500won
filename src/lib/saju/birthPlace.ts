@@ -93,7 +93,7 @@ export function resolveBirth<T extends BirthInput>(input: T): { input: Omit<T, "
     if (!samePillar(chart0.year, chart1.year) || !samePillar(chart0.month, chart1.month)) {
       return {
         input: base,
-        adjust: { label, minutes, applied: false, hourChanged: false, dayChanged: false, reason: "보정하면 절기가 바뀌는 시각이라, 시계 시각 그대로 봤어요." },
+        adjust: { label, minutes, applied: false, hourChanged: false, dayChanged: false, reason: "보정하면 절기가 바뀌는 시각이라, 시계 시각 그대로 봤어." },
       };
     }
     const hourChanged = !!chart0.hour && !!chart1.hour && !samePillar(chart0.hour, chart1.hour);
@@ -106,10 +106,10 @@ export function resolveBirth<T extends BirthInput>(input: T): { input: Omit<T, "
 
 /** 화면에 보여줄 한 줄 안내 */
 export function adjustNote(a: BirthAdjust): string {
-  if (!a.applied) return `📍 ${a.label}: ${a.reason ?? "보정하지 않았어요."}`;
-  if (a.dayChanged) return `📍 ${a.label} 보정을 적용했어요. 날짜 기둥(일주)과 시주가 달라졌어요.`;
-  if (a.hourChanged) return `📍 ${a.label} 보정을 적용했어요. 시주가 달라졌어요.`;
-  return `📍 ${a.label} 보정을 적용했지만 사주 글자는 그대로예요.`;
+  if (!a.applied) return `📍 ${a.label}: ${a.reason ?? "보정하지 않았어."}`;
+  if (a.dayChanged) return `📍 ${a.label} 보정을 적용했어. 날짜 기둥(일주)과 시주가 달라졌어.`;
+  if (a.hourChanged) return `📍 ${a.label} 보정을 적용했어. 시주가 달라졌어.`;
+  return `📍 ${a.label} 보정을 적용했지만 사주 글자는 그대로야.`;
 }
 
 /**
@@ -125,7 +125,7 @@ export function boundaryNote(input: BirthInput): string | null {
     if (!timeKnown) {
       if (chart.uncertainPillars.length === 0) return null;
       const what = chart.uncertainPillars.includes("year") ? "해(연주)와 달(월주)" : "달(월주)";
-      return `🗓 태어난 날에 절기가 바뀌어서, 시간을 모르면 ${what}이 확정되지 않아요. 시간을 알면 더 정확해져요.`;
+      return `🗓 태어난 날에 절기가 바뀌어서, 시간을 모르면 ${what}이 확정되지 않아. 시간을 알면 더 정확해져.`;
     }
     const sd = chart.solarDate;
     const at = shiftWallTime({ ...sd, hour: base.hour as number, minute: base.minute ?? 0 }, 0);
@@ -134,7 +134,7 @@ export function boundaryNote(input: BirthInput): string | null {
       const c = calculateSaju({ ...base, year: w.year, month: w.month, day: w.day, hour: w.hour, minute: w.minute, calendar: "solar", isLeapMonth: false });
       return !samePillar(c.year, chart.year) || !samePillar(c.month, chart.month);
     });
-    return near ? "🗓 절기가 바뀌는 시각과 가까워서, 몇 시간 차이로 달(월주)이 달라질 수 있어요. 출생 시각이 정확한지 한 번 확인해 보면 좋아요." : null;
+    return near ? "🗓 절기가 바뀌는 시각과 가까워서, 몇 시간 차이로 달(월주)이 달라질 수 있어. 출생 시각이 정확한지 한 번 확인해 보면 좋아." : null;
   } catch {
     return null;
   }

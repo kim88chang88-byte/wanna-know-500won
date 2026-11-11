@@ -49,14 +49,14 @@ type BirthResult = { ok: true; value: BirthInput } | { ok: false; error: string 
 
 /** 생년월일시·성별 한 사람 분을 검사해요. /api/reading 과 같은 BirthInput 모양을 받아요. */
 function parseBirth(raw: unknown, who: string): BirthResult {
-  if (!isRecord(raw)) return { ok: false, error: "요청이 올바르지 않아요. 다시 한 번 확인해 주세요." };
+  if (!isRecord(raw)) return { ok: false, error: "요청이 올바르지 않아. 다시 한 번 확인해 줘." };
   const int = (v: unknown) => (typeof v === "number" && Number.isInteger(v) ? v : null);
   const year = int(raw.year);
   const month = int(raw.month);
   const day = int(raw.day);
-  if (year === null || year < 1900 || year > 2100) return { ok: false, error: `${who}태어난 해를 1900~2100 사이로 입력해 주세요.` };
-  if (month === null || month < 1 || month > 12) return { ok: false, error: `${who}태어난 달을 확인해 주세요.` };
-  if (day === null || day < 1 || day > 31) return { ok: false, error: `${who}태어난 날을 확인해 주세요.` };
+  if (year === null || year < 1900 || year > 2100) return { ok: false, error: `${who}태어난 해를 1900~2100 사이로 입력해 줘.` };
+  if (month === null || month < 1 || month > 12) return { ok: false, error: `${who}태어난 달을 확인해 줘.` };
+  if (day === null || day < 1 || day > 31) return { ok: false, error: `${who}태어난 날을 확인해 줘.` };
 
   let hour: number | null = null;
   let minute: number | null = null;
@@ -64,17 +64,17 @@ function parseBirth(raw: unknown, who: string): BirthResult {
     hour = int(raw.hour);
     minute = raw.minute === null || raw.minute === undefined ? 0 : int(raw.minute);
     if (hour === null || hour < 0 || hour > 23 || minute === null || minute < 0 || minute > 59) {
-      return { ok: false, error: `${who}태어난 시간을 확인해 주세요.` };
+      return { ok: false, error: `${who}태어난 시간을 확인해 줘.` };
     }
   }
-  if (raw.calendar !== "solar" && raw.calendar !== "lunar") return { ok: false, error: `${who}양력/음력을 선택해 주세요.` };
-  if (raw.gender !== "male" && raw.gender !== "female") return { ok: false, error: `${who}성별을 선택해 주세요.` };
+  if (raw.calendar !== "solar" && raw.calendar !== "lunar") return { ok: false, error: `${who}양력/음력을 선택해 줘.` };
+  if (raw.gender !== "male" && raw.gender !== "female") return { ok: false, error: `${who}성별을 선택해 줘.` };
   return { ok: true, value: { year, month, day, hour, minute, calendar: raw.calendar, isLeapMonth: raw.isLeapMonth === true, gender: raw.gender, ...(isBirthPlace(raw.birthPlace) ? { birthPlace: raw.birthPlace } : {}), ...(raw.lateZi === "nextDay" ? { lateZi: "nextDay" as const } : {}) } };
 }
 
 /** 서버 입력 검사. 궁합이면 `partner`(상대방 생년월일시)도 같은 모양으로 받아요. */
 export function validatePremiumInput(raw: unknown): ValidationResult {
-  if (!isRecord(raw)) return { ok: false, error: "요청이 올바르지 않아요. 다시 한 번 확인해 주세요." };
+  if (!isRecord(raw)) return { ok: false, error: "요청이 올바르지 않아. 다시 한 번 확인해 줘." };
   const me = parseBirth(raw, "");
   if (!me.ok) return me;
   let partner: BirthInput | null = null;

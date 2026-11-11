@@ -1128,7 +1128,7 @@ export default function IntakeModal({ target, wallet = null, onClose, onComplete
                 </div>
               </div>
               <p className="text-[11px] text-gray-400 leading-relaxed">
-                병원·약·투자 종목 같은 건 풀이에 쓰지 않아요. 개인정보(이름·연락처 등)는 적지 말아 주세요.
+                병원·약·투자 종목 같은 건 풀이에 쓰지 않아. 개인정보(이름·연락처 등)는 적지 말아 줘.
               </p>
             </div>
           )}
@@ -1144,19 +1144,19 @@ export default function IntakeModal({ target, wallet = null, onClose, onComplete
                   onChange={(e) => update({ consent: e.target.checked })}
                 />
                 <span>
-                  (필수) 사주 계산을 위해 생년월일·성별(선택: 태어난 시간·고민 내용){compat ? "과 상대방의 생년월일·성별(선택: 태어난 시간)" : ""}을 처리하는 것에 동의해요.{compat ? " 상대방 정보는 궁합 계산에만 쓰고, 아래 선택에 동의하지 않으면 서버에 저장하지 않아요." : ""}{" "}
+                  (필수) 사주 계산을 위해 생년월일·성별(선택: 태어난 시간·고민 내용){compat ? "과 상대방의 생년월일·성별(선택: 태어난 시간)" : ""}을 처리하는 것에 동의해.{compat ? " 상대방 정보는 궁합 계산에만 쓰고, 아래 선택에 동의하지 않으면 서버에 저장하지 않아." : ""}{" "}
                   <a href="/privacy" target="_blank" rel="noopener noreferrer" className="text-brand-600 underline">
                     개인정보처리방침 보기
                   </a>
                 </span>
               </label>
-              {!(loggedIn || buildConcern(form)) && <p className="text-[11px] text-gray-400">입력한 정보는 서버에 저장하지 않아요.</p>}
+              {!(loggedIn || buildConcern(form)) && <p className="text-[11px] text-gray-400">입력한 정보는 서버에 저장하지 않아.</p>}
 
               {loggedIn && !(savedProfile && sameBirth(savedProfile, buildBirthInput({ ...form, consent: true }))) && (
                 <label className="flex items-start gap-2 text-xs text-gray-700 leading-relaxed">
                   <input type="checkbox" name="saveProfile" className="mt-0.5" checked={saveProfile} onChange={(e) => { setSaveProfile(e.target.checked); if (e.target.checked) setSaveOther(false); }} />
                   <span>
-                    (선택) 도리가 생년월일시·성별을 기억하게 저장해요. 다음부터 다시 입력하지 않아도 돼요. 로그인 창에서 언제든 지울 수 있고, 탈퇴하면 함께 삭제돼요.
+                    (선택) 도리가 생년월일시·성별을 기억하게 저장해. 다음부터 다시 입력하지 않아도 돼. 로그인 창에서 언제든 지울 수 있고, 탈퇴하면 함께 삭제돼.
                   </span>
                 </label>
               )}
@@ -1164,7 +1164,7 @@ export default function IntakeModal({ target, wallet = null, onClose, onComplete
               {loggedIn && (
                 <label className="flex items-start gap-2 text-xs text-gray-700 leading-relaxed">
                   <input type="checkbox" name="saveVault" className="mt-0.5" checked={saveVault} onChange={(e) => setSaveVault(e.target.checked)} />
-                  <span>(선택) 풀이를 내 보관함에 저장해요. 다시 볼 때 추가 비용이 없고, 직접 지우거나 탈퇴하면 함께 삭제돼요.</span>
+                  <span>(선택) 풀이를 내 보관함에 저장해. 다시 볼 때 추가 비용이 없고, 직접 지우거나 탈퇴하면 함께 삭제돼.</span>
                 </label>
               )}
 
@@ -1173,7 +1173,7 @@ export default function IntakeModal({ target, wallet = null, onClose, onComplete
                   <label className="flex items-start gap-2 text-xs text-gray-700 leading-relaxed">
                     <input type="checkbox" name="savePerson" className="mt-0.5" checked={savePerson} onChange={(e) => setSavePerson(e.target.checked)} />
                     <span>
-                      (선택) 이 상대방의 생년월일시·성별을 기억해 둬요. 다음 궁합이나 다른 운세를 볼 때 눌러서 바로 고를 수 있어요. 로그인 창에서 언제든 지울 수 있고, 탈퇴하면 함께 삭제돼요.
+                      (선택) 이 상대방의 생년월일시·성별을 기억해 둬. 다음 궁합이나 다른 운세를 볼 때 눌러서 바로 고를 수 있어. 로그인 창에서 언제든 지울 수 있고, 탈퇴하면 함께 삭제돼.
                     </span>
                   </label>
                   {savePerson && (
@@ -1197,7 +1197,7 @@ export default function IntakeModal({ target, wallet = null, onClose, onComplete
                   <input type="checkbox" name="shareConcern" className="mt-0.5" checked={shareConcern} onChange={(e) => setShareConcern(e.target.checked)} />
                   <span>
                     (선택) 적어 준 고민을 서비스 개선 통계에 써도 좋아. 생년월일은 빼고 나이대·성별만 저장해.
-                    {loggedIn ? " 로그인 후 동의하면 탈퇴 시 함께 삭제돼요." : " 로그인하지 않으면 누구 것인지 알 수 없게 저장돼 나중에 지우기 어려워요."}
+                    {loggedIn ? " 로그인 후 동의하면 탈퇴 시 함께 삭제돼." : " 로그인하지 않으면 누구 것인지 알 수 없게 저장돼 나중에 지우기 어려워."}
                   </span>
                 </label>
               )}

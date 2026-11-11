@@ -100,7 +100,7 @@ export function rewritableItems(c: CompatView): Array<{ id: string; 제목: stri
   return [
     ...c.points.map((p, i) => ({ id: `p${i}`, 제목: `${p.tone === "good" ? "잘 맞는 점" : "맞춰 가면 좋은 점"} · ${p.title}`, 내용: p.body })),
     ...(c.timing ?? []).map((t, i) => ({ id: `t${i}`, 제목: `올해·내년 흐름 · ${t.title}`, 내용: t.body })),
-    ...(c.partnerTrait?.body ? [{ id: "r0", 제목: "상대는 이런 사람이에요", 내용: c.partnerTrait.body }] : []),
+    ...(c.partnerTrait?.body ? [{ id: "r0", 제목: "상대는 이런 사람이야", 내용: c.partnerTrait.body }] : []),
     ...(c.tips ?? []).map((t, i) => ({ id: `k${i}`, 제목: `도리의 팁 · ${t.title}`, 내용: t.body })),
   ];
 }

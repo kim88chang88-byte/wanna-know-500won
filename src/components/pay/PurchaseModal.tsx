@@ -31,12 +31,12 @@ export const PRODUCTS: Product[] = [
 ];
 
 const DemoNote = ({ className = "" }: { className?: string }) => (
-  <p data-testid="demo-note" className={`rounded-xl border border-orange-300 bg-orange-50 px-3 py-2 text-xs font-bold leading-relaxed text-orange-800 ${className}`}>🧪 베타 체험 · 실제 결제는 없어요</p>
+  <p data-testid="demo-note" className={`rounded-xl border border-orange-300 bg-orange-50 px-3 py-2 text-xs font-bold leading-relaxed text-orange-800 ${className}`}>🧪 베타 체험 · 실제 결제는 없어</p>
 );
 
 const won = (n: number) => `${n.toLocaleString("ko-KR")}원`;
 
-export default function PurchaseModal({ preselect, onClose, onContinue, continueLabel = "이어서 풀이 보기" }: { preselect?: ProductId; onClose: () => void; /** 이어 가기 버튼 글자 */ continueLabel?: string; /** 풀이를 보려다 충전하러 온 경우: 결제가 끝나면 "이어서 풀이 보기"로 바로 이어 가요 */ onContinue?: () => void }) {
+export default function PurchaseModal({ preselect, onClose, onContinue, continueLabel = "이어서 풀이 보기" }: { preselect?: ProductId; onClose: () => void; /** 이어 가기 버튼 글자 */ continueLabel?: string; /** 풀이를 보려다 충전하러 온 경우: 결제가 끝나면 "이어서 풀이 보기"로 바로 이어 가 */ onContinue?: () => void }) {
   const [step, setStep] = useState<"buy" | "confirm" | "done" | "soon">("buy");
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<"" | "login" | "fail">("");
@@ -81,7 +81,7 @@ export default function PurchaseModal({ preselect, onClose, onContinue, continue
               <h2 className="text-base font-extrabold">도리 메뉴판</h2>
               <button type="button" onClick={onClose} aria-label="닫기" className="text-lg leading-none">✕</button>
             </div>
-            <p className="border-b border-orange-200 bg-orange-50 px-4 py-2 text-center text-xs font-bold text-orange-800">🧪 베타 체험 · 실제 결제는 없어요</p>
+            <p className="border-b border-orange-200 bg-orange-50 px-4 py-2 text-center text-xs font-bold text-orange-800">🧪 베타 체험 · 실제 결제는 없어</p>
             <p className="bg-amber-50 px-4 py-2.5 text-center text-xs font-semibold text-amber-800">조약돌 1개 = 500원 · 진주 1개 = 3,000원(조약돌 6개) · 뽑기 1회 또는 상담실 질문 5번</p>
             <div role="radiogroup" aria-label="상품 선택">
               {PRODUCTS.map((p) => (
@@ -117,7 +117,7 @@ export default function PurchaseModal({ preselect, onClose, onContinue, continue
               <label className="flex items-start gap-2 text-[11.5px] leading-relaxed text-slate-500">
                 <input type="checkbox" checked={agree} onChange={(e) => setAgree(e.target.checked)} className="mt-0.5 h-4 w-4 shrink-0" />
                 <span>
-                  <a href="/terms" target="_blank" rel="noreferrer" className="underline">이용약관</a>·<a href="/refund" target="_blank" rel="noreferrer" className="underline">환불 안내</a>에 동의해요. 지금은 체험이라 환불할 돈이 없어요.
+                  <a href="/terms" target="_blank" rel="noreferrer" className="underline">이용약관</a>·<a href="/refund" target="_blank" rel="noreferrer" className="underline">환불 안내</a>에 동의해. 지금은 체험이라 환불할 돈이 없어.
                 </span>
               </label>
               <button
@@ -130,7 +130,7 @@ export default function PurchaseModal({ preselect, onClose, onContinue, continue
                 }}
                 className="w-full rounded-2xl bg-brand-500 py-3 text-sm font-extrabold text-white disabled:opacity-50"
               >
-                {picked ? `${won(picked.price)} 체험 결제하기` : "상품을 골라 주세요"}
+                {picked ? `${won(picked.price)} 체험 결제하기` : "상품을 골라 줘"}
               </button>
               <p className="rounded-xl border border-dashed border-slate-300 px-3 py-2 text-xs leading-relaxed text-slate-500">
                 <b className="text-slate-700">무료로 받는 방법</b>
@@ -143,15 +143,15 @@ export default function PurchaseModal({ preselect, onClose, onContinue, continue
           <div className="space-y-3 p-5">
             <h2 className="text-base font-extrabold text-gray-900">체험 결제 확인</h2>
             <DemoNote />
-            <p className="text-sm leading-relaxed text-slate-600">돈이 나가지 않고, 카드·계좌 정보도 받지 않아요. 구매 흐름을 미리 써 보는 베타 체험이에요.</p>
+            <p className="text-sm leading-relaxed text-slate-600">돈이 나가지 않고, 카드·계좌 정보도 받지 않아. 구매 흐름을 미리 써 보는 베타 체험이야.</p>
             <dl className="space-y-2 text-[13px]">
               <div className="flex justify-between border-t border-slate-100 pt-2"><dt className="text-slate-500">상품</dt><dd className="font-bold">{picked.name}</dd></div>
               <div className="flex justify-between border-t border-slate-100 pt-2"><dt className="text-slate-500">받게 되는 것</dt><dd className="font-bold">{pebbleText(DEMO_COINS[picked.id])}</dd></div>
               <div className="flex justify-between border-t border-slate-100 pt-2"><dt className="text-slate-500">결제 금액</dt><dd className="font-bold">0원 (체험)</dd></div>
               <div className="flex justify-between border-t border-slate-100 pt-2"><dt className="text-slate-500">체험 한도</dt><dd className="font-bold">한 달 {DEMO_MONTH_CAP}번</dd></div>
             </dl>
-            {err === "login" && <p role="alert" className="rounded-xl bg-rose-50 px-3 py-2 text-xs text-rose-700">로그인한 뒤에 체험할 수 있어요. 위쪽 로그인 버튼을 눌러 주세요.</p>}
-            {err === "fail" && <p role="alert" className="rounded-xl bg-rose-50 px-3 py-2 text-xs text-rose-700">지금은 체험을 받지 못했어요. 잠시 뒤 다시 눌러 주세요.</p>}
+            {err === "login" && <p role="alert" className="rounded-xl bg-rose-50 px-3 py-2 text-xs text-rose-700">로그인한 뒤에 체험할 수 있어. 위쪽 로그인 버튼을 눌러 줘.</p>}
+            {err === "fail" && <p role="alert" className="rounded-xl bg-rose-50 px-3 py-2 text-xs text-rose-700">지금은 체험을 받지 못했어. 잠시 뒤 다시 눌러 줘.</p>}
             <button type="button" disabled={busy} onClick={buyDemo} className="w-full rounded-2xl bg-brand-500 py-3 text-sm font-extrabold text-white disabled:opacity-50">
               {busy ? "받는 중…" : "체험으로 받기"}
             </button>
@@ -160,20 +160,20 @@ export default function PurchaseModal({ preselect, onClose, onContinue, continue
         ) : step === "done" ? (
           <div className="space-y-3 p-5">
             <h2 className="text-base font-extrabold text-gray-900">구매 완료 (체험)</h2>
-            <p className="text-center text-xl font-black text-gray-900">🎉 {pebbleText(gotCoins)} 분량이 들어왔어요</p>
-            <p role="status" className="rounded-xl bg-emerald-50 px-3 py-2.5 text-center text-sm font-bold text-emerald-700">베타 체험으로 받은 조약돌이에요. 실제 결제는 없었어요.</p>
+            <p className="text-center text-xl font-black text-gray-900">🎉 {pebbleText(gotCoins)} 분량이 들어왔어</p>
+            <p role="status" className="rounded-xl bg-emerald-50 px-3 py-2.5 text-center text-sm font-bold text-emerald-700">베타 체험으로 받은 조약돌이야. 실제 결제는 없었어.</p>
             <DemoNote />
-            {balance > 0 && <p className="text-center text-[13px] text-slate-600">내 잔액 <b>{pebbleText(balance)}</b> · 풀이 뽑기나 상담실 질문에 쓸 수 있어요</p>}
+            {balance > 0 && <p className="text-center text-[13px] text-slate-600">내 잔액 <b>{pebbleText(balance)}</b> · 풀이 뽑기나 상담실 질문에 쓸 수 있어</p>}
             <button type="button" data-testid={onContinue ? "pay-continue" : undefined} onClick={onContinue ?? onClose} className="w-full rounded-2xl bg-brand-500 py-3 text-sm font-extrabold text-white">
               {onContinue ? continueLabel : "확인"}
             </button>
           </div>
         ) : (
           <div className="space-y-3 p-5">
-            <h2 className="text-base font-extrabold text-gray-900">결제는 곧 열려요</h2>
-            <p className="text-sm leading-relaxed text-slate-600">이번 달 체험 구매 3번을 모두 썼어요. 다음 달 1일에 다시 열려요. 정식 결제가 열리면 가장 먼저 알려 드릴게요. 알림만 받으면 되고, 아무것도 결제되지 않아요.</p>
+            <h2 className="text-base font-extrabold text-gray-900">결제는 곧 열려</h2>
+            <p className="text-sm leading-relaxed text-slate-600">이번 달 체험 구매 3번을 모두 썼어. 다음 달 1일에 다시 열려. 정식 결제가 열리면 가장 먼저 알려 줄게. 알림만 받으면 되고, 아무것도 결제되지 않아.</p>
             {notified ? (
-              <p role="status" className="rounded-xl bg-emerald-50 px-3 py-2.5 text-sm text-emerald-700">알림 신청 완료! 결제가 열리면 알려 드릴게요 ❄️</p>
+              <p role="status" className="rounded-xl bg-emerald-50 px-3 py-2.5 text-sm text-emerald-700">알림 신청 완료! 결제가 열리면 알려 줄게 ❄️</p>
             ) : (
               <button
                 type="button"

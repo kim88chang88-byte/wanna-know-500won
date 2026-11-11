@@ -102,7 +102,7 @@ export default function ReviewsSection() {
       </AutoMarquee>
       <p className="mt-3 text-center text-[11px] text-slate-400">
         {real
-          ? "* 이용자가 직접 공개에 동의한 후기만 이름 없이 보여 드려요. 풀이는 사람마다 달라질 수 있어요."
+          ? "* 이용자가 직접 공개에 동의한 후기만 이름 없이 보여 줘. 풀이는 사람마다 달라질 수 있어."
           : "* 예시 문구야. 실제 이용자의 기록이 아니며, 실제 풀이는 입력한 정보에 따라 달라져."}
       </p>
     </section>

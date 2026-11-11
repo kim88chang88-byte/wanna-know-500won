@@ -33,7 +33,7 @@ export async function POST(request: Request) {
     await db.insertReview({ userId: session?.sub ?? null, review, topic: normalizeTopic(o.topic), premium: o.premium === true });
   } catch (err) {
     console.error("insertReview failed:", err instanceof Error ? err.message : "unknown");
-    return NextResponse.json({ error: "후기를 저장하지 못했어요. 잠시 뒤에 다시 시도해 주세요." }, { status: 502 });
+    return NextResponse.json({ error: "후기를 저장하지 못했어. 잠시 뒤에 다시 시도해 줘." }, { status: 502 });
   }
 
   // 정성 후기 보상: 로그인한 회원이 40자 이상 정성껏 쓴 후기면 500원 뽑기 코인 1장을 바로 줘요. (보상이 안 돼도 후기는 이미 저장됐어요)

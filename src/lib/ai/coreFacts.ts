@@ -136,7 +136,7 @@ export function extractCoreFacts(r: SsajuLike, hourKnown: boolean, now: Date = n
       .map((m) => `${(m.month % 12) + 1}월경 ${m.ganzhi}(${m.stemTenGod ?? ""}/${m.branchTenGod ?? ""})`);
     if (months.length) facts.올해월운 = months;
   }
-  if (!hourKnown) facts.참고 = "태어난 시간을 몰라서 신강/신약과 용신은 참고용이에요";
+  if (!hourKnown) facts.참고 = "태어난 시간을 몰라서 신강/신약과 용신은 참고용이야";
   return facts;
 }
 

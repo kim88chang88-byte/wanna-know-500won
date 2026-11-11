@@ -118,10 +118,10 @@ export function stripSummaryLead(text: string): string {
 export const FOLD_TITLES = {
   elements: "오행으로 보는 사주",
   self: "나는 어떤 사람인가?",
-  praise: "이건 정말 칭찬해요",
-  lack: "그렇지만 이건 아쉬워요",
+  praise: "이건 정말 칭찬해 줄게",
+  lack: "그렇지만 이건 아쉬워",
   flow: "올해와 이번 달의 흐름",
-  improve: "이렇게 개선해 보아요",
+  improve: "이렇게 개선해 보자",
 } as const;
 
 /** 접이식 글 한 편을 화면에 맞게 다듬어요. */

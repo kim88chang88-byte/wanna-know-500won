@@ -33,7 +33,7 @@ describe("도리 메모", () => {
     expect(row("보는 날")).toBe("2026-11-10 (화)");
     expect(row("오늘 일진")).toBe("戊子(무자)");
     expect(row("나와의 관계").startsWith("편재 · ")).toBe(true);
-    expect(row("내 글자와 만나면")).toBe("눈에 띄는 합충은 없어요");
+    expect(row("내 글자와 만나면")).toBe("눈에 띄는 합충은 없어");
   });
   it("충이 있으면 지수가 내려가고 글에 드러나요", () => {
     const a = buildChatMemo(daily("정재"), today).score;

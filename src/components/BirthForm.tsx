@@ -180,7 +180,7 @@ export default function BirthForm() {
         <label className="check">
           <input type="checkbox" name="consent" required />
           <span>
-            (필수) 사주 계산을 위해 생년월일·성별(선택: 태어난 시간)을 처리하는 것에 동의해요.{" "}
+            (필수) 사주 계산을 위해 생년월일·성별(선택: 태어난 시간)을 처리하는 것에 동의해.{" "}
             <a href="/privacy" target="_blank" rel="noopener noreferrer">
               개인정보처리방침 보기
             </a>

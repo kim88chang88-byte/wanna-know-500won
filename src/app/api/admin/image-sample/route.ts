@@ -22,15 +22,15 @@ const page = (body: string, status = 200) =>
  */
 export async function GET(request: Request) {
   const session = verifySessionToken(readCookie(request.headers.get("cookie"), SESSION_COOKIE), process.env.AUTH_SECRET);
-  if (!session) return page("<p>로그인이 필요해요.</p>", 401);
+  if (!session) return page("<p>로그인이 필요해.</p>", 401);
   if (!isAdmin(session.sub, process.env)) {
-    return page(`<p>관리자 권한이 없어요.</p><p>내 고유번호: <code>${esc(session.sub)}</code> ${adminIds(process.env).length === 0 ? "(ADMIN_USER_IDS 가 비어 있어요)" : ""}</p>`, 403);
+    return page(`<p>관리자 권한이 없어.</p><p>내 고유번호: <code>${esc(session.sub)}</code> ${adminIds(process.env).length === 0 ? "(ADMIN_USER_IDS 가 비어 있어)" : ""}</p>`, 403);
   }
   const rl = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "admin";
-  if (!limiter.check(rl).ok) return page("<p>요청이 너무 빨라요. 잠시 뒤에 다시 해 주세요.</p>", 429);
+  if (!limiter.check(rl).ok) return page("<p>요청이 너무 빨라. 잠시 뒤에 다시 해 줘.</p>", 429);
 
   const apiKey = process.env.GEMINI_API_KEY?.trim();
-  if (!apiKey) return page("<p>GEMINI_API_KEY 가 설정되어 있지 않아요.</p>", 503);
+  if (!apiKey) return page("<p>GEMINI_API_KEY 가 설정되어 있지 않아.</p>", 503);
 
   const sp = new URL(request.url).searchParams;
   let partner: "male" | "female" = sp.get("partner") === "male" ? "male" : "female";
@@ -38,7 +38,7 @@ export async function GET(request: Request) {
   const user = sp.get("user");
   if (user === "male" || user === "female") {
     const a = partnerAgeFor(user, Number(sp.get("userAge")));
-    if (!a) return page("<p>만 20세 미만(또는 나이를 알 수 없는) 이용자에게는 인물 이미지를 만들지 않아요. (docs/PARTNER_IMAGE.md)</p>", 200);
+    if (!a) return page("<p>만 20세 미만(또는 나이를 알 수 없는) 이용자에게는 인물 이미지를 만들지 않아. (docs/PARTNER_IMAGE.md)</p>", 200);
     age = a;
     partner = user === "male" ? "female" : "male";
   }
@@ -48,7 +48,7 @@ export async function GET(request: Request) {
   const seed = Number.isFinite(vRaw) && sp.get("v") !== null ? vRaw : Math.floor(Math.random() * 6);
   const prompt = spousePrompt(partner, el, age, seed);
   const r = await generateImage(prompt, apiKey, { model: process.env.GEMINI_IMAGE_MODEL?.trim() || undefined });
-  if (!r.ok) return page(`<h2>이미지를 만들지 못했어요</h2><p>${esc(r.error)}</p><p>모델 이름이 다르다면 환경변수 GEMINI_IMAGE_MODEL 에 Google AI Studio 의 이미지 모델 이름을 넣어 주세요.</p>`, 502);
+  if (!r.ok) return page(`<h2>이미지를 만들지 못했어</h2><p>${esc(r.error)}</p><p>모델 이름이 다르다면 환경변수 GEMINI_IMAGE_MODEL 에 Google AI Studio 의 이미지 모델 이름을 넣어 줘.</p>`, 502);
 
   const usd = estimateCostUsd(r.usage);
   const krw = Math.round(usd * (Number(process.env.USD_KRW) || DEFAULT_USD_KRW));

@@ -24,7 +24,7 @@ describe("출생지 경도 보정", () => {
     expect(b.input.hour).toBe(16);
   });
   it("안내 문구", () => {
-    expect(adjustNote({ label: "서울 −32분", minutes: -32, applied: true, hourChanged: true, dayChanged: false })).toContain("시주가 달라졌어요");
+    expect(adjustNote({ label: "서울 −32분", minutes: -32, applied: true, hourChanged: true, dayChanged: false })).toContain("시주가 달라졌어");
     expect(adjustNote({ label: "서울 −32분", minutes: -32, applied: false, hourChanged: false, dayChanged: false, reason: "x" })).toContain("x");
   });
   it("입력 화면: 시간을 알 때만 birthPlace 를 담아요", () => {

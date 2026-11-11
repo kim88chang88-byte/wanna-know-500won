@@ -33,7 +33,7 @@ export default function AdminCopyResult({ report, reading, topic, name, partnerN
     const text = resultToText(report, reading, { topic, name, partnerName });
     try {
       await navigator.clipboard.writeText(text);
-      setMsg(`복사했어요 (${text.length.toLocaleString("ko-KR")}자)`);
+      setMsg(`복사했어 (${text.length.toLocaleString("ko-KR")}자)`);
     } catch {
       // 복사가 막히면 파일로 내려받아요
       const url = URL.createObjectURL(new Blob([text], { type: "text/plain;charset=utf-8" }));
@@ -42,7 +42,7 @@ export default function AdminCopyResult({ report, reading, topic, name, partnerN
       a.download = "dori-result.txt";
       a.click();
       URL.revokeObjectURL(url);
-      setMsg("복사가 막혀서 파일로 받았어요");
+      setMsg("복사가 막혀서 파일로 받았어");
     }
   }
 
