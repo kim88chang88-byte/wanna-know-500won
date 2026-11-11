@@ -454,7 +454,7 @@ function MbtiPicker({ value, onChange }: { value: string; onChange: (v: string) 
   return (
     <div data-testid="mbti-picker" className="mt-4">
       <div className="mb-1.5 text-xs font-bold text-gray-700">
-        MBTI <span className="font-normal text-gray-500">(선택 · 몰라도 괜찮아요)</span>
+        MBTI <span className="font-normal text-gray-500">(선택 · 모르면 건너뛰어도 돼요)</span>
       </div>
       <div className="grid grid-cols-4 gap-1.5" role="group" aria-label="MBTI 고르기">
         {MBTI_TYPES.map((t) => (
