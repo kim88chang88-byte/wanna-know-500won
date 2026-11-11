@@ -110,15 +110,15 @@ describe("형식 검사 이유와 부드러운 말 바꾸기", () => {
   });
 });
 
-describe("19쪽이 1쪽 결론과 같은 방향으로 쓰이게 하는 근거", () => {
+describe("19쪽이 3쪽 결론과 같은 방향으로 쓰이게 하는 근거", () => {
   const page = (key: string) => ({ no: 1, key, title: "t", subtitle: "s", lead: "l", sections: [{ heading: "h", body: "내용" }], tables: [] });
-  it("concern 장에는 1쪽 결론이 들어가고 다른 장에는 안 들어가요", () => {
+  it("concern 장에는 3쪽 결론이 들어가고 다른 장에는 안 들어가요", () => {
     const withIt = chapterFacts([page("concern")], page("concern"), "철수", null, "지금은 이직보다 남아서 준비하는 쪽이에요.");
-    expect(withIt).toContain("1쪽에서 이미 전한 결론");
+    expect(withIt).toContain("3쪽에서 이미 전한 결론");
     expect(withIt).toContain("남아서 준비");
-    expect(chapterFacts([page("lucky")], page("lucky"), "철수", null, "결론")).not.toContain("1쪽에서 이미 전한 결론");
+    expect(chapterFacts([page("lucky")], page("lucky"), "철수", null, "결론")).not.toContain("3쪽에서 이미 전한 결론");
   });
-  it("책 전체가 한 사람을 같은 모습으로 그리도록 1쪽 한 줄을 넘겨 줘요", () => {
+  it("책 전체가 한 사람을 같은 모습으로 그리도록 2쪽 한 줄을 넘겨 줘요", () => {
     const overview = { ...page("overview"), sections: [{ heading: "나를 한 문장으로", body: "큰 나무처럼 묵묵히 버티는 사람이에요." }] };
     const money = page("topic:money");
     expect(chapterFacts([overview, money], money, "철수", null)).toContain("큰 나무처럼 묵묵히");

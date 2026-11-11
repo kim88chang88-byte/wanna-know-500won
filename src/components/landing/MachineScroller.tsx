@@ -57,12 +57,12 @@ export default function MachineScroller({ children, count }: { children: ReactNo
         )}
         {canScroll && !atStart && (
           <button type="button" data-testid="machine-prev" aria-label="이전 카드 보기" onClick={() => go(-1)} className={`${arrow} left-1`}>
-            <span className="material-symbols-outlined text-[24px]" aria-hidden="true">chevron_left</span>
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7" /></svg>
           </button>
         )}
         {canScroll && !atEnd && (
           <button type="button" data-testid="machine-next" aria-label="다음 카드 보기" onClick={() => go(1)} className={`${arrow} right-1`}>
-            <span className="material-symbols-outlined text-[24px]" aria-hidden="true">chevron_right</span>
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7" /></svg>
           </button>
         )}
       </div>

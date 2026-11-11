@@ -157,7 +157,7 @@ export const CHAPTER_METAPHOR: Record<string, string> = {
   concern: "친구와 나누는 산책길 대화",
 };
 
-/** 책 전체가 한 사람을 같은 모습으로 그리도록, 3쪽 '나를 한 문장으로'를 알려 줘요. */
+/** 책 전체가 한 사람을 같은 모습으로 그리도록, 2쪽 '나를 한 문장으로'를 알려 줘요. */
 function bookAnchor(pages: BookPage[]): string[] {
   const line = pages
     .filter((p) => p.key === "overview")
