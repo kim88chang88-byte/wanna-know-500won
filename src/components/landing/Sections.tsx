@@ -7,6 +7,7 @@ import { FREE_PRICE_LABEL, MACHINES, PREMIUM_CARDS } from "./data";
 import { MachineMenuButton } from "./MenuButton";
 import { HERO_IMAGE, IMAGES, LOGO_IMAGE } from "./images";
 import SafeImage from "./SafeImage";
+import MachineScroller from "./MachineScroller";
 import FreeCountdown from "./FreeCountdown";
 import WalletBar, { type WalletValues } from "./WalletBar";
 import BrandLink from "./BrandLink";
@@ -221,14 +222,11 @@ export function MachinesSection({ onSpin, lastKey = null }: SpinProps & { lastKe
           </div>
           <h3 className="text-base sm:text-lg font-bold text-gray-900">하루 1번, 골라서 무료</h3>
         </div>
-        <span className="shrink-0 rounded-full bg-gray-100 px-2.5 py-0.5 text-[11px] text-gray-500">이후 500원 · 궁합 1,000원</span>
+        <span className="shrink-0 rounded-full bg-gray-100 px-2.5 py-0.5 text-[11px] text-gray-500">기본 500원 · 궁합 1,000원</span>
       </div>
 
       {/* 옆으로 밀어서 넘기는 카드야. (큰 화면에서는 한눈에 펼쳐져) */}
-      <div
-        data-testid="machine-scroller"
-        className="-mx-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-4 pt-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:-mx-6 sm:px-6 lg:mx-0 lg:grid lg:grid-cols-3 lg:gap-4 lg:overflow-visible lg:px-0"
-      >
+      <MachineScroller count={MACHINES.length}>
         {MACHINES.map((m) => (
           <div key={m.key} className="relative w-[210px] shrink-0 snap-start sm:w-[230px] lg:w-auto">
             {m.sticker && <Sticker text={m.sticker} testId="machine-sticker" />}
@@ -267,7 +265,7 @@ export function MachinesSection({ onSpin, lastKey = null }: SpinProps & { lastKe
             </div>
           </div>
         ))}
-      </div>
+      </MachineScroller>
     </section>
   );
 }
