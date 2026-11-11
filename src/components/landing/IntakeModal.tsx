@@ -1,5 +1,7 @@
 "use client";
 
+import SafeImage from "./SafeImage";
+import { doriFace } from "@/lib/doriFace";
 import { possessive } from "@/lib/callName";
 import BirthTimeSelect from "@/components/BirthTimeSelect";
 import { conclusionOf, fetchPartnerImage, fetchRestChapters, mergeChapters } from "@/lib/premium/mergeChapters";
@@ -196,18 +198,26 @@ function Pill({ selected, onClick, children, testId }: { selected: boolean; onCl
   );
 }
 
+function DoriSpeaker({ fortune, premium }: { fortune: string; premium?: boolean }) {
+  return (
+    <span className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-full border-2 border-brand-200 bg-white shadow-sm">
+      <SafeImage src={doriFace(fortune, premium)} alt="" className="h-full w-full object-contain" fallback="🦦" fallbackClass="text-2xl" />
+    </span>
+  );
+}
+
 function FieldTitle({ children }: { children: React.ReactNode }) {
   return <p className="rounded-xl bg-gray-50 px-4 py-3 text-sm font-bold text-gray-800">{children}</p>;
 }
 
 /** 처음 쓰는 분(비회원·저장된 정보가 없는 회원)용: 생년월일·성별·태어난 시간을 한 화면에서 직접 적어요. */
 /** 운세를 볼 사람 고르기: 나 · 기억해 둔 사람 · 새로 입력 */
-function WhoPicker({ me, people, onMe, onPerson, onNew }: { me: { name: string; summary: string } | null; people: SavedPerson[]; onMe: () => void; onPerson: (p: SavedPerson) => void; onNew: () => void }) {
+function WhoPicker({ face, me, people, onMe, onPerson, onNew }: { face: { fortune: string; premium?: boolean }; me: { name: string; summary: string } | null; people: SavedPerson[]; onMe: () => void; onPerson: (p: SavedPerson) => void; onNew: () => void }) {
   const card = "relative mx-auto flex w-[76%] min-w-[15rem] items-center justify-center rounded-2xl border px-7 py-3 text-center transition-colors";
   return (
     <div data-testid="who-picker" className="space-y-2">
       <div className="flex items-start gap-2.5 mb-3">
-        <span className="text-2xl" aria-hidden="true">❄️</span>
+        <DoriSpeaker fortune={face.fortune} premium={face.premium} />
         <p className="flex-1 rounded-2xl rounded-tl-sm bg-brand-50 border border-brand-100 px-3.5 py-2.5 text-sm text-gray-800">누구의 운세를 볼까?</p>
       </div>
       {me && (
@@ -994,6 +1004,7 @@ export default function IntakeModal({ target, wallet = null, onClose, onComplete
 
       {phase === "form" && whoOpen && (
         <WhoPicker
+          face={{ fortune: target.fortune, premium: target.premium }}
           me={savedProfile ? { name: nickname?.trim() ?? "", summary: profileSummary(savedProfile) } : null}
           people={people}
           onMe={chooseMe}
@@ -1027,9 +1038,7 @@ export default function IntakeModal({ target, wallet = null, onClose, onComplete
           </div>
 
           <div className="flex items-start gap-2.5 mb-4">
-            <span className="text-2xl" aria-hidden="true">
-              ❄️
-            </span>
+            <DoriSpeaker fortune={target.fortune} premium={target.premium} />
             <p className="flex-1 rounded-2xl rounded-tl-sm bg-brand-50 border border-brand-100 px-3.5 py-2.5 text-sm text-gray-800">
               {BUBBLE[step]}
             </p>
