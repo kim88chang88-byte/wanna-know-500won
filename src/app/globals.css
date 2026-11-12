@@ -509,3 +509,6 @@ body {
 }
 .hanji-curl.br { right: 0; clip-path: polygon(100% 0, 0 100%, 0 0); background: linear-gradient(135deg, #fbf6e8 0%, #e7dabb 100%); }
 .hanji-curl.bl { left: 0; clip-path: polygon(0 0, 100% 100%, 100% 0); background: linear-gradient(225deg, #fbf6e8 0%, #e7dabb 100%); }
+
+/* 프리미엄 책 전체: 고딕·명조 대신 귀여운 둥근 글씨(주아). 굵게는 글씨 자체가 두꺼워서 가짜 굵기를 끄고, 큰 제목도 같은 글씨로 맞춰요. */
+.premium-cute, .premium-cute .font-serifKr { font-family: "Jua", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif; font-synthesis: none; }
