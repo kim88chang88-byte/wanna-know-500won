@@ -12,9 +12,9 @@ export default function BrandLink({ heading = true, overlayBeta = false }: { hea
         <SafeImage src={LOGO_IMAGE} alt="도유사주 로고" className="w-full h-full object-contain" fallback="🦦" fallbackClass="text-2xl" />
       </div>
       <div className="flex flex-col gap-[3px] sm:gap-1">
-        {/* 도유 = DOry with YOU: DO와 YOU만 도유사주와 같은 색으로 살리고 나머지는 회색 */}
+        {/* 도유 = Dory with you: Do와 you만 도유 글자색(보라→분홍)으로 살리고 나머지 영문은 회색 */}
         <span aria-hidden="true" data-testid="brand-tagline" className="font-cute text-[10px] min-[400px]:text-[11px] sm:text-[13px] leading-none whitespace-nowrap tracking-wide text-gray-400">
-          <b className="font-normal text-brand-500">DO</b>ry with <b className="font-normal text-pink-500">YOU</b>
+          <b className="font-normal text-brand-500">Do</b>ry with <b className="font-normal text-fuchsia-500">you</b>
         </span>
         <Title className="font-cute font-normal text-[17px] min-[400px]:text-[22px] sm:text-[30px] leading-none whitespace-nowrap tracking-normal bg-gradient-to-r from-brand-500 via-fuchsia-500 to-pink-500 bg-clip-text text-transparent relative inline-flex items-center gap-1.5">
           도유사주
