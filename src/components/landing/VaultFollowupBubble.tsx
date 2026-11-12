@@ -25,10 +25,10 @@ function rememberClosed() {
 
 /**
  * 보관함에 있는 지난 풀이를 현실과 견줘 보게 묻는 안부 말풍선이에요. 헤더의 닉네임 버튼 아래에 펼쳐진 채 나타나고,
- * ✕로 닫으면 닉네임 버튼의 빨간 점만 남아요(오늘은 다시 튀어나오지 않아요). 어느 쪽을 골라도 응원으로 마무리해요.
+ * ✕로 닫으면 그냥 사라져요(오늘은 다시 튀어나오지 않아요). 어느 쪽을 골라도 응원으로 마무리해요.
  * 로그인한 회원에게만 보여요. 헤더가 감싸 주는 relative 상자 안에서 absolute 로 놓여요.
  */
-export function VaultFollowupBubble({ onShow, onDot }: { onShow?: (shown: boolean) => void; onDot?: (dot: boolean) => void }) {
+export function VaultFollowupBubble({ onShow }: { onShow?: (shown: boolean) => void }) {
   const [pick, setPick] = useState<FollowupPick | null>(null);
   const [chosen, setChosen] = useState<number | null>(null);
   const [asking, setAsking] = useState<number | null>(null);
@@ -66,20 +66,6 @@ export function VaultFollowupBubble({ onShow, onDot }: { onShow?: (shown: boolea
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  // 닫았고 아직 대답하지 않았으면 닉네임 버튼에 빨간 점을 켜요
-  const dot = Boolean(pick) && !open && chosen === null;
-  useEffect(() => {
-    onDot?.(dot);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dot]);
-  // 빨간 점이 찍힌 닉네임 버튼을 누르면 말풍선이 다시 열려요
-  useEffect(() => {
-    if (!pick) return;
-    const reopen = () => setOpen(true);
-    window.addEventListener("wanna500:vault-bubble", reopen);
-    return () => window.removeEventListener("wanna500:vault-bubble", reopen);
-  }, [pick]);
 
   if (!pick || !open) return null;
   const { title, check } = followupPrompt(pick);

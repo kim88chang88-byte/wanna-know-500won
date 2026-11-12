@@ -51,7 +51,7 @@ export function firstGlyph(nickname: string | null | undefined): string {
   return Array.from((nickname ?? "").trim())[0] ?? "❄️";
 }
 
-export function Header({ onOpenLogin, user = null, bubble = null, dot = false }: { onOpenLogin: () => void; user?: AuthUser | null; bubble?: React.ReactNode; dot?: boolean }) {
+export function Header({ onOpenLogin, user = null, bubble = null }: { onOpenLogin: () => void; user?: AuthUser | null; bubble?: React.ReactNode }) {
   return (
     <>
       <header className="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-brand-100 shadow-[0_2px_15px_rgba(128,87,224,0.06)]">
@@ -64,11 +64,7 @@ export function Header({ onOpenLogin, user = null, bubble = null, dot = false }:
           {/* 오른쪽 위: 로그인 전에는 "로그인" 버튼, 로그인 후에는 닉네임(마이페이지) + "?" 안내 메뉴 + 햄버거(자판기) 메뉴. 둘 다 같은 창(로그인/내 정보)을 열어 */}
           <div className="relative shrink-0 flex items-center gap-1.5 sm:gap-2">
             <button
-              onClick={() => {
-                // 빨간 점이 있으면 먼저 안부 말풍선을 다시 열어 줘요
-                if (user && dot) window.dispatchEvent(new Event("wanna500:vault-bubble"));
-                else onOpenLogin();
-              }}
+              onClick={onOpenLogin}
               type="button"
               aria-haspopup="dialog"
               data-testid="mypage-button"
@@ -113,7 +109,6 @@ export function Header({ onOpenLogin, user = null, bubble = null, dot = false }:
                   <span className="hidden sm:block text-[10px] text-brand-100 leading-tight">카카오·구글·네이버</span>
                 </div>
               )}
-              {user && dot && <span aria-hidden="true" data-testid="vault-followup-dot" className="vf-dot absolute -right-0.5 -top-0.5 h-3 w-3 rounded-full border-2 border-white bg-red-500" />}
             </button>
             <MachineMenuButton />
             {bubble}
