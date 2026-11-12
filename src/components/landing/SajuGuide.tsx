@@ -5,8 +5,8 @@ import { getBrowserStorage } from "@/lib/drawCounter";
 
 export const SAJU_GUIDE_LINES = [
   "사주는 오래오래 쌓인 흐름의 지도야.",
-  "도리가 길은 읽어 줄 테니, 너는 \"어, 맞네?\" 하는 대목만 골라 봐.",
-  "딱 맞는 곳은 앞으로 더 살펴볼 신호고, 다르게 느껴지는 곳은 \"그럼 내가 이렇게 바꿔 볼래!\" 하고 내 쪽으로 길을 틀어 볼 기회야 🌙",
+  "도리가 그 흐름의 길을 읽어 줄 테니, 너는 \"어, 맞네?\" 싶은 대목에서는 고개를 끄덕여 줘.",
+  "조금 다르게 느껴지는 곳은 참고만 하고, 너만의 선택으로 길을 만들어 가면 돼 🌙",
 ] as const;
 
 const SEEN_KEY = "doyu_saju_guide_seen";
