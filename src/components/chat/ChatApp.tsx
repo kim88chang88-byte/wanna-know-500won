@@ -165,7 +165,7 @@ function OutfitCard({ pick }: { pick: OutfitPick }) {
   );
 }
 
-export default function ChatApp({ initialCtx, initialMsgs, onChange, onBack, readOnlyNote = null, onToday }: { initialCtx: ChatCtx; initialMsgs: RoomMsg[]; onChange: (msgs: RoomMsg[]) => void; onBack: () => void; /** 지난 날의 오늘의 한마디 방: 읽기만 하고, 이 안내를 입력창 자리에 보여 줘요 */ readOnlyNote?: string | null; onToday?: () => void }) {
+export default function ChatApp({ initialCtx, initialMsgs, onChange, onBack, readOnlyNote = null, onToday, introSeen = false, onIntroSeen }: { initialCtx: ChatCtx; initialMsgs: RoomMsg[]; onChange: (msgs: RoomMsg[]) => void; onBack: () => void; /** 지난 날의 오늘의 한마디 방: 읽기만 하고, 이 안내를 입력창 자리에 보여 줘요 */ readOnlyNote?: string | null; onToday?: () => void; /** 소개 말풍선을 이미 본 방이면 true */ introSeen?: boolean; onIntroSeen?: () => void }) {
   const readOnly = readOnlyNote !== null;
   const [ctx] = useState<ChatCtx>(initialCtx);
   const face = <AnimalFace src={roomAnimal(ctx)} color={roomColor(ctx)} size={36} />;
@@ -187,9 +187,11 @@ export default function ChatApp({ initialCtx, initialMsgs, onChange, onBack, rea
   const [buyOpen, setBuyOpen] = useState(false);
   const [buying, setBuying] = useState(false);
   const [payOpen, setPayOpen] = useState(false);
-  // 처음 여는 방이면, 첫 인사 뒤에 사주 정보를 말풍선으로 하나씩 이어서 보여 줘요. (이미 대화가 있는 방은 건너뛰어요)
-  const intro = useMemo<IntroBubble[]>(() => (initialMsgs.length === 0 ? buildIntro(initialCtx) : []), []); // eslint-disable-line react-hooks/exhaustive-deps
-  const [introShown, setIntroShown] = useState(0);
+  // 사주 소개 말풍선: 처음 여는 방에서는 첫 인사 뒤에 하나씩 이어서 보여 주고, 다 본 뒤에는 방에 "봤다"고 남겨요.
+  // 다시 들어오거나 대화가 이미 있는 방에서는 애니메이션 없이 맨 위에 그대로 보여 줘요.
+  const intro = useMemo<IntroBubble[]>(() => buildIntro(initialCtx), []); // eslint-disable-line react-hooks/exhaustive-deps
+  const seenAtStart = introSeen || initialMsgs.length > 0;
+  const [introShown, setIntroShown] = useState(seenAtStart ? intro.length : 0);
   const scroller = useRef<HTMLDivElement>(null);
   const field = useRef<HTMLTextAreaElement>(null);
   const nearBottom = useRef(true);
@@ -204,13 +206,31 @@ export default function ChatApp({ initialCtx, initialMsgs, onChange, onBack, rea
 
   useEffect(() => {
     if (intro.length === 0) return;
+    if (seenAtStart) {
+      if (!introSeen) onIntroSeen?.();
+      return;
+    }
     if (prefersReducedMotion()) {
       setIntroShown(intro.length);
+      onIntroSeen?.();
       return;
     }
     const t = setInterval(() => setIntroShown((n) => (n >= intro.length ? n : n + 1)), 650);
     return () => clearInterval(t);
-  }, [intro]);
+  }, [intro]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // 소개가 나오는 도중에 뒤로 가도 다음에는 처음부터 다시 틀지 않고 한 번에 보여 줘요
+  useEffect(
+    () => () => {
+      if (!seenAtStart && intro.length > 0) onIntroSeen?.();
+    },
+    [], // eslint-disable-line react-hooks/exhaustive-deps
+  );
+
+  // 소개를 끝까지 보여 줬으면 한 번만 "봤다"고 알려요
+  useEffect(() => {
+    if (!seenAtStart && intro.length > 0 && introShown >= intro.length) onIntroSeen?.();
+  }, [introShown]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // 들어오자마자 남은 질문 수와 조약돌 수를 받아 와요
   useEffect(() => {

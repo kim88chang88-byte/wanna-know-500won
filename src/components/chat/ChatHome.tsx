@@ -169,6 +169,8 @@ export default function ChatHome() {
         onBack={() => setOpen(null)}
         readOnlyNote={isStaleDaily(room) ? "지난 날의 대화라 읽기만 할 수 있어. 오늘 이야기는 오늘의 한마디 방에서 이어서 물어봐 🌙" : null}
         onToday={() => void startDaily()}
+        introSeen={room.introSeen === true}
+        onIntroSeen={() => commit(ref.current.map((r) => (r.id === room.id && !r.introSeen ? { ...r, introSeen: true } : r)))}
       />
     );
   }

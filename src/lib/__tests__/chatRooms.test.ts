@@ -83,6 +83,17 @@ describe("상담실 대화방", () => {
     expect(r.msgs).toHaveLength(1);
   });
 
+  it("소개를 이미 본 방 표시는 저장했다가 다시 읽어도 남아요", () => {
+    const a = upsertRoom([], reading(), new Date("2026-11-14T10:00:00"));
+    expect(a.rooms[0].introSeen).toBeUndefined();
+    const marked = a.rooms.map((r) => ({ ...r, introSeen: true }));
+    const [back] = parseRooms(JSON.parse(JSON.stringify(marked)));
+    expect(back.introSeen).toBe(true);
+    const again = upsertRoom(marked, reading(), new Date("2026-11-14T12:00:00"));
+    expect(again.rooms[0].introSeen).toBe(true);
+    expect(parseRooms(JSON.parse(JSON.stringify(a.rooms)))[0].introSeen).toBeUndefined();
+  });
+
   it("방 칩은 오늘·어제·날짜로 보여요", () => {
     const now = new Date("2026-11-14T10:00:00");
     expect(dayChip("2026-11-14", now)).toBe("오늘");

@@ -40,6 +40,8 @@ export interface ChatRoom {
   updatedAt: number;
   /** 방을 처음 만든 날(YYYY-MM-DD). 오늘의 한마디 방은 날짜마다 따로 만들어져요 */
   day: string;
+  /** 방을 처음 열 때 하나씩 보여 주는 사주 소개 말풍선을 이미 다 보았는지. 보았다면 다시 들어와도 애니메이션 없이 그대로 보여 줘요. */
+  introSeen?: boolean;
 }
 
 interface StoreLike {
@@ -149,6 +151,7 @@ export function parseRooms(raw: unknown): ChatRoom[] {
       msgs: Array.isArray(r.msgs) ? r.msgs.filter(validMsg).slice(-MAX_ROOM_MSGS) : [],
       updatedAt: typeof r.updatedAt === "number" ? r.updatedAt : 0,
       day: c.kind === "daily" ? legacyDay : day,
+      ...(r.introSeen === true ? { introSeen: true } : {}),
     });
   }
   return limitRooms(out);
