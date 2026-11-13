@@ -96,7 +96,7 @@ export default function PrivacyPage() {
             <tr>
               <td className="p-2 border border-brand-100">선택 (후기를 남길 때)</td>
               <td className="p-2 border border-brand-100">별점, 아쉬운 점(고른 항목), 한 줄 후기(200자 이내), 뽑은 자판기 종류, 작성 시각 (로그인한 경우에만 회원과 연결)</td>
-              <td className="p-2 border border-brand-100">서비스 품질 개선. (선택으로 공개에 동의한 후기는 메인 화면에 이름 없이 게시) 로그인하지 않고 남긴 후기는 누구의 것인지 알 수 없어</td>
+              <td className="p-2 border border-brand-100">서비스 품질 개선. (선택으로 공개에 동의한 별점 4점 이상 후기는 메인 화면에 닉네임을 가려서(예: 장OO) 게시) 로그인하지 않고 남긴 후기는 누구의 것인지 알 수 없어</td>
             </tr>
             <tr>
               <td className="p-2 border border-brand-100">자동 저장(내 기기)</td>

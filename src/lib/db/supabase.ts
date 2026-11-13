@@ -41,9 +41,10 @@ export interface ReviewRow {
   created_at: string;
 }
 
-/** 메인 화면에 보여 주는 후기 (이름·회원 정보는 담지 않아요) */
+/** 메인 화면에 보여 주는 후기. 닉네임(users)은 서버에서 가려서만 내보내요. */
 export interface PublicReviewRow {
   id: number;
+  users?: { nickname?: string | null } | null;
   rating: number;
   review_text: string;
   topic: string;
@@ -177,10 +178,10 @@ export function createDb(config: DbConfig, fetchImpl: FetchLike = fetch) {
       });
     },
 
-    /** 메인 화면용: 공개에 동의했고 숨기지 않은 후기만 (한 줄 후기가 있는 것, 최신순) */
+    /** 메인 화면용: 공개에 동의했고 숨기지 않은 별점 4점 이상 후기만 (한 줄 후기가 있는 것, 최신순) */
     async listPublicReviews(limit = 12): Promise<PublicReviewRow[]> {
       const n = Math.max(1, Math.min(30, Math.floor(limit)));
-      const res = await call(`reviews?select=id,rating,review_text,topic,created_at&public_ok=eq.true&hidden=eq.false&review_text=not.is.null&order=id.desc&limit=${n}`, { method: "GET", headers: headers() });
+      const res = await call(`reviews?select=id,rating,review_text,topic,created_at,users(nickname)&public_ok=eq.true&hidden=eq.false&rating=gte.4&review_text=not.is.null&order=id.desc&limit=${n}`, { method: "GET", headers: headers() });
       const rows = (await res.json()) as PublicReviewRow[];
       return Array.isArray(rows) ? rows.filter((r) => typeof r.review_text === "string" && r.review_text.trim()) : [];
     },

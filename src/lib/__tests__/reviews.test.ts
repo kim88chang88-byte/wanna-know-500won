@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { MAX_REVIEW_TEXT, parseReview, reasonLabel } from "../reviews";
+import { MAX_REVIEW_TEXT, maskNickname, parseReview, reasonLabel } from "../reviews";
 import { buildStats, reviewsToCsv } from "../admin/stats";
 
 describe("후기 입력 검사", () => {
@@ -56,5 +56,19 @@ describe("후기 집계", () => {
     expect(parseReview({ rating: 5, text: "좋아요", publicOk: true })?.publicOk).toBe(true);
     expect(parseReview({ rating: 5, text: "", publicOk: true })?.publicOk).toBeUndefined();
     expect(parseReview({ rating: 5, text: "좋아요", publicOk: "yes" })?.publicOk).toBeUndefined();
+  });
+});
+
+describe("닉네임 가리기", () => {
+  it("첫 글자만 남기고 O 로 가려요", () => {
+    expect(maskNickname("장은혁")).toBe("장OO");
+    expect(maskNickname("김철")).toBe("김O");
+    expect(maskNickname("김")).toBe("김O");
+    expect(maskNickname(" Chang88 Kim88 ")).toBe("COOOOOO");
+  });
+  it("이모지도 깨지지 않고, 닉네임이 없으면 null 이에요", () => {
+    expect(maskNickname("🦦수달")).toBe("🦦OO");
+    expect(maskNickname("")).toBeNull();
+    expect(maskNickname(null)).toBeNull();
   });
 });

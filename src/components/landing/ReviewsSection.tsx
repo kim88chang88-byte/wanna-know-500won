@@ -9,6 +9,8 @@ interface PublicReview {
   rating: number;
   text: string;
   topic: string;
+  /** 가린 닉네임 (장OO). 로그인 없이 쓴 후기는 null */
+  name?: string | null;
 }
 
 /** 이 개수 이상 모이기 전에는 실제 후기 대신 '예시' 문구를 보여 줘요. (카드가 너무 적으면 흐르는 줄이 비어 보여요) */
@@ -33,7 +35,7 @@ function Stars({ n }: { n: number }) {
 
 /**
  * 메인 화면의 후기 줄. 카드가 왼쪽에서 오른쪽으로 천천히 흘러가요.
- * 이용자가 직접 "이름 없이 공개해도 좋아요"를 고른 후기만 보여 주고, 아직 모자라면 '예시'를 보여 줘요.
+ * 이용자가 직접 "가린 닉네임과 함께 공개해도 좋아요"를 고른 후기만 보여 주고, 아직 모자라면 '예시'를 보여 줘요.
  */
 export default function ReviewsSection() {
   const [reviews, setReviews] = useState<PublicReview[] | null>(null);
@@ -63,7 +65,7 @@ export default function ReviewsSection() {
             <Stars n={r.rating} />
           </div>
           <p className="text-sm leading-relaxed text-slate-800 break-keep">&ldquo;{r.text}&rdquo;</p>
-          <p className="mt-3 text-[11px] text-slate-400">도유사주 이용자</p>
+          <p className="mt-3 text-[11px] text-slate-400">{r.name ? `${r.name} 님` : "도유사주 이용자"}</p>
         </div>
       ))
     : SAMPLE_CAPSULES.map((s) => (
@@ -102,7 +104,7 @@ export default function ReviewsSection() {
       </AutoMarquee>
       <p className="mt-3 text-center text-[11px] text-slate-400">
         {real
-          ? "* 이용자가 직접 공개에 동의한 후기만 이름 없이 보여 줘. 풀이는 사람마다 달라질 수 있어."
+          ? "* 이용자가 직접 공개에 동의한 후기만 닉네임을 가려서(예: 장OO) 보여 줘. 풀이는 사람마다 달라질 수 있어."
           : "* 예시 문구야. 실제 이용자의 기록이 아니며, 실제 풀이는 입력한 정보에 따라 달라져."}
       </p>
     </section>

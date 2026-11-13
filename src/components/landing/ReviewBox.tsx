@@ -151,7 +151,7 @@ export default function ReviewBox({ topic, premium, loggedIn = false }: { topic:
           {text.trim().length > 0 && (
             <label className="flex items-start gap-2 rounded-xl bg-brand-50/60 px-3 py-2 text-[11px] leading-relaxed text-gray-700">
               <input type="checkbox" data-testid="review-public" checked={publicOk} onChange={(e) => setPublicOk(e.target.checked)} className="mt-0.5 h-3.5 w-3.5 shrink-0 accent-brand-600" />
-              <span>(선택) 이 한 줄 후기를 메인 화면에 이름 없이 보여 줘도 좋아. 별점과 글, 뽑은 운세 종류만 공개돼.</span>
+              <span>(선택) 이 한 줄 후기를 메인 화면에 닉네임을 가려서(예: 장OO) 보여 줘도 좋아. 가린 닉네임, 별점, 글, 뽑은 운세 종류만 공개돼.</span>
             </label>
           )}
           {error && (

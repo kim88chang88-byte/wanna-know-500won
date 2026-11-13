@@ -19,7 +19,7 @@ export interface ReviewInput {
   rating: number;
   text: string;
   reasons: ReviewReasonId[];
-  /** 이름 없이 메인 화면에 보여 줘도 좋다고 직접 고른 경우만 true (한 줄 후기가 있을 때만 의미가 있어요) */
+  /** 가린 닉네임과 함께 메인 화면에 보여 줘도 좋다고 직접 고른 경우만 true (한 줄 후기가 있을 때만 의미가 있어요) */
   publicOk?: boolean;
 }
 
@@ -51,4 +51,14 @@ export function parseReview(raw: unknown): ReviewInput | null {
   const text = typeof o.text === "string" ? cleanReviewText(o.text) : "";
   const publicOk = o.publicOk === true && text.length > 0;
   return { rating, text, reasons, ...(publicOk ? { publicOk: true } : {}) };
+}
+
+/** 메인에 보여 줄 후기 기준: 별점이 이 점수 이상인 것만 */
+export const PUBLIC_MIN_RATING = 4;
+
+/** 닉네임을 가려요: 첫 글자만 남기고 나머지는 O (장은혁 → 장OO). 공백은 빼고 세고, O 는 최대 6개예요. 닉네임이 없으면 null */
+export function maskNickname(nick: string | null | undefined): string | null {
+  const chars = Array.from((nick ?? "").replace(/\s+/g, ""));
+  if (chars.length === 0) return null;
+  return chars[0] + "O".repeat(Math.max(1, Math.min(6, chars.length - 1)));
 }
