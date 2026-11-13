@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { cleanFollowups, cleanVisual, cleanHistory, CRISIS_ANSWER, earlierQuestions, isCrisis, parseChatAnswer, parseChatReply, polishChatAnswer, recentEndings, CHAT_SYSTEM_PROMPT } from "../chat";
+import { cleanFollowups, cleanVisual, cleanHistory, CRISIS_ANSWER, earlierQuestions, isCrisis, parseChatAnswer, parseChatReply, polishChatAnswer, recentEndings, usedBasis, visualAllowed, CHAT_SYSTEM_PROMPT } from "../chat";
 import { parseCtx } from "@/lib/chatServer";
 import { summarizeReport } from "@/lib/chatContext";
 
@@ -143,5 +143,32 @@ describe("끝맺음 반복 막기", () => {
     expect(CHAT_SYSTEM_PROMPT).toContain("인사·짧은 안부");
     expect(CHAT_SYSTEM_PROMPT).toContain("구체적으로");
     expect(recentEndings(h).length).toBeGreaterThan(10);
+  });
+
+  it("이미 풀어 쓴 사주 근거 기운을 모은다", () => {
+    const h = [
+      { role: "user" as const, text: "대화 팁" },
+      { role: "dori" as const, text: "네 사주에는 단단한 [[땅]] 기운이 있어서 차분해." },
+      { role: "user" as const, text: "또?" },
+      { role: "dori" as const, text: "아까처럼 토 기운이 받아주고, 화 기운이 활발해." },
+    ];
+    expect(usedBasis(h).sort()).toEqual(["땅 기운(2번)", "불 기운(1번)"].sort());
+    expect(usedBasis([{ role: "user", text: "땅 기운 알려줘" }])).toEqual([]);
+  });
+
+  it("카드는 사용자가 그 종류를 물었을 때만 붙인다", () => {
+    expect(visualAllowed("lucky", "상대의 말이 길어질 때는?")).toBe(false);
+    expect(visualAllowed("lucky", "곁에 두면 좋은 소품 추천해줘")).toBe(true);
+    expect(visualAllowed("palette", "내일 어울리는 색이 있어?")).toBe(true);
+    expect(visualAllowed("scent", "향을 피우기 좋은 시간대가 있어?")).toBe(true);
+    expect(visualAllowed("timeline", "향을 피우기 좋은 시간대가 있어?")).toBe(true);
+    expect(visualAllowed("note", "오해를 줄이는 대화법이 궁금해")).toBe(true);
+    expect(visualAllowed("note", "상대의 말이 길어질 때는?")).toBe(false);
+  });
+
+  it("프롬프트에 근거 일관성·반복 금지·카드 조건이 들어 있다", () => {
+    expect(CHAT_SYSTEM_PROMPT).toContain("이 대화에서 쓸 사주 기운");
+    expect(CHAT_SYSTEM_PROMPT).toContain("이미 말한 사주 근거");
+    expect(CHAT_SYSTEM_PROMPT).toContain("직접 묻지 않았는데");
   });
 });

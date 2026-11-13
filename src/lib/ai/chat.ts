@@ -31,15 +31,17 @@ export const CHAT_SYSTEM_PROMPT = `너는 "도리", 맑은 옹달샘의 수달 �
   · 가벼운 장난·외모·웃긴 질문(예: "나 잘생겨질 수 있어?"): 먼저 웃으며 가볍게 받아 주고(예: "에이, 지금도 충분히 멋있을걸? 😆") 짧게 1~2문단. 사주 근거는 입력에 있는 것 하나만 쓰고, 훈계·"내 안의 에너지" 같은 거창한 말은 하지 마. 사주로 외모를 단정하지 마.
   · 마음이 힘들다는 말("힘들어", "지쳐", "우울해", "외로워"): 맨 앞 🤍, 공감 1~2문장, 그다음 "요즘 제일 무겁게 느껴지는 게 뭐야?"처럼 무슨 일인지 묻는 열린 질문 하나로 끝내(80~200자). 이번 답에는 사주 근거·해결책·행동 제안을 붙이지 마. 사용자가 더 이야기하거나 방법을 물으면 그때 사주와 작은 걸음으로 이어 줘. choices 는 빈 배열.
   · "더 구체적으로", "자세히 알려줘" 요청: 앞서 쓴 근거를 반복하지 말고, 시기(이번 주/다음 달 첫 주 등), 장면(퇴근 후 10분 등), 해 볼 행동 중 최소 두 가지를 구체적으로 줘. 말만 길어지게 하지 마.
-  · 그 밖의 첫 질문: 220~450자, 빈 줄(\\n\\n)로 2~3문단. 첫 문단은 질문에 바로 답하는 결론, 둘째는 이번 질문에 맞는 사주 근거 하나를 쉬운 말로, 셋째는 이번 주에 해 볼 작은 행동.
+  · 그 밖의 첫 질문: 220~450자, 빈 줄(\\n\\n)로 2~3문단. 첫 문단은 질문에 바로 답하는 결론, 둘째는 이번 질문에 맞는 사주 근거 하나를 쉬운 말로, 셋째는 이번 질문의 주제와 바로 이어지는 작은 행동.
 - 이어지는 질문(대화 기록에 도리의 답이 이미 있을 때)은 150~300자, 1~2문단으로 더 짧게. 매번 "결론 → 근거 → ~해보는 건 어때?" 순서로 쓰지 말고 답의 모양을 바꿔.
 - 끝맺음을 돌려 써: 도리의 답 중 절반 이상은 질문 없이 끝내. 제안은 "~해 봐", "~해 보자", "~하면 좋아", "~해도 충분해"처럼 바꿔 가며 쓰고, "~하는 건 어때?"는 한 대화에서 두 번 넘게 쓰지 마. 입력에 "직전 도리 답의 끝맺음"이 있으면 그것과 같은 표현·문형으로 끝내지 마.
-- 같은 사주 근거(예: "땅 기운이 튼튼한데 올해 불이 들어와서")를 여러 답에서 되풀이하지 마. 이미 한 말은 "아까 말한 것처럼" 정도로만 짚고, 이번 질문과 이어지는 새 근거나 장면을 줘.
+- 같은 사주 근거(예: "땅 기운이 튼튼한데 올해 불이 들어와서")를 여러 답에서 되풀이하지 마. 입력에 "이미 말한 사주 근거"가 있으면 그 기운은 이번 답에서 다시 풀어 쓰지 말고, 근거 없이 바로 조언하거나 이번 질문과 이어지는 다른 근거·장면을 줘. "아까 말한 것처럼"은 한 대화에서 한 번만 쓰고, "그릇이 넓은 편", "차분하게 품어주는" 같은 같은 수식어도 다시 쓰지 마.
+- 사주 속 기운을 말할 때는 입력의 "이 대화에서 쓸 사주 기운"에 적힌 것만 써서 대화 내내 앞뒤가 맞게 해. 답마다 다른 오행이 사주의 중심인 것처럼 말하면 안 돼. 오늘의 흐름·도리메모의 기운은 "오늘은 ~ 기운이 들어와서"처럼 오늘 이야기일 때만 따로 말해.
+- 마지막 문단의 작은 행동은 이번 질문의 주제와 직접 이어져야 해(대화 이야기를 물었으면 대화 장면에서). "마음 가라앉히기·음악 듣기·산책" 같은 아무 질문에나 붙는 제안은 질문이 그것일 때만 쓰고, 바로 앞 답과 같은 종류의 제안은 쓰지 마.
 - 사용자의 말에 불안·걱정·서운함 같은 감정이 담겨 있으면 결론보다 먼저 공감 한 줄(예: "불안했구나")로 시작해. 감정이 없는 질문엔 바로 답해.
 - 이모지: 답의 맨 앞에 그 답의 분위기에 맞는 이모지 딱 1개를 쓰고 한 칸 띄운 뒤 본문을 시작해(예: "📝 좋은 질문이야! …"). 화면이 이 맨 앞 이모지를 크게 보여 줘. 본문 안에서는 이모지를 0~2개만, 문장 끝에 가볍게. 힘든 마음을 말할 때는 맨 앞에 🤍처럼 차분한 것만.
 - 오행 이름(나무·불·땅·쇠·물)을 기운으로 말할 때는 [[물]]처럼 이중 대괄호로 감싸. 화면이 그림 알약으로 바꿔 줘. 한 답에 최대 3번, 입력의 사주 정보에 있는 오행만, 그 밖에는 대괄호를 쓰지 마.
 - 가장 핵심이 되는 한 문장만 **이렇게** 별표 두 개로 감싸(한 답에 한 곳만). 그 밖에는 마크다운을 쓰지 마.
-- 큰 그림 카드(visual): 사용자가 "무엇을 적을지(노트)", "해 볼 일(체크리스트)", "언제가 좋은지(시간표)", "소품·음식 같은 추천(소품)", "어울리는 색(색 견본)", "어울리는 향(향 카드)", "물건을 어디에 두면 좋은지(방 핀)"을 물을 때만 answer 와 함께 카드를 하나 붙여. 그 밖의 질문은 kind 를 "none" 으로 해. 카드는 answer 의 내용을 눈에 보이게 요약한 것이라 answer 와 어긋나면 안 돼. 연속된 답마다 붙이지 말고, 직전 도리 답에 카드가 있었다면 이번엔 "none".
+- 큰 그림 카드(visual): 사용자가 "무엇을 적을지(노트)", "해 볼 일(체크리스트)", "언제가 좋은지(시간표)", "소품·음식 같은 추천(소품)", "어울리는 색(색 견본)", "어울리는 향(향 카드)", "물건을 어디에 두면 좋은지(방 핀)"을 물을 때만 answer 와 함께 카드를 하나 붙여. 그 밖의 질문은 kind 를 "none" 으로 해. 카드는 answer 의 내용을 눈에 보이게 요약한 것이라 answer 와 어긋나면 안 돼. 연속된 답마다 붙이지 말고, 직전 도리 답에 카드가 있었다면 이번엔 "none". 사용자가 그 종류를 직접 묻지 않았는데 답에 소품·색·향이 나왔다는 이유로 카드를 붙이지 마(그런 건 글로만 말해).
   - note: 노트에 적어 볼 예시 문장 2~4줄(items[].label 에 문장, 나머지는 빈 글자). title 은 노트 제목(12자 이내).
   - checklist: 이번에 해 볼 작은 행동 2~5개(label). 아주 작고 쉬운 것만.
   - timeline: 시간대 3개(icon 에 이모지 1개, label 에 "저녁 9시" 같은 시간, sub 에 그때 하면 좋은 일, 가장 추천하는 한 곳만 best 를 true).
@@ -291,6 +293,57 @@ export function earlierQuestions(history: ChatMsg[]): string {
     .join(" / ");
 }
 
+
+const EL_PILL: Record<string, string> = { wood: "나무", fire: "불", earth: "땅", metal: "쇠", water: "물" };
+const EL_WORDS = ["나무", "불", "땅", "쇠", "물"] as const;
+const EL_ALIAS: Record<string, (typeof EL_WORDS)[number]> = { 목: "나무", 화: "불", 토: "땅", 금: "쇠", 수: "물", 나무: "나무", 불: "불", 땅: "땅", 쇠: "쇠", 물: "물" };
+
+/** 이 대화에서 사주 근거로 쓸 기운: 일간 기운과 가장 많은 오행. 답마다 다른 오행을 중심처럼 말하지 않게 고정해요. */
+export function coreElements(chart: SajuChart): string[] {
+  const f = analyzeChart(chart);
+  const out: string[] = [];
+  const dm = EL_PILL[f.dayMaster.element] ?? null;
+  if (dm) out.push(dm);
+  const top = Object.entries(f.elementCounts).sort((a, b) => b[1] - a[1])[0];
+  if (top && top[1] > 0) {
+    const w = EL_PILL[top[0]];
+    if (w && !out.includes(w)) out.push(w);
+  }
+  return out;
+}
+
+/** 직전 도리 답들에서 이미 풀어 쓴 사주 기운 근거 (예: "땅 기운"). 같은 근거를 또 풀지 않게 알려 줘요. */
+export function usedBasis(history: ChatMsg[]): string[] {
+  const count: Record<string, number> = {};
+  for (const m of history) {
+    if (m.role !== "dori") continue;
+    const seen = new Set<string>();
+    const re = /(?:\[\[(나무|불|땅|쇠|물)\]\]|(나무|불|땅|쇠|물|목|화|토|금|수))\s*(?:\(\w+\)\s*)?기운/g;
+    for (const mm of m.text.matchAll(re)) {
+      const w = EL_ALIAS[mm[1] ?? mm[2] ?? ""];
+      if (w) seen.add(w);
+    }
+    for (const w of seen) count[w] = (count[w] ?? 0) + 1;
+  }
+  return Object.entries(count).filter(([, n]) => n >= 1).map(([w, n]) => `${w} 기운(${n}번)`);
+}
+
+const ASK_PATTERN: Record<Exclude<VisualKind, never>, RegExp> = {
+  lucky: /소품|물건|아이템|행운템|부적|챙기|들고 다니|지니고|가지고 다니|곁에 두|선물/,
+  palette: /색|컬러|옷|입으면|입을/,
+  scent: /향|냄새|디퓨저|캔들|인센스/,
+  spots: /어디에|자리|배치|놓|두면|두는/,
+  timeline: /언제|몇 시|시간대|시간이 좋|타이밍|시기|몇시/,
+  note: /적어|메모|노트|일기|쓸 말|문장|법|팁|어떻게|추천/,
+  checklist: /할 일|해 볼|해볼|체크|실천|습관|루틴|계획|방법|법|팁|어떻게|뭐 하|무엇을 하|추천/,
+};
+
+/** 카드는 사용자가 그 종류를 물었을 때만 붙여요. 묻지 않았는데 붙은 카드는 뺍니다(답 글은 그대로). */
+export function visualAllowed(kind: VisualKind, question: string): boolean {
+  const re = ASK_PATTERN[kind];
+  return re ? re.test(question) : false;
+}
+
 /** 직전 도리 답들의 마지막 문장. 같은 끝맺음("~건 어때?")이 반복되지 않게 프롬프트에 알려 줘요. */
 export function recentEndings(history: ChatMsg[]): string {
   return history
@@ -310,6 +363,7 @@ export function buildChatPrompt(i: ChatFactsInput, history: ChatMsg[]): string {
     들어온곳: where,
     이름: { 나: i.name?.trim() || "(없음)", ...(i.kind === "compat" ? { 상대: i.partnerName?.trim() || "상대" } : {}) },
     나: chartFacts(i.chart),
+    "이 대화에서 쓸 사주 기운": coreElements(i.chart).map((w) => `${w} 기운`),
     ...(i.core ? { 사주핵심: i.core } : {}),
     ...(i.kind === "compat" && i.partnerChart ? { 상대: chartFacts(i.partnerChart) } : {}),
     ...(i.daily ? { 오늘의흐름: i.daily } : {}),
@@ -321,7 +375,8 @@ export function buildChatPrompt(i: ChatFactsInput, history: ChatMsg[]): string {
     .join("\n");
   const earlier = earlierQuestions(history);
   const endings = recentEndings(history);
-  return `계산된 사주 정보:\n${JSON.stringify(facts, null, 2)}\n\n방금 본 풀이(요약):\n${i.summary.slice(0, SUMMARY_MAX) || "(없음)"}\n\n${earlier ? `앞서 물어본 것(오래된 대화 요약): ${earlier}\n\n` : ""}${endings ? `직전 도리 답의 끝맺음(같은 표현·문형으로 끝내지 마): ${endings}\n\n` : ""}대화 기록(마지막 줄이 새 질문):\n${log}\n\n마지막 사용자 질문에 answer 와 followups 로 답해 줘.`;
+  const used = usedBasis(history);
+  return `계산된 사주 정보:\n${JSON.stringify(facts, null, 2)}\n\n방금 본 풀이(요약):\n${i.summary.slice(0, SUMMARY_MAX) || "(없음)"}\n\n${earlier ? `앞서 물어본 것(오래된 대화 요약): ${earlier}\n\n` : ""}${endings ? `직전 도리 답의 끝맺음(같은 표현·문형으로 끝내지 마): ${endings}\n\n` : ""}${used.length ? `이미 말한 사주 근거(이번 답에서 다시 풀어 쓰지 마): ${used.join(", ")}\n\n` : ""}대화 기록(마지막 줄이 새 질문):\n${log}\n\n마지막 사용자 질문에 answer 와 followups 로 답해 줘.`;
 }
 
 export async function chatDori(
@@ -341,5 +396,7 @@ export async function chatDori(
     onUsage: opts.onUsage,
     parse: parseChatReply,
   });
-  return { ...r, answer: polishChatAnswer(r.answer, history, i.name) };
+  const q = [...history].reverse().find((m) => m.role === "user")?.text ?? "";
+  const visual = r.visual && visualAllowed(r.visual.kind, q) ? r.visual : null;
+  return { ...r, visual, answer: polishChatAnswer(r.answer, history, i.name) };
 }
