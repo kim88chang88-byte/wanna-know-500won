@@ -592,6 +592,9 @@ function PrefaceExtras({ report }: { report: PremiumReportView }) {
   );
 }
 
+/** 네 기둥이 각각 무엇을 뜻하는지 (칸 위에 작게 붙여요) */
+const PILLAR_MEANING: Record<string, string> = { year: "초년운·조상", month: "청년운·사회", day: "나·배우자", hour: "말년운·자식" };
+
 function Visual({ page, report }: { page: BookPage; report: PremiumReportView }) {
   if (page.chart) return <LifeChart chart={page.chart} />;
   const max = Math.max(1, ...report.elements.map((e) => e.count));
@@ -605,26 +608,40 @@ function Visual({ page, report }: { page: BookPage; report: PremiumReportView })
               태어난 <b className={GOLD}>해·달·날·시간</b>, 이 네 때마다 글자를 위아래 두 개씩 적어. 위는 하늘의 기운(천간), 아래는 땅의 기운(지지)이야.
             </p>
           )}
+          {/* 일주 칸의 위 글자가 '나(일간)'이야. 도리가 짚어 주고, 그 칸만 연보라로 또렷하게 보여. */}
+          <div className="relative mb-3.5 ml-[50%] w-1/2" data-testid="pillar-me-tip">
+            <p className="rounded-2xl border-2 border-[#20203a] bg-[#fffdf7] px-2 py-1.5 text-center text-[13px] leading-snug text-[#26233a]">여기가 바로 너야! 🦦</p>
+            <span aria-hidden="true" className="absolute -bottom-[7px] left-1/4 -ml-1.5 h-3 w-3 rotate-45 border-b-2 border-r-2 border-[#20203a] bg-[#fffdf7]" />
+          </div>
           <div className="grid grid-cols-4 gap-2">
             {report.pillars.map((p) => {
               const [stem, branch] = p.full ? Array.from(p.full) : [null, null];
+              const me = p.key === "day";
               return (
-                <div key={p.key} data-testid="pillar-card" className={`rounded-2xl border ${HAIR} bg-white/[0.04] py-3 text-center`}>
-                  <div className={`text-[13px] font-bold ${GOLD}`}>{p.label}</div>
-                  {p.full ? (
-                    <>
-                      <div className="mt-1.5 space-y-1 px-1.5" aria-label={`${p.label} ${p.full}`}>
-                        <ElementTile ch={stem} el={elementOfChar(stem, false)} reading={p.reading?.[0] ?? ""} tone="dark" sizeClass="text-[36px]" />
-                        <ElementTile ch={branch} el={elementOfChar(branch, true)} reading={p.reading?.[1] ?? ""} tone="dark" sizeClass="text-[36px]" />
-                      </div>
-                      <div className="mt-1.5 text-[11.5px] text-[#e8dfca]/60 leading-tight">
-                        <div>{p.tenGodStem}</div>
-                        <div>{p.tenGodBranch}</div>
-                      </div>
-                    </>
-                  ) : (
-                    <div className="text-[13px] text-[#e8dfca]/50 mt-3 mb-2">시간 미상</div>
-                  )}
+                <div key={p.key} className={`min-w-0 ${me ? "" : "opacity-70"}`}>
+                  <div className={`text-center text-[14px] font-bold ${me ? "text-[#cfc0ff]" : GOLD}`}>{p.label}</div>
+                  <div className="mb-1.5 min-h-[2.4em] text-center text-[11.5px] leading-tight text-[#e8dfca]/60">{PILLAR_MEANING[p.key]}</div>
+                  <div
+                    data-testid="pillar-card"
+                    data-me={me ? "true" : undefined}
+                    className={`relative rounded-2xl border bg-white/[0.04] py-3 text-center ${me ? "border-2 border-[#b9a4ff] bg-[#b9a4ff]/[0.14] shadow-[0_0_0_3px_rgba(185,164,255,0.18),0_6px_18px_rgba(185,164,255,0.22)]" : HAIR}`}
+                  >
+                    {me && <span aria-hidden="true" data-testid="pillar-me-badge" className="absolute -right-1.5 -top-2.5 z-10 rotate-6 rounded-[9px] bg-[#b9a4ff] px-2 py-1 text-[13px] leading-none text-[#1a1530] shadow-md">나</span>}
+                    {p.full ? (
+                      <>
+                        <div className="space-y-1 px-1.5" aria-label={`${p.label} ${p.full}`}>
+                          <ElementTile ch={stem} el={elementOfChar(stem, false)} reading={p.reading?.[0] ?? ""} tone="dark" sizeClass="text-[36px]" />
+                          <ElementTile ch={branch} el={elementOfChar(branch, true)} reading={p.reading?.[1] ?? ""} tone="dark" sizeClass="text-[36px]" />
+                        </div>
+                        <div className="mt-1.5 text-[11.5px] text-[#e8dfca]/60 leading-tight">
+                          <div className={me ? "text-[#cfc0ff]" : ""}>{me ? "본인(本人)" : p.tenGodStem}</div>
+                          <div>{p.tenGodBranch}</div>
+                        </div>
+                      </>
+                    ) : (
+                      <div className="text-[13px] text-[#e8dfca]/50 mt-3 mb-2">시간 미상</div>
+                    )}
+                  </div>
                 </div>
               );
             })}
