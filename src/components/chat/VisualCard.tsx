@@ -159,24 +159,33 @@ function Scent({ v }: { v: ChatVisual }) {
 }
 
 function Palette({ v }: { v: ChatVisual }) {
-  const tilt = ["-rotate-3", "rotate-[1.5deg]", "-rotate-1"];
+  const shown = v.items.filter((it) => PALETTE[it.label]);
   return (
-    <Paper title={v.title || "추천 색상"}>
-      <div className="flex justify-center gap-2.5 pt-1">
-        {v.items.map((it, i) => {
+    <div className="relative my-2 ml-1 mr-2 overflow-hidden rounded-[22px] bg-[linear-gradient(170deg,#1e2a5a,#2b2f73_55%,#4a2f73)] px-3 pb-4 pt-3.5 text-white shadow-[0_8px_20px_rgba(30,30,90,0.35)]">
+      <span aria-hidden="true" className="absolute right-3.5 top-2 text-[11px] tracking-[0.2em] text-white/40">✦ · ✧ · ✦</span>
+      <p className="mb-3 text-center font-hand text-[22px] font-bold tracking-wide text-[#ffe9a8]">{v.title || "추천 색상"}</p>
+      <div className="flex justify-center gap-3">
+        {shown.map((it, i) => {
           const c = PALETTE[it.label];
-          if (!c) return null;
           return (
-            <div key={i} className={`min-w-0 max-w-[112px] flex-1 rounded-[3px] bg-white px-[5px] pb-2 pt-[5px] shadow-[0_4px_9px_rgba(0,0,0,0.25)] ${tilt[i % 3]}`}>
-              <i className="block h-[88px] rounded-sm shadow-[inset_0_0_0_1px_rgba(0,0,0,0.08)]" style={{ background: c.hex }} />
-              <b className="mt-1.5 block text-center text-[13px] text-[#2a2540]">{it.label}</b>
-              <small className="block text-center text-[10px] tracking-wide text-[#7a7590]">{c.en}</small>
-              {it.sub && <span className="mt-0.5 block text-center font-hand text-[15.5px] leading-tight text-[#8a5a2b]">{it.sub}</span>}
+            <div key={i} className="min-w-0 max-w-[112px] flex-1 text-center">
+              <div
+                className="mx-auto grid aspect-square w-full place-items-center rounded-full shadow-[inset_0_-8px_14px_rgba(0,0,0,0.2),inset_0_4px_8px_rgba(255,255,255,0.6)]"
+                style={{
+                  background: `radial-gradient(circle at 30% 25%, #fff, color-mix(in srgb, ${c.hex} 65%, white) 40%, ${c.hex} 85%)`,
+                  boxShadow: `0 0 22px ${c.hex}, inset 0 -8px 14px rgba(0,0,0,0.2), inset 0 4px 8px rgba(255,255,255,0.6)`,
+                }}
+              >
+                <span aria-hidden="true" className="text-[16px] text-white/80 [text-shadow:0_0_8px_#fff]">✦</span>
+              </div>
+              <b className="mt-2.5 block text-[13px]">{it.label}</b>
+              <small className="block text-[10px] tracking-wide text-[#c9c6ee]">{c.en}</small>
+              {it.sub && <span className="mt-1 block font-hand text-[15px] leading-tight text-[#ffe9a8]/90">{it.sub}</span>}
             </div>
           );
         })}
       </div>
-    </Paper>
+    </div>
   );
 }
 
