@@ -860,15 +860,27 @@ function Visual({ page, report }: { page: BookPage; report: PremiumReportView })
   }
 }
 
-/** 리포트마다 한 동물만 나와요: 연애 결혼 = 토끼, 그 밖(성공·재물·궁합 등) = 수달 (용 그림은 쓰지 않아요) */
-type Mascot = "rabbit" | "otter";
+/** 리포트마다 한 동물만 나와요. 자판기 카드·상담실과 같아요: 성공=용, 재물=부자 토끼, 연애·결혼=판다 커플, 궁합=판다 웨딩, 건강=달리는 여우, 공부=새해 수달, 그 밖=수달 */
+type Mascot = "dragon" | "rabbit-rich" | "panda-couple" | "panda-wedding" | "fox-run" | "otter-newyear" | "otter";
 function mascotOf(report: PremiumReportView): Mascot {
-  if (report.compat) return "otter";
-  const k = report.topic.key;
-  if (k === "love" || k === "marriage") return "rabbit";
-  return "otter";
+  if (report.compat) return "panda-wedding";
+  switch (report.topic.key) {
+    case "love":
+    case "marriage":
+      return "panda-couple";
+    case "money":
+      return "rabbit-rich";
+    case "success":
+      return "dragon";
+    case "health":
+      return "fox-run";
+    case "study":
+      return "otter-newyear";
+    default:
+      return "otter";
+  }
 }
-const MASCOT_EMOJI: Record<Mascot, string> = { rabbit: "🐰", otter: "🦦" };
+const MASCOT_EMOJI: Record<Mascot, string> = { dragon: "🐲", "rabbit-rich": "🐰", "panda-couple": "🐼", "panda-wedding": "🐼", "fox-run": "🦊", "otter-newyear": "🦦", otter: "🦦" };
 const avatarOf = (m: Mascot) => `/images/animal-${m}.webp`;
 /** 장 표지 그림은 프리미엄 대문 그림 한 장을 모든 장이 같이 써요. */
 const COVER_SCENE = "/images/premium-main.webp";
