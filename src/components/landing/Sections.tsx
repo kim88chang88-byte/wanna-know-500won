@@ -51,7 +51,7 @@ export function firstGlyph(nickname: string | null | undefined): string {
   return Array.from((nickname ?? "").trim())[0] ?? "❄️";
 }
 
-export function Header({ onOpenLogin, user = null, bubble = null }: { onOpenLogin: () => void; user?: AuthUser | null; bubble?: React.ReactNode }) {
+export function Header({ onOpenLogin, user = null, bubble = null, strip = null }: { onOpenLogin: () => void; user?: AuthUser | null; bubble?: React.ReactNode; strip?: React.ReactNode }) {
   return (
     <>
       <header className="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-brand-100 shadow-[0_2px_15px_rgba(128,87,224,0.06)]">
@@ -114,6 +114,8 @@ export function Header({ onOpenLogin, user = null, bubble = null }: { onOpenLogi
             {bubble}
           </div>
         </div>
+        {/* 로고 줄 아래에 같이 고정되는 줄: 방문자 수 + 내 지갑 */}
+        {strip}
       </header>
 
     </>
@@ -122,13 +124,14 @@ export function Header({ onOpenLogin, user = null, bubble = null }: { onOpenLogi
 
 /* ------------------------------------------------------------------ 히어로 */
 
-export function HeroSection({ visitors = null, tickets = 0, wallet = null, onBuy, onRefill }: { visitors?: { today: number; total: number } | null; tickets?: number; wallet?: WalletValues | null; onBuy?: () => void; onRefill?: () => void }) {
+/** 로고 줄 아래에 같이 고정되는 한 줄: 방문자 수(왼쪽) + 내 진주·조약돌·무료 뽑기(오른쪽, 로그인한 회원만). 둘 다 없으면 아무것도 안 그려요. */
+export function HeaderStrip({ visitors = null, wallet = null, onBuy }: { visitors?: { today: number; total: number } | null; wallet?: WalletValues | null; onBuy?: () => void }) {
+  if (!visitors && !wallet) return null;
   return (
-    <section className="text-left mb-3">
-      {/* 방문자 수(왼쪽) + 내 지폐·조약돌·무료 뽑기(오른쪽, 로그인한 회원만) 한 줄 */}
-      <div className="flex items-center justify-between gap-2">
+    <div data-testid="header-strip" className="border-t border-brand-50 bg-gradient-to-b from-[#f9f1fd]/95 to-[#f4eefc]/95">
+      <div className="max-w-[34rem] lg:max-w-5xl mx-auto px-3 sm:px-6 lg:px-8 py-1.5 flex items-center justify-between gap-2">
         {visitors ? (
-          <div data-testid="visitors" className="inline-flex items-center gap-1.5 rounded-full bg-white/80 border border-brand-100 px-3 py-1.5 text-xs text-gray-500 shadow-sm shrink-0">
+          <div data-testid="visitors" className="inline-flex items-center gap-1.5 rounded-full bg-white/80 border border-brand-100 px-3 py-1 text-xs text-gray-500 shadow-sm shrink-0">
             <span>
               <b className="font-bold text-brand-500">Today</b> <span data-testid="visitors-today">{visitors.today.toLocaleString("ko-KR")}</span>
               <span className="hidden min-[400px]:inline">명</span>
@@ -144,6 +147,13 @@ export function HeroSection({ visitors = null, tickets = 0, wallet = null, onBuy
         )}
         {wallet && <WalletBar {...wallet} onBuy={onBuy} />}
       </div>
+    </div>
+  );
+}
+
+export function HeroSection({ tickets = 0, wallet = null, onRefill }: { tickets?: number; wallet?: WalletValues | null; onRefill?: () => void }) {
+  return (
+    <section className="text-left mb-3">
       {tickets > 0 && (
         <p data-testid="ticket-badge" className="mt-1 text-right text-[11px] font-bold leading-tight text-rose-600">
           🎟 보너스 뽑기 {tickets}장 <span className="hidden text-[10px] font-medium text-rose-400 min-[420px]:inline">· 무료 소진 후 자동 사용</span>
