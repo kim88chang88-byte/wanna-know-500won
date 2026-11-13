@@ -42,14 +42,14 @@ function readOpened(day: string): Daily | null {
 function LuckCoin({ luck, grade, cheer }: { luck: number; grade: string; cheer: string }) {
   const high = luck >= 90;
   return (
-    <div data-testid="daily-luck" className="mt-2.5 flex items-center gap-3 rounded-2xl bg-[#eef5fc] px-3 py-2.5">
+    <div data-testid="daily-luck" className="mt-2.5 flex items-center gap-3 rounded-2xl bg-[#fff8e6] px-3 py-2.5">
       <div className="relative h-[84px] w-[84px] shrink-0 [perspective:500px]" aria-hidden="true">
         <div className="coin-flip relative h-full w-full [transform-style:preserve-3d]">
           <div className="absolute inset-0 [backface-visibility:hidden]">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/images/coin-500.webp" alt="" className={`h-full w-full drop-shadow-[0_6px_6px_rgba(0,0,0,0.25)] ${high ? "coin-glow" : ""}`} />
           </div>
-          <div className="absolute inset-0 grid place-content-center rounded-full bg-[radial-gradient(circle_at_35%_30%,#eaf3fb,#a9c6e2_55%,#7c9fc4)] text-center text-[#25466b] shadow-[0_5px_0_#5f83ab,0_9px_12px_rgba(30,58,95,0.25)] [backface-visibility:hidden] [transform:rotateY(180deg)] after:absolute after:inset-[5px] after:rounded-full after:border-2 after:border-dashed after:border-white/60 after:content-['']">
+          <div className="absolute inset-0 grid place-content-center rounded-full bg-[radial-gradient(circle_at_35%_30%,#fff3b8,#f1b933_55%,#c88a10)] text-center text-[#6b4300] shadow-[0_5px_0_#a8730a,0_9px_12px_rgba(0,0,0,0.25)] [backface-visibility:hidden] [transform:rotateY(180deg)] after:absolute after:inset-[5px] after:rounded-full after:border-2 after:border-dashed after:border-white/60 after:content-['']">
             <small className="text-[8.5px] font-extrabold tracking-[0.08em]">LUCKY</small>
             <b className="text-[30px] font-black leading-none tabular-nums">{luck}</b>
             <small className="text-[8.5px] font-extrabold">오늘의 행운</small>
@@ -57,9 +57,9 @@ function LuckCoin({ luck, grade, cheer }: { luck: number; grade: string; cheer: 
         </div>
       </div>
       <p className="min-w-0 flex-1 text-[13px] font-semibold leading-relaxed text-slate-800">
-        <span className="block font-hand text-[17px] font-bold text-[#3f78b5]">도리의 응원</span>
+        <span className="block font-hand text-[17px] font-bold text-[#d4558a]">도리의 응원</span>
         {cheer}
-        <em className="mt-1 inline-block rounded-full bg-[#dbe9f7] px-2.5 py-0.5 text-[11.5px] font-extrabold not-italic text-[#3d6a9a]">오늘의 행운 {luck}점 · {grade}</em>
+        <em className="mt-1 inline-block rounded-full bg-[#fff0c2] px-2.5 py-0.5 text-[11.5px] font-extrabold not-italic text-[#a8730a]">오늘의 행운 {luck}점 · {grade}</em>
       </p>
     </div>
   );
