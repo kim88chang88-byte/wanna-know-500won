@@ -11,6 +11,7 @@ import { checkMessage } from "@/lib/premium/book/resonance";
 import type { BookChart, BookPage, BookRow, BookTable, ElementKind, PremiumReportView, RealityCheck } from "@/lib/premium/types";
 import { elementOfChar, elName } from "@/lib/elementColor";
 import ElementTile from "@/components/ElementTile";
+import DayMasterScene from "./DayMasterScene";
 import { DAYMASTER_BRIEF, MBTI_BRIEF, cleanMbti } from "@/lib/mbtiBrief";
 import { formatWon } from "@/lib/premium/book/charts";
 import { callName } from "@/lib/ai/nameRepair";
@@ -603,6 +604,7 @@ function Visual({ page, report }: { page: BookPage; report: PremiumReportView })
     case "pillars":
       return (
         <div className="mb-6">
+          {page.key === "preface" && !report.compat && <DayMasterScene stem={Array.from(report.pillars.find((p) => p.key === "day")?.full ?? "")[0]} name={report.viewerName} />}
           {page.key === "preface" && (
             <p className="mb-3 text-[15px] leading-relaxed text-[#e8dfca]/85">
               태어난 <b className={GOLD}>해·달·날·시간</b>, 이 네 때마다 글자를 위아래 두 개씩 적어. 위는 하늘의 기운(천간), 아래는 땅의 기운(지지)이야.
