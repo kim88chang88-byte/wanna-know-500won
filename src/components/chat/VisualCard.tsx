@@ -121,16 +121,10 @@ function Lucky({ v }: { v: ChatVisual }) {
                 )}
               </div>
               <b className="mt-4 inline-block max-w-full truncate rounded-full bg-white px-2.5 py-0.5 text-[12px] text-[#2a2540] shadow-[0_2px_6px_rgba(122,107,208,0.14)]">{it.label}</b>
+              {it.sub && <span className="mt-1.5 block break-keep font-hand text-[16px] leading-[1.25] text-[#8a5a2b]">{it.sub}</span>}
             </div>
           );
         })}
-      </div>
-      <div className="mt-3 grid gap-0.5 text-center">
-        {v.items.map((it, i) => it.sub && (
-          <p key={i} className="font-hand text-[15px] leading-tight text-[#8a5a2b]">
-            <b className="font-sans text-[12px] text-[#2a2540]">{it.label}</b> · {it.sub}
-          </p>
-        ))}
       </div>
     </Paper>
   );

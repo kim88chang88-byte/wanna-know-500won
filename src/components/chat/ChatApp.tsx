@@ -193,6 +193,9 @@ export default function ChatApp({ initialCtx, initialMsgs, onChange, onBack }: {
   const field = useRef<HTMLTextAreaElement>(null);
   const nearBottom = useRef(true);
   const inflight = useRef(false);
+  // 질문 횟수를 다 써서 막힌 질문: 조약돌로 충전하면 그 질문을 자동으로 이어서 보내요
+  const blockedQ = useRef<string | null>(null);
+  const resendQ = useRef<string | null>(null);
 
   useEffect(() => {
     setReady(true);
@@ -336,6 +339,7 @@ export default function ChatApp({ initialCtx, initialMsgs, onChange, onBack }: {
         setLeft(0);
         setMsgs(next.slice(0, -1));
         setInput(text);
+        blockedQ.current = text;
         return;
       }
       if (!res.ok || !data?.answer) throw new Error(data?.error ?? "도리가 잠깐 물놀이하러 갔어. 다시 보내 볼래?");
@@ -351,6 +355,15 @@ export default function ChatApp({ initialCtx, initialMsgs, onChange, onBack }: {
       setBusy(false);
     }
   }
+
+  useEffect(() => {
+    if (resendQ.current && leftNow > 0 && !busy && !inflight.current) {
+      const q = resendQ.current;
+      resendQ.current = null;
+      void send(q);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [leftNow]);
 
   function retry() {
     const lastUser = [...msgs].reverse().find((m) => m.role === "user");
@@ -375,6 +388,9 @@ export default function ChatApp({ initialCtx, initialMsgs, onChange, onBack }: {
       if (res.ok && typeof data?.left === "number") {
         setLeft(data.left);
         setCoins(data.coins ?? 0);
+        // 막혔던 질문이 입력창에 그대로 있으면 충전 직후 자동으로 보내요
+        if (blockedQ.current && input.trim() === blockedQ.current) resendQ.current = blockedQ.current;
+        blockedQ.current = null;
         const added = data.added ?? 5;
         setMsgs((m) => [...m, { role: "dori", text: `🪙 조약돌 1개로 질문 ${added}개를 충전했어`, at: Date.now(), log: true }]);
         setCheer(added);
