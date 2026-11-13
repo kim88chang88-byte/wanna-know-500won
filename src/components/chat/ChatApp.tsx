@@ -671,11 +671,11 @@ export default function ChatApp({ initialCtx, initialMsgs, onChange, onBack }: {
               </button>
               {coins === 0 ? (
                 <button type="button" onClick={() => { setBuyOpen(false); setPayOpen(true); }} className="flex-1 rounded-full bg-brand-500 py-2.5 text-sm font-bold text-white">
-                  조약돌 구매하기
+                  조약돌 사러 갈래
                 </button>
               ) : (
                 <button type="button" onClick={() => void buy()} disabled={buying} className="flex-1 rounded-full bg-brand-500 py-2.5 text-sm font-bold text-white disabled:opacity-50">
-                  {buying ? "쓰는 중…" : "응, 더 해볼래"}
+                  {buying ? "쓰는 중이야…" : "응, 더 해볼래"}
                 </button>
               )}
             </div>
