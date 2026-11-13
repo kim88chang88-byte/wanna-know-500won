@@ -667,7 +667,7 @@ export default function ChatApp({ initialCtx, initialMsgs, onChange, onBack }: {
             <p className="mt-1 text-xs text-slate-500">내 조약돌: {coins}개 {coins === 0 && "· 조약돌이 없어"}</p>
             <div className="mt-4 flex gap-2">
               <button type="button" onClick={() => setBuyOpen(false)} disabled={buying} className="flex-1 rounded-full border border-slate-300 bg-white py-2.5 text-sm font-bold text-slate-600">
-                아니
+                아니, 괜찮아
               </button>
               {coins === 0 ? (
                 <button type="button" onClick={() => { setBuyOpen(false); setPayOpen(true); }} className="flex-1 rounded-full bg-brand-500 py-2.5 text-sm font-bold text-white">
@@ -675,7 +675,7 @@ export default function ChatApp({ initialCtx, initialMsgs, onChange, onBack }: {
                 </button>
               ) : (
                 <button type="button" onClick={() => void buy()} disabled={buying} className="flex-1 rounded-full bg-brand-500 py-2.5 text-sm font-bold text-white disabled:opacity-50">
-                  {buying ? "쓰는 중…" : "네, 더할게"}
+                  {buying ? "쓰는 중…" : "응, 더 해볼래"}
                 </button>
               )}
             </div>
