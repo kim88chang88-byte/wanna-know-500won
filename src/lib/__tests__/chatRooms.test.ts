@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { isStaleDaily, leftLabel, loadRooms, MAX_ROOMS, roomAnimal, roomColor, removeRoom, roomIdFor, roomLook, saveRooms, upsertRoom, withMsgs, type ChatRoom } from "../chatRooms";
+import { dayChip, isStaleDaily, leftLabel, loadRooms, MAX_ROOMS, parseRooms, roomAnimal, roomColor, removeRoom, roomIdFor, roomLook, saveRooms, upsertRoom, withMsgs, type ChatRoom } from "../chatRooms";
 import type { ChatCtx } from "../chatContext";
 
 const birth = { year: 1990, month: 1, day: 2, hour: 3, minute: 0, calendar: "solar", isLeapMonth: false, gender: "female" } as never;
@@ -13,7 +13,7 @@ describe("상담실 대화방", () => {
   it("같은 풀이는 같은 방, 다른 주제는 다른 방이에요", () => {
     expect(roomIdFor(reading())).toBe(roomIdFor(reading("주제: 성공운\n다른 요약")));
     expect(roomIdFor(reading())).not.toBe(roomIdFor(reading("주제: 연애운")));
-    expect(roomIdFor({ kind: "daily", summary: "" })).toBe("daily");
+    expect(roomIdFor({ kind: "daily", summary: "" }, new Date("2026-11-14T10:00:00"))).toBe("daily:2026-11-14");
   });
 
   it("방 이름은 풀이에 맞게 붙어요", () => {
@@ -38,14 +38,56 @@ describe("상담실 대화방", () => {
     expect(b.rooms[0].msgs).toHaveLength(1);
   });
 
-  it("오늘의 한마디 방은 날짜가 바뀌면 새로 시작하고, 빈 요약은 기존 요약을 덮지 않아요", () => {
+  it("오늘의 한마디 방은 날짜마다 따로 만들어지고, 어제 대화는 그대로 남아요", () => {
     const a = upsertRoom([], { kind: "daily", summary: "오늘 카드" }, new Date("2026-11-04T10:00:00"));
-    const chat = withMsgs(a.rooms, "daily", [{ role: "user", text: "q", at: 1 }]);
+    expect(a.id).toBe("daily:2026-11-04");
+    expect(a.rooms[0].title).toBe("오늘의 한마디 · 11/4");
+    const chat = withMsgs(a.rooms, a.id, [{ role: "user", text: "q", at: 1 }]);
     const same = upsertRoom(chat, { kind: "daily", summary: "" }, new Date("2026-11-04T20:00:00"));
+    expect(same.rooms).toHaveLength(1);
     expect(same.rooms[0].msgs).toHaveLength(1);
     expect(same.rooms[0].ctx.summary).toBe("오늘 카드");
-    const next = upsertRoom(chat, { kind: "daily", summary: "" }, new Date("2026-11-05T09:00:00"));
-    expect(next.rooms[0].msgs).toHaveLength(0);
+    const next = upsertRoom(chat, { kind: "daily", summary: "새 카드" }, new Date("2026-11-05T09:00:00"));
+    expect(next.rooms).toHaveLength(2);
+    expect(next.id).toBe("daily:2026-11-05");
+    expect(next.rooms.find((r) => r.id === "daily:2026-11-04")?.msgs).toHaveLength(1);
+    expect(next.rooms.find((r) => r.id === next.id)?.msgs).toHaveLength(0);
+  });
+
+  it("한마디 방은 7일만 남기고, 풀이 방은 밀려나지 않아요", () => {
+    let rooms: ChatRoom[] = [];
+    rooms = upsertRoom(rooms, reading(), new Date("2026-11-01T10:00:00")).rooms;
+    for (let d = 1; d <= 9; d++) rooms = upsertRoom(rooms, { kind: "daily", summary: `카드${d}` }, new Date(`2026-11-${String(d).padStart(2, "0")}T10:00:00`)).rooms;
+    const dailies = rooms.filter((r) => r.ctx.kind === "daily");
+    expect(dailies).toHaveLength(7);
+    expect(dailies.some((r) => r.id === "daily:2026-11-02")).toBe(false);
+    expect(dailies.some((r) => r.id === "daily:2026-11-03")).toBe(true);
+    expect(rooms.some((r) => r.ctx.kind === "reading")).toBe(true);
+    expect(rooms.length).toBeLessThanOrEqual(MAX_ROOMS);
+  });
+
+  it("방이 많으면 오래된 한마디 방부터 빠져요", () => {
+    let rooms: ChatRoom[] = [];
+    for (let i = 0; i < 5; i++) rooms = upsertRoom(rooms, reading(`주제: 풀이${i}`), new Date(`2026-11-0${i + 1}T08:00:00`)).rooms;
+    for (let d = 8; d <= 14; d++) rooms = upsertRoom(rooms, { kind: "daily", summary: "c" }, new Date(`2026-11-${String(d).padStart(2, "0")}T10:00:00`)).rooms;
+    expect(rooms).toHaveLength(MAX_ROOMS);
+    expect(rooms.filter((r) => r.ctx.kind === "reading")).toHaveLength(5);
+    expect(rooms.some((r) => r.id === "daily:2026-11-14")).toBe(true);
+  });
+
+  it("예전에 하나뿐이던 daily 방은 만든 날짜의 방으로 옮겨져요", () => {
+    const old = [{ id: "daily", ctx: { kind: "daily", summary: "옛 카드" }, msgs: [{ role: "user", text: "옛 질문", at: 5 }], updatedAt: 5, day: "2026-11-13" }];
+    const [r] = parseRooms(old);
+    expect(r.id).toBe("daily:2026-11-13");
+    expect(r.title).toBe("오늘의 한마디 · 11/13");
+    expect(r.msgs).toHaveLength(1);
+  });
+
+  it("방 칩은 오늘·어제·날짜로 보여요", () => {
+    const now = new Date("2026-11-14T10:00:00");
+    expect(dayChip("2026-11-14", now)).toBe("오늘");
+    expect(dayChip("2026-11-13", now)).toBe("어제");
+    expect(dayChip("2026-11-10", now)).toBe("11/10");
   });
 
   it("방은 최대 10개, 저장했다가 다시 읽고, 삭제할 수 있어요", () => {

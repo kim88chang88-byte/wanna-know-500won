@@ -1,4 +1,4 @@
-import { CHAT_SYNCED_KEY, MAX_ROOMS, dropExpired, parseRooms, sortRooms, type ChatRoom } from "@/lib/chatRooms";
+import { CHAT_SYNCED_KEY, dropExpired, limitRooms, parseRooms, type ChatRoom } from "@/lib/chatRooms";
 
 /*
  * 상담실 대화방을 서버와 맞춰요. 이 기기의 저장본이 먼저이고, 로그인한 회원이면 서버에도 한 부 두어요.
@@ -41,7 +41,7 @@ export function mergeRooms(local: ChatRoom[], server: ChatRoom[], lastSynced: nu
       byId.set(l.id, l);
     }
   }
-  return sortRooms(dropExpired([...byId.values()], now)).slice(0, MAX_ROOMS);
+  return limitRooms(dropExpired([...byId.values()], now), now);
 }
 
 /** 두 목록이 같은지 (방 번호와 바뀐 시각으로 가볍게 비교) */

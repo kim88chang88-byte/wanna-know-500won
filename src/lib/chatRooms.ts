@@ -9,6 +9,8 @@ import type { ChatVisual } from "@/lib/ai/chat";
  */
 export const CHAT_ROOMS_KEY = "wanna500:chat:rooms:v1";
 export const MAX_ROOMS = 10;
+/** 오늘의 한마디 방은 날짜별로 하나씩 쌓이고, 오늘 포함 이 일수만 남겨요 */
+export const DAILY_KEEP_DAYS = 7;
 /** 서버에는 마지막 대화 후 이 기간만 보관해요 */
 export const RETENTION_DAYS = 30;
 /** 서버와 마지막으로 맞춘 시각(ms). 이 기기에만 둬요. */
@@ -36,7 +38,7 @@ export interface ChatRoom {
   icon: string;
   msgs: RoomMsg[];
   updatedAt: number;
-  /** 오늘의 한마디 방은 날짜(YYYY-MM-DD)가 바뀌면 새로 시작해요 */
+  /** 방을 처음 만든 날(YYYY-MM-DD). 오늘의 한마디 방은 날짜마다 따로 만들어져요 */
   day: string;
 }
 
@@ -59,19 +61,33 @@ const topicLine = (summary: string) => /^주제: (.+)$/m.exec(summary)?.[1]?.tri
 /** 2027 신년운 방인지 (예전에 만든 방은 topic 표시가 없어서 요약의 "주제: 2027 신년운" 줄도 봐요) */
 const isStudyRoom = (ctx: ChatCtx) => ctx.topic === "study" || (ctx.kind === "reading" && /신년운/.test(topicLine(ctx.summary)));
 
-/** 같은 풀이는 같은 방이 되게 하는 값 */
-/** 날짜가 지난 "오늘의 한마디" 방인지. 이런 방은 열 때 오늘 것으로 새로 시작해요. */
+/** 날짜가 지난 "오늘의 한마디" 방인지. 이런 방은 지난 대화를 볼 수만 있고, 이어 묻기는 오늘 방에서 해요. */
 export function isStaleDaily(room: Pick<ChatRoom, "ctx" | "day">, now: Date = new Date()): boolean {
   return room.ctx.kind === "daily" && room.day !== dayOf(now);
 }
 
-export function roomIdFor(ctx: ChatCtx): string {
-  if (ctx.kind === "daily") return "daily";
+/** 같은 풀이는 같은 방이 되게 하는 값. 오늘의 한마디는 날짜마다 다른 방이에요. */
+export function roomIdFor(ctx: ChatCtx, now: Date = new Date()): string {
+  if (ctx.kind === "daily") return `daily:${dayOf(now)}`;
   return `${ctx.kind}:${hash(JSON.stringify([ctx.birth ?? null, ctx.partnerBirth ?? null, ctx.topic ?? null, topicLine(ctx.summary), ...(ctx.premium ? ["premium"] : [])]))}`;
 }
 
-export function roomLook(ctx: ChatCtx): { title: string; chip: string; icon: string } {
-  if (ctx.kind === "daily") return { title: "오늘의 한마디", chip: "오늘", icon: "🌙" };
+const mmdd = (day: string) => {
+  const m = /^\d{4}-(\d{2})-(\d{2})$/.exec(day);
+  return m ? `${Number(m[1])}/${Number(m[2])}` : "";
+};
+
+/** 오늘의 한마디 방 칩: 오늘 · 어제 · 11/12 */
+export function dayChip(day: string, now: Date = new Date()): string {
+  if (day === dayOf(now)) return "오늘";
+  const y = new Date(now);
+  y.setDate(y.getDate() - 1);
+  if (day === dayOf(y)) return "어제";
+  return mmdd(day) || "지난 날";
+}
+
+export function roomLook(ctx: ChatCtx, day = ""): { title: string; chip: string; icon: string } {
+  if (ctx.kind === "daily") return { title: mmdd(day) ? `오늘의 한마디 · ${mmdd(day)}` : "오늘의 한마디", chip: "오늘", icon: "🌙" };
   if (ctx.kind === "compat") return { title: `${ctx.partnerName?.trim() || "상대"}님과의 궁합`, chip: "궁합", icon: "💞" };
   if (isStudyRoom(ctx)) return { title: "2027 신년운", chip: "신년운", icon: "📜" };
   // 풀이 결과에 "성공·재물운"으로 저장된 이름도 카드 이름대로 "성공운"으로 보여요 (예전에 만든 방도 같이)
@@ -122,16 +138,34 @@ export function parseRooms(raw: unknown): ChatRoom[] {
   for (const r of raw as Partial<ChatRoom>[]) {
     const c = r?.ctx as ChatCtx | undefined;
     if (!r || typeof r.id !== "string" || r.id.length > 80 || !c || (c.kind !== "daily" && c.kind !== "reading" && c.kind !== "compat") || typeof c.summary !== "string") continue;
+    const day = typeof r.day === "string" ? r.day : "";
+    // 예전에 하나뿐이던 오늘의 한마디 방은 만든 날짜의 방으로 옮겨요
+    const legacyDay = day || (typeof r.updatedAt === "number" ? dayOf(new Date(r.updatedAt)) : "");
+    const id = c.kind === "daily" && r.id === "daily" ? `daily:${legacyDay}` : r.id;
     out.push({
-      id: r.id,
+      id,
       ctx: c,
-      ...roomLook(c),
+      ...roomLook(c, c.kind === "daily" ? legacyDay : ""),
       msgs: Array.isArray(r.msgs) ? r.msgs.filter(validMsg).slice(-MAX_ROOM_MSGS) : [],
       updatedAt: typeof r.updatedAt === "number" ? r.updatedAt : 0,
-      day: typeof r.day === "string" ? r.day : "",
+      day: c.kind === "daily" ? legacyDay : day,
     });
   }
-  return sortRooms(out).slice(0, MAX_ROOMS);
+  return limitRooms(out);
+}
+
+/** 방 수를 줄여요: 일주일이 지난 오늘의 한마디 방을 빼고, 그래도 많으면 오래된 한마디 방부터 빼요(풀이·궁합 방이 밀려나지 않게). */
+export function limitRooms(rooms: ChatRoom[], now: Date = new Date()): ChatRoom[] {
+  const cut = new Date(now);
+  cut.setDate(cut.getDate() - (DAILY_KEEP_DAYS - 1));
+  const oldest = dayOf(cut);
+  const out = sortRooms(rooms.filter((r) => !(r.ctx.kind === "daily" && r.day && r.day < oldest)));
+  while (out.length > MAX_ROOMS) {
+    let i = out.length - 1;
+    while (i > 0 && out[i].ctx.kind !== "daily") i--;
+    out.splice(out[i].ctx.kind === "daily" ? i : out.length - 1, 1);
+  }
+  return out;
 }
 
 /** 마지막 대화 후 30일이 지난 방을 빼요 */
@@ -150,7 +184,7 @@ export function loadRooms(st: StoreLike | null): ChatRoom[] {
 
 export function saveRooms(st: StoreLike | null, rooms: ChatRoom[]): void {
   try {
-    st?.setItem(CHAT_ROOMS_KEY, JSON.stringify(sortRooms(rooms).slice(0, MAX_ROOMS)));
+    st?.setItem(CHAT_ROOMS_KEY, JSON.stringify(limitRooms(rooms)));
   } catch {
     /* 저장이 막혀 있으면 이번 방문에서만 써요 */
   }
@@ -167,19 +201,19 @@ export function clearRooms(st: StoreLike | null): void {
 
 export const sortRooms = (rooms: ChatRoom[]): ChatRoom[] => [...rooms].sort((a, b) => b.updatedAt - a.updatedAt);
 
-/** 맥락으로 방을 열어요. 같은 풀이면 기존 방(대화 이어서), 아니면 새 방. */
+/** 맥락으로 방을 열어요. 같은 풀이(오늘의 한마디는 같은 날)면 기존 방(대화 이어서), 아니면 새 방. */
 export function upsertRoom(rooms: ChatRoom[], ctx: ChatCtx, now: Date = new Date()): { rooms: ChatRoom[]; id: string } {
-  const id = roomIdFor(ctx);
+  const id = roomIdFor(ctx, now);
   const day = dayOf(now);
   const old = rooms.find((r) => r.id === id);
   let room: ChatRoom;
-  if (!old || (ctx.kind === "daily" && old.day !== day)) {
-    room = { id, ctx, ...roomLook(ctx), msgs: [], updatedAt: now.getTime(), day };
+  if (!old) {
+    room = { id, ctx, ...roomLook(ctx, day), msgs: [], updatedAt: now.getTime(), day };
   } else {
     const merged: ChatCtx = { ...old.ctx, ...ctx, summary: ctx.summary || old.ctx.summary };
-    room = { ...old, ctx: merged, ...roomLook(merged), day: ctx.kind === "daily" ? day : old.day };
+    room = { ...old, ctx: merged, ...roomLook(merged, old.day || day), day: old.day || day };
   }
-  return { rooms: sortRooms([room, ...rooms.filter((r) => r.id !== id)]).slice(0, MAX_ROOMS), id };
+  return { rooms: limitRooms([room, ...rooms.filter((r) => r.id !== id)], now), id };
 }
 
 /** 대화가 바뀌었을 때만 갱신 시각을 올려요 */

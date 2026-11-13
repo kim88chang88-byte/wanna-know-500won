@@ -165,7 +165,8 @@ function OutfitCard({ pick }: { pick: OutfitPick }) {
   );
 }
 
-export default function ChatApp({ initialCtx, initialMsgs, onChange, onBack }: { initialCtx: ChatCtx; initialMsgs: RoomMsg[]; onChange: (msgs: RoomMsg[]) => void; onBack: () => void }) {
+export default function ChatApp({ initialCtx, initialMsgs, onChange, onBack, readOnlyNote = null, onToday }: { initialCtx: ChatCtx; initialMsgs: RoomMsg[]; onChange: (msgs: RoomMsg[]) => void; onBack: () => void; /** 지난 날의 오늘의 한마디 방: 읽기만 하고, 이 안내를 입력창 자리에 보여 줘요 */ readOnlyNote?: string | null; onToday?: () => void }) {
+  const readOnly = readOnlyNote !== null;
   const [ctx] = useState<ChatCtx>(initialCtx);
   const face = <AnimalFace src={roomAnimal(ctx)} color={roomColor(ctx)} size={36} />;
   const [msgs, setMsgs] = useState<Bubble[]>(initialMsgs);
@@ -436,7 +437,7 @@ export default function ChatApp({ initialCtx, initialMsgs, onChange, onBack }: {
     .split("\n")
     .map((l) => l.trim().replace(/^(주제: )성공\s*[·⋅・]\s*재물운$/, "$1성공운"))
     .filter(Boolean);
-  const showEnd = leftNow === 0 && !busy && !typingNow;
+  const showEnd = !readOnly && leftNow === 0 && !busy && !typingNow;
 
   return (
     <div
@@ -617,7 +618,7 @@ export default function ChatApp({ initialCtx, initialMsgs, onChange, onBack }: {
         </p>
       )}
 
-      {leftNow > 0 && !busy && !typingNow && chips.length > 0 && (
+      {!readOnly && leftNow > 0 && !busy && !typingNow && chips.length > 0 && (
         <div className="z-10 flex gap-[7px] overflow-x-auto px-3.5 pb-2 pt-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden" aria-label="추천 질문">
           {chips.map((c) => (
             <button key={c} type="button" onClick={() => void send(c)} className="shrink-0 whitespace-nowrap rounded-full border border-brand-200 bg-white px-3.5 py-2 text-[12.5px] font-semibold text-brand-700 shadow-sm active:scale-95">
@@ -627,6 +628,16 @@ export default function ChatApp({ initialCtx, initialMsgs, onChange, onBack }: {
         </div>
       )}
 
+      {readOnly ? (
+        <div data-testid="past-daily-note" role="status" className="z-20 border-t border-brand-100 bg-white/90 px-4 pb-[max(14px,env(safe-area-inset-bottom))] pt-3 text-center">
+          <p className="text-[13px] leading-relaxed text-[#6b5f8f]">{readOnlyNote}</p>
+          {onToday && (
+            <button type="button" onClick={onToday} className="mt-2.5 rounded-full bg-brand-500 px-5 py-2.5 text-sm font-extrabold text-white active:scale-95">
+              🌙 오늘의 한마디로 이어 묻기
+            </button>
+          )}
+        </div>
+      ) : (
       <form
         onSubmit={(e) => {
           e.preventDefault();
@@ -676,6 +687,7 @@ export default function ChatApp({ initialCtx, initialMsgs, onChange, onBack }: {
         </div>
         {input.length > MSG_MAX - 60 && <p className="mr-2 mt-1 text-right text-[10px] text-[#a99bd0]">{input.length}/{MSG_MAX}</p>}
       </form>
+      )}
       {buyOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 px-6" onClick={() => !buying && setBuyOpen(false)}>
           <div role="alertdialog" aria-modal="true" aria-label="조약돌로 질문 더하기" onClick={(e) => e.stopPropagation()} className="w-full max-w-[320px] rounded-2xl bg-white px-5 py-5 text-center shadow-xl">
