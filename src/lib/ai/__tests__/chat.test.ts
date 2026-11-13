@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { cleanFollowups, cleanVisual, cleanHistory, CRISIS_ANSWER, earlierQuestions, isCrisis, parseChatAnswer, parseChatReply, polishChatAnswer } from "../chat";
+import { cleanFollowups, cleanVisual, cleanHistory, CRISIS_ANSWER, earlierQuestions, isCrisis, parseChatAnswer, parseChatReply, polishChatAnswer, recentEndings, CHAT_SYSTEM_PROMPT } from "../chat";
 import { parseCtx } from "@/lib/chatServer";
 import { summarizeReport } from "@/lib/chatContext";
 
@@ -122,5 +122,26 @@ describe("polishChatAnswer", () => {
   it("증상이 아닌 질문엔 아무것도 붙이지 않는다", () => {
     const h = [{ role: "user" as const, text: "이직 흐름이 궁금해" }];
     expect(polishChatAnswer(body, h, null)).toBe(body);
+  });
+});
+
+describe("끝맺음 반복 막기", () => {
+  const h = [
+    { role: "user" as const, text: "올해 흐름이 궁금해" },
+    { role: "dori" as const, text: "올해는 불이 강해. 가벼운 산책을 하면서 생각을 정리해 보는 건 어때?" },
+    { role: "user" as const, text: "더 알려줘" },
+    { role: "dori" as const, text: "다음 달 첫 주가 좋아. 중요한 결정은 주변 이야기를 듣고 정해 보는 건 어때?" },
+  ];
+  it("직전 도리 답의 마지막 문장을 모아요", () => {
+    const e = recentEndings(h);
+    expect(e).toContain("정리해 보는 건 어때?");
+    expect(e).toContain("정해 보는 건 어때?");
+    expect(recentEndings([{ role: "user", text: "안녕" }])).toBe("");
+  });
+  it("프롬프트에 직전 끝맺음 경고가 들어가고, 시스템 프롬프트에 질문 종류별 규칙이 있어요", () => {
+    expect(CHAT_SYSTEM_PROMPT).toContain("마음이 힘들다는 말");
+    expect(CHAT_SYSTEM_PROMPT).toContain("인사·짧은 안부");
+    expect(CHAT_SYSTEM_PROMPT).toContain("구체적으로");
+    expect(recentEndings(h).length).toBeGreaterThan(10);
   });
 });
