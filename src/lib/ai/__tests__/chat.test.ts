@@ -59,8 +59,8 @@ describe("도유 상담방", () => {
     expect(cleanVisual({ kind: "spots", title: "자리", items: [it("책상 위", "", "a"), it("책상 위", "", "b")] })?.items.length).toBe(1);
     expect(cleanVisual({ kind: "none", title: "", items: [] })).toBeNull();
     expect(cleanVisual({ kind: "note", title: "노트", items: [it("한 줄")] })).toBeNull();
-    expect(cleanVisual({ kind: "lucky", title: "소품", items: [it("물 한 잔", "🫧", "맑은 물"), it("흰색 소품", "⚪", "쇠 기운"), it("작은 화분", "", "나무 기운")] })).toBeNull();
-    expect(cleanVisual({ kind: "lucky", title: "소품", items: [it("물 한 잔", "🫧", "맑은 물"), it("흰색 소품", "⚪", "쇠 기운"), it("작은 화분", "🪴", "나무 기운")] })?.items.length).toBe(3);
+    expect(cleanVisual({ kind: "lucky", title: "소품", items: [it("머그컵", "", "따뜻한 차 한 잔"), it("없는물건", "", "x"), it("화분", "", "나무 기운")] })?.items.map((i) => i.label)).toEqual(["머그컵", "화분"]);
+    expect(cleanVisual({ kind: "lucky", title: "소품", items: [it("머그컵", "", "a"), it("없는물건", "", "b"), it("또없는", "", "c")] })).toBeNull();
     expect(cleanVisual({ kind: "checklist", title: "약속", items: [it("이혼 준비하기"), it("물 마시기")] })).toBeNull();
   });
 

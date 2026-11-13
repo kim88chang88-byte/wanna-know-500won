@@ -1,6 +1,7 @@
 "use client";
 
 import { scentSrc } from "@/lib/scents";
+import { propSrc } from "@/lib/props";
 import type { ChatVisual } from "@/lib/ai/chat";
 import { PALETTE, SPOTS } from "@/lib/visualPalette";
 
@@ -99,22 +100,38 @@ function Paper({ title, children }: { title: string; children: React.ReactNode }
 }
 
 function Lucky({ v }: { v: ChatVisual }) {
-  const tints = ["#e8f1ff", "#f1f1f5", "#e3f6ea"];
+  const tints: Array<[string, string]> = [["#cfe0ff", "#e9d9ff"], ["#ffe3ec", "#ffe9c9"], ["#d4f3e6", "#d6e6ff"]];
   return (
     <Paper title={v.title || "행운 세트"}>
-      <ul className="grid gap-2">
-        {v.items.map((it, i) => (
-          <li key={i} className="flex items-center gap-3 rounded-xl bg-[#f7f2e4] px-2.5 py-2">
-            <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl text-[26px] shadow-[inset_0_-3px_0_rgba(0,0,0,0.1)]" style={{ background: tints[i % 3] }}>
-              {it.icon}
-            </span>
-            <span className="min-w-0">
-              <b className="block text-[13.5px] text-[#2a2540]">{it.label}</b>
-              <span className="block font-hand text-[17px] leading-tight text-[#8a5a2b]">{it.sub}</span>
-            </span>
-          </li>
+      <div className="grid grid-cols-3 gap-2 pt-1">
+        {v.items.map((it, i) => {
+          const src = propSrc(it.label);
+          const [a, b] = tints[i % 3];
+          return (
+            <div key={i} className="min-w-0 text-center">
+              <div
+                className={`grid aspect-square place-items-center rounded-full shadow-[inset_0_-6px_12px_rgba(255,255,255,0.6),inset_0_4px_8px_#fff,0_8px_14px_rgba(122,107,208,0.18)] ${i === 1 ? "translate-y-2" : ""}`}
+                style={{ background: `radial-gradient(circle at 30% 25%, #fff, ${a} 55%, ${b})` }}
+              >
+                {src ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={src} alt={it.label} loading="lazy" className="h-[66%] w-[66%] object-contain drop-shadow-[0_4px_3px_rgba(42,42,106,0.2)]" />
+                ) : (
+                  <span className="text-[30px]">{it.icon}</span>
+                )}
+              </div>
+              <b className="mt-4 inline-block max-w-full truncate rounded-full bg-white px-2.5 py-0.5 text-[12px] text-[#2a2540] shadow-[0_2px_6px_rgba(122,107,208,0.14)]">{it.label}</b>
+            </div>
+          );
+        })}
+      </div>
+      <div className="mt-3 grid gap-0.5 text-center">
+        {v.items.map((it, i) => it.sub && (
+          <p key={i} className="font-hand text-[15px] leading-tight text-[#8a5a2b]">
+            <b className="font-sans text-[12px] text-[#2a2540]">{it.label}</b> · {it.sub}
+          </p>
         ))}
-      </ul>
+      </div>
     </Paper>
   );
 }

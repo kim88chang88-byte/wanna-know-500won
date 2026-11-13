@@ -1,5 +1,6 @@
 import { PALETTE, SPOTS } from "@/lib/visualPalette";
 import { SCENTS } from "@/lib/scents";
+import { PROPS, propCatalog } from "@/lib/props";
 import { analyzeChart } from "@/lib/saju/analysis";
 import type { SajuChart } from "@/lib/saju/types";
 import type { ChatKind, ChatMsg } from "@/lib/chatContext";
@@ -42,7 +43,7 @@ export const CHAT_SYSTEM_PROMPT = `너는 "도리", 맑은 옹달샘의 수달 �
   - note: 노트에 적어 볼 예시 문장 2~4줄(items[].label 에 문장, 나머지는 빈 글자). title 은 노트 제목(12자 이내).
   - checklist: 이번에 해 볼 작은 행동 2~5개(label). 아주 작고 쉬운 것만.
   - timeline: 시간대 3개(icon 에 이모지 1개, label 에 "저녁 9시" 같은 시간, sub 에 그때 하면 좋은 일, 가장 추천하는 한 곳만 best 를 true).
-  - lucky: 정확히 3개(icon 이모지 1개, label 이름, sub 짧은 설명). 입력의 사주 정보에 있는 오행과 연결되는 소품·색만. 특정 상품·브랜드·약·음식 효능 단정 금지.
+  - lucky: 어울리는 소품 3개. label 은 반드시 다음 중 하나만(괄호는 어울리는 오행, 라벨에는 쓰지 마): ${propCatalog()}. sub 는 그 소품을 곁에 두면 좋은 이유 짧게(icon 은 빈 글자). 입력의 사주 정보에 있는 오행과 연결되는 소품만. 특정 상품·브랜드·약·음식 효능 단정 금지.
   - palette: 어울리는 색 2~3개. label 은 반드시 다음 중 하나만: ${Object.keys(PALETTE).join(", ")}. sub 는 그 색이 주는 느낌 한 줄(icon 은 빈 글자). 입력의 사주 정보에 있는 오행과 연결되는 색만.
   - scent: 어울리는 향 2~3개(향 이야기일 때는 lucky 대신 scent). label 은 반드시 다음 중 하나만: ${Object.keys(SCENTS).join(", ")}. sub 는 그 향이 주는 느낌 한 줄(icon 은 빈 글자). 입력의 사주 정보에 있는 오행과 연결되는 향만. 향이 몸에 미치는 효능·치료는 말하지 마.
   - spots: 물건을 두면 좋은 자리 1~3곳. label 은 반드시 다음 중 하나만: ${Object.keys(SPOTS).join(", ")}. sub 는 왜 그 자리인지 짧게(icon 은 빈 글자). 가장 좋은 자리부터 순서대로.
@@ -82,7 +83,7 @@ export const CHAT_SCHEMA = {
           items: {
             type: "object",
             properties: {
-              icon: { type: "string", description: "이모지 1개 (timeline·lucky 만, 나머지는 빈 글자)" },
+              icon: { type: "string", description: "이모지 1개 (timeline 만, 나머지는 빈 글자)" },
               label: { type: "string", description: "20자 이내" },
               sub: { type: "string", description: "20자 이내 (timeline·lucky 만, 나머지는 빈 글자)" },
               best: { type: "boolean", description: "timeline 에서 가장 추천하는 한 곳만 true" },
@@ -133,8 +134,8 @@ export interface ChatReply {
   visual: ChatVisual | null;
 }
 
-const COUNT: Record<VisualKind, [number, number]> = { note: [2, 4], checklist: [2, 5], timeline: [3, 4], lucky: [3, 3], palette: [2, 3], spots: [1, 3], scent: [2, 3] };
-const NEEDS_ICON: VisualKind[] = ["timeline", "lucky"];
+const COUNT: Record<VisualKind, [number, number]> = { note: [2, 4], checklist: [2, 5], timeline: [3, 4], lucky: [2, 3], palette: [2, 3], spots: [1, 3], scent: [2, 3] };
+const NEEDS_ICON: VisualKind[] = ["timeline"];
 const HAS_SUB: VisualKind[] = ["timeline", "lucky", "palette", "spots", "scent"];
 
 /** 그림 카드 검사: 종류·개수·길이·금지어를 통과하지 못하면 카드만 빼고 답은 그대로 보내요. */
@@ -154,6 +155,7 @@ export function cleanVisual(raw: unknown): ChatVisual | null {
     if (kind === "palette" && !PALETTE[label]) continue;
     if (kind === "spots" && !SPOTS[label]) continue;
     if (kind === "scent" && !SCENTS[label]) continue;
+    if (kind === "lucky" && !PROPS[label]) continue;
     if (items.some((x) => x.label === label)) continue;
     items.push({ icon, label, sub, best: kind === "timeline" && o?.best === true });
   }
