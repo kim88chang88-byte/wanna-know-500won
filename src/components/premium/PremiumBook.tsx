@@ -12,6 +12,7 @@ import type { BookChart, BookPage, BookRow, BookTable, ElementKind, PremiumRepor
 import { elementOfChar, elName } from "@/lib/elementColor";
 import ElementTile from "@/components/ElementTile";
 import DayMasterScene from "./DayMasterScene";
+import { MORE_LABELS, SENTENCE_LABELS } from "@/lib/premium/partnerProfile";
 import { DAYMASTER_BRIEF, MBTI_BRIEF, cleanMbti } from "@/lib/mbtiBrief";
 import { formatWon } from "@/lib/premium/book/charts";
 import { callName } from "@/lib/ai/nameRepair";
@@ -596,6 +597,42 @@ function PrefaceExtras({ report }: { report: PremiumReportView }) {
 /** 네 기둥이 각각 무엇을 뜻하는지 (칸 위에 작게 붙여요) */
 const PILLAR_MEANING: Record<string, string> = { year: "초년운·조상", month: "청년운·사회", day: "나·배우자", hour: "말년운·자식" };
 
+/** 운명의 짝 프로필 줄들: 핵심은 먼저, 나머지는 "더 알아보기"로 접어 둬요. MBTI 는 연보라 칩, 한 문장 줄은 문장 상자로 보여 줘요. */
+function PartnerRows({ rows }: { rows: Array<{ label: string; tags: string[] }> }) {
+  const main = rows.filter((r) => !MORE_LABELS.includes(r.label));
+  const more = rows.filter((r) => MORE_LABELS.includes(r.label));
+  const one = (row: { label: string; tags: string[] }) => (
+    <div key={row.label}>
+      <dt className="text-[15px] font-bold text-[#f3ecdc]">{row.label}</dt>
+      {SENTENCE_LABELS.includes(row.label) ? (
+        <dd className="mt-1.5 rounded-r-xl border-l-[3px] border-[#b9a4ff] bg-white/[0.05] px-2.5 py-1 text-[14px] leading-relaxed text-[#e8dfca]/85">{row.tags.join(" · ")}</dd>
+      ) : (
+        <dd className="mt-1.5 flex flex-wrap gap-1.5">
+          {row.tags.map((t, i) => (
+            <span
+              key={t}
+              className={`rounded-full border px-3 py-1 text-[15px] font-semibold text-[#f3ecdc] ${row.label === "MBTI" && i === 0 ? "border-[#b9a4ff] bg-[#b9a4ff]/20 text-[#e5dcff]" : "border-[#e6c887]/60 bg-[#e6c887]/10"}`}
+            >
+              {t}
+            </span>
+          ))}
+        </dd>
+      )}
+    </div>
+  );
+  return (
+    <dl data-testid="partner-profile" className="mt-4 space-y-3 text-left">
+      {main.map(one)}
+      {more.length > 0 && (
+        <details data-testid="partner-more" className="pt-1">
+          <summary className="cursor-pointer rounded-xl border border-dashed border-[#e6c887]/40 py-1.5 text-center text-[14px] text-[#f0d9a0]">더 알아보기 ▾</summary>
+          <div className="mt-3 space-y-3">{more.map(one)}</div>
+        </details>
+      )}
+    </dl>
+  );
+}
+
 function Visual({ page, report }: { page: BookPage; report: PremiumReportView }) {
   if (page.chart) return <LifeChart chart={page.chart} />;
   const max = Math.max(1, ...report.elements.map((e) => e.count));
@@ -1106,20 +1143,7 @@ export default function PremiumBook({ report, flush = false, finale, previewBlur
                 <figcaption className="mt-2 text-[13px] leading-relaxed text-[#e8dfca]/60">{report.partnerImage.notice}</figcaption>
               </>
             )}
-            <dl data-testid="partner-profile" className="mt-4 space-y-3 text-left">
-              {report.partnerImage.profile.map((row) => (
-                <div key={row.label}>
-                  <dt className="text-[15px] font-bold text-[#f3ecdc]">{row.label}</dt>
-                  <dd className="mt-1.5 flex flex-wrap gap-1.5">
-                    {row.tags.map((t) => (
-                      <span key={t} className="rounded-full border border-[#e6c887]/60 bg-[#e6c887]/10 px-3 py-1 text-[15px] font-semibold text-[#f3ecdc]">
-                        {t}
-                      </span>
-                    ))}
-                  </dd>
-                </div>
-              ))}
-            </dl>
+            <PartnerRows rows={report.partnerImage.profile} />
             <p className="mt-3 text-[13px] text-[#e8dfca]/50">사주로 가볍게 그려 본 재미용 상상이야.</p>
           </figure>
         )}

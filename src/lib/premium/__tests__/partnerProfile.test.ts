@@ -2,19 +2,21 @@ import { describe, expect, it } from "vitest";
 import { partnerProfile, partnerTitle, profileSeed } from "../partnerProfile";
 
 describe("partnerProfile", () => {
-  it("직업·외모·성격·특징 네 줄이고 태그가 비어 있지 않아요", () => {
+  it("직업·MBTI·외모·성격·특징에 더 알아보기 여섯 줄이고 태그가 비어 있지 않아요", () => {
     for (const el of ["wood", "fire", "earth", "metal", "water"] as const) {
       for (let seed = 0; seed < 6; seed++) {
         const rows = partnerProfile("female", el, seed);
-        expect(rows.map((r) => r.label)).toEqual(["직업", "외모", "성격", "특징"]);
+        expect(rows.map((r) => r.label)).toEqual(["직업", "MBTI", "외모", "성격", "특징", "연애 스타일", "데이트 취향", "말투·목소리", "취미", "처음 만나는 곳", "인연이 깊어지는 계절"])
+        expect(rows[0].tags).toHaveLength(3)
+        expect(rows[1].tags[0]).toMatch(/^[EI][NS][TF][JP]$/);
         for (const r of rows) expect(r.tags.length).toBeGreaterThan(0);
       }
     }
   });
   it("키는 상대 성별에 맞는 범위예요", () => {
     for (let seed = 0; seed < 12; seed++) {
-      const f = Number(partnerProfile("female", "water", seed)[1].tags[0].replace("cm", ""));
-      const m = Number(partnerProfile("male", "water", seed)[1].tags[0].replace("cm", ""));
+      const f = Number(partnerProfile("female", "water", seed)[2].tags[0].replace("cm", ""));
+      const m = Number(partnerProfile("male", "water", seed)[2].tags[0].replace("cm", ""));
       expect(f).toBeGreaterThanOrEqual(158);
       expect(f).toBeLessThanOrEqual(166);
       expect(m).toBeGreaterThanOrEqual(172);

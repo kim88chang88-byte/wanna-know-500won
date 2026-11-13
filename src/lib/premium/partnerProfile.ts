@@ -1,11 +1,35 @@
 import type { Element5 } from "@/lib/ai/image";
 
 export interface PartnerProfileRow {
-  label: "직업" | "외모" | "성격" | "특징";
+  label: "직업" | "MBTI" | "외모" | "성격" | "특징" | "연애 스타일" | "데이트 취향" | "말투·목소리" | "취미" | "처음 만나는 곳" | "인연이 깊어지는 계절";
   tags: string[];
 }
 
 /** 오행별 어울리는 인연의 분위기. 가볍게 읽는 재미용이라 사실처럼 단정하지 않는 말만 써요. */
+/** 화면에서 "더 알아보기"로 접어 보여 주는 줄 */
+export const MORE_LABELS: ReadonlyArray<string> = ["연애 스타일", "데이트 취향", "말투·목소리", "취미", "처음 만나는 곳", "인연이 깊어지는 계절"];
+/** 한 문장으로 보여 주는 줄(알약 대신 문장 상자) */
+export const SENTENCE_LABELS: ReadonlyArray<string> = ["연애 스타일", "말투·목소리", "인연이 깊어지는 계절"];
+
+interface Extra {
+  mbti: Array<[string, string]>;
+  love: string[];
+  date: string[];
+  voice: string[];
+  hobby: string[];
+  meet: string[];
+  season: string;
+}
+
+/** 오행별 MBTI·연애·취향. 이것도 재미로 읽는 분위기일 뿐이에요. */
+const EXTRA: Record<Element5, Extra> = {
+  wood: { mbti: [["ENFP", "재기발랄한 활동가"], ["ENFJ", "따뜻한 리더"], ["INFP", "다정한 몽상가"], ["ENTP", "아이디어 뱅크"]], love: ["천천히 마음을 키우는 연애", "같이 성장하는 걸 좋아함", "응원을 아끼지 않는 스타일"], date: ["산책과 카페", "전시·서점 데이트", "작은 여행"], voice: ["맑고 청량한 목소리", "말끝이 부드러움", "웃음이 먼저 나옴"], hobby: ["식물 키우기", "독서", "새로운 클래스 듣기"], meet: ["배울 때 만나는 자리", "친구의 소개", "여행지"], season: "봄" },
+  fire: { mbti: [["ESFP", "분위기 메이커"], ["ENFP", "재기발랄한 활동가"], ["ESTP", "행동파 모험가"], ["ENFJ", "따뜻한 리더"]], love: ["표현이 시원하고 직진", "기념일을 잘 챙김", "사랑하면 티가 나는 스타일"], date: ["맛집 투어", "공연·축제", "활동적인 데이트"], voice: ["웃음소리가 큼", "목소리에 에너지가 있음", "말이 빠르고 신남"], hobby: ["운동", "맛집 탐방", "사진 찍기"], meet: ["모임·행사", "운동하는 곳", "친구들과의 자리"], season: "여름" },
+  earth: { mbti: [["ISFJ", "든든한 수호자"], ["ESFJ", "다정한 살림꾼"], ["ISTJ", "믿음직한 원칙주의자"], ["ESTJ", "듬직한 관리자"]], love: ["천천히, 그러나 오래가는 연애", "말보다 행동으로 챙김", "한 번 마음 주면 한결같음"], date: ["집밥과 카페", "동네 산책", "익숙한 단골집"], voice: ["낮고 차분한 목소리", "말수는 적지만 따뜻함", "느긋한 말투"], hobby: ["요리", "정리정돈", "드라마·영화 감상"], meet: ["직장·가까운 동네", "오래된 지인의 소개", "가족 모임"], season: "환절기" },
+  metal: { mbti: [["ISTJ", "믿음직한 원칙주의자"], ["INTJ", "전략가"], ["ESTJ", "듬직한 관리자"], ["ISTP", "냉철한 장인"]], love: ["겉은 차갑고 속은 다정", "약속과 시간을 소중히 여김", "선물을 센스 있게 고름"], date: ["분위기 좋은 레스토랑", "전시·공연", "조용한 드라이브"], voice: ["또렷하고 시원한 말투", "말이 간결함", "웃을 때 반전 매력"], hobby: ["자기계발", "미술관 가기", "정리·수집"], meet: ["일하다가", "전문 모임·스터디", "지인의 소개"], season: "가을" },
+  water: { mbti: [["INFJ", "조용한 통찰가"], ["INTP", "호기심 많은 사색가"], ["INFP", "다정한 몽상가"], ["ISFP", "감성 예술가"]], love: ["대화가 잘 통하면 깊어지는 연애", "마음을 천천히 열지만 깊음", "말없이 곁을 지켜 줌"], date: ["밤 산책과 음악", "조용한 카페·바", "영화·전시"], voice: ["맑고 조용한 목소리", "말이 부드럽고 낮음", "귀 기울여 들어 줌"], hobby: ["음악 듣기", "글쓰기", "여행 계획 세우기"], meet: ["온라인·취미 모임", "밤에 여는 모임", "여행 중"], season: "겨울" },
+};
+
 const POOL: Record<Element5, { job: string[]; look: string[]; nature: string[]; trait: string[] }> = {
   wood: {
     job: ["교육·강의", "기획·콘텐츠", "디자인", "환경·식물", "출판·번역", "여행·레저", "공방·원예", "웹·앱 서비스"],
@@ -77,11 +101,19 @@ export function partnerProfile(partner: "male" | "female", element: Element5, se
   const p = POOL[element];
   const r = rng(seed * 7 + 1);
   const height = partner === "female" ? 158 + Math.floor(r() * 9) : 172 + Math.floor(r() * 11);
+  const x = EXTRA[element];
   return [
-    { label: "직업", tags: pick(p.job, seed + 11, 1) },
+    { label: "직업", tags: pick(p.job, seed + 11, 3) },
+    { label: "MBTI", tags: pick(x.mbti, seed + 61, 1)[0] },
     { label: "외모", tags: [`${height}cm`, ...pick(p.look, seed + 23, 2)] },
     { label: "성격", tags: pick(p.nature, seed + 37, 2) },
     { label: "특징", tags: pick(p.trait, seed + 53, 2) },
+    { label: "연애 스타일", tags: pick(x.love, seed + 67, 1) },
+    { label: "데이트 취향", tags: pick(x.date, seed + 71, 2) },
+    { label: "말투·목소리", tags: pick(x.voice, seed + 73, 1) },
+    { label: "취미", tags: pick(x.hobby, seed + 79, 2) },
+    { label: "처음 만나는 곳", tags: pick(x.meet, seed + 83, 2) },
+    { label: "인연이 깊어지는 계절", tags: [`${x.season}에 마음이 가까워지기 쉬워`] },
   ];
 }
 
