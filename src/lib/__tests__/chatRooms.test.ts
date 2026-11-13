@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { leftLabel, loadRooms, MAX_ROOMS, roomAnimal, roomColor, removeRoom, roomIdFor, roomLook, saveRooms, upsertRoom, withMsgs, type ChatRoom } from "../chatRooms";
+import { isStaleDaily, leftLabel, loadRooms, MAX_ROOMS, roomAnimal, roomColor, removeRoom, roomIdFor, roomLook, saveRooms, upsertRoom, withMsgs, type ChatRoom } from "../chatRooms";
 import type { ChatCtx } from "../chatContext";
 
 const birth = { year: 1990, month: 1, day: 2, hour: 3, minute: 0, calendar: "solar", isLeapMonth: false, gender: "female" } as never;
@@ -73,5 +73,16 @@ describe("상담실 대화방", () => {
     expect(roomColor({ kind: "reading", summary: "주제: 종합운" })).toBe("#a0714f");
     expect(leftLabel({ kind: "daily", summary: "" }, 3)).toBe("오늘 3번");
     expect(leftLabel({ kind: "reading", summary: "" }, 7)).toBe("이번 달 7번");
+  });
+});
+
+describe("날짜가 지난 오늘의 한마디 방", () => {
+  it("다른 날에 만든 daily 방만 낡은 방이에요", () => {
+    const d = upsertRoom([], { kind: "daily", summary: "" }, new Date("2026-11-12T10:00:00"));
+    const room = d.rooms[0];
+    expect(isStaleDaily(room, new Date("2026-11-12T23:00:00"))).toBe(false);
+    expect(isStaleDaily(room, new Date("2026-11-13T00:10:00"))).toBe(true);
+    const r = upsertRoom([], reading(), new Date("2026-11-12T10:00:00")).rooms[0];
+    expect(isStaleDaily(r, new Date("2026-11-20T10:00:00"))).toBe(false);
   });
 });

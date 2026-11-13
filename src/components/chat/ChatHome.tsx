@@ -9,7 +9,7 @@ import SafeImage from "@/components/landing/SafeImage";
 import { CHAT_CTX_KEY, CHAT_LOG_KEY, readChatCtx } from "@/lib/chatContext";
 import type { BirthInput } from "@/lib/saju/types";
 import { pullRooms, pushRooms, mergeRooms, readSynced, sameRooms, writeSynced } from "@/lib/chatRoomsSync";
-import { leftLabel, loadRooms, removeRoom, roomAnimal, roomColor, saveRooms, upsertRoom, withMsgs, type ChatRoom, type RoomMsg } from "@/lib/chatRooms";
+import { isStaleDaily, leftLabel, loadRooms, removeRoom, roomAnimal, roomColor, saveRooms, upsertRoom, withMsgs, type ChatRoom, type RoomMsg } from "@/lib/chatRooms";
 import { getBrowserStorage } from "@/lib/drawCounter";
 
 /** 도유 상담실 첫 화면: 대화방 목록. 결과서에서 넘어오면 그 풀이의 방으로 바로 들어가요. */
@@ -225,7 +225,7 @@ export default function ChatHome() {
             {rooms.map((r) => (
               <li key={r.id} data-testid="room-card" className="relative flex flex-wrap items-center gap-1 overflow-hidden rounded-2xl border border-brand-100 bg-white pr-2.5">
                 <i aria-hidden="true" className="absolute inset-y-0 left-0 w-1.5" style={{ background: roomColor(r.ctx) }} />
-                <button type="button" onClick={() => setOpen(r.id)} className="flex min-w-0 flex-1 items-center gap-3 py-2.5 pl-5 pr-1 text-left">
+                <button type="button" onClick={() => (isStaleDaily(r) ? void startDaily() : setOpen(r.id))} className="flex min-w-0 flex-1 items-center gap-3 py-2.5 pl-5 pr-1 text-left">
                   <span className="relative h-12 w-12 shrink-0 overflow-hidden rounded-full bg-brand-50" style={{ boxShadow: `0 0 0 2px #fff, 0 0 0 4px ${roomColor(r.ctx)}` }} aria-hidden="true">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={roomAnimal(r.ctx)} alt="" className="h-full w-full origin-[50%_30%] scale-[1.35] object-cover object-[50%_22%]" />
@@ -276,9 +276,12 @@ export default function ChatHome() {
               </li>
             ))}
           </ul>
-          <button type="button" onClick={() => void startDaily()} className="mx-3.5 mb-6 mt-3 w-[calc(100%-1.75rem)] rounded-2xl border-[1.5px] border-dashed border-brand-300 py-3 text-sm font-extrabold text-brand-600">
-            ＋ 오늘의 한마디로 상담하기
-          </button>
+          {/* 오늘의 한마디 방이 목록에 없을 때만 시작 버튼을 보여 줘요. (있으면 위 카드가 그 방이고, 날짜가 바뀌었으면 카드를 누를 때 오늘 것으로 새로 시작해요) */}
+          {!rooms.some((r) => r.ctx.kind === "daily") && (
+            <button type="button" onClick={() => void startDaily()} className="mx-3.5 mb-6 mt-3 w-[calc(100%-1.75rem)] rounded-2xl border-[1.5px] border-dashed border-brand-300 py-3 text-sm font-extrabold text-brand-600">
+              ＋ 오늘의 한마디로 상담하기
+            </button>
+          )}
         </div>
       )}
       <BottomTabs page="chat" />

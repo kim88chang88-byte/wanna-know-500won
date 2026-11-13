@@ -60,6 +60,11 @@ const topicLine = (summary: string) => /^주제: (.+)$/m.exec(summary)?.[1]?.tri
 const isStudyRoom = (ctx: ChatCtx) => ctx.topic === "study" || (ctx.kind === "reading" && /신년운/.test(topicLine(ctx.summary)));
 
 /** 같은 풀이는 같은 방이 되게 하는 값 */
+/** 날짜가 지난 "오늘의 한마디" 방인지. 이런 방은 열 때 오늘 것으로 새로 시작해요. */
+export function isStaleDaily(room: Pick<ChatRoom, "ctx" | "day">, now: Date = new Date()): boolean {
+  return room.ctx.kind === "daily" && room.day !== dayOf(now);
+}
+
 export function roomIdFor(ctx: ChatCtx): string {
   if (ctx.kind === "daily") return "daily";
   return `${ctx.kind}:${hash(JSON.stringify([ctx.birth ?? null, ctx.partnerBirth ?? null, ctx.topic ?? null, topicLine(ctx.summary), ...(ctx.premium ? ["premium"] : [])]))}`;
