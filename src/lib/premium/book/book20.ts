@@ -4,6 +4,7 @@ import type { BookPage, BookRow, BookSection, TopicKey } from "../types";
 import { buildBook, type BookContext } from "./index";
 import { STAGE12_TEXT } from "./dict";
 import { buildLifeChart, type ChartKind } from "./charts";
+import { buildWealthCalendar } from "./wealth";
 import { actionSection, buildEnergyChart, closingSection, decadeCards, natalStageSections, nextChainSection, nowPositionSection, stageGlossary } from "./lifeFlow";
 
 /*
@@ -85,7 +86,9 @@ export function buildBook20(r: SajuResult, ctx: BookContext): BookPage[] {
     const insight = buildTopicInsight(k, r, { elements: ctx.elements, hourUnknown: ctx.hourUnknown, level: "full" });
     const page = fixRefs(pageBy(buildBook(r, { ...ctx, topicKey: k, insight }), "topic"));
     const chart = chartKind ? buildLifeChart(r, chartKind) : null;
-    return chart ? { ...page, chart } : page;
+    const cal = k === "money" ? buildWealthCalendar(r, ctx.hourUnknown, ctx.now ?? new Date()) : null;
+    const withCal = cal ? { ...page, tables: [...page.tables, cal] } : page;
+    return chart ? { ...withCal, chart } : withCal;
   };
 
   const overview = get("overview");

@@ -643,8 +643,49 @@ function PartnerRows({ rows }: { rows: Array<{ label: string; tags: string[] }> 
   );
 }
 
+/** 재물 달력: 12달을 타일로. 지수가 높은 달은 금빛, 잠긴 달은 자물쇠 */
+function WealthCalendar({ table }: { table: BookTable }) {
+  return (
+    <div data-testid="wealth-calendar" className="mt-6">
+      <p className={`text-[14px] font-bold tracking-[0.12em] ${GOLD}`}>🗓️ 앞으로 12달 재물 달력</p>
+      <ul className="mt-3 grid grid-cols-3 gap-2">
+        {table.rows.map((r, i) => {
+          const hi = !r.locked && (r.bar ?? 0) >= 75;
+          return (
+            <li
+              key={`${r.label}-${i}`}
+              className={`rounded-xl border px-2 py-2.5 text-center ${r.current ? "outline outline-2 outline-offset-1 outline-white" : ""} ${hi ? "border-[#e6c887]/70 bg-[#e6c887]/15" : "border-white/10 bg-white/[0.04]"}`}
+            >
+              <div className="text-[12px] text-[#e8dfca]/70">{r.label}</div>
+              {r.locked ? (
+                <div className="mt-1 text-[18px] leading-none">🔒</div>
+              ) : (
+                <>
+                  <div className={`mt-0.5 font-serifKr text-[22px] font-bold leading-tight ${hi ? "text-[#f6dfa8]" : "text-[#f5efe0]"}`}>{r.bar}</div>
+                  <div className="mt-0.5 text-[12px] leading-snug text-[#e8dfca]/85 [word-break:keep-all]">{r.value}</div>
+                </>
+              )}
+            </li>
+          );
+        })}
+      </ul>
+      <p className="mt-2 text-[13px] leading-relaxed text-[#e8dfca]/60">달마다 재물 기운이 얼마나 힘을 받는지 보여 주는 상대 지수야. 높다고 꼭 돈이 들어온다는 뜻은 아니고, 계획과 지출의 속도를 정하는 참고용 달력이야. 금빛 칸이 힘이 실리는 달, 흰 테두리가 이번 달이야.</p>
+    </div>
+  );
+}
+
 function Visual({ page, report }: { page: BookPage; report: PremiumReportView }) {
-  if (page.chart) return <LifeChart chart={page.chart} />;
+  if (page.chart) {
+    const cal = page.key === "topic:money" ? page.tables.find((t) => t.title === "재물 달력") : undefined;
+    return cal ? (
+      <div className="mb-6">
+        <LifeChart chart={page.chart} />
+        <WealthCalendar table={cal} />
+      </div>
+    ) : (
+      <LifeChart chart={page.chart} />
+    );
+  }
   const max = Math.max(1, ...report.elements.map((e) => e.count));
   switch (page.key) {
     case "preface":
@@ -1218,7 +1259,7 @@ export default function PremiumBook({ report, flush = false, finale, previewBlur
           </div>
         ))}
 
-        {page.tables.map((t) => (
+        {page.tables.filter((t) => t.title !== "재물 달력").map((t) => (
           <div key={t.title} aria-hidden={blurred ? "true" : undefined} className={`rounded-[14px] border border-[#2c3260] bg-[#1a1f40] px-4 pb-4 ${blurred ? BLUR : ""}`}>
             <Table t={t} />
           </div>
