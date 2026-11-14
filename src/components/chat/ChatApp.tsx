@@ -344,7 +344,9 @@ export default function ChatApp({ initialCtx, initialMsgs, onChange, onBack, rea
     inflight.current = true;
     setInput("");
     setTyping(null);
-    const next: Bubble[] = [...msgs.filter((m) => !m.error), { role: "user", text, at: Date.now() }];
+    // 실패한 답(오류 말풍선)과 그 질문은 함께 지워요. 답 못 받은 질문이 홀로 남아 대화가 어긋나지 않게요.
+    const kept = msgs.filter((m, i) => !m.error && !(m.role === "user" && msgs[i + 1]?.error));
+    const next: Bubble[] = [...kept, { role: "user", text, at: Date.now() }];
     setMsgs(next);
     nearBottom.current = true;
     setBusy(true);

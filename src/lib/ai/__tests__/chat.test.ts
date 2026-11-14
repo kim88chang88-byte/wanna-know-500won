@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { cleanFollowups, cleanVisual, cleanHistory, CRISIS_ANSWER, earlierQuestions, isCrisis, parseChatAnswer, parseChatReply, polishChatAnswer, recentEndings, usedBasis, visualAllowed, CHAT_SYSTEM_PROMPT } from "../chat";
+import { cleanFollowups, cleanVisual, cleanHistory, CRISIS_ANSWER, earlierQuestions, isCrisis, parseChatAnswer, parseChatReply, polishChatAnswer, recentEndings, usedBasis, usedActions, nowContext, visualAllowed, CHAT_SYSTEM_PROMPT } from "../chat";
 import { parseCtx } from "@/lib/chatServer";
 import { summarizeReport } from "@/lib/chatContext";
 
@@ -170,5 +170,34 @@ describe("끝맺음 반복 막기", () => {
     expect(CHAT_SYSTEM_PROMPT).toContain("이 대화에서 쓸 사주 기운");
     expect(CHAT_SYSTEM_PROMPT).toContain("이미 말한 사주 근거");
     expect(CHAT_SYSTEM_PROMPT).toContain("직접 묻지 않았는데");
+  });
+});
+
+describe("구체성·시점·행동 반복 방지", () => {
+  it("시점 문구: 토요일 낮은 주말 점심 무렵", () => {
+    const t = nowContext(new Date("2026-11-14T12:38:00+09:00"));
+    expect(t).toContain("11월 14일");
+    expect(t).toContain("토요일(주말)");
+    expect(t).toContain("점심 무렵");
+    expect(t).toContain("늦가을");
+  });
+  it("평일 저녁", () => {
+    expect(nowContext(new Date("2026-03-04T20:00:00+09:00"))).toContain("수요일(평일) 저녁, 봄");
+  });
+  it("이미 권한 행동을 센다", () => {
+    const h = [
+      { role: "user" as const, text: "a" },
+      { role: "dori" as const, text: "퇴근길에 폰 메모장에 적어 봐" },
+      { role: "user" as const, text: "b" },
+      { role: "dori" as const, text: "노트에 한 줄 적어 보고 따뜻한 차 한 잔 해" },
+    ];
+    const u = usedActions(h);
+    expect(u).toContain("메모·노트에 적기(2번)");
+    expect(u).toContain("차·음료 마시기(1번)");
+  });
+  it("시스템 프롬프트에 새 규칙이 있다", () => {
+    expect(CHAT_SYSTEM_PROMPT).toContain("돈·생계·살림 걱정");
+    expect(CHAT_SYSTEM_PROMPT).toContain("지금 시점에 맞춰");
+    expect(CHAT_SYSTEM_PROMPT).toContain("서로 다른 영역");
   });
 });

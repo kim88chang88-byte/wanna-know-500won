@@ -109,6 +109,7 @@ export async function POST(request: Request) {
         memo,
       },
       history,
+      { now },
     );
     // 옷 질문이면 이용자 성별과 색에 맞는 착장 이미지를 붙여요 (미리 만든 이미지 중에서 고르기만 해서 AI 비용이 없어요)
     const paletteLabels = reply.visual?.kind === "palette" ? reply.visual.items.map((i) => i.label) : [];
