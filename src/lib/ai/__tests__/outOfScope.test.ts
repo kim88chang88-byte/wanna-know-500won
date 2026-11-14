@@ -15,6 +15,10 @@ describe("답할 수 없는 질문 미리 거르기", () => {
     expect(unableReply("내일 날씨 어때?")?.answer).toContain("미안");
     expect(unableReply("비트코인 사도 될까?")?.answer).toContain("투자");
   });
+  it("레스토랑 질문은 가게 질문으로, 상대의 지금 행동은 사과로", () => {
+    expect(unableReply("예약 가능한 레스토랑 알려줘")?.answer).toContain("가게 이름");
+    expect(unableReply("그 사람 지금 뭐 하고 있는지 알려줘")?.answer).toContain("그 사람이 지금");
+  });
   it("평소 질문은 거르지 않는다", () => {
     for (const q of ["카페 가서 책 읽는 게 좋을까?", "오늘 조심할 게 뭐야?", "주말에 혼자 조용히 머물기 좋은 다른 근교도 추천해 줘", "여행지 추천해줘", "속초 2박 3일 코스 짜 줘", "돈 걱정이 커"]) {
       expect(unableReply(q)).toBeNull();
