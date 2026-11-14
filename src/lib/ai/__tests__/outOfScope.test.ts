@@ -26,7 +26,7 @@ describe("AI 가 못 답했다고 표시한 답", () => {
   it("unable 표시를 읽고, 사과가 앞에 오게 다듬는다", () => {
     const r = parseChatReply({ answer: "미안, 카페 이름은 정확하게 알려 줄 수가 없어. 대신 분위기는 같이 골라 줄 수 있어.", followups: ["a 질문이야", "b 질문이야", "c 질문이야"], choices: [], unable: true, visual: { kind: "none", title: "", items: [] } });
     expect(r?.unable).toBe(true);
-    expect(parseChatReply({ answer: "오늘은 편안하게 걷는 날이야, 천천히 해 봐.", followups: [], choices: [], unable: false, visual: null })?.unable).toBe(false);
+    expect(parseChatReply({ answer: "오늘은 일이 몰려도 서두르지 말고 하나씩 끝내는 쪽이 맞아. 점심 뒤에 십 분만 걸으면 오후가 훨씬 가벼워질 거야. 저녁에는 연락을 하나만 정리해 봐.", followups: [], choices: [], unable: false, visual: null })?.unable).toBe(false);
     expect(apologyFirst("가게 이름은 몰라. 대신 동네를 알려 줄게.")).toMatch(/^미안/);
     expect(apologyFirst("미안, 몰라.")).toBe("미안, 몰라.");
   });
