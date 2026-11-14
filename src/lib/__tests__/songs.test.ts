@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { SONGS, songCatalog, songSearchUrl } from "../songs";
+import { SONGS, songCatalog, songSearchUrl, stripUnknownSongs } from "../songs";
 import { cleanVisual, visualAllowed } from "../ai/chat";
 
 describe("노래 목록", () => {
@@ -27,5 +27,13 @@ describe("노래 목록", () => {
   it("노래를 물었을 때만 카드가 허용된다", () => {
     expect(visualAllowed("songs", "들어볼만한 곡 추천해줘")).toBe(true);
     expect(visualAllowed("songs", "오늘 조심할 게 뭐야?")).toBe(false);
+  });
+  it("목록 밖 곡을 말한 문장은 지우고 목록 곡은 남긴다", () => {
+    const a = "오늘 오후엔 창가에 앉아서 넬의 '기억을 지워주는 병'이나 잔나비의 '주저하는 연인들을 위해' 같은 노래를 들어봐. 편하게 쉬어도 충분해.";
+    expect(stripUnknownSongs(a)).toBe("편하게 쉬어도 충분해.");
+    const b = "잔나비의 '주저하는 연인들을 위해' 같은 노래를 들어봐. 차분해질 거야.";
+    expect(stripUnknownSongs(b)).toBe(b);
+    expect(stripUnknownSongs("이루마의 'River Flows in You'가 좋아.")).toContain("River Flows");
+    expect(stripUnknownSongs("오늘은 '쉬는 날'로 정해 봐.")).toBe("오늘은 '쉬는 날'로 정해 봐.");
   });
 });

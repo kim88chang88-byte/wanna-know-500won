@@ -81,3 +81,30 @@ export const songCatalog = (): string => Object.entries(SONGS).map(([n, s]) => `
 
 /** 듣기 링크: 특정 곡 주소가 아니라 검색 주소라서 깨질 일이 없어요. */
 export const songSearchUrl = (label: string): string => `https://www.youtube.com/results?search_query=${encodeURIComponent(label)}`;
+
+const SONG_TITLES = Object.keys(SONGS).map((k) => k.split(" - ").slice(1).join(" - ").toLowerCase());
+const knownTitle = (t: string): boolean => {
+  const x = t.trim().toLowerCase();
+  return x.length >= 2 && SONG_TITLES.some((n) => n.includes(x));
+};
+
+/**
+ * 글 속에서 "가수의 '곡명'" 꼴로 말한 곡이 목록에 없으면 그 문장을 지워요.
+ * (AI 가 목록 밖의 곡을 지어내거나 잘못 기억해도 이용자에게 닿지 않게)
+ */
+export function stripUnknownSongs(text: string): string {
+  const re = /(?:^|[\s,(])[가-힣A-Za-z0-9.&()]{1,20}(?:의|이 부른|가 부른)\s*['‘“"「]([^'’”"」]{1,40})['’”"」]/;
+  return text
+    .split("\n\n")
+    .map((para) =>
+      para
+        .split(/(?<=[.?!…])\s+/)
+        .filter((sent) => {
+          const m = re.exec(sent);
+          return !m || knownTitle(m[1]);
+        })
+        .join(" "),
+    )
+    .filter((p) => p.trim().length > 0)
+    .join("\n\n");
+}

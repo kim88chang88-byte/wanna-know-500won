@@ -1,7 +1,7 @@
 import { PALETTE, SPOTS } from "@/lib/visualPalette";
 import { SCENTS } from "@/lib/scents";
 import { PROPS, propCatalog } from "@/lib/props";
-import { SONGS, songCatalog } from "@/lib/songs";
+import { SONGS, songCatalog, stripUnknownSongs } from "@/lib/songs";
 import { analyzeChart } from "@/lib/saju/analysis";
 import type { SajuChart } from "@/lib/saju/types";
 import type { ChatKind, ChatMsg } from "@/lib/chatContext";
@@ -439,5 +439,5 @@ export async function chatDori(
   });
   const q = [...history].reverse().find((m) => m.role === "user")?.text ?? "";
   const visual = r.visual && visualAllowed(r.visual.kind, q) ? r.visual : null;
-  return { ...r, visual, answer: polishChatAnswer(r.answer, history, i.name) };
+  return { ...r, visual, answer: polishChatAnswer(stripUnknownSongs(r.answer), history, i.name) };
 }

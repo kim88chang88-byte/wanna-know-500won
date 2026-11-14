@@ -153,35 +153,61 @@ function Scent({ v }: { v: ChatVisual }) {
   );
 }
 
+const SONG_COVER: Record<string, string> = {
+  수: "radial-gradient(circle at 30% 25%,#cfe6ff,#6aa0ff 50%,#3a4fb8)",
+  토: "radial-gradient(circle at 30% 25%,#ffe9b0,#f1b24c 55%,#b96d1f)",
+  금: "radial-gradient(circle at 30% 25%,#fff,#cfd4e2 50%,#8d95ad)",
+  목: "radial-gradient(circle at 30% 25%,#d8f5c8,#6fcf7a 50%,#2f8a52)",
+  화: "radial-gradient(circle at 30% 25%,#ffd9cf,#ff7d6a 50%,#c23b3b)",
+};
+
 function Songs({ v }: { v: ChatVisual }) {
   const shown = v.items.filter((it) => SONGS[it.label]);
   return (
-    <Paper title={v.title || "오늘 들어 볼 노래"}>
-      <ul className="grid gap-2 pt-1">
+    <div
+      className="my-2 ml-1 mr-2 rounded-[24px] p-4 text-white shadow-[0_12px_30px_rgba(40,30,120,0.5)]"
+      style={{ background: "radial-gradient(circle at 80% 0,#5a46c9,transparent 55%),linear-gradient(180deg,#1b1840,#0f0d26)" }}
+    >
+      <style>{`@keyframes songEq{0%,100%{height:4px}50%{height:16px}}.song-eq s{display:block;width:3px;border-radius:2px;background:#b8a6ff;animation:songEq 1s ease-in-out infinite}.song-eq s:nth-child(2){animation-delay:.2s}.song-eq s:nth-child(3){animation-delay:.4s}.song-eq s:nth-child(4){animation-delay:.1s}@media (prefers-reduced-motion:reduce){.song-eq s{animation:none;height:10px}}`}</style>
+      <p className="mb-3 text-[15px] font-extrabold text-[#d9ccff]">🌙 {v.title || "오늘의 추천 곡"}</p>
+      <ul className="grid gap-2">
         {shown.map((it, i) => {
           const [artist, ...rest] = it.label.split(" - ");
+          const el = SONGS[it.label].el;
           return (
-            <li key={i} className="flex items-center gap-2.5 rounded-[10px] bg-white px-3 py-2 shadow-[0_3px_8px_rgba(0,0,0,0.18)]">
-              <span aria-hidden="true" className="text-[22px]">{["🎧", "🎵", "🎶"][i % 3]}</span>
+            <li key={i} className="flex items-center gap-3 rounded-2xl border border-white/15 bg-white/[0.08] p-2.5 backdrop-blur-[6px]">
+              <span
+                aria-hidden="true"
+                className="block aspect-square w-[52px] shrink-0 rounded-xl shadow-[0_0_16px_rgba(160,140,255,0.6)]"
+                style={{ background: SONG_COVER[el] }}
+              />
               <div className="min-w-0 flex-1">
-                <b className="block break-keep text-[13.5px] leading-tight text-[#2a2540]">{rest.join(" - ")}</b>
-                <span className="block truncate text-[12px] text-[#6b5f8f]">{artist}</span>
-                {it.sub && <span className="mt-0.5 block break-keep font-hand text-[15px] leading-tight text-[#8a5a2b]">{it.sub}</span>}
+                <b className="block break-keep text-[14px] leading-tight">{rest.join(" - ")}</b>
+                <span className="block truncate text-[12px] text-white/70">{artist}</span>
+                {it.sub && <span className="mt-0.5 block break-keep text-[12px] text-[#c9baff]">{it.sub}</span>}
               </div>
+              {i === 0 && (
+                <span aria-hidden="true" className="song-eq flex h-4 shrink-0 items-end gap-0.5">
+                  <s />
+                  <s />
+                  <s />
+                  <s />
+                </span>
+              )}
               <a
                 href={songSearchUrl(it.label)}
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label={`${it.label} 들으러 가기`}
-                className="shrink-0 rounded-full bg-brand-500 px-3 py-1.5 text-[12px] font-extrabold text-white active:scale-95"
+                className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-[linear-gradient(135deg,#a98bff,#7a52d6)] text-[14px] shadow-[0_0_14px_rgba(150,120,255,0.8)] active:scale-95"
               >
-                듣기
+                ▶
               </a>
             </li>
           );
         })}
       </ul>
-    </Paper>
+    </div>
   );
 }
 
