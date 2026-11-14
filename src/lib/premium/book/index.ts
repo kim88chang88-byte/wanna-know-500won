@@ -19,6 +19,7 @@ import { buildLookBack, buildTraits } from "./resonance";
 import { ELEMENT_INFO, FLOW_LINE, GROUP_TRAIT, GROUPS, groupOf, type Group } from "../topic";
 import type { BookPage, BookRow, BookSection, ElementView, PillarView, TopicInsight, TopicKey } from "../types";
 import { realityCheck } from "./reality";
+import { ageAnchorLine, nextChainLine } from "./lifeFlow";
 import { buildMonthTimeline, daeunCompareRows, timelineRows } from "./timeline";
 import {
   ELEMENT_DOMAIN,
@@ -391,7 +392,7 @@ export function buildBook(r: SajuResult, ctx: BookContext): BookPage[] {
   const daeunSections: BookSection[] = [];
   if (cur) {
     const g = groupsOf(cur.stemTenGod, cur.branchTenGod)[0] ?? dominant;
-    daeunSections.push({ heading: `지금 대운 · ${cur.ganzhi} (${cur.startAge}~${cur.endAge}세)`, reality: realityCheck("flow"), body: `${FLOW_LINE[g]} ${STAGE12_TEXT[cur["12unsung"]] ?? ""} ${GROUP_LONG[g].talent}` });
+    daeunSections.push({ heading: `지금 대운 · ${cur.ganzhi} (${cur.startAge}~${cur.endAge}세)`, reality: realityCheck("flow"), body: `${ageAnchorLine(r)} ${FLOW_LINE[g]} ${STAGE12_TEXT[cur["12unsung"]] ?? ""} ${GROUP_LONG[g].talent}`.trim() });
   }
   if (cur) {
     const line = interactionLine(natal, { label: "대운", ganzhi: cur.ganzhi });
@@ -400,7 +401,7 @@ export function buildBook(r: SajuResult, ctx: BookContext): BookPage[] {
   if (idx >= 0 && dl[idx + 1]) {
     const nx = dl[idx + 1];
     const g = groupsOf(nx.stemTenGod, nx.branchTenGod)[0] ?? dominant;
-    daeunSections.push({ heading: `다음 대운 · ${nx.ganzhi} (${nx.startAge}세~)`, body: `${nx.startAge}세부터는 분위기가 달라져. ${FLOW_LINE[g]} ${STAGE12_TEXT[nx["12unsung"]] ?? ""}` });
+    daeunSections.push({ heading: `다음 대운 · ${nx.ganzhi} (${nx.startAge}세~)`, body: `${nx.startAge}세부터는 분위기가 달라져. ${nextChainLine(r)} ${FLOW_LINE[g]} ${STAGE12_TEXT[nx["12unsung"]] ?? ""}`.replace(/\s+/g, " ") });
   }
   if (idx > 0) {
     const pv = dl[idx - 1];

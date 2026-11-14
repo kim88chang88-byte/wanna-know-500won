@@ -4,6 +4,7 @@ import type { BookPage, BookRow, BookSection, TopicKey } from "../types";
 import { buildBook, type BookContext } from "./index";
 import { STAGE12_TEXT } from "./dict";
 import { buildLifeChart, type ChartKind } from "./charts";
+import { actionSection, buildEnergyChart, closingSection, decadeCards, natalStageSections, nextChainSection, nowPositionSection, stageGlossary } from "./lifeFlow";
 
 /*
  * 프리미엄 20쪽 리포트. 기존 규칙 기반 10쪽 빌더(buildBook)의 내용을 장 구성에 맞게 다시 묶어요.
@@ -143,8 +144,13 @@ export function buildBook20(r: SajuResult, ctx: BookContext): BookPage[] {
       lead: cur ? `지금은 ${cur.ganzhi} 대운, 십이운성으로는 ‘${(cur as unknown as Record<string, string>)["12unsung"] ?? ""}’ 단계에 있어.` : "인생의 시기마다 기운의 세기가 어떻게 달라지는지 봐.",
       sections: [
         { heading: "십이운성이란?", body: "기운이 태어나 자라고, 절정을 지나 쉬었다가 다시 시작하는 열두 단계를 말해. 장생·목욕·관대·건록·제왕·쇠·병·사·묘·절·태·양의 순서로 흐르고, 어느 단계에 있든 좋고 나쁨이 아니라 ‘지금 어울리는 속도’를 알려 주는 신호야." },
-        ...stage.sections,
+        stageGlossary(),
+        ...natalStageSections(r, ctx.hourUnknown),
+        ...(nowPositionSection(r) ? [nowPositionSection(r) as BookSection] : []),
+        ...decadeCards(r, ctx.hourUnknown),
+        ...[nextChainSection(r), actionSection(r), closingSection(r)].filter((x): x is BookSection => x !== null),
       ],
+      ...(buildEnergyChart(r) ? { extra: { chart: buildEnergyChart(r) as NonNullable<BookPage["chart"]> } } : {}),
       tables: [{ title: "대운별 십이운성", rows: stage.rows }],
     },
     {

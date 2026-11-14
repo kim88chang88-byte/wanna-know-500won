@@ -107,6 +107,8 @@ export interface BookChartPoint {
   /** 가장 힘이 실리는 시기 순위(1, 2) */
   peak?: 1 | 2;
   locked?: boolean;
+  /** 점 아래에 붙이는 짧은 표시(예: 아래 카드와 같은 번호 ①) */
+  tag?: string;
 }
 /** 나이별 재물·인연·일 흐름 그래프 */
 export interface BookChart {
@@ -116,6 +118,8 @@ export interface BookChart {
   caption: string;
   points: BookChartPoint[];
   callouts: Array<{ label: string; text: string }>;
+  /** 세로축 왼쪽에 붙이는 단계 이름(높음·중간·낮음). 종합 에너지 그래프에서만 써요. */
+  axis?: { high: string; mid: string; low: string };
 }
 /** 프리미엄 리포트의 한 페이지 */
 export interface BookPage {

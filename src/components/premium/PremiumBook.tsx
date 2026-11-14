@@ -200,7 +200,7 @@ function Table({ t }: { t: BookTable }) {
 function LifeChart({ chart }: { chart: BookChart }) {
   const W = 320;
   const H = 176;
-  const padX = 14;
+  const padX = chart.axis ? 28 : 14;
   const top = 26;
   const bottom = 34;
   const n = chart.points.length;
@@ -227,6 +227,13 @@ function LifeChart({ chart }: { chart: BookChart }) {
         {[25, 50, 75].map((g) => (
           <line key={g} x1={padX} x2={W - padX} y1={y((g / 100) * maxV)} y2={y((g / 100) * maxV)} stroke="#ffffff" strokeOpacity="0.1" strokeDasharray="3 4" />
         ))}
+        {chart.axis && (
+          <g fontSize="9" fill="#e8dfca" fillOpacity="0.6">
+            <text x="2" y={y(0.9 * maxV) + 3}>{chart.axis.high}</text>
+            <text x="2" y={y(0.5 * maxV) + 3}>{chart.axis.mid}</text>
+            <text x="2" y={y(0.12 * maxV) + 3}>{chart.axis.low}</text>
+          </g>
+        )}
         {area && <path d={area} fill="url(#lifeArea)" />}
         {line && <path d={line} fill="none" stroke="#e6c887" strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" />}
         {chart.points.map((p, i) => (
@@ -249,6 +256,9 @@ function LifeChart({ chart }: { chart: BookChart }) {
                   <text x={Math.min(Math.max(x(i), 26), W - 26)} y={y(val(p)) + (p.current || p.peak ? 17 : -9)} textAnchor="middle" fontSize="9.5" fontWeight="700" fill="#f3e7c9">{formatWon(p.amount ?? 0)}</text>
                 )}
               </>
+            )}
+            {p.tag && !p.locked && (
+              <text x={x(i)} y={y(val(p)) + 14} textAnchor="middle" fontSize="9.5" fontWeight="700" fill="#f3e7c9">{p.tag}</text>
             )}
             <text x={x(i)} y={H - 16} textAnchor="middle" fontSize="9.5" fill="#e8dfca" fillOpacity="0.85">{p.age}</text>
           </g>
