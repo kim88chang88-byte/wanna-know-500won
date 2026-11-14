@@ -208,6 +208,6 @@ export function buildPremiumReport(rawInput: BirthInput, now: Date = new Date(),
     concern: hasConcern(concern) ? { text: concern.text, answers: buildConcernAnswers(concern, elements, gradeLabel) } : null,
     locked: locking,
     compat: pair ? pair.compat : null,
-    book: pair ? pair.book : full ? (locking ? applyLocks(buildBook20(r, { elements, pillars, hourUnknown, topicKey, insight: topic, gradeLabel, now }), r.currentYear) : buildBook20(r, { elements, pillars, hourUnknown, topicKey, insight: topic, gradeLabel, now })) : [],
+    book: pair ? pair.book : full ? (locking ? applyLocks(buildBook20(r, { elements, pillars, hourUnknown, topicKey, insight: topic, gradeLabel, now, concern }), r.currentYear) : buildBook20(r, { elements, pillars, hourUnknown, topicKey, insight: topic, gradeLabel, now, concern })) : [],
   };
 }

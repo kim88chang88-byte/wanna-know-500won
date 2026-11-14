@@ -448,3 +448,16 @@ export function ageAnchorLine(r: SajuResult): string {
 export function nextChainLine(r: SajuResult): string {
   return nextChainSection(r)?.body.replace(/^.*?넘어가\.\s*/, "") ?? "";
 }
+
+/** 지금 대운 단계의 이름(예: "숨을 고르며 단단해지는 시기") */
+export function nowStageName(r: SajuResult): string | null {
+  const cur = r.daeun.current as unknown as DaeunItem | null;
+  const st = cur ? stageOfDaeun(cur) : null;
+  return st ? STAGE_NAME[st] : null;
+}
+
+/** 지금 대운의 주제(예: "표현력과 아이디어") */
+export function nowDaeunTrait(r: SajuResult): string | null {
+  const cur = r.daeun.current as unknown as DaeunItem | null;
+  return cur ? GROUP_TRAIT[groupOfDaeun(cur)] : null;
+}

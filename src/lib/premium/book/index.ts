@@ -1,6 +1,7 @@
 import type { SajuResult } from "ssaju";
 import { STEMS } from "@/lib/saju/constants";
 import { josa } from "../josa";
+import type { Concern } from "@/lib/concerns";
 import {
   careerSections,
   comboSections,
@@ -60,6 +61,8 @@ export interface BookContext {
   gradeLabel: string;
   /** 이번 달 풀이에 쓰는 기준 시각(없으면 지금) */
   now?: Date;
+  /** 이용자가 적은 요즘 고민(선택). 장마다 이 고민과 이어 읽는 글을 붙여요 */
+  concern?: Concern | null;
 }
 
 const ELEMENT_OF_STEM: Record<string, string> = { wood: "목", fire: "화", earth: "토", metal: "금", water: "수" };

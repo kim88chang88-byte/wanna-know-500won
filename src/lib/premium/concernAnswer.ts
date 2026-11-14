@@ -9,7 +9,7 @@ import type { ConcernAnswer, ElementView } from "./types";
  * 직접 적은 글은 서버에서 이 규칙에 쓰지 않고(해석하지 않고) 그대로 되돌려 보여 주기만 해요.
  */
 
-const BODY: Record<ConcernId, { lead: string; tip: string }> = {
+export const CONCERN_BODY: Record<ConcernId, { lead: string; tip: string }> = {
   crush: {
     lead: "설레는 마음이 크면 상대의 한마디에 하루가 흔들리기 쉬워. 결과를 점치기보다, 내가 편안한 속도를 지키는 쪽이 오래 가.",
     tip: "이번 주에는 확인받으려는 연락 대신, 부담 없는 안부 한 번만 건네 봐.",
@@ -189,7 +189,7 @@ export function buildConcernAnswers(concern: Concern | null | undefined, element
   const chartLine = `내 사주는 ${gradeLabel} 에너지에 ${lowest.name}(${info.color}) 기운이 가장 적어. ${ELEMENT_LACK[lowest.name]} 도움이 되는 생활 습관은 '${habit.habit}'이야.`;
   return concern.tags.map((id) => {
     const chip = CONCERN_CHIPS.find((c) => c.id === id)!;
-    const b = BODY[id];
+    const b = CONCERN_BODY[id];
     return { id, emoji: chip.emoji, title: concernLabel(id), body: `${b.lead} ${chartLine} ${b.tip}` };
   });
 }
