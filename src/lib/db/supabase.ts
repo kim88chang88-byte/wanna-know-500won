@@ -530,6 +530,15 @@ export function createDb(config: DbConfig, fetchImpl: FetchLike = fetch) {
       return typeof n === "number" && Number.isFinite(n) ? n : 0;
     },
 
+    /** 속도 제한에서 센 한 번을 되돌려요(rate_limit_refund 함수가 있을 때). */
+    async refundRateLimit(key: string, windowSec: number): Promise<void> {
+      await call("rpc/rate_limit_refund", {
+        method: "POST",
+        headers: headers(),
+        body: JSON.stringify({ p_key: key.slice(0, 200), p_window_sec: windowSec }),
+      });
+    },
+
     /** 오늘 방문을 기록하고(vid 는 이미 해시된 값), 오늘·누적 방문자 수를 돌려줘요. DB 함수(visit_hit) 안에서 한 번에 처리해요. */
     async recordVisit(day: string, vid: string): Promise<{ today: number; total: number } | null> {
       const res = await call("rpc/visit_hit", {

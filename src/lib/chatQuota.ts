@@ -15,7 +15,7 @@ export const FREE_DAILY = 3;
 export const FREE_RESULT = 5;
 export const FREE_COMPAT = 10;
 export const BUY_AMOUNT = 5;
-export const DAY_CAP = 40;
+export const DAY_CAP = 50;
 
 export const freeFor = (kind: ChatKind): number => (kind === "daily" ? FREE_DAILY : kind === "compat" ? FREE_COMPAT : FREE_RESULT);
 

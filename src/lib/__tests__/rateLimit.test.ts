@@ -25,4 +25,14 @@ describe("createRateLimiter", () => {
     t = 1001;
     expect(rl.check("a").ok).toBe(true);
   });
+
+  it("refund 는 방금 센 한 번을 되돌려 줘서 실패한 요청이 한도를 쓰지 않는다", () => {
+    const rl = createRateLimiter(2, 1000, () => 0);
+    expect(rl.check("a").ok).toBe(true);
+    expect(rl.check("a").ok).toBe(true);
+    expect(rl.check("a").ok).toBe(false);
+    rl.refund("a");
+    expect(rl.check("a").ok).toBe(true);
+    rl.refund("none");
+  });
 });

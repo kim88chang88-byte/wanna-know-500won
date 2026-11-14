@@ -9,7 +9,8 @@ import { ReadingUnavailableError } from "@/lib/ai/interpret";
 import { hasAiKey } from "@/lib/ai/llm";
 import { DAY_CAP } from "@/lib/chatQuota";
 import { canChat, chatServerCap, dbOrNull, parseCtx, quotaLeft, refundQuestion, sessionOf, takeQuestion, targetOf } from "@/lib/chatServer";
-import { enforceLimits, guardOrigin, takeLimit } from "@/lib/guard";
+import { isAdmin } from "@/lib/admin/auth";
+import { enforceLimits, guardOrigin, refundLimit, takeLimit } from "@/lib/guard";
 import { resolveBirth } from "@/lib/saju/birthPlace";
 import { calculateSaju } from "@/lib/saju/calculate";
 import { SajuInputError } from "@/lib/saju/errors";
@@ -50,6 +51,8 @@ export async function POST(request: Request) {
   if (!hasAiKey()) return NextResponse.json({ error: "지금은 도리가 답을 준비하지 못했어." }, { status: 503 });
 
   let taken: { left: number; via: "db" | "mem" } | null = null;
+  let dayTaken = false;
+  const DAY_MS = 24 * 60 * 60 * 1000;
   try {
     // 누구의 사주인지: 결과서에서 왔으면 그 풀이의 생년월일시, 오늘 카드면 저장된 내 정보
     let birth = ctx.birth;
@@ -69,11 +72,16 @@ export async function POST(request: Request) {
     if (!all.ok) throw new ReadingUnavailableError();
 
     // 하루에 한 사람이 보낼 수 있는 전체 질문 수 (범위가 달라도 합쳐서)
-    const day = await takeLimit("chat-day", `u:${session.sub}`, DAY_CAP, 24 * 60 * 60 * 1000);
-    if (!day.ok) return NextResponse.json({ error: "오늘은 도리가 질문을 많이 받았어. 내일 다시 물어봐 줘 ❄️", code: "day_cap", left: 0 }, { status: 429 });
+    // 관리자(테스트 계정)는 이 한도에서 빼요.
+    if (!isAdmin(session.sub, process.env)) {
+      const day = await takeLimit("chat-day", `u:${session.sub}`, DAY_CAP, DAY_MS);
+      if (!day.ok) return NextResponse.json({ error: "오늘은 도리가 질문을 많이 받았어. 내일 다시 물어봐 줘 ❄️", code: "day_cap", left: 0 }, { status: 429 });
+      dayTaken = true;
+    }
 
     taken = await takeQuestion(db, target);
     if (taken.left < 0) {
+      if (dayTaken) await refundLimit("chat-day", `u:${session.sub}`, DAY_CAP, DAY_MS);
       return NextResponse.json({ error: "질문을 모두 사용했어. 조약돌 하나로 질문을 5번 더 할 수 있어.", code: "quota", left: 0 }, { status: 402 });
     }
 
@@ -110,6 +118,7 @@ export async function POST(request: Request) {
   } catch (err) {
     // 답을 못 만들었으면 쓴 질문을 돌려줘요.
     if (taken && taken.left >= 0) await refundQuestion(db, target, taken.via);
+    if (dayTaken) await refundLimit("chat-day", `u:${session.sub}`, DAY_CAP, DAY_MS);
     if (err instanceof SajuInputError) return NextResponse.json({ error: err.message }, { status: 400 });
     if (err instanceof ReadingUnavailableError) return NextResponse.json({ error: "오늘은 도리가 많이 답해서 잠깐 쉬고 있어. 내일 다시 물어봐 줘 ❄️" }, { status: 503 });
     console.error("chat failed:", err instanceof Error ? err.message : "unknown");

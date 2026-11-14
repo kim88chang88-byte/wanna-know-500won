@@ -162,6 +162,24 @@ $$;
 revoke all on function public.rate_limit_take(text, int, int) from public, anon, authenticated;
 grant execute on function public.rate_limit_take(text, int, int) to service_role;
 
+-- 요청이 실패했을 때 방금 센 한 번을 되돌려요. (이 파일 전체를 다시 Run 하면 추가돼요. 없어도 서비스는 그대로 동작해요)
+create or replace function public.rate_limit_refund(p_key text, p_window_sec int)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  win bigint := floor(extract(epoch from now()) / p_window_sec);
+  b text := p_key || ':' || win::text;
+begin
+  update public.rate_limits set hits = hits - 1 where bucket = b and hits > 0;
+end;
+$$;
+
+revoke all on function public.rate_limit_refund(text, int) from public, anon, authenticated;
+grant execute on function public.rate_limit_refund(text, int) to service_role;
+
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 내 보관함: 로그인한 회원이 본 풀이 결과를 그대로 저장해 두고, 다시 볼 때는 AI 를 부르지 않아요.
 -- 회원을 지우면(탈퇴·카카오 연결 끊기) 함께 지워져요. 같은 결과를 두 번 저장하지 않게 payload_hash 로 걸러요.

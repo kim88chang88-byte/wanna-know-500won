@@ -59,6 +59,18 @@ function memoryLimiter(name: string, limit: number, windowMs: number): RateLimit
 
 const DB_TIMEOUT_MS = 1500;
 
+/** takeLimit 으로 센 한 번을 되돌려요. 답을 못 줬거나 막힌 요청이 하루 한도를 쓰지 않게 해요. (DB 함수가 없으면 메모리만 되돌려요) */
+export async function refundLimit(name: string, subject: string, limit: number, windowMs: number): Promise<void> {
+  memoryLimiter(name, limit, windowMs).refund(subject);
+  const config = loadDbConfig(process.env);
+  if (!config) return;
+  try {
+    await Promise.race([createDb(config).refundRateLimit(`${name}:${subject}`, Math.ceil(windowMs / 1000)), new Promise<null>((r) => setTimeout(() => r(null), DB_TIMEOUT_MS))]);
+  } catch {
+    // 함수를 아직 안 만들었거나 DB 가 잠깐 안 될 때는 조용히 넘어가요.
+  }
+}
+
 /**
  * 한 가지 키에 대한 제한 확인. 서버 메모리에서 먼저 세고(DB 가 느리거나 없어도 최소한의 방어),
  * DB(rate_limit_take 함수)가 있으면 여러 서버가 함께 세요. DB 가 실패하면 메모리 결과만 써요.

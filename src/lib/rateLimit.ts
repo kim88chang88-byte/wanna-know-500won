@@ -5,6 +5,8 @@
  */
 export interface RateLimiter {
   check(key: string): { ok: true } | { ok: false; retryAfterSec: number };
+  /** 방금 센 한 번을 되돌려요(요청이 실패했을 때) */
+  refund(key: string): void;
 }
 
 export function createRateLimiter(limit: number, windowMs: number, now: () => number = Date.now): RateLimiter {
@@ -22,6 +24,10 @@ export function createRateLimiter(limit: number, windowMs: number, now: () => nu
       // 오래된 키가 쌓이지 않게 가끔 정리
       if (hits.size > 5000) for (const [k, v] of hits) if (v.every((x) => t - x >= windowMs)) hits.delete(k);
       return { ok: true };
+    },
+    refund(key) {
+      const list = hits.get(key);
+      if (list && list.length > 0) list.pop();
     },
   };
 }
