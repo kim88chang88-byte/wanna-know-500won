@@ -90,6 +90,8 @@ interface Bubble extends ChatMsg {
   outfit?: OutfitPick | null;
   /** 도리가 되물은 질문에 눌러서 답하는 선택지 */
   choices?: string[];
+  /** 답 아래 바로가기 버튼 (예: 지도에서 찾기) */
+  links?: Array<{ label: string; url: string }>;
   /** 답 앞에 붙는 "도리 메모" 카드 (오늘 일진과 내 사주) */
   memo?: ChatMemo | null;
 }
@@ -356,7 +358,7 @@ export default function ChatApp({ initialCtx, initialMsgs, onChange, onBack, rea
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ctx, messages: next.filter((m) => !m.log).map(({ role, text: t }) => ({ role, text: t })) }),
       });
-      const data = (await res.json().catch(() => null)) as { answer?: string; followups?: unknown; visual?: ChatVisual | null; outfit?: OutfitPick | null; choices?: unknown; memo?: ChatMemo | null; error?: string; code?: string; left?: number } | null;
+      const data = (await res.json().catch(() => null)) as { answer?: string; followups?: unknown; visual?: ChatVisual | null; outfit?: OutfitPick | null; choices?: unknown; links?: unknown; memo?: ChatMemo | null; error?: string; code?: string; left?: number } | null;
       if (res.status === 402 && data?.code === "quota") {
         // 질문을 다 쓴 경우: 방금 보낸 말은 입력창으로 돌려놓고 "조약돌로 더하기" 카드를 보여 줘요
         setLeft(0);
@@ -368,7 +370,7 @@ export default function ChatApp({ initialCtx, initialMsgs, onChange, onBack, rea
       if (!res.ok || !data?.answer) throw new Error(data?.error ?? "도리가 잠깐 물놀이하러 갔어. 다시 보내 볼래?");
       if (typeof data.left === "number") setLeft(data.left);
       else setLeft((l) => (l === null ? null : Math.max(0, l - 1)));
-      const all: Bubble[] = [...next, { role: "dori", text: data.answer, at: Date.now(), follow: Array.isArray(data.followups) ? data.followups.filter((f): f is string => typeof f === "string").slice(0, 3) : undefined, visual: data.visual ?? null, outfit: data.outfit ?? null, choices: Array.isArray(data.choices) ? data.choices.filter((c): c is string => typeof c === "string").slice(0, 2) : undefined, memo: data.memo ?? null }];
+      const all: Bubble[] = [...next, { role: "dori", text: data.answer, at: Date.now(), follow: Array.isArray(data.followups) ? data.followups.filter((f): f is string => typeof f === "string").slice(0, 3) : undefined, visual: data.visual ?? null, outfit: data.outfit ?? null, choices: Array.isArray(data.choices) ? data.choices.filter((c): c is string => typeof c === "string").slice(0, 2) : undefined, memo: data.memo ?? null, links: Array.isArray(data.links) ? (data.links as Array<{ label?: unknown; url?: unknown }>).filter((l): l is { label: string; url: string } => typeof l.label === "string" && typeof l.url === "string" && l.url.startsWith("https://www.google.com/maps/search/")).slice(0, 2) : undefined }];
       setMsgs(all);
       if (!prefersReducedMotion()) setTyping({ idx: all.length - 1, shown: 1 });
     } catch (e) {
@@ -580,6 +582,15 @@ export default function ChatApp({ initialCtx, initialMsgs, onChange, onBack, rea
             />
             {m.visual && !live && !m.error && <VisualCard v={m.visual} onAsk={(q) => void send(q)} />}
             {m.outfit && !live && !m.error && <OutfitCard pick={m.outfit} />}
+            {m.links && m.links.length > 0 && !live && !m.error && (
+              <div className="ml-11 flex flex-wrap gap-1.5" data-testid="reply-links">
+                {m.links.map((l) => (
+                  <a key={l.url} href={l.url} target="_blank" rel="noopener noreferrer" className="rounded-full bg-brand-500 px-3.5 py-1.5 text-[12.5px] font-extrabold text-white shadow-sm active:scale-95">
+                    📍 {l.label}
+                  </a>
+                ))}
+              </div>
+            )}
             {!live && !m.error && !busy && i === msgs.length - 1 && leftNow > 0 && m.choices && m.choices.length === 2 && (
               <div className="ml-11 flex flex-wrap gap-1.5" aria-label="도리 질문에 답하기" data-testid="reply-choices">
                 {m.choices.map((c) => (

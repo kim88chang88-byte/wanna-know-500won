@@ -2,6 +2,7 @@ import { isOutfitQuestion, pickOutfit } from "@/lib/outfits";
 import { NextResponse } from "next/server";
 import { takeAiBudget } from "@/lib/ai/budget";
 import { chatDori, cleanHistory, CRISIS_ANSWER, isCrisis } from "@/lib/ai/chat";
+import { apologyFirst, REFUND_DAY_CAP, REFUND_NOTICE, unableReply } from "@/lib/ai/outOfScope";
 import { buildCoreFacts, factsNowFor } from "@/lib/ai/coreFacts";
 import { buildChatMemo, buildCompatMemo, buildReadingMemo, type ChatMemo } from "@/lib/ai/chatMemo";
 import { buildDailyFacts, kstToday } from "@/lib/ai/dailyFacts";
@@ -47,6 +48,10 @@ export async function POST(request: Request) {
   // 마음이 힘든 말은 AI 를 부르지 않고 안내만 해요. (질문 횟수도 쓰지 않아요)
   const last = history[history.length - 1].text;
   if (isCrisis(last)) return NextResponse.json({ answer: CRISIS_ANSWER, safe: true, left: await quotaLeft(db, target) });
+
+  // 도리가 정확하게 답할 수 없는 질문(가게 이름·실시간 정보·투자 종목)은 AI 를 부르지 않고 사과와 대안만 보내요. 질문은 쓰지 않아요.
+  const unable = unableReply(last);
+  if (unable) return NextResponse.json({ answer: unable.answer, links: unable.links, unable: true, left: await quotaLeft(db, target) });
 
   if (!hasAiKey()) return NextResponse.json({ error: "지금은 도리가 답을 준비하지 못했어." }, { status: 503 });
 
@@ -111,6 +116,21 @@ export async function POST(request: Request) {
       history,
       { now },
     );
+    // 도리가 "정확하게 답할 수 없는 질문"이라고 표시한 답: 사과로 다듬고 질문을 돌려줘요 (하루 상한 안에서만)
+    if (reply.unable) {
+      const refund = await takeLimit("chat-refund", `u:${session.sub}`, REFUND_DAY_CAP, DAY_MS);
+      let answer = apologyFirst(reply.answer);
+      let refunded = false;
+      if (refund.ok) {
+        if (taken && taken.left >= 0) await refundQuestion(db, target, taken.via);
+        if (dayTaken) await refundLimit("chat-day", `u:${session.sub}`, DAY_CAP, DAY_MS);
+        taken = null;
+        dayTaken = false;
+        refunded = true;
+        answer += `\n\n${REFUND_NOTICE}`;
+      }
+      return NextResponse.json({ answer, followups: reply.followups, choices: [], visual: null, outfit: null, memo, unable: true, refunded, left: refunded ? await quotaLeft(db, target) : (taken?.left ?? 0) });
+    }
     // 옷 질문이면 이용자 성별과 색에 맞는 착장 이미지를 붙여요 (미리 만든 이미지 중에서 고르기만 해서 AI 비용이 없어요)
     const paletteLabels = reply.visual?.kind === "palette" ? reply.visual.items.map((i) => i.label) : [];
     const outfit = isOutfitQuestion(last) ? pickOutfit(birth.gender, last, paletteLabels) : null;

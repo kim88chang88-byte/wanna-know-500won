@@ -67,6 +67,7 @@ export const CHAT_SYSTEM_PROMPT = `너는 "도리", 맑은 옹달샘의 수달 �
 - 사실은 입력의 "계산된 사주 정보", "방금 본 풀이", "대화 기록"에 있는 것만 써. 없는 글자·합충·신살·사건은 지어내지 마. 근거가 부족하면 "이건 사주만으로 단정하기 어려워"라고 솔직히 말해.
 - 방금 본 풀이와 앞뒤가 어긋나는 말은 하지 마. 그 풀이의 결론을 이어서 더 구체적으로 풀어 줘.
 - 사주 근거는 입력에 있는 글자·오행·풀이와만 연결해. "하체에 기운이 몰려 순환이…"처럼 입력에 없는 원리를 지어 설명하지 마. 사주와 직접 이어지지 않는 생활 질문(운동·수면·식사 등)은 근거를 억지로 붙이지 말고 일반적인 짧은 팁 한두 문장만 줘.
+- 모르는 건 모른다고 먼저 말해: 가게(카페·식당·숙소) 이름, 영업시간·날씨·요금 같은 실시간 정보, 네가 확인할 수 없는 사실을 물으면 아는 척하거나 두루뭉술하게 돌려 말하지 마. 이럴 때는 unable 을 true 로 하고, answer 에는 "미안, ..."으로 시작하는 사과와 이유 한 줄, 대신 도울 수 있는 것 한 줄만 써(100~200자, 카드 없음). 조금이라도 구체적으로 도움이 되는 답(지역·동네 단위 추천, 사주 흐름, 작은 행동)을 줄 수 있으면 unable 은 false 로 하고 평소처럼 답해.
 - 여행 질문: 출발지를 모르면 "수도권 기준이야"라고 한 줄만 밝히고(되묻지 마), 이용자가 출발지를 말하면 그에 맞춰. 영업시간·요금·날씨·예약·입국 조건은 모르니 단정하지 말고 마지막에 "출발 전에 확인해 봐" 한 줄을 붙여. 사주 연결은 "물 기운이 필요한 분이라 바다 쪽"처럼 한 줄만. "가도 된다/가지 마" 단정 금지.
 - 읽는 사람이 "어, 내 얘기네" 할 만한 일상 장면을 하나 넣되, 연락·감정·습관 같은 행동 패턴까지만 살짝 넘겨짚어. 직업·가족·재산·건강·과거 사건은 짚지 마.
 
@@ -84,6 +85,7 @@ export const CHAT_SCHEMA = {
     answer: { type: "string", description: `도리의 채팅 답. 질문 종류에 맞게: 인사는 1~2문장, 마음이 힘든 말은 80~200자, 일반 첫 질문은 220~450자, 이어지는 질문은 150~300자(최대 ${CHAT_MAX}자), 빈 줄로 1~3문단` },
     followups: { type: "array", items: { type: "string" }, description: "방금 답에서 이어지는 사용자의 다음 질문 3개 (각 20자 안팎)" },
     choices: { type: "array", items: { type: "string" }, description: "도리의 되묻는 질문에 눌러서 답할 선택지 2개(각 12자 이내). 없으면 빈 배열" },
+    unable: { type: "boolean", description: "이 질문이 도리가 정확하게 답할 수 없는 정보(가게 이름, 실시간 정보, 확인할 수 없는 사실)를 묻는 것이라, 구체적으로 도움이 되는 답을 하나도 못 줬으면 true. 조금이라도 구체적으로 도왔으면 false" },
     visual: {
       type: "object",
       description: "답에 붙이는 큰 그림 카드. 필요 없으면 kind 를 none 으로 하고 나머지는 비워요.",
@@ -109,7 +111,7 @@ export const CHAT_SCHEMA = {
       additionalProperties: false,
     },
   },
-  required: ["answer", "followups", "choices", "visual"],
+  required: ["answer", "followups", "choices", "unable", "visual"],
   additionalProperties: false,
 } as const;
 
@@ -144,6 +146,8 @@ export interface ChatReply {
   /** 도리가 되물은 질문에 눌러서 답하는 선택지 (없으면 빈 목록) */
   choices: string[];
   visual: ChatVisual | null;
+  /** 도리가 "정확하게 답할 수 없는 질문"이라고 스스로 표시했는지 (true 면 사과 답이고 질문은 돌려줘요) */
+  unable?: boolean;
 }
 
 const COUNT: Record<VisualKind, [number, number]> = { note: [2, 4], checklist: [2, 5], timeline: [3, 4], lucky: [2, 3], palette: [2, 3], spots: [1, 3], scent: [2, 3], songs: [2, 3], travel: [2, 3], course: [6, 9] };
@@ -245,8 +249,8 @@ export function polishChatAnswer(answer: string, history: ChatMsg[], name?: stri
 export function parseChatReply(value: unknown): ChatReply | null {
   const answer = parseChatAnswer(value);
   if (answer === null) return null;
-  const o = value as { followups?: unknown; choices?: unknown; visual?: unknown } | null;
-  return { answer, followups: cleanFollowups(o?.followups), choices: cleanChoices(o?.choices), visual: cleanVisual(o?.visual) };
+  const o = value as { followups?: unknown; choices?: unknown; visual?: unknown; unable?: unknown } | null;
+  return { answer, followups: cleanFollowups(o?.followups), choices: cleanChoices(o?.choices), visual: cleanVisual(o?.visual), unable: o?.unable === true };
 }
 
 /** 마음이 많이 힘들다는 말이 보이면 AI 를 부르지 않고 정해 둔 답으로 안내해요. */
