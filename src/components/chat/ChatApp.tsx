@@ -578,7 +578,7 @@ export default function ChatApp({ initialCtx, initialMsgs, onChange, onBack, rea
               }
               at={m.error ? undefined : m.at}
             />
-            {m.visual && !live && !m.error && <VisualCard v={m.visual} />}
+            {m.visual && !live && !m.error && <VisualCard v={m.visual} onAsk={(q) => void send(q)} />}
             {m.outfit && !live && !m.error && <OutfitCard pick={m.outfit} />}
             {!live && !m.error && !busy && i === msgs.length - 1 && leftNow > 0 && m.choices && m.choices.length === 2 && (
               <div className="ml-11 flex flex-wrap gap-1.5" aria-label="도리 질문에 답하기" data-testid="reply-choices">

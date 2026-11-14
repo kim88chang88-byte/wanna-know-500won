@@ -2,6 +2,7 @@
 
 import { scentSrc } from "@/lib/scents";
 import { SONGS, songSearchUrl } from "@/lib/songs";
+import { TRAVEL, regionsIn, travelImg, travelMapUrl } from "@/lib/travel";
 import { propSrc } from "@/lib/props";
 import type { ChatVisual } from "@/lib/ai/chat";
 import { PALETTE, SPOTS } from "@/lib/visualPalette";
@@ -209,6 +210,103 @@ function Songs({ v }: { v: ChatVisual }) {
   );
 }
 
+const EL_NAME: Record<string, string> = { 목: "나무", 화: "불", 토: "땅", 금: "쇠", 수: "물" };
+
+function Travel({ v, onAsk }: { v: ChatVisual; onAsk?: (q: string) => void }) {
+  const shown = v.items.filter((it) => TRAVEL[it.label]);
+  return (
+    <div className="my-2 ml-1 mr-2 grid gap-3">
+      {shown.map((it, i) => {
+        const p = TRAVEL[it.label];
+        const img = travelImg(it.label);
+        return (
+          <article key={i} className="relative min-h-[236px] overflow-hidden rounded-[22px] bg-[#2a2550] text-white shadow-[0_10px_24px_rgba(40,30,120,0.35)]">
+            {img && (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={img} alt="" loading="lazy" className="absolute inset-0 h-full w-full object-cover" />
+            )}
+            <div aria-hidden="true" className="absolute inset-0 bg-[linear-gradient(180deg,rgba(12,9,34,0.1)_0%,rgba(12,9,34,0.15)_35%,rgba(12,9,34,0.88)_100%)]" />
+            <div className="relative flex min-h-[236px] flex-col justify-between p-3.5">
+              <div className="flex flex-wrap gap-1.5 text-[11px] font-bold">
+                <span className="rounded-full bg-white/25 px-2.5 py-0.5 backdrop-blur-sm">{p.intl ? "해외" : "국내"}</span>
+                <span className="rounded-full bg-white/25 px-2.5 py-0.5 backdrop-blur-sm">{EL_NAME[p.el]} 기운 · {p.mood}</span>
+                <span className="rounded-full bg-white/25 px-2.5 py-0.5 backdrop-blur-sm">{p.fit === "빡빡" ? "3박4일 권장" : `2박3일 ${p.fit}`}</span>
+              </div>
+              <div className="mt-8 grid gap-1.5">
+                <b className="text-[22px] font-extrabold leading-none drop-shadow">{it.label}</b>
+                {it.sub && <p className="break-keep text-[13px] leading-snug text-white/95">{it.sub}</p>}
+                <ul className="grid gap-0.5 text-[12px] text-white/90">
+                  <li>{p.intl ? "✈️" : "🚆"} {p.move1}</li>
+                  <li>{p.intl ? "🚇" : "🚗"} {p.move2}</li>
+                </ul>
+                <p className="break-keep text-[11.5px] text-white/75">이번 철 포인트 · {p.point}</p>
+                <div className="mt-1 flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => onAsk?.(`${it.label} 2박 3일 코스 짜 줘`)}
+                    className="flex-1 rounded-full bg-[linear-gradient(135deg,#a98bff,#7a52d6)] px-3 py-2 text-[12.5px] font-extrabold shadow-[0_0_14px_rgba(150,120,255,0.7)] active:scale-95"
+                  >
+                    이 곳으로 코스 짜 줘
+                  </button>
+                  <a href={travelMapUrl(it.label)} target="_blank" rel="noopener noreferrer" className="rounded-full bg-white/25 px-3.5 py-2 text-[12.5px] font-extrabold backdrop-blur-sm active:scale-95">
+                    지도
+                  </a>
+                </div>
+              </div>
+            </div>
+          </article>
+        );
+      })}
+    </div>
+  );
+}
+
+function Course({ v, onAsk }: { v: ChatVisual; onAsk?: (q: string) => void }) {
+  const region = regionsIn(v.title)[0] ?? "";
+  const img = region ? travelImg(region) : null;
+  const days = ["1", "2", "3"].map((d) => ({ d, rows: v.items.filter((it) => it.icon === d) })).filter((x) => x.rows.length > 0);
+  return (
+    <div className="my-2 ml-1 mr-2 overflow-hidden rounded-[22px] bg-[#fffdf7] text-[#2a2540] shadow-[0_10px_24px_rgba(40,30,120,0.22)]">
+      <div className="relative h-[92px] bg-[#2a2550]">
+        {img && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={img} alt="" loading="lazy" className="absolute inset-0 h-full w-full object-cover" />
+        )}
+        <div aria-hidden="true" className="absolute inset-0 bg-[linear-gradient(180deg,rgba(12,9,34,0.05),rgba(12,9,34,0.75))]" />
+        <p className="absolute bottom-2.5 left-3.5 right-3.5 text-[17px] font-extrabold text-white drop-shadow">🧳 {v.title}</p>
+      </div>
+      <div className="grid gap-3 p-3.5">
+        {days.map(({ d, rows }) => (
+          <section key={d}>
+            <p className="mb-1.5 flex items-center gap-2 text-[13px] font-extrabold text-[#6b3fd0]">
+              <span className="grid h-5 w-5 place-items-center rounded-full bg-[#7a52d6] text-[11px] text-white">{d}</span>DAY {d}
+            </p>
+            <ul className="grid gap-1.5 border-l-2 border-dashed border-[#d9ccff] pl-3.5">
+              {rows.map((it, i) => (
+                <li key={i} className="break-keep text-[13px] leading-snug">
+                  <b>{it.label}</b>
+                  {it.sub && <span className="block text-[12px] text-[#6b5f8f]">{it.sub}</span>}
+                </li>
+              ))}
+            </ul>
+          </section>
+        ))}
+        <p className="rounded-xl bg-[#f3efff] px-3 py-2 text-[11.5px] leading-snug text-[#6b5f8f]">출발 전에 영업시간·요금·날씨·예약 여부를 한 번 확인해 봐.</p>
+        <div className="flex flex-wrap gap-2">
+          {region && (
+            <a href={travelMapUrl(region)} target="_blank" rel="noopener noreferrer" className="rounded-full bg-[#7a52d6] px-4 py-2 text-[12.5px] font-extrabold text-white active:scale-95">
+              지도 보기
+            </a>
+          )}
+          <button type="button" onClick={() => onAsk?.("다른 여행지도 추천해 줘")} className="rounded-full bg-[#ece4ff] px-4 py-2 text-[12.5px] font-extrabold text-[#6b3fd0] active:scale-95">
+            다른 곳도 볼래
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function Palette({ v }: { v: ChatVisual }) {
   const shown = v.items.filter((it) => PALETTE[it.label]);
   return (
@@ -282,7 +380,7 @@ function Spots({ v }: { v: ChatVisual }) {
   );
 }
 
-export default function VisualCard({ v }: { v: ChatVisual }) {
+export default function VisualCard({ v, onAsk }: { v: ChatVisual; onAsk?: (q: string) => void }) {
   const label = `${v.title || "도리의 카드"}: ${v.items.map((i) => i.label).join(", ")}`;
   return (
     <Wrap label={label}>
@@ -294,6 +392,8 @@ export default function VisualCard({ v }: { v: ChatVisual }) {
       {v.kind === "spots" && <Spots v={v} />}
       {v.kind === "scent" && <Scent v={v} />}
       {v.kind === "songs" && <Songs v={v} />}
+      {v.kind === "travel" && <Travel v={v} onAsk={onAsk} />}
+      {v.kind === "course" && <Course v={v} onAsk={onAsk} />}
     </Wrap>
   );
 }
