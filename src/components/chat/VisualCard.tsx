@@ -236,31 +236,32 @@ function Travel({ v, onAsk }: { v: ChatVisual; onAsk?: (q: string) => void }) {
             style={{ background: `linear-gradient(165deg,${c1},${c2})` }}
           >
             <span aria-hidden="true" className="absolute -top-[7px] right-[26px] h-[18px] w-[70px] rotate-6 rounded-[2px] opacity-85" style={{ background: c3 }} />
-            <div className="overflow-hidden rounded-2xl bg-[#fffdf8]">
-              <div className="relative h-[54px]" style={{ background: `linear-gradient(120deg,${c1},${c2})` }}>
-                <span className="absolute right-2.5 top-2.5 inline-flex items-center gap-[5px] rounded-full border bg-white py-0.5 pl-[3px] pr-2.5 text-[11.5px] font-extrabold" style={{ color: c3, borderColor: c1 }}>
-                  <i aria-hidden="true" className="block h-[18px] w-[18px] rounded-full" style={{ background: `radial-gradient(circle at 30% 25%,#fff,${c1} 40%,${c3})` }} />
-                  {EL_NAME[p.el]} 기운
-                </span>
-                {img && (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={img} alt="" loading="lazy" className="absolute left-3.5 top-3.5 h-[84px] w-[84px] rounded-full border-4 border-[#fffdf8] object-cover shadow-[0_3px_10px_rgba(0,0,0,0.25)]" />
-                )}
-              </div>
-              <div className="grid min-h-[52px] gap-[3px] py-1.5 pl-[112px] pr-3.5">
+            <div className="grid grid-cols-[104px_1fr] items-start gap-3 rounded-2xl bg-[#fffdf8] p-3">
+              {img && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={img} alt="" loading="lazy" className="aspect-[3/4] w-full -rotate-2 rounded-[14px] border-[3px] border-white object-cover shadow-[0_3px_8px_rgba(0,0,0,0.2)]" />
+              )}
+              <div className="grid min-w-0 gap-[3px]">
+                <div className="flex flex-wrap gap-[5px]">
+                  <span className="inline-flex items-center gap-[5px] rounded-full border bg-white py-0.5 pl-[3px] pr-2.5 text-[11.5px] font-extrabold" style={{ color: c3, borderColor: c1 }}>
+                    <i aria-hidden="true" className="block h-[18px] w-[18px] rounded-full" style={{ background: `radial-gradient(circle at 30% 25%,#fff,${c1} 40%,${c3})` }} />
+                    {EL_NAME[p.el]} 기운
+                  </span>
+                  <span className="rounded-full bg-[#f3efff] px-2.5 py-0.5 text-[11px] font-extrabold text-[#6b5f8f]">
+                    {p.fit === "빡빡" ? "3박4일 권장" : `2박3일 ${p.fit}`}
+                  </span>
+                </div>
                 <b className="font-cute text-[22px] leading-tight" style={{ color: c3 }}>{it.label}</b>
-                <span className="justify-self-start rounded-full bg-[#f3efff] px-2.5 py-0.5 text-[11px] font-extrabold text-[#6b5f8f]">
-                  {p.fit === "빡빡" ? "3박4일 권장" : `2박3일 ${p.fit}`} · {p.intl ? "해외" : "국내"}
-                </span>
-              </div>
-              <div className="grid gap-[3px] px-3.5 pb-3.5 pt-1">
                 {it.sub && <p className="break-keep font-hand text-[17px] leading-tight text-[#4a3f6a]">{it.sub}</p>}
+                <p className="mt-0.5 text-[10.5px] font-bold text-[#9a90b5]">{p.intl ? "인천 출발" : "서울 출발"} · 대략</p>
                 <ul className="grid gap-px text-[12.5px] text-[#5a5070]">
                   <li>{p.intl ? "✈️" : "🚆"} {p.move1}</li>
                   <li>{p.intl ? "🚇" : "🚗"} {p.move2}</li>
                 </ul>
+              </div>
+              <div className="col-span-full grid gap-1">
                 <p className="break-keep text-[11.5px] text-[#8a80a0]">{p.mood} · 이번 철 {p.point}</p>
-                <div className="mt-1.5 flex gap-2">
+                <div className="mt-1 flex gap-2">
                   <button type="button" onClick={() => onAsk?.(`${it.label} 2박 3일 코스 짜 줘`)} className="flex-1 rounded-full px-3 py-[7px] text-[12.5px] font-extrabold text-white active:scale-95" style={{ background: c3 }}>
                     이 곳으로 코스 짜 줘
                   </button>
@@ -273,6 +274,7 @@ function Travel({ v, onAsk }: { v: ChatVisual; onAsk?: (q: string) => void }) {
           </article>
         );
       })}
+      <p className="px-1 text-[11.5px] leading-snug text-[#6b5f8f]">이동 시간은 대략이에요. 정확한 시간과 요금은 출발 전에 확인해 봐.</p>
     </div>
   );
 }
