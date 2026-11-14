@@ -9,7 +9,7 @@ const base: BirthInput = { year: 1990, month: 7, day: 13, hour: 8, minute: 30, c
 const HEAD = "네 고민과 이어 보면";
 const SKIP = ["preface", "overview", "concernTop", "concern"];
 const FORBIDDEN = ["undefined", "NaN", "null", "망한", "파산", "반드시", "큰일"];
-const concern: Concern = { tags: ["money", "love"] as Concern["tags"], text: "이직을 해야 할지 계속 고민돼요" };
+const concern: Concern = { tags: ["job", "money"], text: "이직을 해야 할지 계속 고민돼요" };
 
 describe("요즘 고민을 모든 장에 이어 붙이기", () => {
   it("고민이 있으면 16개 장의 둘째 자리에 이어진다", () => {
