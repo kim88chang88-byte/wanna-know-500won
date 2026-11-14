@@ -675,13 +675,66 @@ function WealthCalendar({ table }: { table: BookTable }) {
   );
 }
 
+/** 돈 팔자 유형 카드 + 돈그릇 그림. 그릇 크기는 평생 재물 기운, 물높이는 지금 대운이에요. */
+function WealthCard({ w }: { w: NonNullable<BookPage["wealth"]> }) {
+  const size = w.bowl.size;
+  const fill = w.bowl.fill;
+  const rimW = (110 + size * 1.4) / 2;
+  const bodyH = 70 + size * 0.7;
+  const cx = 160;
+  const top = 60;
+  const bottom = top + bodyH;
+  const level = top + bodyH * (1 - (fill / 100) * 0.85) - 6;
+  const body = `M${cx - rimW} ${top} Q${cx - rimW} ${bottom + 10} ${cx} ${bottom + 10} Q${cx + rimW} ${bottom + 10} ${cx + rimW} ${top} Z`;
+  return (
+    <div data-testid="wealth-card" className={`mb-6 rounded-2xl border ${HAIR} bg-white/[0.04] px-4 py-5 text-center`}>
+      <p className={`text-[12px] tracking-[0.18em] ${GOLD}`}>나의 돈 팔자</p>
+      <p className="mt-0.5 font-serifKr text-[26px] font-extrabold leading-tight text-[#f6dfa8]">{w.name}</p>
+      <span className="mt-1.5 inline-block -rotate-3 rounded-md border-[1.5px] border-[#b44a3c] px-3 py-0.5 text-[15px] font-extrabold tracking-[0.2em] text-[#ff9c8c]">{w.code}</span>
+      <p className="mt-2.5 text-[15px] text-[#e8dfca]">{w.tagline}</p>
+      <div className="mt-3.5 grid grid-cols-2 gap-2">
+        {w.axes.map((ax) => (
+          <div key={ax.a.letter} className="flex overflow-hidden rounded-xl border border-white/10 text-[13px]">
+            {(["a", "b"] as const).map((k) => (
+              <span key={k} className={`flex-1 py-1.5 ${ax.pick === k ? "bg-[#e6c887]/20 font-bold text-[#f6dfa8]" : "text-[#e8dfca]/45"}`}>{ax[k].label}</span>
+            ))}
+          </div>
+        ))}
+      </div>
+      <svg viewBox={`0 0 320 ${bottom + 60}`} role="img" aria-label={`돈그릇 그림, ${w.bowl.tier}`} className="mx-auto mt-4 w-full max-w-[320px]">
+        <defs>
+          <clipPath id="wbClip"><path d={body} /></clipPath>
+          <linearGradient id="wbBody" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#3a4166" /><stop offset="1" stopColor="#232852" /></linearGradient>
+          <linearGradient id="wbWater" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#f6dfa8" /><stop offset="1" stopColor="#e6c887" /></linearGradient>
+        </defs>
+        <ellipse cx={cx} cy={bottom + 22} rx={rimW * 0.8} ry="8" fill="#000" opacity=".25" />
+        <path d={body} fill="url(#wbBody)" stroke="#e6c887" strokeOpacity=".6" strokeWidth="2" />
+        <g clipPath="url(#wbClip)">
+          <rect x={cx - rimW} y={level} width={rimW * 2} height={bottom - level + 14} fill="url(#wbWater)" opacity=".9" />
+          <path d={`M${cx - rimW} ${level} q${rimW / 4} -7 ${rimW / 2} 0 t${rimW / 2} 0 t${rimW / 2} 0 t${rimW / 2} 0`} fill="none" stroke="#fff" strokeOpacity=".5" strokeWidth="2" />
+          {[0, 1, 2, 3, 4].map((i) => (
+            <circle key={i} cx={cx - rimW * 0.6 + i * rimW * 0.3} cy={level + 18 + (i % 2) * 14} r={6 + (i % 3)} fill="#fff4cf" opacity=".55" />
+          ))}
+        </g>
+        <ellipse cx={cx} cy={top} rx={rimW} ry="12" fill="#14172f" stroke="#e6c887" strokeWidth="2.2" />
+        <ellipse cx={cx} cy={top} rx={rimW - 6} ry="8" fill="none" stroke="#e6c887" strokeOpacity=".35" />
+        <path d={`M${cx - 24} ${top - 12} q-8 -16 0 -26 M${cx} ${top - 14} q-8 -18 0 -30 M${cx + 24} ${top - 12} q-8 -16 0 -26`} fill="none" stroke="#f6dfa8" strokeOpacity=".4" strokeWidth="2.5" strokeLinecap="round" />
+        <text x={cx} y={bottom + 46} textAnchor="middle" fontSize="11" fill="#e8dfca" fillOpacity=".7">그릇 크기 {size} · 지금 물높이 {fill}</text>
+      </svg>
+      <p className="mt-1 text-[17px] font-bold text-[#f6dfa8]">{w.bowl.tier}</p>
+      <p className="mt-0.5 text-[13px] text-[#e8dfca]/70">평생 재물 기운으로 본 그릇이야. 크다고 부자가 된다는 뜻이 아니라 재물 기운의 높낮이를 보는 참고용 그림이야.</p>
+    </div>
+  );
+}
+
 function Visual({ page, report }: { page: BookPage; report: PremiumReportView }) {
   if (page.chart) {
     const cal = page.key === "topic:money" ? page.tables.find((t) => t.title === "재물 달력") : undefined;
-    return cal ? (
+    return cal || page.wealth ? (
       <div className="mb-6">
+        {page.wealth && <WealthCard w={page.wealth} />}
         <LifeChart chart={page.chart} />
-        <WealthCalendar table={cal} />
+        {cal && <WealthCalendar table={cal} />}
       </div>
     ) : (
       <LifeChart chart={page.chart} />

@@ -123,6 +123,17 @@ export interface BookChart {
   /** 세로축 왼쪽에 붙이는 단계 이름(높음·중간·낮음). 종합 에너지 그래프에서만 써요. */
   axis?: { high: string; mid: string; low: string };
 }
+/** 재물운 장의 돈 팔자 유형과 돈그릇 */
+export interface WealthProfile {
+  name: string;
+  /** 4축 4글자 (예: SRLP) */
+  code: string;
+  tagline: string;
+  axes: Array<{ a: { letter: string; label: string }; b: { letter: string; label: string }; pick: "a" | "b" }>;
+  /** 그릇 크기(평생 재물 기운)와 물높이(지금 대운), 둘 다 0~100 상대 지수 */
+  bowl: { tier: string; size: number; fill: number; note: string };
+}
+
 /** 프리미엄 리포트의 한 페이지 */
 export interface BookPage {
   no: number;
@@ -141,6 +152,8 @@ export interface BookPage {
   tables: BookTable[];
   /** 나이별 기운 흐름 그래프 (재물·연애·직업 장) */
   chart?: BookChart;
+  /** 재물운 장: 돈 팔자 유형과 돈그릇 그림 */
+  wealth?: WealthProfile;
   /** 장 앞에 붙는 "~이란?" 쉬운 설명 (모두에게 같은 풀이 상식이라 AI 를 쓰지 않아요) */
   explainer?: { title: string; body: string };
 }

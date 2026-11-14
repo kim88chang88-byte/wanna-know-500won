@@ -1,10 +1,12 @@
 import type { SajuResult } from "ssaju";
+import { STEMS } from "@/lib/saju/constants";
 import { buildTopicInsight } from "../topic";
 import type { BookPage, BookRow, BookSection, TopicKey } from "../types";
 import { buildBook, type BookContext } from "./index";
 import { STAGE12_TEXT } from "./dict";
 import { buildLifeChart, type ChartKind } from "./charts";
 import { buildWealthCalendar } from "./wealth";
+import { buildWealthProfile, moneyIntroSections, moneyTailSections } from "./moneyType";
 import { actionSection, buildEnergyChart, closingSection, decadeCards, natalStageSections, nextChainSection, nowPositionSection, stageGlossary } from "./lifeFlow";
 
 /*
@@ -87,7 +89,15 @@ export function buildBook20(r: SajuResult, ctx: BookContext): BookPage[] {
     const page = fixRefs(pageBy(buildBook(r, { ...ctx, topicKey: k, insight }), "topic"));
     const chart = chartKind ? buildLifeChart(r, chartKind) : null;
     const cal = k === "money" ? buildWealthCalendar(r, ctx.hourUnknown, ctx.now ?? new Date()) : null;
-    const withCal = cal ? { ...page, tables: [...page.tables, cal] } : page;
+    let withCal: BookPage = cal ? { ...page, tables: [...page.tables, cal] } : page;
+    if (k === "money") {
+      const w = buildWealthProfile(r, ctx, chart);
+      const yEl = r.advanced.yongsin.map((y) => STEMS.find((x) => x.hanja === y)?.element).map((e) => ({ wood: "목", fire: "화", earth: "토", metal: "금", water: "수" } as Record<string, string>)[e ?? ""]).find(Boolean) ?? null;
+      const tailHeads = ["상황별 가이드", "실천 처방", "줄이면 좋은 습관", "한 줄 마무리"];
+      const body = withCal.sections.filter((s) => !tailHeads.some((h) => s.heading.startsWith(h)));
+      const tail = withCal.sections.filter((s) => tailHeads.some((h) => s.heading.startsWith(h)));
+      withCal = { ...withCal, wealth: w, sections: [...moneyIntroSections(r, w, ctx.hourUnknown, chart), ...body, ...moneyTailSections(w, cal, yEl), ...tail] };
+    }
     return chart ? { ...withCal, chart } : withCal;
   };
 

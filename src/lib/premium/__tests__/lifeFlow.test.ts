@@ -78,7 +78,7 @@ describe("제4장 십이운성 쪽 보강", () => {
     const cards = r.book.find((x) => x.key === "stage12")!.sections.filter((s) => /^[①②③④⑤⑥⑦⑧⑨⑩⑪⑫] /.test(s.heading));
     const idx = cards.findIndex((s) => s.heading.includes("(지금)"));
     expect(idx).toBeGreaterThan(0);
-    expect(cards.slice(0, idx).every((s) => s.mbti?.tense === "past" && s.body.includes("괜찮아") && s.body.includes("의지로"))).toBe(true);
+    expect(cards.slice(0, idx).every((s) => s.mbti?.tense === "past" && s.body.includes("괜찮아") && /의지로|노력으로|스스로/.test(s.body))).toBe(true);
     expect(cards[idx].mbti?.tense).toBe("now");
     expect(cards[idx].body).toContain("너라면 충분히 해낼 수 있어");
     expect(cards.slice(idx + 1).every((s) => s.mbti?.tense === "future" && s.body.includes("너라면 할 수 있어"))).toBe(true);

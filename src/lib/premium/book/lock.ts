@@ -63,7 +63,7 @@ function rulesFor(page: BookPage, year: number): { sec: SecRule; row?: (r: BookR
     }
     case "topic":
       return {
-        sec: (s) => ({ lock: startsWithAny(s.heading, ["상황별 가이드", "실천 처방", "줄이면 좋은 습관"]) || /^\d{4}년 흐름|^지금 대운/.test(s.heading) }),
+        sec: (s) => ({ lock: startsWithAny(s.heading, ["상황별 가이드", "실천 처방", "줄이면 좋은 습관", "재물 시기 한눈에", "투자 스타일", "지갑 열기 전"]) || /^\d{4}년 흐름|^지금 대운/.test(s.heading) }),
         // 재물 달력은 이번 달을 포함한 앞 석 달만 열어 둬요.
         row: (_r, i, _rows, title) => title === "재물 달력" && i >= 3,
       };
