@@ -168,7 +168,7 @@ function Songs({ v }: { v: ChatVisual }) {
       className="my-2 ml-1 mr-2 rounded-[24px] p-4 text-white shadow-[0_12px_30px_rgba(40,30,120,0.5)]"
       style={{ background: "radial-gradient(circle at 80% 0,#5a46c9,transparent 55%),linear-gradient(180deg,#1b1840,#0f0d26)" }}
     >
-      <style>{`@keyframes songEq{0%,100%{height:4px}50%{height:16px}}.song-eq s{display:block;width:3px;border-radius:2px;background:#b8a6ff;animation:songEq 1s ease-in-out infinite}.song-eq s:nth-child(2){animation-delay:.2s}.song-eq s:nth-child(3){animation-delay:.4s}.song-eq s:nth-child(4){animation-delay:.1s}@media (prefers-reduced-motion:reduce){.song-eq s{animation:none;height:10px}}`}</style>
+      <style>{`@keyframes songEq{0%,100%{height:4px}50%{height:16px}}.song-eq s{display:block;width:3px;border-radius:2px;background:#b8a6ff;animation:songEq var(--eq-s,1s) ease-in-out infinite;animation-delay:var(--eq-d,0s)}.song-eq s:nth-child(2){animation-delay:calc(var(--eq-d,0s) + .2s)}.song-eq s:nth-child(3){animation-delay:calc(var(--eq-d,0s) + .4s)}.song-eq s:nth-child(4){animation-delay:calc(var(--eq-d,0s) + .1s)}@media (prefers-reduced-motion:reduce){.song-eq s{animation:none;height:10px}}`}</style>
       <p className="mb-3 text-[15px] font-extrabold text-[#d9ccff]">🌙 {v.title || "오늘의 추천 곡"}</p>
       <ul className="grid gap-2">
         {shown.map((it, i) => {
@@ -186,14 +186,12 @@ function Songs({ v }: { v: ChatVisual }) {
                 <span className="block truncate text-[12px] text-white/70">{artist}</span>
                 {it.sub && <span className="mt-0.5 block break-keep text-[12px] text-[#c9baff]">{it.sub}</span>}
               </div>
-              {i === 0 && (
-                <span aria-hidden="true" className="song-eq flex h-4 shrink-0 items-end gap-0.5">
-                  <s />
-                  <s />
-                  <s />
-                  <s />
-                </span>
-              )}
+              <span aria-hidden="true" className="song-eq flex h-4 shrink-0 items-end gap-0.5" style={{ ["--eq-d" as string]: `${i * 0.35}s`, ["--eq-s" as string]: `${1 + i * 0.15}s` }}>
+                <s />
+                <s />
+                <s />
+                <s />
+              </span>
               <a
                 href={songSearchUrl(it.label)}
                 target="_blank"
