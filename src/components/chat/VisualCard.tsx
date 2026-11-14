@@ -212,43 +212,59 @@ function Songs({ v }: { v: ChatVisual }) {
 
 const EL_NAME: Record<string, string> = { 목: "나무", 화: "불", 토: "땅", 금: "쇠", 수: "물" };
 
+/** 오행마다 카드 색이 달라져요: [연한 색, 중간 색, 진한 색] */
+const EL_TONE: Record<string, [string, string, string]> = {
+  수: ["#d6e6ff", "#c3d6ff", "#3a64c8"],
+  토: ["#ffe6b8", "#ffd48a", "#b8731f"],
+  화: ["#ffd9cf", "#ffc2b3", "#c23b3b"],
+  목: ["#d8f5c8", "#bfeab0", "#2f8a52"],
+  금: ["#eceff6", "#d5dae8", "#6a7290"],
+};
+
 function Travel({ v, onAsk }: { v: ChatVisual; onAsk?: (q: string) => void }) {
   const shown = v.items.filter((it) => TRAVEL[it.label]);
   return (
-    <div className="my-2 ml-1 mr-2 grid gap-3">
+    <div className="my-2 ml-1 mr-2 grid gap-3.5">
       {shown.map((it, i) => {
         const p = TRAVEL[it.label];
         const img = travelImg(it.label);
+        const [c1, c2, c3] = EL_TONE[p.el];
         return (
-          <article key={i} className="relative min-h-[236px] overflow-hidden rounded-[22px] bg-[#2a2550] text-white shadow-[0_10px_24px_rgba(40,30,120,0.35)]">
-            {img && (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={img} alt="" loading="lazy" className="absolute inset-0 h-full w-full object-cover" />
-            )}
-            <div aria-hidden="true" className="absolute inset-0 bg-[linear-gradient(180deg,rgba(12,9,34,0.1)_0%,rgba(12,9,34,0.15)_35%,rgba(12,9,34,0.88)_100%)]" />
-            <div className="relative flex min-h-[236px] flex-col justify-between p-3.5">
-              <div className="flex flex-wrap gap-1.5 text-[11px] font-bold">
-                <span className="rounded-full bg-white/25 px-2.5 py-0.5 backdrop-blur-sm">{p.intl ? "해외" : "국내"}</span>
-                <span className="rounded-full bg-white/25 px-2.5 py-0.5 backdrop-blur-sm">{EL_NAME[p.el]} 기운 · {p.mood}</span>
-                <span className="rounded-full bg-white/25 px-2.5 py-0.5 backdrop-blur-sm">{p.fit === "빡빡" ? "3박4일 권장" : `2박3일 ${p.fit}`}</span>
+          <article
+            key={i}
+            className="relative overflow-hidden rounded-[22px] p-3 text-[#2a2540] shadow-[0_8px_20px_rgba(60,50,120,0.22)]"
+            style={{ background: `linear-gradient(165deg,${c1},${c2})` }}
+          >
+            <span aria-hidden="true" className="absolute -top-[7px] right-[26px] h-[18px] w-[70px] rotate-6 rounded-[2px] opacity-85" style={{ background: c3 }} />
+            <div className="overflow-hidden rounded-2xl bg-[#fffdf8]">
+              <div className="relative h-[54px]" style={{ background: `linear-gradient(120deg,${c1},${c2})` }}>
+                <span className="absolute right-2.5 top-2.5 inline-flex items-center gap-[5px] rounded-full border bg-white py-0.5 pl-[3px] pr-2.5 text-[11.5px] font-extrabold" style={{ color: c3, borderColor: c1 }}>
+                  <i aria-hidden="true" className="block h-[18px] w-[18px] rounded-full" style={{ background: `radial-gradient(circle at 30% 25%,#fff,${c1} 40%,${c3})` }} />
+                  {EL_NAME[p.el]} 기운
+                </span>
+                {img && (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={img} alt="" loading="lazy" className="absolute left-3.5 top-3.5 h-[84px] w-[84px] rounded-full border-4 border-[#fffdf8] object-cover shadow-[0_3px_10px_rgba(0,0,0,0.25)]" />
+                )}
               </div>
-              <div className="mt-8 grid gap-1.5">
-                <b className="text-[22px] font-extrabold leading-none drop-shadow">{it.label}</b>
-                {it.sub && <p className="break-keep text-[13px] leading-snug text-white/95">{it.sub}</p>}
-                <ul className="grid gap-0.5 text-[12px] text-white/90">
+              <div className="grid min-h-[52px] gap-[3px] py-1.5 pl-[112px] pr-3.5">
+                <b className="font-cute text-[22px] leading-tight" style={{ color: c3 }}>{it.label}</b>
+                <span className="justify-self-start rounded-full bg-[#f3efff] px-2.5 py-0.5 text-[11px] font-extrabold text-[#6b5f8f]">
+                  {p.fit === "빡빡" ? "3박4일 권장" : `2박3일 ${p.fit}`} · {p.intl ? "해외" : "국내"}
+                </span>
+              </div>
+              <div className="grid gap-[3px] px-3.5 pb-3.5 pt-1">
+                {it.sub && <p className="break-keep font-hand text-[17px] leading-tight text-[#4a3f6a]">{it.sub}</p>}
+                <ul className="grid gap-px text-[12.5px] text-[#5a5070]">
                   <li>{p.intl ? "✈️" : "🚆"} {p.move1}</li>
                   <li>{p.intl ? "🚇" : "🚗"} {p.move2}</li>
                 </ul>
-                <p className="break-keep text-[11.5px] text-white/75">이번 철 포인트 · {p.point}</p>
-                <div className="mt-1 flex gap-2">
-                  <button
-                    type="button"
-                    onClick={() => onAsk?.(`${it.label} 2박 3일 코스 짜 줘`)}
-                    className="flex-1 rounded-full bg-[linear-gradient(135deg,#a98bff,#7a52d6)] px-3 py-2 text-[12.5px] font-extrabold shadow-[0_0_14px_rgba(150,120,255,0.7)] active:scale-95"
-                  >
+                <p className="break-keep text-[11.5px] text-[#8a80a0]">{p.mood} · 이번 철 {p.point}</p>
+                <div className="mt-1.5 flex gap-2">
+                  <button type="button" onClick={() => onAsk?.(`${it.label} 2박 3일 코스 짜 줘`)} className="flex-1 rounded-full px-3 py-[7px] text-[12.5px] font-extrabold text-white active:scale-95" style={{ background: c3 }}>
                     이 곳으로 코스 짜 줘
                   </button>
-                  <a href={travelMapUrl(it.label)} target="_blank" rel="noopener noreferrer" className="rounded-full bg-white/25 px-3.5 py-2 text-[12.5px] font-extrabold backdrop-blur-sm active:scale-95">
+                  <a href={travelMapUrl(it.label)} target="_blank" rel="noopener noreferrer" className="rounded-full px-3.5 py-[7px] text-[12.5px] font-extrabold active:scale-95" style={{ background: c1 }}>
                     지도
                   </a>
                 </div>
