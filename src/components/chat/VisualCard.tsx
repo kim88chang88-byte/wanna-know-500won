@@ -1,6 +1,7 @@
 "use client";
 
 import { scentSrc } from "@/lib/scents";
+import { SONGS, songSearchUrl } from "@/lib/songs";
 import { propSrc } from "@/lib/props";
 import type { ChatVisual } from "@/lib/ai/chat";
 import { PALETTE, SPOTS } from "@/lib/visualPalette";
@@ -152,6 +153,38 @@ function Scent({ v }: { v: ChatVisual }) {
   );
 }
 
+function Songs({ v }: { v: ChatVisual }) {
+  const shown = v.items.filter((it) => SONGS[it.label]);
+  return (
+    <Paper title={v.title || "오늘 들어 볼 노래"}>
+      <ul className="grid gap-2 pt-1">
+        {shown.map((it, i) => {
+          const [artist, ...rest] = it.label.split(" - ");
+          return (
+            <li key={i} className="flex items-center gap-2.5 rounded-[10px] bg-white px-3 py-2 shadow-[0_3px_8px_rgba(0,0,0,0.18)]">
+              <span aria-hidden="true" className="text-[22px]">{["🎧", "🎵", "🎶"][i % 3]}</span>
+              <div className="min-w-0 flex-1">
+                <b className="block break-keep text-[13.5px] leading-tight text-[#2a2540]">{rest.join(" - ")}</b>
+                <span className="block truncate text-[12px] text-[#6b5f8f]">{artist}</span>
+                {it.sub && <span className="mt-0.5 block break-keep font-hand text-[15px] leading-tight text-[#8a5a2b]">{it.sub}</span>}
+              </div>
+              <a
+                href={songSearchUrl(it.label)}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={`${it.label} 들으러 가기`}
+                className="shrink-0 rounded-full bg-brand-500 px-3 py-1.5 text-[12px] font-extrabold text-white active:scale-95"
+              >
+                듣기
+              </a>
+            </li>
+          );
+        })}
+      </ul>
+    </Paper>
+  );
+}
+
 function Palette({ v }: { v: ChatVisual }) {
   const shown = v.items.filter((it) => PALETTE[it.label]);
   return (
@@ -236,6 +269,7 @@ export default function VisualCard({ v }: { v: ChatVisual }) {
       {v.kind === "palette" && <Palette v={v} />}
       {v.kind === "spots" && <Spots v={v} />}
       {v.kind === "scent" && <Scent v={v} />}
+      {v.kind === "songs" && <Songs v={v} />}
     </Wrap>
   );
 }

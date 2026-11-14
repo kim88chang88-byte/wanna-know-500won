@@ -1,6 +1,7 @@
 import { PALETTE, SPOTS } from "@/lib/visualPalette";
 import { SCENTS } from "@/lib/scents";
 import { PROPS, propCatalog } from "@/lib/props";
+import { SONGS, songCatalog } from "@/lib/songs";
 import { analyzeChart } from "@/lib/saju/analysis";
 import type { SajuChart } from "@/lib/saju/types";
 import type { ChatKind, ChatMsg } from "@/lib/chatContext";
@@ -45,13 +46,14 @@ export const CHAT_SYSTEM_PROMPT = `너는 "도리", 맑은 옹달샘의 수달 �
 - 이모지: 답의 맨 앞에 그 답의 분위기에 맞는 이모지 딱 1개를 쓰고 한 칸 띄운 뒤 본문을 시작해(예: "📝 좋은 질문이야! …"). 화면이 이 맨 앞 이모지를 크게 보여 줘. 본문 안에서는 이모지를 0~2개만, 문장 끝에 가볍게. 힘든 마음을 말할 때는 맨 앞에 🤍처럼 차분한 것만.
 - 오행 이름(나무·불·땅·쇠·물)을 기운으로 말할 때는 [[물]]처럼 이중 대괄호로 감싸. 화면이 그림 알약으로 바꿔 줘. 한 답에 최대 3번, 입력의 사주 정보에 있는 오행만, 그 밖에는 대괄호를 쓰지 마.
 - 가장 핵심이 되는 한 문장만 **이렇게** 별표 두 개로 감싸(한 답에 한 곳만). 그 밖에는 마크다운을 쓰지 마.
-- 큰 그림 카드(visual): 사용자가 "무엇을 적을지(노트)", "해 볼 일(체크리스트)", "언제가 좋은지(시간표)", "소품·음식 같은 추천(소품)", "어울리는 색(색 견본)", "어울리는 향(향 카드)", "물건을 어디에 두면 좋은지(방 핀)"을 물을 때만 answer 와 함께 카드를 하나 붙여. 그 밖의 질문은 kind 를 "none" 으로 해. 카드는 answer 의 내용을 눈에 보이게 요약한 것이라 answer 와 어긋나면 안 돼. 연속된 답마다 붙이지 말고, 직전 도리 답에 카드가 있었다면 이번엔 "none". 사용자가 그 종류를 직접 묻지 않았는데 답에 소품·색·향이 나왔다는 이유로 카드를 붙이지 마(그런 건 글로만 말해).
+- 큰 그림 카드(visual): 사용자가 "무엇을 적을지(노트)", "해 볼 일(체크리스트)", "언제가 좋은지(시간표)", "소품·음식 같은 추천(소품)", "어울리는 색(색 견본)", "어울리는 향(향 카드)", "들을 노래(노래 카드)", "물건을 어디에 두면 좋은지(방 핀)"을 물을 때만 answer 와 함께 카드를 하나 붙여. 그 밖의 질문은 kind 를 "none" 으로 해. 카드는 answer 의 내용을 눈에 보이게 요약한 것이라 answer 와 어긋나면 안 돼. 연속된 답마다 붙이지 말고, 직전 도리 답에 카드가 있었다면 이번엔 "none". 사용자가 그 종류를 직접 묻지 않았는데 답에 소품·색·향이 나왔다는 이유로 카드를 붙이지 마(그런 건 글로만 말해).
   - note: 노트에 적어 볼 예시 문장 2~4줄(items[].label 에 문장, 나머지는 빈 글자). title 은 노트 제목(12자 이내).
   - checklist: 이번에 해 볼 작은 행동 2~5개(label). 아주 작고 쉬운 것만.
   - timeline: 시간대 3개(icon 에 이모지 1개, label 에 "저녁 9시" 같은 시간, sub 에 그때 하면 좋은 일, 가장 추천하는 한 곳만 best 를 true).
   - lucky: 어울리는 소품 3개. label 은 반드시 다음 중 하나만(괄호는 어울리는 오행, 라벨에는 쓰지 마): ${propCatalog()}. sub 는 그 소품을 곁에 두면 좋은 이유 짧게(icon 은 빈 글자). 입력의 사주 정보에 있는 오행과 연결되는 소품만. 특정 상품·브랜드·약·음식 효능 단정 금지.
   - palette: 어울리는 색 2~3개. label 은 반드시 다음 중 하나만: ${Object.keys(PALETTE).join(", ")}. sub 는 그 색이 주는 느낌 한 줄(icon 은 빈 글자). 입력의 사주 정보에 있는 오행과 연결되는 색만.
   - scent: 어울리는 향 2~3개(향 이야기일 때는 lucky 대신 scent). label 은 반드시 다음 중 하나만: ${Object.keys(SCENTS).join(", ")}. sub 는 그 향이 주는 느낌 한 줄(icon 은 빈 글자). 입력의 사주 정보에 있는 오행과 연결되는 향만. 향이 몸에 미치는 효능·치료는 말하지 마.
+  - songs: 들을 노래 2~3곡(노래·음악·플레이리스트 추천을 물을 때). label 은 반드시 다음 중 하나만("가수 - 곡명" 그대로, 괄호는 어울리는 오행·분위기라 라벨에는 쓰지 마): ${songCatalog()}. sub 는 언제·어떻게 들으면 좋은지 20자 이내(icon 은 빈 글자). 지금 시점과 이용자의 기분(힘들면 차분·위로, 기운이 필요하면 신남, 집중은 연주, 연말 무렵엔 연말)에 맞는 곡을 고르고, 입력의 사주 정보에 있는 오행과 연결되면 더 좋아. answer 글에서도 같은 곡만 가수와 곡명으로 말하고, 목록에 없는 곡·가수는 글에서도 절대 말하지 마. 가사는 인용하지 말고 곡의 느낌만 말해.
   - spots: 물건을 두면 좋은 자리 1~3곳. label 은 반드시 다음 중 하나만: ${Object.keys(SPOTS).join(", ")}. sub 는 왜 그 자리인지 짧게(icon 은 빈 글자). 가장 좋은 자리부터 순서대로.
   - label·sub 는 각각 20자 이내, 글 속에 별표·마크다운 금지. 모든 글은 위 "지켜야 할 선"을 그대로 지켜.
 - choices: 답 끝에서 도리가 사용자에게 되묻는 질문이 있고 그 대답이 두세 가지로 나뉠 때만, 사용자가 눌러서 답할 선택지 2개를 써(각 12자 이내, 예: "편한 사이야", "아직 어려워"). 되묻는 질문이 없거나 열린 질문이면 빈 배열.
@@ -82,7 +84,7 @@ export const CHAT_SCHEMA = {
       type: "object",
       description: "답에 붙이는 큰 그림 카드. 필요 없으면 kind 를 none 으로 하고 나머지는 비워요.",
       properties: {
-        kind: { type: "string", enum: ["none", "note", "checklist", "timeline", "lucky", "palette", "spots", "scent"] },
+        kind: { type: "string", enum: ["none", "note", "checklist", "timeline", "lucky", "palette", "spots", "scent", "songs"] },
         title: { type: "string", description: "카드 제목(12자 이내). none 이면 빈 글자" },
         items: {
           type: "array",
@@ -116,7 +118,7 @@ export function parseChatAnswer(value: unknown): string | null {
   return t;
 }
 
-export type VisualKind = "note" | "checklist" | "timeline" | "lucky" | "palette" | "spots" | "scent";
+export type VisualKind = "note" | "checklist" | "timeline" | "lucky" | "palette" | "spots" | "scent" | "songs";
 
 export interface VisualItem {
   icon: string;
@@ -140,9 +142,9 @@ export interface ChatReply {
   visual: ChatVisual | null;
 }
 
-const COUNT: Record<VisualKind, [number, number]> = { note: [2, 4], checklist: [2, 5], timeline: [3, 4], lucky: [2, 3], palette: [2, 3], spots: [1, 3], scent: [2, 3] };
+const COUNT: Record<VisualKind, [number, number]> = { note: [2, 4], checklist: [2, 5], timeline: [3, 4], lucky: [2, 3], palette: [2, 3], spots: [1, 3], scent: [2, 3], songs: [2, 3] };
 const NEEDS_ICON: VisualKind[] = ["timeline"];
-const HAS_SUB: VisualKind[] = ["timeline", "lucky", "palette", "spots", "scent"];
+const HAS_SUB: VisualKind[] = ["timeline", "lucky", "palette", "spots", "scent", "songs"];
 
 /** 그림 카드 검사: 종류·개수·길이·금지어를 통과하지 못하면 카드만 빼고 답은 그대로 보내요. */
 export function cleanVisual(raw: unknown): ChatVisual | null {
@@ -154,7 +156,7 @@ export function cleanVisual(raw: unknown): ChatVisual | null {
   const items: VisualItem[] = [];
   for (const it of v.items as unknown[]) {
     const o = it as { icon?: unknown; label?: unknown; sub?: unknown; best?: unknown } | null;
-    const label = clip(o?.label, 24);
+    const label = clip(o?.label, kind === "songs" ? 60 : 24);
     if (!label) continue;
     const icon = NEEDS_ICON.includes(kind) ? clip(o?.icon, 4) : "";
     const sub = HAS_SUB.includes(kind) ? clip(o?.sub, 24) : "";
@@ -162,6 +164,7 @@ export function cleanVisual(raw: unknown): ChatVisual | null {
     if (kind === "spots" && !SPOTS[label]) continue;
     if (kind === "scent" && !SCENTS[label]) continue;
     if (kind === "lucky" && !PROPS[label]) continue;
+    if (kind === "songs" && !SONGS[label]) continue;
     if (items.some((x) => x.label === label)) continue;
     items.push({ icon, label, sub, best: kind === "timeline" && o?.best === true });
   }
@@ -368,6 +371,7 @@ const ASK_PATTERN: Record<Exclude<VisualKind, never>, RegExp> = {
   lucky: /소품|물건|아이템|행운템|부적|챙기|들고 다니|지니고|가지고 다니|곁에 두|선물/,
   palette: /색|컬러|옷|입으면|입을/,
   scent: /향|냄새|디퓨저|캔들|인센스/,
+  songs: /노래|곡|음악|플레이리스트|플리/,
   spots: /어디에|자리|배치|놓|두면|두는/,
   timeline: /언제|몇 시|시간대|시간이 좋|타이밍|시기|몇시/,
   note: /적어|메모|노트|일기|쓸 말|문장|법|팁|어떻게|추천/,
