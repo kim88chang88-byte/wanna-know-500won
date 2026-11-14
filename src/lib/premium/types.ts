@@ -69,6 +69,8 @@ export interface BookSection {
   checks?: string[];
   /** '사주 vs 지금 내 현실' 3갈래 비교 (화면에서 세 버튼으로 보여줘요) */
   reality?: RealityCheck;
+  /** MBTI 를 입력한 이용자에게 화면에서 한 줄을 붙일 때 쓰는 열쇠(십성 묶음, 지난·지금·다가오는 시기). 잠긴 풀이에는 내려가지 않아요. */
+  mbti?: { group: string; tense: "past" | "now" | "future" };
 }
 export interface RealityCheck {
   question: string;

@@ -14,6 +14,7 @@ import ElementTile from "@/components/ElementTile";
 import DayMasterScene from "./DayMasterScene";
 import { MORE_LABELS, SENTENCE_LABELS } from "@/lib/premium/partnerProfile";
 import { DAYMASTER_BRIEF, MBTI_BRIEF, cleanMbti } from "@/lib/mbtiBrief";
+import { mbtiDecadeLine } from "@/lib/mbtiLine";
 import { formatWon } from "@/lib/premium/book/charts";
 import { callName } from "@/lib/ai/nameRepair";
 import BodyFigure from "./BodyFigure";
@@ -1247,7 +1248,15 @@ export default function PremiumBook({ report, flush = false, finale, previewBlur
                         <span className="sr-only">잠긴 풀이야. 전체 열기를 누르면 볼 수 있어.</span>
                       </div>
                     ) : (
-                      <RichBody text={s.body} />
+                      <>
+                        <RichBody text={s.body} />
+                        {s.mbti && mbtiDecadeLine(report.mbti, s.mbti.group, s.mbti.tense) && (
+                          <p data-testid="decade-mbti" className="mt-2 rounded-xl bg-[#b9a4ff]/15 px-3 py-2 text-[14.5px] leading-[1.8] text-[#322f47]">
+                            <b className="mr-1 text-[#5a43b5]">MBTI</b>
+                            {mbtiDecadeLine(report.mbti, s.mbti.group, s.mbti.tense)}
+                          </p>
+                        )}
+                      </>
                     )}
                     {!s.locked && s.checks && s.checks.length > 0 && <CheckList items={s.checks} />}
                     {!s.locked && s.reality && <RealityPick rc={s.reality} />}

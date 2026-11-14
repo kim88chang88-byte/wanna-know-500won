@@ -73,6 +73,27 @@ describe("제4장 십이운성 쪽 보강", () => {
     });
   }
 
+  it("10년 카드는 지난·지금·앞으로가 다른 마무리를 가진다", () => {
+    const r = buildPremiumReport(base, NOW, "full", "연애운", false);
+    const cards = r.book.find((x) => x.key === "stage12")!.sections.filter((s) => /^[①②③④⑤⑥⑦⑧⑨⑩⑪⑫] /.test(s.heading));
+    const idx = cards.findIndex((s) => s.heading.includes("(지금)"));
+    expect(idx).toBeGreaterThan(0);
+    expect(cards.slice(0, idx).every((s) => s.mbti?.tense === "past" && s.body.includes("괜찮아") && s.body.includes("의지로"))).toBe(true);
+    expect(cards[idx].mbti?.tense).toBe("now");
+    expect(cards[idx].body).toContain("너라면 충분히 해낼 수 있어");
+    expect(cards.slice(idx + 1).every((s) => s.mbti?.tense === "future" && s.body.includes("너라면 할 수 있어"))).toBe(true);
+    for (const c of cards) {
+      expect(c.body).toContain("**“");
+      expect(c.body.split("\n\n").length).toBeGreaterThanOrEqual(3);
+    }
+  });
+
+  it("잠긴 카드에는 MBTI 열쇠가 내려가지 않는다", () => {
+    const r = buildPremiumReport(base, NOW, "full", "연애운", false);
+    const locked = applyLocks(r.book, 2026).find((x) => x.key === "stage12")!;
+    expect(locked.sections.filter((s) => s.locked).every((s) => s.mbti === undefined)).toBe(true);
+  });
+
   it("시간을 몰라도 원국 자리별 읽기는 세 기둥으로 나온다", () => {
     const r = buildPremiumReport({ ...base, hour: null, minute: null }, NOW, "full", "재물운", false);
     const p = r.book.find((x) => x.key === "stage12")!;

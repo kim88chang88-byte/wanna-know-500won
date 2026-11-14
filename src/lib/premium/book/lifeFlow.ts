@@ -274,31 +274,106 @@ export function natalStageSections(r: SajuResult, hourUnknown: boolean): BookSec
   return out;
 }
 
+/** 한 줄 그림: 천간 오행 × 지지 오행 */
+const SCENE: Record<string, Record<string, string>> = {
+  목: { 목: "푸른 숲이 빽빽이 우거진 형국", 화: "나무가 불을 만나 환하게 타오르는 형국", 토: "나무가 기름진 흙에 뿌리를 내리는 형국", 금: "나무가 날 선 도끼 앞에서 단단히 다듬어지는 형국", 수: "나무가 맑은 물을 한껏 빨아올리는 형국" },
+  화: { 목: "장작 위로 불꽃이 활짝 피어오르는 형국", 화: "한낮의 태양이 이글이글 타오르는 형국", 토: "화로 위에서 흙이 따뜻하게 익어 가는 형국", 금: "용광로에서 쇠가 붉게 달궈지는 형국", 수: "찬 물가 위로 등불이 은은하게 비치는 형국" },
+  토: { 목: "넓은 땅 위에서 새싹이 힘차게 올라오는 형국", 화: "따뜻한 햇볕을 머금은 옥토가 열매를 키우는 형국", 토: "거대한 산이 묵직하게 자리를 잡은 형국", 금: "땅속에서 단단한 보석이 영그는 형국", 수: "둑이 깊은 물을 품어 고요한 호수를 만드는 형국" },
+  금: { 목: "날 선 도끼가 큰 나무를 다듬는 형국", 화: "불길 속에서 쇠가 단련되어 명검이 되는 형국", 토: "흙 속에서 황금이 모습을 드러내는 형국", 금: "서리 내린 가을 들판에 쇠붙이가 반짝이는 형국", 수: "맑은 샘물 위로 쇠가 은빛으로 빛나는 형국" },
+  수: { 목: "물이 새로 돋은 나무를 키워 올리는 형국", 화: "물과 불이 맞부딪쳐 수증기를 피워 올리는 형국", 토: "물이 흙을 만나 잠시 고이며 길을 찾는 형국", 금: "샘이 바위틈에서 맑게 솟아나는 형국", 수: "깊은 바다 위로 물결이 끝없이 이어지는 형국" },
+};
+
+type Tense = "past" | "now" | "future";
+
+/** 지난 시기: 열어 두고 말하는 구체적인 이야기(그랬을 수 있어) */
+const PAST_DESC: Record<Group, string> = {
+  비겁: "내 방식과 주관이 또렷해서 남의 뜻에 맞추기보다 스스로 해 보려는 마음이 컸을 수 있어. 친구나 경쟁 상대와 부딪히며 ‘나는 누구지’를 배운 기억이 있다면 이 기운 때문일 수 있어.",
+  식상: "하고 싶은 말과 끼가 안에서 꿈틀대서 이것저것 해 보고 싶은 마음이 컸을 수 있어. 규칙이나 정해진 틀보다 호기심이 앞서 어른들과 부딪힌 기억이 있다면 이 기운 때문일 수 있어.",
+  재성: "돈과 현실, 눈에 보이는 결과에 눈을 뜨기 시작했을 수 있어. 일과 소비에서 시행착오를 겪으며 ‘세상은 이렇게 돌아가는구나’를 배운 기억이 있다면 이 기운 때문일 수 있어.",
+  관성: "해야 할 일과 책임, 사회의 시선이 어깨에 얹히는 느낌이 있었을 수 있어. 눈치를 보거나 버텨야 했던 순간이 있었다면 이 기운 때문일 수 있어.",
+  인성: "배우고 보호받는 흐름이 중심이라, 안쪽에서 생각이 깊어지고 혼자 곱씹는 시간이 많았을 수 있어. 공부나 사람에게서 힘을 얻은 기억이 있다면 이 기운 때문일 수 있어.",
+};
+const PAST_TILT: Record<0 | 1 | 2 | 3, string> = {
+  0: "이 시기에는 새로 시작하고 자라는 느낌이 컸을 수 있어.",
+  1: "힘이 한창 차올라서 마음먹은 만큼 밀고 나가던 때였을 수 있어.",
+  2: "속도가 더디게 느껴지고 한 템포 쉬어 가야 했던 때였을 수 있어.",
+  3: "겉으로 드러나기보다 안으로 쌓고 준비하던 시간이 길었을 수 있어.",
+};
+/** 지난 시기 마무리: 의지를 칭찬하는 문장(맞든 달랐든 똑같이 읽혀요) */
+const PAST_PRAISE: Record<Group, string> = {
+  비겁: "혹시 이야기가 네 기억과 달랐어도 괜찮아. 사주가 준 재료보다 네가 의지로 더 좋게 만들어 온 시간이었고, 그때 지킨 주관이 지금 네 중심이 됐어.",
+  식상: "혹시 이야기가 네 기억과 달랐어도 괜찮아. 사주가 준 재료보다 네가 의지로 더 좋게 키워 온 시간이었고, 그때 꺼내 본 시도들이 지금 네 재능의 바탕이 됐어.",
+  재성: "혹시 이야기가 네 기억과 달랐어도 괜찮아. 사주가 준 재료보다 네가 노력으로 더 단단하게 만들어 온 시간이었고, 그때의 시행착오가 지금 네 현실 감각이 됐어.",
+  관성: "혹시 이야기가 네 기억과 달랐어도 괜찮아. 사주가 준 재료보다 네가 의지로 더 잘 버텨 낸 시간이었고, 그때 쌓은 책임감이 지금 네 신뢰가 됐어.",
+  인성: "혹시 이야기가 네 기억과 달랐어도 괜찮아. 사주가 준 재료보다 네가 스스로 더 깊이 채워 온 시간이었고, 그때 쌓은 내공이 지금 네 깊이가 됐어.",
+};
+
+/** 지금 시기 */
+const NOW_DESC: Record<Group, string> = {
+  비겁: "나 자신과 내 사람들의 기운이 강해지는 때라, 주관을 또렷하게 세우고 내 길을 내 방식으로 열기 좋아. 다만 비교와 경쟁 앞에서는 여유를 가지면 더 멀리 가.",
+  식상: "표현하고 만들어 내는 힘이 커지는 때라, 꺼내 놓은 아이디어와 재능이 결과로 이어지기 쉬워. 완벽해지기를 기다리기보다 작게 먼저 보여 줘 봐.",
+  재성: "현실적인 결과와 실속이 눈에 들어오는 때라, 쌓아 온 것이 손에 잡히는 성과로 바뀌기 좋아. 한 번에 크게 노리기보다 판을 차근차근 키워 가면 좋아.",
+  관성: "책임과 기회가 함께 오는 때라, 맡은 역할을 잘 해내면 인정받기 좋아. 다 짊어지기보다 우선순위를 정하고 쉬는 시간도 지켜 줘.",
+  인성: "배우고 정리하며 힘을 채우는 때라, 겉으로 큰 변화가 없어 보여도 안쪽이 단단해지고 있어. 배운 것을 한 줄씩 남겨 두면 곧 쓸모가 보여.",
+};
+const NOW_PUSH = "지금까지 해 온 걸 보면, 이 시기의 문도 네가 움직일 때 열려. 너라면 충분히 해낼 수 있어.";
+
+/** 다가오는 시기: 희망과 의지를 북돋는 방향 제시 */
+const FUTURE_DESC: Record<Group, string> = {
+  비겁: "나의 기운이 커지는 때가 오니, 내 이름으로 해 보고 싶은 일을 당당히 정해 볼 만해. 함께할 사람을 고르고 내 몫을 분명히 하면 힘이 두 배가 돼.",
+  식상: "표현하고 만드는 힘이 커지는 때가 오니, 지금부터 재능과 아이디어를 조금씩 꺼내 연습해 두면 좋아. 그때 꺼낸 것들이 너를 알리는 이야기가 돼.",
+  재성: "현실의 열매가 눈에 들어오는 때가 오니, 지금부터 기반을 다지고 판을 준비해 두면 좋아. 쌓아 둔 것이 실속으로 바뀌는 계절이야.",
+  관성: "역할과 인정이 따라오는 때가 오니, 지금부터 실력과 신뢰를 한 칸씩 쌓아 두면 좋아. 책임이 커질수록 쉬는 법도 같이 챙겨 줘.",
+  인성: "배움과 보살핌이 힘이 되는 때가 오니, 하고 싶은 공부나 관심사를 천천히 준비해 두면 좋아. 안쪽이 깊어진 만큼 더 멀리 보여.",
+};
+const FUTURE_PUSH: Record<Group, string> = {
+  비겁: "기운은 판을 깔아 줄 뿐이고, 걷는 건 늘 네 몫이야. 너라면 할 수 있어.",
+  식상: "기운은 무대를 만들어 줄 뿐이고, 올라가는 건 네 의지야. 너라면 할 수 있어.",
+  재성: "기운은 길을 열어 줄 뿐이고, 걸어가 열매를 따는 건 네 노력이야. 너라면 할 수 있어.",
+  관성: "기운은 기회를 건네 줄 뿐이고, 잡아서 해내는 건 네 의지야. 너라면 할 수 있어.",
+  인성: "기운은 씨앗을 건네 줄 뿐이고, 키워 내는 건 네 꾸준함이야. 너라면 할 수 있어.",
+};
+
 /** 번호 붙은 10년 카드 */
 export function decadeCards(r: SajuResult, hourUnknown: boolean): BookSection[] {
   const list = r.daeun.list as unknown as DaeunItem[];
   const cur = r.daeun.current;
+  const curIdx = cur ? list.findIndex((d) => d.startAge === cur.startAge) : -1;
   const natal = natalOf(r, hourUnknown);
   return list.map((d, i) => {
     const st = stageOfDaeun(d);
     const g = groupOfDaeun(d);
-    const isCur = cur !== null && d.startAge === cur.startAge;
+    const tense: Tense = curIdx < 0 ? "future" : i < curIdx ? "past" : i === curIdx ? "now" : "future";
+    const isCur = tense === "now";
     const cls = st ? STAGE_CLASS[st] : 1;
     const nick = NICK[g][cls][i % 2];
     const mid = Math.floor((d.startAge + d.endAge) / 2);
     const prev = i > 0 ? list[i - 1] : null;
     const inter = interactionLine(natal, { label: "대운", ganzhi: d.ganzhi });
     const chain = prev ? chainLine(stemEl(prev.ganzhi[0]), stemEl(d.ganzhi[0])) : "";
-    const third = inter ? inter : chain ? `앞 시기에서 넘어올 때는, ${chain}` : "";
+    const link = inter ? inter : chain ? `앞 시기에서 넘어올 때는, ${chain}` : "";
+    const evidence = `천간 ${d.stemTenGod ?? "-"}·지지 ${d.branchTenGod ?? "-"}${st ? `, 십이운성 ${st}` : ""}`;
+    const scene = SCENE[stemEl(d.ganzhi[0])]?.[branchEl(d.ganzhi[1])] ?? "";
+    const left = isCur ? yearsLeft(r) : null;
+    const nowAge = r.input.year ? r.currentYear - r.input.year + 1 : null;
     const head = `${circ(i)} ${ageBand(d.startAge, d.endAge)}${isCur ? " (지금)" : ""} · ${nick}`;
-    const body = [
-      `${d.startAge}~${d.endAge}세, ${ganzhiLabel(d.ganzhi)} 대운${st ? ` · ${st}` : ""}.`,
-      `${ageContext(mid)} ${josa(GROUP_TRAIT[g], "이/가")} 주제가 돼. ${st ? STAGE12_TEXT[st] : ""}`.replace(/\s+/g, " ").trim(),
-      third,
-    ]
-      .filter(Boolean)
-      .join(" ");
-    return { heading: head, body };
+    const intro = `${d.startAge}~${d.endAge}세, ${ganzhiLabel(d.ganzhi)} 대운${st ? ` · ${st}` : ""}. (${evidence}) ${st ? STAGE12_TEXT[st] : ""}`.replace(/\s+/g, " ").trim();
+    const child = tense === "past" && d.endAge < 20 ? "어린 시절은 환경의 영향이 커서 네 탓이 아니야. " : "";
+    let main = "";
+    let close = "";
+    if (tense === "past") {
+      main = `${child}${ageContext(mid)} ${PAST_DESC[g]} ${st ? PAST_TILT[cls] : ""} ${link}`;
+      close = PAST_PRAISE[g];
+    } else if (tense === "now") {
+      const anchor = nowAge ? `지금 네 나이는 ${nowAge}세 무렵이고, 이 계절의 한복판이야.${left ? ` 바뀌기까지 약 ${left}년 남았어.` : ""} ` : "";
+      main = `${anchor}${NOW_DESC[g]} ${link}`;
+      close = NOW_PUSH;
+    } else {
+      main = `${ageContext(mid)} ${FUTURE_DESC[g]} ${link}`;
+      close = FUTURE_PUSH[g];
+    }
+    const paras = [scene ? `**“${scene}”**` : "", `${intro} ${main}`.replace(/\s+/g, " ").trim(), close].filter(Boolean);
+    return { heading: head, body: paras.join("\n\n"), mbti: { group: g, tense } };
   });
 }
 
