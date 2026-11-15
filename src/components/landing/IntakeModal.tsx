@@ -43,7 +43,7 @@ import { UpsellTeaser } from "./UpsellTeaser";
 import { chipsForFortune, MAX_CONCERN_TAGS, MAX_CONCERN_TEXT, type Concern, type ConcernId } from "@/lib/concerns";
 import { MACHINES } from "./data";
 import { IMAGES } from "./images";
-import LoadingBar from "./LoadingBar";
+import LoadingBar, { PREMIUM_MIN_MS } from "./LoadingBar";
 import { ReadingCard } from "./ReadingCard";
 import StoryReport from "./StoryReport";
 import CompatStory from "./CompatStory";
@@ -623,6 +623,7 @@ export default function IntakeModal({ target, wallet = null, onClose, onComplete
     setFreeUsed(false);
     setLoadDone(false);
     setPhase("loading");
+    const loadStartedAt = Date.now();
     setError(null);
     const concern = buildConcern(form);
     // 저장된 정보를 그대로 쓰는 경우엔 다시 저장하지 않아요.
@@ -681,6 +682,12 @@ export default function IntakeModal({ target, wallet = null, onClose, onComplete
       setAiNotice(target.premium ? p.aiNotice === true : !data.reading?.folds);
       setAiGated(target.premium === true && p.aiGated === true);
       if (data.profileSaved) onProfileSaved?.(input);
+      // 프리미엄은 응답이 일찍 와도 최소 PREMIUM_MIN_MS 동안은 집필 장면을 보여줘요. (결과로 넘어가는 시점도 함께 미뤄요)
+      if (target.premium === true && !compat) {
+        const wait = PREMIUM_MIN_MS - (Date.now() - loadStartedAt);
+        if (wait > 0) await new Promise((r) => setTimeout(r, wait));
+        if (ctrl.signal.aborted) return;
+      }
       // 막대를 끝까지 채우는 모습을 잠깐 보여주고 결과로 넘어가요.
       setLoadDone(true);
       await new Promise((r) => setTimeout(r, 2400)); // 100% 까지 부드럽게 채우는 시간(0.9초) + 축하 장면(색종이·폭죽)을 보여 줄 시간
