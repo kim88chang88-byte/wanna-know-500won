@@ -8,6 +8,7 @@ import { buildLifeChart, type ChartKind } from "./charts";
 import { buildWealthCalendar } from "./wealth";
 import { weaveConcern } from "./concernWeave";
 import { buildWealthProfile, moneyIntroSections, moneyTailSections } from "./moneyType";
+import { CHAPTER_TITLES, healthMiniTitle } from "./chapterTitles";
 import { actionSection, buildEnergyChart, closingSection, decadeCards, natalStageSections, nextChainSection, nowPositionSection, stageGlossary } from "./lifeFlow";
 
 /*
@@ -176,10 +177,14 @@ export function buildBook20(r: SajuResult, ctx: BookContext): BookPage[] {
       tables: [],
     },
     { key: "gui", title: "제6장 · 나를 도와주는 귀인들 - 귀인 분석", subtitle: "CHAPTER 6", lead: "내가 힘들 때 곁에서 힘이 되어 줄 기운을 찾아봐.", sections: guiBase, tables: [] },
-    { ...topicPage("money", "money"), key: "topic:money", title: "제7장 · 재물운", subtitle: "CHAPTER 7" },
-    { ...topicPage("love", "love"), key: "topic:love", title: "제8장 · 연애 & 결혼운", subtitle: "CHAPTER 8" },
-    { ...topicPage("success", "career"), key: "topic:career", title: "제9장 · 직업운", subtitle: "CHAPTER 9" },
-    { ...topicPage("health"), key: "topic:health", title: "제10장 · 건강운", subtitle: "CHAPTER 10" },
+    { ...topicPage("money", "money"), key: "topic:money", title: CHAPTER_TITLES.money, subtitle: "CHAPTER 7" },
+    { ...topicPage("love", "love"), key: "topic:love", title: CHAPTER_TITLES.love, subtitle: "CHAPTER 8" },
+    { ...topicPage("success", "career"), key: "topic:career", title: CHAPTER_TITLES.career, subtitle: "CHAPTER 9" },
+    (() => {
+      const hp = topicPage("health");
+      const mini = healthMiniTitle(ctx.elements);
+      return { ...hp, key: "topic:health", title: CHAPTER_TITLES.health, subtitle: "CHAPTER 10", ...(mini ? { lead: `${mini} ${hp.lead}` } : {}) };
+    })(),
     { ...geukguk, title: "부록 · 격국과 용신", subtitle: "APPENDIX 1" },
     { ...daeun, title: "부록 · 대운 — 10년 단위의 큰 흐름", subtitle: "APPENDIX 2" },
     { ...years, key: "years", title: "부록 · 올해·내년의 흐름", subtitle: "APPENDIX 3-1", sections: yrA, tables: years.tables.slice(0, 1) },
