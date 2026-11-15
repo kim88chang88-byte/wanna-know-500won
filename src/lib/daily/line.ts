@@ -1,4 +1,5 @@
 import type { DailyFacts, TenGod } from "@/lib/ai/dailyFacts";
+import { colorOfGanzhi, fillTip, TIP_POOL, TIPS_PER_GOD } from "./tips";
 
 /*
  * 오늘의 도리 한마디. AI 를 부르지 않고, 오늘의 일진과 내 일간의 관계(십성)로 미리 써 둔 문장 중에서 골라요.
@@ -58,19 +59,6 @@ const LINES: Record<TenGod, readonly [string, string, string]> = {
   ],
 };
 
-const TIPS: Record<TenGod, string> = {
-  비견: "오늘의 작은 실천: 내 속도대로 할 일 하나 끝내기",
-  겁재: "오늘의 작은 실천: 좋아하는 일에 20분 푹 빠지기",
-  식신: "오늘의 작은 실천: 맛있는 것 한 입, 천천히 음미하기",
-  상관: "오늘의 작은 실천: 떠오른 생각 한 줄 적어 두기",
-  편재: "오늘의 작은 실천: 안 가 본 길로 5분 걸어 보기",
-  정재: "오늘의 작은 실천: 서랍이나 화면 하나 정리하기",
-  편관: "오늘의 작은 실천: 제일 작은 할 일부터 끝내기",
-  정관: "오늘의 작은 실천: 작은 약속 하나 지키기",
-  편인: "오늘의 작은 실천: 5분 동안 조용히 생각 정리하기",
-  정인: "오늘의 작은 실천: 물 한 잔 마시고 5분 쉬기",
-};
-
 /** 오늘 글자와 내 일간이 합이거나 부딪힐 때 덧붙이는 부드러운 한 줄 */
 const COMBINE_ADD = "오늘 글자와 내 일간이 서로 끌리는 날이라, 사람 사이가 한결 편안해질 수 있어.";
 const CLASH_ADD = "오늘은 자극이 조금 있는 날이라, 가볍게 몸을 움직이면 활력으로 바뀌어.";
@@ -120,6 +108,22 @@ export function variantOf(dayKey: string): number {
   return h % 3;
 }
 
+/** 이 십성의 오늘 실천 문장 번호. 어제 같은 십성에서 나온 번호와는 항상 다르게 해요. */
+export function tipIndexOf(dayKey: string, god: TenGod): number {
+  const pick = (key: string) => hashOf(`${key}|tip|${god}`) % TIPS_PER_GOD;
+  const prev = pick(prevDayKey(dayKey));
+  const today = pick(dayKey);
+  return today === prev ? (today + 1) % TIPS_PER_GOD : today;
+}
+
+/** "YYYY-MM-DD" 의 전날 (달력 날짜 계산만 해요) */
+function prevDayKey(dayKey: string): string {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(dayKey);
+  if (!m) return dayKey;
+  const t = new Date(Date.UTC(Number(m[1]), Number(m[2]) - 1, Number(m[3])) - 86_400_000);
+  return t.toISOString().slice(0, 10);
+}
+
 export function dailyLine(facts: DailyFacts, dayKey: string): DailyLine {
   const god = facts.일간과의관계.십성;
   const base = LINES[god][variantOf(dayKey)];
@@ -129,7 +133,8 @@ export function dailyLine(facts: DailyFacts, dayKey: string): DailyLine {
   const luck = Math.max(55, Math.min(98, BASE_LUCK[god] + move + wobble));
   const grade = gradeOf(luck);
   const cheer = CHEERS[grade][hashOf(`${dayKey}|cheer`) % 3];
-  return { god, line: extra ? `${base} ${extra}` : base, tip: TIPS[god], ganzhi: facts.오늘일진, luck, grade, cheer };
+  const tip = `오늘의 작은 실천: ${fillTip(TIP_POOL[god][tipIndexOf(dayKey, god)][1], luck, colorOfGanzhi(facts.오늘일진))}`;
+  return { god, line: extra ? `${base} ${extra}` : base, tip, ganzhi: facts.오늘일진, luck, grade, cheer };
 }
 
 export const DAILY_GODS = Object.keys(LINES) as TenGod[];
