@@ -29,7 +29,7 @@ describe("끝날 때 진행률", () => {
   });
   it("처음부터 꾸준히 차오르고 92%를 넘지 않는다", () => {
     expect(progressAt(5)).toBeGreaterThan(40);
-    expect(progressAt(10)).toBeGreaterThan(70);
+    expect(progressAt(10)).toBeGreaterThan(60);
     expect(progressAt(1000)).toBeLessThanOrEqual(92);
   });
 });

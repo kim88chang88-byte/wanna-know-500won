@@ -12,7 +12,7 @@ const STAGES: { at: number; text: string }[] = [
   { at: 75, text: "도리가 풀이를 정리하고 있어" },
 ];
 
-/** 경과 시간(초) → 진행률(0~92). 처음부터 꾸준히 차오르다(5초≈48%, 10초≈74%) 뒤로 갈수록 느려져서 끝까지 차 버리지 않아요. */
+/** 경과 시간(초) → 진행률(0~92). 처음부터 꾸준히 차오르다(5초≈43%, 10초≈66%) 뒤로 갈수록 느려져서 끝까지 차 버리지 않아요. */
 export function progressAt(sec: number): number {
   return Math.min(92, 92 * (1 - Math.exp(-sec / 8)));
 }
