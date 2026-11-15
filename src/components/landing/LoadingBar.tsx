@@ -38,7 +38,7 @@ export function finishPct(from: number, k: number): number {
   return from + (100 - from) * e;
 }
 
-export default function LoadingBar({ done = false, animal = "/images/animal-otter.webp", premium = false }: { done?: boolean; animal?: string; premium?: boolean }) {
+export default function LoadingBar({ done = false, animal = "/images/animal-otter.webp", premium = false, label, onClose }: { done?: boolean; animal?: string; premium?: boolean; label?: string; onClose?: () => void }) {
   const [pct, setPct] = useState(3);
   const [celebrate, setCelebrate] = useState(false);
   const pctRef = useRef(3);
@@ -68,10 +68,14 @@ export default function LoadingBar({ done = false, animal = "/images/animal-otte
   const shown = pct;
   const stages = premium ? PREMIUM_STAGES : STAGES;
   const stage = celebrate ? { at: 100, text: "다 됐어! 🎉" } : ([...stages].reverse().find((s) => pct >= s.at) ?? stages[0]);
+  if (!premium) {
+    // 팝업 전체를 채우는 밤하늘 로딩 (퍼센트는 게이지에 붙어 따라가요)
+    return <LoadingScene pct={shown} done={celebrate} animal={animal} label={label} onClose={onClose} stageText={stage.text} />;
+  }
   return (
     <div>
-      {premium ? <PremiumLoadingScene pct={shown} done={celebrate} /> : <LoadingScene pct={shown} done={celebrate} animal={animal} />}
-      <p className="mt-3 font-bold text-gray-900 text-center">{premium ? "프리미엄 사주서를 만들고 있어" : "풀이를 만들고 있어"}</p>
+      <PremiumLoadingScene pct={shown} done={celebrate} />
+      <p className="mt-3 font-bold text-gray-900 text-center">프리미엄 사주서를 만들고 있어</p>
       <div className="mt-4">
       <div
         role="progressbar"
@@ -83,7 +87,7 @@ export default function LoadingBar({ done = false, animal = "/images/animal-otte
       >
         <div className={`h-full rounded-full bg-brand-500 ease-out ${done ? "" : "duration-300 transition-[width]"}`} style={{ width: `${shown}%` }} />
       </div>
-      <p className="mt-2 text-xs text-gray-500 text-center">{stage.text}{premium && !celebrate ? ` · ${Math.round(shown)}%` : ""}</p>
+      <p className="mt-2 text-xs text-gray-500 text-center">{stage.text}{!celebrate ? ` · ${Math.round(shown)}%` : ""}</p>
       </div>
     </div>
   );

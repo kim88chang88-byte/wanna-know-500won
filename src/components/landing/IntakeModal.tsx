@@ -780,25 +780,27 @@ export default function IntakeModal({ target, wallet = null, onClose, onComplete
     </div>
   );
 
+  // 일반(500원·1000원) 로딩 중에는 하늘 장면이 팝업 안을 가득 채워요. (프리미엄은 목차 카드를 그대로 써요)
+  const fullLoading = phase === "loading" && !(target.premium === true && !compat);
   return (
     <ModalShell
       labelId="intake-title"
-      panelClass={`max-w-md ${luxe ? "md:max-w-[800px]" : ""} p-5 sm:p-6 max-h-[90vh] overflow-y-auto ${luxe ? "border border-[#e6c887]/40" : "border-2 border-brand-300"}`}
+      panelClass={`max-w-md ${luxe ? "md:max-w-[800px]" : ""} ${fullLoading ? "p-0 overflow-hidden" : "p-5 sm:p-6 max-h-[90vh] overflow-y-auto"} ${luxe ? "border border-[#e6c887]/40" : "border-2 border-brand-300"}`}
       onClose={onClose}
       closeOnOverlay={false}
       luxe={luxe}
     >
-      <CloseButton onClose={onClose} luxe={luxe} />
+      {!fullLoading && <CloseButton onClose={onClose} luxe={luxe} />}
       {resultTitle || (
         <h3 id="intake-title" className="sr-only">
           생년월일시 입력
         </h3>
       )}
-      {!luxe && header}
+      {!luxe && !fullLoading && header}
 
       {phase === "loading" && (
-        <div role="status" className="py-10 text-center">
-          <LoadingBar done={loadDone} animal={loadingAnimal} premium={target.premium === true && !compat} />
+        <div role="status" className={fullLoading ? "text-center" : "py-10 text-center"}>
+          <LoadingBar done={loadDone} animal={loadingAnimal} premium={target.premium === true && !compat} label={`${target.fortune} · ${target.price}`} onClose={onClose} />
         </div>
       )}
 
