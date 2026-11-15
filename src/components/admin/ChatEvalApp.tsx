@@ -22,16 +22,16 @@ export default function ChatEvalApp() {
   const [msg, setMsg] = useState("");
   const [copied, setCopied] = useState(false);
 
-  async function run() {
+  async function run(set: "love" | "menu" = "love") {
     setBusy(true);
     setRows([]);
     setMsg("");
     try {
-      const info = (await (await fetch("/api/admin/chat-eval")).json()) as { total?: number };
+      const info = (await (await fetch(`/api/admin/chat-eval?set=${set}`)).json()) as { total?: number };
       const total = info.total ?? 0;
       for (let i = 0; i < total; i++) {
         setMsg(`${i + 1} / ${total} 돌리는 중…`);
-        const res = await fetch("/api/admin/chat-eval", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ index: i }) });
+        const res = await fetch("/api/admin/chat-eval", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ index: i, set }) });
         const d = (await res.json().catch(() => null)) as (Omit<Row, "n"> & { error?: string }) | null;
         if (!res.ok || !d) {
           setMsg(d?.error ?? "점검을 멈췄어. 관리자 로그인과 AI 키를 확인해 줘.");
@@ -67,8 +67,11 @@ export default function ChatEvalApp() {
       <h1 className="font-cute text-xl">상담실 점검 · 연애 30문</h1>
       <p className="mt-1 text-[13px] text-neutral-600">내 저장된 사주로 연애운 풀이 방에서 묻는 것처럼 돌려요. 질문 횟수와 조약돌은 쓰지 않고, AI 비용은 조금 나가요.</p>
       <div className="mt-3 flex flex-wrap items-center gap-2">
-        <button type="button" onClick={() => void run()} disabled={busy} className="rounded-full bg-brand-500 px-4 py-2 text-sm font-extrabold text-white disabled:opacity-50">
-          {busy ? "돌리는 중…" : "30개 돌리기"}
+        <button type="button" onClick={() => void run("love")} disabled={busy} className="rounded-full bg-brand-500 px-4 py-2 text-sm font-extrabold text-white disabled:opacity-50">
+          {busy ? "돌리는 중…" : "연애 30개 돌리기"}
+        </button>
+        <button type="button" onClick={() => void run("menu")} disabled={busy} className="rounded-full bg-brand-500 px-4 py-2 text-sm font-extrabold text-white disabled:opacity-50">
+          메뉴·취미 17개 돌리기
         </button>
         {rows.length > 0 && (
           <button type="button" onClick={() => void copy()} className="rounded-full border border-neutral-300 px-4 py-2 text-sm font-bold">

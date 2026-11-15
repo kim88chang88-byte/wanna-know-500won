@@ -15,6 +15,7 @@ import type { DailyFacts } from "./dailyFacts";
 import { modelFor } from "./llm";
 import { containsForbidden, isGeneric } from "./reading";
 import { tidyMarkup } from "@/lib/chatMarkup";
+import { recommendFacts } from "./menuHobby";
 
 /*
  * 도유 상담방: 방금 본 풀이를 이어서 물어보는 대화. 사실은 계산된 사주 정보에서만 가져와요.
@@ -47,6 +48,7 @@ export const CHAT_SYSTEM_PROMPT = `너는 "도리", 맑은 옹달샘의 수달 �
 - 이모지: 답의 맨 앞에 그 답의 분위기에 맞는 이모지 딱 1개를 쓰고 한 칸 띄운 뒤 본문을 시작해(예: "📝 좋은 질문이야! …"). 화면이 이 맨 앞 이모지를 크게 보여 줘. 본문 안에서는 이모지를 0~2개만, 문장 끝에 가볍게. 힘든 마음을 말할 때는 맨 앞에 🤍처럼 차분한 것만.
 - 오행 이름(나무·불·땅·쇠·물)을 기운으로 말할 때는 [[물]]처럼 이중 대괄호로 감싸. 화면이 그림 알약으로 바꿔 줘. 한 답에 최대 3번, 입력의 사주 정보에 있는 오행만, 그 밖에는 대괄호를 쓰지 마.
 - 가장 핵심이 되는 한 문장만 **이렇게** 별표 두 개로 감싸(한 답에 한 곳만). 그 밖에는 마크다운을 쓰지 마.
+- 입력에 "추천재료"가 있으면 메뉴·취미 추천 질문이야. 재료의 후보 안에서 1~3가지만 골라 이름을 말하고, 근거는 "기준기운"을 쉬운 말로 한 줄만 써. 질문에 끼니가 없으면 재료의 끼니를 그대로 쓰되 "지금이면 점심 쪽이겠다"처럼 한 마디로 짚어. "규칙"을 반드시 지켜. 의학·다이어트·치료 표현은 쓰지 말고 기분 좋은 참고로만 말해.
 - 큰 그림 카드(visual): 사용자가 "무엇을 적을지(노트)", "해 볼 일(체크리스트)", "언제가 좋은지(시간표)", "소품·음식 같은 추천(소품)", "어울리는 색(색 견본)", "어울리는 향(향 카드)", "들을 노래(노래 카드)", "여행지 후보(여행 카드)", "한 지역 코스(코스 카드)", "물건을 어디에 두면 좋은지(방 핀)"을 물을 때만 answer 와 함께 카드를 하나 붙여. 그 밖의 질문은 kind 를 "none" 으로 해. 카드는 answer 의 내용을 눈에 보이게 요약한 것이라 answer 와 어긋나면 안 돼. 연속된 답마다 붙이지 말고, 직전 도리 답에 카드가 있었다면 이번엔 "none". 사용자가 그 종류를 직접 묻지 않았는데 답에 소품·색·향이 나왔다는 이유로 카드를 붙이지 마(그런 건 글로만 말해).
   - note: 노트에 적어 볼 예시 문장 2~4줄(items[].label 에 문장, 나머지는 빈 글자). title 은 노트 제목(12자 이내).
   - checklist: 이번에 해 볼 작은 행동 2~5개(label). 아주 작고 쉬운 것만.
@@ -411,6 +413,8 @@ export function recentEndings(history: ChatMsg[]): string {
 }
 
 export function buildChatPrompt(i: ChatFactsInput, history: ChatMsg[], now: Date = new Date()): string {
+  const askedNow = [...history].reverse().find((m) => m.role === "user")?.text ?? "";
+  const rec = recommendFacts(askedNow, history, i.chart, i.daily, now);
   const where = i.kind === "daily" ? "오늘의 도리 한마디 카드에서 들어왔어요" : i.kind === "compat" ? "궁합 결과서를 읽고 들어왔어요" : "사주 풀이 결과서를 읽고 들어왔어요";
   const facts = {
     들어온곳: where,
@@ -418,6 +422,7 @@ export function buildChatPrompt(i: ChatFactsInput, history: ChatMsg[], now: Date
     나: chartFacts(i.chart),
     "이 대화에서 쓸 사주 기운": coreElements(i.chart).map((w) => `${w} 기운`),
     ...(i.core ? { 사주핵심: i.core } : {}),
+    ...(rec ? { 추천재료: rec } : {}),
     ...(i.kind === "compat" && i.partnerChart ? { 상대: chartFacts(i.partnerChart) } : {}),
     ...(i.daily ? { 오늘의흐름: i.daily } : {}),
     ...(i.memo ? { 도리메모: { 제목: i.memo.title, 항목: Object.fromEntries(i.memo.rows), [i.memo.scoreLabel]: `${i.memo.score} (${i.memo.tone})`, 한줄결론: i.memo.line } } : {}),
