@@ -40,6 +40,13 @@ const MEAL_WORDS: Array<[RegExp, Meal]> = [
   [/야식|간식|출출|밤에/, "야식"],
 ];
 
+/** 질문에 끼니가 둘 이상 나오거나 "하루 식단·세 끼"면 아침·점심·저녁을 모두, 아니면 null */
+export function mealsAll(question: string): Meal[] | null {
+  if (/하루\s?(식단|메뉴|세\s?끼)|세\s?끼|삼시\s?세?\s?끼|종일|온종일/.test(question)) return ["아침", "점심", "저녁"];
+  const hit = (["아침", "점심", "저녁"] as Meal[]).filter((m) => MEAL_WORDS.find(([, x]) => x === m)![0].test(question));
+  return hit.length >= 2 ? hit : null;
+}
+
 /** 질문에 끼니가 있으면 그것, 없으면 한국 시각으로 추정해요 */
 export function mealFor(question: string, now: Date): Meal {
   for (const [re, m] of MEAL_WORDS) if (re.test(question)) return m;
@@ -87,6 +94,8 @@ function pick(list: string[], seen: string): string[] {
 export interface RecommendFacts {
   종류: "메뉴" | "취미";
   끼니?: Meal;
+  /** 여러 끼를 물었을 때: 끼니마다 후보 */
+  끼니별?: Partial<Record<Meal, string[]>>;
   기준기운: string;
   오늘일진기운?: string;
   후보: string[];
@@ -97,6 +106,15 @@ export interface RecommendFacts {
 /** 답에 실제로 나온 후보만 골라 그림 카드로 만들어요(AI 가 카드를 정하지 않아요). 1~3개, 없으면 null */
 export function recommendVisual(rec: RecommendFacts, answer: string): { kind: "food" | "hobby"; title: string; items: Array<{ icon: string; label: string; sub: string; best: boolean }> } | null {
   const kind = rec.종류 === "메뉴" ? "food" : "hobby";
+  if (rec.끼니별) {
+    const fl = answer.replace(/\s+/g, "");
+    const its: Array<{ icon: string; label: string; sub: string; best: boolean }> = [];
+    for (const [m, cs] of Object.entries(rec.끼니별) as Array<[Meal, string[]]>) {
+      const c = cs.find((x) => fl.includes(x.replace(/\s+/g, "")) && artFor("food", x));
+      if (c) its.push({ icon: "", label: c, sub: m, best: false });
+    }
+    return its.length ? { kind: "food", title: "하루 메뉴 후보", items: its.slice(0, 3) } : null;
+  }
   const flat = answer.replace(/\s+/g, "");
   const items = rec.후보
     .filter((c) => flat.includes(c.replace(/\s+/g, "")) && artFor(kind, c))
@@ -123,6 +141,16 @@ export function recommendFacts(question: string, history: ChatMsg[], chart: Saju
   const base = `${EL_KO[el]} 기운(내 사주에서 가장 얇은 편${balanced ? ", 전체적으로는 고른 편" : ""})`;
   const todayNote = todayEl ? `${EL_KO[todayEl]} 기운` : undefined;
   if (kind === "meal") {
+    const all = mealsAll(question);
+    if (all) {
+      const per: Partial<Record<Meal, string[]>> = {};
+      for (const m of all) {
+        const pool = MENU[el][m as "아침" | "점심" | "저녁"];
+        const alt = todayEl && todayEl !== el ? pick(MENU[todayEl][m as "아침" | "점심" | "저녁"], seen).slice(0, 1) : [];
+        per[m] = [...pick(pool, seen).slice(0, 2), ...alt];
+      }
+      return { 종류: "메뉴", 끼니: all[0], 끼니별: per, 기준기운: base, ...(todayNote ? { 오늘일진기운: todayNote } : {}), 후보: Object.values(per).flat() as string[], 결: MENU[el].결, 규칙: [...RULES, `여러 끼를 물었어. ${all.join("·")}을 빠짐없이 끼니마다 후보 1가지씩 골라서 한 번에 답해. 끼니별 후보는 "끼니별"에 있어.`] };
+    }
     const meal = mealFor(question, now);
     const key = meal === "야식" ? "저녁" : meal;
     const main = pick(MENU[el][key], seen);

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { SajuChart } from "@/lib/saju/types";
-import { HOBBY, MENU, mealFor, recommendFacts, recommendKind, recommendVisual } from "../menuHobby";
+import { HOBBY, MENU, mealFor, mealsAll, recommendFacts, recommendKind, recommendVisual } from "../menuHobby";
 import { FOOD_ART, HOBBY_ART } from "@/lib/foodArt";
 import { EVAL_MENU } from "../evalSets";
 import { unableReply } from "../outOfScope";
@@ -81,5 +81,11 @@ describe("메뉴·취미 추천", () => {
     expect(v?.kind).toBe("food");
     expect(v?.items.map((i) => i.label)).toEqual([first]);
     expect(recommendVisual(f!, "오늘은 그냥 쉬어 가자")).toBeNull();
+  });
+  it("아침점심저녁을 함께 물으면 세 끼 모두 돌려줘요", () => {
+    expect(mealsAll("오늘 아침점심저녁 메뉴 추천해줘")).toEqual(["아침", "점심", "저녁"]);
+    expect(mealsAll("하루 식단 짜줘")).toEqual(["아침", "점심", "저녁"]);
+    expect(mealsAll("점심 뭐 먹지")).toBeNull();
+    expect(mealsAll("점심이랑 저녁 추천")).toEqual(["점심", "저녁"]);
   });
 });
