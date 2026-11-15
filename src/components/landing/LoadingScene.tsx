@@ -154,7 +154,7 @@ export default function LoadingScene({
         <SafeImage src={animal} alt="" className="w-full h-full object-contain drop-shadow-md" fallback="🦦" fallbackClass="text-5xl" />
       </div>
 
-      <div aria-hidden="true" className="absolute inset-x-0 bottom-[168px] flex justify-center gap-2">
+      <div aria-hidden="true" className="absolute inset-x-0 bottom-[150px] flex justify-center gap-2">
         {CHIPS.map(([ch, color], i) => {
           const on = done || (pct / 100) * 5 * 1.05 > i;
           return (
@@ -173,19 +173,16 @@ export default function LoadingScene({
         <p className="mb-2.5 text-base font-extrabold" style={{ textShadow: "0 1px 8px rgba(40,20,100,.4)" }}>
           풀이를 만들고 있어
         </p>
-        <div className="relative mt-8">
-          <span
-            className="absolute -top-[30px] -translate-x-1/2 rounded-full bg-white px-2.5 py-[3px] text-xs font-extrabold text-brand-700 shadow-md"
-            style={{ left: `${Math.max(8, Math.min(92, pct))}%`, transition: "left .3s" }}
-          >
-            {shown}%
-            <span className="absolute left-1/2 -bottom-1 -ml-1 border-4 border-transparent border-t-white border-b-0" />
+        <div className="mb-2 flex items-baseline justify-between gap-3">
+          <span className="text-[34px] font-black leading-none" style={{ textShadow: "0 2px 10px rgba(40,20,100,.4)" }}>
+            {shown}
+            <small className="text-base">%</small>
           </span>
-          <div role="progressbar" aria-label="풀이 진행" aria-valuemin={0} aria-valuemax={100} aria-valuenow={shown} className="h-2.5 rounded-full bg-white/30 overflow-hidden">
-            <div className="h-full rounded-full" style={{ width: `${pct}%`, background: "linear-gradient(90deg,#fff,#ffd1ea)" }} />
-          </div>
+          <span className="min-w-0 truncate text-xs opacity-90">{stageText}</span>
         </div>
-        <p className="mt-2 min-h-4 text-xs opacity-90">{stageText}</p>
+        <div role="progressbar" aria-label="풀이 진행" aria-valuemin={0} aria-valuemax={100} aria-valuenow={shown} className="h-2.5 rounded-full bg-white/30 overflow-hidden">
+          <div className="h-full rounded-full" style={{ width: `${pct}%`, background: "linear-gradient(90deg,#fff,#ffd1ea)" }} />
+        </div>
       </div>
 
       {done && (
