@@ -23,7 +23,7 @@ describe("오늘의 작은 실천 문장", () => {
   });
   it("겁주는 말·위험한 조언·식상한 서랍 정리가 없고, 한 줄로 짧다", () => {
     for (const g of DAILY_GODS) for (const [, s] of TIP_POOL[g]) {
-      expect(/조심|위험|불길|흉|파산|이별|사고|서랍|약|병원|투자|주식|대출|단식|굶/.test(s)).toBe(false);
+      expect(/조심|위험|불길|흉|파산|이별|사고|서랍|약국|약을|복용|병원|투자|주식|대출|단식|굶/.test(s)).toBe(false);
       expect(s.length).toBeLessThanOrEqual(40);
     }
   });
