@@ -116,7 +116,7 @@ function rulesFor(page: BookPage, year: number): { sec: SecRule; row?: (r: BookR
       return { sec: (s) => ({ lock: /^\d{4}년 흐름|^지금 대운/.test(s.heading) }) };
     case "lucky":
       return {
-        sec: (s) => ({ lock: ["한 달 행운 처방전", "마무리 편지", "잘 맞는 사람의 결", "서로 맞춰 가면 좋은 결"].includes(s.heading) }),
+        sec: (s) => ({ lock: ["개운 부적 카드", "한 달 행운 처방전", "마무리 편지", "잘 맞는 사람의 결", "서로 맞춰 가면 좋은 결"].includes(s.heading) }),
         row: (r, i) => i >= 1,
       };
     default:
@@ -155,6 +155,7 @@ export function previewBlank(pages: BookPage[], fromNo: number): BookPage[] {
       ...p,
       note: undefined,
       advice: undefined,
+      letter: undefined,
       evidence: undefined,
       chart: undefined,
       sections: p.sections.map((s) => lockSection(s)),

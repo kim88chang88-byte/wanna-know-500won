@@ -14,7 +14,7 @@ import ElementTile from "@/components/ElementTile";
 import DayMasterScene from "./DayMasterScene";
 import { MORE_LABELS, SENTENCE_LABELS } from "@/lib/premium/partnerProfile";
 import { DAYMASTER_BRIEF, MBTI_BRIEF, cleanMbti } from "@/lib/mbtiBrief";
-import { mbtiDecadeLine } from "@/lib/mbtiLine";
+import { fillLetterMbti, mbtiDecadeLine } from "@/lib/mbtiLine";
 import { MBTI_MARK } from "@/lib/premium/book/lifeFlow";
 import { formatWon } from "@/lib/premium/book/charts";
 import { callName } from "@/lib/ai/nameRepair";
@@ -1116,9 +1116,11 @@ export default function PremiumBook({ report, flush = false, finale, previewBlur
   );
 
   // 풀이는 종이 카드(2~3개 소제목)로 나누고, 카드 사이에 도리의 말풍선을 넣어요.
-  const perCard = page.sections.length > 6 ? 3 : 2;
+  // AI 편지가 있으면 같은 자리의 기본 "마무리 편지"는 빼요.
+  const cardSecs = page.letter ? page.sections.filter((x) => x.heading !== "마무리 편지") : page.sections;
+  const perCard = cardSecs.length > 6 ? 3 : 2;
   const groups: BookPage["sections"][] = [];
-  for (let k = 0; k < page.sections.length; k += perCard) groups.push(page.sections.slice(k, k + perCard));
+  for (let k = 0; k < cardSecs.length; k += perCard) groups.push(cardSecs.slice(k, k + perCard));
   const tp = titleParts(page.title);
   const mascot = mascotOf(report);
   const pic = avatarOf(mascot);
@@ -1333,6 +1335,13 @@ export default function PremiumBook({ report, flush = false, finale, previewBlur
           <div data-testid="book-advice" aria-hidden={blurred ? "true" : undefined} className={`rounded-2xl border border-[#e6c887]/40 bg-[#e6c887]/[0.08] px-4 py-4 ${blurred ? BLUR : ""}`}>
             <p className={`text-[14px] font-bold tracking-wide ${GOLD}`}>{MASCOT_EMOJI[mascot]} 도리의 맞춤 조언</p>
             <p className="mt-1.5 font-serifKr text-[15px] leading-[1.85] text-[#fbf3de]">{page.advice}</p>
+          </div>
+        )}
+
+        {page.letter && (
+          <div data-testid="book-letter" aria-hidden={blurred ? "true" : undefined} className={`rounded-2xl border border-[#e6c887]/40 bg-[#e6c887]/[0.08] px-4 py-4 ${blurred ? BLUR : ""}`}>
+            <p className={`text-[14px] font-bold tracking-wide ${GOLD}`}>{MASCOT_EMOJI[mascot]} 도리의 편지</p>
+            <p className="mt-1.5 whitespace-pre-line font-serifKr text-[15px] leading-[1.85] text-[#fbf3de]">{fillLetterMbti(page.letter, report.mbti)}</p>
           </div>
         )}
 

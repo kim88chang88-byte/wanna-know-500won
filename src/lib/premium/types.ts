@@ -146,6 +146,8 @@ export interface BookPage {
   note?: string;
   /** 고민을 적은 이용자에게 AI 가 쓰는 맞춤 조언 한 문단 (마지막 쪽) */
   advice?: string;
+  /** 마지막 당부 쪽의 AI 편지 한 문단 (⟦MBTI⟧ 자리는 화면에서 채워요) */
+  letter?: string;
   /** '이 풀이의 근거 보기'에 접어서 보여주는 계산 근거 */
   evidence?: BookRow[];
   sections: BookSection[];

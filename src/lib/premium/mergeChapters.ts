@@ -9,7 +9,9 @@ export function conclusionOf(report: PremiumReportView | null | undefined): stri
 
 export function mergeChapters(report: PremiumReportView, replaced: Record<string, BookSection[]> | undefined): PremiumReportView {
   if (!replaced || Object.keys(replaced).length === 0) return report;
-  return { ...report, book: report.book.map((p) => (replaced[String(p.no)] ? { ...p, sections: replaced[String(p.no)] } : p)) };
+  // 마지막 당부 쪽의 계산 카드(슬로건·부적)는 AI 가 장을 다시 써도 그대로 앞에 둬요.
+  const keep = (p: PremiumReportView["book"][number]) => (p.key === "lucky" ? p.sections.filter((s) => s.heading === "한 줄 슬로건" || s.heading === "개운 부적 카드") : []);
+  return { ...report, book: report.book.map((p) => (replaced[String(p.no)] ? { ...p, sections: [...keep(p), ...replaced[String(p.no)]] } : p)) };
 }
 
 /** 나머지 장 묶음(2~4번)을 쪽 순서대로 이어서 받아요. 묶음이 올 때마다 onPart 로 알려 줘서 화면에 바로 끼워 넣을 수 있어요. 실패한 묶음은 건너뛰고(이미 보이는 리포트는 그대로), aiNotice 만 켜요. */

@@ -1,3 +1,4 @@
+import { buildLetterFacts } from "@/lib/premium/letterFacts";
 import { hasAiKey } from "@/lib/ai/llm";
 import { NextResponse } from "next/server";
 import { hasEntitlement, ENTITLEMENT_COOKIE } from "@/lib/premium/entitlement";
@@ -82,6 +83,7 @@ export async function POST(request: Request) {
       const dbCfg = loadDbConfig(process.env);
       const db = dbCfg ? createDb(dbCfg) : null;
       const book0 = report.book;
+      const letterFacts = parsed.partner ? null : buildLetterFacts(report, parsed.value.year, new Date(Date.now() + 9 * 3600_000).getUTCFullYear());
       // 미리 보기는 열려 있는 쪽만 AI 로 써요. (가려질 쪽에는 AI 비용을 쓰지 않아요)
       const openKeys = new Set(book0.filter((p) => p.no < PREVIEW_OPEN_PAGES).map((p) => p.key));
       const notesJob = (async () => {
@@ -89,9 +91,9 @@ export async function POST(request: Request) {
         try {
           const gate = await takeAiBudget(process.env, db);
           if (gate === "ok") {
-            if (!preview) return await addBookNotes(book0, { kind: parsed.partner ? "compat" : "personal", concern: parsed.concern, name: chapterName(callNick) });
+            if (!preview) return await addBookNotes(book0, { kind: parsed.partner ? "compat" : "personal", concern: parsed.concern, name: chapterName(callNick), letter: letterFacts });
             const head = book0.filter((p) => p.no < PREVIEW_OPEN_PAGES);
-            const done = await addBookNotes(head, { kind: parsed.partner ? "compat" : "personal", concern: parsed.concern, name: chapterName(callNick) });
+            const done = await addBookNotes(head, { kind: parsed.partner ? "compat" : "personal", concern: parsed.concern, name: chapterName(callNick), letter: letterFacts });
             return book0.map((p) => done.find((d) => d.no === p.no) ?? p);
           }
         } catch (err) {

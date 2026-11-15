@@ -32,6 +32,24 @@ const FUTURE: Record<string, string> = {
   인성: "관심 있는 공부를 천천히 준비하는 데 쓰면 좋아",
 };
 
+/** "INFP 특유의 번뜩이는 섬세함" 같은 명사구. MBTI 가 없거나 모르는 값이면 빈 문자열 */
+export function mbtiPhrase(rawMbti: unknown): string {
+  const m = cleanMbti(rawMbti);
+  if (!m) return "";
+  const adj = ADJ[`${m[1]}${m[3]}`];
+  const noun = NOUN[`${m[0]}${m[2]}`];
+  return adj && noun ? `${m} 특유의 ${adj} ${noun}` : "";
+}
+
+/** 편지 속 ⟦MBTI⟧(+선택 조사 표기 예: 은(는))를 명사구로 채워요. MBTI 가 없으면 "타고난 결"로 대신해요. */
+export function fillLetterMbti(text: string, rawMbti: unknown): string {
+  const phrase = mbtiPhrase(rawMbti) || "타고난 결";
+  return text.replace(/⟦MBTI⟧(은\(는\)|이\(가\)|을\(를\)|과\(와\))?/g, (_m, p?: string) => {
+    if (!p) return phrase;
+    return josa(phrase, `${p[0]}/${p[2]}` as "은/는");
+  });
+}
+
 /** MBTI 가 없거나 모르는 값이면 빈 문장. 카드 본문 속 한 문장으로 들어가요("○○ 특유의 …"). */
 export function mbtiDecadeLine(rawMbti: unknown, group: string, tense: "past" | "now" | "future"): string {
   const m = cleanMbti(rawMbti);

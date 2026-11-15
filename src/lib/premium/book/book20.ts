@@ -10,6 +10,8 @@ import { weaveConcern } from "./concernWeave";
 import { buildWealthProfile, moneyIntroSections, moneyTailSections } from "./moneyType";
 import { CHAPTER_TITLES, healthMiniTitle } from "./chapterTitles";
 import { guiSections } from "./gui";
+import { closingCardSections } from "./closing";
+import { cleanConcernText, hasConcern } from "@/lib/concerns";
 import { actionSection, buildEnergyChart, closingSection, decadeCards, natalStageSections, nextChainSection, nowPositionSection, stageGlossary } from "./lifeFlow";
 
 /*
@@ -76,6 +78,18 @@ function stageTimeline(r: SajuResult): { sections: BookSection[]; rows: BookRow[
     if (stage && STAGE12_TEXT[stage]) sections.push({ heading: `${d.startAge}~${d.endAge}세 · ${stage}${isCur ? " (지금)" : ""}`, body: STAGE12_TEXT[stage] });
   }
   return { sections, rows };
+}
+
+/** 고민 부록 맨 위: 이용자가 적은 고민 문장을 인용해 걸고, 풀리는 시기부터 먼저 보여 줘요. 고민이 없으면 비어 있어요. */
+function concernQuoteSections(ctx: BookContext): BookSection[] {
+  const c = ctx.concern;
+  if (!hasConcern(c)) return [];
+  const text = cleanConcernText(c.text ?? "");
+  const first = ctx.insight.timing[0];
+  if (!text || !first) return [];
+  const sentence = first.body.split(/(?<=[.!?])\s/)[0] ?? first.body;
+  const q = text.length > 80 ? `${text.slice(0, 80)}…` : text;
+  return [{ heading: "네가 적어 준 고민", body: `“${q}”\n이 고민이 풀리는 시기부터 먼저 말해 줄게. ${first.title}: ${sentence}` }];
 }
 
 function pageBy(pages: BookPage[], key: string): BookPage {
@@ -196,10 +210,10 @@ export function buildBook20(r: SajuResult, ctx: BookContext): BookPage[] {
       title: "부록 · 요즘 고민 맞춤 풀이",
       subtitle: "APPENDIX 4",
       lead: ctx.insight.headline,
-      sections: [...ctx.insight.points.map((p) => ({ heading: p.title, body: p.body })), ...ctx.insight.timing.map((t) => ({ heading: t.title, body: t.body }))],
+      sections: [...concernQuoteSections(ctx), ...ctx.insight.points.map((p) => ({ heading: p.title, body: p.body })), ...ctx.insight.timing.map((t) => ({ heading: t.title, body: t.body }))],
       tables: [],
     },
-    { ...lucky, key: "lucky", title: "부록 · 행운 처방전", subtitle: "APPENDIX 5", sections: [...rxSecs.filter((x) => x.heading === "한 달 행운 처방전"), { heading: "작게 시작하는 법", body: "처방을 한꺼번에 다 하려고 하면 부담이 돼. 이번 주에는 색, 습관, 방향 중 마음이 가는 하나만 골라 가볍게 시작해 봐. 작은 실천이 쌓이면 흐름이 조금씩 달라져." }, ...rxSecs.filter((x) => x.heading === "마무리 편지")], tables: lucky.tables },
+    { ...lucky, key: "lucky", title: CHAPTER_TITLES.closing, subtitle: "APPENDIX 5", lead: "슬로건 하나, 부적 하나, 그리고 마지막 편지야.", sections: [...closingCardSections(r, ctx.elements), ...rxSecs.filter((x) => x.heading === "한 달 행운 처방전"), { heading: "작게 시작하는 법", body: "처방을 한꺼번에 다 하려고 하면 부담이 돼. 이번 주에는 색, 습관, 방향 중 마음이 가는 하나만 골라 가볍게 시작해 봐. 작은 실천이 쌓이면 흐름이 조금씩 달라져." }, ...rxSecs.filter((x) => x.heading === "마무리 편지")], tables: lucky.tables },
   ];
 
   const pages = seq.map((s, i) => {
