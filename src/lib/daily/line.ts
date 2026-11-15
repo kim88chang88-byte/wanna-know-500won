@@ -63,8 +63,9 @@ const LINES: Record<TenGod, readonly [string, string, string]> = {
 const COMBINE_ADD = "오늘 글자와 내 일간이 서로 끌리는 날이라, 사람 사이가 한결 편안해질 수 있어.";
 const CLASH_ADD = "오늘은 자극이 조금 있는 날이라, 가볍게 몸을 움직이면 활력으로 바뀌어.";
 
-/** 십성별 기본 행운 점수. 합이면 올라가고 충이면 조금 내려가요. 낮아도 55점 아래로는 가지 않아요. */
-const BASE_LUCK: Record<TenGod, number> = { 식신: 82, 정인: 81, 정재: 79, 정관: 77, 편재: 75, 비견: 73, 상관: 71, 편인: 69, 겁재: 67, 편관: 65 };
+/** 십성별 기본 행운 점수. 합이면 올라가고 충이면 조금 내려가요. 낮아도 55점 아래로는 가지 않아요.
+ * 등급은 90 대길 / 80 길 / 70 소길 / 그 아래 쉬어가는 날. (11-15: 기본 점수를 +6 올려서, 점수는 높아지고 등급 기준은 10점 단위로 정리했어요) */
+const BASE_LUCK: Record<TenGod, number> = { 식신: 88, 정인: 87, 정재: 85, 정관: 83, 편재: 81, 비견: 79, 상관: 77, 편인: 75, 겁재: 73, 편관: 71 };
 
 export type LuckGrade = "대길" | "길" | "소길" | "쉬어가는 날";
 
@@ -77,7 +78,7 @@ const CHEERS: Record<LuckGrade, readonly [string, string, string]> = {
 };
 
 export function gradeOf(luck: number): LuckGrade {
-  return luck >= 90 ? "대길" : luck >= 75 ? "길" : luck >= 60 ? "소길" : "쉬어가는 날";
+  return luck >= 90 ? "대길" : luck >= 80 ? "길" : luck >= 70 ? "소길" : "쉬어가는 날";
 }
 
 function hashOf(s: string): number {

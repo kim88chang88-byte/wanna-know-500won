@@ -19,8 +19,20 @@ describe("오늘의 도리 한마디", () => {
     }
     expect(gradeOf(95)).toBe("대길");
     expect(gradeOf(80)).toBe("길");
-    expect(gradeOf(62)).toBe("소길");
+    expect(gradeOf(79)).toBe("소길");
+    expect(gradeOf(70)).toBe("소길");
+    expect(gradeOf(69)).toBe("쉬어가는 날");
     expect(gradeOf(58)).toBe("쉬어가는 날");
+  });
+  it("등급 분포: 쉬어가는 날은 가끔, 대부분은 길·소길", () => {
+    const count: Record<string, number> = {};
+    for (const g of DAILY_GODS) for (let i = 0; i < 60; i++) {
+      const gr = dailyLine(facts(g), new Date(Date.UTC(2026, 10, 1) + i * 86_400_000).toISOString().slice(0, 10)).grade;
+      count[gr] = (count[gr] ?? 0) + 1;
+    }
+    const total = DAILY_GODS.length * 60;
+    expect(((count["길"] ?? 0) + (count["소길"] ?? 0) + (count["대길"] ?? 0)) / total).toBeGreaterThan(0.9);
+    expect((count["쉬어가는 날"] ?? 0) / total).toBeLessThan(0.1);
   });
   it("같은 날엔 같은 문장, 열 가지 십성 모두 문장이 있다", () => {
     for (const g of DAILY_GODS) {
