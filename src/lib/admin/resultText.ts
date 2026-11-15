@@ -32,8 +32,8 @@ export function resultToText(report: PremiumReportView, reading: unknown, meta: 
     `# 결과 복사 — ${meta.topic ?? report.topic?.label ?? ""}`.trim(),
     `시각: ${(meta.at ?? new Date()).toISOString()} · 등급: ${report.level}${report.compat ? " · 궁합" : ""}${report.hourUnknown ? " · 태어난 시간 모름" : ""}`,
     `이름: ${meta.name ?? "-"}${report.compat ? ` / 상대: ${meta.partnerName ?? "-"}` : ""}`,
-    `핵심: ${report.summary}`,
-    `격국: ${report.geukguk} · 용신: ${report.yongsin.join(", ")}`,
+    ...(report.summary ? [`핵심: ${report.summary}`] : []),
+    ...(report.geukguk || report.yongsin.length ? [`격국: ${report.geukguk || "-"} · 용신: ${report.yongsin.join(", ") || "-"}`] : []),
   ];
   if (report.concern) out.push(`\n## 고민 답변\n(고민 글) ${report.concern.text}`, ...report.concern.answers.map((a) => `### ${a.title}\n${a.body}`));
   if (report.compat) {

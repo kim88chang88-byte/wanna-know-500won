@@ -104,9 +104,17 @@ export function stripTitleEcho(text: string, title: string): string {
 export function trimToLastSentence(text: string): string {
   const t = text.trim();
   const tail = "[\\u{1F300}-\\u{1FAFF}\\u2600-\\u27BF\\uFE0F\\s\"'”’)*]*";
-  if (new RegExp(`[.!?…~]${tail}$`, "u").test(t)) return t;
+  if (new RegExp(`[.!?…~]${tail}$`, "u").test(t)) return dropOrphanBold(t);
   const m = new RegExp(`^[\\s\\S]*[.!?…~]${tail}`, "u").exec(t);
-  return m ? m[0].trim() : t;
+  return dropOrphanBold(m ? m[0].trim() : t);
+}
+
+/** 문장을 자르다 강조 표시(**)의 여는 쪽만 남으면(짝이 안 맞으면) 맨 끝의 남은 표시를 지워요. */
+export function dropOrphanBold(text: string): string {
+  const marks = text.match(/\*\*/g) ?? [];
+  if (marks.length % 2 === 0) return text;
+  const i = text.lastIndexOf("**");
+  return (text.slice(0, i) + text.slice(i + 2)).replace(/\s+$/, "");
 }
 
 /** 요약 문단 맨 앞의 "요약하자면," 같은 말머리를 떼어요. (제목에 이미 있어요) */
