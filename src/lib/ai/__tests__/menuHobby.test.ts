@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { SajuChart } from "@/lib/saju/types";
-import { HOBBY, MENU, mealFor, recommendFacts, recommendKind } from "../menuHobby";
+import { HOBBY, MENU, mealFor, recommendFacts, recommendKind, recommendVisual } from "../menuHobby";
+import { FOOD_ART, HOBBY_ART } from "@/lib/foodArt";
 import { EVAL_MENU } from "../evalSets";
 import { unableReply } from "../outOfScope";
 
@@ -67,5 +68,18 @@ describe("메뉴·취미 추천", () => {
       const un = unableReply(q.q);
       expect(Boolean(un)).toBe(q.expect === "prefilter");
     }
+  });
+  it("표의 모든 메뉴·취미에 그림 이름이 있어요", () => {
+    for (const m of Object.values(MENU)) for (const k of ["아침", "점심", "저녁"] as const) for (const n of m[k]) expect(FOOD_ART[n], n).toBeTruthy();
+    for (const h of Object.values(HOBBY)) for (const n of [...h.혼자, ...h.함께, ...h.밖]) expect(HOBBY_ART[n], n).toBeTruthy();
+  });
+  it("답에 나온 후보만 그림 카드로 만들어요", () => {
+    const f = recommendFacts("점심 뭐 먹지?", [], chart, null, noon);
+    expect(f).not.toBeNull();
+    const first = f!.후보[0];
+    const v = recommendVisual(f!, `오늘은 ${first} 어때?`);
+    expect(v?.kind).toBe("food");
+    expect(v?.items.map((i) => i.label)).toEqual([first]);
+    expect(recommendVisual(f!, "오늘은 그냥 쉬어 가자")).toBeNull();
   });
 });

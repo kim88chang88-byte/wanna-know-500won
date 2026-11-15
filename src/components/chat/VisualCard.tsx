@@ -1,9 +1,11 @@
 "use client";
 
+import { useState } from "react";
 import { scentSrc } from "@/lib/scents";
 import { SONGS, songSearchUrl } from "@/lib/songs";
 import { TRAVEL, regionsIn, travelImg, travelMapUrl } from "@/lib/travel";
 import { propSrc } from "@/lib/props";
+import { artFor } from "@/lib/foodArt";
 import type { ChatVisual } from "@/lib/ai/chat";
 import { PALETTE, SPOTS } from "@/lib/visualPalette";
 
@@ -98,6 +100,43 @@ function Paper({ title, children }: { title: string; children: React.ReactNode }
       <p className="mb-2.5 mt-0.5 text-center font-hand text-[22px] font-bold leading-none">{title}</p>
       {children}
     </div>
+  );
+}
+
+/** 메뉴·취미 추천 카드: 스티커 그림이 아직 없으면 이모지로 보여 줘요 */
+function Sticker({ kind, label }: { kind: "food" | "hobby"; label: string }) {
+  const art = artFor(kind, label);
+  const [failed, setFailed] = useState(false);
+  if (!art) return null;
+  return failed ? (
+    <span className="text-[30px]">{art.emoji}</span>
+  ) : (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img src={art.src} alt={label} loading="lazy" onError={() => setFailed(true)} className="h-[66%] w-[66%] object-contain drop-shadow-[0_4px_3px_rgba(42,42,106,0.2)]" />
+  );
+}
+
+function PickCard({ v, kind }: { v: ChatVisual; kind: "food" | "hobby" }) {
+  const tints: Array<[string, string]> = [["#ffe9c9", "#ffe3ec"], ["#d4f3e6", "#fff0c9"], ["#e9d9ff", "#cfe0ff"]];
+  return (
+    <Paper title={v.title || (kind === "food" ? "메뉴 후보" : "어울리는 취미")}>
+      <div className="grid grid-cols-3 gap-2 pt-1">
+        {v.items.map((it, i) => {
+          const [a, b] = tints[i % 3];
+          return (
+            <div key={i} className="min-w-0 text-center">
+              <div
+                className={`grid aspect-square place-items-center rounded-full shadow-[inset_0_-6px_12px_rgba(255,255,255,0.6),inset_0_4px_8px_#fff,0_8px_14px_rgba(122,107,208,0.18)] ${i === 1 ? "translate-y-2" : ""}`}
+                style={{ background: `radial-gradient(circle at 30% 25%, #fff, ${a} 55%, ${b})` }}
+              >
+                <Sticker kind={kind} label={it.label} />
+              </div>
+              <b className="mt-4 inline-block max-w-full truncate rounded-full bg-white px-2.5 py-0.5 text-[12px] text-[#2a2540] shadow-[0_2px_6px_rgba(122,107,208,0.14)]">{it.label}</b>
+            </div>
+          );
+        })}
+      </div>
+    </Paper>
   );
 }
 
@@ -406,6 +445,8 @@ export default function VisualCard({ v, onAsk }: { v: ChatVisual; onAsk?: (q: st
       {v.kind === "checklist" && <Checklist v={v} />}
       {v.kind === "timeline" && <Timeline v={v} />}
       {v.kind === "lucky" && <Lucky v={v} />}
+      {v.kind === "food" && <PickCard v={v} kind="food" />}
+      {v.kind === "hobby" && <PickCard v={v} kind="hobby" />}
       {v.kind === "palette" && <Palette v={v} />}
       {v.kind === "spots" && <Spots v={v} />}
       {v.kind === "scent" && <Scent v={v} />}

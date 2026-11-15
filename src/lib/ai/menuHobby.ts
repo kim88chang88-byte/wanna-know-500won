@@ -3,6 +3,7 @@ import type { SajuChart } from "@/lib/saju/types";
 import { analyzeChart } from "@/lib/saju/analysis";
 import type { ChatMsg } from "@/lib/chatContext";
 import type { DailyFacts } from "./dailyFacts";
+import { artFor } from "@/lib/foodArt";
 
 /*
  * 상담실 "오늘 뭐 먹지 / 취미 추천": 후보는 코드가 오행으로 정하고, AI 는 그 안에서 골라 말투로 풀어요.
@@ -17,7 +18,7 @@ export const EL_KO: Record<Element, string> = { wood: "나무", fire: "불", ear
 const ORDER: Element[] = ["wood", "fire", "earth", "metal", "water"];
 
 export const MENU: Record<Element, { 아침: string[]; 점심: string[]; 저녁: string[]; 결: string }> = {
-  wood: { 아침: ["샐러드", "과일 요거트", "나물 비빔밥"], 점심: ["쌈밥", "비빔국수", "나물 정식"], 저녁: ["채소 샤브샤브", "보쌈과 쌈 채소", "오이·부추 무침 곁들인 식사"], 결: "푸르고 신선한 결로 쑥쑥 자라는 기운을 채워 주는 쪽" },
+  wood: { 아침: ["샐러드", "과일 요거트", "나물 비빔밥"], 점심: ["쌈밥", "비빔국수", "나물 정식"], 저녁: ["채소 샤브샤브", "보쌈과 쌈 채소", "오이·부추 반찬 한 상"], 결: "푸르고 신선한 결로 쑥쑥 자라는 기운을 채워 주는 쪽" },
   fire: { 아침: ["따뜻한 죽", "토스트와 따뜻한 차"], 점심: ["불향 볶음밥", "매콤한 덮밥", "닭갈비"], 저녁: ["삼겹살 구이", "카레", "마라 계열 요리"], 결: "뜨겁고 생기 있는 결로 열정 기운을 데워 주는 쪽" },
   earth: { 아침: ["고구마", "단호박죽", "곡물 시리얼"], 점심: ["비빔밥", "곡물밥 정식", "감자 요리"], 저녁: ["찜닭", "수육", "카레"], 결: "든든하고 구수한 결로 중심을 잡아 주는 쪽" },
   metal: { 아침: ["배나 사과", "흰죽", "두부 요리"], 점심: ["흰살생선 구이", "두부 정식", "닭가슴살 샐러드"], 저녁: ["담백한 생선구이", "닭백숙", "무 요리"], 결: "담백하고 깔끔한 결로 정리하는 기운을 살리는 쪽" },
@@ -93,8 +94,20 @@ export interface RecommendFacts {
   규칙: string[];
 }
 
+/** 답에 실제로 나온 후보만 골라 그림 카드로 만들어요(AI 가 카드를 정하지 않아요). 1~3개, 없으면 null */
+export function recommendVisual(rec: RecommendFacts, answer: string): { kind: "food" | "hobby"; title: string; items: Array<{ icon: string; label: string; sub: string; best: boolean }> } | null {
+  const kind = rec.종류 === "메뉴" ? "food" : "hobby";
+  const flat = answer.replace(/\s+/g, "");
+  const items = rec.후보
+    .filter((c) => flat.includes(c.replace(/\s+/g, "")) && artFor(kind, c))
+    .slice(0, 3)
+    .map((label) => ({ icon: "", label, sub: "", best: false }));
+  if (items.length === 0) return null;
+  return { kind, title: kind === "food" ? `${rec.끼니 ?? "오늘"} 메뉴 후보` : "어울리는 취미", items };
+}
+
 const RULES = [
-  "후보 안에서만 1~3가지를 골라. 후보에 없는 음식·취미를 사주 근거로 말하지 마.",
+  "후보 안에서만 1~3가지를 골라. 이름은 후보에 적힌 그대로 써. 후보에 없는 음식·취미를 사주 근거로 말하지 마.",
   "근거는 한 줄만(예: 물 기운이 얇은 편이라 국물 있는 걸로). 병이나 몸을 낫게 한다, 살이 빠진다 같은 말은 절대 쓰지 마. 참고용이고 기분 좋게 가볍게.",
   "대화에서 이미 못 먹는 음식·싫다고 한 것·이미 하는 취미를 말했으면 그건 빼.",
   "특정 가게·브랜드 이름은 말하지 마.",

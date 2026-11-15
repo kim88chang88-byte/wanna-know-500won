@@ -15,7 +15,8 @@ import type { DailyFacts } from "./dailyFacts";
 import { modelFor } from "./llm";
 import { containsForbidden, isGeneric } from "./reading";
 import { tidyMarkup } from "@/lib/chatMarkup";
-import { recommendFacts } from "./menuHobby";
+import { recommendFacts, recommendVisual } from "./menuHobby";
+import { artFor } from "@/lib/foodArt";
 
 /*
  * 도유 상담방: 방금 본 풀이를 이어서 물어보는 대화. 사실은 계산된 사주 정보에서만 가져와요.
@@ -126,7 +127,7 @@ export function parseChatAnswer(value: unknown): string | null {
   return t;
 }
 
-export type VisualKind = "note" | "checklist" | "timeline" | "lucky" | "palette" | "spots" | "scent" | "songs" | "travel" | "course";
+export type VisualKind = "note" | "checklist" | "timeline" | "lucky" | "palette" | "spots" | "scent" | "songs" | "travel" | "course" | "food" | "hobby";
 
 export interface VisualItem {
   icon: string;
@@ -152,7 +153,7 @@ export interface ChatReply {
   unable?: boolean;
 }
 
-const COUNT: Record<VisualKind, [number, number]> = { note: [2, 4], checklist: [2, 5], timeline: [3, 4], lucky: [2, 3], palette: [2, 3], spots: [1, 3], scent: [2, 3], songs: [2, 3], travel: [2, 3], course: [6, 9] };
+const COUNT: Record<VisualKind, [number, number]> = { note: [2, 4], checklist: [2, 5], timeline: [3, 4], lucky: [2, 3], palette: [2, 3], spots: [1, 3], scent: [2, 3], songs: [2, 3], travel: [2, 3], course: [6, 9], food: [1, 3], hobby: [1, 3] };
 const NEEDS_ICON: VisualKind[] = ["timeline", "course"];
 const HAS_SUB: VisualKind[] = ["timeline", "lucky", "palette", "spots", "scent", "songs", "travel", "course"];
 
@@ -175,6 +176,7 @@ export function cleanVisual(raw: unknown): ChatVisual | null {
     if (kind === "scent" && !SCENTS[label]) continue;
     if (kind === "lucky" && !PROPS[label]) continue;
     if (kind === "songs" && !SONGS[label]) continue;
+    if ((kind === "food" || kind === "hobby") && !artFor(kind, label)) continue;
     if (kind === "travel" && !TRAVEL[label]) continue;
     if (kind === "course" && !/^[123]$/.test(icon)) continue;
     if (items.some((x) => x.label === label)) continue;
@@ -389,6 +391,8 @@ const ASK_PATTERN: Record<Exclude<VisualKind, never>, RegExp> = {
   course: /코스|일정|계획|짜 줘|짜줘|1박|2박|3박|\d일/,
   spots: /어디에|자리|배치|놓|두면|두는/,
   timeline: /언제|몇 시|시간대|시간이 좋|타이밍|시기|몇시/,
+  food: /^$/,
+  hobby: /^$/,
   note: /적어|메모|노트|일기|쓸 말|문장|법|팁|어떻게|추천/,
   checklist: /할 일|해 볼|해볼|체크|실천|습관|루틴|계획|방법|법|팁|어떻게|뭐 하|무엇을 하|추천/,
 };
@@ -460,6 +464,9 @@ export async function chatDori(
     parse: parseChatReply,
   });
   const q = [...history].reverse().find((m) => m.role === "user")?.text ?? "";
-  const visual = r.visual && visualAllowed(r.visual.kind, q) ? r.visual : null;
+  // 메뉴·취미 추천은 답에 나온 후보로 코드가 그림 카드를 만들어요. 그 밖에는 질문이 허락한 카드만 붙여요.
+  const rec = recommendFacts(q, history, i.chart, i.daily, opts.now ?? new Date());
+  const recVisual = rec ? recommendVisual(rec, r.answer) : null;
+  const visual = recVisual ?? (r.visual && visualAllowed(r.visual.kind, q) ? r.visual : null);
   return { ...r, visual, answer: polishChatAnswer(stripUnknownSongs(r.answer), history, i.name) };
 }
