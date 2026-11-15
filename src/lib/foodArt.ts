@@ -14,7 +14,7 @@ export const FOOD_ART: Record<string, [string, string]> = {
 export const HOBBY_ART: Record<string, [string, string]> = {
   "화분 가꾸기": ["gardening-pot", "🪴"], "스트레칭·요가": ["yoga", "🧘"], "독서": ["reading", "📖"], "독서 모임": ["book-club", "📚"], "원데이 클래스": ["oneday-class", "🎨"], "가벼운 등산": ["hiking", "🥾"], "공원 산책": ["park-walk", "🌳"],
   "노래나 악기": ["sing-play", "🎤"], "그림": ["drawing", "🖍️"], "영상 만들기": ["video-making", "🎬"], "공연 보러 가기": ["concert", "🎭"], "댄스 수업": ["dance", "💃"], "친구 모임": ["friends", "🥳"], "캠핑 불멍": ["camping-fire", "🔥"], "야외 공연": ["outdoor-show", "🎪"],
-  "베이킹·요리": ["baking", "🧁"], "도예": ["pottery", "🏺"], "방 정리": ["tidy-room", "🧺"], "같이 요리": ["cook-together", "🍳"], "텃밭 가꾸기": ["vegetable-garden", "🥕"], "느긋한 걷기": ["slow-walk", "🚶"],
+  "베이킹·요리": ["baking", "🧁"], "도예": ["pottery", "🏺"], "방 정리": ["tidy-room", "🧺"], "가족·친구와 같이 요리": ["cook-together", "🍳"], "텃밭 가꾸기": ["vegetable-garden", "🥕"], "느긋한 걷기": ["slow-walk", "🚶"],
   "캘리그라피": ["calligraphy", "🖌️"], "퍼즐": ["puzzle", "🧩"], "악기 연주": ["instrument", "🎹"], "보드게임": ["boardgame", "🎲"], "스터디 모임": ["study-group", "✏️"], "실내 클라이밍": ["climbing", "🧗"], "수영": ["swimming", "🏊"],
   "일기·글쓰기": ["journaling", "📓"], "음악 감상": ["listening", "🎧"], "명상": ["meditation", "🧘"], "깊은 대화 모임": ["deep-talk", "💬"], "영화 모임": ["movie-night", "🎞️"], "물가 산책": ["waterside-walk", "🌊"], "온천·찜질": ["hot-spring", "♨️"],
 };
