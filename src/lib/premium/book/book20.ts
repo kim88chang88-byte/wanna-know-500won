@@ -9,6 +9,7 @@ import { buildWealthCalendar } from "./wealth";
 import { weaveConcern } from "./concernWeave";
 import { buildWealthProfile, moneyIntroSections, moneyTailSections } from "./moneyType";
 import { CHAPTER_TITLES, healthMiniTitle } from "./chapterTitles";
+import { guiSections } from "./gui";
 import { actionSection, buildEnergyChart, closingSection, decadeCards, natalStageSections, nextChainSection, nowPositionSection, stageGlossary } from "./lifeFlow";
 
 /*
@@ -131,7 +132,8 @@ export function buildBook20(r: SajuResult, ctx: BookContext): BookPage[] {
   const sinSecs = luckySecs.filter((s) => !isGui(s) && !rxHeads.includes(s.heading));
   const guiBase: BookSection[] = [
     { heading: "귀인이란?", body: "귀인은 내가 힘들 때 하늘이 보내 주는 도움의 기운이야. 사람일 수도, 기회나 환경일 수도 있어. 사주에 귀인이 있다는 것은 어려운 순간에 도움을 받기 쉬운 결을 타고났다는 뜻이야." },
-    ...(guiSecs.length ? guiSecs : [{ heading: "나의 귀인", body: "두드러지게 드러난 귀인은 없어. 귀인은 사주에 글자로 있는 것만이 아니라, 내가 마음을 열고 먼저 다가갈 때 만나는 인연이기도 해." }]),
+    ...guiSections(r, { hourUnknown: ctx.hourUnknown, now: ctx.now ?? new Date() }),
+    ...guiSecs.filter((s) => !/천을귀인/.test(s.heading)),
     { heading: "귀인을 만나는 마음가짐", body: "도움이 오는 순간을 알아보려면 평소에 감사 인사를 자주 하고, 어려울 때 혼자 끌어안기보다 말해 보는 것이 좋아. 귀인은 거창한 모습이 아니라 작은 조언이나 소개로 찾아오기도 해." },
   ];
   const stage = stageTimeline(r);
@@ -176,7 +178,7 @@ export function buildBook20(r: SajuResult, ctx: BookContext): BookPage[] {
       sections: [{ heading: "신살이란?", body: "신살은 사주 속에 숨어 있는 특별한 기운이야. 이름이 거칠어 보여도 쓰기에 따라 힘이 되는 경우가 많아서, 겁먹기보다 ‘이런 기운이 있구나’ 하고 알아 두는 정도로 읽어 줘." }, ...sinSecs],
       tables: [],
     },
-    { key: "gui", title: "제6장 · 나를 도와주는 귀인들 - 귀인 분석", subtitle: "CHAPTER 6", lead: "내가 힘들 때 곁에서 힘이 되어 줄 기운을 찾아봐.", sections: guiBase, tables: [] },
+    { key: "gui", title: CHAPTER_TITLES.gui, subtitle: "CHAPTER 6", lead: "내가 힘들 때 곁에서 힘이 되어 줄 기운을 찾아봐.", sections: guiBase, tables: [] },
     { ...topicPage("money", "money"), key: "topic:money", title: CHAPTER_TITLES.money, subtitle: "CHAPTER 7" },
     { ...topicPage("love", "love"), key: "topic:love", title: CHAPTER_TITLES.love, subtitle: "CHAPTER 8" },
     { ...topicPage("success", "career"), key: "topic:career", title: CHAPTER_TITLES.career, subtitle: "CHAPTER 9" },

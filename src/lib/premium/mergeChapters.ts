@@ -60,6 +60,7 @@ export async function fetchPartnerImage(body: unknown, signal?: AbortSignal, att
       image?: { src?: string; notice?: string; alt?: string } | null;
       profile?: Array<{ label?: unknown; tags?: unknown }>;
       title?: unknown;
+      card?: Record<string, unknown> | null;
       reason?: unknown;
     } | null;
     if (!data || typeof data.title !== "string" || !Array.isArray(data.profile)) return null;
@@ -77,7 +78,9 @@ export async function fetchPartnerImage(body: unknown, signal?: AbortSignal, att
       }
     }
     if (!src && profile.length === 0) return null;
-    return { src, notice: img?.notice ?? "AI가 만든 가상의 인물, 참고용 상상도", alt: data.title, title: data.title, profile };
+    const c = data.card;
+    const card = c && ["typeName", "link", "when", "whenNote", "where"].every((k) => typeof c[k] === "string") ? (c as unknown as NonNullable<PartnerImageView["card"]>) : undefined;
+    return { src, notice: img?.notice ?? "AI가 만든 가상의 인물, 참고용 상상도", alt: data.title, title: data.title, profile, ...(card ? { card } : {}) };
   } catch {
     return null;
   }

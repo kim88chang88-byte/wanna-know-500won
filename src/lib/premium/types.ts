@@ -224,6 +224,8 @@ export interface PartnerImageView {
   title: string;
   /** 직업·외모·성격·특징 */
   profile: Array<{ label: string; tags: string[] }>;
+  /** 유형명 · 내 사주와의 연결 근거 · 만날 시기와 장소 (없으면 생략) */
+  card?: { typeName: string; link: string; when: string; whenNote: string; where: string };
 }
 
 /** 두 사람 궁합 결과 (궁합 리포트에서만 채워져요) */

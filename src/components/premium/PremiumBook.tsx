@@ -1251,6 +1251,23 @@ export default function PremiumBook({ report, flush = false, finale, previewBlur
                 <figcaption className="mt-2 text-[13px] leading-relaxed text-[#e8dfca]/60">{report.partnerImage.notice}</figcaption>
               </>
             )}
+            {report.partnerImage.card && (
+              <div data-testid="partner-card" className="mt-3 space-y-2 text-left">
+                <p className="text-center font-serifKr text-[19px] font-bold text-[#f6dfa8]">{report.partnerImage.card.typeName}</p>
+                <p className="rounded-xl bg-white/[0.06] px-3 py-2.5 text-[14px] leading-relaxed text-[#e8dfca]/90">{report.partnerImage.card.link}</p>
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="rounded-xl border border-[#e6c887]/40 bg-[#e6c887]/10 px-3 py-2.5">
+                    <p className="text-[12px] tracking-[0.12em] text-[#e6c887]">⏳ 인연의 문이 열리기 좋은 때</p>
+                    <p className="mt-1 text-[16px] font-bold text-[#f6dfa8]">{report.partnerImage.card.when}</p>
+                  </div>
+                  <div className="rounded-xl border border-[#e6c887]/40 bg-[#e6c887]/10 px-3 py-2.5">
+                    <p className="text-[12px] tracking-[0.12em] text-[#e6c887]">📍 처음 마주치기 쉬운 곳</p>
+                    <p className="mt-1 text-[14px] font-bold leading-snug text-[#f6dfa8]">{report.partnerImage.card.where}</p>
+                  </div>
+                </div>
+                <p className="text-[12.5px] leading-relaxed text-[#e8dfca]/60">{report.partnerImage.card.whenNote}</p>
+              </div>
+            )}
             <PartnerRows rows={report.partnerImage.profile} />
             <p className="mt-3 text-[13px] text-[#e8dfca]/50">사주로 가볍게 그려 본 재미용 상상이야.</p>
           </figure>
