@@ -7,6 +7,7 @@ import BirthTimeSelect from "@/components/BirthTimeSelect";
 import { formatDateInput } from "@/lib/intake";
 import ManseReport from "./ManseReport";
 import AiNotice from "./AiNotice";
+import PremiumLoadingScene from "./PremiumLoadingScene";
 import { profileToForm, type SavedProfile } from "@/lib/profile";
 import { conclusionOf, fetchPartnerImage, fetchRestChapters, mergeChapters } from "@/lib/premium/mergeChapters";
 
@@ -38,6 +39,8 @@ function PremiumProgress() {
   const stage = [...STAGES].reverse().find((x) => pct >= x.at) ?? STAGES[0];
   return (
     <div data-testid="premium-progress" className="mt-4">
+      <PremiumLoadingScene pct={pct} done={false} />
+      <div className="h-3" />
       <div role="progressbar" aria-label="풀이 진행" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(pct)} className="h-2.5 rounded-full bg-white/10 overflow-hidden">
         <div className="h-full rounded-full bg-gradient-to-r from-[#f0d9a0] to-[#d3ac62] transition-[width] duration-300 ease-out" style={{ width: `${pct}%` }} />
       </div>

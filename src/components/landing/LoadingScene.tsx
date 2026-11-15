@@ -15,12 +15,12 @@ const PTS: Array<[number, number]> = [[40, 126], [78, 80], [120, 113], [160, 59]
 const BG_STARS = Array.from({ length: 34 }, (_, k) => ({ x: (k * 53 + 23) % 300, y: (k * 37 + 69) % 220, r: 0.6 + (k % 3) * 0.4, d: (k % 7) * 0.3 }));
 const COLORS = ["#ff95c6", "#ffd98a", "#9ff3e1", "#a07df0", "#ffffff", "#34c38f", "#4c8df5", "#f0607c"];
 
-interface Piece {
+export interface Piece {
   id: number;
   style: React.CSSProperties;
 }
 
-function makePieces(): Piece[] {
+export function makePieces(colors: string[] = COLORS): Piece[] {
   const out: Piece[] = [];
   for (let i = 0; i < 56; i++) {
     const a = Math.random() * Math.PI * 2;
@@ -32,7 +32,7 @@ function makePieces(): Piece[] {
         ["--y" as string]: `${Math.sin(a) * r * 0.8 - 40 + Math.random() * 80}px`,
         ["--r" as string]: `${Math.random() * 900 - 450}deg`,
         ["--d" as string]: `${1.1 + Math.random()}s`,
-        background: COLORS[i % COLORS.length],
+        background: colors[i % colors.length],
         borderRadius: i % 3 === 0 ? "50%" : 2,
         width: i % 3 === 0 ? 8 : 9,
         height: i % 3 === 0 ? 8 : 14,
@@ -53,7 +53,7 @@ function makePieces(): Piece[] {
         ["--d" as string]: "1.8s",
         top: "0%",
         left: `${10 + Math.random() * 80}%`,
-        background: COLORS[i % COLORS.length],
+        background: colors[i % colors.length],
         borderRadius: 2,
         width: 9,
         height: 14,
@@ -80,15 +80,15 @@ export default function LoadingScene({ pct, done, animal }: { pct: number; done:
   const cy = PTS[seg][1] + (PTS[seg + 1][1] - PTS[seg][1]) * fr;
 
   return (
-    <div aria-hidden="true" className={`ls-sky relative mx-auto w-full max-w-[320px] h-56 rounded-2xl overflow-hidden ${done ? "ls-shake" : ""}`} style={{ background: "linear-gradient(170deg,#0f1b3d,#1f2f66)" }}>
+    <div aria-hidden="true" className={`ls-sky relative mx-auto w-full max-w-[320px] h-56 rounded-3xl overflow-hidden ${done ? "ls-shake" : ""}`} style={{ background: "linear-gradient(180deg,#a99af0 0%,#7d5cdd 55%,#4f33a8 100%)", boxShadow: "0 0 0 6px #eee7ff" }}>
       <svg viewBox="0 0 300 220" preserveAspectRatio="xMidYMid slice" className="absolute inset-0 w-full h-full">
         {BG_STARS.map((s, i) => (
           <circle key={i} className="ls-tw" cx={s.x} cy={s.y} r={s.r} fill="#fff" opacity=".7" style={{ animationDelay: `${s.d}s` }} />
         ))}
         <g style={{ filter: "blur(14px)" }}>
-          <ellipse className="ls-au" cx="90" cy="60" rx="110" ry="24" fill="#34e0b5" opacity=".45" />
-          <ellipse className="ls-au" cx="210" cy="85" rx="100" ry="22" fill="#a07df0" opacity=".5" style={{ animationDelay: "-3s" }} />
-          <ellipse className="ls-au" cx="150" cy="40" rx="90" ry="16" fill="#ff95c6" opacity=".35" style={{ animationDelay: "-5s" }} />
+          <ellipse className="ls-au" cx="90" cy="60" rx="110" ry="24" fill="#ffd1ea" opacity=".45" />
+          <ellipse className="ls-au" cx="210" cy="85" rx="100" ry="22" fill="#ffb9d9" opacity=".5" style={{ animationDelay: "-3s" }} />
+          <ellipse className="ls-au" cx="150" cy="40" rx="90" ry="16" fill="#fff3c8" opacity=".4" style={{ animationDelay: "-5s" }} />
         </g>
         {PTS.slice(0, -1).map((a, i) => (
           <line
@@ -97,7 +97,7 @@ export default function LoadingScene({ pct, done, animal }: { pct: number; done:
             y1={a[1]}
             x2={PTS[i + 1][0]}
             y2={PTS[i + 1][1]}
-            stroke="#bfeee4"
+            stroke="#ffffff"
             strokeWidth="1.6"
             strokeLinecap="round"
             pathLength={1}
@@ -120,7 +120,7 @@ export default function LoadingScene({ pct, done, animal }: { pct: number; done:
         })}
         {!done && (
           <g style={{ transform: `translate(${cx}px,${cy}px)`, transition: "transform .3s linear" }}>
-            <circle r="9" fill="#9ff3e1" opacity=".3" />
+            <circle r="9" fill="#ffffff" opacity=".3" />
             <circle r="3.5" fill="#fff" />
           </g>
         )}
@@ -129,7 +129,7 @@ export default function LoadingScene({ pct, done, animal }: { pct: number; done:
       <div className="absolute right-3 top-2 w-14 h-14 ls-bob">
         <SafeImage src={animal} alt="" className="w-full h-full object-contain drop-shadow-md" fallback="🦦" fallbackClass="text-4xl" />
       </div>
-      <span className="absolute left-3 top-2.5 text-[13px] font-extrabold text-amber-200 bg-black/25 px-2.5 py-0.5 rounded-full">{Math.round(pct)}%</span>
+      <span className="absolute left-3 top-2.5 text-[13px] font-extrabold text-white bg-white/25 px-2.5 py-0.5 rounded-full">{Math.round(pct)}%</span>
 
       <div className="absolute inset-x-0 bottom-2 flex justify-center gap-1.5">
         {CHIPS.map(([ch, color], i) => {
