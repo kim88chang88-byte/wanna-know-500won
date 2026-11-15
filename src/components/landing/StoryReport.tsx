@@ -8,7 +8,7 @@ import ManseReport from "@/components/premium/ManseReport";
 import { bodyStates } from "@/lib/premium/bodyMap";
 import { RealityLight } from "@/components/premium/RealityLight";
 import type { PremiumReportView } from "@/lib/premium/types";
-import { ELEMENT_BOX, elEasyName, elementOfChar } from "@/lib/elementColor";
+import { ELEMENT_BOX, ELEMENT_SOFT, ELEMENT_SOFT_ZERO, elementOfChar, elementOfKo } from "@/lib/elementColor";
 import { ElIconName } from "@/components/ElIcon";
 import type { Element } from "@/lib/saju/constants";
 import { Stars } from "./ReadingCard";
@@ -317,11 +317,18 @@ export default function StoryReport({
               >
                 {st.key === "elements" && (
                   <p className="mb-2.5 flex flex-wrap gap-1.5">
-                    {report.elements.map((e) => (
-                      <span key={e.name} className="rounded-full bg-brand-50 px-2.5 py-1 text-[11px] font-bold text-gray-700">
-                        {elEasyName(e.name)} {e.count}
-                      </span>
-                    ))}
+                    {report.elements.map((e) => {
+                      const el = elementOfKo(e.name);
+                      return (
+                        <span
+                          key={e.name}
+                          data-testid="fold-element-chip"
+                          className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[12px] font-bold ${el ? (e.count === 0 ? ELEMENT_SOFT_ZERO : ELEMENT_SOFT[el]) : "bg-brand-50 text-gray-700"}`}
+                        >
+                          {el ? <ElIconName e={el} /> : e.name} {e.count}
+                        </span>
+                      );
+                    })}
                   </p>
                 )}
                 {f[st.key] ? <Paras mark={mark} text={f[st.key] as string} /> : <PendingNote />}
