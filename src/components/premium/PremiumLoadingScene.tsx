@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type CSSProperties } from "react";
 import { makePieces, type Piece } from "@/components/landing/LoadingScene";
 
 /*
@@ -9,6 +9,31 @@ import { makePieces, type Piece } from "@/components/landing/LoadingScene";
  * 끝나면 금빛 색종이가 터져요. (밝은 모달 안에서도, 어두운 프리미엄 화면에서도 같은 어두운 카드로 보여요)
  */
 export const BOOK_CHAPTERS = ["서문 · 한눈에 보기", "제1장 · 나의 사주팔자", "제2장 · 나는 어떤 사람인가", "제3장 · 십성으로 보는 삶의 방식", "제4~6장 · 운의 흐름·신살·귀인", "제7~10장 · 재물·연애·직업·건강", "부록 · 격국과 용신", "부록 · 대운과 올해·내년"] as const;
+/** 완성 장면의 금가루 한 알(끝나는 순간에만 무작위로 정해요) */
+interface Dust {
+  id: number;
+  style: Record<string, string>;
+  big: boolean;
+}
+function makeDust(n: number): Dust[] {
+  return Array.from({ length: n }, (_, i) => {
+    const big = i % 7 === 0;
+    const sz = 1.5 + Math.random() * (big ? 5 : 3);
+    return {
+      id: i,
+      big,
+      style: {
+        left: `${Math.random() * 100}%`,
+        width: `${sz}px`,
+        height: `${sz}px`,
+        "--d": `${2.4 + Math.random() * 2.2}s`,
+        "--x": `${Math.random() * 60 - 30}px`,
+        "--h": `${-(280 + Math.random() * 260)}px`,
+        animationDelay: `${Math.random() * 4.4}s`,
+      },
+    };
+  });
+}
 const GOLD = ["#f0d9a0", "#e6c887", "#d3ac62", "#fff3c8", "#ffffff", "#a07df0", "#ff95c6"];
 
 /** 진행률 → 지금 쓰는 장 번호(끝났으면 전부 완료) */
@@ -36,15 +61,18 @@ export default function PremiumLoadingScene({
   stageText?: string;
 }) {
   const [pieces, setPieces] = useState<Piece[]>([]);
+  const [dust, setDust] = useState<Dust[]>([]);
   useEffect(() => {
-    if (done) setPieces(makePieces(GOLD));
-  }, [done]);
+    if (!done) return;
+    if (full) setDust(makeDust(600));
+    else setPieces(makePieces(GOLD));
+  }, [done, full]);
   const n = currentChapter(pct);
   if (full) {
     return (
       <div
         data-testid="premium-loading-scene"
-        className={`relative w-full h-[min(540px,78vh)] min-h-[440px] overflow-hidden ${done ? "ls-shake" : ""}`}
+        className={`relative w-full h-[min(540px,78vh)] min-h-[440px] overflow-hidden ${done ? "pf-done" : ""}`}
         style={{ background: "linear-gradient(180deg,#4a3a8a 0%,#2a2058 40%,#15121e 100%)" }}
       >
         <svg aria-hidden="true" viewBox="0 0 360 500" preserveAspectRatio="xMidYMid slice" className="absolute inset-0 w-full h-full">
@@ -62,7 +90,7 @@ export default function PremiumLoadingScene({
             <span className="material-symbols-outlined text-[20px]">close</span>
           </button>
         )}
-        <div aria-hidden="true" className="absolute left-7 right-7 top-[66px] grid gap-[11px]">
+        <div aria-hidden="true" className="pf-rows absolute left-7 right-7 top-[66px] grid gap-[11px]">
           {BOOK_CHAPTERS.map((c, i) => {
             const ok = done || i < n;
             const cur = !done && i === n;
@@ -75,7 +103,7 @@ export default function PremiumLoadingScene({
             );
           })}
         </div>
-        <div className="absolute inset-x-6 bottom-6 text-[#fbf3de]">
+        <div className="pf-foot absolute inset-x-6 bottom-6 text-[#fbf3de]">
           <p className="mb-2.5 text-center text-base font-extrabold">프리미엄 사주서를 만들고 있어</p>
           <div className="mb-2 flex items-baseline justify-between gap-2.5">
             <span className="text-[34px] font-black leading-none text-[#f6dfa8]" style={{ textShadow: "0 2px 12px rgba(230,200,135,.35)" }}>
@@ -89,15 +117,23 @@ export default function PremiumLoadingScene({
           </div>
         </div>
         {done && (
-          <>
-            <span className="ls-flash" style={{ borderColor: "#e6c887" }} />
-            {pieces.map((p) => (
-              <span key={p.id} className="ls-cf" style={p.style} />
+          <div aria-hidden="true" className="pf-fx">
+            <div className="pf-sweep" />
+            {dust.map((d) => (
+              <i key={d.id} className={`pf-dust${d.big ? " pf-big" : ""}`} style={d.style as CSSProperties} />
             ))}
-            <div className="ls-big" style={{ color: "#fff3c8", textShadow: "0 2px 16px rgba(230,200,135,.9)" }}>
-              20쪽 완성! 🎉
+            <div className="pf-cover">
+              <div>
+                <small>THE PREMIUM EDITION</small>
+                <b>
+                  나만을 위한
+                  <br />
+                  한 권의 사주서
+                </b>
+              </div>
             </div>
-          </>
+            <p className="pf-cap">당신의 사주서가 완성되었습니다</p>
+          </div>
         )}
       </div>
     );

@@ -690,7 +690,7 @@ export default function IntakeModal({ target, wallet = null, onClose, onComplete
       }
       // 막대를 끝까지 채우는 모습을 잠깐 보여주고 결과로 넘어가요.
       setLoadDone(true);
-      await new Promise((r) => setTimeout(r, 2400)); // 100% 까지 부드럽게 채우는 시간(0.9초) + 축하 장면(색종이·폭죽)을 보여 줄 시간
+      await new Promise((r) => setTimeout(r, target.premium === true && !compat ? 6200 : 2400)); // 프리미엄은 금가루·표지 연출까지 길게. 100% 까지 부드럽게 채우는 시간(0.9초) + 축하 장면(색종이·폭죽)을 보여 줄 시간
       if (ctrl.signal.aborted) return;
       setPhase("result");
       // 지난 고민을 도리가 다시 물어볼 수 있게, 고른 항목 이름만 이 기기에 기억해요. (직접 쓴 글은 저장하지 않아요)
