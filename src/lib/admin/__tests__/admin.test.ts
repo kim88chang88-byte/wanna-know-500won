@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest";
 import { adminIds, isAdmin } from "../auth";
 import { buildStats, concernsToCsv, csvCell, daysBetween, sinceDayFor } from "../stats";
 
+import { ADMIN_PEBBLES } from "../auth";
+
 describe("관리자 판별", () => {
   it("환경변수에 있는 고유번호만 관리자", () => {
     const env = { ADMIN_USER_IDS: " 123 , g_abc ,," };
@@ -69,5 +71,11 @@ describe("CSV", () => {
     expect(csv.trim().split("\r\n")).toHaveLength(2);
     expect(csv).toContain("'=1+1");
     expect(csv).toContain("썸·짝사랑이 어떻게 될지");
+  });
+});
+
+describe("관리자 테스트 잔액", () => {
+  it("진주 99개 = 조약돌 594개", () => {
+    expect(ADMIN_PEBBLES).toBe(594);
   });
 });

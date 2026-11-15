@@ -13,3 +13,6 @@ export function adminIds(env: Record<string, string | undefined>): string[] {
 export function isAdmin(sub: string | null | undefined, env: Record<string, string | undefined>): boolean {
   return !!sub && adminIds(env).includes(sub);
 }
+
+/** 관리자 테스트용 지급량: 진주 99개 = 조약돌 594개 (진주 1개 = 조약돌 6개) */
+export const ADMIN_PEBBLES = 99 * 6;
