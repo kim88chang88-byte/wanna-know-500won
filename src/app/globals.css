@@ -564,3 +564,13 @@ body {
 .pf-cap { position: absolute; left: 0; right: 0; top: 77%; margin: 0; text-align: center; font-family: "Noto Serif KR", serif; font-weight: 700; font-size: 15px; color: #f6dfa8; opacity: 0; text-shadow: 0 0 14px rgba(230,200,135,.6); animation: pfCap 1.6s 3.1s ease forwards; }
 @keyframes pfCap { from { opacity: 0; transform: translateY(10px); filter: blur(4px); } to { opacity: 1; transform: none; filter: none; } }
 @media (prefers-reduced-motion: reduce) { .pf-sweep, .pf-dust { display: none; } .pf-cover, .pf-cap { animation: none; opacity: 1; } }
+
+/* 일반 풀이 완료: 도리 폴짝 + 별똥별 + 반짝임 (색종이 없이) */
+.ls-fin { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+.ls-dori { position: absolute; left: 50%; bottom: 190px; width: 84px; height: 84px; margin-left: -42px; animation: lsDori 1.6s .3s ease-out both; }
+@keyframes lsDori { 0% { opacity: 0; transform: translateY(120px) scale(.6); } 40% { opacity: 1; transform: translateY(-60px) scale(1.1); } 60% { transform: translateY(0); } 75% { transform: translateY(-24px); } 100% { opacity: 1; transform: translateY(0); } }
+.ls-shoot { position: absolute; height: 2px; width: 90px; background: linear-gradient(90deg, transparent, #fff); transform-origin: right; opacity: 0; animation: lsShoot 1.1s ease-in forwards; }
+@keyframes lsShoot { 0% { opacity: 0; transform: translate(0,0) rotate(28deg); } 10% { opacity: 1; } 100% { opacity: 0; transform: translate(-260px,150px) rotate(28deg); } }
+.ls-spk { position: absolute; color: #fff3c8; opacity: 0; animation: lsSpk 1.6s ease-out forwards; }
+@keyframes lsSpk { 0% { opacity: 0; transform: translate(0,0); } 15% { opacity: 1; } 100% { opacity: 0; transform: translate(var(--sx), -70px); } }
+@media (prefers-reduced-motion: reduce) { .ls-shoot, .ls-spk { display: none; } .ls-dori { animation: none; } }

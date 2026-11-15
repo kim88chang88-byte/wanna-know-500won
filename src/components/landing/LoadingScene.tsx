@@ -1,12 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import SafeImage from "./SafeImage";
 
 /*
  * 풀이를 만드는 동안 보여주는 밤하늘 장면(오로라 + 별자리 + 오행 칩).
  * 사주 여덟 글자가 별로 떠서 혜성이 선을 그리며 이어 가고, 진행률에 맞춰 아래 오행 칩 다섯이 하나씩 켜져요.
- * 끝나면(done) 색종이와 폭죽이 터져요.
+ * 끝나면(done) 도리가 폴짝 뛰고 별똥별이 지나가요.
  */
 const EIGHT = ["甲", "子", "乙", "丑", "丙", "寅", "丁", "卯"] as const;
 const STAR_COLOR: Record<string, string> = { 甲: "#34c38f", 乙: "#34c38f", 寅: "#34c38f", 卯: "#34c38f", 丙: "#f0607c", 丁: "#f0607c", 子: "#4c8df5", 丑: "#e0a63a" };
@@ -82,12 +81,6 @@ export default function LoadingScene({
   onClose?: () => void;
   stageText: string;
 }) {
-  const [pieces, setPieces] = useState<Piece[]>([]);
-  useEffect(() => {
-    // 색종이 모양은 끝나는 순간에만 무작위로 정해요. (서버 렌더와 어긋나지 않게)
-    if (done) setPieces(makePieces());
-  }, [done]);
-
   const E = PTS.length - 1;
   const f = (pct / 100) * E * 1.02;
   const lit = Math.floor((pct / 100) * PTS.length * 1.04);
@@ -98,7 +91,7 @@ export default function LoadingScene({
   const shown = Math.round(pct);
 
   return (
-    <div className={`ls-full relative w-full h-[min(540px,78vh)] min-h-[440px] overflow-hidden ${done ? "ls-shake" : ""}`} style={{ background: "linear-gradient(180deg,#a99af0 0%,#7d5cdd 52%,#4f33a8 100%)" }}>
+    <div className={`ls-full relative w-full h-[min(540px,78vh)] min-h-[440px] overflow-hidden `} style={{ background: "linear-gradient(180deg,#a99af0 0%,#7d5cdd 52%,#4f33a8 100%)" }}>
       <svg aria-hidden="true" viewBox="0 0 360 500" preserveAspectRatio="xMidYMid slice" className="absolute inset-0 w-full h-full">
         {BG_STARS.map((s, i) => (
           <circle key={i} className="ls-tw" cx={s.x} cy={s.y} r={s.r} fill="#fff" opacity=".7" style={{ animationDelay: `${s.d}s` }} />
@@ -186,17 +179,20 @@ export default function LoadingScene({
       </div>
 
       {done && (
-        <>
-          <span className="ls-flash" />
-          {pieces.map((p) => (
-            <span key={p.id} className="ls-cf" style={p.style} />
+        <div aria-hidden="true" className="ls-fin">
+          {[0, 1, 2, 3].map((k) => (
+            <i key={k} className="ls-shoot" style={{ left: `${62 + k * 9}%`, top: `${6 + k * 7}%`, animationDelay: `${0.3 + k * 0.45}s` }} />
           ))}
-          <span className="ls-pop2 left-3">🎉</span>
-          <span className="ls-pop2 right-3" style={{ animationDelay: ".12s" }}>
-            🎊
-          </span>
-          <div className="ls-big">다 됐어! 🎉</div>
-        </>
+          {Array.from({ length: 14 }, (_, k) => (
+            <span key={k} className="ls-spk" style={{ left: `${(k * 37 + 11) % 86 + 6}%`, top: `${55 + ((k * 13) % 22)}%`, fontSize: `${10 + (k % 4) * 2}px`, animationDelay: `${1 + (k % 5) * 0.2}s`, ["--sx" as string]: `${(k % 2 ? 1 : -1) * (8 + (k % 3) * 6)}px` }}>
+              ✦
+            </span>
+          ))}
+          <div className="ls-dori">
+            <SafeImage src={animal} alt="" className="w-full h-full object-contain drop-shadow-lg" fallback="🦦" fallbackClass="text-6xl" />
+          </div>
+          <div className="ls-big">짜잔! 다 됐어</div>
+        </div>
       )}
     </div>
   );
