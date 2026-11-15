@@ -71,6 +71,8 @@ export interface BookSection {
   reality?: RealityCheck;
   /** MBTI 를 입력한 이용자에게 화면에서 한 줄을 붙일 때 쓰는 열쇠(십성 묶음, 지난·지금·다가오는 시기). 잠긴 풀이에는 내려가지 않아요. */
   mbti?: { group: string; tense: "past" | "now" | "future" };
+  /** 제5장 신살 조합 카드: 화면에서 "카드를 눌러 확인"으로 열고, 한 장 이미지로 저장·공유할 수 있어요 */
+  sinsalCard?: { title: string; share: string };
 }
 export interface RealityCheck {
   question: string;

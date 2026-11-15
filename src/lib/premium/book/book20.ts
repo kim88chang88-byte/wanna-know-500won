@@ -11,6 +11,7 @@ import { buildWealthProfile, moneyIntroSections, moneyTailSections } from "./mon
 import { CHAPTER_TITLES, CLOSING_TITLE, healthMiniTitle } from "./chapterTitles";
 import { guiSections } from "./gui";
 import { closingCardSections } from "./closing";
+import { buildSinsalCard } from "./sinsalCombo";
 import { cleanConcernText, hasConcern } from "@/lib/concerns";
 import { actionSection, buildEnergyChart, closingSection, decadeCards, natalStageSections, nextChainSection, nowPositionSection, stageGlossary } from "./lifeFlow";
 
@@ -189,7 +190,7 @@ export function buildBook20(r: SajuResult, ctx: BookContext): BookPage[] {
       title: "제5장 · 위기 또는 기회 - 신살 분석",
       subtitle: "CHAPTER 5",
       lead: "사주 속 특별한 기운이 위기가 될지 기회가 될지 살펴봐.",
-      sections: [{ heading: "신살이란?", body: "신살은 사주 속에 숨어 있는 특별한 기운이야. 이름이 거칠어 보여도 쓰기에 따라 힘이 되는 경우가 많아서, 겁먹기보다 ‘이런 기운이 있구나’ 하고 알아 두는 정도로 읽어 줘." }, ...sinSecs],
+      sections: [buildSinsalCard(r, ctx.hourUnknown), { heading: "신살이란?", body: "신살은 사주 속에 숨어 있는 특별한 기운이야. 이름이 거칠어 보여도 쓰기에 따라 힘이 되는 경우가 많아서, 겁먹기보다 ‘이런 기운이 있구나’ 하고 알아 두는 정도로 읽어 줘." }, ...sinSecs],
       tables: [],
     },
     { key: "gui", title: CHAPTER_TITLES.gui, subtitle: "CHAPTER 6", lead: "내가 힘들 때 곁에서 힘이 되어 줄 기운을 찾아봐.", sections: guiBase, tables: [] },

@@ -1310,6 +1310,8 @@ export default function PremiumBook({ report, flush = false, finale, previewBlur
                         </p>
                         <span className="sr-only">잠긴 풀이야. 전체 열기를 누르면 볼 수 있어.</span>
                       </div>
+                    ) : s.sinsalCard ? (
+                      <SinsalReveal card={s.sinsalCard} body={fillLetterMbti(s.body, report.mbti)} />
                     ) : (
                       <>
                         <RichBody text={fillMbti(s.body, s.mbti, report.mbti)} />
@@ -1395,6 +1397,60 @@ export default function PremiumBook({ report, flush = false, finale, previewBlur
         </button>
       </div>
       <p className="mt-4 text-center text-[13px] leading-relaxed text-[#8f95c0]">명리학의 일반적인 관점으로 풀어 쓴 재미와 참고용 해석이야.</p>
+    </div>
+  );
+}
+
+/** 신살 조합 카드: 눌러서 열고, 한 장 이미지로 저장·공유해요. */
+function SinsalReveal({ card, body }: { card: { title: string; share: string }; body: string }) {
+  const [open, setOpen] = useState(false);
+  const [msg, setMsg] = useState("");
+  const save = () => {
+    try {
+      const W = 900, H = 1200;
+      const c = document.createElement("canvas");
+      c.width = W; c.height = H;
+      const g = c.getContext("2d");
+      if (!g) return;
+      g.fillStyle = "#1d1a33"; g.fillRect(0, 0, W, H);
+      g.strokeStyle = "#e6c887"; g.lineWidth = 4; g.strokeRect(40, 40, W - 80, H - 80);
+      g.fillStyle = "#e6c887"; g.textAlign = "center";
+      g.font = "bold 34px sans-serif"; g.fillText("내 신살 조합", W / 2, 150);
+      g.fillStyle = "#fbf3de"; g.font = "bold 64px serif";
+      const wrap = (t: string, max: number, size: number) => {
+        g.font = `${size}px sans-serif`;
+        const out: string[] = []; let line = "";
+        for (const ch of t) { if (g.measureText(line + ch).width > max) { out.push(line); line = ch; } else line += ch; }
+        if (line) out.push(line);
+        return out;
+      };
+      g.font = "bold 64px sans-serif";
+      g.fillText(`“${card.title}”`, W / 2, 300, W - 160);
+      g.fillStyle = "#e9e4f7";
+      wrap(card.share, W - 200, 36).slice(0, 12).forEach((l, i) => g.fillText(l, W / 2, 440 + i * 58));
+      g.fillStyle = "#9a93b0"; g.font = "28px sans-serif";
+      g.fillText("도유사주 · 재미로 보는 참고예요", W / 2, H - 90);
+      c.toBlob((b) => {
+        if (!b) return;
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(b); a.download = "신살-조합-카드.png"; a.click();
+        setMsg("카드를 저장했어.");
+      }, "image/png");
+    } catch { setMsg("이 기기에서는 저장이 안 돼. 화면을 캡처해 줘."); }
+  };
+  if (!open) {
+    return (
+      <button type="button" data-testid="sinsal-card-open" onClick={() => setOpen(true)} className="mt-2 w-full rounded-2xl border border-[#e6c887]/60 bg-[#e6c887]/10 px-4 py-6 text-center">
+        <span className="block text-[13px] text-[#5b5670]">🔍 발견된 기운</span>
+        <span className="mt-1 block font-serifKr text-[16px] font-bold text-[#26233a]">카드를 눌러 내용을 확인해 봐</span>
+      </button>
+    );
+  }
+  return (
+    <div data-testid="sinsal-card">
+      <RichBody text={body} />
+      <button type="button" onClick={save} className="mt-3 rounded-full border border-[#9a93b0] px-4 py-2 text-[13px] font-bold text-[#26233a]">📷 한 장 카드로 저장</button>
+      {msg && <p className="mt-1 text-[12px] text-[#5b5670]">{msg}</p>}
     </div>
   );
 }
