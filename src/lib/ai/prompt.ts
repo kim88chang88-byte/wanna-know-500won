@@ -95,7 +95,11 @@ export function buildUserMessage(chart: SajuChart, topic: ReadingTopic, gender: 
     topic === "general"
       ? "특별히 고른 주제는 없으니 총운 중심으로 균형 있게 써줘."
       : `이번에는 "${TOPIC_LABEL[topic]}" 캡슐을 뽑았으니, 도리 한마디와 총운 요약에서 이 주제를 조금 더 살려줘.`;
+  const yearly =
+    topic === "study"
+      ? "\n이번 풀이는 하루가 아니라 2027년 한 해(정미년) 기준이야. 총운·도리 한마디·이유에서 '오늘', '하루', '날'로 말하지 말고 '2027년', '새해', '올 한 해', '새해 첫 달'처럼 한 해의 시기로 말해. '올해'만 쓰면 헷갈리니 '2027년'이라고 써. '~가 될 거야'처럼 장담하지 말고 '~할 여지가 커' 정도로."
+      : "";
 
   const focusConcern = hasConcern(concern) ? "\n사용자가 적은 '요즘 고민'에 공감하며 도리 한마디가 그 고민에 닿게 해줘." : "";
-  return `계산된 사주 정보:\n${JSON.stringify(payload, null, 2)}\n\n${focus}${focusConcern}\n${ask ?? "총운, 연애운, 금전운, 마음운, 오늘의 키워드, 도리 한마디, 도리가 본 이유를 써줘."}`;
+  return `계산된 사주 정보:\n${JSON.stringify(payload, null, 2)}\n\n${focus}${yearly}${focusConcern}\n${ask ?? "총운, 연애운, 금전운, 마음운, 오늘의 키워드, 도리 한마디, 도리가 본 이유를 써줘."}`;
 }

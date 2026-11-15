@@ -8,6 +8,7 @@ import { callJson } from "./callJson";
 import { ReadingFailedError } from "./interpret";
 import { normalizeBold, stripSummaryLead, tidyFold, trimToLastSentence } from "@/lib/storyHelpers";
 import { detailAnchor } from "./detailAnchor";
+import { polishDetail } from "./detailPolish";
 import { buildUserMessage, type ExtraFacts } from "./prompt";
 import { containsForbidden, isGeneric, TOPIC_LABEL, type DetailFolds, type ReadingTopic } from "./reading";
 
@@ -86,7 +87,7 @@ export const DETAIL_SYSTEM_PROMPT = `너는 "도리"야. 오늘의 운을 쪽지
 - 각 글의 제목("그렇지만 이건 아쉬워" 같은 말)은 화면에 따로 나오니까 글 첫 문장에서 제목을 그대로 따라 쓰지 마. 바로 본론으로 시작해.
 - 핵심 강조: 글 하나(요약 포함)마다 가장 중요한 구절 2~4곳을 **이렇게** 별표 두 개로 감싸. 문단마다 하나쯤이 좋아. 감싸는 건 4~20자의 짧은 구절(예: **불 기운이 필요한 사주**, **작은 약속 하나부터**, **하반기에 힘이 붙는 흐름**)이고, 문장 전체나 이모지, 항목 제목(heads)은 감싸지 마. 한 문단에 두 번 넘게 쓰지 마.
 - 오행의 금(金)은 "금"이라고 쓰지 말고 "쇠"라고 써(예: 쇠 기운). 금요일·금전 같은 다른 뜻의 "금"은 그대로 써.
-- 사주 용어는 쉬운 말로 풀고, 꼭 필요하면 괄호로 한 번만. 읽는 사람이 "어, 나 얘기네!" 할 만한 일상 장면을 하나씩 넣어. 장면은 누구에게나 있는 것(친구와 약속, 통장 앱 열어 볼 때, 장바구니에 담을 때, 주말 아침, 잠들기 전 같은 것)만 쓰고, 등굣길·교실·시험·회사·회의·퇴근·상사처럼 학생이나 직장인을 전제하는 장면, 입력에 없는 가족·친구 사정, "주변에서 물어본다" 같은 지어낸 사실은 쓰지 마.
+- 사주 용어는 쉬운 말로 풀고, 꼭 필요하면 괄호로 한 번만. 읽는 사람이 "어, 나 얘기네!" 할 만한 일상 장면을 하나씩 넣어. 장면은 입력의 "[장면 후보]"에서 골라 쓰고(후보에 없는 돈·쇼핑 장면을 다른 주제에 끌어오지 마), 누구에게나 있는 일상이어야 해. 등굣길·교실·시험·회사·회의·퇴근·상사처럼 학생이나 직장인을 전제하는 장면, 입력에 없는 가족·친구 사정, "주변에서 물어본다" 같은 지어낸 사실은 쓰지 마.
 
 내용 원칙
 - 같은 말을 되풀이하지 마. "든든", "단단", "추진력", "뜨거운 열정", "묵직" 같은 낱말은 여덟 편 전체에서 각각 두세 번까지만 쓰고, 나머지는 다른 표현(예: 꾸준한, 믿음직한, 밀고 가는 힘, 따뜻한 의욕)으로 바꿔.
@@ -100,7 +101,9 @@ export const DETAIL_SYSTEM_PROMPT = `너는 "도리"야. 오늘의 운을 쪽지
 - "요즘고민"이 있으면 일곱 글 모두에서 한 번씩은 그 고민과 이어서 말해줘(예: 고민이 사업이면 연애 글에서도 관계를 대하는 태도로 연결). 고민이 병·약·법적 문제·투자·심한 우울 같은 무거운 주제면 구체적으로 답하지 말고 "전문가와 이야기해 보는 것도 좋아" 정도로만 하고 작은 행동 하나로 마무리해. 고민이 없으면 이번 주제로 이어서 말해.
 - 누구에게나 맞는 말만 쓰지 말고, 이 사람의 일간·오행 중 구체적인 것을 짚어.
 - 공통 진단: 입력에 "[공통 진단]"이 있으면 모든 글이 그 진단과 같은 결론을 말해. 칭찬 글은 진단의 강점만, 아쉬움 글은 진단의 아쉬운 점만 말하고, 아쉬움 글에서 짚은 습관을 다른 글에서 "이미 잘한다·단단하게 지킨다"고 말하지 마. 요약하자면은 일곱 글을 한 줄기로 모으는 글이니 진단에서 벗어난 새 성격이나 새 근거를 만들지 마. 고민이 있으면 그 고민을 칭찬으로 뒤집지 마(예: 고민이 새는 돈이면 "알뜰하게 살피고 있다는 증거"라고 하지 말고, 그 마음을 알아주되 지출이 늘기 쉬운 순간을 짚어).
-- 행동 제안은 글마다 나눠서 겹치지 않게 해: lack 마지막 문단은 '살펴보기·기록하기' 행동 하나, improve는 '규칙·습관' 행동 2~3가지, lucky는 오행을 채우는 생활 습관 하나, story는 새 행동을 만들지 말고 개선 글의 방향을 한 줄로만 되짚어. "장바구니에 담아 하루 묵히기", "하루 한도 정하기", "영수증·지출 내역 적기" 같은 같은 처방을 두 글 이상에서 쓰지 마(쓴다면 improve 글에서만).
+- 행동 제안은 글마다 나눠서 겹치지 않게 해: lack 마지막 문단은 '살펴보기·기록하기' 행동 하나, improve는 '규칙·습관' 행동 2~3가지, lucky는 오행을 채우는 생활 습관 하나, story는 새 행동을 만들지 말고 개선 글의 방향을 한 줄로만 되짚어. 같은 처방(예: 하루 묵히기, 한도 정하기, 기록 남기기)을 두 글 이상에서 쓰지 마(쓴다면 improve 글에서만).
+- 공통 진단·장별 표현은 뜻만 가져가고 글자 그대로 옮기지 마. 진단에 적힌 낱말구("속도 조절", "한 박자", "밀고 가는 힘", "마무리가 흐트러" 같은 것)는 여덟 편 전체에서 각각 두 번까지만 쓰고, 글마다 지정된 "장별 표현"의 결로 새롭게 말해.
+- 2027 신년운이면 모든 글을 한 해 기준으로 써. "오늘", "하루의 날" 같은 하루 기준 표현과, 2026년인지 2027년인지 헷갈리는 "올해"는 쓰지 말고 "2027년", "새해", "한 해"로 말해. 시기 이야기(flow)에는 입력 사주핵심의 올해세운·올해월운에 실제로 있는 간지·합 중 하나 이상을 근거로 짚어(없는 근거는 지어내지 마).
 - 시기: "이번 달"은 입력의 이번달월운이야. 이번달월운과 같은 간지의 달을 "다가오는 달", "다음에 올 달"이라고 쓰지 마. 같은 달을 두 번 다른 이름으로 부르지 마.
 - 말이 되는 표현만 써. "시원섭섭한 소비", "시원하게 쓰기 바쁜 에너지"처럼 뜻이 어긋나는 관용구는 쓰지 마. 띄어쓰기도 정확하게.
 
@@ -185,11 +188,23 @@ export const TOPIC_ANGLE: Record<ReadingTopic, string> = {
   study: "2027년(정미년, 붉은 양의 해) 한 해의 전체 흐름(사주핵심의 올해세운·올해월운이 모두 2027년 기준이야. 지금 이 순간의 '이번 달' 이야기는 하지 말고 2027년 안의 시기만 말해), 새해에 힘이 붙는 방식, 상반기·하반기 마음가짐, 새해에 채우면 좋은 습관",
 };
 
+/** 주제마다 어울리는 일상 장면. (돈 장면이 다른 주제로 새지 않게 주제별로 나눠요) */
+export const TOPIC_SCENES: Record<ReadingTopic, string> = {
+  general: "친구와 약속 잡을 때, 주말 아침 눈 떴을 때, 잠들기 전 폰 내려놓을 때",
+  success: "할 일 목록을 적을 때, 새로운 걸 배우기 시작할 때, 해야 할 일을 미루고 싶은 순간",
+  money: "통장 앱을 열어 볼 때, 장바구니에 담을 때, 결제 버튼 누르기 직전, 택배 알림이 올 때",
+  love: "메신저 답장을 기다릴 때, 약속 시간을 정할 때, 잠들기 전 나눈 대화를 곱씹을 때",
+  marriage: "함께 먹을 메뉴를 고를 때, 사소한 의견이 다를 때, 서로 일정을 맞출 때",
+  health: "잠들기 전 폰을 볼 때, 주말 아침 일어날 때, 산책길에 걷는 속도를 느낄 때",
+  study: "새 다이어리·달력 앱을 열 때, 새해 다짐을 메모에 적을 때, 연말연초 밤에 지난 한 해를 떠올릴 때, 주말 아침 계획을 그릴 때",
+};
+
 export function buildDetailMessage(chart: SajuChart, topic: ReadingTopic, gender: Gender, concern: Concern | null | undefined, extra: ExtraFacts, tail?: string): string {
   const label = TOPIC_LABEL[topic];
   const lens = `이번 주제는 "${label}"이야. 일곱 글과 요약하자면 모두 이 주제의 관점(${TOPIC_ANGLE[topic]})으로, 오행·일간 근거와 이어서 써줘. 다른 주제 이야기로 새지 마.\n`;
   const anchor = detailAnchor(chart, topic, extra.core, concern);
-  return buildUserMessage(chart, topic, gender, concern, extra, lens + (anchor ? anchor + "\n" : "") + (tail ?? "일곱 글(오행·나·칭찬·아쉬움·흐름·개선·행운 처방)과 항목 제목(heads), 요약하자면(story)을 써줘."));
+  const scenes = `[장면 후보] ${TOPIC_SCENES[topic]} (이 중에서만 고르고, 글마다 다른 장면으로)\n`;
+  return buildUserMessage(chart, topic, gender, concern, extra, lens + scenes + (anchor ? anchor + "\n" : "") + (tail ?? "일곱 글(오행·나·칭찬·아쉬움·흐름·개선·행운 처방)과 항목 제목(heads), 요약하자면(story)을 써줘."));
 }
 
 function mergeDetail(parts: (Detail | null)[]): Detail | null {
@@ -240,7 +255,8 @@ export async function interpretDetail(chart: SajuChart, o: { topic: ReadingTopic
     run(DETAIL_SCHEMA_C, "이번 호출에서는 두 글만 써줘: 흐름(flow)·개선(improve). 그리고 이 두 글의 항목 제목(heads)을 써줘.", ["flow", "improve"]),
     run(DETAIL_SCHEMA_D, "이번 호출에서는 행운 처방(lucky)과 그 항목 제목(heads)을 쓴 뒤, 마지막에 요약하자면(story)을 써줘. 요약하자면은 두괄식으로, 첫 문단에 결론(흐름 → 개선 → 응원), 이어서 근거(오행 → 나 → 칭찬), 마지막에 아쉬움을 3~4문단으로 녹여 줘.", ["lucky"]),
   ]);
-  const merged = mergeDetail([a, b, c, d]);
+  const merged0 = mergeDetail([a, b, c, d]);
+  const merged = merged0 ? { ...polishDetail(merged0, o.extra?.name), ...(merged0.warn ? { warn: merged0.warn } : {}) } : null;
   if (merged && errs.length) merged.warn = errs.join(" / ").slice(0, 120);
   if (!merged) throw new ReadingFailedError(`긴 풀이 실패: ${errs.join(" / ").slice(0, 120)}`);
   return merged;
