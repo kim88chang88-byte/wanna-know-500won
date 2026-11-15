@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { analyzeBook, overallLevel, sentencesOf } from "../bookQuality";
+import { analyzeBook, compareQuality, overallLevel, sentencesOf } from "../bookQuality";
 import type { BookPage } from "../types";
 
 const page = (no: number, bodies: string[], extra: Partial<BookPage> = {}): BookPage =>
@@ -27,5 +27,13 @@ describe("프리미엄 책 품질 점검", () => {
   it("비유가 여러 쪽에 걸치면 알려 준다", () => {
     const book = [1, 2, 3, 4, 5].map((n) => page(n, ["이 장은 저수지처럼 차분하게 흘러가는 시기예요."]));
     expect(analyzeBook({ book, viewerName: null }).metrics.find((m) => m.id === "metaphor")?.level).toBe("fail");
+  });
+  it("이전 점검과 비교해서 줄었는지 늘었는지 알려 준다", () => {
+    const rep = (n: number) => analyzeBook({ book: [page(1, [Array.from({ length: n }, (_, i) => `이번 ${i}번째 상황에서는 천천히 이번 주에는 해 보세요.`).join(" ")])], viewerName: null });
+    const ch = compareQuality(rep(11), rep(3));
+    const e = ch.find((c) => c.id === "endings");
+    expect(e?.trend).toBe("better");
+    expect(e?.before).toBeGreaterThan(e?.after ?? 99);
+    expect(compareQuality(rep(3), rep(3)).every((c) => c.trend === "same")).toBe(true);
   });
 });

@@ -2,12 +2,27 @@
 
 import { useEffect, useState, type FormEvent } from "react";
 import { CONCERN_CHIPS } from "@/lib/concerns";
-import { analyzeBook, overallLevel, pageTexts, THRESHOLDS, type Level, type QualityReport } from "@/lib/premium/bookQuality";
+import { analyzeBook, compareQuality, overallLevel, pageTexts, THRESHOLDS, type Level, type MetricChange, type QualityReport } from "@/lib/premium/bookQuality";
 import { conclusionOf, fetchRestChapters, mergeChapters } from "@/lib/premium/mergeChapters";
 import type { PremiumReportView } from "@/lib/premium/types";
+import type { DeployInfo } from "@/lib/version";
 
 const TONE: Record<Level, string> = { ok: "bg-emerald-100 text-emerald-800", warn: "bg-amber-100 text-amber-800", fail: "bg-rose-100 text-rose-800" };
 const LABEL: Record<Level, string> = { ok: "통과", warn: "주의", fail: "실패" };
+const TREND: Record<MetricChange["trend"], { text: string; cls: string }> = { better: { text: "좋아짐 ▼", cls: "text-emerald-700" }, worse: { text: "나빠짐 ▲", cls: "text-rose-700" }, same: { text: "같음", cls: "text-neutral-500" } };
+
+interface SavedRun {
+  id: number;
+  created_at: string;
+  input_key: string;
+  label: string | null;
+  version: string;
+  version_message: string | null;
+  overall: string;
+  score: QualityReport;
+}
+
+const when = (iso: string | null) => (iso ? new Date(iso).toLocaleString("ko-KR", { timeZone: "Asia/Seoul", month: "numeric", day: "numeric", hour: "2-digit", minute: "2-digit", hour12: false }) : "시각 모름");
 
 /** 관리자 전용(재홍용): 프리미엄 책 한 권을 만들고, 반복·말투·오타를 코드로 세어 점수표로 보여줘요. 조약돌은 쓰지 않고 AI 비용은 프리미엄 1회분이에요. */
 export default function PremiumEvalApp() {
@@ -23,9 +38,34 @@ export default function PremiumEvalApp() {
   const [report, setReport] = useState<PremiumReportView | null>(null);
   const [quality, setQuality] = useState<QualityReport | null>(null);
   const [copied, setCopied] = useState<string | null>(null);
+  const [label, setLabel] = useState("");
+  const [deploy, setDeploy] = useState<DeployInfo | null>(null);
+  const [runs, setRuns] = useState<SavedRun[]>([]);
+  const [saveNote, setSaveNote] = useState("");
+  const [savedVersion, setSavedVersion] = useState<string | null>(null);
+  const [baseId, setBaseId] = useState<number | null>(null);
+
+  const inputKey = `${date}|${timeUnknown ? "-" : time}|${female ? "f" : "m"}|${chip}|${text.trim()}`;
+
+  async function loadRuns(): Promise<SavedRun[]> {
+    try {
+      const res = await fetch("/api/admin/premium-eval");
+      const d = (await res.json().catch(() => null)) as { runs?: SavedRun[]; error?: string } | null;
+      if (!res.ok || !d?.runs) {
+        setSaveNote(d?.error ?? "저장 기록을 불러오지 못했어.");
+        return [];
+      }
+      setRuns(d.runs);
+      return d.runs;
+    } catch {
+      return [];
+    }
+  }
 
   useEffect(() => {
     void fetch("/api/admin/me").then((r) => r.json()).then((d: { admin?: boolean }) => setAdmin(d.admin === true)).catch(() => setAdmin(false));
+    void fetch("/api/admin/version").then((r) => (r.ok ? r.json() : null)).then((d: DeployInfo | null) => setDeploy(d)).catch(() => undefined);
+    void loadRuns();
   }, []);
 
   async function run(e: FormEvent) {
@@ -42,6 +82,8 @@ export default function PremiumEvalApp() {
     setBusy(true);
     setReport(null);
     setQuality(null);
+    setSaveNote("");
+    setSavedVersion(null);
     const t0 = Date.now();
     try {
       setMsg("1/4 첫 묶음을 만드는 중… (1~2분 걸려요)");
@@ -57,8 +99,25 @@ export default function PremiumEvalApp() {
         setReport(cur);
         if (rest.aiNotice) setMsg("일부 장은 AI 풀이를 못 받았어요(기본 글로 대체). 아래 점수는 그대로 계산했어요.");
       }
-      setQuality(analyzeBook(cur));
+      const q = analyzeBook(cur);
+      setQuality(q);
       setMsg((p) => (p.startsWith("일부") ? p : `끝났어. ${Math.round((Date.now() - t0) / 1000)}초 걸렸어.`));
+      // 저장하기 전에, 같은 입력으로 돌린 가장 최근 기록을 비교 대상으로 잡아요.
+      const before = await loadRuns();
+      const prev = before.find((r) => r.input_key === inputKey);
+      setBaseId(prev?.id ?? null);
+      try {
+        const bookTxt = cur.book.map((p) => `# ${p.no}쪽 ${p.title}\n${pageTexts(p).join("\n")}`).join("\n\n");
+        const sv = await fetch("/api/admin/premium-eval", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ inputKey, label: label.trim(), overall: overallLevel(q), score: q, bookText: bookTxt }) });
+        const sd = (await sv.json().catch(() => null)) as { version?: string; error?: string } | null;
+        if (sv.ok) {
+          setSavedVersion(sd?.version ?? null);
+          setSaveNote("이 결과를 저장했어.");
+          void loadRuns();
+        } else setSaveNote(sd?.error ?? "저장하지 못했어. (점검과 점수는 그대로 볼 수 있어)");
+      } catch {
+        setSaveNote("저장하지 못했어. (점검과 점수는 그대로 볼 수 있어)");
+      }
     } catch {
       setMsg("만드는 중 연결이 끊겼어.");
     } finally {
@@ -68,7 +127,7 @@ export default function PremiumEvalApp() {
 
   const scoreText = () =>
     quality
-      ? [`프리미엄 점검 (${date} ${timeUnknown ? "시간모름" : time} ${female ? "여" : "남"} / 고민:${chip}) 총평:${LABEL[overallLevel(quality)]} · ${quality.pages}쪽 · ${quality.chars}자`, ...quality.metrics.map((m) => `[${LABEL[m.level]}] ${m.title}: ${m.summary}${m.details.length ? "\n  - " + m.details.slice(0, 6).join("\n  - ") : ""}`)].join("\n")
+      ? [`프리미엄 점검 (${date} ${timeUnknown ? "시간모름" : time} ${female ? "여" : "남"} / 고민:${chip}) 총평:${LABEL[overallLevel(quality)]} · ${quality.pages}쪽 · ${quality.chars}자 · 버전:${savedVersion ?? deploy?.sha ?? "?"}`, ...quality.metrics.map((m) => `[${LABEL[m.level]}] ${m.title}: ${m.summary}${m.details.length ? "\n  - " + m.details.slice(0, 6).join("\n  - ") : ""}`)].join("\n")
       : "";
   const bookText = () => (report ? report.book.map((p) => `# ${p.no}쪽 ${p.title}\n${pageTexts(p).join("\n")}`).join("\n\n") : "");
   async function copy(kind: string, value: string) {
@@ -87,6 +146,13 @@ export default function PremiumEvalApp() {
     <main className="mx-auto max-w-2xl px-4 py-6">
       <h1 className="font-cute text-xl">프리미엄 사주 점검</h1>
       <p className="mt-1 text-[13px] text-neutral-600">책 한 권을 만들고 반복·말투·오타를 코드로 세어요. 조약돌은 쓰지 않고, AI 비용은 프리미엄 1회분이에요. 기준값은 <code>src/lib/premium/bookQuality.ts</code>의 THRESHOLDS에서 고쳐요.</p>
+      <div className="mt-2 rounded-xl bg-neutral-100 px-3 py-2 text-[12.5px] text-neutral-700" data-testid="deploy-info">
+        {deploy ? (
+          <>지금 배포된 버전 <b>{deploy.sha}</b> · {when(deploy.builtAt)} 빌드{deploy.message ? ` · ${deploy.message}` : ""}<span className="text-neutral-500"> (고친 내용이 안 보이면 새로고침하고 버전이 바뀌었는지 확인해 줘)</span></>
+        ) : (
+          "배포 버전을 불러오는 중…"
+        )}
+      </div>
       <form onSubmit={(e) => void run(e)} className="mt-3 grid gap-2 rounded-2xl border border-neutral-200 bg-white p-3 text-[13px]">
         <div className="flex flex-wrap items-center gap-2">
           <input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="rounded-lg border px-2 py-1" aria-label="생년월일 (양력)" />
@@ -102,6 +168,7 @@ export default function PremiumEvalApp() {
           </select>
         </label>
         <input value={text} onChange={(e) => setText(e.target.value)} maxLength={200} placeholder="직접 적은 고민 (선택)" className="rounded-lg border px-2 py-1" />
+        <input value={label} onChange={(e) => setLabel(e.target.value)} maxLength={80} placeholder="이번에 무엇을 바꿨는지 한 줄 (예: 회의 낱말 줄이는 지시 추가)" className="rounded-lg border px-2 py-1" />
         <div className="flex items-center gap-2">
           <button type="submit" disabled={busy || admin !== true} className="rounded-full bg-brand-500 px-4 py-2 font-extrabold text-white disabled:opacity-50">{busy ? "만드는 중…" : "프리미엄 만들고 점검하기"}</button>
           <span className="text-[12.5px] text-neutral-600" role="status">{msg}</span>
@@ -136,6 +203,70 @@ export default function PremiumEvalApp() {
           <p className="mt-2 text-[11.5px] text-neutral-500">기준(주의/실패): 같은 끝맺음 {THRESHOLDS.endingRepeat.warn}/{THRESHOLDS.endingRepeat.fail}번, 같은 시작 {THRESHOLDS.startRepeat.warn}/{THRESHOLDS.startRepeat.fail}번, 한 낱말 {THRESHOLDS.wordRepeat.warn}/{THRESHOLDS.wordRepeat.fail}번, 같은 비유 {THRESHOLDS.metaphorPages.warn}/{THRESHOLDS.metaphorPages.fail}쪽. 임시 기준이라 결과를 보며 조정해요.</p>
         </section>
       )}
+
+      {quality && saveNote && <p className="mt-2 text-[12.5px] text-neutral-600" role="status">{saveNote}{savedVersion ? ` (버전 ${savedVersion})` : ""}</p>}
+
+      {quality && (() => {
+        const sameInput = runs.filter((r) => r.input_key === inputKey);
+        const base = runs.find((r) => r.id === baseId) ?? null;
+        const changes = base ? compareQuality(base.score, quality) : [];
+        return (
+          <section className="mt-4 rounded-2xl border border-neutral-200 bg-white p-3">
+            <h2 className="text-[14px] font-extrabold">이전 결과와 비교</h2>
+            {sameInput.length === 0 && !base ? (
+              <p className="mt-1 text-[12.5px] text-neutral-600">같은 입력으로 저장된 이전 결과가 없어요. 이번 결과가 첫 기록이에요. 같은 입력으로 다시 돌리면 여기에 비교가 나와요.</p>
+            ) : (
+              <>
+                <label className="mt-1 flex flex-wrap items-center gap-2 text-[12.5px]">비교할 기록
+                  <select value={baseId ?? ""} onChange={(e) => setBaseId(e.target.value ? Number(e.target.value) : null)} className="rounded-lg border px-2 py-1">
+                    <option value="">(선택)</option>
+                    {sameInput.map((r) => (
+                      <option key={r.id} value={r.id}>{when(r.created_at)} · 버전 {r.version}{r.label ? ` · ${r.label}` : ""}</option>
+                    ))}
+                  </select>
+                </label>
+                {base && (
+                  <>
+                    <p className="mt-1 text-[12px] text-neutral-500">이전: 버전 {base.version}{base.version_message ? ` (${base.version_message})` : ""} / 지금: 버전 {savedVersion ?? deploy?.sha ?? "?"}. 숫자는 작을수록 좋아요.</p>
+                    <ul className="mt-1.5 divide-y divide-neutral-100 text-[12.5px]">
+                      {changes.map((m) => (
+                        <li key={m.id} className="flex flex-wrap items-center gap-2 py-1">
+                          <span className="min-w-0 flex-1 font-bold">{m.title}</span>
+                          <span>{m.before} → {m.after}</span>
+                          <span className={`font-extrabold ${TREND[m.trend].cls}`}>{TREND[m.trend].text}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </>
+                )}
+              </>
+            )}
+          </section>
+        );
+      })()}
+
+      <section className="mt-4">
+        <h2 className="text-[14px] font-extrabold">저장된 점검 기록 (최근 {runs.length}개)</h2>
+        {runs.length === 0 ? (
+          <p className="mt-1 text-[12.5px] text-neutral-600">아직 기록이 없어요. 점검을 한 번 돌리면 자동으로 저장돼요.</p>
+        ) : (
+          <ul className="mt-1.5 space-y-1.5">
+            {runs.map((r) => (
+              <li key={r.id} className="flex flex-wrap items-center gap-2 rounded-xl border border-neutral-200 bg-white px-3 py-2 text-[12.5px]">
+                <span className={`rounded-full px-2 py-0.5 text-[11px] font-extrabold ${TONE[(r.overall as Level) in TONE ? (r.overall as Level) : "warn"]}`}>{LABEL[(r.overall as Level) in LABEL ? (r.overall as Level) : "warn"]}</span>
+                <span className="font-bold">{when(r.created_at)}</span>
+                <span className="text-neutral-600">버전 {r.version}</span>
+                {r.label && <span className="min-w-0 flex-1 truncate text-neutral-800">{r.label}</span>}
+                <button type="button" onClick={async () => {
+                  const res = await fetch(`/api/admin/premium-eval?id=${r.id}`);
+                  const d = (await res.json().catch(() => null)) as { bookText?: string } | null;
+                  if (d?.bookText) await copy(`run${r.id}`, d.bookText);
+                }} className="rounded-full border px-2.5 py-0.5 font-bold">{copied === `run${r.id}` ? "복사됨 ✓" : "전체 글 복사"}</button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
     </main>
   );
 }

@@ -26,6 +26,8 @@ export interface Metric {
   id: string;
   title: string;
   level: Level;
+  /** 한 줄 요약에 쓴 대표 숫자 (작을수록 좋아요). 이전 결과와 비교할 때 써요 */
+  value: number;
   summary: string;
   /** 자세한 줄들 (많이 나온 것 순) */
   details: string[];
@@ -82,7 +84,7 @@ function edgeRepeat(sentences: string[], edge: "start" | "end", t: { warn: numbe
   }
   const list = top(m, 8);
   const max = list[0]?.[1] ?? 0;
-  return { id, title, level: level(max, t), summary: list.length ? `가장 많이 반복된 것: "${list[0][0]}" ${max}번` : "눈에 띄는 반복 없음", details: list.map(([k, c]) => `${k} — ${c}번`) };
+  return { id, title, level: level(max, t), value: max, summary: list.length ? `가장 많이 반복된 것: "${list[0][0]}" ${max}번` : "눈에 띄는 반복 없음", details: list.map(([k, c]) => `${k} — ${c}번`) };
 }
 
 export function analyzeBook(report: Pick<PremiumReportView, "book" | "viewerName">): QualityReport {
@@ -103,11 +105,11 @@ export function analyzeBook(report: Pick<PremiumReportView, "book" | "viewerName
     wc.set(w, (wc.get(w) ?? 0) + 1);
   }
   const words = top(wc, 20, 3);
-  metrics.push({ id: "words", title: "많이 나오는 낱말 상위 20", level: level(words[0]?.[1] ?? 0, THRESHOLDS.wordRepeat), summary: words.length ? `가장 많은 낱말: "${words[0][0]}" ${words[0][1]}번` : "쏠린 낱말 없음", details: words.map(([k, c]) => `${k} — ${c}번`) });
+  metrics.push({ id: "words", title: "많이 나오는 낱말 상위 20", level: level(words[0]?.[1] ?? 0, THRESHOLDS.wordRepeat), value: words[0]?.[1] ?? 0, summary: words.length ? `가장 많은 낱말: "${words[0][0]}" ${words[0][1]}번` : "쏠린 낱말 없음", details: words.map(([k, c]) => `${k} — ${c}번`) });
 
   // 비유 소재가 몇 쪽에 나왔는지
   const metaRows = METAPHORS.map((m) => ({ m, pages: perPage.filter((x) => x.text.includes(m)).length, times: all.split(m).length - 1 })).filter((r) => r.pages > 0).sort((a, b) => b.pages - a.pages);
-  metrics.push({ id: "metaphor", title: "같은 비유 소재의 쪽 수", level: level(metaRows[0]?.pages ?? 0, THRESHOLDS.metaphorPages), summary: metaRows.length ? `"${metaRows[0].m}" ${metaRows[0].pages}쪽 ${metaRows[0].times}번` : "비유 소재 반복 없음", details: metaRows.slice(0, 8).map((r) => `${r.m} — ${r.pages}쪽, 총 ${r.times}번`) });
+  metrics.push({ id: "metaphor", title: "같은 비유 소재의 쪽 수", level: level(metaRows[0]?.pages ?? 0, THRESHOLDS.metaphorPages), value: metaRows[0]?.pages ?? 0, summary: metaRows.length ? `"${metaRows[0].m}" ${metaRows[0].pages}쪽 ${metaRows[0].times}번` : "비유 소재 반복 없음", details: metaRows.slice(0, 8).map((r) => `${r.m} — ${r.pages}쪽, 총 ${r.times}번`) });
 
   // 자리표시·이름 오타
   const holders = pages.flatMap((p) => pageTexts(p).filter((t) => PLACEHOLDER.test(t)).map((t) => `${p.no}쪽: ${t.slice(0, 40)}…`));
@@ -116,30 +118,52 @@ export function analyzeBook(report: Pick<PremiumReportView, "book" | "viewerName
   const viewer = report.viewerName ?? null;
   const names = [...nameSet.entries()].filter(([n]) => !/(고객|여러분|도리|사용자|이용자|독자)/.test(n)).sort((a, b) => b[1] - a[1]);
   const typo = viewer ? names.filter(([n]) => n !== viewer && n[0] === viewer[0]) : names.slice(1);
-  metrics.push({ id: "names", title: "이름 오타·자리표시", level: holders.length ? "fail" : typo.length ? "warn" : "ok", summary: holders.length ? `남은 자리표시 ${holders.length}곳` : typo.length ? `비슷한 이름 ${typo.length}개: ${typo.map(([n]) => n).join(", ")}` : "문제 없음", details: [...holders, ...names.slice(0, 5).map(([n, c]) => `"${n}님" ${c}번`)] });
+  metrics.push({ id: "names", title: "이름 오타·자리표시", level: holders.length ? "fail" : typo.length ? "warn" : "ok", value: holders.length + typo.length, summary: holders.length ? `남은 자리표시 ${holders.length}곳` : typo.length ? `비슷한 이름 ${typo.length}개: ${typo.map(([n]) => n).join(", ")}` : "문제 없음", details: [...holders, ...names.slice(0, 5).map(([n, c]) => `"${n}님" ${c}번`)] });
 
   // 금지어
   const forb: string[] = [];
   for (const p of pages) for (const t of pageTexts(p)) { const w = containsForbidden(plain(t)); if (w) forb.push(`${p.no}쪽 "${w}": ${plain(t).slice(0, 36)}…`); }
-  metrics.push({ id: "forbidden", title: "금지어", level: forb.length ? "fail" : "ok", summary: forb.length ? `${forb.length}곳` : "없음", details: forb.slice(0, 8) });
+  metrics.push({ id: "forbidden", title: "금지어", level: forb.length ? "fail" : "ok", value: forb.length, summary: forb.length ? `${forb.length}곳` : "없음", details: forb.slice(0, 8) });
 
   // 말투 섞임: 존댓말 글에 반말 2인칭이 끼는지
   const informal = [...all.matchAll(/(^|\s)(너를|너는|너의|네가|너도|너랑)(?=\s|[.,!?]|$)/g)].length;
-  metrics.push({ id: "tone", title: "말투 섞임(존댓말 속 반말 '너')", level: informal >= 3 ? "fail" : informal >= 1 ? "warn" : "ok", summary: informal ? `반말 2인칭 ${informal}곳` : "없음", details: [] });
+  metrics.push({ id: "tone", title: "말투 섞임(존댓말 속 반말 '너')", level: informal >= 3 ? "fail" : informal >= 1 ? "warn" : "ok", value: informal, summary: informal ? `반말 2인칭 ${informal}곳` : "없음", details: [] });
 
   // 문장 통째로 굵게
   const bold = [...report.book.flatMap((p) => pageTexts(p)).join("\n").matchAll(/\*\*([^*]+)\*\*/g)].map((m) => m[1]);
   const longBold = bold.filter((b) => b.length >= 40);
-  metrics.push({ id: "bold", title: "굵은 글씨", level: level(longBold.length, THRESHOLDS.longBold), summary: `굵은 곳 ${bold.length}개, 문장 통째 ${longBold.length}개`, details: longBold.slice(0, 5).map((b) => b.slice(0, 50) + "…") });
+  metrics.push({ id: "bold", title: "굵은 글씨", level: level(longBold.length, THRESHOLDS.longBold), value: longBold.length, summary: `굵은 곳 ${bold.length}개, 문장 통째 ${longBold.length}개`, details: longBold.slice(0, 5).map((b) => b.slice(0, 50) + "…") });
 
   // 쪽 길이
   const lens = perPage.map((x) => x.text.length);
   const sorted = [...lens].sort((a, b) => a - b);
   const med = sorted[Math.floor(sorted.length / 2)] ?? 0;
   const shortPages = perPage.filter((x) => med > 0 && x.text.length < med * THRESHOLDS.shortPageRatio);
-  metrics.push({ id: "length", title: "쪽별 글자 수", level: shortPages.length >= 3 ? "fail" : shortPages.length ? "warn" : "ok", summary: `중앙값 ${med}자, 짧은 쪽 ${shortPages.length}개`, details: perPage.map((x) => `${x.p.no}쪽 ${x.p.title} — ${x.text.length}자`) });
+  metrics.push({ id: "length", title: "쪽별 글자 수", level: shortPages.length >= 3 ? "fail" : shortPages.length ? "warn" : "ok", value: shortPages.length, summary: `중앙값 ${med}자, 짧은 쪽 ${shortPages.length}개`, details: perPage.map((x) => `${x.p.no}쪽 ${x.p.title} — ${x.text.length}자`) });
 
   return { chars: all.length, pages: pages.length, metrics };
 }
 
 export const overallLevel = (r: QualityReport): Level => r.metrics.reduce<Level>((a, m) => worst(a, m.level), "ok");
+
+export interface MetricChange {
+  id: string;
+  title: string;
+  before: number;
+  after: number;
+  /** better: 줄었음, worse: 늘었음, same: 같음 (모든 항목이 작을수록 좋아요) */
+  trend: "better" | "worse" | "same";
+  beforeLevel: Level;
+  afterLevel: Level;
+}
+
+/** 이전 점검과 지금 점검의 항목별 변화. 같은 항목(id)끼리만 비교해요. */
+export function compareQuality(before: QualityReport, after: QualityReport): MetricChange[] {
+  const out: MetricChange[] = [];
+  for (const m of after.metrics) {
+    const b = before.metrics.find((x) => x.id === m.id);
+    if (!b) continue;
+    out.push({ id: m.id, title: m.title, before: b.value, after: m.value, trend: m.value < b.value ? "better" : m.value > b.value ? "worse" : "same", beforeLevel: b.level, afterLevel: m.level });
+  }
+  return out;
+}

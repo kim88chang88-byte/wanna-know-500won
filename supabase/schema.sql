@@ -852,3 +852,23 @@ create table if not exists public.chat_rooms (
 );
 create index if not exists chat_rooms_updated_idx on public.chat_rooms (updated_at);
 alter table public.chat_rooms enable row level security;
+
+-- ─────────────────────────────────────────────────────────────────────────────
+-- 관리자 프리미엄 점검 기록: /admin/premium-eval 에서 만든 책의 점수표와 전체 글을 저장해서,
+-- 같은 입력으로 다시 돌렸을 때 이전 결과와 비교해요. (관리자만 읽고 써요. 서버 키로만 접근)
+-- 이 파일 전체를 다시 Run 하면 추가돼요. (코드를 배포하기 '전에' Run 하세요. 없으면 점검은 되지만 저장·비교만 꺼져 있어요)
+-- ─────────────────────────────────────────────────────────────────────────────
+create table if not exists public.premium_eval_runs (
+  id bigint generated always as identity primary key,
+  created_at timestamptz not null default now(),
+  admin_id text not null,
+  input_key text not null,
+  label text,
+  version text not null,
+  version_message text,
+  overall text not null,
+  score jsonb not null,
+  book_text text not null
+);
+create index if not exists premium_eval_runs_idx on public.premium_eval_runs (input_key, created_at desc);
+alter table public.premium_eval_runs enable row level security;

@@ -239,6 +239,41 @@ export function createDb(config: DbConfig, fetchImpl: FetchLike = fetch) {
       await call(`vault_items?id=eq.${id}&user_id=eq.${safeId(userId)}`, { method: "DELETE", headers: headers({ Prefer: "return=minimal" }) });
     },
 
+    /** 관리자: 프리미엄 점검 결과 저장 */
+    async insertEvalRun(row: { adminId: string; inputKey: string; label: string | null; version: string; versionMessage: string | null; overall: string; score: unknown; bookText: string }): Promise<number | null> {
+      const res = await call("premium_eval_runs", {
+        method: "POST",
+        headers: headers({ Prefer: "return=representation" }),
+        body: JSON.stringify({
+          admin_id: safeId(row.adminId),
+          input_key: row.inputKey.slice(0, 200),
+          label: row.label ? row.label.slice(0, 80) : null,
+          version: row.version.slice(0, 20),
+          version_message: row.versionMessage ? row.versionMessage.slice(0, 120) : null,
+          overall: row.overall.slice(0, 10),
+          score: row.score,
+          book_text: row.bookText.slice(0, 120000),
+        }),
+      });
+      const rows = (await res.json().catch(() => [])) as Array<{ id?: unknown }>;
+      return Array.isArray(rows) && typeof rows[0]?.id === "number" ? rows[0].id : null;
+    },
+
+    /** 관리자: 점검 기록 목록 (최신순, 글 본문 제외) */
+    async listEvalRuns(limit = 30): Promise<EvalRunRow[]> {
+      const res = await call(`premium_eval_runs?select=id,created_at,input_key,label,version,version_message,overall,score&order=id.desc&limit=${Math.min(limit, 100)}`, { method: "GET", headers: headers() });
+      const rows = (await res.json().catch(() => [])) as EvalRunRow[];
+      return Array.isArray(rows) ? rows : [];
+    },
+
+    /** 관리자: 점검 기록 하나의 전체 글 */
+    async getEvalBook(id: number): Promise<string | null> {
+      if (!Number.isInteger(id) || id < 1) return null;
+      const res = await call(`premium_eval_runs?id=eq.${id}&select=book_text&limit=1`, { method: "GET", headers: headers() });
+      const rows = (await res.json().catch(() => [])) as Array<{ book_text?: unknown }>;
+      return Array.isArray(rows) && typeof rows[0]?.book_text === "string" ? rows[0].book_text : null;
+    },
+
     /** 관리자: 기간 안의 후기 (최신순) */
     listReviews(sinceIso: string, maxRows = 20000): Promise<ReviewRow[]> {
       return fetchAll(
@@ -707,6 +742,17 @@ export function createDb(config: DbConfig, fetchImpl: FetchLike = fetch) {
       });
     },
   };
+}
+
+export interface EvalRunRow {
+  id: number;
+  created_at: string;
+  input_key: string;
+  label: string | null;
+  version: string;
+  version_message: string | null;
+  overall: string;
+  score: unknown;
 }
 
 export type Db = ReturnType<typeof createDb>;

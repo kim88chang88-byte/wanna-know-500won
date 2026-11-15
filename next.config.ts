@@ -22,6 +22,8 @@ const CSP = [
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
+  // 이 배포를 빌드한 시각 (관리자 점검 화면의 "배포 버전" 표시용)
+  env: { NEXT_PUBLIC_BUILT_AT: new Date().toISOString() },
   poweredByHeader: false,
   // 기본 보안 헤더. (카카오 로그인은 주소 이동 방식이라 영향이 없어요)
   async headers() {
