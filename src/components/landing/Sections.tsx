@@ -316,7 +316,7 @@ export function PremiumSection({ onSpin }: SpinProps) {
         </div>
         <div className="relative z-10 mt-3 text-center">
           <Link href="/premium" data-testid="premium-report-link" className="text-sm font-bold text-pink-200 hover:text-white underline underline-offset-4">
-            샘플 먼저 보기 →
+            프리미엄 사주 체험 미리보기 →
           </Link>
         </div>
       </div>

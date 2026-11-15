@@ -15,6 +15,7 @@ import DayMasterScene from "./DayMasterScene";
 import { MORE_LABELS, SENTENCE_LABELS } from "@/lib/premium/partnerProfile";
 import { DAYMASTER_BRIEF, MBTI_BRIEF, cleanMbti } from "@/lib/mbtiBrief";
 import { mbtiDecadeLine } from "@/lib/mbtiLine";
+import { MBTI_MARK } from "@/lib/premium/book/lifeFlow";
 import { formatWon } from "@/lib/premium/book/charts";
 import { callName } from "@/lib/ai/nameRepair";
 import BodyFigure from "./BodyFigure";
@@ -549,8 +550,7 @@ function DailyRoutine({ states }: { states: Partial<Record<BodyEl, BodyState>> }
 
 /** 서문: 네 기둥 이름표 + "왜 해마다/매일 다시 보나" + 도유사주 이용 안내. 모두에게 같은 글이라 AI 를 쓰지 않아요. */
 function PrefaceExtras({ report }: { report: PremiumReportView }) {
-  const mbti = cleanMbti(report.mbti);
-  const dayStem = report.pillars.find((p) => p.key === "day")?.full?.[0] ?? null;
+  void report;
   const lane: Array<[string, string]> = [
     ["타고난 집", "내 여덟 글자 (1~3장)"],
     ["10년의 계절", "대운"],
@@ -560,15 +560,6 @@ function PrefaceExtras({ report }: { report: PremiumReportView }) {
   ];
   return (
     <div data-testid="preface-extras" className="mt-4 space-y-3">
-      {mbti && dayStem && (
-        <div data-testid="preface-mbti" className="rounded-xl bg-white/[0.06] px-3 py-2.5 text-[14.5px] leading-relaxed text-[#e8dfca]/90">
-          <div className="flex gap-4">
-            <span>나의 일간 <b className={GOLD}>{dayStem}</b></span>
-            <span>MBTI <b className={GOLD}>{mbti}</b></span>
-          </div>
-          <p className="mt-1 text-[13px] text-[#e8dfca]/65">MBTI는 곁에 놓고 보는 참고야. 네 글자로 사람 속을 다 알 수는 없어서, 사주와 나란히 놓고 같은 말을 하는 곳을 살펴봐.</p>
-        </div>
-      )}
       <div className="flex flex-wrap justify-between gap-x-3 gap-y-1 text-[14px] text-[#e8dfca]/70">
         <span>네 기둥 = <b className={GOLD}>사주 四柱</b></span>
         <span>여덟 글자 = <b className={GOLD}>팔자 八字</b></span>
@@ -1302,13 +1293,7 @@ export default function PremiumBook({ report, flush = false, finale, previewBlur
                       </div>
                     ) : (
                       <>
-                        <RichBody text={s.body} />
-                        {s.mbti && mbtiDecadeLine(report.mbti, s.mbti.group, s.mbti.tense) && (
-                          <p data-testid="decade-mbti" className="mt-2 rounded-xl bg-[#b9a4ff]/15 px-3 py-2 text-[14.5px] leading-[1.8] text-[#322f47]">
-                            <b className="mr-1 text-[#5a43b5]">MBTI</b>
-                            {mbtiDecadeLine(report.mbti, s.mbti.group, s.mbti.tense)}
-                          </p>
-                        )}
+                        <RichBody text={fillMbti(s.body, s.mbti, report.mbti)} />
                       </>
                     )}
                     {!s.locked && s.checks && s.checks.length > 0 && <CheckList items={s.checks} />}
@@ -1386,4 +1371,11 @@ export default function PremiumBook({ report, flush = false, finale, previewBlur
       <p className="mt-4 text-center text-[13px] leading-relaxed text-[#8f95c0]">명리학의 일반적인 관점으로 풀어 쓴 재미와 참고용 해석이야.</p>
     </div>
   );
+}
+
+/** 카드 본문의 MBTI 자리(⟦MBTI⟧)를 "○○ 특유의 …" 한 문장으로 바꾸거나, MBTI 가 없으면 지워요. */
+function fillMbti(body: string, meta: { group: string; tense: "past" | "now" | "future" } | undefined, mbti: unknown): string {
+  if (!body.includes(MBTI_MARK)) return body;
+  const line = meta ? mbtiDecadeLine(mbti, meta.group, meta.tense) : "";
+  return body.split(MBTI_MARK).join(line).replace(/[ \t]+\n/g, "\n").replace(/ {2,}/g, " ").trim();
 }

@@ -223,14 +223,14 @@ export function buildEnergyChart(r: SajuResult): BookChart | null {
   const points: BookChartPoint[] = list.map((d, i) => {
     const st = stageOfDaeun(d);
     const level = st ? STAGE_LEVEL[st] : 50;
-    let v = 0.65 * level + 14;
+    let v = 0.8 * level + 6;
     if (yong.includes(stemEl(d.ganzhi[0]))) v += 8;
     if (yong.includes(branchEl(d.ganzhi[1]))) v += 6;
     return {
       age: d.startAge,
       endAge: d.endAge,
       ganzhi: d.ganzhi,
-      value: Math.round(Math.min(95, Math.max(10, v))),
+      value: Math.round(Math.min(95, Math.max(8, v))),
       tag: circ(i),
       ...(cur !== null && d.startAge === cur.startAge ? { current: true } : {}),
     };
@@ -243,6 +243,9 @@ export function buildEnergyChart(r: SajuResult): BookChart | null {
   const range = (p: BookChartPoint) => `${p.tag} ${p.age}~${p.endAge}세 (${ganzhiLabel(p.ganzhi)} 대운)`;
   const callouts = [{ label: "기운이 가장 높이 오르는 시기", text: range(points[first.i]) }];
   if (second) callouts.push({ label: "그다음으로 힘이 실리는 시기", text: range(points[second.i]) });
+  // 쉬어 가는 시기도 따로 보여 줘요. (좋고 나쁨이 아니라 속도를 낮추고 쌓는 때)
+  const lowest = [...points].sort((a, b) => a.value - b.value)[0];
+  if (lowest && lowest.value <= 45 && lowest !== points[first.i]) callouts.push({ label: "쉬어 가며 쌓기 좋은 시기", text: range(lowest) });
   const curP = points.find((p) => p.current);
   if (curP) callouts.push({ label: "지금 시기", text: `${range(curP)} · 지수 ${curP.value}` });
   return {
@@ -334,12 +337,94 @@ const FUTURE_PUSH: Record<Group, string> = {
   인성: "기운은 씨앗을 건네 줄 뿐이고, 키워 내는 건 네 꾸준함이야. 너라면 할 수 있어.",
 };
 
+
+/* ───────── 10년 카드 4문단: 겹침 · 장면과 속마음 · 반전 · 지금의 나 ───────── */
+
+const EL_COUNT_KEYS = ["목", "화", "토", "금", "수"];
+
+/** 원국 여덟 글자의 오행 개수 */
+function natalElementCount(natal: Partial<Record<PosKey, string>>): Record<string, number> {
+  const c: Record<string, number> = {};
+  for (const k of EL_COUNT_KEYS) c[k] = 0;
+  for (const gz of Object.values(natal)) {
+    if (!gz || gz.length < 2) continue;
+    const a = stemEl(gz[0]);
+    const b = branchEl(gz[1]);
+    if (a) c[a]++;
+    if (b) c[b]++;
+  }
+  return c;
+}
+
+const MISS_POOL: Array<(e: string) => string> = [
+  (e) => `네 원국에는 거의 없던 ${e} 기운이 이 시기에 처음 채워져.`,
+  (e) => `원국에서 비어 있던 ${e} 기운이 이 대운에 들어와서, 안 쓰던 근육이 깨어나는 때야.`,
+  (e) => `네 여덟 글자에 없던 ${e} 기운이 새로 얹히는 시기라, 낯설지만 그만큼 새로운 재료야.`,
+];
+const HEAVY_POOL: Array<(e: string) => string> = [
+  (e) => `원래 많던 ${e} 기운이 한 겹 더 쌓여서, 네 색이 더 또렷해지는 때야.`,
+  (e) => `이미 넉넉한 ${e} 기운에 같은 결이 더해져서, 힘이 한쪽으로 몰리기 쉬운 시기야.`,
+];
+const PLAIN_POOL: Array<(e: string) => string> = [
+  (e) => `원국의 기운과 크게 어긋나지 않는 ${e} 기운이 들어와서, 익숙한 결 위에 새 계절이 얹혀.`,
+  (e) => `네 여덟 글자와 무난하게 섞이는 ${e} 기운이라, 흐름이 비교적 고르게 이어져.`,
+];
+
+/** 장면과 속마음: [그 시기의 한 장면, 속마음 대변] (십성 묶음 × 지난/지금/앞으로) */
+const SCENE_VOICE: Record<Group, Record<Tense, Array<[string, string]>>> = {
+  비겁: {
+    past: [["친구들 사이에서 내 의견만은 끝까지 접지 않고 버티던 날이 있었을 수 있어.", "속으로는 ‘나만 이렇게 힘줘야 하나’ 싶으면서도, 물러서면 내가 녹아 없어질 것 같았을 거야."], ["누가 정해 준 길 앞에서 괜히 반대로 걸어 보고 싶던 때가 있었을 수 있어.", "‘나는 나대로 가고 싶어’라는 마음이 속에서 단단히 뭉쳐 있었을 거야."]],
+    now: [["회의나 모임에서 내 몫을 분명히 말해야 하는 순간이 자주 오고 있을 수 있어.", "속마음은 ‘나도 인정받고 싶다’와 ‘괜히 부딪히기 싫다’ 사이를 오가고 있을 거야."], ["비슷한 또래나 동료와 나를 견주어 보게 되는 날이 늘고 있을 수 있어.", "‘내 속도가 맞나’ 싶다가도 속에서는 내 방식으로 피어나고 싶은 마음이 커지고 있을 거야."]],
+    future: [["내 이름 걸고 해 보고 싶은 일이 하나둘 떠오르는 날이 올 수 있어.", "그때 속에서는 ‘이제는 내가 정해 보고 싶다’는 마음이 뚫고 올라올 거야."], ["함께할 사람을 고르고 내 몫을 정하는 장면이 늘어날 수 있어.", "속으로는 기대와 걱정이 반반이어도, 그 마음이 오히려 중심을 잡아 줄 거야."]],
+  },
+  식상: {
+    past: [["수업 시간이나 모임에서 하고 싶은 말이 입 끝까지 올라왔다 삼킨 날이 있었을 수 있어.", "속으로는 ‘이걸 꺼내면 이상하게 볼까’ 하면서도, 꺼내고 싶은 마음이 얼음처럼 녹아내리고 있었을 거야."], ["노트 귀퉁이에 낙서나 메모를 끄적이며 시간을 보내던 날이 있었을 수 있어.", "속마음은 ‘나도 뭔가 만들어 보고 싶다’였을 거야."]],
+    now: [["머릿속 아이디어를 메모장에 적어 두고 한참 들여다보는 밤이 있을 수 있어.", "속마음은 ‘완벽하게 되면 보여 줘야지’와 ‘일단 꺼내 보고 싶다’가 맞서고 있을 거야."], ["말이나 글로 내 생각을 꺼내 놓을 일이 늘고 있을 수 있어.", "속으로는 ‘이렇게 말해도 되나’ 하면서도, 표현이 꽃처럼 피어나고 싶은 마음이 있을 거야."]],
+    future: [["작게라도 만든 것을 사람들에게 보여 주는 날이 올 수 있어.", "그때 속에서는 ‘떨리지만 보여 주고 싶다’는 마음이 닫힌 문을 열어 줄 거야."], ["취미가 일이 되거나 재능이 누군가의 눈에 띄는 장면이 생길 수 있어.", "속마음은 설렘과 부담이 섞여도, 연습해 둔 만큼 단단해질 거야."]],
+  },
+  재성: {
+    past: [["월급이나 용돈 앱을 열어 놓고 한참 들여다보다 닫은 밤이 있었을 수 있어.", "속으로는 ‘나도 제대로 쥐고 싶다’ 싶으면서, 숫자 앞에서 한숨이 먼저 나왔을 거야."], ["처음으로 내 돈이나 내 몫을 직접 다뤄 보며 서툴렀던 날이 있었을 수 있어.", "‘세상은 이렇게 돌아가는구나’를 배우며, 속으로는 조금 얼얼했을 거야."]],
+    now: [["퇴근길에 통장 앱을 열어 보거나 장바구니를 담았다 비우는 날이 있을 수 있어.", "속마음은 ‘이제는 실속을 챙겨야 한다’와 ‘그래도 쓰고 싶다’ 사이를 오가고 있을 거야."], ["일의 결과가 숫자나 성과로 눈에 보이기 시작하는 장면이 늘고 있을 수 있어.", "속으로는 ‘이걸 지킬 수 있을까’ 싶으면서도, 쌓아 온 것이 손에 잡히며 단단히 굳어 가는 느낌이 있을 거야."]],
+    future: [["작은 목표를 세우고 숫자로 확인해 보는 날이 늘어날 수 있어.", "그때 속에서는 ‘이제는 막연한 불안이 아니라 계획으로 만들고 싶다’는 마음이 올라올 거야."], ["벌이보다 지킬 것을 고르는 장면이 생길 수 있어.", "속으로는 욕심과 안정 사이에서 흔들려도, 기반을 다진 만큼 중심이 잡힐 거야."]],
+  },
+  관성: {
+    past: [["해야 할 일과 눈치 사이에서 어깨가 무거웠던 날이 있었을 수 있어.", "속으로는 ‘다들 괜찮아 보이는데 나만 버티나’ 싶으면서도, 책임을 놓지 않으려 애썼을 거야."], ["시험, 평가, 규칙 앞에서 긴장하던 때가 있었을 수 있어.", "속마음은 ‘잘해야 한다’였지만, 그 긴장이 네 안에서 성실함으로 굳어 갔을 거야."]],
+    now: [["맡은 역할이 늘어서 할 일 목록이 길어지는 날이 있을 수 있어.", "속마음은 ‘다 잘하고 싶다’와 ‘조금 쉬고 싶다’가 같이 있을 거야."], ["누군가 나를 평가하거나 기대하는 시선을 느끼는 날이 늘고 있을 수 있어.", "속으로는 부담이 커도, 그 압력이 뚫고 지나가면 단단한 신뢰로 남을 거야."]],
+    future: [["역할과 책임이 자연스럽게 내게 맡겨지는 장면이 올 수 있어.", "그때 속에서는 ‘내가 해낼 수 있을까’와 ‘해내고 싶다’가 같이 올라올 거야."], ["신뢰를 쌓아 둔 만큼 인정받는 순간이 생길 수 있어.", "속마음은 기쁨과 책임감이 섞이겠지만, 쉬는 법도 같이 챙기면 오래 갈 거야."]],
+  },
+  인성: {
+    past: [["방에서 혼자 책이나 생각에 빠져 시간을 보내던 날이 있었을 수 있어.", "속으로는 ‘나는 왜 이렇게 생각이 많을까’ 싶으면서도, 그 시간이 안쪽에서 조용히 쌓이고 있었을 거야."], ["누군가에게 배우거나 보호받으며 마음이 놓이던 날이 있었을 수 있어.", "속마음은 ‘여기서는 안심하고 자라도 되겠다’였을 거야."]],
+    now: [["퇴근 후나 주말 아침에 배우고 싶던 것을 슬쩍 검색해 보는 날이 있을 수 있어.", "속마음은 ‘언제 시작하지’와 ‘더 알고 나서’ 사이에서 머뭇거리고 있을 거야."], ["일이나 관계 속에서 한 발 물러나 정리할 시간이 필요한 날이 늘고 있을 수 있어.", "속으로는 느린 것 같아 조급해도, 안쪽에서는 단단한 뿌리가 내려가고 있을 거야."]],
+    future: [["하고 싶던 공부나 관심사를 천천히 시작하는 날이 올 수 있어.", "그때 속에서는 ‘늦지 않았다’는 마음이 얼어 있던 호기심을 녹여 줄 거야."], ["배운 것을 정리하고 누군가에게 나눠 주는 장면이 생길 수 있어.", "속마음은 뿌듯함과 쑥스러움이 섞여도, 쌓은 깊이가 받쳐 줄 거야."]],
+  },
+};
+
+/** 반전·의미: 좋은 시기(0·1)와 쉬어 가는 시기(2·3)를 나눠 써요. 단정하지 않아요. */
+const TURN_POOL: Record<0 | 1 | 2 | 3, string[]> = {
+  0: ["그런데 이 시기는 흔들림이 약점이라기보다, 새로 자라는 힘이 먼저 올라오는 때에 가까워. 작게 시작해 두면 뒤에서 크게 받쳐 줄 가능성이 있어.", "겉으로는 서툴러 보여도, 이 시기의 에너지는 오르막이라 시작한 만큼 붙는 편이야. 서두르기보다 꾸준히 쌓는 쪽이 잘 맞아."],
+  1: ["그런데 이 시기는 힘이 한창 찬 때라, 마음먹은 일을 밀고 나가기 좋은 편이야. 다만 힘이 넘칠수록 한 템포 쉬며 듣는 여유가 오래 가는 비결이야.", "이 시기의 에너지는 정점 근처라 성과가 눈에 보이기 쉬워. 그래도 ‘다 이뤄진다’고 단정할 수는 없고, 움직인 만큼 손에 잡힌다고 보는 게 정확해."],
+  2: ["그런데 이 시기는 성과를 더 밀어붙이라는 때가 아니라, 속도를 낮추고 정리하며 다음을 준비하라는 신호에 가까워. 쉬어 가는 것도 이 시기의 중요한 일이야.", "에너지가 한풀 가라앉는 시기라, 무리해서 넓히기보다 덜어 내고 지키는 쪽이 잘 맞아. 느려 보여도 뒤에서 힘이 되는 시간이야."],
+  3: ["그런데 이 시기는 겉으로 드러나는 일이 적은 대신, 안쪽에 씨앗을 심고 갈무리하는 때에 가까워. 보이지 않아도 쌓이는 시간이라고 생각해도 좋아.", "드러나는 성과보다 준비와 정리가 어울리는 시기라, 조급해하지 않고 기반을 만들면 다음 계절에 도움이 돼."],
+};
+
+/** MBTI 한 문장이 들어갈 자리. 화면에서 입력한 MBTI 가 있으면 문장으로 바뀌고, 없으면 지워져요. */
+export const MBTI_MARK = "⟦MBTI⟧";
+
 /** 번호 붙은 10년 카드 */
 export function decadeCards(r: SajuResult, hourUnknown: boolean): BookSection[] {
   const list = r.daeun.list as unknown as DaeunItem[];
   const cur = r.daeun.current;
   const curIdx = cur ? list.findIndex((d) => d.startAge === cur.startAge) : -1;
   const natal = natalOf(r, hourUnknown);
+  const natalCount = natalElementCount(natal);
+  // MBTI 문장은 지금 카드 말고 가장 힘이 큰 시기 한 곳에만 더 넣어요. (한두 곳만)
+  let peakIdx = -1;
+  list.forEach((d, i) => {
+    if (i === curIdx) return;
+    const st = stageOfDaeun(d);
+    const lv = st ? STAGE_LEVEL[st] : 0;
+    if (peakIdx < 0 || lv > (stageOfDaeun(list[peakIdx]) ? STAGE_LEVEL[stageOfDaeun(list[peakIdx]) as Stage] : 0)) peakIdx = i;
+  });
   return list.map((d, i) => {
     const st = stageOfDaeun(d);
     const g = groupOfDaeun(d);
@@ -359,20 +444,31 @@ export function decadeCards(r: SajuResult, hourUnknown: boolean): BookSection[] 
     const head = `${circ(i)} ${ageBand(d.startAge, d.endAge)}${isCur ? " (지금)" : ""} · ${nick}`;
     const intro = `${d.startAge}~${d.endAge}세, ${ganzhiLabel(d.ganzhi)} 대운${st ? ` · ${st}` : ""}. (${evidence}) ${st ? STAGE12_TEXT[st] : ""}`.replace(/\s+/g, " ").trim();
     const child = tense === "past" && d.endAge < 20 ? "어린 시절은 환경의 영향이 커서 네 탓이 아니야. " : "";
-    let main = "";
-    let close = "";
-    if (tense === "past") {
-      main = `${child}${ageContext(mid)} ${PAST_DESC[g]} ${st ? PAST_TILT[cls] : ""} ${link}`;
-      close = PAST_PRAISE[g];
-    } else if (tense === "now") {
+    // ① 겹침: 일주·연주 등 원국과 이번 대운이 어떻게 겹치는지 코드로 계산해요.
+    const inc = [stemEl(d.ganzhi[0]), branchEl(d.ganzhi[1])];
+    const miss = [...new Set(inc.filter((e) => e && !natalCount[e]))];
+    const heavy = [...new Set(inc.filter((e) => e && (natalCount[e] ?? 0) >= 3))];
+    const elLine = miss.length ? MISS_POOL[i % MISS_POOL.length](miss.join("·")) : heavy.length ? HEAVY_POOL[i % HEAVY_POOL.length](heavy[0]) : PLAIN_POOL[i % PLAIN_POOL.length](inc[0] || "새");
+    const overlap = `${intro} ${elLine} ${link}`;
+    // ② 장면과 속마음
+    const sv = SCENE_VOICE[g][tense][i % 2];
+    const scenePara = `${child}${ageContext(mid)} ${sv[0]} ${sv[1]}`;
+    // ③ 반전·의미 (좋은 시기와 쉬어 가는 시기를 나눠서)
+    const desc = tense === "past" ? `${PAST_DESC[g]} ${st ? PAST_TILT[cls] : ""}` : tense === "now" ? NOW_DESC[g] : FUTURE_DESC[g];
+    const turn = tense === "past" ? "" : ` ${TURN_POOL[cls][i % 2]}`;
+    const wantMbti = tense === "now" || i === peakIdx;
+    const turnPara = `${desc}${turn}${wantMbti ? ` ${MBTI_MARK}` : ""}`;
+    // ④ 지금의 나
+    let nowPara = "";
+    if (tense === "past") nowPara = PAST_PRAISE[g];
+    else if (tense === "now") {
       const anchor = nowAge ? `지금 네 나이는 ${nowAge}세 무렵이고, 이 계절의 한복판이야.${left ? ` 바뀌기까지 약 ${left}년 남았어.` : ""} ` : "";
-      main = `${anchor}${NOW_DESC[g]} ${link}`;
-      close = NOW_PUSH;
-    } else {
-      main = `${ageContext(mid)} ${FUTURE_DESC[g]} ${link}`;
-      close = FUTURE_PUSH[g];
-    }
-    const paras = [scene ? `**“${scene}”**` : "", `${intro} ${main}`.replace(/\s+/g, " ").trim(), close].filter(Boolean);
+      const sy = r.seyun.find((x) => x.year === r.currentYear);
+      const sg = sy ? (groupOf(sy.tenGodStem) ?? groupOf(sy.tenGodBranch)) : null;
+      const yr = sy && sg ? `올해 ${ganzhiLabel(sy.ganzhi)}년은 ${YEAR_HOOK[sg]} ` : "";
+      nowPara = `${anchor}${yr}${NOW_PUSH}`;
+    } else nowPara = FUTURE_PUSH[g];
+    const paras = [scene ? `**“${scene}”**` : "", overlap, scenePara, turnPara, nowPara].map((x) => x.replace(/\s+/g, " ").trim()).filter(Boolean);
     return { heading: head, body: paras.join("\n\n"), mbti: { group: g, tense } };
   });
 }

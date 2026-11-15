@@ -11,9 +11,7 @@ describe("10년 카드 MBTI 한 줄", () => {
     const a = mbtiDecadeLine("ENFP", "식상", "past");
     const b = mbtiDecadeLine("enfp", "식상", "now");
     const c = mbtiDecadeLine("ENFP", "식상", "future");
-    expect(a).toContain("ENFP답게");
-    expect(a).toContain("사람 속에서 에너지를 얻는");
-    expect(a).toContain("가능성을 먼저 보는");
+    expect(a).toContain("ENFP 특유의 번뜩이는 다정함");
     expect(new Set([a, b, c]).size).toBe(3);
     for (const t of [a, b, c]) expect(t).not.toMatch(/undefined|NaN/);
   });

@@ -84,7 +84,9 @@ describe("제4장 십이운성 쪽 보강", () => {
     expect(cards.slice(idx + 1).every((s) => s.mbti?.tense === "future" && s.body.includes("너라면 할 수 있어"))).toBe(true);
     for (const c of cards) {
       expect(c.body).toContain("**“");
-      expect(c.body.split("\n\n").length).toBeGreaterThanOrEqual(3);
+      expect(c.body.split("\n\n").length).toBeGreaterThanOrEqual(5);
+      for (const w of ["대박", "반드시", "100%", "무조건"]) expect(c.body.includes(w)).toBe(false);
+      expect(/합니다|입니다|해요\.|예요\.|세요\./.test(c.body.replace(/\(.*?\)/g, ""))).toBe(false);
     }
   });
 
