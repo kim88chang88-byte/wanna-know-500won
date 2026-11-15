@@ -780,8 +780,8 @@ export default function IntakeModal({ target, wallet = null, onClose, onComplete
     </div>
   );
 
-  // 일반(500원·1000원) 로딩 중에는 하늘 장면이 팝업 안을 가득 채워요. (프리미엄은 목차 카드를 그대로 써요)
-  const fullLoading = phase === "loading" && !(target.premium === true && !compat);
+  // 로딩 중에는 장면이 팝업 안을 가득 채워요. (일반은 밤하늘, 프리미엄은 보랏빛 밤 + 금박)
+  const fullLoading = phase === "loading";
   return (
     <ModalShell
       labelId="intake-title"

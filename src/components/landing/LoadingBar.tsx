@@ -72,23 +72,6 @@ export default function LoadingBar({ done = false, animal = "/images/animal-otte
     // 팝업 전체를 채우는 밤하늘 로딩 (퍼센트는 게이지에 붙어 따라가요)
     return <LoadingScene pct={shown} done={celebrate} animal={animal} label={label} onClose={onClose} stageText={stage.text} />;
   }
-  return (
-    <div>
-      <PremiumLoadingScene pct={shown} done={celebrate} />
-      <p className="mt-3 font-bold text-gray-900 text-center">프리미엄 사주서를 만들고 있어</p>
-      <div className="mt-4">
-      <div
-        role="progressbar"
-        aria-label="풀이 진행"
-        aria-valuemin={0}
-        aria-valuemax={100}
-        aria-valuenow={Math.round(shown)}
-        className="h-2 rounded-full bg-brand-100 overflow-hidden"
-      >
-        <div className={`h-full rounded-full bg-brand-500 ease-out ${done ? "" : "duration-300 transition-[width]"}`} style={{ width: `${shown}%` }} />
-      </div>
-      <p className="mt-2 text-xs text-gray-500 text-center">{stage.text}{!celebrate ? ` · ${Math.round(shown)}%` : ""}</p>
-      </div>
-    </div>
-  );
+  // 프리미엄도 팝업 전체를 채우는 보랏빛 밤 + 금박 장면 (큰 숫자 + 단계 문구 + 게이지)
+  return <PremiumLoadingScene full pct={shown} done={celebrate} label={label} onClose={onClose} stageText={stage.text} />;
 }
