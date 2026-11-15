@@ -11,8 +11,10 @@ export const CHAPTER_TITLES = {
   love: "제8장 · 사주로 보는 사랑의 결. 서두르지 않아도 인연은 제 속도로 와 - [연애·결혼운] 두근두근, 내 마음 번역기",
   career: "제9장 · 사주로 보는 일의 결. 맞는 자리에 서면 가장 빛나 - [직업운] 출근하는 나, 어디에 쓰일 사람일까",
   health: "제10장 · 오행으로 보는 몸. 아껴 쓰면 오래 가 - [건강운] 삐걱삐걱, 내 몸 사용 설명서",
-  closing: "부록 · 마지막 당부. 슬로건 하나, 부적 하나, 편지 한 통 - [마무리] 가기 전에 이것만 챙겨 가",
 } as const;
+
+/** 마지막 쪽(부록) 제목. 장 번호가 없어서 CHAPTER_TITLES 와 따로 둬요. */
+export const CLOSING_TITLE = "부록 · 마지막 당부. 슬로건 하나, 부적 하나, 편지 한 통 - [마무리] 가기 전에 이것만 챙겨 가";
 
 /** 가장 약한 오행별 건강운 한 줄 제목 */
 const HEALTH_BY_WEAK: Record<string, { title: string; why: string }> = {

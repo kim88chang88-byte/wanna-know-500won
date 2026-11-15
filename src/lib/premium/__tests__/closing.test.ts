@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { SLOGAN, TALISMAN, talismanBody } from "../book/closing";
 import { fillLetterMbti } from "@/lib/mbtiLine";
 import { ageBand } from "../letterFacts";
-import { CHAPTER_TITLES } from "../book/chapterTitles";
+import { CLOSING_TITLE } from "../book/chapterTitles";
 
 describe("마지막 당부", () => {
   it("오행마다 슬로건과 부적 표가 있어요", () => {
@@ -28,6 +28,6 @@ describe("마지막 당부", () => {
     expect(ageBand(5)).toBe("");
   });
   it("제목은 익살 제목이에요", () => {
-    expect(CHAPTER_TITLES.closing).toContain("[마무리]");
+    expect(CLOSING_TITLE).toContain("[마무리]");
   });
 });

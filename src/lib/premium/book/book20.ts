@@ -8,7 +8,7 @@ import { buildLifeChart, type ChartKind } from "./charts";
 import { buildWealthCalendar } from "./wealth";
 import { weaveConcern } from "./concernWeave";
 import { buildWealthProfile, moneyIntroSections, moneyTailSections } from "./moneyType";
-import { CHAPTER_TITLES, healthMiniTitle } from "./chapterTitles";
+import { CHAPTER_TITLES, CLOSING_TITLE, healthMiniTitle } from "./chapterTitles";
 import { guiSections } from "./gui";
 import { closingCardSections } from "./closing";
 import { cleanConcernText, hasConcern } from "@/lib/concerns";
@@ -213,7 +213,7 @@ export function buildBook20(r: SajuResult, ctx: BookContext): BookPage[] {
       sections: [...concernQuoteSections(ctx), ...ctx.insight.points.map((p) => ({ heading: p.title, body: p.body })), ...ctx.insight.timing.map((t) => ({ heading: t.title, body: t.body }))],
       tables: [],
     },
-    { ...lucky, key: "lucky", title: CHAPTER_TITLES.closing, subtitle: "APPENDIX 5", lead: "슬로건 하나, 부적 하나, 그리고 마지막 편지야.", sections: [...closingCardSections(r, ctx.elements), ...rxSecs.filter((x) => x.heading === "한 달 행운 처방전"), { heading: "작게 시작하는 법", body: "처방을 한꺼번에 다 하려고 하면 부담이 돼. 이번 주에는 색, 습관, 방향 중 마음이 가는 하나만 골라 가볍게 시작해 봐. 작은 실천이 쌓이면 흐름이 조금씩 달라져." }, ...rxSecs.filter((x) => x.heading === "마무리 편지")], tables: lucky.tables },
+    { ...lucky, key: "lucky", title: CLOSING_TITLE, subtitle: "APPENDIX 5", lead: "슬로건 하나, 부적 하나, 그리고 마지막 편지야.", sections: [...closingCardSections(r, ctx.elements), ...rxSecs.filter((x) => x.heading === "한 달 행운 처방전"), { heading: "작게 시작하는 법", body: "처방을 한꺼번에 다 하려고 하면 부담이 돼. 이번 주에는 색, 습관, 방향 중 마음이 가는 하나만 골라 가볍게 시작해 봐. 작은 실천이 쌓이면 흐름이 조금씩 달라져." }, ...rxSecs.filter((x) => x.heading === "마무리 편지")], tables: lucky.tables },
   ];
 
   const pages = seq.map((s, i) => {
