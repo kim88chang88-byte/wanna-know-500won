@@ -304,11 +304,23 @@ export function PremiumSection({ onSpin }: SpinProps) {
                   />
                 </div>
 
-                <h4 className="font-cute font-normal text-lg text-gray-900 text-center mb-1">{p.title}</h4>
-                <p className="text-xs text-slate-500 text-center leading-relaxed">{p.desc}</p>
+                <p className="text-center text-[10.5px] font-bold tracking-[0.32em] text-[#a07d2c]">THE PREMIUM EDITION</p>
+                <h4 className="mt-1.5 text-center font-serifKr text-[20px] font-bold text-gray-900">나만을 위한 한 권의 사주서</h4>
+                <div aria-hidden="true" className="mx-auto my-2.5 h-px w-3/5 bg-gradient-to-r from-transparent via-[#d9b765] to-transparent" />
+                <p className="text-center text-[13px] leading-relaxed text-slate-500">{p.desc}</p>
+                <p className="mt-2 text-center">
+                  <span className="inline-block rounded-full border border-[#e6c887] px-2.5 py-0.5 text-[11.5px] text-[#a07d2c]">20page 분량</span>
+                </p>
               </div>
-              <span className={`mt-4 block rounded-full py-3 text-center text-sm font-extrabold text-white ${p.button}`}>
-                진주 3개 + 조약돌 1개 · 시작하기
+              <span className="prem-btn relative mt-4 flex items-center justify-center gap-2.5 overflow-hidden rounded-2xl border border-[#e6c887]/70 px-3 py-3.5 text-[15px] font-extrabold text-[#fff3c8]">
+                <span aria-hidden="true">✦</span>
+                <span>한 권 열어 보기</span>
+                <span className="flex items-center gap-1.5 rounded-full bg-black/20 px-2.5 py-0.5 text-xs">
+                  <img src="/images/pearl-3000.webp" alt="" className="h-4 w-4 object-contain" />
+                  진주 3
+                  <img src="/images/coin-500.webp" alt="" className="h-4 w-4 object-contain" />
+                  조약돌 1
+                </span>
               </span>
             </div>
             </div>

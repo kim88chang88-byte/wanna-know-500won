@@ -538,3 +538,10 @@ body {
 
 /* 프리미엄 책 전체: 고딕·명조 대신 귀여운 둥근 글씨(주아). 굵게는 글씨 자체가 두꺼워서 가짜 굵기를 끄고, 큰 제목도 같은 글씨로 맞춰요. */
 .premium-cute, .premium-cute .font-serifKr { font-family: "Jua", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif; font-synthesis: none; }
+
+/* 프리미엄 시작 버튼: 흑금 + 보랏빛 달무리, 금테 이중선, 지나가는 빛 */
+.prem-btn { background: radial-gradient(circle at 50% 0%, #4a3a8a, #15121e 75%); box-shadow: 0 8px 24px rgba(74,58,138,.55), inset 0 0 18px rgba(230,200,135,.15); }
+.prem-btn::before { content: ""; position: absolute; inset: 3px; border: 1px solid rgba(230,200,135,.35); border-radius: 13px; pointer-events: none; }
+.prem-btn::after { content: ""; position: absolute; top: 0; bottom: 0; width: 40%; left: -60%; background: linear-gradient(100deg, transparent, rgba(255,255,255,.5), transparent); transform: skewX(-20deg); animation: premShine 3.2s ease-in-out infinite; }
+@keyframes premShine { 0%, 55% { left: -60%; } 100% { left: 130%; } }
+@media (prefers-reduced-motion: reduce) { .prem-btn::after { animation: none; display: none; } }
