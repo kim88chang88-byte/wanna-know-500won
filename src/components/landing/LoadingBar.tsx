@@ -25,9 +25,10 @@ const PREMIUM_STAGES: { at: number; text: string }[] = [
   { at: 80, text: "도리가 20쪽 풀이를 정리하고 있어" },
 ];
 
-/** 프리미엄은 1분 안팎 걸려서 더 천천히 차올라요. (최대 94%) */
+/** 프리미엄은 1분 안팎 걸려서 더 천천히 차올라요. (최대 94%, 30초쯤에 80% 언저리) */
+export const PREMIUM_MIN_MS = 30_000;
 export function premiumProgressAt(sec: number): number {
-  return Math.min(94, 94 * (1 - Math.exp(-sec / 35)));
+  return Math.min(94, 94 * (1 - Math.exp(-sec / 18)));
 }
 
 /** 응답이 일찍 와도 막대가 순식간에 100% 로 뛰지 않게, 지금 값에서 100 까지 이 시간(ms) 동안 부드럽게 채워요. */
@@ -38,7 +39,15 @@ export function finishPct(from: number, k: number): number {
   return from + (100 - from) * e;
 }
 
-export default function LoadingBar({ done = false, animal = "/images/animal-otter.webp", premium = false, label, onClose }: { done?: boolean; animal?: string; premium?: boolean; label?: string; onClose?: () => void }) {
+export default function LoadingBar({ done: doneProp = false, animal = "/images/animal-otter.webp", premium = false, label, onClose }: { done?: boolean; animal?: string; premium?: boolean; label?: string; onClose?: () => void }) {
+  // 프리미엄은 응답이 일찍 와도 최소 30초는 "집필 중" 장면을 보여줘요.
+  const [minPassed, setMinPassed] = useState(!premium);
+  useEffect(() => {
+    if (!premium) return;
+    const id = setTimeout(() => setMinPassed(true), PREMIUM_MIN_MS);
+    return () => clearTimeout(id);
+  }, [premium]);
+  const done = doneProp && minPassed;
   const [pct, setPct] = useState(3);
   const [celebrate, setCelebrate] = useState(false);
   const pctRef = useRef(3);

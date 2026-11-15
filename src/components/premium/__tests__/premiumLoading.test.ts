@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { BOOK_CHAPTERS, currentChapter } from "../PremiumLoadingScene";
-import { FINISH_MS, finishPct, premiumProgressAt, progressAt } from "@/components/landing/LoadingBar";
+import { PREMIUM_MIN_MS, FINISH_MS, finishPct, premiumProgressAt, progressAt } from "@/components/landing/LoadingBar";
 
 describe("프리미엄 로딩", () => {
   it("진행률에 따라 쓰는 장이 하나씩 올라간다", () => {
@@ -12,6 +12,11 @@ describe("프리미엄 로딩", () => {
   it("프리미엄은 일반보다 천천히 차오르고 94%를 넘지 않는다", () => {
     expect(premiumProgressAt(10)).toBeLessThan(progressAt(10));
     expect(premiumProgressAt(10_000)).toBeLessThanOrEqual(94);
+  });
+  it("최소 30초 동안은 집필 장면을 보여주고, 그때 막대가 중반 이상까지 와 있다", () => {
+    expect(PREMIUM_MIN_MS).toBe(30_000);
+    expect(premiumProgressAt(30)).toBeGreaterThan(70);
+    expect(premiumProgressAt(5)).toBeLessThan(30);
   });
 });
 
