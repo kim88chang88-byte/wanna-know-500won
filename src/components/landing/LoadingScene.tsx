@@ -1,127 +1,164 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import SafeImage from "./SafeImage";
 
 /*
- * 풀이를 만드는 동안 보여주는 작은 장면. 진행 단계(0~3, 끝나면 4)마다 장면이 바뀌어요.
- * 캐릭터는 고른 운의 동물 그림을 쓰고, 소품(글자 타일·저울·연도 띠·두루마리)은 CSS 로 움직여요.
+ * 풀이를 만드는 동안 보여주는 밤하늘 장면(오로라 + 별자리 + 오행 칩).
+ * 사주 여덟 글자가 별로 떠서 혜성이 선을 그리며 이어 가고, 진행률에 맞춰 아래 오행 칩 다섯이 하나씩 켜져요.
+ * 끝나면(done) 색종이와 폭죽이 터져요.
  */
-export const SCENE_STAGES = 4;
+const EIGHT = ["甲", "子", "乙", "丑", "丙", "寅", "丁", "卯"] as const;
+const STAR_COLOR: Record<string, string> = { 甲: "#34c38f", 乙: "#34c38f", 寅: "#34c38f", 卯: "#34c38f", 丙: "#f0607c", 丁: "#f0607c", 子: "#4c8df5", 丑: "#e0a63a" };
+const CHIPS: Array<[string, string]> = [["木", "#34c38f"], ["火", "#f0607c"], ["土", "#e0a63a"], ["金", "#aab4c3"], ["水", "#4c8df5"]];
+const PTS: Array<[number, number]> = [[40, 126], [78, 80], [120, 113], [160, 59], [200, 97], [238, 52], [262, 100], [215, 144]];
+const BG_STARS = Array.from({ length: 34 }, (_, k) => ({ x: (k * 53 + 23) % 300, y: (k * 37 + 69) % 220, r: 0.6 + (k % 3) * 0.4, d: (k % 7) * 0.3 }));
+const COLORS = ["#ff95c6", "#ffd98a", "#9ff3e1", "#a07df0", "#ffffff", "#34c38f", "#4c8df5", "#f0607c"];
 
-const EIGHT = ["甲", "子", "乙", "丑", "丙", "寅", "丁", "卯"];
-const ELEMENT_STYLE: Record<string, string> = {
-  木: "bg-emerald-100 text-emerald-700 border-emerald-300",
-  火: "bg-rose-100 text-rose-700 border-rose-300",
-  土: "bg-amber-100 text-amber-700 border-amber-300",
-  金: "bg-slate-100 text-slate-600 border-slate-300",
-  水: "bg-blue-100 text-blue-700 border-blue-300",
-};
-
-function Chip({ ch, className = "" }: { ch: string; className?: string }) {
-  return (
-    <span className={`inline-flex items-center justify-center w-7 h-7 rounded-lg border text-sm font-bold shadow-sm ${ELEMENT_STYLE[ch] ?? "bg-white text-gray-700 border-gray-200"} ${className}`}>
-      {ch}
-    </span>
-  );
+interface Piece {
+  id: number;
+  style: React.CSSProperties;
 }
 
-export default function LoadingScene({ stage, animal, year }: { stage: number; animal: string; year: number }) {
-  const hero = (cls = "ls-bob") => (
-    <div className={`relative z-10 w-24 h-24 ${cls}`}>
-      <SafeImage src={animal} alt="" className="w-full h-full object-contain drop-shadow-md" fallback="🦦" fallbackClass="text-6xl" />
-    </div>
-  );
-
-  let body: React.ReactNode;
-  if (stage >= 4) {
-    // 끝: 폴짝 뛰며 축하
-    body = (
-      <div className="relative flex items-end justify-center h-full">
-        <span className="absolute left-6 top-4 text-xl ls-bob">🎉</span>
-        <span className="absolute right-6 top-6 text-xl ls-bob" style={{ animationDelay: ".4s" }}>
-          ✨
-        </span>
-        {hero("ls-jump")}
-      </div>
-    );
-  } else if (stage === 0) {
-    // 사주 여덟 글자를 세워요: 글자 타일이 하나씩 떠올라요
-    body = (
-      <div className="relative flex items-end justify-center h-full">
-        <div className="absolute top-1 left-1/2 -translate-x-1/2 flex gap-1">
-          {EIGHT.map((c, i) => (
-            <span
-              key={i}
-              className="ls-pop w-6 h-8 rounded-md bg-white border border-brand-200 text-brand-700 text-sm font-bold flex items-center justify-center shadow-sm"
-              style={{ animationDelay: `${i * 0.22}s` }}
-            >
-              {c}
-            </span>
-          ))}
-        </div>
-        {hero()}
-      </div>
-    );
-  } else if (stage === 1) {
-    // 오행의 균형: 저울을 양손에 들고 균형을 맞춰요
-    body = (
-      <div className="relative flex items-end justify-center h-full">
-        <div className="absolute top-2 left-1/2 -translate-x-1/2 w-44 h-10 ls-tilt">
-          <div className="absolute top-3 left-0 right-0 h-1 rounded-full bg-amber-700/70" />
-          <div className="absolute -top-0.5 left-0 ls-untilt">
-            <Chip ch="木" />
-          </div>
-          <div className="absolute -top-0.5 right-0 ls-untilt">
-            <Chip ch="金" />
-          </div>
-        </div>
-        <div className="absolute top-12 left-4 text-xs flex flex-col gap-1">
-          <Chip ch="火" className="ls-bob" />
-        </div>
-        <div className="absolute top-12 right-4 text-xs flex flex-col gap-1">
-          <Chip ch="水" className="ls-bob" />
-        </div>
-        <div className="absolute top-1 left-1/2 -translate-x-1/2 w-2 h-2 rounded-full bg-amber-800/80" />
-        {hero()}
-      </div>
-    );
-  } else if (stage === 2) {
-    // 올해와 대운의 흐름: 연도 띠가 흘러가요
-    const years = Array.from({ length: 11 }, (_, i) => year - 5 + i);
-    const row = [...years, ...years];
-    body = (
-      <div className="relative flex items-end justify-center h-full overflow-hidden">
-        <div className="absolute top-3 left-0 w-max flex ls-flow">
-          {row.map((y, i) => (
-            <span
-              key={i}
-              className={`w-11 shrink-0 text-center text-xs font-bold rounded-full mx-0.5 py-1 border ${y === year ? "bg-brand-500 text-white border-brand-500" : "bg-brand-50 text-brand-700 border-brand-100"}`}
-            >
-              {y}
-            </span>
-          ))}
-        </div>
-        {hero()}
-      </div>
-    );
-  } else {
-    // 풀이 정리: 두루마리에 글을 써요
-    body = (
-      <div className="relative flex items-end justify-center h-full">
-        <span className="absolute left-8 top-6 text-3xl">📜</span>
-        <span className="absolute left-12 top-5 text-2xl ls-write">✍️</span>
-        <span className="absolute right-8 top-4 text-lg ls-bob">✨</span>
-        <span className="absolute right-12 top-14 text-sm ls-bob" style={{ animationDelay: ".6s" }}>
-          ✦
-        </span>
-        {hero()}
-      </div>
-    );
+function makePieces(): Piece[] {
+  const out: Piece[] = [];
+  for (let i = 0; i < 56; i++) {
+    const a = Math.random() * Math.PI * 2;
+    const r = 60 + Math.random() * 120;
+    out.push({
+      id: i,
+      style: {
+        ["--x" as string]: `${Math.cos(a) * r}px`,
+        ["--y" as string]: `${Math.sin(a) * r * 0.8 - 40 + Math.random() * 80}px`,
+        ["--r" as string]: `${Math.random() * 900 - 450}deg`,
+        ["--d" as string]: `${1.1 + Math.random()}s`,
+        background: COLORS[i % COLORS.length],
+        borderRadius: i % 3 === 0 ? "50%" : 2,
+        width: i % 3 === 0 ? 8 : 9,
+        height: i % 3 === 0 ? 8 : 14,
+        animationDelay: `${Math.random() * 0.15}s`,
+      },
+    });
   }
+  // 조금 뒤에 위에서 한 번 더 쏟아지는 색종이
+  for (let i = 0; i < 24; i++) {
+    const a = -Math.PI / 2 + (Math.random() - 0.5) * 2.2;
+    const r = 90 + Math.random() * 110;
+    out.push({
+      id: 100 + i,
+      style: {
+        ["--x" as string]: `${Math.cos(a) * r}px`,
+        ["--y" as string]: `${Math.sin(a) * r + 120}px`,
+        ["--r" as string]: `${Math.random() * 720 - 360}deg`,
+        ["--d" as string]: "1.8s",
+        top: "0%",
+        left: `${10 + Math.random() * 80}%`,
+        background: COLORS[i % COLORS.length],
+        borderRadius: 2,
+        width: 9,
+        height: 14,
+        animationDelay: "0.7s",
+      },
+    });
+  }
+  return out;
+}
+
+export default function LoadingScene({ pct, done, animal }: { pct: number; done: boolean; animal: string }) {
+  const [pieces, setPieces] = useState<Piece[]>([]);
+  useEffect(() => {
+    // 색종이 모양은 끝나는 순간에만 무작위로 정해요. (서버 렌더와 어긋나지 않게)
+    if (done) setPieces(makePieces());
+  }, [done]);
+
+  const E = PTS.length - 1;
+  const f = (pct / 100) * E * 1.02;
+  const lit = Math.floor((pct / 100) * PTS.length * 1.04);
+  const seg = Math.min(E - 1, Math.floor(f));
+  const fr = Math.max(0, Math.min(1, f - seg));
+  const cx = PTS[seg][0] + (PTS[seg + 1][0] - PTS[seg][0]) * fr;
+  const cy = PTS[seg][1] + (PTS[seg + 1][1] - PTS[seg][1]) * fr;
 
   return (
-    <div aria-hidden="true" className="relative mx-auto w-64 h-32">
-      <div key={stage} className="absolute inset-0 ls-fade">
-        {body}
+    <div aria-hidden="true" className={`ls-sky relative mx-auto w-full max-w-[320px] h-56 rounded-2xl overflow-hidden ${done ? "ls-shake" : ""}`} style={{ background: "linear-gradient(170deg,#0f1b3d,#1f2f66)" }}>
+      <svg viewBox="0 0 300 220" preserveAspectRatio="xMidYMid slice" className="absolute inset-0 w-full h-full">
+        {BG_STARS.map((s, i) => (
+          <circle key={i} className="ls-tw" cx={s.x} cy={s.y} r={s.r} fill="#fff" opacity=".7" style={{ animationDelay: `${s.d}s` }} />
+        ))}
+        <g style={{ filter: "blur(14px)" }}>
+          <ellipse className="ls-au" cx="90" cy="60" rx="110" ry="24" fill="#34e0b5" opacity=".45" />
+          <ellipse className="ls-au" cx="210" cy="85" rx="100" ry="22" fill="#a07df0" opacity=".5" style={{ animationDelay: "-3s" }} />
+          <ellipse className="ls-au" cx="150" cy="40" rx="90" ry="16" fill="#ff95c6" opacity=".35" style={{ animationDelay: "-5s" }} />
+        </g>
+        {PTS.slice(0, -1).map((a, i) => (
+          <line
+            key={i}
+            x1={a[0]}
+            y1={a[1]}
+            x2={PTS[i + 1][0]}
+            y2={PTS[i + 1][1]}
+            stroke="#bfeee4"
+            strokeWidth="1.6"
+            strokeLinecap="round"
+            pathLength={1}
+            strokeDasharray="1"
+            strokeDashoffset={1 - Math.max(0, Math.min(1, f - i))}
+            style={{ transition: "stroke-dashoffset .5s" }}
+          />
+        ))}
+        {PTS.map((p, i) => {
+          const c = STAR_COLOR[EIGHT[i]];
+          return (
+            <g key={i} opacity={i <= lit ? 1 : 0.25} style={{ transition: "opacity .4s" }}>
+              <circle cx={p[0]} cy={p[1]} r="10" fill={c} opacity=".22" />
+              <circle cx={p[0]} cy={p[1]} r="4" fill={c} />
+              <text x={p[0]} y={p[1] - 13} textAnchor="middle" fontSize="11" fill="#fff" fontWeight="700" opacity=".9">
+                {EIGHT[i]}
+              </text>
+            </g>
+          );
+        })}
+        {!done && (
+          <g style={{ transform: `translate(${cx}px,${cy}px)`, transition: "transform .3s linear" }}>
+            <circle r="9" fill="#9ff3e1" opacity=".3" />
+            <circle r="3.5" fill="#fff" />
+          </g>
+        )}
+      </svg>
+
+      <div className="absolute right-3 top-2 w-14 h-14 ls-bob">
+        <SafeImage src={animal} alt="" className="w-full h-full object-contain drop-shadow-md" fallback="🦦" fallbackClass="text-4xl" />
       </div>
+      <span className="absolute left-3 top-2.5 text-[13px] font-extrabold text-amber-200 bg-black/25 px-2.5 py-0.5 rounded-full">{Math.round(pct)}%</span>
+
+      <div className="absolute inset-x-0 bottom-2 flex justify-center gap-1.5">
+        {CHIPS.map(([ch, color], i) => {
+          const on = done || (pct / 100) * 5 * 1.05 > i;
+          return (
+            <span
+              key={ch}
+              className="w-[26px] h-[26px] rounded-[9px] grid place-items-center font-extrabold text-xs text-white transition-all duration-500"
+              style={{ background: color, opacity: on ? 1 : 0.25, transform: on ? "translateY(-3px) scale(1.08)" : "none" }}
+            >
+              {ch}
+            </span>
+          );
+        })}
+      </div>
+
+      {done && (
+        <>
+          <span className="ls-flash" />
+          {pieces.map((p) => (
+            <span key={p.id} className="ls-cf" style={p.style} />
+          ))}
+          <span className="ls-pop2 left-2.5">🎉</span>
+          <span className="ls-pop2 right-2.5" style={{ animationDelay: ".12s" }}>
+            🎊
+          </span>
+          <div className="ls-big">다 됐어! 🎉</div>
+        </>
+      )}
     </div>
   );
 }

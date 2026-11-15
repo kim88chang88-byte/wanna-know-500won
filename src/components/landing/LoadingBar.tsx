@@ -26,10 +26,9 @@ export default function LoadingBar({ done = false, animal = "/images/animal-otte
   }, [done]);
   const shown = done ? 100 : pct;
   const stage = done ? { at: 100, text: "다 됐어! 🎉" } : ([...STAGES].reverse().find((s) => pct >= s.at) ?? STAGES[0]);
-  const stageIndex = done ? 4 : STAGES.indexOf(stage);
   return (
     <div>
-      <LoadingScene stage={stageIndex} animal={animal} year={new Date().getFullYear()} />
+      <LoadingScene pct={shown} done={done} animal={animal} />
       <p className="mt-3 font-bold text-gray-900 text-center">풀이를 만들고 있어</p>
       <div className="mt-4">
       <div

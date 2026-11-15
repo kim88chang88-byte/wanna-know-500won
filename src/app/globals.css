@@ -367,6 +367,27 @@ body {
   .ls-pop { opacity: 1; }
 }
 
+/* ── 밤하늘 로딩(오로라 + 별자리 + 완료 축하포) ── */
+@keyframes lsTw { 50% { opacity: .25; } }
+@keyframes lsAu { to { transform: translateX(30px) scaleY(1.2); opacity: .55; } }
+@keyframes lsCf { 0% { opacity: 1; transform: translate(0,0) rotate(0) scale(.4); } 70% { opacity: 1; } 100% { opacity: 0; transform: translate(var(--x),var(--y)) rotate(var(--r)) scale(1); } }
+@keyframes lsFlash { 0% { opacity: .9; transform: scale(1); } 100% { opacity: 0; transform: scale(14); } }
+@keyframes lsPop2 { 0% { opacity: 0; transform: scale(.2) rotate(0); } 30% { opacity: 1; transform: scale(1.4) rotate(-10deg); } 100% { opacity: 1; transform: scale(1) rotate(0); } }
+@keyframes lsBig { 0% { opacity: 0; transform: scale(.3); } 35% { opacity: 1; transform: scale(1.15); } 60% { transform: scale(1); } 100% { opacity: 1; transform: scale(1); } }
+@keyframes lsShake { 20% { transform: translateX(-3px); } 40% { transform: translateX(3px); } 60% { transform: translateX(-2px); } }
+.ls-tw { animation: lsTw 2.4s ease-in-out infinite; }
+.ls-au { animation: lsAu 7s ease-in-out infinite alternate; }
+.ls-cf { position: absolute; left: 50%; top: 55%; opacity: 0; pointer-events: none; animation: lsCf var(--d, 1.5s) cubic-bezier(.15,.7,.3,1) forwards; }
+.ls-flash { position: absolute; left: 50%; top: 55%; width: 20px; height: 20px; margin: -10px; border-radius: 50%; border: 3px solid #fff; opacity: 0; pointer-events: none; animation: lsFlash .9s ease-out forwards; }
+.ls-pop2 { position: absolute; bottom: 34px; font-size: 34px; pointer-events: none; transform-origin: 50% 100%; animation: lsPop2 1.1s cubic-bezier(.2,.8,.2,1) forwards; }
+.ls-big { position: absolute; left: 0; right: 0; top: 34%; text-align: center; font-weight: 900; font-size: 26px; color: #fff; text-shadow: 0 2px 14px rgba(160,125,240,.9), 0 0 4px rgba(0,0,0,.4); pointer-events: none; opacity: 0; animation: lsBig 1.6s .25s cubic-bezier(.2,.9,.3,1.3) forwards; }
+.ls-shake { animation: lsShake .5s; }
+@media (prefers-reduced-motion: reduce) {
+  .ls-tw, .ls-au, .ls-shake { animation: none; }
+  .ls-cf, .ls-flash { display: none; }
+  .ls-pop2, .ls-big { animation: none; opacity: 1; }
+}
+
 /* "이런 운세 풀이가 나와요": 카드가 왼쪽에서 오른쪽으로 일정한 속도로 흘러가며 반복돼요 */
 @keyframes sampleFlow { from { transform: translateX(-50%); } to { transform: translateX(0); } }
 .sample-marquee { -webkit-mask-image: linear-gradient(90deg, transparent, #000 4%, #000 96%, transparent); mask-image: linear-gradient(90deg, transparent, #000 4%, #000 96%, transparent); }
