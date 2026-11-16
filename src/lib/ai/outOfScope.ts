@@ -1,4 +1,5 @@
 import { regionsIn } from "@/lib/travel";
+import { josa } from "@/lib/premium/josa";
 
 /*
  * 도리가 정확하게 답할 수 없는 질문(가게 이름, 실시간 정보, 투자 종목)은 AI 를 부르지 않고
@@ -15,6 +16,7 @@ const PLACE_ASK = /추천|알려\s?줘|알려줄|어디|가볼|괜찮은|찾아|
 const LIVE = /영업\s?시간|운영\s?시간|몇\s?시까지\s?(해|열|영업)|지금\s?(열었|영업)|예약\s?(가능|돼|될까)|입장료|티켓\s?(가격|값)|(오늘|내일|모레|주말|이번\s?주)\s?.{0,4}날씨|날씨\s?(어때|알려|어떨|좋을까)|비\s?올까|환율|주가|시세/;
 const INVEST = /(주식|코인|비트코인|이더리움|종목|펀드|etf|선물|옵션).{0,10}(추천|사도|살까|팔까|팔아|매수|매도|오를|올라|떨어)/i;
 const NOW_PERSON = /(걔|그\s?사람|그\s?애|그\s?남자|그\s?여자|상대|전남친|전여친|남친|여친).{0,10}(지금|방금)\s?(뭐\s?해|뭐\s?하고|어디\s?(있|가)|누구랑)/;
+const SKIP_ADJ = new Set(["가능한", "불가능한"]);
 const SKIP_REGION = new Set(["혼자", "오늘", "내일", "주말", "요즘", "근처", "여기", "거기", "다른", "조용", "가까"]);
 
 const FOOT = "\n\n이 질문은 횟수에서 빼지 않았어 🌙";
@@ -24,7 +26,7 @@ export const mapSearchUrl = (q: string): string => `https://www.google.com/maps/
 function regionOf(text: string): string {
   const r = regionsIn(text)[0];
   if (r) return r;
-  const m = /([가-힣]{2,6})(?:에서|근처|쪽|에)\s/.exec(text + " ");
+  const m = /([가-힣]{2,6})\s?(?:에서|근처|쪽|에)\s/.exec(text + " ");
   return m && !SKIP_REGION.has(m[1]) ? m[1] : "";
 }
 
@@ -45,10 +47,11 @@ export function unableReply(text: string): UnableReply | null {
   }
   const kind = PLACE_KIND.exec(t)?.[0];
   if (kind && PLACE_ASK.test(t)) {
-    const adj = new RegExp(`([가-힣]{2,4}(?:한|운))\\s?${kind}`).exec(t)?.[1] ?? "";
+    const adjRaw = new RegExp(`([가-힣]{2,4}(?:한|운))\\s?${kind}`).exec(t)?.[1] ?? "";
+    const adj = SKIP_ADJ.has(adjRaw) ? "" : adjRaw;
     const q = [regionOf(t), adj, kind].filter(Boolean).join(" ");
     return {
-      answer: `미안, 가게 이름은 문을 닫았거나 바뀌었을 수 있어서 정확하게 알려 줄 수가 없어. 모르는 걸 아는 척하는 것보다 솔직한 게 낫다고 생각했어.\n\n대신 지도에서 '${q}'로 찾아보고, 후기와 영업시간을 꼭 확인해 봐. 어떤 분위기를 고르면 좋을지는 도리가 같이 정해 줄 수 있어.${FOOT}`,
+      answer: `미안, 가게 이름은 문을 닫았거나 바뀌었을 수 있어서 정확하게 알려 줄 수가 없어. 모르는 걸 아는 척하는 것보다 솔직한 게 낫다고 생각했어.\n\n대신 지도에서 ${`'${q}'${josa(q, "으로/로").slice(q.length)}`} 찾아보고, 후기와 영업시간을 꼭 확인해 봐. 어떤 분위기를 고르면 좋을지는 도리가 같이 정해 줄 수 있어.${FOOT}`,
       links: [{ label: `지도에서 '${q}' 찾기`, url: mapSearchUrl(q) }],
     };
   }
