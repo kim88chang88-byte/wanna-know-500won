@@ -455,6 +455,22 @@ export function buildChatPrompt(i: ChatFactsInput, history: ChatMsg[], now: Date
   return `계산된 사주 정보:\n${JSON.stringify(facts, null, 2)}\n\n방금 본 풀이(요약):\n${i.summary.slice(0, SUMMARY_MAX) || "(없음)"}\n\n${earlier ? `앞서 물어본 것(오래된 대화 요약): ${earlier}\n\n` : ""}${endings ? `직전 도리 답의 끝맺음(같은 표현·문형으로 끝내지 마): ${endings}\n\n` : ""}${`지금 시점(한국 시간): ${nowContext(now)}. 직업·학교 여부는 사용자가 말하기 전까지 모름.\n\n`}${travelBlock}${acts.length ? `이미 권한 행동(같은 종류를 또 권하지 마): ${acts.join(", ")}\n\n` : ""}${used.length ? `이미 말한 사주 근거(이번 답에서 다시 풀어 쓰지 마): ${used.join(", ")}\n\n` : ""}대화 기록(마지막 줄이 새 질문):\n${log}\n\n마지막 사용자 질문에 answer 와 followups 로 답해 줘.`;
 }
 
+const TRAVEL_Q = /여행|코스|놀러|드라이브|당일치기|\d박\s?\d일|가고\s?싶|가볼|데이트\s?(장소|코스)|어디\s?가/;
+const ORIGIN_SAID = /출발|에서\s?(가|떠나|출발)|서울|경기|인천|수원|성남|부산|대구|광주|대전|울산|세종|청주|전주|창원/;
+
+/** 여행 답에는 코드가 확인 문구와 출발지 가정을 빠뜨리지 않게 붙여요(AI 가 놓쳐도 지켜져요). */
+export function addTravelNotes(answer: string, question: string, history: ChatMsg[]): string {
+  if (!TRAVEL_Q.test(question) || regionsIn(question).length === 0) return answer;
+  let out = answer.trimEnd();
+  const userSaid = history.filter((m) => m.role === "user").map((m) => m.text).join(" ");
+  const hasTime = /자차|KTX|ktx|기차|버스|지하철|비행기|운전|걸려|걸리/.test(out);
+  const notes: string[] = [];
+  if (hasTime && !/수도권|출발지/.test(out) && !ORIGIN_SAID.test(userSaid)) notes.push("이동 시간은 수도권에서 출발한다고 보고 말한 거야.");
+  if (!/확인해/.test(out)) notes.push("영업시간·요금·날씨·예약은 출발 전에 확인해 봐.");
+  if (notes.length) out += `\n\n${notes.join(" ")}`;
+  return out;
+}
+
 export async function chatDori(
   i: ChatFactsInput,
   history: ChatMsg[],
@@ -477,5 +493,5 @@ export async function chatDori(
   const rec = recommendFacts(q, history, i.chart, i.daily, opts.now ?? new Date());
   const recVisual = rec ? recommendVisual(rec, r.answer) : null;
   const visual = recVisual ?? (r.visual && visualAllowed(r.visual.kind, q) ? r.visual : null);
-  return { ...r, visual, answer: polishChatAnswer(stripUnknownSongs(r.answer), history, i.name) };
+  return { ...r, visual, answer: addTravelNotes(polishChatAnswer(stripUnknownSongs(r.answer), history, i.name), q, history) };
 }
