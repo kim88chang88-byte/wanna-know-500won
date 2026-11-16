@@ -53,6 +53,7 @@ import { birthSummary, isStoryReport, readingKind } from "@/lib/storyHelpers";
 import { VaultSaveBar } from "./VaultSaveBar";
 import { profileSummary, profileToForm, sameBirth, type SavedProfile } from "@/lib/profile";
 import { MAX_LABEL, MAX_PEOPLE, type SavedPerson } from "@/lib/people";
+import InvitePanel from "./InvitePanel";
 import { BRANCHES, STEMS } from "@/lib/saju/constants";
 import type { Pillar, SajuChart } from "@/lib/saju/types";
 import { CloseButton, ModalShell } from "./Modals";
@@ -286,7 +287,7 @@ function autoLabel(b: { year: number; month: number; day: number }): string {
   return `${b.year}.${p(b.month)}.${p(b.day)}`;
 }
 
-function CombinedBirthFields({ f, patch }: { f: IntakeForm; patch: (p: Partial<IntakeForm>) => void }) {
+export function CombinedBirthFields({ f, patch }: { f: IntakeForm; patch: (p: Partial<IntakeForm>) => void }) {
   const [dateText, setDateText] = useState(() => (f.calendar === "solar" ? f.solarDate : f.lunarYear && f.lunarMonth && f.lunarDay ? `${f.lunarYear.padStart(4, "0")}-${f.lunarMonth.padStart(2, "0")}-${f.lunarDay.padStart(2, "0")}` : ""));
   function onDate(raw: string) {
     const t = formatDateInput(raw);
@@ -497,6 +498,8 @@ export default function IntakeModal({ target, wallet = null, onClose, onComplete
   const [savePerson, setSavePerson] = useState(true); // 기본은 켜 두고, 끌 수 있어요 (로그인한 회원만 보여요)
   const [personLabel, setPersonLabel] = useState("");
   const [pickedPerson, setPickedPerson] = useState<string | null>(null);
+  // 링크로 받아 온 상대 정보: 상대에게 "확인 뒤 24시간 안에 지워진다"고 약속했으니 내 "기억해 둔 사람"에는 저장하지 않아요
+  const [fromInvite, setFromInvite] = useState(false);
   // 궁합이 아닌 풀이에서, 지금 적은 정보가 다른 사람 것일 때 기억해 두기 (선택 동의, 기본은 꺼짐)
   const [saveOther, setSaveOther] = useState(false);
   const [otherLabel, setOtherLabel] = useState("");
@@ -602,6 +605,18 @@ export default function IntakeModal({ target, wallet = null, onClose, onComplete
     setStepIndex(steps.indexOf("concern"));
   }
 
+  /** 링크로 받은 상대 정보를 불러오면 상대방 질문을 건너뛰고 고민 단계로 가요. */
+  function takeInvited(birth: BirthFields, name: string | null) {
+    setPartner({ ...EMPTY_BIRTH, ...birth });
+    setPickedPerson(null);
+    setFromInvite(true);
+    setSavePerson(false);
+    setPersonOk(false);
+    setPersonLabel(name ?? "");
+    setError(null);
+    setStepIndex(steps.indexOf("concern"));
+  }
+
   const step = steps[stepIndex];
   const isLast = stepIndex === steps.length - 1;
 
@@ -629,7 +644,7 @@ export default function IntakeModal({ target, wallet = null, onClose, onComplete
     // 저장된 정보를 그대로 쓰는 경우엔 다시 저장하지 않아요.
     const wantSave = loggedIn && saveProfile && !saveOther && !sameBirth(savedProfile, input);
     // 상대방을 기억해 두기 (선택 동의. 풀이와 따로 보내고, 실패해도 풀이엔 영향 없어요)
-    if (compat && loggedIn && savePerson && personOk && !pickedPerson && partnerInput && people.length < MAX_PEOPLE) {
+    if (compat && loggedIn && !fromInvite && savePerson && personOk && !pickedPerson && partnerInput && people.length < MAX_PEOPLE) {
       void fetch("/api/people", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ label: personLabel.trim() || autoLabel(partnerInput), birth: partnerInput }) }).catch(() => {});
     }
     // 궁합이 아닌 풀이에서 다른 사람 것을 기억해 두기 (풀이와 따로 보내고, 실패해도 풀이엔 영향 없어요)
@@ -1081,6 +1096,7 @@ export default function IntakeModal({ target, wallet = null, onClose, onComplete
           {step === "birth" && target.premium === true && !compat && <MbtiPicker value={form.mbti} onChange={(v) => update({ mbti: v })} />}
           {(step === "date" || step === "time" || step === "gender") && <BirthStepFields kind={step} f={form} patch={update} />}
           {step === "pdate" && people.length > 0 && <SavedPeoplePicker people={people} onPick={pickPerson} title="기억해 둔 사람 (눌러서 바로 불러와)" />}
+          {step === "pdate" && <InvitePanel loggedIn={loggedIn} onRequestLogin={onRequestLogin} onTaken={takeInvited} />}
           {step === "pdate" && !loggedIn && (
             <p data-testid="people-nudge" className="mb-3 rounded-xl bg-amber-50 border border-amber-200 px-3 py-2 text-center text-[11px] font-bold text-amber-900">
               ❄️ 로그인하면 상대방 정보를 기억해 두고, 다음에 눌러서 바로 고를 수 있어
@@ -1177,7 +1193,7 @@ export default function IntakeModal({ target, wallet = null, onClose, onComplete
                 </label>
               )}
 
-              {compat && loggedIn && !pickedPerson && people.length < MAX_PEOPLE && (
+              {compat && loggedIn && !pickedPerson && !fromInvite && people.length < MAX_PEOPLE && (
                 <div className="space-y-1.5">
                   <label className="flex items-start gap-2 text-xs text-gray-700 leading-relaxed">
                     <input type="checkbox" name="savePerson" className="mt-0.5" checked={savePerson} onChange={(e) => setSavePerson(e.target.checked)} />

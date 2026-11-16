@@ -480,6 +480,57 @@ export function createDb(config: DbConfig, fetchImpl: FetchLike = fetch) {
       return { done: await one("done"), pending: await one("pending") };
     },
 
+    /** 궁합 초대 링크 만들기. ok / bad / limit_day / limit_pending */
+    async inviteCreate(userId: string, token: string, nick: string | null, relation: string): Promise<string> {
+      const res = await call("rpc/compat_invite_create", { method: "POST", headers: headers(), body: JSON.stringify({ p_user: safeId(userId), p_token: token, p_nick: nick, p_relation: relation }) });
+      const v = await res.json().catch(() => null);
+      return typeof v === "string" ? v : "failed";
+    },
+
+    /** 상대가 링크를 열었을 때: 상태와 초대한 사람의 호칭·관계만 (생년월일 등은 없어요) */
+    async invitePeek(token: string): Promise<{ status: string; nick: string | null; relation: string | null }> {
+      const res = await call("rpc/compat_invite_peek", { method: "POST", headers: headers(), body: JSON.stringify({ p_token: token }) });
+      const rows = (await res.json().catch(() => null)) as Array<{ out_status?: unknown; out_nick?: unknown; out_relation?: unknown }> | { out_status?: unknown; out_nick?: unknown; out_relation?: unknown } | null;
+      const row = Array.isArray(rows) ? rows[0] : rows;
+      return {
+        status: typeof row?.out_status === "string" ? row.out_status : "not_found",
+        nick: typeof row?.out_nick === "string" ? row.out_nick : null,
+        relation: typeof row?.out_relation === "string" ? row.out_relation : null,
+      };
+    },
+
+    /** 상대가 생년월일시를 제출. ok / not_found / expired / already / bad */
+    async inviteFill(token: string, birth: unknown, name: string | null): Promise<string> {
+      const res = await call("rpc/compat_invite_fill", { method: "POST", headers: headers(), body: JSON.stringify({ p_token: token, p_birth: birth, p_name: name }) });
+      const v = await res.json().catch(() => null);
+      return typeof v === "string" ? v : "failed";
+    },
+
+    /** 내 초대 현황 (입력값은 없어요) */
+    async inviteMine(userId: string): Promise<Array<{ token: string; relation: string; status: string; name: string | null; createdAt: string; expiresAt: string }>> {
+      const res = await call("rpc/compat_invite_mine", { method: "POST", headers: headers(), body: JSON.stringify({ p_user: safeId(userId) }) });
+      const rows = (await res.json().catch(() => [])) as Array<Record<string, unknown>>;
+      if (!Array.isArray(rows)) return [];
+      return rows.flatMap((r) =>
+        typeof r.out_token === "string" && typeof r.out_relation === "string" && typeof r.out_status === "string"
+          ? [{ token: r.out_token, relation: r.out_relation, status: r.out_status, name: typeof r.out_name === "string" ? r.out_name : null, createdAt: String(r.out_created ?? ""), expiresAt: String(r.out_expires ?? "") }]
+          : [],
+      );
+    },
+
+    /** 초대한 사람이 상대의 입력값을 가져가요(내 초대만). ok / not_found / not_ready / expired */
+    async inviteTake(userId: string, token: string): Promise<{ result: string; birth: unknown; name: string | null; relation: string | null }> {
+      const res = await call("rpc/compat_invite_take", { method: "POST", headers: headers(), body: JSON.stringify({ p_user: safeId(userId), p_token: token }) });
+      const rows = (await res.json().catch(() => null)) as Array<Record<string, unknown>> | Record<string, unknown> | null;
+      const row = Array.isArray(rows) ? rows[0] : rows;
+      return {
+        result: typeof row?.out_result === "string" ? row.out_result : "failed",
+        birth: row?.out_birth ?? null,
+        name: typeof row?.out_name === "string" ? row.out_name : null,
+        relation: typeof row?.out_relation === "string" ? row.out_relation : null,
+      };
+    },
+
     /** 오늘(한국 시간)·이번 달 뽑기 횟수 */
     async getCounts(userId: string, now: Date = new Date()): Promise<DrawCounts> {
       const id = safeId(userId);
