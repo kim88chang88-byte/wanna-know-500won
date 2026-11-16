@@ -37,7 +37,6 @@ import { summarizeReport } from "@/lib/chatContext";
 import { CompareCard } from "./CompareCard";
 import { HoursCard } from "./HoursCard";
 import { MbtiCard } from "./MbtiCard";
-import { MBTI_TYPES } from "@/lib/ai/mbtiTypes";
 import { cleanMbti } from "@/lib/mbtiBrief";
 import { UpsellTeaser } from "./UpsellTeaser";
 import { chipsForFortune, MAX_CONCERN_TAGS, MAX_CONCERN_TEXT, type Concern, type ConcernId } from "@/lib/concerns";
@@ -108,6 +107,7 @@ const BUBBLE: Record<AnyStepId, string> = {
   date: "먼저, 언제 태어났어? ❄️",
   time: "태어난 시간도 알면 더 또렷하게 볼 수 있어. 몰라도 괜찮아!",
   gender: "성별도 알려줄래?",
+  mbti: "마지막으로, MBTI도 알려줄래? 알면 네 성향을 사주 옆에 나란히 놓고 볼 수 있어. 몰라도 괜찮아! ❄️",
   concern: "요즘 마음에 걸리는 게 있어? 골라주면 그 얘기를 더 살려서 풀어줄게 ❄️",
   consent: "풀이를 만들기 전에, 개인정보 처리 동의만 확인할게.",
   pdate: "이번엔 궁합을 볼 상대방이야! 상대방은 언제 태어났어? 💞",
@@ -460,20 +460,40 @@ function BirthStepFields({ kind, f, patch }: { kind: "date" | "time" | "gender";
   );
 }
 
-/** 프리미엄 사주 입력 화면의 MBTI 고르기 (선택). 곁에 놓고 보는 참고라는 안내와 함께 보여요. */
+/** MBTI 네 글자 고르기: E/I, S/N, T/F, J/P 네 줄에서 한 글자씩 눌러요. 네 줄을 모두 고르면 값이 되고, 하나라도 비면 비어 있는 걸로 봐요. */
+const MBTI_PAIRS: ReadonlyArray<readonly [string, string, string]> = [
+  ["E", "I", "에너지"],
+  ["S", "N", "보는 방식"],
+  ["T", "F", "결정 방식"],
+  ["J", "P", "생활 방식"],
+];
+
 function MbtiPicker({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  const [letters, setLetters] = useState<string[]>(() => (value.length === 4 ? value.split("") : ["", "", "", ""]));
+  const pick = (row: number, ch: string) => {
+    const next = letters.map((l, i) => (i === row ? (l === ch ? "" : ch) : l));
+    setLetters(next);
+    onChange(next.every(Boolean) ? next.join("") : "");
+  };
+  const shown = letters.map((l) => l || "_").join(" ");
   return (
-    <div data-testid="mbti-picker" className="mt-4">
-      <div className="mb-1.5 text-xs font-bold text-gray-700">
-        MBTI <span className="font-normal text-gray-500">(선택 · 모르면 건너뛰어도 돼)</span>
+    <div data-testid="mbti-picker" className="mt-1">
+      <div className="mb-2 text-center font-cute text-2xl tracking-[0.3em] text-brand-700" aria-live="polite" data-testid="mbti-shown">
+        {shown}
       </div>
-      <div className="grid grid-cols-4 gap-1.5" role="group" aria-label="MBTI 고르기">
-        {MBTI_TYPES.map((t) => (
-          <button key={t} type="button" data-testid={`mbti-chip-${t}`} aria-pressed={value === t} onClick={() => onChange(value === t ? "" : t)} className={`rounded-full border py-1.5 text-xs font-bold transition-colors ${value === t ? CHOICE_ON : CHOICE_OFF}`}>
-            {t}
-          </button>
+      <div className="space-y-2" role="group" aria-label="MBTI 고르기">
+        {MBTI_PAIRS.map(([x, y, label], row) => (
+          <div key={x} className="flex items-center gap-2">
+            <span className="w-16 shrink-0 text-[11px] text-gray-500">{label}</span>
+            {[x, y].map((ch) => (
+              <button key={ch} type="button" data-testid={`mbti-letter-${ch}`} aria-pressed={letters[row] === ch} onClick={() => pick(row, ch)} className={`flex-1 rounded-full border py-2 text-base font-bold transition-colors ${letters[row] === ch ? CHOICE_ON : CHOICE_OFF}`}>
+                {ch}
+              </button>
+            ))}
+          </div>
         ))}
       </div>
+      <p className="mt-3 text-center text-[11px] text-gray-500">네 줄을 모두 고르면 저장돼. 하나라도 모르겠으면 건너뛰어도 돼.</p>
       <p className="mt-2 rounded-xl bg-brand-50 px-3 py-2 text-[11px] leading-relaxed text-gray-600">
         <b className="text-gray-800">MBTI는 사주를 읽을 때 곁에 놓고 보는 참고야.</b> 네 글자로 사람 속을 다 알 수는 없어서, 내가 알려준 성향을 사주와 나란히 놓고 같은 말을 하는 곳, 다른 말을 하는 곳을 살펴봐.
       </p>
@@ -490,7 +510,9 @@ export default function IntakeModal({ target, wallet = null, onClose, onComplete
   const isStudy = !compat && target.fortune.includes("신년운");
   // 저장된 정보가 없는 분(비회원·처음 쓰는 회원)은 생년월일·성별·시간을 한 화면에서 적어요.
   const combined = !compat && !savedProfile;
-  const steps: readonly AnyStepId[] = compat ? COMPAT_STEPS : combined ? COMBINED_STEPS : STEPS;
+  const baseSteps: readonly AnyStepId[] = compat ? COMPAT_STEPS : combined ? COMBINED_STEPS : STEPS;
+  // 프리미엄 사주(궁합 제외)에서는 고민 다음, 동의 전에 MBTI 단계를 따로 둬요(고민 질문에 집중하도록).
+  const steps: readonly AnyStepId[] = target.premium === true && !compat ? baseSteps.flatMap((x) => (x === "consent" ? (["mbti", x] as const) : [x])) : baseSteps;
   const firstAfterMe = steps.indexOf(compat ? "pdate" : "concern");
   const [partner, setPartner] = useState<BirthFields>(EMPTY_BIRTH);
   // 기억해 둔 다른 사람 (로그인 회원 + 궁합일 때만 불러와요. 표가 아직 없으면 조용히 빈 목록)
@@ -1093,7 +1115,7 @@ export default function IntakeModal({ target, wallet = null, onClose, onComplete
           )}
 
           {step === "birth" && <CombinedBirthFields key={meKey} f={form} patch={update} />}
-          {step === "birth" && target.premium === true && !compat && <MbtiPicker value={form.mbti} onChange={(v) => update({ mbti: v })} />}
+          {step === "mbti" && <MbtiPicker value={form.mbti} onChange={(v) => update({ mbti: v })} />}
           {(step === "date" || step === "time" || step === "gender") && <BirthStepFields kind={step} f={form} patch={update} />}
           {step === "pdate" && people.length > 0 && <SavedPeoplePicker people={people} onPick={pickPerson} title="기억해 둔 사람 (눌러서 바로 불러와)" />}
           {step === "pdate" && <InvitePanel loggedIn={loggedIn} onRequestLogin={onRequestLogin} onTaken={takeInvited} />}
@@ -1108,7 +1130,6 @@ export default function IntakeModal({ target, wallet = null, onClose, onComplete
 
           {step === "concern" && (
             <div className="space-y-3">
-              {!combined && target.premium === true && !compat && <MbtiPicker value={form.mbti} onChange={(v) => update({ mbti: v })} />}
               <div className="flex items-center justify-between text-[11px] text-gray-500">
                 <span>최대 {MAX_CONCERN_TAGS}개까지 고를 수 있어 (건너뛰어도 돼)</span>
                 <span data-testid="concern-count" className="font-bold text-brand-600">
@@ -1288,7 +1309,7 @@ export default function IntakeModal({ target, wallet = null, onClose, onComplete
               type="submit"
               className="flex-1 py-2.5 rounded-full bg-brand-600 text-white font-cute font-normal text-sm shadow-md hover:bg-brand-700 transition-colors"
             >
-              {isLast ? "풀이 보기 ✧" : step === "concern" && form.concernTags.length === 0 && !form.concernText.trim() ? "건너뛰기" : "다음"}
+              {isLast ? "풀이 보기 ✧" : step === "concern" && form.concernTags.length === 0 && !form.concernText.trim() ? "건너뛰기" : step === "mbti" && !form.mbti ? "건너뛰기" : "다음"}
             </button>
           </div>
           <p className="mt-3 text-center text-[10px] text-gray-400">* 베타 기간이라 결제는 발생하지 않아.</p>

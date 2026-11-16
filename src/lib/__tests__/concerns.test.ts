@@ -109,4 +109,8 @@ describe("풀이 종류에 맞는 고민 항목", () => {
       expect(chipsForFortune(f).every((c) => CONCERN_CHIPS.includes(c))).toBe(true);
     }
   });
+  it("MBTI 단계는 선택이라 비어 있어도 통과해요", () => {
+    expect(validateStep("mbti", EMPTY_FORM)).toBeNull();
+    expect(validateStep("mbti", { ...EMPTY_FORM, mbti: "ENFP" })).toBeNull();
+  });
 });

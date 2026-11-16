@@ -7,7 +7,7 @@ import type { BirthInput, Gender } from "@/lib/saju/types";
 export const MIN_YEAR = 1900;
 export const MAX_YEAR = 2100;
 
-export type StepId = "date" | "time" | "gender" | "birth" | "concern" | "consent";
+export type StepId = "date" | "time" | "gender" | "birth" | "concern" | "mbti" | "consent";
 export const STEPS: readonly StepId[] = ["date", "time", "gender", "concern", "consent"];
 
 /**
@@ -142,6 +142,8 @@ export function validateStep(step: StepId, f: IntakeForm): string | null {
       if (f.concernTags.length > MAX_CONCERN_TAGS) return `고민 버튼은 ${MAX_CONCERN_TAGS}개까지 고를 수 있어.`;
       if (f.concernText.length > MAX_CONCERN_TEXT) return `고민은 ${MAX_CONCERN_TEXT}자까지 적을 수 있어.`;
       return null;
+    case "mbti":
+      return null; // 선택이라 건너뛰어도 돼요
     case "consent":
       return f.consent ? null : "개인정보 처리에 동의해야 풀이를 볼 수 있어.";
   }
