@@ -3,7 +3,7 @@ import { isAdmin } from "@/lib/admin/auth";
 import { buildCoreFacts, factsNowFor } from "@/lib/ai/coreFacts";
 import { buildReadingMemo } from "@/lib/ai/chatMemo";
 import { chatDori, CRISIS_ANSWER, isCrisis } from "@/lib/ai/chat";
-import { EVAL_LOVE, EVAL_MENU } from "@/lib/ai/evalSets";
+import { EVAL_LOVE, EVAL_MENU, EVAL_WORK } from "@/lib/ai/evalSets";
 import { buildDailyFacts, kstToday } from "@/lib/ai/dailyFacts";
 import { hasAiKey } from "@/lib/ai/llm";
 import { unableReply } from "@/lib/ai/outOfScope";
@@ -38,7 +38,8 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "요청이 올바르지 않아." }, { status: 400, headers: NO_STORE });
   }
   const isMenu = body?.set === "menu";
-  const set = isMenu ? EVAL_MENU : EVAL_LOVE;
+  const isWork = body?.set === "work";
+  const set = isMenu ? EVAL_MENU : isWork ? EVAL_WORK : EVAL_LOVE;
   const i = typeof body?.index === "number" ? Math.floor(body.index) : -1;
   if (i < 0 || i >= set.length) return NextResponse.json({ error: "질문 번호가 올바르지 않아." }, { status: 400, headers: NO_STORE });
   const item = set[i];
@@ -57,7 +58,7 @@ export async function POST(request: Request) {
     const core = buildCoreFacts(birth, factsNowFor(null, now), true);
     const memo = buildReadingMemo(chart, core, factsNowFor(null, now));
     const reply = await chatDori(
-      { kind: "reading", name: null, partnerName: null, summary: isMenu ? "사주 풀이 결과서를 읽고 온 상담방. 오늘의 메뉴와 취미를 묻는 중" : "연애운 풀이. 연애와 결혼에 대한 고민을 이야기하는 방", chart, core, daily: isMenu ? buildDailyFacts(chart, kstToday(now)) : null, partnerChart: null, memo },
+      { kind: "reading", name: null, partnerName: null, summary: isMenu ? "사주 풀이 결과서를 읽고 온 상담방. 오늘의 메뉴와 취미를 묻는 중" : isWork ? "사주 풀이 결과서를 읽고 온 상담방. 일과 커리어 고민을 이야기하는 중" : "연애운 풀이. 연애와 결혼에 대한 고민을 이야기하는 방", chart, core, daily: isMenu ? buildDailyFacts(chart, kstToday(now)) : null, partnerChart: null, memo },
       [{ role: "user", text: item.q }],
       { now },
     );
@@ -72,6 +73,6 @@ export async function POST(request: Request) {
 }
 
 export async function GET(request: Request) {
-  const menu = new URL(request.url).searchParams.get("set") === "menu";
-  return NextResponse.json({ total: (menu ? EVAL_MENU : EVAL_LOVE).length }, { headers: NO_STORE });
+  const which = new URL(request.url).searchParams.get("set");
+  return NextResponse.json({ total: (which === "menu" ? EVAL_MENU : which === "work" ? EVAL_WORK : EVAL_LOVE).length }, { headers: NO_STORE });
 }

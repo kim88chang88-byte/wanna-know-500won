@@ -22,7 +22,7 @@ export default function ChatEvalApp() {
   const [msg, setMsg] = useState("");
   const [copied, setCopied] = useState(false);
 
-  async function run(set: "love" | "menu" = "love") {
+  async function run(set: "love" | "menu" | "work" = "love") {
     setBusy(true);
     setRows([]);
     setMsg("");
@@ -72,6 +72,9 @@ export default function ChatEvalApp() {
         </button>
         <button type="button" onClick={() => void run("menu")} disabled={busy} className="rounded-full bg-brand-500 px-4 py-2 text-sm font-extrabold text-white disabled:opacity-50">
           메뉴·취미 17개 돌리기
+        </button>
+        <button type="button" onClick={() => void run("work")} disabled={busy} className="rounded-full bg-brand-500 px-4 py-2 text-sm font-extrabold text-white disabled:opacity-50">
+          일·창업 고민 10개 돌리기
         </button>
         {rows.length > 0 && (
           <button type="button" onClick={() => void copy()} className="rounded-full border border-neutral-300 px-4 py-2 text-sm font-bold">
