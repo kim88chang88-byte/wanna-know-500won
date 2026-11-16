@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { siteOrigin } from "@/lib/siteOrigin";
 
 /** 주소를 클립보드에 넣어요. 최신 방식이 막혀 있으면(http 주소·일부 앱 안 브라우저) 예전 방식으로 한 번 더 해 봐요. */
 async function copyText(text: string): Promise<boolean> {
@@ -35,7 +36,7 @@ export default function ShareSiteBar() {
   }, []);
 
   async function onCopy() {
-    const ok = await copyText(window.location.origin);
+    const ok = await copyText(siteOrigin());
     setState(ok ? "copied" : "failed");
     if (timer.current) clearTimeout(timer.current);
     if (ok) timer.current = setTimeout(() => setState("idle"), 3000);

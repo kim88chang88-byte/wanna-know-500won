@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { siteOrigin } from "@/lib/siteOrigin";
 import { FUNNEL_STEPS } from "@/lib/visitTrack";
 
 interface Row { src: string; event: string; n: number }
@@ -151,7 +152,7 @@ export default function FunnelSection({ days }: { days: number }) {
                 type="button"
                 disabled={!utm}
                 onClick={() => {
-                  const link = `${window.location.origin}/?utm_source=${utm}`;
+                  const link = `${siteOrigin()}/?utm_source=${utm}`;
                   void navigator.clipboard?.writeText(link).then(() => setCopied(true)).catch(() => undefined);
                 }}
                 className="shrink-0 rounded-lg bg-brand-500 px-3 py-1.5 text-xs font-bold text-white disabled:opacity-40"
@@ -159,7 +160,7 @@ export default function FunnelSection({ days }: { days: number }) {
                 {copied ? "복사됨!" : "링크 복사"}
               </button>
             </div>
-            <p className="mt-1.5 break-all text-[10px] text-gray-500">{typeof window !== "undefined" ? `${window.location.origin}/?utm_source=${utm || "이름표"}` : ""}</p>
+            <p className="mt-1.5 break-all text-[10px] text-gray-500">{typeof window !== "undefined" ? `${siteOrigin()}/?utm_source=${utm || "이름표"}` : ""}</p>
           </div>
           <p className="mt-2 text-[10px] text-gray-400">경로: direct=직접 접속, friend=친구 초대 링크, utm:이름=주소의 utm_source, web:도메인=다른 사이트에서 이동. 이 기능을 켠 이후 처음 온 사람부터 기록돼.</p>
         </>

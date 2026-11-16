@@ -8,13 +8,15 @@ import { buildPhotoCardData, CARD_H, CARD_SCALE, CARD_W, photoAltText, photoFile
 import { IMAGES } from "./images";
 import { getBrowserStorage } from "@/lib/drawCounter";
 import { readMyCode, withRef } from "@/lib/referral";
+import { siteHost, siteOrigin } from "@/lib/siteOrigin";
+import { track } from "@/lib/track";
 import ShareFullButton from "./ShareFullButton";
 import type { ShareReading } from "@/lib/shareText";
 
 /** 공유 주소: 로그인한 회원이면 내 추천 코드가 붙어, 친구가 로그인할 때 자동으로 적용돼요. */
 function shareOrigin(): string {
   if (typeof window === "undefined") return "";
-  return withRef(window.location.origin, readMyCode(getBrowserStorage()));
+  return withRef(siteOrigin(), readMyCode(getBrowserStorage()));
 }
 
 /** 같은 사이트 안의 도리 로고. 다른 사이트 그림은 저장용 캔버스를 막아서 쓰지 않아요. */
@@ -66,7 +68,7 @@ export default function ResultShareCard({ report, aiQuote, shareNames, reading }
     return shareCaption(d, url);
   }
   const data = useMemo(
-    () => buildPhotoCardData(report, { date: new Date(), siteLabel: typeof window === "undefined" ? "" : window.location.host, shareUrl: shareOrigin(), aiQuote }),
+    () => buildPhotoCardData(report, { date: new Date(), siteLabel: typeof window === "undefined" ? "" : siteHost(), shareUrl: shareOrigin(), aiQuote }),
     [report, aiQuote],
   );
 
@@ -124,6 +126,7 @@ export default function ResultShareCard({ report, aiQuote, shareNames, reading }
       if (nav.canShare?.({ files: [file] })) {
         try {
           await nav.share({ files: [file], text: captionOf(data, shareOrigin()) });
+          track("share_card");
           setState("done");
           return;
         } catch (e) {
@@ -142,6 +145,7 @@ export default function ResultShareCard({ report, aiQuote, shareNames, reading }
       a.click();
       a.remove();
       window.setTimeout(() => URL.revokeObjectURL(url), 4000);
+      track("share_card");
       setState("done");
     } catch {
       setState("error");

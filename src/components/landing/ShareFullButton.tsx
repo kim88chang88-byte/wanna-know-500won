@@ -5,6 +5,8 @@ import type { PremiumReportView } from "@/lib/premium/types";
 import { buildShareText, type ShareMode, type ShareReading } from "@/lib/shareText";
 import { getBrowserStorage } from "@/lib/drawCounter";
 import { readMyCode, withRef } from "@/lib/referral";
+import { siteOrigin } from "@/lib/siteOrigin";
+import { track } from "@/lib/track";
 
 /** 풀이 글 전체(또는 핵심 요약)와 도유사주 링크를 한꺼번에 보내는 버튼. 서버에 저장하지 않고 이 기기에서 글을 만들어요. */
 export default function ShareFullButton({ report, reading, topic, name, partnerName, className = "" }: { report: PremiumReportView; reading?: ShareReading | null; topic: string; name?: string | null; partnerName?: string | null; className?: string }) {
@@ -15,11 +17,12 @@ export default function ShareFullButton({ report, reading, topic, name, partnerN
   const myName = name ?? report.viewerName ?? null;
 
   async function send() {
-    const url = withRef(typeof window === "undefined" ? "" : window.location.origin, readMyCode(getBrowserStorage()));
+    const url = withRef(siteOrigin(), readMyCode(getBrowserStorage()));
     const text = buildShareText(report, reading ?? null, { mode, name: myName, withName, topic, url, partnerName });
     try {
       if (navigator.share) {
         await navigator.share({ title: "도유사주", text });
+        track("share_text");
         setOpen(false);
         return;
       }
@@ -28,6 +31,7 @@ export default function ShareFullButton({ report, reading, topic, name, partnerN
     }
     try {
       await navigator.clipboard.writeText(text);
+      track("share_text");
       setMsg("풀이와 링크를 복사했어. 보낼 곳에 붙여넣어 줘 ❄️");
     } catch {
       setMsg("복사하지 못했어. 잠시 뒤에 다시 시도해 줘.");
