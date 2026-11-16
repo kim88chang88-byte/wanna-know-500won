@@ -8,6 +8,8 @@ import { casualHead } from "@/lib/storyHelpers";
 import { buildCompatAnswer, buildShareSummary, buildTogether, elementNote, plainPointTitle } from "@/lib/premium/compatAnswer";
 import { getBrowserStorage } from "@/lib/drawCounter";
 import { readMyCode, withRef } from "@/lib/referral";
+import { siteOrigin } from "@/lib/siteOrigin";
+import { track } from "@/lib/track";
 import { EL_LABEL, elementOfChar } from "@/lib/elementColor";
 import ElementTile from "@/components/ElementTile";
 import { Fold, MARK, Paras, Pillars } from "./StoryReport";
@@ -134,11 +136,12 @@ function TogetherCard({ c, name, partnerName, hideSend = false }: { c: CompatVie
   const base = buildTogether(c);
   const together = { questions: c.ai?.questions ?? base.questions, action: c.ai?.action ?? base.action };
   async function send() {
-    const origin = typeof window === "undefined" ? "" : withRef(window.location.origin, readMyCode(getBrowserStorage()));
+    const origin = typeof window === "undefined" ? "" : withRef(siteOrigin(), readMyCode(getBrowserStorage()));
     const text = buildShareSummary(c, { me: name, partner: partnerName === "상대" || partnerName === "상대방" ? null : partnerName }, together, origin);
     try {
       if (navigator.share) {
         await navigator.share({ title: "도유사주 · 둘의 궁합", text });
+        track("share_text");
         setMsg("");
         return;
       }
@@ -147,6 +150,7 @@ function TogetherCard({ c, name, partnerName, hideSend = false }: { c: CompatVie
     }
     try {
       await navigator.clipboard.writeText(text);
+      track("share_text");
       setMsg("요약을 복사했어. 상대에게 붙여넣어 보내 줘 ❄️");
     } catch {
       setMsg("복사하지 못했어. 글을 길게 눌러 직접 복사해 줘.");

@@ -8,13 +8,15 @@ import { buildPhotoCardData, CARD_H, CARD_SCALE, CARD_W, photoAltText, photoFile
 import { IMAGES } from "./images";
 import { getBrowserStorage } from "@/lib/drawCounter";
 import { readMyCode, withRef } from "@/lib/referral";
+import { siteHost, siteOrigin } from "@/lib/siteOrigin";
+import { track } from "@/lib/track";
 import ShareFullButton from "./ShareFullButton";
 import type { ShareReading } from "@/lib/shareText";
 
 /** 공유 주소: 로그인한 회원이면 내 추천 코드가 붙어, 친구가 로그인할 때 자동으로 적용돼요. */
 function shareOrigin(): string {
   if (typeof window === "undefined") return "";
-  return withRef(window.location.origin, readMyCode(getBrowserStorage()));
+  return withRef(siteOrigin(), readMyCode(getBrowserStorage()));
 }
 
 /** 같은 사이트 안의 도리 로고. 다른 사이트 그림은 저장용 캔버스를 막아서 쓰지 않아요. */
@@ -51,6 +53,8 @@ export default function ResultShareCard({ report, aiQuote, shareNames, reading }
   const [copied, setCopied] = useState(false);
   const [linkCopied, setLinkCopied] = useState<"idle" | "ok" | "fail">("idle");
   const [link, setLink] = useState("");
+  /** 프리미엄 카드의 사주 글자(연·월·일·시)를 가릴지. 공유된 이미지로 생년월일시를 짐작하지 못하게 기본은 가려요. */
+  const [hidePillars, setHidePillars] = useState(true);
   useEffect(() => {
     setLink(shareOrigin());
   }, []);
@@ -66,8 +70,8 @@ export default function ResultShareCard({ report, aiQuote, shareNames, reading }
     return shareCaption(d, url);
   }
   const data = useMemo(
-    () => buildPhotoCardData(report, { date: new Date(), siteLabel: typeof window === "undefined" ? "" : window.location.host, shareUrl: shareOrigin(), aiQuote }),
-    [report, aiQuote],
+    () => buildPhotoCardData(report, { date: new Date(), siteLabel: typeof window === "undefined" ? "" : siteHost(), shareUrl: shareOrigin(), aiQuote, hidePillars }),
+    [report, aiQuote, hidePillars],
   );
 
   // 미리보기와 저장용 그림은 같은 함수로 그려요.
@@ -124,6 +128,7 @@ export default function ResultShareCard({ report, aiQuote, shareNames, reading }
       if (nav.canShare?.({ files: [file] })) {
         try {
           await nav.share({ files: [file], text: captionOf(data, shareOrigin()) });
+          track("share_card");
           setState("done");
           return;
         } catch (e) {
@@ -142,6 +147,7 @@ export default function ResultShareCard({ report, aiQuote, shareNames, reading }
       a.click();
       a.remove();
       window.setTimeout(() => URL.revokeObjectURL(url), 4000);
+      track("share_card");
       setState("done");
     } catch {
       setState("error");
@@ -157,6 +163,12 @@ export default function ResultShareCard({ report, aiQuote, shareNames, reading }
         className={`mx-auto w-44 rounded-2xl shadow-[0_10px_30px_rgba(128,87,224,0.25)] transition-opacity duration-500 ${ready ? "opacity-100" : "opacity-0"}`}
         style={{ aspectRatio: `${CARD_W} / ${CARD_H}`, height: "auto" }}
       />
+      {data.tier === "premium" && (
+        <label data-testid="share-hide-pillars" className="mx-auto mt-3 flex w-fit cursor-pointer items-center gap-2 rounded-full border border-brand-100 bg-white px-3 py-1.5 text-[12px] text-gray-700">
+          <input type="checkbox" checked={hidePillars} onChange={(e) => setHidePillars(e.target.checked)} className="h-4 w-4 accent-brand-600" />
+          사주 글자 가리기 <span className="text-[10.5px] text-gray-400">(켜면 연·월·일·시 글자가 안 보여)</span>
+        </label>
+      )}
       <button
         type="button"
         onClick={save}

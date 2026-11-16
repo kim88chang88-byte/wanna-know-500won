@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import { getBrowserStorage } from "@/lib/drawCounter";
 import { cleanRefCode, isFinalRedeem, redeemMessage, saveMyCode, withRef } from "@/lib/referral";
+import { siteOrigin } from "@/lib/siteOrigin";
+import { track } from "@/lib/track";
 
 interface Me {
   code: string;
@@ -34,16 +36,18 @@ export default function ReferralBox() {
   }, []);
 
   if (!me) return null;
-  const link = withRef(typeof window === "undefined" ? "" : window.location.origin, me.code);
+  const link = withRef(siteOrigin(), me.code);
 
   async function share() {
     const text = `도유사주에서 내 사주를 무료로 봐! 내 초대 코드로 가입하고 첫 풀이를 마치면 우리 둘 다 500원 뽑기 1회를 받아 🎁 (코드 ${me?.code})`;
     try {
       if (navigator.share) {
         await navigator.share({ title: "도유사주", text, url: link });
+        track("ref_share");
         return;
       }
       await navigator.clipboard.writeText(`${text}\n${link}`);
+      track("ref_share");
       setCopied(true);
       window.setTimeout(() => setCopied(false), 2500);
     } catch {

@@ -94,6 +94,22 @@ describe("프리미엄 포토카드 데이터", () => {
     expect(photoAltText(d).startsWith("프리미엄 ")).toBe(true);
     expect(shareCaption(d, "https://x.app").includes("#프리미엄사주")).toBe(true);
   });
+  it("사주 글자 가리기: 글자·일주 이름이 카드 데이터에서 빠지고 masked 가 켜져요", () => {
+    const shown = buildPhotoCardData(full, { date, siteLabel: "x" });
+    expect(shown.luxe?.masked).toBeUndefined();
+    expect(shown.luxe?.pillars.some((p) => p)).toBe(true);
+    const hidden = buildPhotoCardData(full, { date, siteLabel: "x", hidePillars: true });
+    expect(hidden.luxe?.masked).toBe(true);
+    expect(hidden.luxe?.pillars).toEqual([null, null, null, null]);
+    expect(hidden.luxe?.dayLabel).toBe("");
+    expect(hidden.luxe?.structure).toBe(shown.luxe?.structure);
+    // 어디에도 간지 글자가 남지 않아요(공유 문구·대체 글 포함)
+    const all = JSON.stringify(hidden) + photoAltText(hidden) + shareCaption(hidden, "https://x.app");
+    for (const p of shown.luxe?.pillars ?? []) if (p) for (const ch of Array.from(p)) expect(all.includes(ch)).toBe(false);
+  });
+  it("가리기를 켜도 일반 카드는 그대로예요", () => {
+    expect(buildPhotoCardData(report, { date, siteLabel: "x", hidePillars: true }).luxe).toBeNull();
+  });
   it("시간을 모르면 시주는 null", () => {
     const r = buildPremiumReport({ ...input, hour: null, minute: null }, new Date("2026-10-18T00:00:00+09:00"), "full", "");
     expect(buildPhotoCardData(r, { date, siteLabel: "x" }).luxe?.pillars[3]).toBeNull();

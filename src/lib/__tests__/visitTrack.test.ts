@@ -4,6 +4,9 @@ import { isTrackEvent, refererHost, sourceLabel } from "../visitTrack";
 describe("visitTrack", () => {
   it("정해진 행동 이름만 받아요", () => {
     expect(isTrackEvent("draw_done")).toBe(true);
+    expect(isTrackEvent("share_card")).toBe(true);
+    expect(isTrackEvent("share_text")).toBe(true);
+    expect(isTrackEvent("ref_share")).toBe(true);
     expect(isTrackEvent("birthday=2000-01-01")).toBe(false);
     expect(isTrackEvent(undefined)).toBe(false);
   });
