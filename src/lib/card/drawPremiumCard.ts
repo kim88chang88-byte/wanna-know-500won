@@ -302,7 +302,7 @@ export function drawPremiumCard(ctx: CanvasRenderingContext2D, d: PhotoCardData)
     } else {
       ctx.fillStyle = IVORY_DIM;
       setFont(ctx, 500, 10, SANS);
-      ctx.fillText("미상", colCx, plateY + 52);
+      ctx.fillText(luxe?.masked ? "비공개" : "미상", colCx, plateY + 52);
     }
     if (i > 0 && i !== 2 && i !== 3) {
       ctx.strokeStyle = "rgba(226,191,120,0.25)";
@@ -317,7 +317,8 @@ export function drawPremiumCard(ctx: CanvasRenderingContext2D, d: PhotoCardData)
   ctx.fillStyle = IVORY_DIM;
   setFont(ctx, 600, 10, SERIF);
   spaced(ctx, 0.6);
-  ctx.fillText(`${luxe?.dayLabel ?? ""}${luxe?.structure ? `  ·  ${luxe.structure}` : ""}`, cx, plateY + plateH + 19);
+  const baseLine = luxe?.masked ? (luxe.structure || "사주 글자는 비공개야") : `${luxe?.dayLabel ?? ""}${luxe?.structure ? `  ·  ${luxe.structure}` : ""}`;
+  ctx.fillText(baseLine, cx, plateY + plateH + 19);
   spaced(ctx, 0);
 
   /* ---------- 한마디 ---------- */

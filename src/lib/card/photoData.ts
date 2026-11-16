@@ -13,6 +13,8 @@ export interface LuxeData {
   dayLabel: string;
   /** 예: "신강 · 종왕격" */
   structure: string;
+  /** true 면 사주 글자를 카드에 그리지 않아요(공유 이미지에서 생년월일시를 짐작하지 못하게). 이때 pillars 는 모두 null, dayLabel 은 빈 글자 */
+  masked?: boolean;
 }
 
 export interface PhotoCardData {
@@ -50,7 +52,7 @@ export function clipQuote(s: string, max = MAX_QUOTE): string {
   return (end >= max * 0.5 ? cut.slice(0, end + 1) : cut.trimEnd() + "…").trim();
 }
 
-export function buildPhotoCardData(report: PremiumReportView, opts: { date: Date; siteLabel: string; shareUrl?: string; aiQuote?: string | null }): PhotoCardData {
+export function buildPhotoCardData(report: PremiumReportView, opts: { date: Date; siteLabel: string; shareUrl?: string; aiQuote?: string | null; /** 프리미엄 카드의 사주 글자를 가려요 */ hidePillars?: boolean }): PhotoCardData {
   const t = report.topic;
   const ai = opts.aiQuote ? clipQuote(opts.aiQuote) : "";
   const premium = report.level === "full" && report.book.length > 0;
@@ -59,9 +61,10 @@ export function buildPhotoCardData(report: PremiumReportView, opts: { date: Date
     tier: premium ? "premium" : "basic",
     luxe: premium
       ? {
-          pillars: [byKey("year"), byKey("month"), byKey("day"), byKey("hour")],
-          dayLabel: `${byKey("day") ?? ""} 일주`,
+          pillars: opts.hidePillars ? [null, null, null, null] : [byKey("year"), byKey("month"), byKey("day"), byKey("hour")],
+          dayLabel: opts.hidePillars ? "" : `${byKey("day") ?? ""} 일주`,
           structure: [report.strength.grade, report.geukguk].filter(Boolean).join(" · "),
+          ...(opts.hidePillars ? { masked: true } : {}),
         }
       : null,
     topic: t.key,
