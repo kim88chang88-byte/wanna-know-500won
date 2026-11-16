@@ -460,7 +460,7 @@ function BirthStepFields({ kind, f, patch }: { kind: "date" | "time" | "gender";
   );
 }
 
-/** MBTI 네 글자 고르기: E/I, S/N, T/F, J/P 네 줄에서 한 글자씩 눌러요. 네 줄을 모두 고르면 값이 되고, 하나라도 비면 비어 있는 걸로 봐요. */
+/** MBTI 네 글자 고르기: 가로로 E/I · S/N · T/F · J/P 네 칸이 놓이고, 각 칸에서 위아래 두 글자 중 하나를 눌러요. 네 칸을 모두 고르면 값이 되고, 하나라도 비면 비어 있는 걸로 봐요. */
 const MBTI_PAIRS: ReadonlyArray<readonly [string, string, string]> = [
   ["E", "I", "에너지"],
   ["S", "N", "보는 방식"],
@@ -481,19 +481,19 @@ function MbtiPicker({ value, onChange }: { value: string; onChange: (v: string) 
       <div className="mb-2 text-center font-cute text-2xl tracking-[0.3em] text-brand-700" aria-live="polite" data-testid="mbti-shown">
         {shown}
       </div>
-      <div className="space-y-2" role="group" aria-label="MBTI 고르기">
+      <div className="grid grid-cols-4 gap-2" role="group" aria-label="MBTI 고르기">
         {MBTI_PAIRS.map(([x, y, label], row) => (
-          <div key={x} className="flex items-center gap-2">
-            <span className="w-16 shrink-0 text-[11px] text-gray-500">{label}</span>
+          <div key={x} className="flex flex-col items-stretch gap-2">
+            <span className="text-center text-[10.5px] leading-tight text-gray-500">{label}</span>
             {[x, y].map((ch) => (
-              <button key={ch} type="button" data-testid={`mbti-letter-${ch}`} aria-pressed={letters[row] === ch} onClick={() => pick(row, ch)} className={`flex-1 rounded-full border py-2 text-base font-bold transition-colors ${letters[row] === ch ? CHOICE_ON : CHOICE_OFF}`}>
+              <button key={ch} type="button" data-testid={`mbti-letter-${ch}`} aria-pressed={letters[row] === ch} onClick={() => pick(row, ch)} className={`rounded-2xl border py-3 text-lg font-bold transition-colors ${letters[row] === ch ? CHOICE_ON : CHOICE_OFF}`}>
                 {ch}
               </button>
             ))}
           </div>
         ))}
       </div>
-      <p className="mt-3 text-center text-[11px] text-gray-500">네 줄을 모두 고르면 저장돼. 하나라도 모르겠으면 건너뛰어도 돼.</p>
+      <p className="mt-3 text-center text-[11px] text-gray-500">네 칸을 모두 고르면 저장돼. 하나라도 모르겠으면 건너뛰어도 돼.</p>
       <p className="mt-2 rounded-xl bg-brand-50 px-3 py-2 text-[11px] leading-relaxed text-gray-600">
         <b className="text-gray-800">MBTI는 사주를 읽을 때 곁에 놓고 보는 참고야.</b> 네 글자로 사람 속을 다 알 수는 없어서, 내가 알려준 성향을 사주와 나란히 놓고 같은 말을 하는 곳, 다른 말을 하는 곳을 살펴봐.
       </p>
