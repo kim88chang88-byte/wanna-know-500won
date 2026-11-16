@@ -9,6 +9,7 @@ interface Row {
   route: string;
   answer: string;
   followups?: string[];
+  choices?: string[];
   visual?: string | null;
   ms: number;
 }
@@ -22,7 +23,7 @@ export default function ChatEvalApp() {
   const [msg, setMsg] = useState("");
   const [copied, setCopied] = useState(false);
 
-  async function run(set: "love" | "menu" | "work" = "love") {
+  async function run(set: "love" | "menu" | "work" | "multi" = "love") {
     setBusy(true);
     setRows([]);
     setMsg("");
@@ -49,7 +50,7 @@ export default function ChatEvalApp() {
 
   const asText = () =>
     rows
-      .map((r) => `${r.n}. [${ROUTE[r.route] ?? r.route}${r.expect ? ` / 기대:${r.expect}` : ""}${r.visual ? ` / 카드:${r.visual}` : ""}] ${r.q}\n${r.answer}`)
+      .map((r) => `${r.n}. [${ROUTE[r.route] ?? r.route}${r.expect ? ` / 기대:${r.expect}` : ""}${r.visual ? ` / 카드:${r.visual}` : ""}] ${r.q}\n${r.answer}${r.followups?.length && !r.answer.includes("▶") ? `\n(${[r.choices?.length ? `선택지: ${r.choices.join(" / ")}` : "", `다음 질문 칩: ${r.followups.join(" / ")}`].filter(Boolean).join(" · ")})` : ""}`)
       .join("\n\n");
 
   async function copy() {
@@ -76,6 +77,9 @@ export default function ChatEvalApp() {
         <button type="button" onClick={() => void run("work")} disabled={busy} className="rounded-full bg-brand-500 px-4 py-2 text-sm font-extrabold text-white disabled:opacity-50">
           일·창업 고민 10개 돌리기
         </button>
+        <button type="button" onClick={() => void run("multi")} disabled={busy} className="rounded-full bg-brand-500 px-4 py-2 text-sm font-extrabold text-white disabled:opacity-50">
+          연애 이어 묻기 6개(3턴) 돌리기
+        </button>
         {rows.length > 0 && (
           <button type="button" onClick={() => void copy()} className="rounded-full border border-neutral-300 px-4 py-2 text-sm font-bold">
             {copied ? "복사됨 ✓" : "전체 복사"}
@@ -95,6 +99,9 @@ export default function ChatEvalApp() {
             </div>
             <p className="mt-1 text-[13.5px] font-bold">{r.q}</p>
             <p className="mt-1 whitespace-pre-wrap text-[13.5px] leading-relaxed">{r.answer || "(답 없음)"}</p>
+            {r.followups && r.followups.length > 0 && !r.answer.includes("▶") && (
+              <p className="mt-1 text-[12px] text-neutral-500">{r.choices && r.choices.length > 0 ? `선택지: ${r.choices.join(" / ")} · ` : ""}다음 질문 칩: {r.followups.join(" / ")}</p>
+            )}
           </li>
         ))}
       </ol>

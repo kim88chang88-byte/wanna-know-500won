@@ -3,7 +3,7 @@ import { isAdmin } from "@/lib/admin/auth";
 import { buildCoreFacts, factsNowFor } from "@/lib/ai/coreFacts";
 import { buildReadingMemo } from "@/lib/ai/chatMemo";
 import { chatDori, CRISIS_ANSWER, isCrisis } from "@/lib/ai/chat";
-import { EVAL_LOVE, EVAL_MENU, EVAL_WORK } from "@/lib/ai/evalSets";
+import { EVAL_LOVE, EVAL_MENU, EVAL_MULTI, EVAL_WORK } from "@/lib/ai/evalSets";
 import { buildDailyFacts, kstToday } from "@/lib/ai/dailyFacts";
 import { hasAiKey } from "@/lib/ai/llm";
 import { unableReply } from "@/lib/ai/outOfScope";
@@ -39,7 +39,8 @@ export async function POST(request: Request) {
   }
   const isMenu = body?.set === "menu";
   const isWork = body?.set === "work";
-  const set = isMenu ? EVAL_MENU : isWork ? EVAL_WORK : EVAL_LOVE;
+  const isMulti = body?.set === "multi";
+  const set = isMenu ? EVAL_MENU : isWork ? EVAL_WORK : isMulti ? EVAL_MULTI : EVAL_LOVE;
   const i = typeof body?.index === "number" ? Math.floor(body.index) : -1;
   if (i < 0 || i >= set.length) return NextResponse.json({ error: "질문 번호가 올바르지 않아." }, { status: 400, headers: NO_STORE });
   const item = set[i];
@@ -57,13 +58,22 @@ export async function POST(request: Request) {
     const chart = calculateSaju(birth);
     const core = buildCoreFacts(birth, factsNowFor(null, now), true);
     const memo = buildReadingMemo(chart, core, factsNowFor(null, now));
-    const reply = await chatDori(
-      { kind: "reading", name: null, partnerName: null, summary: isMenu ? "사주 풀이 결과서를 읽고 온 상담방. 오늘의 메뉴와 취미를 묻는 중" : isWork ? "사주 풀이 결과서를 읽고 온 상담방. 일과 커리어 고민을 이야기하는 중" : "연애운 풀이. 연애와 결혼에 대한 고민을 이야기하는 방", chart, core, daily: isMenu ? buildDailyFacts(chart, kstToday(now)) : null, partnerChart: null, memo },
-      [{ role: "user", text: item.q }],
-      { now },
-    );
+    const info = { kind: "reading" as const, name: null, partnerName: null, summary: isMenu ? "사주 풀이 결과서를 읽고 온 상담방. 오늘의 메뉴와 취미를 묻는 중" : isWork ? "사주 풀이 결과서를 읽고 온 상담방. 일과 커리어 고민을 이야기하는 중" : isMulti ? "연애운 풀이. 연애와 결혼에 대한 고민을 이어서 이야기하는 방" : "연애운 풀이. 연애와 결혼에 대한 고민을 이야기하는 방", chart, core, daily: isMenu ? buildDailyFacts(chart, kstToday(now)) : null, partnerChart: null, memo };
+    const turns = [item.q, ...(item.next ?? [])];
+    const history: Array<{ role: "user" | "dori"; text: string }> = [];
+    const texts: string[] = [];
+    let last = null as Awaited<ReturnType<typeof chatDori>> | null;
+    for (let t = 0; t < turns.length; t++) {
+      history.push({ role: "user", text: turns[t] });
+      const reply = await chatDori({ ...info, memo: t === 0 ? memo : undefined }, history, { now });
+      history.push({ role: "dori", text: reply.answer });
+      last = reply;
+      const extra = [reply.choices.length ? `선택지: ${reply.choices.join(" / ")}` : "", reply.followups.length ? `다음 질문 칩: ${reply.followups.join(" / ")}` : ""].filter(Boolean).join("\n");
+      texts.push(turns.length > 1 ? `▶ ${turns[t]}\n${reply.answer}${extra ? `\n(${extra})` : ""}` : reply.answer);
+    }
+    const reply = last as NonNullable<typeof last>;
     return NextResponse.json(
-      { q: item.q, expect: item.expect ?? null, route: reply.unable ? "ai-unable" : "ai", answer: reply.answer, followups: reply.followups, choices: reply.choices, visual: reply.visual ? reply.visual.kind : null, ms: Date.now() - t0 },
+      { q: item.q, expect: item.expect ?? null, route: reply.unable ? "ai-unable" : "ai", answer: texts.join("\n\n"), followups: reply.followups, choices: reply.choices, visual: reply.visual ? reply.visual.kind : null, ms: Date.now() - t0 },
       { headers: NO_STORE },
     );
   } catch (err) {
@@ -74,5 +84,5 @@ export async function POST(request: Request) {
 
 export async function GET(request: Request) {
   const which = new URL(request.url).searchParams.get("set");
-  return NextResponse.json({ total: (which === "menu" ? EVAL_MENU : which === "work" ? EVAL_WORK : EVAL_LOVE).length }, { headers: NO_STORE });
+  return NextResponse.json({ total: (which === "menu" ? EVAL_MENU : which === "work" ? EVAL_WORK : which === "multi" ? EVAL_MULTI : EVAL_LOVE).length }, { headers: NO_STORE });
 }

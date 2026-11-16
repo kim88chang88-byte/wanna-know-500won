@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { LOVE_Q, loveFacts } from "../loveFacts";
 import { unableReply } from "../outOfScope";
-import { CHAT_SYSTEM_PROMPT, addTravelNotes, stripInternalTerms } from "../chat";
+import { CHAT_SYSTEM_PROMPT, addTravelNotes, stripInternalTerms, addCompatNote } from "../chat";
 
 const chart = { year: { stem: "甲", branch: "子" }, month: { stem: "戊", branch: "辰" }, day: { stem: "壬", branch: "午" }, hour: null, solarDate: { year: 1994, month: 3, day: 10 }, uncertainPillars: [] } as never;
 
@@ -42,5 +42,18 @@ describe("연애 재료와 상담실 규칙", () => {
   it("메모장은 기본 행동이 아니고 스캠 경고는 직접 말했을 때만이에요", () => {
     expect(CHAT_SYSTEM_PROMPT).toContain("메모장에 적기는 기본 행동이 아니야");
     expect(CHAT_SYSTEM_PROMPT).toContain("직접 말했을 때만");
+  });
+  it("지시문 변형도 지워요", () => {
+    expect(stripInternalTerms("해라 마라 단정하기보다는, 두 가지를 확인해 봐.")).toBe("두 가지를 확인해 봐.");
+  });
+  it("궁합 질문엔 안내를 보장하고 쉬는 제안은 지워요", () => {
+    const a = addCompatNote("정확한 궁합은 시간까지 필요해. 오늘 밤에는 창문을 열고 머리를 식혀 보자.", "상대 사주랑 궁합 어때?", "reading");
+    expect(a).not.toContain("창문");
+    expect(a).toContain("궁합 보기에서 상대 생년월일");
+    expect(addCompatNote("좋아.", "오늘 운세", "reading")).toBe("좋아.");
+    expect(addCompatNote("좋아.", "궁합 어때?", "compat")).toBe("좋아.");
+  });
+  it("서울 기준이라고 했으면 출발지 문구를 또 붙이지 않아요", () => {
+    expect(addTravelNotes("서울 기준 KTX로 두 시간쯤 걸려. 출발 전에 확인해 봐.", "강릉 여행 어때", [])).not.toContain("수도권에서");
   });
 });
