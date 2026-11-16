@@ -872,3 +872,199 @@ create table if not exists public.premium_eval_runs (
 );
 create index if not exists premium_eval_runs_idx on public.premium_eval_runs (input_key, created_at desc);
 alter table public.premium_eval_runs enable row level security;
+
+-- ─────────────────────────────────────────────────────────────────────────────
+-- 궁합 초대 링크: 내가 링크를 보내면 상대가 로그인 없이 자기 생년월일시를 직접 넣어요.
+-- · 링크 만들기는 무료예요. 조약돌은 내가 "궁합 보기"를 눌러 풀이를 열 때만 (기존 궁합 흐름대로) 나가요.
+-- · 상대의 입력값은 내가 가져가서 풀이를 연 뒤 24시간 안에, 안 가져가면 만료(7일) 때 지워요.
+-- · 링크 주소의 토큰은 서버가 만든 추측 불가능한 긴 값이에요. 이 표는 서버 키로만 읽고 써요.
+-- 이 부분만 따로 Run 해도 되고, 파일 전체를 다시 Run 해도 안전해요. (users 표가 먼저 있어야 해요)
+-- ─────────────────────────────────────────────────────────────────────────────
+create table if not exists public.compat_invites (
+  token text primary key,                                       -- 링크에 들어가는 값 (서버가 만든 긴 무작위 문자)
+  inviter_id text not null references public.users(id) on delete cascade,
+  inviter_nick text,                                            -- 상대 화면에 보여 줄 호칭 (닉네임만)
+  relation text not null,                                       -- lover / some / friend / work / family
+  status text not null default 'pending',                       -- pending: 대기 / filled: 상대가 입력함 / done: 내가 가져감
+  invitee_birth jsonb,                                          -- 상대가 넣은 생년월일시·성별 (지울 때 null)
+  invitee_name text,                                            -- 상대가 정한 호칭 (선택)
+  created_at timestamptz not null default now(),
+  filled_at timestamptz,
+  taken_at timestamptz,
+  expires_at timestamptz not null default (now() + interval '7 days'),
+  constraint compat_invites_token_chk check (token ~ '^[A-Za-z0-9_-]{32,64}$'),
+  constraint compat_invites_relation_chk check (relation in ('lover', 'some', 'friend', 'work', 'family')),
+  constraint compat_invites_status_chk check (status in ('pending', 'filled', 'done'))
+);
+create index if not exists compat_invites_inviter_idx on public.compat_invites (inviter_id, created_at desc);
+create index if not exists compat_invites_expires_idx on public.compat_invites (expires_at);
+alter table public.compat_invites enable row level security;
+
+-- 만료된 초대와 가져간 지 24시간 지난 입력값을 지워요. (초대를 만들 때마다 같이 돌려서 따로 스케줄이 필요 없어요)
+create or replace function public.compat_invite_purge()
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  update public.compat_invites
+     set invitee_birth = null, invitee_name = null
+   where invitee_birth is not null
+     and (expires_at < now() or (status = 'done' and taken_at < now() - interval '24 hours'));
+  delete from public.compat_invites where expires_at < now() - interval '30 days';
+end;
+$$;
+
+-- 초대 링크 만들기. 결과: ok / bad / limit_day(하루 5개) / limit_pending(대기 중 10개)
+create or replace function public.compat_invite_create(p_user text, p_token text, p_nick text, p_relation text)
+returns text
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  today_start timestamptz;
+  n_day int;
+  n_pending int;
+begin
+  if p_token is null or p_token !~ '^[A-Za-z0-9_-]{32,64}$' then
+    return 'bad';
+  end if;
+  if p_relation is null or p_relation not in ('lover', 'some', 'friend', 'work', 'family') then
+    return 'bad';
+  end if;
+  perform public.compat_invite_purge();
+  today_start := date_trunc('day', now() at time zone 'Asia/Seoul') at time zone 'Asia/Seoul';
+  select count(*) into n_day from public.compat_invites where inviter_id = p_user and created_at >= today_start;
+  if n_day >= 5 then
+    return 'limit_day';
+  end if;
+  select count(*) into n_pending from public.compat_invites
+    where inviter_id = p_user and status = 'pending' and expires_at > now();
+  if n_pending >= 10 then
+    return 'limit_pending';
+  end if;
+  insert into public.compat_invites (token, inviter_id, inviter_nick, relation)
+    values (p_token, p_user, nullif(left(coalesce(p_nick, ''), 20), ''), p_relation);
+  return 'ok';
+end;
+$$;
+
+-- 상대가 링크를 열었을 때 보여 줄 정보. 초대한 사람의 생년월일 등은 이 표에 아예 없어요.
+-- 상태: pending(입력 가능) / filled·done(이미 입력됨) / expired / not_found
+create or replace function public.compat_invite_peek(p_token text)
+returns table (out_status text, out_nick text, out_relation text)
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  r record;
+begin
+  if p_token is null or p_token !~ '^[A-Za-z0-9_-]{32,64}$' then
+    return query select 'not_found'::text, null::text, null::text;
+    return;
+  end if;
+  select * into r from public.compat_invites where token = p_token;
+  if not found then
+    return query select 'not_found'::text, null::text, null::text;
+  elsif r.expires_at < now() then
+    return query select 'expired'::text, null::text, null::text;
+  else
+    return query select r.status, r.inviter_nick, r.relation;
+  end if;
+end;
+$$;
+
+-- 상대가 생년월일시를 제출해요. 한 번만 돼요. 결과: ok / not_found / expired / already / bad
+create or replace function public.compat_invite_fill(p_token text, p_birth jsonb, p_name text)
+returns text
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  hit int;
+  st text;
+  exp timestamptz;
+begin
+  if p_token is null or p_token !~ '^[A-Za-z0-9_-]{32,64}$' then
+    return 'not_found';
+  end if;
+  if p_birth is null or jsonb_typeof(p_birth) <> 'object' or length(p_birth::text) > 600 then
+    return 'bad';
+  end if;
+  update public.compat_invites
+     set status = 'filled', invitee_birth = p_birth,
+         invitee_name = nullif(left(coalesce(p_name, ''), 20), ''), filled_at = now()
+   where token = p_token and status = 'pending' and expires_at > now();
+  get diagnostics hit = row_count;
+  if hit = 1 then
+    return 'ok';
+  end if;
+  select status, expires_at into st, exp from public.compat_invites where token = p_token;
+  if st is null then
+    return 'not_found';
+  elsif exp < now() then
+    return 'expired';
+  end if;
+  return 'already';
+end;
+$$;
+
+-- 내 초대 현황 (입력값은 돌려주지 않아요). 만료된 초대는 빼요.
+create or replace function public.compat_invite_mine(p_user text)
+returns table (out_token text, out_relation text, out_status text, out_name text, out_created timestamptz, out_expires timestamptz)
+language sql
+security definer
+set search_path = public
+as $$
+  select token, relation, status, invitee_name, created_at, expires_at
+    from public.compat_invites
+   where inviter_id = p_user and expires_at > now()
+   order by created_at desc
+   limit 20;
+$$;
+
+-- 초대한 사람이 상대의 입력값을 가져가요. 내 초대일 때만 돼요. 처음 가져갈 때 done 이 되고 24시간 뒤 지워져요.
+-- (풀이가 중간에 실패해도 24시간 안에는 같은 값을 다시 가져갈 수 있어요.)
+-- 결과: ok / not_found / not_ready(상대가 아직 안 넣음) / expired
+create or replace function public.compat_invite_take(p_user text, p_token text)
+returns table (out_result text, out_birth jsonb, out_name text, out_relation text)
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  r record;
+begin
+  perform public.compat_invite_purge();
+  select * into r from public.compat_invites where token = p_token and inviter_id = p_user for update;
+  if not found then
+    return query select 'not_found'::text, null::jsonb, null::text, null::text;
+  elsif r.expires_at < now() or (r.invitee_birth is null and r.status <> 'pending') then
+    return query select 'expired'::text, null::jsonb, null::text, null::text;
+  elsif r.invitee_birth is null then
+    return query select 'not_ready'::text, null::jsonb, null::text, r.relation;
+  else
+    update public.compat_invites
+       set status = 'done', taken_at = coalesce(taken_at, now())
+     where token = p_token;
+    return query select 'ok'::text, r.invitee_birth, r.invitee_name, r.relation;
+  end if;
+end;
+$$;
+
+revoke all on function public.compat_invite_purge() from public, anon, authenticated;
+grant execute on function public.compat_invite_purge() to service_role;
+revoke all on function public.compat_invite_create(text, text, text, text) from public, anon, authenticated;
+grant execute on function public.compat_invite_create(text, text, text, text) to service_role;
+revoke all on function public.compat_invite_peek(text) from public, anon, authenticated;
+grant execute on function public.compat_invite_peek(text) to service_role;
+revoke all on function public.compat_invite_fill(text, jsonb, text) from public, anon, authenticated;
+grant execute on function public.compat_invite_fill(text, jsonb, text) to service_role;
+revoke all on function public.compat_invite_mine(text) from public, anon, authenticated;
+grant execute on function public.compat_invite_mine(text) to service_role;
+revoke all on function public.compat_invite_take(text, text) from public, anon, authenticated;
+grant execute on function public.compat_invite_take(text, text) to service_role;
