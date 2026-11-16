@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { LOVE_Q, loveFacts } from "../loveFacts";
 import { unableReply } from "../outOfScope";
-import { CHAT_SYSTEM_PROMPT, addTravelNotes } from "../chat";
+import { CHAT_SYSTEM_PROMPT, addTravelNotes, stripInternalTerms } from "../chat";
 
 const chart = { year: { stem: "甲", branch: "子" }, month: { stem: "戊", branch: "辰" }, day: { stem: "壬", branch: "午" }, hour: null, solarDate: { year: 1994, month: 3, day: 10 }, uncertainPillars: [] } as never;
 
@@ -32,5 +32,15 @@ describe("연애 재료와 상담실 규칙", () => {
     expect(addTravelNotes("좋아.", "오늘 점심 뭐 먹지", [])).toBe("좋아.");
     const b = addTravelNotes("자차로 두 시간. 출발 전에 확인해 봐.", "부산에서 강릉 여행 갈까", []);
     expect(b).toBe("자차로 두 시간. 출발 전에 확인해 봐.");
+  });
+  it("입력 항목 이름이 답에 새지 않아요", () => {
+    expect(stripInternalTerms("연애 재료를 보면 일지에 불 기운이 있어.")).toBe("사주를 보면 일지에 불 기운이 있어.");
+    expect(stripInternalTerms("메모에 적은 것처럼 올해는 조용해.")).toBe("올해는 조용해.");
+    expect(stripInternalTerms("'해라, 하지 마라' 대신 기준을 살펴봐.")).toBe("기준을 살펴봐.");
+    expect(stripInternalTerms("평범한 문장이야.")).toBe("평범한 문장이야.");
+  });
+  it("메모장은 기본 행동이 아니고 스캠 경고는 직접 말했을 때만이에요", () => {
+    expect(CHAT_SYSTEM_PROMPT).toContain("메모장에 적기는 기본 행동이 아니야");
+    expect(CHAT_SYSTEM_PROMPT).toContain("직접 말했을 때만");
   });
 });
