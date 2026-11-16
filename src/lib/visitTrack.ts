@@ -1,6 +1,6 @@
 /** 방문 출처·핵심 행동(퍼널) 기록에 쓰는 공용 규칙. 서버와 브라우저가 같이 써요. 입력값(생일·글·이름)은 절대 넣지 않아요. */
 
-export const TRACK_EVENTS = ["bday_read", "draw_start", "draw_done", "login_click", "chat_login_click", "login_done", "signup", "pay_open", "pay_demo", "pay_notify", "share_card", "share_text", "ref_share"] as const;
+export const TRACK_EVENTS = ["bday_read", "draw_start", "draw_done", "login_click", "chat_login_click", "login_done", "signup", "pay_open", "pay_demo", "pay_notify", "share_card", "share_text", "ref_share", "invite_create", "invite_open", "invite_fill", "invite_view"] as const;
 export type TrackEvent = (typeof TRACK_EVENTS)[number];
 
 /** 관리자 화면에 보여 줄 순서와 이름 */
@@ -19,6 +19,10 @@ export const FUNNEL_STEPS: Array<{ key: "visit" | TrackEvent; label: string }> =
   { key: "share_card", label: "결과 카드 저장·공유" },
   { key: "share_text", label: "풀이 글 공유" },
   { key: "ref_share", label: "친구 초대 링크 보내기" },
+  { key: "invite_create", label: "궁합 초대 링크 만들기" },
+  { key: "invite_open", label: "궁합 초대 링크 열기" },
+  { key: "invite_fill", label: "궁합 초대 입력 완료" },
+  { key: "invite_view", label: "궁합 초대 결과 보기" },
 ];
 
 export function isTrackEvent(v: unknown): v is TrackEvent {
