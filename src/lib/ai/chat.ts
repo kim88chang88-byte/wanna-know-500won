@@ -462,7 +462,7 @@ const ORIGIN_SAID = /출발|에서\s?(가|떠나|출발)|서울|경기|인천|�
 export function addTravelNotes(answer: string, question: string, history: ChatMsg[]): string {
   if (!TRAVEL_Q.test(question) || regionsIn(question).length === 0) return answer;
   let out = answer.trimEnd();
-  const userSaid = history.filter((m) => m.role === "user").map((m) => m.text).join(" ");
+  const userSaid = [question, ...history.filter((m) => m.role === "user").map((m) => m.text)].join(" ");
   const hasTime = /자차|KTX|ktx|기차|버스|지하철|비행기|운전|걸려|걸리/.test(out);
   const notes: string[] = [];
   if (hasTime && !/수도권|출발지/.test(out) && !ORIGIN_SAID.test(userSaid)) notes.push("이동 시간은 수도권에서 출발한다고 보고 말한 거야.");
