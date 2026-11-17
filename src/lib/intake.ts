@@ -207,6 +207,12 @@ export function formatDateInput(raw: string): string {
   return `${d.slice(0, 4)}-${d.slice(4, 6)}-${d.slice(6)}`;
 }
 
+/** 숫자만 뽑아서 "14:30" 모양으로 맞춰 줘요. */
+export function formatTimeInput(raw: string): string {
+  const d = raw.replace(/\D/g, "").slice(0, 4);
+  return d.length <= 2 ? d : `${d.slice(0, 2)}:${d.slice(2)}`;
+}
+
 /** 태어난 시간을 고르는 시진(2시간 단위). time 은 그 시진 한가운데 시각이에요. 자시는 자정 전·후를 나눠요. */
 export const TIME_BLOCKS: ReadonlyArray<{ label: string; range: string; time: string }> = [
   { label: "자시", range: "밤 11시~12시", time: "23:30" },

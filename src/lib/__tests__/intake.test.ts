@@ -134,4 +134,12 @@ describe("한 화면 입력(생년월일·성별·시간)", () => {
     const { COMBINED_STEPS } = await import("../intake");
     expect(COMBINED_STEPS).toEqual(["birth", "concern", "consent"]);
   });
+
+  it("태어난 시간 입력은 숫자만 받아 14:30 모양으로 맞춘다", async () => {
+    const { formatTimeInput } = await import("../intake");
+    expect(formatTimeInput("1430")).toBe("14:30");
+    expect(formatTimeInput("14")).toBe("14");
+    expect(formatTimeInput("143")).toBe("14:3");
+    expect(formatTimeInput("14:30:99")).toBe("14:30");
+  });
 });
