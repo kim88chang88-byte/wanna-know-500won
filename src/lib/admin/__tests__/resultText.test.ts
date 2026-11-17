@@ -44,4 +44,10 @@ describe("resultToText", () => {
     expect(t).toContain("### 요약하자면\n이야기");
     expect(t).toContain("### 제목\n접이식 글");
   });
+  it("AI 가 제목을 안 준 글은 내부 이름 대신 화면과 같은 기본 제목을 써요", () => {
+    const t = resultToText({ ...report, book: [] }, { keyword: "k", folds: { praise: "칭찬 글", lucky: "행운 글" }, heads: {} });
+    expect(t).toContain("### 이건 정말 칭찬해 줄게\n칭찬 글");
+    expect(t).toContain("### 행운 처방\n행운 글");
+    expect(t).not.toContain("### praise");
+  });
 });
