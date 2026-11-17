@@ -23,18 +23,23 @@ import { firstSentence, casualHead, iya, splitBold, stripSummaryLead, tidyFold, 
 
 type FoldKey = "elements" | "self" | "praise" | "lack" | "flow" | "improve";
 
-const STEPS: Array<{ key: FoldKey; name: string }> = [
-  { key: "elements", name: "오행으로 보는 사주" },
-  { key: "self", name: "나는 어떤 사람인가?" },
-  { key: "praise", name: "이건 정말 칭찬해 줄게 👏" },
-  { key: "lack", name: "그렇지만 이건 아쉬워" },
-  { key: "improve", name: "이렇게 개선해 보자 🌱" },
-  { key: "flow", name: "올해와 이번 달의 흐름" },
+const STEPS: Array<{ key: FoldKey; name: string; short: string }> = [
+  { key: "elements", name: "오행으로 보는 사주", short: "사주의 큰 그림" },
+  { key: "self", name: "나는 어떤 사람인가?", short: "나의 성격" },
+  { key: "praise", name: "이건 정말 칭찬해 줄게 👏", short: "나의 강점" },
+  { key: "lack", name: "그렇지만 이건 아쉬워", short: "아쉬운 점" },
+  { key: "improve", name: "이렇게 개선해 보자 🌱", short: "개선 방법" },
+  { key: "flow", name: "올해와 이번 달의 흐름", short: "올해의 흐름" },
 ];
 
 /** 신년운에서는 "올해와 이번 달" 대신 2027년 기준 이름을 써요. */
 function stepName(key: FoldKey, name: string, topic: string): string {
   return key === "flow" && topic === "study" ? "2027년의 흐름" : name;
+}
+
+/** AI 제목이 없을 때 STEP 라벨 옆에 붙이는 짧은 이름. (큰 제목은 기본 장 이름이라 겹치지 않게 달라요) */
+function stepShort(short: string): string {
+  return short;
 }
 
 /** 형광펜 색: 주제별 동물 그림에 맞춰요. (용 노랑 · 토끼 분홍 · 남자 팬더 연보라 · 여자 팬더 장미 · 여우 주황 · 수달 하늘색) */
@@ -312,7 +317,7 @@ export default function StoryReport({
               <Fold
                 key={st.key}
                 testId={`story-fold-${st.key}`}
-                label={heads[st.key] ? `STEP ${n + 1} · ${stepName(st.key, st.name, t.key)}` : `STEP ${n + 1}`}
+                label={`STEP ${n + 1} · ${heads[st.key] ? stepName(st.key, st.name, t.key) : stepShort(st.short)}`}
                 title={heads[st.key] || stepName(st.key, st.name, t.key)}
               >
                 {st.key === "elements" && (
