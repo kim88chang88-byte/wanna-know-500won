@@ -1,4 +1,10 @@
 import type { BookPage, PremiumReportView } from "@/lib/premium/types";
+import { FOLD_TITLES } from "@/lib/storyHelpers";
+
+/** AI 가 제목을 안 줬을 때 복사본에 내부 이름(praise 등) 대신 화면과 같은 기본 제목을 써요. */
+function foldTitle(key: string): string {
+  return key === "lucky" ? "행운 처방" : (FOLD_TITLES as Record<string, string>)[key] ?? key;
+}
 
 /** 관리자가 AI 가 쓴 결과 글을 통째로 복사해서 품질을 점검할 때 쓰는 글자 모음 (화면에는 안 나와요) */
 export interface ResultTextMeta {
@@ -50,7 +56,7 @@ export function resultToText(report: PremiumReportView, reading: unknown, meta: 
     out.push(`\n## 일반 풀이`, `키워드: ${r.keyword ?? ""}`, `총운: ${r.total?.summary ?? ""}`, `도리 한마디: ${r.kkotgeoji ?? ""}`);
     if (r.reason) out.push(`이유: ${r.reason}`);
     if (r.story) out.push(`### 요약하자면\n${r.story}`);
-    for (const [k, v] of Object.entries(r.folds ?? {})) out.push(`### ${r.heads?.[k] ?? k}\n${v}`);
+    for (const [k, v] of Object.entries(r.folds ?? {})) out.push(`### ${r.heads?.[k] ?? foldTitle(k)}\n${v}`);
   }
   if (report.book.length) out.push("", ...report.book.map(pageText).flatMap((t) => [t, ""]));
   return out.join("\n").replace(/\n{3,}/g, "\n\n").trim() + "\n";
