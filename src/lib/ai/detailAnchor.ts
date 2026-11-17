@@ -115,7 +115,7 @@ export function detailAnchor(chart: SajuChart, topic: ReadingTopic, core: CoreFa
   const least = [...entries].reverse().filter(([, n]) => n === entries[entries.length - 1][1]).map(([k]) => KO[k]);
   const concernLine = hasConcern(concern) && concern.tags.length ? `\n- 고민: ${concern.tags.map(concernLabel).join(", ")}. 진단의 '아쉬운 점'과 이어서 다루고, 이 고민을 칭찬이나 "이미 잘하고 있다"로 뒤집지 마.` : "";
   return [
-    `[공통 진단 — ${TOPIC_LABEL[topic]} 일곱 글과 요약하자면은 모두 이 진단을 그대로 따라야 해. 글마다 다른 성격을 말하거나 서로 반대로 말하면 안 돼.]`,
+    `[공통 진단 — ${TOPIC_LABEL[topic]} 일곱 글과 요약하자면은 모두 이 진단을 그대로 따라야 해. 글마다 다른 성격을 말하거나 서로 반대로 말하면 안 돼. 아래 진단의 낱말구는 메모 형태("~기 쉬움", "~하는 것")라서 문장에 그대로 붙여 넣지 말고, "~기 쉬워", "~거든" 같은 자연스러운 반말로 풀어서 써.]`,
     `- 기본 결: ${take.nature}`,
     `- 강점(칭찬 글과 요약에서만 크게 다뤄): ${take.strength}`,
     `- 아쉬운 점(아쉬움·개선 글에서 다뤄): ${take.weakness}`,
