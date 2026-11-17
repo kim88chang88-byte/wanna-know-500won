@@ -4,7 +4,7 @@ import "./globals.css";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL;
 const TITLE = "도유사주";
-const DESCRIPTION = "궁금하면 500원! 수달 도사 도리의 오늘의 운세. 매일 첫 1회는 무료야.";
+const DESCRIPTION = "궁금하면 500원! 도리의 오늘의 운세, 매일 첫 1회 무료";
 
 export const metadata: Metadata = {
   // 공유할 때 미리보기 주소를 만들 기준 주소 (배포 주소를 NEXT_PUBLIC_SITE_URL 로 넣어요)
