@@ -7,8 +7,8 @@ import { buildDailyFacts } from "./dailyFacts";
 import { TOPIC_LABEL, type ReadingTopic } from "./reading";
 
 /** 수달 도사 도리의 성격과 지켜야 할 선을 정한 시스템 프롬프트입니다. (BRIEF.md 의 "뽑기 언어, 무섭지 않게" 방향) */
-export const SYSTEM_PROMPT = `너는 "도리"야. 맑은 옹달샘 옆 500원 캡슐 자판기를 지키는 수달 도사로, 오늘의 운을 물빛 쪽지에 담아 건네주는 다정하고 장난기 있는 친구야.
-사주를 "점"이 아니라 "오늘 기분이 나아지는 캡슐 속 쪽지"처럼 가볍고 포근하게 풀어줘.
+export const SYSTEM_PROMPT = `너는 "도리"야. 맑은 옹달샘 옆에서 오늘의 운을 물빛 쪽지에 담아 건네주는 수달 도사로, 다정하고 장난기 있는 친구야.
+사주를 "점"이 아니라 "오늘 기분이 나아지는 물빛 쪽지"처럼 가볍고 포근하게 풀어줘.
 
 말투
 - 친근한 반말. 예: "조개 속에 든 네 고민, 도리가 톡- 까서 알려줄게!" 하지만 무례하거나 느끼하지 않게. 물·조개·달빛 같은 비유는 가끔만 써.
@@ -71,7 +71,7 @@ export interface ExtraFacts {
 export function buildUserMessage(chart: SajuChart, topic: ReadingTopic, gender: Gender, concern?: Concern | null, extra: ExtraFacts = {}, ask?: string): string {
   const facts = analyzeChart(chart);
   const payload = {
-    오늘뽑은캡슐: TOPIC_LABEL[topic],
+    오늘고른주제: TOPIC_LABEL[topic],
     성별: gender === "female" ? "여성" : "남성",
     일간: `${facts.dayMaster.hanja}(${facts.dayMaster.hangul}) · ${facts.dayMaster.elementKo} · ${facts.dayMaster.yinYang === "yang" ? "양" : "음"}`,
     네기둥: facts.pillars.map((p) => `${p.label} ${p.text}`),
@@ -94,7 +94,7 @@ export function buildUserMessage(chart: SajuChart, topic: ReadingTopic, gender: 
   const focus =
     topic === "general"
       ? "특별히 고른 주제는 없으니 총운 중심으로 균형 있게 써줘."
-      : `이번에는 "${TOPIC_LABEL[topic]}" 캡슐을 뽑았으니, 도리 한마디와 총운 요약에서 이 주제를 조금 더 살려줘.`;
+      : `이번에는 "${TOPIC_LABEL[topic]}" 주제를 골랐으니, 도리 한마디와 총운 요약에서 이 주제를 조금 더 살려줘.`;
   const yearly =
     topic === "study"
       ? "\n이번 풀이는 하루가 아니라 2027년 한 해(정미년) 기준이야. 총운·도리 한마디·이유에서 '오늘', '하루', '날'로 말하지 말고 '2027년', '새해', '올 한 해', '새해 첫 달'처럼 한 해의 시기로 말해. '올해'만 쓰면 헷갈리니 '2027년'이라고 써. '~가 될 거야'처럼 장담하지 말고 '~할 여지가 커' 정도로."
