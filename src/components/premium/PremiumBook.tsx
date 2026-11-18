@@ -754,15 +754,21 @@ function Visual({ page, report }: { page: BookPage; report: PremiumReportView })
               const [stem, branch] = p.full ? Array.from(p.full) : [null, null];
               const me = p.key === "day";
               return (
-                <div key={p.key} className={`min-w-0 ${me ? "" : "opacity-70"}`}>
-                  <div className={`text-center text-[14px] font-bold ${me ? "text-[#cfc0ff]" : GOLD}`}>{p.label}</div>
+                <div key={p.key} className="min-w-0">
+                  <div className={`text-center font-bold ${me ? "text-[15.5px] text-[#f6dfa8]" : `text-[14px] ${GOLD}`}`}>{p.label}</div>
                   <div className="mb-1.5 min-h-[2.4em] text-center text-[11.5px] leading-tight text-[#e8dfca]/60">{PILLAR_MEANING[p.key]}</div>
                   <div
                     data-testid="pillar-card"
                     data-me={me ? "true" : undefined}
-                    className={`relative rounded-2xl border bg-white/[0.04] py-3 text-center ${me ? "border-2 border-[#b9a4ff] bg-[#b9a4ff]/[0.14] shadow-[0_0_0_3px_rgba(185,164,255,0.18),0_6px_18px_rgba(185,164,255,0.22)]" : HAIR}`}
+                    className={`relative rounded-2xl border bg-white/[0.04] py-3 text-center ${me ? "border-2 border-[#e6c887] bg-[#e6c887]/[0.12] shadow-[0_0_18px_rgba(230,200,135,0.4)]" : HAIR}`}
                   >
-                    {me && <span aria-hidden="true" data-testid="pillar-me-badge" className="absolute -right-1.5 -top-2.5 z-10 rotate-6 rounded-[9px] bg-[#b9a4ff] px-2 py-1 text-[13px] leading-none text-[#1a1530] shadow-md">나</span>}
+                    {me && (
+                      <>
+                        <span aria-hidden="true" data-testid="pillar-me-badge" className="absolute -right-1.5 -top-2.5 z-10 rotate-6 rounded-[9px] bg-[#e6c887] px-2 py-1 text-[13px] leading-none text-[#3a2a07] shadow-md">나</span>
+                        <span aria-hidden="true" className="pointer-events-none absolute -left-1 -top-2 text-[16px] leading-none text-[#f6dfa8] [text-shadow:0_0_8px_rgba(246,223,168,0.8)]">✦</span>
+                        <span aria-hidden="true" className="pointer-events-none absolute -right-1 bottom-9 text-[11px] leading-none text-[#f6dfa8]">✦</span>
+                      </>
+                    )}
                     {p.full ? (
                       <>
                         <div className="space-y-1 px-1.5" aria-label={`${p.label} ${p.full}`}>
@@ -770,7 +776,7 @@ function Visual({ page, report }: { page: BookPage; report: PremiumReportView })
                           <ElementTile ch={branch} el={elementOfChar(branch, true)} reading={p.reading?.[1] ?? ""} tone="dark" sizeClass="text-[36px]" />
                         </div>
                         <div className="mt-1.5 text-[11.5px] text-[#e8dfca]/60 leading-tight">
-                          <div className={me ? "text-[#cfc0ff]" : ""}>{me ? "본인(本人)" : p.tenGodStem}</div>
+                          <div className={me ? "text-[#f6dfa8]" : ""}>{me ? "본인(本人)" : p.tenGodStem}</div>
                           <div>{p.tenGodBranch}</div>
                         </div>
                       </>
