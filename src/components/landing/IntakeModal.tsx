@@ -505,7 +505,7 @@ function MbtiPicker({ value, onChange }: { value: string; onChange: (v: string) 
       </div>
       <p className="mt-3 text-center text-[11px] text-gray-500">네 칸을 모두 고르면 저장돼. 하나라도 모르겠으면 건너뛰어도 돼.</p>
       <p className="mt-2 rounded-xl bg-brand-50 px-3 py-2 text-[11px] leading-relaxed text-gray-600">
-        <b className="text-gray-800">MBTI는 사주를 읽을 때 곁에 놓고 보는 참고야.</b> 네 글자로 사람 속을 다 알 수는 없어서, 내가 알려준 성향을 사주와 나란히 놓고 같은 말을 하는 곳, 다른 말을 하는 곳을 살펴봐.
+        <b className="text-gray-800">MBTI는 사주를 읽을 때 곁에 놓고 참고로 볼 뿐이야.</b> 네 글자로 사람 속을 다 알 수는 없어서, 사주가 들려주는 이야기와 나란히 놓고 비교하며 살펴볼게.
       </p>
     </div>
   );
