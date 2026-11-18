@@ -483,13 +483,23 @@ function MbtiPicker({ value, onChange }: { value: string; onChange: (v: string) 
       </div>
       <div className="grid grid-cols-4 gap-2" role="group" aria-label="MBTI 고르기">
         {MBTI_PAIRS.map(([x, y, label], row) => (
-          <div key={x} className="flex flex-col items-stretch gap-2">
+          <div key={x} className="flex flex-col items-stretch gap-1.5">
             <span className="text-center text-[10.5px] leading-tight text-gray-500">{label}</span>
-            {[x, y].map((ch) => (
-              <button key={ch} type="button" data-testid={`mbti-letter-${ch}`} aria-pressed={letters[row] === ch} onClick={() => pick(row, ch)} className={`rounded-2xl border py-3 text-lg font-bold transition-colors ${letters[row] === ch ? CHOICE_ON : CHOICE_OFF}`}>
-                {ch}
-              </button>
-            ))}
+            {/* 위아래 둘 중 하나를 고르는 세로 토글: 연한 트랙 위에서 고른 글자가 흰 알약으로 올라와요 */}
+            <div className="flex flex-col gap-1 rounded-[18px] bg-brand-50 p-1">
+              {[x, y].map((ch) => (
+                <button
+                  key={ch}
+                  type="button"
+                  data-testid={`mbti-letter-${ch}`}
+                  aria-pressed={letters[row] === ch}
+                  onClick={() => pick(row, ch)}
+                  className={`h-11 rounded-[14px] text-lg font-bold transition-all ${letters[row] === ch ? "bg-white text-brand-600 shadow-[0_1px_4px_rgba(60,30,120,0.25)]" : "text-gray-400"}`}
+                >
+                  {ch}
+                </button>
+              ))}
+            </div>
           </div>
         ))}
       </div>
