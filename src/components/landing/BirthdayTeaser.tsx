@@ -63,7 +63,7 @@ export default function BirthdayTeaser({ onOpenLogin }: { /** 로그인하면 �
   }
 
   return (
-    <section id="daily-try" data-testid="birthday-teaser" className="mb-6 -mx-2.5 rounded-3xl border border-brand-200/70 bg-white/85 px-2.5 py-3 sm:mx-0 sm:p-5 shadow-sm">
+    <section id="daily-try" data-testid="birthday-teaser" className={`mb-6 -mx-2.5 rounded-3xl border border-brand-200/70 bg-white/85 px-2.5 py-3 shadow-sm ${result ? "sm:mx-0 sm:p-5" : "min-[480px]:mx-auto min-[480px]:max-w-[21.25rem]"}`}>
       {result ? (
         <div className="text-center">
           <p className="text-left text-xs font-bold text-brand-500">오늘의 도리 한마디</p>
@@ -105,7 +105,7 @@ export default function BirthdayTeaser({ onOpenLogin }: { /** 로그인하면 �
         </div>
       ) : (
         <form onSubmit={submit} className="flex flex-col items-center gap-2">
-          <p className="text-[13.5px] font-bold text-slate-700">생일과 태어난 시간을 알려주면 오늘의 도리 한마디를 보여줄게 <DoriIcon className="!mr-0 ml-1" /></p>
+          <p className="text-balance text-center text-[13.5px] font-bold text-slate-700">생일과 태어난 시간을 알려주면 오늘의 도리 한마디를 보여줄게 <DoriIcon className="!mr-0 ml-1" /></p>
           <div className="flex w-full max-w-sm flex-col gap-2">
             <div className="flex gap-2">
               <input
