@@ -888,7 +888,7 @@ export default function IntakeModal({ target, wallet = null, onClose, onComplete
 
               {(aiNotice || aiGated) && <AiNotice dark={luxe} gated={aiGated} />}
 
-              <SajuGuide dark={luxe} />
+              {!bookMode && <SajuGuide dark={luxe} />}
 
               {storyMode ? (
                 <>

@@ -956,25 +956,19 @@ function Visual({ page, report }: { page: BookPage; report: PremiumReportView })
   }
 }
 
-/** 리포트마다 한 동물만 나와요. 자판기 카드·상담실과 같아요: 성공=용, 재물=부자 토끼, 연애·결혼=판다 커플, 궁합=판다 웨딩, 건강=달리는 여우, 공부=새해 수달, 그 밖=수달 */
+/** 책 첫 쪽 머리말. 예전에 결과서 맨 위에 접이식 말풍선으로 있던 "사주, 이렇게 읽어 봐"를 본문으로 옮긴 거예요. */
+const BOOK_PREFACE = [
+  "사주는 오래오래 쌓인 흐름으로 나를 살펴보는 지도 같은 거야.",
+  "이 책에서는 도리가 네 곁에서 한 장씩 길을 읽어 줄게. 모르는 말은 쉽게 풀어 줄 테니 편하게 따라와 줘.",
+  "“어, 맞네?” 싶은 곳은 고개를 끄덕이고, 다르게 느껴지는 곳은 “그럴 수도 있구나” 하고 지나가 줘. 지금은 안 맞아 보여도 나중에 문득 떠오르는 대목도 있어.",
+  "어떤 길로 갈지는 언제나 네 선택이야. 도리는 그 선택에 작은 힌트가 되고 싶어 🌙",
+] as const;
+
+/** 책 안의 말풍선 캐릭터. 예전에는 주제별로 달랐지만(성공=용, 재물=토끼, 연애=판다 …) 지금은 도리(수달)로 통일해요. */
 type Mascot = "dragon" | "rabbit-rich" | "panda-couple" | "panda-wedding" | "fox-run" | "otter-newyear" | "otter";
-function mascotOf(report: PremiumReportView): Mascot {
-  if (report.compat) return "panda-wedding";
-  switch (report.topic.key) {
-    case "love":
-    case "marriage":
-      return "panda-couple";
-    case "money":
-      return "rabbit-rich";
-    case "success":
-      return "dragon";
-    case "health":
-      return "fox-run";
-    case "study":
-      return "otter-newyear";
-    default:
-      return "otter";
-  }
+function mascotOf(_report: PremiumReportView): Mascot {
+  // 책 안에서는 말하는 캐릭터를 도리(수달)로 통일해요. (주제별 동물은 자판기 카드·상담실에서 그대로 써요)
+  return "otter";
 }
 const MASCOT_EMOJI: Record<Mascot, string> = { dragon: "🐲", "rabbit-rich": "🐰", "panda-couple": "🐼", "panda-wedding": "🐼", "fox-run": "🦊", "otter-newyear": "🦦", otter: "🦦" };
 const avatarOf = (m: Mascot) => `/images/animal-${m}.webp`;
@@ -1295,6 +1289,14 @@ export default function PremiumBook({ report, flush = false, finale, previewBlur
                   <p className="text-center text-[13px] tracking-[0.3em] text-[#5b5670]">사 주 풀 이</p>
                   <p className="mb-4 mt-1 text-center font-serifKr text-[20px] font-bold text-[#26233a]">{tp.main}</p>
                 </>
+              )}
+              {gi === 0 && page.no === 1 && (
+                <div data-testid="book-preface" className="mb-5 border-b border-dotted border-[#9a93b0] px-0.5 pb-3.5">
+                  <p className="mb-1.5 text-[12px] tracking-[0.14em] text-[#8a5f12]">도리의 머리말</p>
+                  {BOOK_PREFACE.map((l) => (
+                    <p key={l} className="mb-2 text-[14.5px] leading-[1.85] text-[#322f47] last:mb-0">{l}</p>
+                  ))}
+                </div>
               )}
               <div className={`space-y-5 ${blurred ? "[&_p]:blur-[6px] [&_li]:blur-[6px] select-none" : ""}`} aria-hidden={blurred ? "true" : undefined}>
                 {g.map((s, n) => (
