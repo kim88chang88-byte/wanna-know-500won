@@ -63,7 +63,7 @@ export default function BirthdayTeaser({ onOpenLogin }: { /** 로그인하면 �
   }
 
   return (
-    <section id="daily-try" data-testid="birthday-teaser" className="mb-6 rounded-3xl border border-brand-200/70 bg-white/85 p-4 sm:p-5 shadow-sm">
+    <section id="daily-try" data-testid="birthday-teaser" className="mb-6 -mx-2.5 rounded-3xl border border-brand-200/70 bg-white/85 px-2.5 py-3 sm:mx-0 sm:p-5 shadow-sm">
       {result ? (
         <div className="text-center">
           <p className="text-left text-xs font-bold text-brand-500">오늘의 도리 한마디</p>
@@ -119,36 +119,33 @@ export default function BirthdayTeaser({ onOpenLogin }: { /** 로그인하면 �
                 onChange={(e) => setValue(formatDateInput(e.target.value))}
                 className="h-11 w-full min-w-0 rounded-[14px] border-2 border-transparent bg-gray-100 px-3 text-[14px] text-gray-900 placeholder:text-gray-400 transition-colors focus:border-brand-300 focus:bg-white focus:outline-none flex-[1.2]"
               />
-              <div className="relative flex min-w-0 flex-1">
-                <input
-                  type="text"
-                  inputMode="numeric"
-                  autoComplete="off"
-                  aria-label="태어난 시간"
-                  data-testid="teaser-time"
-                  placeholder="시간 14:30"
-                  maxLength={5}
-                  disabled={timeUnknown}
-                  value={time}
-                  onChange={(e) => setTime(formatTimeInput(e.target.value))}
-                  className="h-11 w-full min-w-0 rounded-[14px] border-2 border-transparent bg-gray-100 px-3 text-[14px] text-gray-900 placeholder:text-gray-400 transition-colors focus:border-brand-300 focus:bg-white focus:outline-none pr-[68px] disabled:opacity-45"
-                />
-                <label className="absolute right-1.5 top-1/2 flex -translate-y-1/2 items-center gap-1 rounded-full border border-gray-200 bg-white py-[3px] pl-1.5 pr-2 text-[11.5px] text-gray-500">
-                  <input
-                    type="checkbox"
-                    data-testid="teaser-time-unknown"
-                    checked={timeUnknown}
-                    onChange={(e) => {
-                      setTimeUnknown(e.target.checked);
-                      if (e.target.checked) setTime("");
-                    }}
-                    aria-label="태어난 시간을 몰라요"
-                    className="h-3.5 w-3.5 accent-brand-500"
-                  />
-                  모름
-                </label>
-              </div>
+              <input
+                type="text"
+                inputMode="numeric"
+                autoComplete="off"
+                aria-label="태어난 시간"
+                data-testid="teaser-time"
+                placeholder="시간 14:30"
+                maxLength={5}
+                disabled={timeUnknown}
+                value={time}
+                onChange={(e) => setTime(formatTimeInput(e.target.value))}
+                className="h-11 w-full min-w-0 flex-1 rounded-[14px] border-2 border-transparent bg-gray-100 px-3 text-[14px] text-gray-900 placeholder:text-gray-400 transition-colors focus:border-brand-300 focus:bg-white focus:outline-none disabled:opacity-45"
+              />
             </div>
+            <label className="flex items-center gap-1.5 self-end text-[12px] text-gray-500">
+              <input
+                type="checkbox"
+                data-testid="teaser-time-unknown"
+                checked={timeUnknown}
+                onChange={(e) => {
+                  setTimeUnknown(e.target.checked);
+                  if (e.target.checked) setTime("");
+                }}
+                className="h-4 w-4 accent-brand-500"
+              />
+              태어난 시간을 몰라요
+            </label>
             <button
               type="submit"
               disabled={state === "loading"}
