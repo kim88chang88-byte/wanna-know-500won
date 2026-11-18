@@ -19,6 +19,7 @@ import { MBTI_MARK } from "@/lib/premium/book/lifeFlow";
 import { formatWon } from "@/lib/premium/book/charts";
 import { callName } from "@/lib/ai/nameRepair";
 import BodyFigure from "./BodyFigure";
+import DoriIcon from "@/components/landing/DoriIcon";
 import { BODY_GROUPS, STATE_SHORT, STATE_TEXT, bodyElName, bodyStates, bodyWhy, dailyRoutine, monthlyCondition, monthlySummary, yearFocus, type BodyEl, type BodyState } from "@/lib/premium/bodyMap";
 
 /*
@@ -745,7 +746,7 @@ function Visual({ page, report }: { page: BookPage; report: PremiumReportView })
           )}
           {/* 일주 칸의 위 글자가 '나(일간)'이야. 도리가 짚어 주고, 그 칸만 연보라로 또렷하게 보여. */}
           <div className="relative mb-3.5 ml-[50%] w-1/2" data-testid="pillar-me-tip">
-            <p className="rounded-2xl border-2 border-[#20203a] bg-[#fffdf7] px-2 py-1.5 text-center text-[13px] leading-snug text-[#26233a]">여기가 바로 너야! 🦦</p>
+            <p className="rounded-2xl border-2 border-[#20203a] bg-[#fffdf7] px-2 py-1.5 text-center text-[13px] leading-snug text-[#26233a]">여기가 바로 너야! <DoriIcon className="!mr-0 ml-0.5 !h-6 !w-6" /></p>
             <span aria-hidden="true" className="absolute -bottom-[7px] left-1/4 -ml-1.5 h-3 w-3 rotate-45 border-b-2 border-r-2 border-[#20203a] bg-[#fffdf7]" />
           </div>
           <div className="grid grid-cols-4 gap-2">
@@ -970,7 +971,6 @@ function mascotOf(_report: PremiumReportView): Mascot {
   // 책 안에서는 말하는 캐릭터를 도리(수달)로 통일해요. (주제별 동물은 자판기 카드·상담실에서 그대로 써요)
   return "otter";
 }
-const MASCOT_EMOJI: Record<Mascot, string> = { dragon: "🐲", "rabbit-rich": "🐰", "panda-couple": "🐼", "panda-wedding": "🐼", "fox-run": "🦊", "otter-newyear": "🦦", otter: "🦦" };
 const avatarOf = (m: Mascot) => `/images/animal-${m}.webp`;
 /** 장 표지 그림은 프리미엄 대문 그림 한 장을 모든 장이 같이 써요. */
 const COVER_SCENE = "/images/premium-main.webp";
@@ -1337,14 +1337,14 @@ export default function PremiumBook({ report, flush = false, finale, previewBlur
 
         {page.advice && (
           <div data-testid="book-advice" aria-hidden={blurred ? "true" : undefined} className={`rounded-2xl border border-[#e6c887]/40 bg-[#e6c887]/[0.08] px-4 py-4 ${blurred ? BLUR : ""}`}>
-            <p className={`text-[14px] font-bold tracking-wide ${GOLD}`}>{MASCOT_EMOJI[mascot]} 도리의 맞춤 조언</p>
+            <p className={`text-[14px] font-bold tracking-wide ${GOLD}`}><DoriIcon className="!h-6 !w-6" />도리의 맞춤 조언</p>
             <p className="mt-1.5 font-serifKr text-[15px] leading-[1.85] text-[#fbf3de]">{page.advice}</p>
           </div>
         )}
 
         {page.letter && (
           <div data-testid="book-letter" aria-hidden={blurred ? "true" : undefined} className={`rounded-2xl border border-[#e6c887]/40 bg-[#e6c887]/[0.08] px-4 py-4 ${blurred ? BLUR : ""}`}>
-            <p className={`text-[14px] font-bold tracking-wide ${GOLD}`}>{MASCOT_EMOJI[mascot]} 도리의 편지</p>
+            <p className={`text-[14px] font-bold tracking-wide ${GOLD}`}><DoriIcon className="!h-6 !w-6" />도리의 편지</p>
             <p className="mt-1.5 whitespace-pre-line font-serifKr text-[15px] leading-[1.85] text-[#fbf3de]">{fillLetterMbti(page.letter, report.mbti)}</p>
           </div>
         )}
