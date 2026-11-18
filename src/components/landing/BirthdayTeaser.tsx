@@ -63,7 +63,7 @@ export default function BirthdayTeaser({ onOpenLogin }: { /** 로그인하면 �
   }
 
   return (
-    <section id="daily-try" data-testid="birthday-teaser" className={`mb-6 -mx-2.5 rounded-3xl border border-brand-200/70 bg-white/85 px-2.5 py-3 shadow-sm ${result ? "sm:mx-0 sm:p-5" : "min-[480px]:mx-auto min-[480px]:max-w-[21.25rem]"}`}>
+    <section id="daily-try" data-testid="birthday-teaser" className={`mb-6 rounded-3xl border border-brand-200/70 bg-white/85 shadow-sm ${result ? "-mx-2.5 px-2.5 py-3 sm:mx-0 sm:p-5" : "mx-auto max-w-[18.75rem] px-2.5 py-3"}`}>
       {result ? (
         <div className="text-center">
           <p className="text-left text-xs font-bold text-brand-500">오늘의 도리 한마디</p>
