@@ -107,45 +107,46 @@ export default function BirthdayTeaser({ onOpenLogin }: { /** 로그인하면 �
         <form onSubmit={submit} className="flex flex-col items-center gap-2">
           <p className="text-balance text-center text-[13.5px] font-bold text-slate-700">생일과 태어난 시간을 알려주면 오늘의 도리 한마디를 보여줄게 <DoriIcon className="!mr-0 ml-1" /></p>
           <div className="flex w-full max-w-sm flex-col gap-2">
-            <div className="flex gap-2">
-              <input
-                type="text"
-                inputMode="numeric"
-                autoComplete="off"
-                aria-label="생년월일 (양력)"
-                placeholder="생년월일 2000-01-01"
-                maxLength={10}
-                value={value}
-                onChange={(e) => setValue(formatDateInput(e.target.value))}
-                className="h-11 w-full min-w-0 rounded-[14px] border-2 border-transparent bg-gray-100 px-3 text-[14px] text-gray-900 placeholder:text-gray-400 transition-colors focus:border-brand-300 focus:bg-white focus:outline-none flex-[1.2]"
-              />
+            <input
+              type="text"
+              inputMode="numeric"
+              autoComplete="off"
+              aria-label="생년월일 (양력)"
+              placeholder="생년월일 2000-01-01"
+              maxLength={10}
+              value={value}
+              onChange={(e) => setValue(formatDateInput(e.target.value))}
+              className="h-11 w-full min-w-0 rounded-[14px] border-2 border-transparent bg-gray-100 px-3 text-[14px] text-gray-900 placeholder:text-gray-400 transition-colors focus:border-brand-300 focus:bg-white focus:outline-none"
+            />
+            <div className="relative flex">
               <input
                 type="text"
                 inputMode="numeric"
                 autoComplete="off"
                 aria-label="태어난 시간"
                 data-testid="teaser-time"
-                placeholder="시간 14:30"
+                placeholder="태어난 시간 14:30"
                 maxLength={5}
                 disabled={timeUnknown}
                 value={time}
                 onChange={(e) => setTime(formatTimeInput(e.target.value))}
-                className="h-11 w-full min-w-0 flex-1 rounded-[14px] border-2 border-transparent bg-gray-100 px-3 text-[14px] text-gray-900 placeholder:text-gray-400 transition-colors focus:border-brand-300 focus:bg-white focus:outline-none disabled:opacity-45"
+                className="h-11 w-full min-w-0 rounded-[14px] border-2 border-transparent bg-gray-100 px-3 text-[14px] text-gray-900 placeholder:text-gray-400 transition-colors focus:border-brand-300 focus:bg-white focus:outline-none pr-[72px] disabled:opacity-45"
               />
+              <label className="absolute right-1.5 top-1/2 flex -translate-y-1/2 items-center gap-1 rounded-full border border-gray-200 bg-white py-[3px] pl-1.5 pr-2 text-[11.5px] text-gray-500">
+                <input
+                  type="checkbox"
+                  data-testid="teaser-time-unknown"
+                  checked={timeUnknown}
+                  onChange={(e) => {
+                    setTimeUnknown(e.target.checked);
+                    if (e.target.checked) setTime("");
+                  }}
+                  aria-label="태어난 시간을 몰라요"
+                  className="h-3.5 w-3.5 accent-brand-500"
+                />
+                모름
+              </label>
             </div>
-            <label className="flex items-center gap-1.5 self-end text-[12px] text-gray-500">
-              <input
-                type="checkbox"
-                data-testid="teaser-time-unknown"
-                checked={timeUnknown}
-                onChange={(e) => {
-                  setTimeUnknown(e.target.checked);
-                  if (e.target.checked) setTime("");
-                }}
-                className="h-4 w-4 accent-brand-500"
-              />
-              태어난 시간을 몰라요
-            </label>
             <button
               type="submit"
               disabled={state === "loading"}
