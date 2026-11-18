@@ -106,7 +106,7 @@ export default function BirthdayTeaser({ onOpenLogin }: { /** 로그인하면 �
       ) : (
         <form onSubmit={submit} className="flex flex-col items-center gap-2">
           <p className="text-center text-[13.5px] font-bold leading-normal text-slate-700 [word-break:keep-all]">생일과 태어난 시간을 알려주면<br />오늘의 도리 한마디를 보여줄게 <DoriIcon className="!mr-0 ml-1" /></p>
-          <div className="flex w-full max-w-sm flex-col gap-2">
+          <div className="flex w-full max-w-[18.5rem] flex-col gap-2">
             <input
               type="text"
               inputMode="numeric"
