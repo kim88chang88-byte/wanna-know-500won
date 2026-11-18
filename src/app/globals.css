@@ -536,8 +536,10 @@ body {
 .hanji-curl.br { right: 0; clip-path: polygon(100% 0, 0 100%, 0 0); background: linear-gradient(135deg, #fbf6e8 0%, #e7dabb 100%); }
 .hanji-curl.bl { left: 0; clip-path: polygon(0 0, 100% 100%, 100% 0); background: linear-gradient(225deg, #fbf6e8 0%, #e7dabb 100%); }
 
-/* 프리미엄 책 전체: 고딕·명조 대신 귀여운 둥근 글씨(주아). 굵게는 글씨 자체가 두꺼워서 가짜 굵기를 끄고, 큰 제목도 같은 글씨로 맞춰요. */
-.premium-cute, .premium-cute .font-serifKr { font-family: "Jua", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif; font-synthesis: none; }
+/* 프리미엄 책: 고딕·명조 대신 귀여운 글씨(한지 본문은 주아, 남색 영역은 싱글데이). 굵게는 글씨 자체가 두꺼워서 가짜 굵기를 끄고, 큰 제목도 같은 글씨로 맞춰요. */
+.premium-cute, .premium-cute .font-serifKr { font-family: "Single Day", "Jua", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif; font-synthesis: weight; }
+/* 한지 위 본문은 계속 주아. 남색 바탕의 설명·표·팁 영역만 발랄한 싱글데이로 (싱글데이는 굵은 글씨가 없어 굵기는 살짝 만들어 써요) */
+.premium-cute .hanji-page, .premium-cute .hanji-page .font-serifKr { font-family: "Jua", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif; font-synthesis: none; }
 
 /* 프리미엄 시작 버튼: 흑금 + 보랏빛 달무리, 금테 이중선, 지나가는 빛 */
 .prem-btn { background: radial-gradient(circle at 50% 0%, #4a3a8a, #15121e 75%); box-shadow: 0 8px 24px rgba(74,58,138,.55), inset 0 0 18px rgba(230,200,135,.15); }
