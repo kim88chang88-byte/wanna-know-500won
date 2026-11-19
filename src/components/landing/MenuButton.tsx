@@ -6,6 +6,18 @@ import { MACHINES, PREMIUM_CARDS } from "./data";
 // 개발용 계산 화면(/saju)은 배포(production)에서는 메뉴에도, 주소로도 열리지 않아요.
 const SHOW_DEV_LINKS = process.env.NODE_ENV === "development";
 
+/** 메뉴에 붙는 작은 캐릭터: 판매대마다 정해진 동물 (책·상담실과 같은 그림) */
+const MENU_ANIMAL: Record<string, string> = {
+  "machine-study": "otter-newyear",
+  "machine-success": "dragon",
+  "machine-compat": "panda-wedding",
+  "machine-money": "rabbit-rich",
+  "machine-love": "panda-couple",
+  "machine-health": "fox-run",
+  "premium-all": "otter",
+};
+const animalImg = (key: string) => (MENU_ANIMAL[key] ? `/images/animal-${MENU_ANIMAL[key]}.webp` : undefined);
+
 const HOME_GROUP: MenuGroup = {
   items: [
     { href: "/", label: "처음으로", emoji: "🏠" },
@@ -27,11 +39,11 @@ const MACHINE_GROUPS: readonly MenuGroup[] = [
   { items: [{ href: "/wallet", label: "내 지갑", emoji: "👛" }] },
   {
     heading: "🐾 6대 운세 카드 (매일 첫 1회 무료)",
-    items: MACHINES.map((m) => ({ href: `#${m.key}`, label: m.name, emoji: m.emoji })),
+    items: MACHINES.map((m) => ({ href: `#${m.key}`, label: m.name, emoji: m.emoji, image: animalImg(m.key) })),
   },
   {
     heading: "👑 프리미엄 심층 리포트",
-    items: PREMIUM_CARDS.map((p) => ({ href: `#${p.key}`, label: p.title, emoji: p.emoji })),
+    items: PREMIUM_CARDS.map((p) => ({ href: `#${p.key}`, label: p.title, emoji: p.emoji, image: animalImg(p.key) })),
   },
   POLICY_GROUP,
 ];

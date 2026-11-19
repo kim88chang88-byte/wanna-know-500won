@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState, type ReactNode } from "react";
+import SafeImage from "./SafeImage";
 
 export interface MenuItem {
   /** "#아이디" 는 같은 페이지 안으로 이동(부드럽게 스크롤), 그 밖에는 다른 페이지 */
@@ -9,6 +10,8 @@ export interface MenuItem {
   label: string;
   /** 글머리 이모지 (선택) */
   emoji?: string;
+  /** 이모지 대신 보여 줄 작은 캐릭터 그림 (못 불러오면 이모지) */
+  image?: string;
 }
 
 export interface MenuGroup {
@@ -90,7 +93,11 @@ export default function HeaderMenu({
               {g.items.map((item) => {
                 const content = (
                   <>
-                    {item.emoji && <span aria-hidden="true">{item.emoji}</span>}
+                    {item.image && item.emoji ? (
+                      <SafeImage src={item.image} alt="" className="h-7 w-7 shrink-0 object-contain" fallback={item.emoji} fallbackClass="text-lg" />
+                    ) : (
+                      item.emoji && <span aria-hidden="true">{item.emoji}</span>
+                    )}
                     <span>{item.label}</span>
                   </>
                 );
