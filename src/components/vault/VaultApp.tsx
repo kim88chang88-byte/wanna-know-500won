@@ -1,5 +1,6 @@
 "use client";
 
+import { VaultFollowupBubble } from "@/components/landing/VaultFollowupBubble";
 import { useCallback, useEffect, useState } from "react";
 import { getBrowserStorage } from "@/lib/drawCounter";
 import { markNavSeen, pingNav } from "@/lib/navDots";
@@ -201,6 +202,7 @@ export default function VaultApp() {
   return (
     <div>
       {notice && <p role="alert" className="mb-2 text-xs text-amber-800">{notice}</p>}
+      <VaultFollowupBubble variant="inline" />
       <VaultSummaryBar items={view.items} />
       <ul data-testid="vault-list" className="space-y-2.5">
         {view.items.map((it) => (

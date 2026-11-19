@@ -23,6 +23,7 @@ function kindLabel(kind: string, delta: number): string {
   if (kind === REWARD_KIND) return "정성 후기";
   if (kind === "referral_join") return "친구 초대 (초대받음)";
   if (kind === "referral_invite") return "친구 초대";
+  if (kind === "referral_bonus") return "친구 초대 보너스 (진주 1개)";
   if (kind === "chat_buy") return "도유 상담실 질문 더하기";
   if (kind === "spend") {
     const n = Math.abs(delta);

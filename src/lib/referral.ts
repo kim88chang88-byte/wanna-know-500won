@@ -5,6 +5,10 @@
 
 export const REF_KEY = "wanna500:ref:v1";
 export const MYCODE_KEY = "wanna500:mycode:v1";
+/** 친구 초대 보상: 두 사람 모두 조약돌 2개, 친구 3명이 첫 풀이를 마치면 진주 1개(조약돌 6개). 숫자는 supabase/schema.sql 의 referral_complete 와 같아야 해요. */
+export const REF_REWARD = 2;
+export const REF_BONUS_GOAL = 3;
+
 const CODE = /^[A-Z0-9]{6,12}$/;
 
 import type { StorageLike } from "./drawCounter";
@@ -80,7 +84,7 @@ export function withRef(url: string, code: string | null): string {
 export function redeemMessage(result: string): { ok: boolean; text: string } {
   switch (result) {
     case "ok":
-      return { ok: true, text: "친구 초대 코드가 적용됐어! 풀이를 한 번 마치면 두 분 모두 500원 뽑기 1회를 받아 🎁" };
+      return { ok: true, text: "친구 초대 코드가 적용됐어! 풀이를 한 번 마치면 두 분 모두 조약돌 2개를 받아 🎁" };
     case "bad_code":
       return { ok: false, text: "없는 코드야. 친구에게 코드를 다시 확인해 봐." };
     case "self":

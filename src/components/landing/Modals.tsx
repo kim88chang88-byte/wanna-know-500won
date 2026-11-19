@@ -205,7 +205,7 @@ function RefCodeEntry() {
       {saved ? (
         <div className="mt-2">
           <p data-testid="ref-entry-saved" className="text-[11.5px] leading-relaxed text-amber-900">
-            초대 코드 <b className="font-mono tracking-widest">{saved}</b>를 저장해 뒀어. 아래에서 가입하고 첫 풀이를 마치면 두 분 모두 500원 뽑기 1회를 받아 🎁
+            초대 코드 <b className="font-mono tracking-widest">{saved}</b>를 저장해 뒀어. 아래에서 가입하고 첫 풀이를 마치면 두 분 모두 조약돌 2개를 받아 🎁
           </p>
           <button
             type="button"

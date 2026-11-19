@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
+import { VaultFollowupBubble } from "@/components/landing/VaultFollowupBubble";
 import ChatApp from "@/components/chat/ChatApp";
 import BottomTabs from "@/components/landing/BottomTabs";
 import { markNavSeen, pingNav } from "@/lib/navDots";
@@ -205,6 +206,8 @@ export default function ChatHome() {
           <p className="text-[11px] text-[#8a7fa8]">{cloud ? "대화는 30일 동안 보관돼" : "대화는 이 기기에만 저장돼"}</p>
         </div>
       </header>
+
+      <VaultFollowupBubble variant="chat" />
 
       <p data-testid="chat-free-hint" className="mx-4 mt-3 text-[12px] leading-relaxed text-[#8a7fa8]">
         💬 질문은 <b className="text-brand-600">방마다 따로</b> 세. 풀이 방은 이번 달 5번, 궁합 방은 10번, 오늘의 한마디는 하루 3번이 무료야.

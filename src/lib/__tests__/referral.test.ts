@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { cleanRefCode, isFinalRedeem, readMyCode, readRef, redeemMessage, refFromSearch, saveMyCode, saveRef, clearRef, withRef } from "../referral";
+import { REF_BONUS_GOAL, REF_REWARD, cleanRefCode, isFinalRedeem, readMyCode, readRef, redeemMessage, refFromSearch, saveMyCode, saveRef, clearRef, withRef } from "../referral";
 
 function mem() {
   const m = new Map<string, string>();
@@ -47,5 +47,11 @@ describe("추천 코드 도우미", () => {
     expect(isFinalRedeem("ok")).toBe(true);
     expect(isFinalRedeem("already")).toBe(true);
     expect(isFinalRedeem("failed")).toBe(false);
+  });
+
+  it("초대 보상은 조약돌 2개, 친구 3명이면 보너스예요 (DB 함수와 같은 숫자)", () => {
+    expect(REF_REWARD).toBe(2);
+    expect(REF_BONUS_GOAL).toBe(3);
+    expect(redeemMessage("ok").text).toContain("조약돌 2개");
   });
 });

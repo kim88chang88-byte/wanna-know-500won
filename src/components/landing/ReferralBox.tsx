@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { getBrowserStorage } from "@/lib/drawCounter";
-import { cleanRefCode, isFinalRedeem, redeemMessage, saveMyCode, withRef } from "@/lib/referral";
+import { cleanRefCode, isFinalRedeem, redeemMessage, REF_BONUS_GOAL, REF_REWARD, saveMyCode, withRef } from "@/lib/referral";
 import { siteOrigin } from "@/lib/siteOrigin";
 import { track } from "@/lib/track";
 
@@ -39,7 +39,7 @@ export default function ReferralBox() {
   const link = withRef(siteOrigin(), me.code);
 
   async function share() {
-    const text = `도유사주에서 내 사주를 무료로 봐! 내 초대 코드로 가입하고 첫 풀이를 마치면 우리 둘 다 500원 뽑기 1회를 받아 🎁 (코드 ${me?.code})`;
+    const text = `도유사주에서 내 사주를 무료로 봐! 내 초대 코드로 가입하고 첫 풀이를 마치면 우리 둘 다 조약돌 2개를 받아 🎁 (코드 ${me?.code})`;
     try {
       if (navigator.share) {
         await navigator.share({ title: "도유사주", text, url: link });
@@ -79,8 +79,12 @@ export default function ReferralBox() {
     <div data-testid="referral-box" className="rounded-2xl bg-amber-50 border border-amber-200 p-3 text-left">
       <p className="text-xs font-bold text-amber-900">🎁 친구 초대</p>
       <p className="mt-1 text-[11px] leading-relaxed text-amber-800">
-        친구가 내 코드로 가입하고 첫 풀이를 마치면, 두 사람 모두 500원 뽑기 1회를 받아. (초대 보상은 한 달에 3번까지)
+        친구가 내 코드로 가입하고 첫 풀이를 마치면 <b>두 사람 모두 조약돌 {REF_REWARD}개</b>! 궁합을 한 번 볼 수 있어. (초대 보상은 한 달에 3번까지)
       </p>
+      <div className="mt-2 flex gap-1.5 text-center text-[11px] text-gray-800">
+        <span className="flex-1 rounded-lg border border-amber-200 bg-white px-2 py-1.5"><b className="block text-[12px] text-amber-900">나 +{REF_REWARD}</b>조약돌 {REF_REWARD}개</span>
+        <span className="flex-1 rounded-lg border border-amber-200 bg-white px-2 py-1.5"><b className="block text-[12px] text-amber-900">친구 +{REF_REWARD}</b>조약돌 {REF_REWARD}개</span>
+      </div>
       <div className="mt-2 flex items-center gap-2">
         <span data-testid="my-ref-code" className="rounded-lg bg-white border border-amber-200 px-3 py-1.5 font-mono text-sm font-bold tracking-widest text-gray-900">
           {me.code}
@@ -89,9 +93,19 @@ export default function ReferralBox() {
           {copied ? "복사했어" : "초대 링크 보내기"}
         </button>
       </div>
-      <p className="mt-1.5 text-[11px] text-amber-800">
-        초대 성공 {me.done}명{me.pending > 0 ? ` · 첫 풀이를 기다리는 친구 ${me.pending}명` : ""}
-      </p>
+      <div data-testid="ref-bonus" className="mt-2 rounded-xl border border-amber-200 bg-white px-2.5 py-2 text-gray-800">
+        <p className="text-[11.5px] font-bold">
+          {me.done >= REF_BONUS_GOAL ? "친구 3명 보너스, 진주 1개를 받았어 🎉" : me.done === REF_BONUS_GOAL - 1 ? "한 명만 더 부르면 진주 1개 🎉" : "친구 3명이 모이면 진주 1개 보너스"}
+        </p>
+        <div className="my-1 flex gap-1.5" aria-hidden="true">
+          {Array.from({ length: REF_BONUS_GOAL }, (_, i) => (
+            <span key={i} className={`h-2 flex-1 rounded-full ${i < me.done ? "bg-amber-400" : "bg-amber-100"}`} />
+          ))}
+        </div>
+        <p className="text-[11px] text-amber-800">
+          초대 성공 {Math.min(me.done, REF_BONUS_GOAL)} / {REF_BONUS_GOAL}명{me.pending > 0 ? ` · 첫 풀이를 기다리는 친구 ${me.pending}명` : ""} · 보너스는 한 번만 받아요
+        </p>
+      </div>
       <div className="mt-2.5 flex items-center gap-2">
         <input
           value={input}

@@ -26,9 +26,10 @@ function rememberClosed() {
 /**
  * 보관함에 있는 지난 풀이를 현실과 견줘 보게 묻는 안부 말풍선이에요. 헤더의 닉네임 버튼 아래에 펼쳐진 채 나타나고,
  * ✕로 닫으면 그냥 사라져요(오늘은 다시 튀어나오지 않아요). 어느 쪽을 골라도 응원으로 마무리해요.
- * 로그인한 회원에게만 보여요. 헤더가 감싸 주는 relative 상자 안에서 absolute 로 놓여요.
+ * 로그인한 회원에게만 보여요. variant: header = 헤더가 감싸 주는 relative 상자 안에서 absolute(예전 자리),
+ * inline = 보관함 맨 위의 카드, chat = 도유 상담실 첫 화면에서 도리가 먼저 말을 거는 모양.
  */
-export function VaultFollowupBubble({ onShow }: { onShow?: (shown: boolean) => void }) {
+export function VaultFollowupBubble({ onShow, variant = "header" }: { onShow?: (shown: boolean) => void; variant?: "header" | "inline" | "chat" }) {
   const [pick, setPick] = useState<FollowupPick | null>(null);
   const [chosen, setChosen] = useState<number | null>(null);
   const [asking, setAsking] = useState<number | null>(null);
@@ -80,12 +81,23 @@ export function VaultFollowupBubble({ onShow }: { onShow?: (shown: boolean) => v
     saveChoice(getBrowserStorage(), pick.id, i, new Date());
   };
 
+  const isChat = variant === "chat";
+  const wrap =
+    variant === "header"
+      ? "vf-bubble absolute right-0 top-full z-50 mt-3 w-[min(19.5rem,calc(100vw-1.5rem))]"
+      : isChat
+        ? "vf-bubble mx-4 mt-3"
+        : "vf-bubble mb-3";
+  const box = `relative rounded-2xl border border-amber-300 bg-amber-50 px-3.5 py-3 ${variant === "header" ? "shadow-[0_8px_22px_rgba(124,90,10,0.18)]" : "shadow-sm"}`;
+
   return (
-    <div className="vf-bubble absolute right-0 top-full z-50 mt-3 w-[min(19.5rem,calc(100vw-1.5rem))]" data-testid="vault-followup" role="region" aria-label="지난 풀이 안부">
-      <span aria-hidden="true" className="absolute -top-[7px] right-[5.4rem] h-3.5 w-3.5 rotate-45 border-l border-t border-amber-300 bg-amber-50 sm:right-[6.4rem]" />
-      <div className="relative rounded-2xl border border-amber-300 bg-amber-50 px-3.5 py-3 shadow-[0_8px_22px_rgba(124,90,10,0.18)]">
+    <div className={wrap} data-testid="vault-followup" data-variant={variant} role="region" aria-label="지난 풀이 안부">
+      {variant === "header" && (
+        <span aria-hidden="true" className="absolute -top-[7px] right-[5.4rem] h-3.5 w-3.5 rotate-45 border-l border-t border-amber-300 bg-amber-50 sm:right-[6.4rem]" />
+      )}
+      <div className={box}>
         <div className="flex items-start gap-1">
-          <p className="min-w-0 flex-1 text-[13px] font-bold leading-snug text-gray-900"><DoriIcon className="!h-6 !w-6" />{title}</p>
+          <p className="min-w-0 flex-1 text-[13px] font-bold leading-snug text-gray-900"><DoriIcon className="!h-6 !w-6" />{isChat ? `안녕! ${title}` : title}</p>
           <button type="button" onClick={close} aria-label="안부 말풍선 닫기" data-testid="vault-followup-close" className="-mr-1 -mt-0.5 shrink-0 px-1.5 text-base leading-none text-gray-400 hover:text-gray-600">
             ✕
           </button>

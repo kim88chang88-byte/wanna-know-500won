@@ -438,7 +438,8 @@ revoke all on function public.coin_spend(text) from public, anon, authenticated;
 grant execute on function public.coin_spend(text) to service_role;
 
 -- ─────────────────────────────────────────────────────────────────────────────
--- 친구 초대(추천 코드): 친구가 내 코드를 입력하고 그 뒤 첫 풀이를 마치면 두 사람 모두 뽑기 코인 1장.
+-- 친구 초대(추천 코드): 친구가 내 코드를 입력하고 그 뒤 첫 풀이를 마치면 두 사람 모두 조약돌 2개 (11-19 개편, 예전엔 1개).
+-- · 초대한 사람은 친구 3명이 첫 풀이를 마치면 진주 1개(조약돌 6개)를 한 번만 더 받아요. (kind referral_bonus)
 -- · 코드 입력은 가입 후 7일 안의 계정만 가능해요. (이미 뽑기를 해 본 계정도 입력할 수 있어요)
 -- · 초대한 사람은 한 달(한국 시간)에 3번까지 받아요. 초대받은 친구는 항상 받아요.
 -- 이 부분만 따로 Run 해도 되고, 파일 전체를 다시 Run 해도 안전해요. (코인 테이블이 먼저 있어야 해요)
@@ -535,6 +536,7 @@ declare
   cnt int;
   month_start timestamptz;
   gave boolean := false;
+  done_cnt int;
 begin
   select * into r from public.referrals where referee_id = p_user and status = 'pending' for update;
   if not found then
@@ -542,13 +544,18 @@ begin
     return;
   end if;
   update public.referrals set status = 'done', completed_at = now() where referee_id = p_user;
-  perform public.coin_grant(p_user, 'referral_join', r.referrer_id, 1);
+  perform public.coin_grant(p_user, 'referral_join', r.referrer_id, 2);
   month_start := date_trunc('month', now() at time zone 'Asia/Seoul') at time zone 'Asia/Seoul';
   select count(*) into cnt from public.coin_log
     where user_id = r.referrer_id and kind = 'referral_invite' and created_at >= month_start;
   if cnt < 3 then
-    perform public.coin_grant(r.referrer_id, 'referral_invite', p_user, 1);
+    perform public.coin_grant(r.referrer_id, 'referral_invite', p_user, 2);
     gave := true;
+  end if;
+  -- 친구 3명이 첫 풀이를 마치면 진주 1개(조약돌 6개). (kind, ref)가 같으면 한 번만 지급돼요.
+  select count(*) into done_cnt from public.referrals where referrer_id = r.referrer_id and status = 'done';
+  if done_cnt >= 3 then
+    perform public.coin_grant(r.referrer_id, 'referral_bonus', 'milestone3', 6);
   end if;
   return query select true, gave;
 end;
