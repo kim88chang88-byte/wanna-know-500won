@@ -7,7 +7,6 @@ import { FREE_PRICE_LABEL, MACHINES, PREMIUM_CARDS } from "./data";
 import { MachineMenuButton } from "./MenuButton";
 import { HERO_IMAGE, IMAGES, LOGO_IMAGE } from "./images";
 import SafeImage from "./SafeImage";
-import MachineScroller from "./MachineScroller";
 import FreeCountdown from "./FreeCountdown";
 import WalletBar, { type WalletValues } from "./WalletBar";
 import BrandLink from "./BrandLink";
@@ -69,15 +68,16 @@ export function Header({ onOpenLogin, user = null, bubble = null, strip = null }
               aria-haspopup="dialog"
               data-testid="mypage-button"
               data-logged-in={user ? "true" : "false"}
-              className={`group relative flex items-center gap-1.5 sm:gap-2 p-1 pr-2.5 sm:px-3.5 sm:py-1.5 rounded-full border transition-all text-left shadow-sm ${
+              aria-label={user ? `${user.nickname ? `${user.nickname}님` : "회원님"} 로그인됨 · 내 정보 보기` : undefined}
+              className={`group relative flex items-center gap-1.5 sm:gap-2 rounded-full border transition-all text-left shadow-sm ${
                 user
-                  ? "bg-emerald-50 hover:bg-emerald-100/70 border-emerald-300/70"
-                  : "bg-brand-600 hover:bg-brand-700 border-brand-600 text-white"
+                  ? "p-0.5 bg-emerald-50 hover:bg-emerald-100/70 border-emerald-300/70"
+                  : "p-1 pr-2.5 sm:px-3.5 sm:py-1.5 bg-brand-600 hover:bg-brand-700 border-brand-600 text-white"
               }`}
             >
               <div
                 className={`relative w-7 h-7 sm:w-8 sm:h-8 shrink-0 rounded-full bg-white flex items-center justify-center group-hover:scale-105 transition-transform ${
-                  user ? "text-emerald-700 font-bold text-sm" : "text-brand-600"
+                  user ? "text-emerald-700 font-bold text-sm sm:h-9 sm:w-9" : "text-brand-600"
                 }`}
               >
                 {user ? (
@@ -93,13 +93,10 @@ export function Header({ onOpenLogin, user = null, bubble = null, strip = null }
                 )}
               </div>
               {user ? (
-                // 로그인된 상태는 작은 화면에서도 닉네임이 보이게 해요 (길면 말줄임)
-                <div className="min-w-0">
-                  <span data-testid="mypage-name" className="hidden min-[380px]:block max-w-[3rem] min-[400px]:max-w-[5.5rem] sm:max-w-[9rem] truncate text-xs font-bold text-gray-800">
-                    {user.nickname ? `${user.nickname}님` : "회원님"}
-                  </span>
-                  <span className="sr-only sm:not-sr-only sm:block text-[10px] font-medium text-emerald-700">로그인됨</span>
-                </div>
+                // 로그인된 상태는 동그란 아바타(머리글자 + 초록 점)만 보여요. 닉네임은 화면 낭독기용으로만 남겨 둬요.
+                <span data-testid="mypage-name" className="sr-only">
+                  {user.nickname ? `${user.nickname}님` : "회원님"} 로그인됨
+                </span>
               ) : (
                 // 로그인 전에는 작은 화면에서도 "로그인" 글자가 보이게 해요
                 <div>
@@ -216,10 +213,10 @@ export function MachinesSection({ onSpin, lastKey = null }: SpinProps & { lastKe
         <span className="shrink-0 rounded-full bg-gray-100 px-2.5 py-0.5 text-[11px] text-gray-500">기본 500원 · 궁합 1,000원</span>
       </div>
 
-      {/* 옆으로 밀어서 넘기는 카드야. (큰 화면에서는 한눈에 펼쳐져) */}
-      <MachineScroller count={MACHINES.length}>
-        {MACHINES.map((m) => (
-          <div key={m.key} className="relative w-[210px] shrink-0 snap-start sm:w-[230px] lg:w-auto">
+      {/* 폰에서는 2열로 아래로 내려 보여요. 맨 위 카드(새해운)만 가로로 크게. (큰 화면에서는 3열로 펼쳐져) */}
+      <div data-testid="machine-grid" className="grid grid-cols-2 gap-x-3 gap-y-4 pb-4 pt-3 lg:grid-cols-3 lg:gap-4">
+        {MACHINES.map((m, idx) => (
+          <div key={m.key} className={`relative ${idx === 0 ? "col-span-2 lg:col-span-1" : ""}`}>
             {m.sticker && <Sticker text={m.sticker} testId="machine-sticker" />}
             {lastKey === m.key && (
               <span data-testid="last-drawn" className="absolute -top-2 left-3 z-10 rounded-full bg-white border border-sky-300 px-2 py-0.5 text-[10px] font-bold text-sky-700 shadow-sm">
@@ -234,10 +231,10 @@ export function MachinesSection({ onSpin, lastKey = null }: SpinProps & { lastKe
               aria-label={`${m.name} 운세 보기`}
               onClick={() => onSpin(m.key, m.fortune, m.price ?? FREE_PRICE_LABEL, m.premium)}
               onKeyDown={(e) => activateOnKey(e, () => onSpin(m.key, m.fortune, m.price ?? FREE_PRICE_LABEL, m.premium))}
-              className={`scroll-mt-24 relative flex h-full cursor-pointer select-none flex-col gap-2.5 overflow-hidden rounded-3xl p-3 transition-shadow hover:shadow-lg group focus:outline-none focus-visible:ring-4 focus-visible:ring-brand-300 ${m.card}`}
+              className={`scroll-mt-24 relative flex h-full cursor-pointer select-none overflow-hidden rounded-3xl p-2.5 transition-shadow lg:p-3 ${idx === 0 ? "max-lg:flex-row max-lg:items-center max-lg:gap-3 flex-col gap-2.5" : "flex-col gap-2 lg:gap-2.5"} hover:shadow-lg group focus:outline-none focus-visible:ring-4 focus-visible:ring-brand-300 ${m.card}`}
             >
               <span aria-hidden="true" className={`pointer-events-none absolute -right-8 -top-8 h-24 w-24 rounded-full opacity-50 blur-xl ${m.blob}`} />
-              <div className={`relative flex aspect-[4/3] w-full items-center justify-center overflow-hidden rounded-2xl border p-1.5 ${m.imageBox}`}>
+              <div className={`relative flex w-full items-center justify-center overflow-hidden rounded-2xl border p-1.5 ${idx === 0 ? "aspect-[4/3] max-lg:w-[44%] max-lg:shrink-0" : "aspect-[16/10] lg:aspect-[4/3]"} ${m.imageBox}`}>
                 <SafeImage
                   src={IMAGES[m.image]}
                   alt={m.name}
@@ -246,17 +243,17 @@ export function MachinesSection({ onSpin, lastKey = null }: SpinProps & { lastKe
                 />
               </div>
 
-              <div className="relative">
+              <div className="relative min-w-0 flex-1">
                 <div className="mb-1 flex items-center justify-between gap-2">
-                  <h4 className={`font-cute text-base font-normal ${m.titleClass}`}>{m.name}</h4>
+                  <h4 className={`font-cute font-normal ${idx === 0 ? "text-base" : "text-[15px] lg:text-base"} ${m.titleClass}`}>{m.name}</h4>
                   {m.chip && <span className="shrink-0 rounded-full bg-brand-100 px-2 py-0.5 text-[10px] font-bold text-brand-700">{m.chip}</span>}
                 </div>
-                <p className="line-clamp-2 min-h-[2.6rem] text-xs leading-relaxed text-slate-600">{m.desc}</p>
+                <p className={`line-clamp-2 text-xs leading-relaxed text-slate-600 ${idx === 0 ? "min-h-[2.6rem]" : "min-h-[2.4rem] text-[11.5px] lg:min-h-[2.6rem] lg:text-xs"}`}>{m.desc}</p>
               </div>
             </div>
           </div>
         ))}
-      </MachineScroller>
+      </div>
     </section>
   );
 }
