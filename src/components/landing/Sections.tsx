@@ -253,6 +253,19 @@ export function MachinesSection({ onSpin, lastKey = null }: SpinProps & { lastKe
             </div>
           </div>
         ))}
+        {/* 2열에서 마지막 한 칸이 비어 보이지 않게 채워 두는 "곧 만나요" 카드예요. 눌리지 않아요. (3열 큰 화면에서는 숨겨요) */}
+        <div data-testid="machine-coming-soon" aria-hidden="true" className="pointer-events-none relative select-none lg:hidden">
+          <div className="flex h-full flex-col gap-2 overflow-hidden rounded-3xl border border-dashed border-gray-300 bg-gray-100/70 p-2.5">
+            <div className="relative flex aspect-[16/10] w-full items-center justify-center overflow-hidden rounded-2xl border border-gray-200 bg-gray-50 p-1.5">
+              <SafeImage src="/images/animal-otter.webp" alt="" className="h-full w-auto max-w-full object-contain opacity-30 grayscale" fallback="🦦" fallbackClass="text-4xl" />
+              <span className="absolute inset-0 flex items-center justify-center font-cute text-4xl text-gray-400/90">?</span>
+            </div>
+            <div className="min-w-0">
+              <h4 className="mb-1 font-cute text-[15px] font-normal text-gray-400">??운</h4>
+              <p className="text-[11.5px] leading-relaxed text-gray-400">Coming soon · 곧 만나요</p>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
   );
