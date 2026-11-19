@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
  * 오늘의 도리 한마디 장면: 파스텔 하늘 배경에서 도리가 손을 흔들고, 오른쪽 말풍선에 한마디와 작은 실천이 보여요.
  * 배경 그림(daily-scene.webp)의 말풍선 자리를 같은 모양의 풍선으로 덮어서, 글은 실제 글자로 보여줘요.
  * 글자 크기는 장면 너비에 비례해서(cqw) 화면이 좁아도 그림과 같은 비율로 줄어요.
- * 한마디·실천·버튼이 길어서 풍선이 장면보다 커지면 장면이 같이 늘어나요(글이 잘리지 않게).
+ * 한마디·실천·버튼이 길어서 풍선이 장면보다 커지면 장면이 같이 늘어나요(글이 잘리지 않게). 배경 그림은 자르지 않고(contain) 왼쪽에 맞춰서 도리가 안 잘려요.
  */
 export default function DoriScene({ line, tip, action }: { line: string; tip: string; /** 말풍선 맨 아래에 붙는 버튼 (예: 도리에게 더 물어보기) */ action?: ReactNode }) {
   const long = line.length > 42;
@@ -15,7 +15,7 @@ export default function DoriScene({ line, tip, action }: { line: string; tip: st
   return (
     <div
       data-testid="dori-scene"
-      className="relative mx-auto flex aspect-[856/412] w-full max-w-xl items-center rounded-3xl bg-[#f6eef0] bg-cover bg-left shadow-[0_8px_24px_rgba(128,87,224,0.12)]"
+      className="relative mx-auto flex aspect-[856/412] w-full max-w-xl items-center rounded-3xl bg-[#f6eef0] bg-contain bg-left bg-no-repeat shadow-[0_8px_24px_rgba(128,87,224,0.12)]"
       style={{ backgroundImage: "url(/images/daily-scene.webp)", containerType: "inline-size", paddingBlock: "2cqw" }}
       role="img"
       aria-label={`도리가 말해: ${line} ${tip}`}
