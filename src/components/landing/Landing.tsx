@@ -26,7 +26,6 @@ import { useRouter } from "next/navigation";
 import { clearRef, isFinalRedeem, readRef, redeemMessage, refFromSearch, saveMyCode, saveRef } from "@/lib/referral";
 import { DailyLineCard } from "./DailyLineCard";
 import { FollowupCard } from "./FollowupCard";
-import { VaultFollowupBubble } from "./VaultFollowupBubble";
 import dynamic from "next/dynamic";
 import type { IntakeTarget } from "./IntakeModal";
 
@@ -58,7 +57,6 @@ export default function Landing() {
   const [loginOpen, setLoginOpen] = useState(false);
   // 비회원이 뽑기를 누르면 로그인 창을 열면서, 왜 열렸는지 한 줄로 알려줘요.
   const [loginReason, setLoginReason] = useState<string | null>(null);
-  const [vaultAsk, setVaultAsk] = useState(false); // 보관함 안부 말풍선이 있으면 다른 안부 카드는 숨겨요
   const userRef = useRef<typeof user>(null);
   userRef.current = user;
   const [intake, setIntake] = useState<IntakeTarget | null>(null);
@@ -481,7 +479,6 @@ export default function Landing() {
       <Header
         onOpenLogin={openLogin}
         user={user}
-        bubble={user ? <VaultFollowupBubble onShow={setVaultAsk} /> : null}
         strip={<HeaderStrip visitors={visitors} onBuy={user ? () => router.push("/wallet") : undefined} wallet={user ? { ...splitPearls(coins), free: Math.max(0, FREE_PER_DAY - counts.today) + tickets } : null} />}
       />
 
@@ -494,7 +491,7 @@ export default function Landing() {
           recordVisit(getBrowserStorage(), dayKey(new Date()));
           syncReward();
         }} />}
-        {!(user && vaultAsk) && <FollowupCard />}
+        <FollowupCard />
         <MachinesSection onSpin={handleSpin} lastKey={lastKey} />
         <PremiumSection onSpin={handleSpin} />
         <SampleSection />
