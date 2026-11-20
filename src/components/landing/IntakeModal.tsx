@@ -800,19 +800,27 @@ export default function IntakeModal({ target, wallet = null, onClose, onComplete
   const luxe = target.premium === true && !compat && phase === "result";
   const storyMode = !luxe && premiumReport ? isStoryReport(premiumReport) : false;
   const bookMode = luxe && !!premiumReport && premiumReport.level === "full" && premiumReport.book.length > 0;
+  const nyTitle = isStudy && !luxe && !compat;
   const resultTitle = phase === "result" && chart && premiumReport && (
     <div
       data-testid="result-title"
       data-no-click-fx=""
-      className={`mb-4 rounded-2xl px-4 py-4 text-center ${luxe ? "border border-[#e6c887]/50 bg-gradient-to-b from-[#e6c887]/15 to-transparent" : "border-2 border-brand-300 bg-gradient-to-br from-brand-50 via-white to-amber-50 shadow-[0_6px_20px_rgba(128,87,224,0.12)]"}`}
+      className={`relative mb-4 overflow-hidden rounded-2xl px-4 py-4 text-center ${nyTitle ? "pb-14 pt-5" : ""} ${luxe ? "border border-[#e6c887]/50 bg-gradient-to-b from-[#e6c887]/15 to-transparent" : "border-2 border-brand-300 bg-gradient-to-br from-brand-50 via-white to-amber-50 shadow-[0_6px_20px_rgba(128,87,224,0.12)]"}`}
     >
-      <h3 id="intake-title" className={`font-cute text-[25px] sm:text-[28px] font-normal leading-tight break-keep ${luxe ? "text-[#fbf3de]" : "text-brand-700"}`}>
+      {nyTitle && (
+        <>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img data-testid="result-title-bg" src="/images/ny-title.webp" alt="" aria-hidden="true" className="absolute inset-0 h-full w-full object-cover" />
+          <div aria-hidden="true" className="absolute inset-0 bg-gradient-to-b from-white/75 via-white/25 to-white/0" />
+        </>
+      )}
+      <h3 id="intake-title" className={`relative font-cute text-[25px] sm:text-[28px] font-normal leading-tight break-keep ${luxe ? "text-[#fbf3de]" : "text-brand-700"}`}>
         {compat && resultPartner ? `${josa(nickname?.trim() ? `${nickname.trim()}님` : "나", "과/와")} ${resultPartner.name}의 궁합♥` : `${viewName?.trim() ? (luxe ? `${viewName.trim()}님의` : possessive(viewName)) : subject ? "" : "나의"} ${luxe ? "종합 사주 프리미엄 분석" : `${readingKind(target.fortune)} 해설`}`}
       </h3>
       {askInput && (
         <p
           data-testid="result-title-birth"
-          className={`mx-auto mt-2.5 inline-block rounded-full px-3.5 py-1 text-[14px] font-bold tracking-tight ${luxe ? "border border-[#e6c887]/50 text-[#f6dfa8]" : "bg-white text-brand-700 ring-1 ring-brand-200"}`}
+          className={`relative mx-auto mt-2.5 inline-block rounded-full px-3.5 py-1 text-[14px] font-bold tracking-tight ${luxe ? "border border-[#e6c887]/50 text-[#f6dfa8]" : "bg-white text-brand-700 ring-1 ring-brand-200"}`}
         >
           {compat && resultPartner ? `나 ${birthSummary(askInput)}` : birthSummary(askInput)}
         </p>
