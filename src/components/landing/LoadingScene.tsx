@@ -1,5 +1,6 @@
 "use client";
 
+import NewYearSky from "./NewYearSky";
 import SafeImage from "./SafeImage";
 
 /*
@@ -72,6 +73,7 @@ export default function LoadingScene({
   label,
   onClose,
   stageText,
+  newYear = false,
 }: {
   pct: number;
   done: boolean;
@@ -80,6 +82,8 @@ export default function LoadingScene({
   label?: string;
   onClose?: () => void;
   stageText: string;
+  /** 2027 신년운이면 밤하늘 대신 새벽 풍경(불꽃 → 해돋이 + 양)을 보여줘요 */
+  newYear?: boolean;
 }) {
   const E = PTS.length - 1;
   const f = (pct / 100) * E * 1.02;
@@ -91,8 +95,9 @@ export default function LoadingScene({
   const shown = Math.round(pct);
 
   return (
-    <div className={`ls-full relative w-full h-[min(540px,78vh)] min-h-[440px] overflow-hidden `} style={{ background: "linear-gradient(180deg,#a99af0 0%,#7d5cdd 52%,#4f33a8 100%)" }}>
-      <svg aria-hidden="true" viewBox="0 0 360 500" preserveAspectRatio="xMidYMid slice" className="absolute inset-0 w-full h-full">
+    <div className={`ls-full relative w-full h-[min(540px,78vh)] min-h-[440px] overflow-hidden ${newYear ? `ny-root${done ? " ny-done" : ""}` : ""}`} data-testid={newYear ? "loading-newyear" : undefined} style={{ background: "linear-gradient(180deg,#a99af0 0%,#7d5cdd 52%,#4f33a8 100%)", ...(newYear ? { ["--p" as string]: Math.max(0, Math.min(1, pct / 100)) } : {}) }}>
+      {newYear && <NewYearSky />}
+      {!newYear && <svg aria-hidden="true" viewBox="0 0 360 500" preserveAspectRatio="xMidYMid slice" className="absolute inset-0 w-full h-full">
         {BG_STARS.map((s, i) => (
           <circle key={i} className="ls-tw" cx={s.x} cy={s.y} r={s.r} fill="#fff" opacity=".7" style={{ animationDelay: `${s.d}s` }} />
         ))}
@@ -135,7 +140,7 @@ export default function LoadingScene({
             <circle r="4" fill="#fff" />
           </g>
         )}
-      </svg>
+      </svg>}
 
       {label && <span className="absolute top-4 left-1/2 -translate-x-1/2 max-w-[78%] truncate rounded-full bg-white/90 px-3 py-1 text-xs font-bold text-brand-700">{label}</span>}
       {onClose && (

@@ -576,3 +576,29 @@ body {
 .ls-spk { position: absolute; color: #fff3c8; opacity: 0; animation: lsSpk 1.6s ease-out forwards; }
 @keyframes lsSpk { 0% { opacity: 0; transform: translate(0,0); } 15% { opacity: 1; } 100% { opacity: 0; transform: translate(var(--sx), -70px); } }
 @media (prefers-reduced-motion: reduce) { .ls-shoot, .ls-spk { display: none; } .ls-dori { animation: none; } }
+
+/* 2027 신년운 로딩: 새벽 풍경 + 불꽃 + 해 + 양 (NewYearSky). 진행률은 부모의 --p(0~1) */
+@property --p { syntax: "<number>"; inherits: true; initial-value: 0; }
+.ny-root { transition: --p .3s linear; }
+.ny-night { opacity: calc(1 - var(--p) * 1.2); }
+.ny-stars { opacity: calc(1 - var(--p) * 2); }
+.ny-sun { transform: translateY(calc(var(--p) * -150px)); transform-origin: 180px 345px; }
+.ny-halo { transform-origin: 180px 345px; animation: nyPulse 2.4s ease-in-out infinite; }
+.ny-swy { transform-origin: 180px 345px; animation: nySway 3.2s ease-in-out infinite; }
+.ny-fw { opacity: calc(clamp(0, calc((var(--p) * 18 - var(--k) + 1) * 3), 1) * clamp(0, calc((.82 - var(--p)) * 4), 1)); filter: drop-shadow(0 0 3px currentColor); }
+.ny-done .ny-fw { opacity: 1; }
+.ny-bst { transform-origin: 0 0; animation: nyBurst 3.4s ease-out infinite; animation-delay: var(--d); }
+.ny-rk { animation: nyRocket 3.4s ease-in infinite; animation-delay: var(--d); }
+.ny-done .ny-bst, .ny-done .ny-rk { animation-duration: 1.5s; }
+.ny-sheep { transform-origin: 268px 360px; animation: nyBob 3s ease-in-out infinite; }
+.ny-cloud { animation: nyBob 4s ease-in-out infinite; }
+.ny-done .ny-sheep { animation: nyJump .9s ease-in-out infinite; }
+.ny-done .ls-dori { display: none; }
+.ny-done .ls-big { top: 17%; }
+@keyframes nyPulse { 50% { opacity: .5; transform: scale(1.08); } }
+@keyframes nySway { 0%, 100% { transform: rotate(-3deg) scale(1); } 50% { transform: rotate(3deg) scale(1.03); } }
+@keyframes nyBob { 50% { transform: translateY(-4px); } }
+@keyframes nyJump { 50% { transform: translateY(-34px) rotate(-6deg); } }
+@keyframes nyBurst { 0%, 28% { transform: scale(0); opacity: 0; } 30% { opacity: 1; } 100% { transform: scale(1.25); opacity: 0; } }
+@keyframes nyRocket { 0% { transform: translateY(0); opacity: 1; } 28% { transform: translateY(var(--up)); opacity: 1; } 29%, 100% { transform: translateY(var(--up)); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .ny-halo, .ny-swy, .ny-bst, .ny-rk, .ny-sheep, .ny-cloud { animation: none; } .ny-fw { display: none; } }

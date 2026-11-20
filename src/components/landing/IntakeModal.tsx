@@ -854,7 +854,7 @@ export default function IntakeModal({ target, wallet = null, onClose, onComplete
 
       {phase === "loading" && (
         <div role="status" className={fullLoading ? "text-center" : "py-10 text-center"}>
-          <LoadingBar done={loadDone} animal={loadingAnimal} premium={target.premium === true && !compat} label={`${target.fortune} · ${target.price}`} onClose={onClose} />
+          <LoadingBar done={loadDone} animal={loadingAnimal} premium={target.premium === true && !compat} newYear={isStudy} label={`${target.fortune} · ${target.price}`} onClose={onClose} />
         </div>
       )}
 

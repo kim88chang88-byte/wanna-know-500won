@@ -39,7 +39,7 @@ export function finishPct(from: number, k: number): number {
   return from + (100 - from) * e;
 }
 
-export default function LoadingBar({ done: doneProp = false, animal = "/images/animal-otter.webp", premium = false, label, onClose }: { done?: boolean; animal?: string; premium?: boolean; label?: string; onClose?: () => void }) {
+export default function LoadingBar({ done: doneProp = false, animal = "/images/animal-otter.webp", premium = false, newYear = false, label, onClose }: { done?: boolean; animal?: string; premium?: boolean; newYear?: boolean; label?: string; onClose?: () => void }) {
   // 프리미엄은 응답이 일찍 와도 최소 30초는 "집필 중" 장면을 보여줘요.
   const [minPassed, setMinPassed] = useState(!premium);
   useEffect(() => {
@@ -79,7 +79,7 @@ export default function LoadingBar({ done: doneProp = false, animal = "/images/a
   const stage = celebrate ? { at: 100, text: "다 됐어! 🎉" } : ([...stages].reverse().find((s) => pct >= s.at) ?? stages[0]);
   if (!premium) {
     // 팝업 전체를 채우는 밤하늘 로딩 (퍼센트는 게이지에 붙어 따라가요)
-    return <LoadingScene pct={shown} done={celebrate} animal={animal} label={label} onClose={onClose} stageText={stage.text} />;
+    return <LoadingScene pct={shown} done={celebrate} animal={animal} newYear={newYear} label={label} onClose={onClose} stageText={stage.text} />;
   }
   // 프리미엄도 팝업 전체를 채우는 보랏빛 밤 + 금박 장면 (큰 숫자 + 단계 문구 + 게이지)
   return <PremiumLoadingScene full pct={shown} done={celebrate} label={label} onClose={onClose} stageText={stage.text} />;
