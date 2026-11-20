@@ -536,8 +536,8 @@ body {
 .hanji-curl.br { right: 0; clip-path: polygon(100% 0, 0 100%, 0 0); background: linear-gradient(135deg, #fbf6e8 0%, #e7dabb 100%); }
 .hanji-curl.bl { left: 0; clip-path: polygon(0 0, 100% 100%, 100% 0); background: linear-gradient(225deg, #fbf6e8 0%, #e7dabb 100%); }
 
-/* 프리미엄 책: 고딕·명조 대신 귀여운 글씨(한지 본문은 주아, 남색 영역은 싱글데이). 굵게는 글씨 자체가 두꺼워서 가짜 굵기를 끄고, 큰 제목도 같은 글씨로 맞춰요. */
-.premium-cute, .premium-cute .font-serifKr { font-family: "Single Day", "Jua", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif; font-synthesis: weight; }
+/* 프리미엄 책: 한지 본문은 주아, 남색 영역은 Hahmlet(장 제목과 통일). 굵게는 글씨 자체가 두꺼워서 가짜 굵기를 끄고, 큰 제목도 같은 글씨로 맞춰요. */
+.premium-cute, .premium-cute .font-serifKr { font-family: "Hahmlet", "Noto Serif KR", "Apple SD Gothic Neo", "Malgun Gothic", serif; font-synthesis: none; }
 /* 한지 위 본문은 계속 주아. 남색 바탕의 설명·표·팁 영역만 발랄한 싱글데이로 (싱글데이는 굵은 글씨가 없어 굵기는 살짝 만들어 써요) */
 /* 장 표지 제목만: Hahmlet + 금빛 그라데이션 */
 .premium-cute .cover-title { font-family: "Hahmlet", "Noto Serif KR", serif; font-weight: 800; font-synthesis: none; letter-spacing: .05em; word-break: keep-all; text-wrap: balance;
