@@ -76,10 +76,15 @@ describe("상담실 대화방", () => {
   });
 
   it("예전에 하나뿐이던 daily 방은 만든 날짜의 방으로 옮겨져요", () => {
-    const old = [{ id: "daily", ctx: { kind: "daily", summary: "옛 카드" }, msgs: [{ role: "user", text: "옛 질문", at: 5 }], updatedAt: 5, day: "2026-11-13" }];
+    // 날짜를 고정하면 보관 기간(7일)이 지나서 깨져요. 어제 날짜로 만들어요.
+    const y = new Date();
+    y.setDate(y.getDate() - 1);
+    const p2 = (n: number) => String(n).padStart(2, "0");
+    const day = `${y.getFullYear()}-${p2(y.getMonth() + 1)}-${p2(y.getDate())}`;
+    const old = [{ id: "daily", ctx: { kind: "daily", summary: "옛 카드" }, msgs: [{ role: "user", text: "옛 질문", at: 5 }], updatedAt: 5, day }];
     const [r] = parseRooms(old);
-    expect(r.id).toBe("daily:2026-11-13");
-    expect(r.title).toBe("오늘의 한마디 · 11/13");
+    expect(r.id).toBe(`daily:${day}`);
+    expect(r.title).toBe(`오늘의 한마디 · ${y.getMonth() + 1}/${y.getDate()}`);
     expect(r.msgs).toHaveLength(1);
   });
 
