@@ -744,11 +744,6 @@ function Visual({ page, report }: { page: BookPage; report: PremiumReportView })
               태어난 <b className={GOLD}>해·달·날·시간</b>, 이 네 때마다 글자를 위아래 두 개씩 적어. 위는 하늘의 기운(천간), 아래는 땅의 기운(지지)이야.
             </p>
           )}
-          {/* 일주 칸의 위 글자가 '나(일간)'이야. 도리가 짚어 주고, 그 칸만 연보라로 또렷하게 보여. */}
-          <div className="relative mb-3.5 ml-[50%] w-1/2" data-testid="pillar-me-tip">
-            <p className="rounded-2xl border-2 border-[#20203a] bg-[#fffdf7] px-2 py-1.5 text-center text-[13px] leading-snug text-[#26233a]">여기가 바로 너야! <DoriIcon className="!mr-0 ml-0.5 !h-6 !w-6" /></p>
-            <span aria-hidden="true" className="absolute -bottom-[7px] left-1/4 -ml-1.5 h-3 w-3 rotate-45 border-b-2 border-r-2 border-[#20203a] bg-[#fffdf7]" />
-          </div>
           <div className="grid grid-cols-4 gap-2">
             {report.pillars.map((p) => {
               const [stem, branch] = p.full ? Array.from(p.full) : [null, null];
