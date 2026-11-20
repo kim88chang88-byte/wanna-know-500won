@@ -20,6 +20,8 @@ describe("도유 상담방", () => {
 
   it("마음이 힘든 말은 AI 없이 안내해요", () => {
     expect(isCrisis("요즘 죽고 싶어요")).toBe(true);
+    expect(isCrisis("너무 힘들어서 다 끝내고 싶어")).toBe(true);
+    expect(isCrisis("숙제 다 끝내고 싶어")).toBe(false);
     expect(isCrisis("이직 시기가 궁금해")).toBe(false);
     expect(CRISIS_ANSWER).toContain("109");
   });

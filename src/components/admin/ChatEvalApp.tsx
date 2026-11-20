@@ -1,5 +1,7 @@
 "use client";
 
+import { plainAnswer } from "@/lib/chatMarkup";
+
 import { useEffect, useState } from "react";
 
 interface Row {
@@ -29,6 +31,9 @@ const GROUPS: Array<{ id: Cat["group"]; title: string }> = [
 const ROUTE: Record<string, string> = { ai: "AI 답", "ai-unable": "AI가 사과", prefilter: "미리 걸러서 사과", crisis: "위기 안내", error: "오류" };
 
 /** 관리자 전용: 카테고리별 상담 질문을 실제 도리로 한꺼번에 돌려 보고 결과를 복사해요. 질문 횟수는 쓰지 않아요. (프리미엄은 제외) */
+/** 점검 화면은 표시를 변환하지 않으니, [[땅]]·**굵게** 표시를 걷어 읽기 쉽게 보여 줘요. */
+const shown = (t: string) => plainAnswer(t).replace(/\*\*/g, "");
+
 export default function ChatEvalApp() {
   const [rows, setRows] = useState<Row[]>([]);
   const [busy, setBusy] = useState(false);
@@ -73,7 +78,7 @@ export default function ChatEvalApp() {
   const asText = () =>
     `# 상담실 점검 · ${current}\n\n` +
     rows
-      .map((r) => `${r.n}. [${ROUTE[r.route] ?? r.route}${r.expect ? ` / 기대:${r.expect}` : ""}${r.visual ? ` / 카드:${r.visual}` : ""}] ${r.q}\n${r.answer}${r.followups?.length && !r.answer.includes("▶") ? `\n(${[r.choices?.length ? `선택지: ${r.choices.join(" / ")}` : "", `다음 질문 칩: ${r.followups.join(" / ")}`].filter(Boolean).join(" · ")})` : ""}`)
+      .map((r) => `${r.n}. [${ROUTE[r.route] ?? r.route}${r.expect ? ` / 기대:${r.expect}` : ""}${r.visual ? ` / 카드:${r.visual}` : ""}] ${r.q}\n${shown(r.answer)}${r.followups?.length && !r.answer.includes("▶") ? `\n(${[r.choices?.length ? `선택지: ${r.choices.join(" / ")}` : "", `다음 질문 칩: ${r.followups.join(" / ")}`].filter(Boolean).join(" · ")})` : ""}`)
       .join("\n\n");
 
   async function copy() {
@@ -127,7 +132,7 @@ export default function ChatEvalApp() {
               <span className="text-neutral-400">{(r.ms / 1000).toFixed(1)}초</span>
             </div>
             <p className="mt-1 text-[13.5px] font-bold">{r.q}</p>
-            <p className="mt-1 whitespace-pre-wrap text-[13.5px] leading-relaxed">{r.answer || "(답 없음)"}</p>
+            <p className="mt-1 whitespace-pre-wrap text-[13.5px] leading-relaxed">{shown(r.answer) || "(답 없음)"}</p>
             {r.followups && r.followups.length > 0 && !r.answer.includes("▶") && (
               <p className="mt-1 text-[12px] text-neutral-500">{r.choices && r.choices.length > 0 ? `선택지: ${r.choices.join(" / ")} · ` : ""}다음 질문 칩: {r.followups.join(" / ")}</p>
             )}

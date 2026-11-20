@@ -18,7 +18,7 @@ const REL_TEXT: Record<"합" | "충" | "해", string> = {
 };
 
 /** 입춘(2월 4일) 전이면 아직 지난해 세운이에요 */
-function sewoonBranch(now: Date): { year: number; branch: string } {
+export function sewoonBranch(now: Date): { year: number; branch: string } {
   const k = new Date(now.getTime() + 9 * 3600_000);
   let y = k.getUTCFullYear();
   if (k.getUTCMonth() < 1 || (k.getUTCMonth() === 1 && k.getUTCDate() < 4)) y -= 1;
