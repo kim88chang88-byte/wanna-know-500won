@@ -12,9 +12,17 @@ const STAGES: { at: number; text: string }[] = [
   { at: 75, text: "도리가 풀이를 정리하고 있어" },
 ];
 
-/** 경과 시간(초) → 진행률(0~92). 처음부터 꾸준히 차오르다(5초≈43%, 10초≈66%) 뒤로 갈수록 느려져서 끝까지 차 버리지 않아요. */
+/** 일반 풀이는 응답이 빨리 와도 막대가 이 시간(ms)까지는 꾸준히 차오르게 보여줘요. (끝나면 0.9초 동안 100% 로 채워서 총 8초쯤) */
+export const GENERAL_MIN_MS = 7_100;
+
+/**
+ * 경과 시간(초) → 진행률. 처음 7.1초 동안 3%→88% 로 처음부터 끝까지 꾸준히 차오르고(조금씩 느려져요),
+ * 응답이 더 늦으면 92% 까지 아주 천천히 더 가요. (응답이 와야 100% 로 채워요)
+ */
 export function progressAt(sec: number): number {
-  return Math.min(92, 92 * (1 - Math.exp(-sec / 8)));
+  const edge = GENERAL_MIN_MS / 1000;
+  if (sec <= edge) return 3 + 85 * (1 - Math.pow(1 - sec / edge, 1.5));
+  return Math.min(92, 88 + 4 * (1 - Math.exp(-(sec - edge) / 8)));
 }
 
 const PREMIUM_STAGES: { at: number; text: string }[] = [

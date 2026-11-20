@@ -42,7 +42,7 @@ import { UpsellTeaser } from "./UpsellTeaser";
 import { chipsForFortune, MAX_CONCERN_TAGS, MAX_CONCERN_TEXT, type Concern, type ConcernId } from "@/lib/concerns";
 import { MACHINES } from "./data";
 import { IMAGES } from "./images";
-import LoadingBar, { PREMIUM_MIN_MS } from "./LoadingBar";
+import LoadingBar, { GENERAL_MIN_MS, PREMIUM_MIN_MS } from "./LoadingBar";
 import { ReadingCard } from "./ReadingCard";
 import StoryReport from "./StoryReport";
 import CompatStory from "./CompatStory";
@@ -729,9 +729,9 @@ export default function IntakeModal({ target, wallet = null, onClose, onComplete
       setAiNotice(target.premium ? p.aiNotice === true : !data.reading?.folds);
       setAiGated(target.premium === true && p.aiGated === true);
       if (data.profileSaved) onProfileSaved?.(input);
-      // 프리미엄은 응답이 일찍 와도 최소 PREMIUM_MIN_MS 동안은 집필 장면을 보여줘요. (결과로 넘어가는 시점도 함께 미뤄요)
-      if (target.premium === true && !compat) {
-        const wait = PREMIUM_MIN_MS - (Date.now() - loadStartedAt);
+      // 응답이 일찍 와도 막대가 순식간에 100% 로 뛰지 않게, 프리미엄은 최소 PREMIUM_MIN_MS(집필 장면), 그 밖의 풀이는 GENERAL_MIN_MS(총 8초쯤) 동안은 로딩을 보여줘요. (결과로 넘어가는 시점도 함께 미뤄요)
+      {
+        const wait = (target.premium === true && !compat ? PREMIUM_MIN_MS : GENERAL_MIN_MS) - (Date.now() - loadStartedAt);
         if (wait > 0) await new Promise((r) => setTimeout(r, wait));
         if (ctrl.signal.aborted) return;
       }

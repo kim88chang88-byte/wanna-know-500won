@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { BOOK_CHAPTERS, currentChapter } from "../PremiumLoadingScene";
-import { PREMIUM_MIN_MS, FINISH_MS, finishPct, premiumProgressAt, progressAt } from "@/components/landing/LoadingBar";
+import { GENERAL_MIN_MS, PREMIUM_MIN_MS, FINISH_MS, finishPct, premiumProgressAt, progressAt } from "@/components/landing/LoadingBar";
 
 describe("프리미엄 로딩", () => {
   it("진행률에 따라 쓰는 장이 하나씩 올라간다", () => {
@@ -36,5 +36,13 @@ describe("끝날 때 진행률", () => {
     expect(progressAt(5)).toBeGreaterThan(40);
     expect(progressAt(10)).toBeGreaterThan(60);
     expect(progressAt(1000)).toBeLessThanOrEqual(92);
+  });
+  it("일반 풀이는 7.1초까지 꾸준히 올라 88%에 닿고, 20%에서 오래 머물지 않는다", () => {
+    expect(GENERAL_MIN_MS).toBe(7_100);
+    expect(progressAt(7.1)).toBeCloseTo(88, 0);
+    // 1초마다 항상 올라가고(멈추지 않고), 20%를 넘기까지 1초를 넘기지 않는다
+    for (let s = 1; s <= 7; s++) expect(progressAt(s) - progressAt(s - 1)).toBeGreaterThan(3);
+    expect(progressAt(1)).toBeGreaterThan(20);
+    expect(progressAt(60)).toBeLessThanOrEqual(92);
   });
 });
