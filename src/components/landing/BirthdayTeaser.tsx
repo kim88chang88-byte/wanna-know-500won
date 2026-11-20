@@ -34,11 +34,12 @@ export default function BirthdayTeaser({ onOpenLogin }: { /** 로그인하면 �
     }
     let hour: number | undefined;
     let minute: number | undefined;
-    if (!timeUnknown) {
+    // 시간 칸을 비워 두면 '모름'으로 봐요. (생일만 넣어도 바로 볼 수 있게. 적었는데 형식이 틀리면 알려줘요)
+    if (!timeUnknown && time.trim() !== "") {
       const t = /^(\d{2}):(\d{2})$/.exec(time);
       if (!t || Number(t[1]) > 23 || Number(t[2]) > 59) {
         setState("error");
-        setError("태어난 시간을 입력하거나 '모름'을 눌러 줘. (예: 14:30)");
+        setError("태어난 시간은 14:30 처럼 적거나, 모르면 비워 둬도 돼.");
         return;
       }
       hour = Number(t[1]);
@@ -105,7 +106,7 @@ export default function BirthdayTeaser({ onOpenLogin }: { /** 로그인하면 �
         </div>
       ) : (
         <form onSubmit={submit} className="flex flex-col items-center gap-2">
-          <p className="text-center text-[13.5px] font-bold leading-normal text-slate-700 [word-break:keep-all]">생일과 태어난 시간을 알려주면<br />오늘의 도리 한마디를 보여줄게 <DoriIcon className="!mr-0 ml-1" /></p>
+          <p className="text-center text-[13.5px] font-bold leading-normal text-slate-700 [word-break:keep-all]">생일만 알려줘도<br />오늘의 도리 한마디를 보여줄게 <DoriIcon className="!mr-0 ml-1" /></p>
           <div className="flex w-full max-w-[18.5rem] flex-col gap-2">
             <input
               type="text"
@@ -125,7 +126,7 @@ export default function BirthdayTeaser({ onOpenLogin }: { /** 로그인하면 �
                 autoComplete="off"
                 aria-label="태어난 시간"
                 data-testid="teaser-time"
-                placeholder="태어난 시간 14:30"
+                placeholder="태어난 시간 (몰라도 돼)"
                 maxLength={5}
                 disabled={timeUnknown}
                 value={time}
