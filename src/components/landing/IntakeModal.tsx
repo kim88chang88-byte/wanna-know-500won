@@ -58,6 +58,7 @@ import type { Pillar, SajuChart } from "@/lib/saju/types";
 import { CloseButton, ModalShell } from "./Modals";
 import { ResultHero } from "./PhotoCard";
 import ResultShareCard from "./ResultShareCard";
+import InviteNudge from "./InviteNudge";
 import SajuGuide from "./SajuGuide";
 import ResultBurst from "./ResultBurst";
 import ReviewBox from "./ReviewBox";
@@ -904,12 +905,12 @@ export default function IntakeModal({ target, wallet = null, onClose, onComplete
                   <div data-testid="premium-result">
                     {compat && premiumReport.compat ? (
                       <CompatStory report={premiumReport} intro={null} partnerName={resultPartner?.name ?? "상대"} name={nickname} shareInCard
-                        lastWord={<><ResultHero report={premiumReport} aiQuote={premiumReport.compat?.ai?.last ?? null} luxe={false} hideLucky /><ResultShareCard report={premiumReport} aiQuote={premiumReport.compat?.ai?.last ?? null} shareNames={{ me: nickname, partner: resultPartner?.name ?? null }} reading={reading} /></>}
+                        lastWord={<><ResultHero report={premiumReport} aiQuote={premiumReport.compat?.ai?.last ?? null} luxe={false} hideLucky /><ResultShareCard report={premiumReport} aiQuote={premiumReport.compat?.ai?.last ?? null} shareNames={{ me: nickname, partner: resultPartner?.name ?? null }} reading={reading} /><InviteNudge /></>}
                         closing={premiumReport.compat ? <CompatAsk compat={premiumReport.compat} /> : undefined}
                       />
                     ) : (
                       <StoryReport report={premiumReport} reading={reading} intro={null} name={subject ? (subject.name ?? "") : nickname}
-                        lastWord={<><ResultHero report={premiumReport} aiQuote={reading?.kkotgeoji ?? null} luxe={false} hideLucky /><ResultShareCard report={premiumReport} aiQuote={reading?.kkotgeoji ?? null} reading={reading} /></>}
+                        lastWord={<><ResultHero report={premiumReport} aiQuote={reading?.kkotgeoji ?? null} luxe={false} hideLucky /><ResultShareCard report={premiumReport} aiQuote={reading?.kkotgeoji ?? null} reading={reading} /><InviteNudge /></>}
                         closing={askInput ? <AskChips input={askInput} luxe={false} topic={isStudy ? "study" : target.fortune} hideTitle /> : undefined}
                         chat={askInput ? <ChatEntry ctx={{ kind: "reading", summary: summarizeReport(premiumReport), birth: askInput, name: viewName?.trim() || null, ...(isStudy ? { topic: "study" as const } : {}) }} /> : undefined}
                       />
