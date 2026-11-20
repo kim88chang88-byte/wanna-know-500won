@@ -261,7 +261,7 @@ export function MachinesSection({ onSpin, lastKey = null }: SpinProps & { lastKe
               <span className="absolute inset-0 flex items-center justify-center font-cute text-4xl text-gray-400/90">?</span>
             </div>
             <div className="min-w-0">
-              <h4 className="mb-1 font-cute text-[15px] font-normal text-gray-400">??운</h4>
+              <h4 className="mb-1 font-cute text-[15px] font-normal text-gray-400">???</h4>
               <p className="text-[11.5px] leading-relaxed text-gray-400">Coming soon · 곧 만나요</p>
             </div>
           </div>
