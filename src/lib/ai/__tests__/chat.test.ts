@@ -198,7 +198,7 @@ describe("구체성·시점·행동 반복 방지", () => {
     expect(u).toContain("차·음료 마시기(1번)");
   });
   it("시스템 프롬프트에 새 규칙이 있다", () => {
-    expect(CHAT_SYSTEM_PROMPT).toContain("돈·생계·살림 걱정");
+    expect(CHAT_SYSTEM_PROMPT).toContain("돈·재물 질문");
     expect(CHAT_SYSTEM_PROMPT).toContain("지금 시점에 맞춰");
     expect(CHAT_SYSTEM_PROMPT).toContain("서로 다른 영역");
   });
