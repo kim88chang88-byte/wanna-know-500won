@@ -376,7 +376,7 @@ export function buildBook(r: SajuResult, ctx: BookContext): BookPage[] {
     if (cs.timing) topicSections.push(cs.timing);
   }
   for (const t of insight.timing) topicSections.push({ heading: t.title, body: t.body });
-  if ((topicKey === "study" || topicKey === "health") && topicSections.length > 0 && !topicSections[0].reality) {
+  if (topicKey === "study" && topicSections.length > 0 && !topicSections[0].reality) {
     topicSections[0] = { ...topicSections[0], reality: realityCheck(topicKey) };
   }
   for (const sit of TOPIC_SITUATIONS[topicKey]) topicSections.push({ heading: `상황별 가이드 · ${sit.title}`, body: sit.body });
