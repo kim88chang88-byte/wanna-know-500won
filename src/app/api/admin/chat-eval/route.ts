@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
 import { isAdmin } from "@/lib/admin/auth";
 import { buildCoreFacts, factsNowFor } from "@/lib/ai/coreFacts";
-import { buildReadingMemo } from "@/lib/ai/chatMemo";
+import { buildCompatMemo, buildReadingMemo } from "@/lib/ai/chatMemo";
 import { chatDori, CRISIS_ANSWER, isCrisis } from "@/lib/ai/chat";
-import { EVAL_LOVE, EVAL_MENU, EVAL_MULTI, EVAL_WORK } from "@/lib/ai/evalSets";
+import { EVAL_CATALOG, evalCategory } from "@/lib/ai/evalSets";
 import { buildDailyFacts, kstToday } from "@/lib/ai/dailyFacts";
 import { hasAiKey } from "@/lib/ai/llm";
 import { unableReply } from "@/lib/ai/outOfScope";
@@ -37,10 +37,8 @@ export async function POST(request: Request) {
   } catch {
     return NextResponse.json({ error: "요청이 올바르지 않아." }, { status: 400, headers: NO_STORE });
   }
-  const isMenu = body?.set === "menu";
-  const isWork = body?.set === "work";
-  const isMulti = body?.set === "multi";
-  const set = isMenu ? EVAL_MENU : isWork ? EVAL_WORK : isMulti ? EVAL_MULTI : EVAL_LOVE;
+  const cat = evalCategory(body?.set);
+  const set = cat.qs;
   const i = typeof body?.index === "number" ? Math.floor(body.index) : -1;
   if (i < 0 || i >= set.length) return NextResponse.json({ error: "질문 번호가 올바르지 않아." }, { status: 400, headers: NO_STORE });
   const item = set[i];
@@ -56,9 +54,12 @@ export async function POST(request: Request) {
     const now = new Date();
     const birth = resolveBirth(profile).input;
     const chart = calculateSaju(birth);
-    const core = buildCoreFacts(birth, factsNowFor(null, now), true);
-    const memo = buildReadingMemo(chart, core, factsNowFor(null, now));
-    const info = { kind: "reading" as const, name: null, partnerName: null, summary: isMenu ? "사주 풀이 결과서를 읽고 온 상담방. 오늘의 메뉴와 취미를 묻는 중" : isWork ? "사주 풀이 결과서를 읽고 온 상담방. 일과 커리어 고민을 이야기하는 중" : isMulti ? "연애운 풀이. 연애와 결혼에 대한 고민을 이어서 이야기하는 방" : "연애운 풀이. 연애와 결혼에 대한 고민을 이야기하는 방", chart, core, daily: isMenu ? buildDailyFacts(chart, kstToday(now)) : null, partnerChart: null, memo };
+    const factsNow = factsNowFor(cat.topic ?? null, now);
+    const core = buildCoreFacts(birth, factsNow, true);
+    // 궁합 점검은 고정된 예시 상대(1994-03-15 낮 12시)와 함께 돌려요. 성별은 내 성별과 반대로 놓아요.
+    const partnerChart = cat.kind === "compat" ? calculateSaju({ year: 1994, month: 3, day: 15, hour: 12, minute: 0, calendar: "solar", gender: birth.gender === "male" ? "female" : "male" }) : null;
+    const memo = cat.kind === "compat" && partnerChart ? buildCompatMemo(chart, partnerChart, { me: null, partner: "상대" }) : buildReadingMemo(chart, core, factsNow);
+    const info = { kind: cat.kind, name: null, partnerName: cat.kind === "compat" ? "상대" : null, summary: cat.summary, chart, core, daily: cat.daily ? buildDailyFacts(chart, kstToday(now)) : null, partnerChart, memo };
     const turns = [item.q, ...(item.next ?? [])];
     const history: Array<{ role: "user" | "dori"; text: string }> = [];
     const texts: string[] = [];
@@ -84,5 +85,7 @@ export async function POST(request: Request) {
 
 export async function GET(request: Request) {
   const which = new URL(request.url).searchParams.get("set");
-  return NextResponse.json({ total: (which === "menu" ? EVAL_MENU : which === "work" ? EVAL_WORK : which === "multi" ? EVAL_MULTI : EVAL_LOVE).length }, { headers: NO_STORE });
+  // set 이 없으면 점검 카테고리 목록을 돌려줘요 (화면의 버튼이 이걸로 만들어져요)
+  if (!which) return NextResponse.json({ categories: EVAL_CATALOG.map((c) => ({ id: c.id, label: c.label, group: c.group, total: c.qs.length })) }, { headers: NO_STORE });
+  return NextResponse.json({ total: evalCategory(which).qs.length }, { headers: NO_STORE });
 }

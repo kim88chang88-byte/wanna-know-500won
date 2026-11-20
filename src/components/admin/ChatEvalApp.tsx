@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 interface Row {
   n: number;
@@ -14,17 +14,39 @@ interface Row {
   ms: number;
 }
 
+interface Cat {
+  id: string;
+  label: string;
+  group: "p500" | "p1000" | "etc";
+  total: number;
+}
+const GROUPS: Array<{ id: Cat["group"]; title: string }> = [
+  { id: "p500", title: "500원 사주 (주제별 풀이 방)" },
+  { id: "p1000", title: "1,000원 궁합" },
+  { id: "etc", title: "기타 점검" },
+];
+
 const ROUTE: Record<string, string> = { ai: "AI 답", "ai-unable": "AI가 사과", prefilter: "미리 걸러서 사과", crisis: "위기 안내", error: "오류" };
 
-/** 관리자 전용: 연애 질문 30개를 실제 도리로 한꺼번에 돌려 보고 결과를 복사해요. 질문 횟수는 쓰지 않아요. */
+/** 관리자 전용: 카테고리별 상담 질문을 실제 도리로 한꺼번에 돌려 보고 결과를 복사해요. 질문 횟수는 쓰지 않아요. (프리미엄은 제외) */
 export default function ChatEvalApp() {
   const [rows, setRows] = useState<Row[]>([]);
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState("");
   const [copied, setCopied] = useState(false);
+  const [cats, setCats] = useState<Cat[]>([]);
+  const [current, setCurrent] = useState("");
 
-  async function run(set: "love" | "menu" | "work" | "multi" = "love") {
+  useEffect(() => {
+    fetch("/api/admin/chat-eval", { cache: "no-store" })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d: { categories?: Cat[] } | null) => setCats(d?.categories ?? []))
+      .catch(() => setMsg("점검 목록을 불러오지 못했어."));
+  }, []);
+
+  async function run(set: string) {
     setBusy(true);
+    setCurrent(cats.find((c) => c.id === set)?.label ?? "");
     setRows([]);
     setMsg("");
     try {
@@ -49,6 +71,7 @@ export default function ChatEvalApp() {
   }
 
   const asText = () =>
+    `# 상담실 점검 · ${current}\n\n` +
     rows
       .map((r) => `${r.n}. [${ROUTE[r.route] ?? r.route}${r.expect ? ` / 기대:${r.expect}` : ""}${r.visual ? ` / 카드:${r.visual}` : ""}] ${r.q}\n${r.answer}${r.followups?.length && !r.answer.includes("▶") ? `\n(${[r.choices?.length ? `선택지: ${r.choices.join(" / ")}` : "", `다음 질문 칩: ${r.followups.join(" / ")}`].filter(Boolean).join(" · ")})` : ""}`)
       .join("\n\n");
@@ -65,21 +88,27 @@ export default function ChatEvalApp() {
 
   return (
     <main className="mx-auto max-w-2xl px-4 py-6">
-      <h1 className="font-cute text-xl">상담실 점검 · 연애 30문</h1>
-      <p className="mt-1 text-[13px] text-neutral-600">내 저장된 사주로 연애운 풀이 방에서 묻는 것처럼 돌려요. 질문 횟수와 조약돌은 쓰지 않고, AI 비용은 조금 나가요.</p>
+      <h1 className="font-cute text-xl">상담실 점검{current ? ` · ${current}` : ""}</h1>
+      <p className="mt-1 text-[13px] text-neutral-600">내 저장된 사주로 해당 풀이 방에서 묻는 것처럼 돌려요. 질문 횟수와 조약돌은 쓰지 않고, AI 비용은 조금 나가요. 한 시간에 120번까지 돌릴 수 있어요.</p>
+      <div className="mt-3 space-y-3">
+        {GROUPS.map((g) => {
+          const list = cats.filter((c) => c.group === g.id);
+          if (list.length === 0) return null;
+          return (
+            <section key={g.id} data-testid={`eval-group-${g.id}`}>
+              <h2 className="text-[12.5px] font-bold text-neutral-500">{g.title}</h2>
+              <div className="mt-1 flex flex-wrap gap-2">
+                {list.map((c) => (
+                  <button key={c.id} type="button" onClick={() => void run(c.id)} disabled={busy} data-testid={`eval-run-${c.id}`} className="rounded-full bg-brand-500 px-3.5 py-2 text-sm font-extrabold text-white disabled:opacity-50">
+                    {c.label} {c.total}개
+                  </button>
+                ))}
+              </div>
+            </section>
+          );
+        })}
+      </div>
       <div className="mt-3 flex flex-wrap items-center gap-2">
-        <button type="button" onClick={() => void run("love")} disabled={busy} className="rounded-full bg-brand-500 px-4 py-2 text-sm font-extrabold text-white disabled:opacity-50">
-          {busy ? "돌리는 중…" : "연애 30개 돌리기"}
-        </button>
-        <button type="button" onClick={() => void run("menu")} disabled={busy} className="rounded-full bg-brand-500 px-4 py-2 text-sm font-extrabold text-white disabled:opacity-50">
-          메뉴·취미 17개 돌리기
-        </button>
-        <button type="button" onClick={() => void run("work")} disabled={busy} className="rounded-full bg-brand-500 px-4 py-2 text-sm font-extrabold text-white disabled:opacity-50">
-          일·창업 고민 10개 돌리기
-        </button>
-        <button type="button" onClick={() => void run("multi")} disabled={busy} className="rounded-full bg-brand-500 px-4 py-2 text-sm font-extrabold text-white disabled:opacity-50">
-          연애 이어 묻기 6개(3턴) 돌리기
-        </button>
         {rows.length > 0 && (
           <button type="button" onClick={() => void copy()} className="rounded-full border border-neutral-300 px-4 py-2 text-sm font-bold">
             {copied ? "복사됨 ✓" : "전체 복사"}
