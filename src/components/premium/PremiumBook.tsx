@@ -1021,7 +1021,7 @@ function ChapterCover({ page }: { page: BookPage }) {
       <div className="absolute inset-0 bg-gradient-to-b from-[#0b0e22]/80 via-transparent to-[#0b0e22]/55" />
       <div className="relative z-[1] text-center">
         <small className="block text-[15px] tracking-[0.3em] text-[#e6c887]">{t.small}</small>
-        <b className="mt-2 block font-serifKr text-[30px] leading-tight text-[#fbf3de]">{t.main}</b>
+        <b className="cover-title mt-2 block text-[30px] leading-tight text-[#fbf3de]">{t.main}</b>
         {t.sub && <span className="mt-1.5 block text-[15px] text-[#e8dfca]">{t.sub}</span>}
         <i className="mx-auto mt-2.5 block h-px w-24 bg-[#e6c887]/70" />
       </div>
