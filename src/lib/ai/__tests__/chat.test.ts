@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { cleanFollowups, cleanVisual, cleanHistory, CRISIS_ANSWER, earlierQuestions, isCrisis, parseChatAnswer, parseChatReply, polishChatAnswer, recentEndings, usedBasis, usedActions, nowContext, visualAllowed, CHAT_SYSTEM_PROMPT } from "../chat";
+import { fixTypos, cleanFollowups, cleanVisual, cleanHistory, CRISIS_ANSWER, earlierQuestions, isCrisis, parseChatAnswer, parseChatReply, polishChatAnswer, recentEndings, usedBasis, usedActions, nowContext, visualAllowed, CHAT_SYSTEM_PROMPT } from "../chat";
 import { parseCtx } from "@/lib/chatServer";
 import { summarizeReport } from "@/lib/chatContext";
 
@@ -203,5 +203,11 @@ describe("구체성·시점·행동 반복 방지", () => {
     expect(CHAT_SYSTEM_PROMPT).toContain("솔직히 설렁했어");
     expect(CHAT_SYSTEM_PROMPT).toContain("지금 시점에 맞춰");
     expect(CHAT_SYSTEM_PROMPT).toContain("서로 다른 영역");
+  });
+});
+
+describe("반말 오타 보정", () => {
+  it("고맙어를 고마워로 고친다", () => {
+    expect(fixTypos("솔직하게 말해 줘서 고맙어.")).toBe("솔직하게 말해 줘서 고마워.");
   });
 });
