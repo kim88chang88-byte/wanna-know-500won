@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { fixTypos, cleanFollowups, cleanVisual, cleanHistory, CRISIS_ANSWER, earlierQuestions, isCrisis, parseChatAnswer, parseChatReply, polishChatAnswer, recentEndings, usedBasis, usedActions, nowContext, visualAllowed, CHAT_SYSTEM_PROMPT } from "../chat";
+import { timeAlreadySaid, fixTypos, cleanFollowups, cleanVisual, cleanHistory, CRISIS_ANSWER, earlierQuestions, isCrisis, parseChatAnswer, parseChatReply, polishChatAnswer, recentEndings, usedBasis, usedActions, nowContext, visualAllowed, CHAT_SYSTEM_PROMPT } from "../chat";
 import { parseCtx } from "@/lib/chatServer";
 import { summarizeReport } from "@/lib/chatContext";
 
@@ -209,5 +209,12 @@ describe("구체성·시점·행동 반복 방지", () => {
 describe("반말 오타 보정", () => {
   it("고맙어를 고마워로 고친다", () => {
     expect(fixTypos("솔직하게 말해 줘서 고맙어.")).toBe("솔직하게 말해 줘서 고마워.");
+  });
+});
+
+describe("시점 말 반복 방지", () => {
+  it("도리가 이미 요일·시간대를 말했으면 true", () => {
+    expect(timeAlreadySaid([{ role: "dori", text: "토요일 저녁에 시험 보느라 고생했어" } as never])).toBe(true);
+    expect(timeAlreadySaid([{ role: "user", text: "토요일 저녁인데" } as never, { role: "dori", text: "고생했어. 오늘은 푹 쉬어." } as never])).toBe(false);
   });
 });
