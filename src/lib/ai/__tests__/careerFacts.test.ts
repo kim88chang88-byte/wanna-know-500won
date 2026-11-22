@@ -25,6 +25,8 @@ describe("일 재료", () => {
     expect(f.배우고받치는힘).toContain("나무 기운");
     expect(f.직장자리월주).toContain("식신");
     expect(f.올해세운).toContain("2026년");
+    expect(f.올해세운).not.toContain("올해 분위기");
+    expect(f.어울리는분야).toContain("→");
     expect(f.내년세운).toContain("2027년");
   });
 

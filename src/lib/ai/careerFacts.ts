@@ -2,7 +2,7 @@ import type { SajuChart } from "@/lib/saju/types";
 import { STEMS } from "@/lib/saju/constants";
 import { EL_KO, type Element } from "@/lib/ai/menuHobby";
 import { analyzeChart } from "@/lib/saju/analysis";
-import { tenGodOf, TEN_GOD_MOOD, type TenGod } from "@/lib/ai/dailyFacts";
+import { tenGodOf, type TenGod } from "@/lib/ai/dailyFacts";
 import { sewoonBranch } from "@/lib/ai/loveFacts";
 
 /*
@@ -32,6 +32,15 @@ const GOD_WORK: Partial<Record<TenGod, string>> = {
   겁재: "겁재 — 경쟁·나눔이 커지는 결, 공을 나누거나 뺏기기 쉬움",
 };
 
+/** 오행별로 어울리는 일하는 분야(단정하지 않고 "이런 쪽이 맞는 편"으로만 써요) */
+const FIELD: Record<Element, string> = {
+  wood: "교육·기획·콘텐츠·성장하는 조직·사람 키우는 일",
+  fire: "표현·방송·마케팅·IT 서비스·강의처럼 드러나고 전하는 일",
+  earth: "운영·관리·부동산·상담·신뢰가 중요한 중간 조정 일",
+  metal: "금융·법·품질·기술·정밀하게 다듬는 일",
+  water: "연구·분석·글쓰기·유통·사람과 정보가 흐르는 일",
+};
+
 export function careerFacts(chart: SajuChart, now: Date): Record<string, unknown> {
   const f = analyzeChart(chart);
   const me = f.dayMaster.element as Element;
@@ -45,6 +54,8 @@ export function careerFacts(chart: SajuChart, now: Date): Record<string, unknown
     배우고받치는힘: `${EL_KO[seal]} 기운 ${f.elementCounts[seal]}글자 — ${level(f.elementCounts[seal], 3)}(인성: 공부·자격·윗사람 도움·시험)`,
     내곁의사람: `나와 같은 ${EL_KO[me]} 기운은 동료, 나를 받쳐 주는 ${EL_KO[seal]} 기운은 멘토·후원자, 나를 다스리는 ${EL_KO[gwan]} 기운은 평가하는 상사 같은 결`,
   };
+  const ranked = ([gwan, output, seal] as Element[]).sort((a, b) => f.elementCounts[b] - f.elementCounts[a]);
+  out.어울리는분야 = `센 기운 ${EL_KO[ranked[0]]} → ${FIELD[ranked[0]]} / 다음 ${EL_KO[ranked[1]]} → ${FIELD[ranked[1]]} (이런 쪽이 맞는 편이라고만 말하고 단정 금지)`;
   if (chart.month?.stem) out.직장자리월주 = `${tenGodOf(chart.day.stem, chart.month.stem)} — ${GOD_WORK[tenGodOf(chart.day.stem, chart.month.stem)] ?? "일하는 자리의 결"}`;
   const sw = sewoonBranch(now);
   const stemAt = (y: number) => STEMS[(((y - 4) % 10) + 10) % 10];
@@ -52,7 +63,7 @@ export function careerFacts(chart: SajuChart, now: Date): Record<string, unknown
   const nxt = stemAt(sw.year + 1);
   const g1 = tenGodOf(chart.day.stem, cur.hanja);
   const g2 = tenGodOf(chart.day.stem, nxt.hanja);
-  out.올해세운 = `${sw.year}년 ${cur.hanja} — ${GOD_WORK[g1] ?? g1}. 올해 분위기: ${TEN_GOD_MOOD[g1]}`;
-  out.내년세운 = `${sw.year + 1}년 ${nxt.hanja} — ${GOD_WORK[g2] ?? g2}. 내년 분위기: ${TEN_GOD_MOOD[g2]}`;
+  out.올해세운 = `${sw.year}년 ${cur.hanja} — ${GOD_WORK[g1] ?? g1}`;
+  out.내년세운 = `${sw.year + 1}년 ${nxt.hanja} — ${GOD_WORK[g2] ?? g2}`;
   return out;
 }
