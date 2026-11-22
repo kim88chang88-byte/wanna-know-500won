@@ -1,7 +1,7 @@
 import { isOutfitQuestion, pickOutfit } from "@/lib/outfits";
 import { NextResponse } from "next/server";
 import { takeAiBudget } from "@/lib/ai/budget";
-import { chatDori, checkRisk, cleanHistory, CRISIS_ANSWER, isCrisis, needsRiskCheck } from "@/lib/ai/chat";
+import { chatDori, checkRisk, cleanHistory, CRISIS_ANSWER, isCrisis } from "@/lib/ai/chat";
 import { apologyFirst, REFUND_DAY_CAP, REFUND_NOTICE, unableReply } from "@/lib/ai/outOfScope";
 import { buildCoreFacts, factsNowFor } from "@/lib/ai/coreFacts";
 import { buildChatMemo, buildCompatMemo, buildReadingMemo, type ChatMemo } from "@/lib/ai/chatMemo";
@@ -55,13 +55,11 @@ export async function POST(request: Request) {
 
   if (!hasAiKey()) return NextResponse.json({ error: "지금은 도리가 답을 준비하지 못했어." }, { status: 503 });
 
-  // 말 고르기를 빠져나간 돌려 말하기: 마음이 힘든 말이 섞였을 수 있을 때만 짧은 분류 호출로 한 번 더 살펴요. 위험이면 안내만 보내고 질문은 쓰지 않아요.
-  if (needsRiskCheck(last)) {
-    try {
-      if (await checkRisk(history)) return NextResponse.json({ answer: CRISIS_ANSWER, safe: true, left: await quotaLeft(db, target) });
-    } catch {
-      /* 분류가 실패하면 평소 흐름으로 이어가요 (아래에서 답 안의 위험 표시로 한 번 더 살펴요) */
-    }
+  // 말 고르기를 빠져나간 돌려 말하기: 모든 질문을 짧은 분류 호출로 한 번 더 살펴요(글자 힌트에 기대지 않아요). 위험이면 안내만 보내고, 질문은 아직 쓰기 전이라 쓰지 않아요.
+  try {
+    if (await checkRisk(history)) return NextResponse.json({ answer: CRISIS_ANSWER, safe: true, left: await quotaLeft(db, target) });
+  } catch {
+    /* 분류가 실패하면 평소 흐름으로 이어가요 (아래에서 답 안의 위험 표시로 한 번 더 살펴요) */
   }
 
   let taken: { left: number; via: "db" | "mem" } | null = null;

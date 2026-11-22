@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { timeAlreadySaid, fixTypos, cleanFollowups, cleanVisual, cleanHistory, CRISIS_ANSWER, earlierQuestions, isCrisis, parseChatAnswer, parseChatReply, parseRisk, needsRiskCheck, polishChatAnswer, recentEndings, usedBasis, usedActions, nowContext, visualAllowed, CHAT_SYSTEM_PROMPT } from "../chat";
+import { timeAlreadySaid, fixTypos, cleanFollowups, cleanVisual, cleanHistory, CRISIS_ANSWER, earlierQuestions, isCrisis, parseChatAnswer, parseChatReply, parseRisk, polishChatAnswer, recentEndings, usedBasis, usedActions, nowContext, visualAllowed, CHAT_SYSTEM_PROMPT } from "../chat";
 import { parseCtx } from "@/lib/chatServer";
 import { summarizeReport } from "@/lib/chatContext";
 
@@ -259,9 +259,7 @@ describe("위험 표시(risk)", () => {
 });
 
 describe("위험 분류기", () => {
-  it("마음이 힘든 말이 섞였을 수 있는 글에서만 부르고, 응답은 true/false 만 읽는다", () => {
-    for (const q of ["다 그냥 내려놓고 싶어", "나같은 인간은 왜 살까?", "모든게 지쳤어", "그냥 다 때려치고 싶어"]) expect(needsRiskCheck(q)).toBe(true);
-    for (const q of ["올해 승진운 알려줘", "면접 앞두고 있는데 어떤 마음으로 가면 좋을까?", "이직 준비 언제 시작할까?"]) expect(needsRiskCheck(q)).toBe(false);
+  it("응답은 true/false 만 읽는다", () => {
     expect(parseRisk({ risk: true })).toEqual({ risk: true });
     expect(parseRisk({ risk: false })).toEqual({ risk: false });
     expect(parseRisk({})).toBeNull();

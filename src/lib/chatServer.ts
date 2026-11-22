@@ -117,7 +117,8 @@ export async function refundQuestion(db: Db | null, t: QuotaTarget, via: "db" | 
   try {
     if (via === "db" && db) await db.chatRefund(t.user, t.scope);
     else memQuota.refund(t.user, t.scope);
-  } catch {
-    /* 돌려주지 못해도 답을 막지는 않아요 */
+  } catch (e) {
+    /* 돌려주지 못해도 답을 막지는 않아요. 다만 기록은 남겨요(횟수가 안 돌아온 일을 찾으려고) */
+    console.error("chatRefund failed:", e instanceof Error ? e.message : "unknown");
   }
 }
