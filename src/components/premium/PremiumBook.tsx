@@ -1,5 +1,6 @@
 "use client";
 
+import { BRIDGES, sectionLink } from "@/lib/premium/flow";
 import { softToDeep } from "@/lib/premium/deepTone";
 import { getBrowserStorage } from "@/lib/drawCounter";
 import { readRealityPick, saveRealityPick } from "@/lib/realityPick";
@@ -1044,12 +1045,23 @@ function ChapterEnd({ cur, next }: { cur: BookPage; next?: BookPage }) {
   if (!next) return null;
   const here = titleParts(cur.title).main;
   const there = titleParts(next.title).main;
+  const bridge = cur.key in BRIDGES && !cur.key.startsWith("compat") ? BRIDGES[cur.key] : null;
   return (
     <div className="mt-9 flex flex-col items-center gap-4">
       <div data-testid="next-teaser" className="border-2 border-[#20203a] bg-[#fffdf7] px-[18px] py-3 text-center text-[15px] font-bold leading-[1.5] text-[#26233a] shadow-[4px_4px_0_#b98a2f]">
-        지금까지 ‘{here}’{josa(here, "을/를").slice(here.length)} 살펴봤어.
-        <br />
-        다음 장에서는 ‘{there}’{josa(there, "을/를").slice(there.length)} 함께 볼게!
+        {bridge ? (
+          <>
+            {bridge[0]}
+            <br />
+            {bridge[1]}
+          </>
+        ) : (
+          <>
+            지금까지 ‘{here}’{josa(here, "을/를").slice(here.length)} 살펴봤어.
+            <br />
+            다음 장에서는 ‘{there}’{josa(there, "을/를").slice(there.length)} 함께 볼게!
+          </>
+        )}
       </div>
     </div>
   );
@@ -1283,7 +1295,7 @@ export default function PremiumBook({ report, flush = false, finale, previewBlur
 
         {groups.map((g, gi) => (
           <div key={`${gi}-${g[0]?.heading}`} className="flex flex-col gap-[18px]">
-            {gi > 0 && <BubbleRow text={`이어서 ‘${g[0].heading.replace(/ · .*$/, "")}’ 이야기를 들려줄게.`} img={pic} right={gi % 2 === 1} />}
+            {gi > 0 && <BubbleRow text={sectionLink(g[0].heading, gi)} img={pic} right={gi % 2 === 1} />}
             <div className="hanji-wrap">
             <div className="hanji-page px-5 pb-[18px] pt-[22px] text-[#26233a]">
               <span aria-hidden="true" className="hanji-tex" />
