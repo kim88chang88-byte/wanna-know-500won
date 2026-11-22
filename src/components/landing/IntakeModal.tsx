@@ -1200,19 +1200,23 @@ export default function IntakeModal({ target, wallet = null, onClose, onComplete
 
           {step === "consent" && (
             <div className="space-y-3">
-              <label className="flex items-start gap-2 text-xs text-gray-700 leading-relaxed">
-                <input
-                  type="checkbox"
-                  name="consent"
-                  className="mt-0.5"
-                  checked={form.consent}
-                  onChange={(e) => update({ consent: e.target.checked })}
-                />
+              <label className="flex items-center justify-between gap-3 text-xs text-gray-700 leading-relaxed">
                 <span>
-                  (필수) 사주 계산을 위해 생년월일·성별(선택: 태어난 시간·고민 내용){compat ? "과 상대방의 생년월일·성별(선택: 태어난 시간)" : ""}을 처리하는 것에 동의해.{compat ? " 상대방 정보는 궁합 계산에만 쓰고, 아래 선택에 동의하지 않으면 서버에 저장하지 않아." : ""}{" "}
-                  <a href="/privacy" target="_blank" rel="noopener noreferrer" className="text-brand-600 underline">
-                    개인정보처리방침 보기
-                  </a>
+                  (필수) 사주를 풀려면 생년월일이랑 성별{compat ? "(상대방 것도)" : ""}이 꼭 필요해! 이 개인정보를 풀이에만 쓰려고 하는데 동의해 줄래?{" "}
+                  (<a href="/privacy" target="_blank" rel="noopener noreferrer" className="text-brand-600 underline">개인정보처리방침 보기</a>)
+                  <span className="mt-1 block text-[11px] text-gray-500">
+                    태어난 시간·고민 내용을 적었다면 그것도 풀이에만 써.{compat ? " 상대방 정보는 궁합 계산에만 쓰고, 아래 선택에 동의하지 않으면 서버에 저장하지 않아." : ""}
+                  </span>
+                </span>
+                <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-brand-200 bg-brand-50 px-3 py-1.5 text-[13px] font-bold text-brand-700">
+                  <input
+                    type="checkbox"
+                    name="consent"
+                    className="h-5 w-5"
+                    checked={form.consent}
+                    onChange={(e) => update({ consent: e.target.checked })}
+                  />
+                  동의함
                 </span>
               </label>
               {!(loggedIn || buildConcern(form)) && <p className="text-[11px] text-gray-400">입력한 정보는 서버에 저장하지 않아.</p>}
