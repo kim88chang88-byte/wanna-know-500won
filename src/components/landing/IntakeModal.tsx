@@ -512,6 +512,19 @@ function MbtiPicker({ value, onChange }: { value: string; onChange: (v: string) 
   );
 }
 
+/** 선택 항목 한 줄: 왼쪽에 쉬운 말 설명, 오른쪽에 짧은 답(응/좋아)과 체크칸 */
+function OptRow({ name, checked, onChange, pill, children }: { name: string; checked: boolean; onChange: (v: boolean) => void; pill: string; children: ReactNode }) {
+  return (
+    <label className="flex items-center justify-between gap-3 text-xs leading-relaxed text-gray-700">
+      <span>{children}</span>
+      <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-brand-200 bg-brand-50 px-3 py-1.5 text-[13px] font-bold text-brand-700">
+        <input type="checkbox" name={name} className="h-5 w-5" checked={checked} onChange={(e) => onChange(e.target.checked)} />
+        {pill}
+      </span>
+    </label>
+  );
+}
+
 export default function IntakeModal({ target, wallet = null, onClose, onComplete, loggedIn = false, nickname = null, savedProfile = null, onRequestLogin, onProfileSaved }: Props) {
   // 저장된 생년월일시가 있으면 미리 채우고, 이미 입력한 질문(생년월일·시간·성별)은 건너뛰어 고민 단계에서 시작해요.
   const [form, setForm] = useState<IntakeForm>(() => (savedProfile ? { ...EMPTY_FORM, ...profileToForm(savedProfile) } : EMPTY_FORM));
@@ -1222,29 +1235,22 @@ export default function IntakeModal({ target, wallet = null, onClose, onComplete
               {!(loggedIn || buildConcern(form)) && <p className="text-[11px] text-gray-400">입력한 정보는 서버에 저장하지 않아.</p>}
 
               {loggedIn && !(savedProfile && sameBirth(savedProfile, buildBirthInput({ ...form, consent: true }))) && (
-                <label className="flex items-start gap-2 text-xs text-gray-700 leading-relaxed">
-                  <input type="checkbox" name="saveProfile" className="mt-0.5" checked={saveProfile} onChange={(e) => { setSaveProfile(e.target.checked); if (e.target.checked) setSaveOther(false); }} />
-                  <span>
-                    (선택) 도리가 생년월일시·성별을 기억하게 저장해. 다음부터 다시 입력하지 않아도 돼. 로그인 창에서 언제든 지울 수 있고, 탈퇴하면 함께 삭제돼.
-                  </span>
-                </label>
+                <OptRow name="saveProfile" checked={saveProfile} onChange={(v) => { setSaveProfile(v); if (v) setSaveOther(false); }} pill="응">
+                  (선택) 도리가 내 생년월일시·성별을 기억해 둘까? 기억해 두면 다음부터 다시 안 적어도 돼서 편해. 로그인 창에서 언제든 지울 수 있고, 탈퇴하면 함께 삭제돼.
+                </OptRow>
               )}
 
               {loggedIn && (
-                <label className="flex items-start gap-2 text-xs text-gray-700 leading-relaxed">
-                  <input type="checkbox" name="saveVault" className="mt-0.5" checked={saveVault} onChange={(e) => setSaveVault(e.target.checked)} />
-                  <span>(선택) 풀이를 내 보관함에 저장해. 다시 볼 때 추가 비용이 없고, 직접 지우거나 탈퇴하면 함께 삭제돼.</span>
-                </label>
+                <OptRow name="saveVault" checked={saveVault} onChange={setSaveVault} pill="응">
+                  (선택) 풀이를 내 보관함에 담아 둘까? 담아 두면 언제든 다시 볼 수 있고 추가 비용도 없어. 직접 지우거나 탈퇴하면 함께 삭제돼.
+                </OptRow>
               )}
 
               {compat && loggedIn && !pickedPerson && !fromInvite && people.length < MAX_PEOPLE && (
                 <div className="space-y-1.5">
-                  <label className="flex items-start gap-2 text-xs text-gray-700 leading-relaxed">
-                    <input type="checkbox" name="savePerson" className="mt-0.5" checked={savePerson} onChange={(e) => setSavePerson(e.target.checked)} />
-                    <span>
-                      (선택) 이 상대방의 생년월일시·성별을 기억해 둬. 다음 궁합이나 다른 운세를 볼 때 눌러서 바로 고를 수 있어. 로그인 창에서 언제든 지울 수 있고, 탈퇴하면 함께 삭제돼.
-                    </span>
-                  </label>
+                  <OptRow name="savePerson" checked={savePerson} onChange={setSavePerson} pill="응">
+                    (선택) 이 상대방의 생년월일시·성별도 기억해 둘까? 다음 궁합이나 운세를 볼 때 눌러서 바로 고를 수 있어서 편해. 로그인 창에서 언제든 지울 수 있고, 탈퇴하면 함께 삭제돼.
+                  </OptRow>
                   {savePerson && (
                     <input
                       type="text"
@@ -1262,13 +1268,10 @@ export default function IntakeModal({ target, wallet = null, onClose, onComplete
               )}
 
               {buildConcern(form) && (
-                <label className="flex items-start gap-2 text-xs text-gray-700 leading-relaxed">
-                  <input type="checkbox" name="shareConcern" className="mt-0.5" checked={shareConcern} onChange={(e) => setShareConcern(e.target.checked)} />
-                  <span>
-                    (선택) 적어 준 고민을 서비스 개선 통계에 써도 좋아. 생년월일은 빼고 나이대·성별만 저장해.
-                    {loggedIn ? " 로그인 후 동의하면 탈퇴 시 함께 삭제돼." : " 로그인하지 않으면 누구 것인지 알 수 없게 저장돼 나중에 지우기 어려워."}
-                  </span>
-                </label>
+                <OptRow name="shareConcern" checked={shareConcern} onChange={setShareConcern} pill="좋아">
+                  (선택) 적어 준 고민을 도유사주 품질 개선 통계에 써도 될까? 덕분에 도유사주가 좋아져서 더 나은 서비스로 돌려줄게. 생년월일은 빼고 나이대·성별만 저장해.
+                  {loggedIn ? " 로그인 후 동의하면 탈퇴 시 함께 삭제돼." : " 로그인하지 않으면 누구 것인지 알 수 없게 저장돼 나중에 지우기 어려워."}
+                </OptRow>
               )}
             </div>
           )}
