@@ -2,6 +2,7 @@ import { isOutfitQuestion, pickOutfit } from "@/lib/outfits";
 import { NextResponse } from "next/server";
 import { takeAiBudget } from "@/lib/ai/budget";
 import { chatDori, checkRisk, cleanHistory, CRISIS_ANSWER, isCrisis } from "@/lib/ai/chat";
+import { greetingReply, isFirstAsk, withoutCrisisTurns } from "@/lib/ai/chatFlow";
 import { apologyFirst, REFUND_DAY_CAP, REFUND_NOTICE, unableReply } from "@/lib/ai/outOfScope";
 import { buildCoreFacts, factsNowFor } from "@/lib/ai/coreFacts";
 import { buildChatMemo, buildCompatMemo, buildReadingMemo, type ChatMemo } from "@/lib/ai/chatMemo";
@@ -53,6 +54,10 @@ export async function POST(request: Request) {
   const unable = unableReply(last);
   if (unable) return NextResponse.json({ answer: unable.answer, links: unable.links, followups: unable.followups, unable: true, left: await quotaLeft(db, target) });
 
+  // 인사만 보낸 말("안녕", "하이")은 AI 를 부르지 않고 정해 둔 답으로 받아요. 질문도 쓰지 않아요.
+  const hello = greetingReply(history);
+  if (hello) return NextResponse.json({ answer: hello, greeting: true, left: await quotaLeft(db, target) });
+
   if (!hasAiKey()) return NextResponse.json({ error: "지금은 도리가 답을 준비하지 못했어." }, { status: 503 });
 
   // 말 고르기를 빠져나간 돌려 말하기: 모든 질문을 짧은 분류 호출로 한 번 더 살펴요(글자 힌트에 기대지 않아요). 위험이면 안내만 보내고, 질문은 아직 쓰기 전이라 쓰지 않아요.
@@ -92,6 +97,8 @@ export async function POST(request: Request) {
     }
 
     taken = await takeQuestion(db, target);
+    // 횟수가 어떻게 줄었는지 기록해요(사용자 번호는 남기지 않아요). via 가 mem 이면 DB 대신 서버 메모리로 센 거예요.
+    console.info("chat take:", JSON.stringify({ kind: ctx.kind, left: taken.left, via: taken.via, admin: isAdmin(session.sub, process.env) }));
     if (taken.left < 0) {
       if (dayTaken) await refundLimit("chat-day", `u:${session.sub}`, DAY_CAP, DAY_MS);
       return NextResponse.json({ error: "질문을 모두 사용했어. 조약돌 하나로 질문을 5번 더 할 수 있어.", code: "quota", left: 0 }, { status: 402 });
@@ -101,7 +108,7 @@ export async function POST(request: Request) {
     const core = buildCoreFacts(birth, factsNowFor(ctx.topic, now), true);
     const daily = ctx.kind === "daily" ? buildDailyFacts(chart, kstToday(now)) : null;
     // 첫 질문에는 들어온 곳에 맞는 "도리 메모"를 붙여요 (코드 계산, AI 비용 없음). 답도 이 메모를 근거로 삼아요.
-    const firstAsk = !history.some((m) => m.role === "dori");
+    const firstAsk = isFirstAsk(history);
     let memo: ChatMemo | null = null;
     if (firstAsk) {
       if (ctx.kind === "daily" && daily) memo = buildChatMemo(daily, kstToday(now));
@@ -120,7 +127,7 @@ export async function POST(request: Request) {
         partnerChart,
         memo,
       },
-      history,
+      withoutCrisisTurns(history),
       { now },
     );
     // 도리가 "자해·자살 위험이 보인다"고 표시한 답(말 고르기로 못 거른 돌려 말하기): AI 답 대신 정해 둔 안내만 보내고 질문은 돌려줘요
@@ -150,7 +157,9 @@ export async function POST(request: Request) {
     const paletteLabels = reply.visual?.kind === "palette" ? reply.visual.items.map((i) => i.label) : [];
     const outfit = isOutfitQuestion(last) ? pickOutfit(birth.gender, last, paletteLabels) : null;
     const visual = outfit && reply.visual?.kind === "palette" ? null : reply.visual;
-    return NextResponse.json({ answer: reply.answer, followups: reply.followups, choices: reply.choices, visual, outfit, memo, left: taken.left });
+    // 마음을 달래는 답(🤍)에는 "가볍게 즐기면 기분이 풀리는 날" 같은 메모 카드를 붙이지 않아요
+    const comfort = reply.answer.trimStart().startsWith("🤍");
+    return NextResponse.json({ answer: reply.answer, followups: reply.followups, choices: reply.choices, visual, outfit, memo: comfort ? null : memo, left: taken.left });
   } catch (err) {
     // 답을 못 만들었으면 쓴 질문을 돌려줘요.
     if (taken && taken.left >= 0) await refundQuestion(db, target, taken.via);
