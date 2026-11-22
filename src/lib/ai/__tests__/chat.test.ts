@@ -23,6 +23,14 @@ describe("도유 상담방", () => {
     expect(isCrisis("너무 힘들어서 다 끝내고 싶어")).toBe(true);
     expect(isCrisis("숙제 다 끝내고 싶어")).toBe(false);
     expect(isCrisis("이직 시기가 궁금해")).toBe(false);
+    // 돌려 말하는 표현도 안내로 넘겨요
+    for (const q of ["그냥 사라졌으면 좋겠어", "내가 없어지면 다들 편하겠지", "내가 없는 게 나을 것 같아", "살 이유가 없어", "사는 의미를 모르겠어", "그냥 눈 감으면 안 떠졌으면", "더는 못 버티겠어"]) {
+      expect(isCrisis(q)).toBe(true);
+    }
+    // 평소 말은 걸리지 않아요
+    for (const q of ["이 프로젝트가 사라졌으면 좋겠어", "내가 없으면 회사가 안 돌아가", "내일 시험이 끝났으면 좋겠어", "살 이유 같은 철학 책 추천해 줘", "눈 감고 면접 연습해도 돼?"]) {
+      expect(isCrisis(q)).toBe(false);
+    }
     expect(CRISIS_ANSWER).toContain("109");
   });
 

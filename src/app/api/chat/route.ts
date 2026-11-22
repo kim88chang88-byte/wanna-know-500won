@@ -51,7 +51,7 @@ export async function POST(request: Request) {
 
   // 도리가 정확하게 답할 수 없는 질문(가게 이름·실시간 정보·투자 종목)은 AI 를 부르지 않고 사과와 대안만 보내요. 질문은 쓰지 않아요.
   const unable = unableReply(last);
-  if (unable) return NextResponse.json({ answer: unable.answer, links: unable.links, unable: true, left: await quotaLeft(db, target) });
+  if (unable) return NextResponse.json({ answer: unable.answer, links: unable.links, followups: unable.followups, unable: true, left: await quotaLeft(db, target) });
 
   if (!hasAiKey()) return NextResponse.json({ error: "지금은 도리가 답을 준비하지 못했어." }, { status: 503 });
 

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { apologyFirst, mapSearchUrl, unableReply } from "../outOfScope";
-import { parseChatReply } from "../chat";
+import { isCrisis, parseChatReply } from "../chat";
 
 describe("답할 수 없는 질문 미리 거르기", () => {
   it("가게 이름을 물으면 사과와 지도 검색 링크", () => {
@@ -33,5 +33,19 @@ describe("AI 가 못 답했다고 표시한 답", () => {
     expect(parseChatReply({ answer: "오늘은 일이 몰려도 서두르지 말고 하나씩 끝내는 쪽이 맞아. 점심 뒤에 십 분만 걸으면 오후가 훨씬 가벼워질 거야. 저녁에는 연락을 하나만 정리해 봐.", followups: [], choices: [], unable: false, visual: null })?.unable).toBe(false);
     expect(apologyFirst("가게 이름은 몰라. 대신 동네를 알려 줄게.")).toMatch(/^미안/);
     expect(apologyFirst("미안, 몰라.")).toBe("미안, 몰라.");
+  });
+});
+
+describe("사과 답 아래의 후속 질문 칩", () => {
+  it("대안으로 말한 부분을 바로 누를 수 있고, 칩이 다시 사과나 위기 답에 걸리지 않는다", () => {
+    const asks = ["비트코인 사도 될까?", "그 사람 지금 뭐 하고 있는지 알려줘", "홍대 근처 분위기 좋은 맛집 알려줘", "내일 날씨 어때?"];
+    for (const q of asks) {
+      const r = unableReply(q);
+      expect(r?.followups.length).toBeGreaterThanOrEqual(2);
+      for (const f of r!.followups) {
+        expect(unableReply(f)).toBeNull();
+        expect(isCrisis(f)).toBe(false);
+      }
+    }
   });
 });

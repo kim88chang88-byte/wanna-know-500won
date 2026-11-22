@@ -9,6 +9,8 @@ import { josa } from "@/lib/premium/josa";
 export interface UnableReply {
   answer: string;
   links: Array<{ label: string; url: string }>;
+  /** 사과 뒤에 "대신 같이 볼 수 있어"라고 한 부분을 바로 누를 수 있게 하는 후속 질문 칩 (이 규칙에 다시 걸리지 않는 말만) */
+  followups: string[];
 }
 
 const PLACE_KIND = /카페|커피숍|식당|맛집|밥집|술집|빵집|베이커리|숙소|호텔|펜션|게스트하우스|에어비앤비|미용실|네일샵|약국|헬스장|서점|영화관|레스토랑|이자카야|브런치|바\s?추천|디저트/;
@@ -37,12 +39,14 @@ export function unableReply(text: string): UnableReply | null {
     return {
       answer: `미안, 투자 종목이나 사고파는 시점은 도리가 알려 줄 수가 없어. 틀리면 네 돈이 걸린 일이라 아는 척하지 않을게.\n\n대신 네 사주에서 돈이 들어오고 나가는 흐름과, 마음이 급해질 때 어떻게 하면 좋을지는 같이 볼 수 있어.${FOOT}`,
       links: [],
+      followups: ["내 돈 흐름은 어때?", "마음이 급할 때는 어떻게 하면 좋아?", "돈을 쓰는 습관은 사주로 어때?"],
     };
   }
   if (NOW_PERSON.test(t) || /지금\s?뭐\s?하고\s?있는지/.test(t)) {
     return {
       answer: `미안, 그 사람이 지금 뭘 하는지, 어디에 있는지는 도리가 알 수가 없어. 모르는 걸 아는 척하고 싶지 않아.\n\n대신 그 사람 생각이 자꾸 날 때 마음을 어떻게 다루면 좋을지, 먼저 연락해도 되는 때는 언제인지는 같이 볼 수 있어.${FOOT}`,
       links: [],
+      followups: ["그 사람 생각이 자꾸 날 때는 어떻게 해?", "먼저 연락해도 되는 때는 언제야?"],
     };
   }
   const kind = PLACE_KIND.exec(t)?.[0];
@@ -53,12 +57,14 @@ export function unableReply(text: string): UnableReply | null {
     return {
       answer: `미안, 가게 이름은 문을 닫았거나 바뀌었을 수 있어서 정확하게 알려 줄 수가 없어. 모르는 걸 아는 척하는 것보다 솔직한 게 낫다고 생각했어.\n\n대신 지도에서 ${`'${q}'${josa(q, "으로/로").slice(q.length)}`} 찾아보고, 후기와 영업시간을 꼭 확인해 봐. 어떤 분위기를 고르면 좋을지는 도리가 같이 정해 줄 수 있어.${FOOT}`,
       links: [{ label: `지도에서 '${q}' 찾기`, url: mapSearchUrl(q) }],
+      followups: ["어떤 분위기를 고르면 좋을까?", "혼자 가기 좋은 날은 언제야?"],
     };
   }
   if (LIVE.test(t)) {
     return {
       answer: `미안, 영업시간이나 날씨, 요금 같은 실시간 정보는 도리가 정확하게 알 수가 없어. 틀리게 알려 주면 헛걸음하게 될까 봐 말을 아낄게.\n\n해당 장소의 공식 안내나 지도 앱에서 확인해 줘. 그 시간을 어떻게 보내면 좋을지는 같이 이야기할 수 있어.${FOOT}`,
       links: [],
+      followups: ["그 시간을 어떻게 보내면 좋을까?", "오늘 컨디션에 맞는 하루는 어떤 모양이야?"],
     };
   }
   return null;
