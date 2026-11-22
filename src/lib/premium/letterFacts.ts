@@ -21,5 +21,13 @@ export function buildLetterFacts(report: PremiumReportView, birthYear: number, n
   const stem = STEMS.find((s) => s.hanja === day.full?.[0]);
   const band = ageBand(nowYear - birthYear);
   if (!focus || !stem || !band) return null;
-  return { 일주: `${day.reading}일주`, 나이대: band, 겉모습: DAYMASTER_BRIEF[stem.element], 부족한오행: focus };
+  const els = [...report.elements].sort((a, b) => b.count - a.count);
+  const bits: string[] = [];
+  if (els[0] && els[els.length - 1] && els[0].name !== els[els.length - 1].name) bits.push(`가장 많은 기운 ${els[0].name}(${els[0].count}개), 가장 적은 기운 ${els[els.length - 1].name}(${els[els.length - 1].count}개)`);
+  if (report.strength?.grade) bits.push(report.strength.grade);
+  if (report.geukguk) bits.push(report.geukguk);
+  const dn = report.daeun?.list.find((d) => d.current)?.ganzhi;
+  if (dn) bits.push(`지금 ${dn} 대운`);
+  if (report.seyun?.ganzhi) bits.push(`올해 ${report.seyun.ganzhi}년`);
+  return { 책속이야기: bits.join(" · ") || undefined, 일주: `${day.reading}일주`, 나이대: band, 겉모습: DAYMASTER_BRIEF[stem.element], 부족한오행: focus };
 }
