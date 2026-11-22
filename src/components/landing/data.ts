@@ -197,7 +197,7 @@ export const PREMIUM_CARDS: readonly PremiumCard[] = [
     tag: "👑 종합 사주",
     tagClass: "bg-amber-100 text-amber-900 border border-amber-200",
     title: "프리미엄 종합 사주",
-    desc: "당신의 고민에 대한 결론으로 문을 열고, 타고난 결에서 올해의 흐름까지 이어 씁니다.",
+    desc: "당신의 고민에 대한 결론으로 문을 열고,\n타고난 결에서 올해의 흐름까지 이어 씁니다.",
     card: "border-2 border-amber-300 shadow-md",
     imageBox: "bg-white border-amber-300 ring-2 ring-amber-100 ring-offset-2 ring-offset-white",
     button: "bg-gradient-to-r from-amber-400 to-orange-400 hover:brightness-105",

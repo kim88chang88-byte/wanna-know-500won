@@ -318,7 +318,7 @@ export function PremiumSection({ onSpin }: SpinProps) {
                 <p className="text-center text-[10.5px] font-bold tracking-[0.32em] text-[#a07d2c]">THE PREMIUM EDITION</p>
                 <h4 className="mt-1.5 text-center font-serifKr text-[20px] font-bold text-gray-900">나만을 위한 한 권의 사주서</h4>
                 <div aria-hidden="true" className="mx-auto my-2.5 h-px w-3/5 bg-gradient-to-r from-transparent via-[#d9b765] to-transparent" />
-                <p className="text-center text-[13px] leading-relaxed text-slate-500">{p.desc}</p>
+                <p className="whitespace-pre-line text-center text-[13px] leading-relaxed text-slate-500">{p.desc}</p>
                 <p className="mt-2 text-center">
                   <span className="inline-block rounded-full border border-[#e6c887] px-2.5 py-0.5 text-[11.5px] text-[#a07d2c]">20page 분량</span>
                 </p>
