@@ -848,7 +848,7 @@ export default function IntakeModal({ target, wallet = null, onClose, onComplete
   return (
     <ModalShell
       labelId="intake-title"
-      panelClass={`max-w-md ${luxe ? "md:max-w-[800px]" : ""} ${fullLoading ? "p-0 overflow-hidden" : "p-5 sm:p-6 max-h-[90vh] overflow-y-auto"} ${luxe ? "border border-[#e6c887]/40" : "border-2 border-brand-300"}`}
+      panelClass={`max-w-md ${luxe ? "min-[560px]:max-w-[620px] md:max-w-[800px]" : ""} ${fullLoading ? "p-0 overflow-hidden" : "p-5 sm:p-6 max-h-[90vh] overflow-y-auto"} ${luxe ? "border border-[#e6c887]/40" : "border-2 border-brand-300"}`}
       onClose={onClose}
       closeOnOverlay={false}
       luxe={luxe}
