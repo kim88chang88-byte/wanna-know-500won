@@ -541,7 +541,7 @@ export default function IntakeModal({ target, wallet = null, onClose, onComplete
   const [partner, setPartner] = useState<BirthFields>(EMPTY_BIRTH);
   // 기억해 둔 다른 사람 (로그인 회원 + 궁합일 때만 불러와요. 표가 아직 없으면 조용히 빈 목록)
   const [people, setPeople] = useState<SavedPerson[]>([]);
-  const [savePerson, setSavePerson] = useState(true); // 기본은 켜 두고, 끌 수 있어요 (로그인한 회원만 보여요)
+  const [savePerson, setSavePerson] = useState(false); // 기본은 꺼짐: 이용자가 직접 켜야 저장해요 (로그인한 회원만 보여요)
   const [personLabel, setPersonLabel] = useState("");
   const [pickedPerson, setPickedPerson] = useState<string | null>(null);
   // 링크로 받아 온 상대 정보: 상대에게 "확인 뒤 24시간 안에 지워진다"고 약속했으니 내 "기억해 둔 사람"에는 저장하지 않아요
@@ -559,10 +559,10 @@ export default function IntakeModal({ target, wallet = null, onClose, onComplete
   const [whoDone, setWhoDone] = useState(false);
   const [stepIndex, setStepIndex] = useState(() => (savedProfile ? firstAfterMe : 0));
   // 선택 동의: 둘 다 기본은 꺼짐. (이미 저장해 둔 회원이 정보를 고치는 경우만, 전에 동의한 "기억하기"를 켜 둬요)
-  const [saveProfile, setSaveProfile] = useState(true); // 선택 항목은 기본으로 체크해 두고, 끌 수 있어요 (옵트아웃)
-  const [shareConcern, setShareConcern] = useState(true); // 고민을 적었을 때만 보이고, 기본은 체크 (끌 수 있어요)
-  // 보던 풀이를 내 보관함에 저장 (로그인한 회원이 선택. 기본은 켜 두고, 끌 수 있어요)
-  const [saveVault, setSaveVault] = useState(true);
+  const [saveProfile, setSaveProfile] = useState(false); // 기본은 꺼짐: 이용자가 직접 켜야 저장해요
+  const [shareConcern, setShareConcern] = useState(false); // 고민을 적었을 때만 보이고, 기본은 꺼짐
+  // 보던 풀이를 내 보관함에 저장 (로그인한 회원이 선택. 기본은 꺼짐)
+  const [saveVault, setSaveVault] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [freeUsed, setFreeUsed] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -1215,7 +1215,7 @@ export default function IntakeModal({ target, wallet = null, onClose, onComplete
             <div className="space-y-3">
               <label className="flex items-center justify-between gap-3 text-xs text-gray-700 leading-relaxed">
                 <span>
-                  (필수) 사주를 풀려면 생년월일이랑 성별{compat ? "(상대방 것도)" : ""}이 꼭 필요해! 이 개인정보를 풀이에만 쓰려고 하는데 동의해 줄래?{" "}
+                  사주를 풀려면 생년월일이랑 성별{compat ? "(상대방 것도)" : ""}이 꼭 필요해! 이 개인정보를 풀이에만 쓰려고 하는데 동의해 줄래?{" "}
                   (<a href="/privacy" target="_blank" rel="noopener noreferrer" className="text-brand-600 underline">개인정보처리방침 보기</a>)
                   <span className="mt-1 block text-[11px] text-gray-500">
                     태어난 시간·고민 내용을 적었다면 그것도 풀이에만 써.{compat ? " 상대방 정보는 궁합 계산에만 쓰고, 아래 선택에 동의하지 않으면 서버에 저장하지 않아." : ""}
@@ -1236,20 +1236,20 @@ export default function IntakeModal({ target, wallet = null, onClose, onComplete
 
               {loggedIn && !(savedProfile && sameBirth(savedProfile, buildBirthInput({ ...form, consent: true }))) && (
                 <OptRow name="saveProfile" checked={saveProfile} onChange={(v) => { setSaveProfile(v); if (v) setSaveOther(false); }} pill="응">
-                  (선택) 도리가 내 생년월일시·성별을 기억해 둘까? 기억해 두면 다음부터 다시 안 적어도 돼서 편해. 로그인 창에서 언제든 지울 수 있고, 탈퇴하면 함께 삭제돼.
+                  도리가 내 생년월일시·성별을 기억해 둘까? 기억해 두면 다음부터 다시 안 적어도 돼서 편해. 로그인 창에서 언제든 지울 수 있고, 탈퇴하면 함께 삭제돼.
                 </OptRow>
               )}
 
               {loggedIn && (
                 <OptRow name="saveVault" checked={saveVault} onChange={setSaveVault} pill="응">
-                  (선택) 풀이를 내 보관함에 담아 둘까? 담아 두면 언제든 다시 볼 수 있고 추가 비용도 없어. 직접 지우거나 탈퇴하면 함께 삭제돼.
+                  풀이를 내 보관함에 담아 둘까? 담아 두면 언제든 다시 볼 수 있고 추가 비용도 없어. 직접 지우거나 탈퇴하면 함께 삭제돼.
                 </OptRow>
               )}
 
               {compat && loggedIn && !pickedPerson && !fromInvite && people.length < MAX_PEOPLE && (
                 <div className="space-y-1.5">
                   <OptRow name="savePerson" checked={savePerson} onChange={setSavePerson} pill="응">
-                    (선택) 이 상대방의 생년월일시·성별도 기억해 둘까? 다음 궁합이나 운세를 볼 때 눌러서 바로 고를 수 있어서 편해. 로그인 창에서 언제든 지울 수 있고, 탈퇴하면 함께 삭제돼.
+                    이 상대방의 생년월일시·성별도 기억해 둘까? 다음 궁합이나 운세를 볼 때 눌러서 바로 고를 수 있어서 편해. 로그인 창에서 언제든 지울 수 있고, 탈퇴하면 함께 삭제돼.
                   </OptRow>
                   {savePerson && (
                     <input
@@ -1269,7 +1269,7 @@ export default function IntakeModal({ target, wallet = null, onClose, onComplete
 
               {buildConcern(form) && (
                 <OptRow name="shareConcern" checked={shareConcern} onChange={setShareConcern} pill="좋아">
-                  (선택) 적어 준 고민을 도유사주 품질 개선 통계에 써도 될까? 덕분에 도유사주가 좋아져서 더 나은 서비스로 돌려줄게. 생년월일은 빼고 나이대·성별만 저장해.
+                  적어 준 고민을 도유사주 품질 개선 통계에 써도 될까? 덕분에 도유사주가 좋아져서 더 나은 서비스로 돌려줄게. 생년월일은 빼고 나이대·성별만 저장해.
                   {loggedIn ? " 로그인 후 동의하면 탈퇴 시 함께 삭제돼." : " 로그인하지 않으면 누구 것인지 알 수 없게 저장돼 나중에 지우기 어려워."}
                 </OptRow>
               )}
