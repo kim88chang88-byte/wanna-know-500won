@@ -349,7 +349,8 @@ export default function ChatApp({ initialCtx, initialMsgs, onChange, onBack, rea
 
   async function send(raw: string) {
     const text = raw.trim().slice(0, MSG_MAX);
-    if (!text || inflight.current || leftNow === 0) return;
+    // 질문이 0번이어도 보내 볼 수 있어요: 서버가 위기 문장은 질문을 쓰지 않고 안내로 답하고, 그 밖의 말은 402 로 돌려보내요
+    if (!text || inflight.current) return;
     inflight.current = true;
     setInput("");
     setTyping(null);
@@ -468,7 +469,10 @@ export default function ChatApp({ initialCtx, initialMsgs, onChange, onBack, rea
     .split("\n")
     .map((l) => l.trim().replace(/^(주제: )성공\s*[·⋅・]\s*재물운$/, "$1성공운"))
     .filter(Boolean);
-  const showEnd = !readOnly && leftNow === 0 && !busy && !typingNow;
+  // 안내(안전) 답 바로 아래에는 결제 카드를 보이지 않아요
+  const lastShown = msgs.filter((m) => !m.log).slice(-1)[0];
+  const afterSafe = lastShown?.role === "dori" && lastShown.quiet === true;
+  const showEnd = !readOnly && leftNow === 0 && !busy && !typingNow && !afterSafe;
 
   return (
     <div
@@ -634,6 +638,7 @@ export default function ChatApp({ initialCtx, initialMsgs, onChange, onBack, rea
             <button type="button" onClick={onBack} className="mt-2 text-xs font-bold text-brand-600">
               대화 목록으로
             </button>
+            <p className="mt-3 text-[11px] leading-relaxed text-[#8a7fa8]">마음이 많이 힘들다면 언제든 아래 입력창에 적어도 돼. 지금 당장 도움이 필요하면 자살예방 상담전화 109(24시간)·112·119</p>
           </section>
         )}
       </div>
@@ -709,15 +714,14 @@ export default function ChatApp({ initialCtx, initialMsgs, onChange, onBack, rea
               }
             }}
             rows={1}
-            disabled={leftNow === 0}
-            placeholder={leftNow === 0 ? "오늘 대화는 여기까지야" : "도리에게 고민을 적어봐…"}
+            placeholder={leftNow === 0 ? "질문은 끝났지만, 힘든 마음은 여기에 적어도 돼" : "도리에게 고민을 적어봐…"}
             aria-label="도리에게 보낼 질문"
             className="max-h-[120px] min-h-[42px] flex-1 resize-none rounded-[22px] border-[1.5px] border-brand-200 bg-white px-4 py-[10px] text-[14px] leading-snug outline-none focus:border-brand-400 disabled:bg-[#f3f0fa]"
           />
           <button
             type="submit"
             aria-label="보내기"
-            disabled={busy || typingNow || !input.trim() || leftNow === 0}
+            disabled={busy || typingNow || !input.trim()}
             className="grid h-[42px] w-[42px] shrink-0 place-items-center rounded-full bg-gradient-to-br from-brand-500 to-brand-600 text-white shadow-[0_4px_12px_#8057e055] transition active:scale-95 disabled:bg-none disabled:bg-[#e5defa] disabled:shadow-none"
           >
             <svg viewBox="0 0 24 24" width="19" height="19" fill="currentColor" aria-hidden="true">
