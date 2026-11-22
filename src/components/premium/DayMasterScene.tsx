@@ -14,6 +14,11 @@ export default function DayMasterScene({ stem }: { stem: string | null | undefin
   if (!d || !stem || !IMG[stem]) return null;
   return (
     <div data-testid="day-master-scene" className="mb-6">
+      <div data-testid="weather-map-title" className="mb-3 flex items-center justify-center gap-3">
+        <span aria-hidden="true" className="h-px w-10 bg-gradient-to-r from-transparent to-[#e6c887]/70" />
+        <h3 className="cover-title text-[22px] leading-tight">나의 날씨 지도</h3>
+        <span aria-hidden="true" className="h-px w-10 bg-gradient-to-l from-transparent to-[#e6c887]/70" />
+      </div>
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img src={`/images/daymaster/${IMG[stem]}.webp`} width={960} height={717} alt={`나의 대장 글자 ${stem}${d.el}, ${d.ko}. ${d.nature} 같은 사람`} className="block h-auto w-full rounded-[22px]" />
       <p className="mt-2 text-center text-[13px] text-[#e8dfca]/60">여덟 글자 중 대장 글자 · 일간(日干) {d.ko}({stem}{d.el})</p>

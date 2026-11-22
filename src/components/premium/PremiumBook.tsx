@@ -1,5 +1,6 @@
 "use client";
 
+import { softToDeep } from "@/lib/premium/deepTone";
 import { getBrowserStorage } from "@/lib/drawCounter";
 import { readRealityPick, saveRealityPick } from "@/lib/realityPick";
 import { ConfirmChoice } from "@/components/ConfirmChoice";
@@ -993,8 +994,8 @@ const BUBBLE =
   "relative max-w-[78%] rounded-[22px] border-2 border-[#20203a] bg-[#fffdf7] px-4 py-3.5 text-[15px] font-medium leading-[1.55] text-[#26233a] after:absolute after:bottom-3.5 after:h-3.5 after:w-3.5 after:bg-[#fffdf7] after:content-['']";
 
 /** 도리와 친구의 말풍선 한 줄. right 면 오른쪽에 그림이 와요. */
-/** 도리 한 줄에서 "가볍게"는 프리미엄 분위기와 맞지 않아 뺍니다. 이미 만들어진 리포트에도 적용돼요. */
-const dropLight = (t: string) => t.replace(/가볍게\s*/g, "").replace(/\s{2,}/g, " ").trim();
+/** 도리 한 줄의 "가볍게"는 프리미엄 분위기와 맞지 않아 "깊이 있게"로 바꿉니다. 이미 만들어진 리포트에도 적용돼요. */
+const dropLight = softToDeep;
 
 function BubbleRow({ text, img, right = false }: { text: string; img: string; right?: boolean }) {
   return (
