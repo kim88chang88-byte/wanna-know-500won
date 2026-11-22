@@ -88,6 +88,8 @@ interface Bubble extends ChatMsg {
   log?: boolean;
   /** 도리 답에서 이어지는 다음 질문 칩 */
   follow?: string[];
+  /** 마음이 힘든 말에 안내만 한 답: 바로 아래에 가벼운 칩을 보여 주지 않아요 */
+  quiet?: boolean;
   /** 답 아래에 크게 보여 주는 그림 카드 */
   visual?: ChatVisual | null;
   /** 옷 질문에 붙는 착장 카드 */
@@ -337,6 +339,7 @@ export default function ChatApp({ initialCtx, initialMsgs, onChange, onBack, rea
     const done = new Set(msgs.filter((m) => m.role === "user").map((m) => m.text));
     // 방금 도리 답에 후속 질문이 있으면 그것부터, 없으면 기본 칩
     const lastMsg = msgs.filter((m) => !m.log).slice(-1)[0];
+    if (lastMsg?.role === "dori" && lastMsg.quiet) return [];
     const follow = lastMsg?.role === "dori" && !lastMsg.error ? (lastMsg.follow ?? []).filter((c) => !done.has(c)) : [];
     if (follow.length > 0) return follow.slice(0, 3);
     const pool = ctx.kind === "reading" && ctx.topic === "study" ? STUDY_CHIPS : CHIP_POOL[ctx.kind];
@@ -362,7 +365,7 @@ export default function ChatApp({ initialCtx, initialMsgs, onChange, onBack, rea
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ctx, messages: next.filter((m) => !m.log).map(({ role, text: t }) => ({ role, text: t })) }),
       });
-      const data = (await res.json().catch(() => null)) as { answer?: string; followups?: unknown; visual?: ChatVisual | null; outfit?: OutfitPick | null; choices?: unknown; links?: unknown; memo?: ChatMemo | null; error?: string; code?: string; left?: number } | null;
+      const data = (await res.json().catch(() => null)) as { answer?: string; followups?: unknown; visual?: ChatVisual | null; outfit?: OutfitPick | null; choices?: unknown; links?: unknown; memo?: ChatMemo | null; safe?: boolean; error?: string; code?: string; left?: number } | null;
       if (res.status === 402 && data?.code === "quota") {
         // 질문을 다 쓴 경우: 방금 보낸 말은 입력창으로 돌려놓고 "조약돌로 더하기" 카드를 보여 줘요
         setLeft(0);
@@ -374,7 +377,7 @@ export default function ChatApp({ initialCtx, initialMsgs, onChange, onBack, rea
       if (!res.ok || !data?.answer) throw new Error(data?.error ?? "도리가 잠깐 물놀이하러 갔어. 다시 보내 볼래?");
       if (typeof data.left === "number") setLeft(data.left);
       else setLeft((l) => (l === null ? null : Math.max(0, l - 1)));
-      const all: Bubble[] = [...next, { role: "dori", text: data.answer, at: Date.now(), follow: Array.isArray(data.followups) ? data.followups.filter((f): f is string => typeof f === "string").slice(0, 3) : undefined, visual: data.visual ?? null, outfit: data.outfit ?? null, choices: Array.isArray(data.choices) ? data.choices.filter((c): c is string => typeof c === "string").slice(0, 2) : undefined, memo: data.memo ?? null, links: Array.isArray(data.links) ? (data.links as Array<{ label?: unknown; url?: unknown }>).filter((l): l is { label: string; url: string } => typeof l.label === "string" && typeof l.url === "string" && l.url.startsWith("https://www.google.com/maps/search/")).slice(0, 2) : undefined }];
+      const all: Bubble[] = [...next, { role: "dori", text: data.answer, at: Date.now(), ...(data.safe === true ? { quiet: true } : {}), follow: Array.isArray(data.followups) ? data.followups.filter((f): f is string => typeof f === "string").slice(0, 3) : undefined, visual: data.visual ?? null, outfit: data.outfit ?? null, choices: Array.isArray(data.choices) ? data.choices.filter((c): c is string => typeof c === "string").slice(0, 2) : undefined, memo: data.memo ?? null, links: Array.isArray(data.links) ? (data.links as Array<{ label?: unknown; url?: unknown }>).filter((l): l is { label: string; url: string } => typeof l.label === "string" && typeof l.url === "string" && l.url.startsWith("https://www.google.com/maps/search/")).slice(0, 2) : undefined }];
       setMsgs(all);
       if (!prefersReducedMotion()) setTyping({ idx: all.length - 1, shown: 1 });
     } catch (e) {
