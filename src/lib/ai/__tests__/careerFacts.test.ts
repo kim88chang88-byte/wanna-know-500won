@@ -36,3 +36,12 @@ describe("일 재료", () => {
     expect(CHAT_SYSTEM_PROMPT).toContain("연애 곡을 일 고민에 권하지 마");
   });
 });
+
+import { parseChatReply } from "../chat";
+describe("선택지와 칩", () => {
+  it("선택지가 있으면 후속 질문 칩은 비운다", () => {
+    const r = parseChatReply({ answer: "📝 시험을 앞두고 있구나! 어느 정도 준비했어? 솔직하게 말해 줄래? 그래야 맞춰서 짚어 줄 수 있어.", followups: ["공부 기간은 어느 정도야?", "남은 기간 어떻게 정리할까?"], choices: ["열심히 했어", "솔직히 설렁했어"] });
+    expect(r?.choices).toHaveLength(2);
+    expect(r?.followups).toEqual([]);
+  });
+});
