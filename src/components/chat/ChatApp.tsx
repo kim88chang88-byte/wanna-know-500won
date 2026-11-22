@@ -342,6 +342,8 @@ export default function ChatApp({ initialCtx, initialMsgs, onChange, onBack, rea
     if (lastMsg?.role === "dori" && lastMsg.quiet) return [];
     const follow = lastMsg?.role === "dori" && !lastMsg.error ? (lastMsg.follow ?? []).filter((c) => !done.has(c)) : [];
     if (follow.length > 0) return follow.slice(0, 3);
+    // 마음을 달래는 답(🤍) 아래에는 기분 전환용 일반 칩을 보이지 않아요 (선택지가 따로 있어요)
+    if (lastMsg?.role === "dori" && lastMsg.text.trimStart().startsWith("🤍")) return [];
     const pool = ctx.kind === "reading" && ctx.topic === "study" ? STUDY_CHIPS : CHIP_POOL[ctx.kind];
     return pool.filter((c) => !done.has(c)).slice(0, 4);
   }, [msgs, ctx.kind, ctx.topic]);
