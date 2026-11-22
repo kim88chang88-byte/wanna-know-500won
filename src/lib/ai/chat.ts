@@ -295,7 +295,7 @@ export function parseChatReply(value: unknown): ChatReply | null {
 }
 
 /** 마음이 많이 힘들다는 말이 보이면 AI 를 부르지 않고 정해 둔 답으로 안내해요. */
-const CRISIS = /자살|죽고\s?싶|죽을래|죽어\s?버|자해|목숨|사라지고\s?싶|없어지고\s?싶|살기\s?싫|살고\s?싶지|그만\s?살고|(힘들|지쳐|버티기|못\s?버티).{0,12}(다|모두|전부)\s?끝(내|낼)|(삶|인생|모든\s?걸|모든\s?것).{0,6}끝(내|낼)|(나는|내가|난|그냥|차라리)\s?(사라졌으면|없어졌으면|죽었으면)|차라리\s?죽|내가\s?(없어지면|사라지면|죽으면|없으면|없는\s?게).{0,12}(편(하|해)|낫|나을|좋|행복|걱정\s?(없|안))|(사는|살)\s?(게\s?|것이?\s?)?(의미|이유|목적|가치)(가|를|도|는)?\s?[가-힣\s]{0,6}(없|모르|몰라|잃)|눈\s?(을\s?)?감(으면|고).{0,10}(안\s?떠|못\s?떠|뜨지\s?않)|(안|못)\s?떠졌으면|떠지지\s?(않았으면|말았으면)|깨어나지\s?(않았으면|말았으면)|(다시|영원히)\s?(안|못)\s?깨|태어나지\s?말(걸|았어야)|(더는|더\s?이상)\s?못\s?(버티|살)|모든\s?(게|것이?|걸|거)\s?(다\s?|그냥\s?)?(끝났으면|끝나버렸으면|끝나면\s?좋겠|멈췄으면)/;
+const CRISIS = /자살|죽고\s?싶|죽을래|죽어\s?버|자해|목숨|사라지고\s?싶|없어지고\s?싶|살기\s?싫|살고\s?싶지|그만\s?살고|(힘들|지쳐|버티기|못\s?버티).{0,12}(다|모두|전부)\s?끝(내|낼)|(삶|인생|모든\s?걸|모든\s?것).{0,6}끝(내|낼)|(나는|내가|난|그냥|차라리)\s?(사라졌으면|없어졌으면|죽었으면)|차라리\s?죽|내가\s?(없어지면|사라지면|죽으면|없으면|없는\s?게).{0,12}(편(하|해)|낫|나을|좋|행복|걱정\s?(없|안))|(사는|살)\s?(게\s?|것이?\s?)?(의미|이유|목적|가치)(가|를|도|는)?\s?[가-힣\s]{0,6}(없|모르|몰라|잃)|눈\s?(을\s?)?감(으면|고).{0,10}(안\s?떠|못\s?떠|뜨지\s?않)|(안|못)\s?떠졌으면|떠지지\s?(않았으면|말았으면)|깨어나지\s?(않았으면|말았으면)|(다시|영원히)\s?(안|못)\s?깨|태어나지\s?말(걸|았어야)|(더는|더\s?이상)\s?못\s?(버티|살)|모든\s?(게|것이?|걸|거)\s?(다\s?|그냥\s?)?(끝났으면|끝나버렸으면|끝나면\s?좋겠|멈췄으면)|(살|사는)\s?가치|왜\s?(사|살)(는|아야|까)|(나|내)\s?같은\s?(인간|놈|사람|건|게).{0,12}(왜\s?(사|살)|살\s?(가치|이유|자격)|있어\s?봐야|쓸모)|내가\s?없어도\s?(이\s?)?(세상|다들|모두|사람들)|(쓸모|가치)\s?없는\s?(인간|사람|존재)/;
 
 export function isCrisis(text: string): boolean {
   return CRISIS.test(text);
@@ -303,6 +303,48 @@ export function isCrisis(text: string): boolean {
 
 export const CRISIS_ANSWER =
   "지금 마음이 많이 무거운 것 같아서 도리가 걱정돼. 사주 이야기는 잠깐 내려놓고, 혼자 버티지 말고 가까운 사람이나 전문 상담에 꼭 이야기해 줘.\n\n한국에서는 24시간 받는 자살예방 상담전화 109(또는 1393), 위기 상황이면 112·119에 바로 연락할 수 있어. 도리는 여기서 네 편으로 기다릴게 ❄️";
+
+/** 마음이 힘든 말이 섞여 있을 수 있는 글자들 (이 글자가 보일 때만 분류기를 불러 비용을 아껴요) */
+const RISK_HINT = /살|죽|사라|없어|없는|끝|포기|그만|의미|가치|쓸모|지쳐|지쳤|지친|힘들|무거|외로|혼자|버티|괴로|우울|싫|때려|내려놓|떠지지|깨어|사람들/;
+
+export function needsRiskCheck(text: string): boolean {
+  return RISK_HINT.test(text);
+}
+
+const RISK_SYSTEM = `너는 안전 분류기야. 사용자의 마지막 말에 자해·자살 위험이 직접 또는 돌려서라도 보이는지만 판단해.
+위험(true): 죽고 싶다, 사라지고 싶다, 자고 일어나지 않았으면, 눈을 뜨지 못했으면, 모든 게 끝났으면, 내가 없어야 남들이 편하다, 내가 없어도 세상은 잘 돌아간다, 살 의미·가치가 없다, 나 같은 인간은 왜 사나, 내가 쓸모없다고 느껴 사라지고 싶다는 뜻의 말.
+위험 아님(false): 피곤·스트레스, 회사·일·공부를 그만두고 싶다, 시험·회의·일이 끝나길 바란다, 다 때려치우고 싶다(일·관계), 평범한 고민이나 사주 질문.
+애매하면 true 로 해. JSON 으로만 답해.`;
+
+const RISK_SCHEMA = {
+  type: "object",
+  properties: { risk: { type: "boolean", description: "자해·자살 위험이 조금이라도 보이면 true" } },
+  required: ["risk"],
+  additionalProperties: false,
+} as const;
+
+export function parseRisk(value: unknown): { risk: boolean } | null {
+  const r = (value as { risk?: unknown } | null)?.risk;
+  return typeof r === "boolean" ? { risk: r } : null;
+}
+
+/** 짧은 분류 전용 호출: 긴 상담 프롬프트에 섞인 표시보다 훨씬 믿을 만해요. 실패하면 던져요(부르는 쪽에서 평소대로 이어가요). */
+export async function checkRisk(history: ChatMsg[], opts: { apiKey?: string; model?: string; fetchImpl?: typeof fetch } = {}): Promise<boolean> {
+  const recent = history.slice(-4).map((m) => `${m.role === "user" ? "사용자" : "도리"}: ${m.text.slice(0, 200)}`).join("\n");
+  const r = await callJson<{ risk: boolean }>({
+    system: RISK_SYSTEM,
+    user: `대화 기록:\n${recent}\n\n마지막 사용자 말의 위험 여부를 판단해.`,
+    schema: RISK_SCHEMA,
+    maxTokens: 40,
+    attempts: 1,
+    timeoutMs: 6_000,
+    model: opts.model ?? modelFor("free"),
+    apiKey: opts.apiKey,
+    fetchImpl: opts.fetchImpl,
+    parse: parseRisk,
+  });
+  return r.risk;
+}
 
 /** 서버에서 대화 기록을 다시 정리해요 (길이·개수 제한, 마지막은 반드시 사용자의 말). */
 export function cleanHistory(raw: unknown): ChatMsg[] | null {
