@@ -26,6 +26,7 @@ export const NOTES_SYSTEM_PROMPT = `너는 "도리", 맑은 옹달샘의 수달 
 - 그 쪽의 "내용" 안에 실제로 나온 사실(일주, 오행, 관계 등) 한 가지를 짚고, 지금 바로 해 볼 수 있는 작은 행동이나 마음가짐으로 이어 줘. 이 책은 하루 운세가 아니라 평생 사주 책이니 "오늘 하루"처럼 일일 운세식으로는 쓰지 마.
 - 사용자가 "고민"을 적었다면 가장 알맞은 한두 쪽에서만 자연스럽게 닿게 해. 억지로 모든 쪽에 넣지 마.
 - 누구에게나 맞는 말("좋은 일이 있을 거야")만 쓰지 마. 내용에 없는 사실은 지어내지 마.
+- "가볍게"라는 말은 쓰지 마(프리미엄 책이라 차분하고 깊이 있는 말투로).
 - 겁주기, 단정, 예언 금지. 질병·이혼·사고·파산·투자·의료·법률 얘기 금지.
 - 쪽마다 시작과 끝맺음이 서로 다르게.
 - "부르는이름"이 있으면 한 줄 중 몇 개(서너 쪽에 한 번쯤)에서 "부르는이름"에 적힌 호칭 그대로(예: 은혁아) 친근하게 불러. 그 외에는 "당신"을 쓰지 말고, "너"도 되도록 줄여서 주어를 생략해. "○○" 같은 빈칸 표기는 쓰지 말고 실제 이름을 넣어.
@@ -108,7 +109,7 @@ export function parseNotes(value: unknown, validNos: number[]): Map<number, stri
     if (typeof note !== "string") continue;
     const t = note.trim();
     if (t.length < 12 || t.length > NOTE_MAX || containsForbidden(t)) continue;
-    out.set(no, t);
+    out.set(no, t.replace(/가볍게\s*/g, "").replace(/\s{2,}/g, " ").trim());
   }
   return out;
 }

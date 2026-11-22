@@ -741,7 +741,7 @@ function Visual({ page, report }: { page: BookPage; report: PremiumReportView })
           {page.key === "preface" && !report.compat && <DayMasterScene stem={Array.from(report.pillars.find((p) => p.key === "day")?.full ?? "")[0]} name={report.viewerName} />}
           {page.key === "preface" && (
             <p className="mb-3 text-[15px] leading-relaxed text-[#e8dfca]/85">
-              태어난 <b className={GOLD}>해·달·날·시간</b>, 이 네 때마다 글자를 위아래 두 개씩 적어. 위는 하늘의 기운(천간), 아래는 땅의 기운(지지)이야.
+              태어난 <b className={GOLD}>해·달·날·시간</b>, 이 네 가지마다 글자를 위아래 두 개씩 적어. 위는 하늘의 기운(천간), 아래는 땅의 기운(지지)이야.
             </p>
           )}
           <div className="grid grid-cols-4 gap-2">
@@ -993,6 +993,9 @@ const BUBBLE =
   "relative max-w-[78%] rounded-[22px] border-2 border-[#20203a] bg-[#fffdf7] px-4 py-3.5 text-[15px] font-medium leading-[1.55] text-[#26233a] after:absolute after:bottom-3.5 after:h-3.5 after:w-3.5 after:bg-[#fffdf7] after:content-['']";
 
 /** 도리와 친구의 말풍선 한 줄. right 면 오른쪽에 그림이 와요. */
+/** 도리 한 줄에서 "가볍게"는 프리미엄 분위기와 맞지 않아 뺍니다. 이미 만들어진 리포트에도 적용돼요. */
+const dropLight = (t: string) => t.replace(/가볍게\s*/g, "").replace(/\s{2,}/g, " ").trim();
+
 function BubbleRow({ text, img, right = false }: { text: string; img: string; right?: boolean }) {
   return (
     <div className={`flex items-end gap-2.5 ${right ? "flex-row-reverse" : ""}`}>
@@ -1225,7 +1228,7 @@ export default function PremiumBook({ report, flush = false, finale, previewBlur
 
         {/* 도리 한 마리에 말풍선 하나: AI 한 줄이 있으면 그것을, 없으면 쪽 첫 문장을 보여. */}
         <div data-testid={page.key === "concernTop" ? "book-opening" : page.note ? "book-note" : "book-lead"}>
-          <BubbleRow text={page.key === "concernTop" ? openingBubble(report.viewerName) : page.note ? page.note : page.lead} img={pic} />
+          <BubbleRow text={page.key === "concernTop" ? openingBubble(report.viewerName) : page.note ? dropLight(page.note) : page.lead} img={pic} />
         </div>
 
         {/* 손님이 고른 고민에 대한 답은 첫 쪽 위가 아니라, 같은 주제를 다루는 '요즘 고민 맞춤 풀이' 쪽에 둬. */}
