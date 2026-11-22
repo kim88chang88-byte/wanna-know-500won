@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { timeAlreadySaid, fixTypos, cleanFollowups, cleanVisual, cleanHistory, CRISIS_ANSWER, earlierQuestions, isCrisis, parseChatAnswer, parseChatReply, polishChatAnswer, recentEndings, usedBasis, usedActions, nowContext, visualAllowed, CHAT_SYSTEM_PROMPT } from "../chat";
+import { timeAlreadySaid, fixTypos, cleanFollowups, cleanVisual, cleanHistory, CRISIS_ANSWER, earlierQuestions, isCrisis, parseChatAnswer, parseChatReply, parseRisk, needsRiskCheck, polishChatAnswer, recentEndings, usedBasis, usedActions, nowContext, visualAllowed, CHAT_SYSTEM_PROMPT } from "../chat";
 import { parseCtx } from "@/lib/chatServer";
 import { summarizeReport } from "@/lib/chatContext";
 
@@ -30,6 +30,13 @@ describe("도유 상담방", () => {
     // 11-22 실제 점검에서 AI로 넘어갔던 말들
     for (const q of ["내가 사라지면 모두가 편해지겠지?", "내가 사는 의미를 잘 모르겠어.", "오늘 밤 잠에 들고 내일 아침 눈이 떠지지 않았으면…", "눈이 안 떠졌으면 좋겠어", "내일 아침에 깨어나지 않았으면 좋겠어", "그냥 죽었으면 좋겠다", "태어나지 말걸 그랬어", "살 이유를 모르겠어"]) {
       expect(isCrisis(q)).toBe(true);
+    }
+    // 11-22 세 번째 점검에서 AI로 넘어갔던 말
+    for (const q of ["내가 살 가치가 있을까?", "나같은 인간은 왜 살까?", "나 같은 놈이 왜 살아야 해", "내가 없어도 이 세상은 잘 돌아가겠지?", "나는 쓸모없는 인간이야"]) {
+      expect(isCrisis(q)).toBe(true);
+    }
+    for (const q of ["올해 승진할 가치가 있는 일일까?", "내가 없어도 팀은 인수인계 덕에 잘 돌아가", "왜 사주에 불이 많아?", "이직할 가치가 있을까?"]) {
+      expect(isCrisis(q)).toBe(false);
     }
     // 11-22 두 번째 점검에서 AI로 넘어갔던 말
     for (const q of ["모든게 다 끝났으면 좋겠어", "모든 것이 끝나버렸으면", "모든 걸 그냥 끝나면 좋겠다"]) {
@@ -248,5 +255,16 @@ describe("위험 표시(risk)", () => {
     expect(parseChatReply({ answer: a, followups: [], choices: [], unable: false, risk: false, visual: null })?.risk).toBe(false);
     expect(parseChatReply({ answer: a })?.risk).toBe(false);
     expect(CHAT_SYSTEM_PROMPT).toContain("risk 를 true");
+  });
+});
+
+describe("위험 분류기", () => {
+  it("마음이 힘든 말이 섞였을 수 있는 글에서만 부르고, 응답은 true/false 만 읽는다", () => {
+    for (const q of ["다 그냥 내려놓고 싶어", "나같은 인간은 왜 살까?", "모든게 지쳤어", "그냥 다 때려치고 싶어"]) expect(needsRiskCheck(q)).toBe(true);
+    for (const q of ["올해 승진운 알려줘", "면접 앞두고 있는데 어떤 마음으로 가면 좋을까?", "이직 준비 언제 시작할까?"]) expect(needsRiskCheck(q)).toBe(false);
+    expect(parseRisk({ risk: true })).toEqual({ risk: true });
+    expect(parseRisk({ risk: false })).toEqual({ risk: false });
+    expect(parseRisk({})).toBeNull();
+    expect(parseRisk({ risk: "yes" })).toBeNull();
   });
 });
