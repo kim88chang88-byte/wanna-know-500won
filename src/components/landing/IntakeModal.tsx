@@ -6,7 +6,7 @@ import { possessive } from "@/lib/callName";
 import BirthTimeSelect from "@/components/BirthTimeSelect";
 import { conclusionOf, fetchPartnerImage, fetchRestChapters, mergeChapters } from "@/lib/premium/mergeChapters";
 import AiNotice from "@/components/premium/AiNotice";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import {
   COMPAT_STEPS,
   EMPTY_BIRTH,
