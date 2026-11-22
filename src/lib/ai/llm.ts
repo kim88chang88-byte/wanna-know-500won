@@ -1,8 +1,8 @@
 /*
  * 모델 호출을 한 곳에 모은 어댑터예요. 환경변수로 Anthropic(Claude)과 Google Gemini 를 골라요.
  *  - AI_PROVIDER = "gemini" | "anthropic" (비우면: Anthropic 키가 있으면 anthropic, 없고 Gemini 키가 있으면 gemini)
- *  - Gemini: GEMINI_API_KEY, GEMINI_MODEL(500원), GEMINI_MODEL_PAID(프리미엄)
- *  - Anthropic: ANTHROPIC_API_KEY, ANTHROPIC_MODEL, ANTHROPIC_MODEL_PAID
+ *  - Gemini: GEMINI_API_KEY, GEMINI_MODEL(500원), GEMINI_MODEL_PAID(프리미엄), GEMINI_MODEL_CHAT(상담실, 비우면 GEMINI_MODEL)
+ *  - Anthropic: ANTHROPIC_API_KEY, ANTHROPIC_MODEL, ANTHROPIC_MODEL_PAID, ANTHROPIC_MODEL_CHAT(비우면 ANTHROPIC_MODEL)
  * 호출하는 쪽은 "시스템 글 + 사용자 글 + JSON 스키마"만 넘기면 되고, 결과는 같은 모양으로 돌려받아요.
  */
 
@@ -10,7 +10,8 @@ import { readingFirst } from "@/lib/hanjaReading";
 import { adminCacheOn, aiCacheKey, logAiCall, readAiCache, writeAiCache } from "./aiTools";
 
 export type Provider = "anthropic" | "gemini";
-export type Tier = "free" | "paid";
+/** free = 일반 풀이(500원), paid = 프리미엄 풀이, chat = 도유 상담실 */
+export type Tier = "free" | "paid" | "chat";
 
 export const DEFAULT_MODEL = "claude-haiku-5-5";
 export const PAID_MODEL = "claude-sonnet-5-5";
@@ -37,12 +38,22 @@ export function hasAiKey(env: Env = process.env): boolean {
   return !!aiKey(env);
 }
 
-/** 제공자별 기본 모델. paid 는 프리미엄 장 풀이용(더 똑똑한 모델). */
+/**
+ * 제공자별 모델. 일반 풀이(free)·프리미엄(paid)·상담실(chat)을 따로 정할 수 있어요.
+ * chat 은 환경변수를 안 정하면 일반 풀이(free) 모델을 그대로 써요.
+ */
 export function modelFor(tier: Tier, env: Env = process.env): string {
+  const pick = (v: string | undefined) => (v ?? "").trim();
   if (activeProvider(env) === "gemini") {
-    return tier === "paid" ? (env.GEMINI_MODEL_PAID || GEMINI_PAID_MODEL) : (env.GEMINI_MODEL || GEMINI_DEFAULT_MODEL);
+    const free = pick(env.GEMINI_MODEL) || GEMINI_DEFAULT_MODEL;
+    if (tier === "paid") return pick(env.GEMINI_MODEL_PAID) || GEMINI_PAID_MODEL;
+    if (tier === "chat") return pick(env.GEMINI_MODEL_CHAT) || free;
+    return free;
   }
-  return tier === "paid" ? (env.ANTHROPIC_MODEL_PAID || PAID_MODEL) : (env.ANTHROPIC_MODEL || DEFAULT_MODEL);
+  const free = pick(env.ANTHROPIC_MODEL) || DEFAULT_MODEL;
+  if (tier === "paid") return pick(env.ANTHROPIC_MODEL_PAID) || PAID_MODEL;
+  if (tier === "chat") return pick(env.ANTHROPIC_MODEL_CHAT) || free;
+  return free;
 }
 
 export interface LlmRequest {
