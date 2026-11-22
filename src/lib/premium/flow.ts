@@ -36,3 +36,60 @@ export function sectionLink(heading: string, groupIndex: number): string {
   const h = heading.replace(/ · .*$/, "");
   return SECTION_LINKS[(Math.max(1, groupIndex) - 1) % SECTION_LINKS.length](h);
 }
+
+/** 장을 열 때 앞에서 본 내 사주를 한 줄로 받아 오는 "이어받기"에 필요한 값만 담은 모양 */
+export interface OpeningFacts {
+  dayFull: string | null;
+  dayReading: string | null;
+  elements: Array<{ name: string; count: number }>;
+  grade: string;
+  geukguk: string;
+  yongsin: string[];
+  daeunNow: string | null;
+  year: number | null;
+  yearGanzhi: string | null;
+}
+
+const EL_DISPLAY: Record<string, string> = { 목: "나무", 화: "불", 토: "땅", 금: "쇠", 수: "물" };
+
+const TOPIC_WORD: Record<string, string> = { "topic:money": "돈", "topic:love": "사랑", "topic:career": "일", "topic:health": "몸" };
+
+/**
+ * 장 맨 앞에서 "앞에서 본 내 사주"를 한 줄로 받아 이어 줘요. 이 사람의 값(일주·오행·신강신약·용신…)으로 만들어서
+ * 같은 책이어도 사람마다 다르게 이어져요. 값이 모자라면 null(아무것도 보이지 않아요).
+ */
+export function chapterOpening(key: string, f: OpeningFacts): string | null {
+  const el = (n: string) => `${EL_DISPLAY[n] ?? n} 기운`;
+  const sorted = [...f.elements].sort((a, b) => b.count - a.count);
+  const top = sorted[0];
+  const low = [...f.elements].sort((a, b) => a.count - b.count)[0];
+  const yong = f.yongsin[0]?.replace(/\(.*$/, "");
+  switch (key) {
+    case "nature":
+      return f.dayFull ? `앞에서 세운 네 기둥 가운데 ‘나’를 뜻하는 건 일주 ${f.dayFull}${f.dayReading ? `(${f.dayReading})` : ""}야. 이제 이 두 글자 속으로 들어가 볼게.` : null;
+    case "elements":
+      return top && low && top.name !== low.name
+        ? `일주 하나로 중심을 봤다면, 이번엔 사주 전체야. 네 사주에는 ${el(top.name)}이 ${top.count}개로 가장 많고, ${el(low.name)}은 ${low.count}개로 가장 적어.`
+        : null;
+    case "tengods":
+      return f.grade ? `기운의 양을 봤으니, ${f.grade} 사주인 네가 그 힘을 세상에 어떻게 쓰는지 볼게.` : null;
+    case "topic:money":
+    case "topic:love":
+    case "topic:career":
+    case "topic:health": {
+      const w = TOPIC_WORD[key];
+      if (!f.grade) return null;
+      return yong
+        ? `앞에서 본 ${f.grade} 사주와 도움이 되는 기운(${yong})이, ${w}의 결에서는 어떻게 나타나는지 따라가 보자.`
+        : `앞에서 본 ${f.grade} 사주의 모습이, ${w}의 결에서는 어떻게 나타나는지 따라가 보자.`;
+    }
+    case "geukguk":
+      return f.geukguk ? `분야별 이야기 밑에는 ‘${f.geukguk}’이라는 뼈대가 있어. 지금까지 읽은 이야기가 모두 이 뼈대에서 자라난 거야.` : null;
+    case "daeun":
+      return f.daeunNow ? `뼈대 위로 10년마다 계절이 바뀌어. 네가 지금 지나는 계절은 ${f.daeunNow} 대운이야.` : null;
+    case "years":
+      return f.year && f.yearGanzhi ? `${f.daeunNow ? `${f.daeunNow} 대운이라는 큰 계절 안에서, ` : ""}${f.year}년은 ${f.yearGanzhi}년이야.` : null;
+    default:
+      return null;
+  }
+}

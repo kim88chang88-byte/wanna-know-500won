@@ -27,6 +27,15 @@ interface ShellProps {
 export function ModalShell({ labelId, panelClass, onClose, closeOnOverlay = true, luxe = false, children }: ShellProps) {
   const panelRef = useRef<HTMLDivElement>(null);
 
+  // 모달이 떠 있는 동안 뒤쪽 화면이 같이 스크롤되지 않게 잠가요.
+  useEffect(() => {
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, []);
+
   useEffect(() => {
     const previous = document.activeElement as HTMLElement | null;
     panelRef.current?.focus();
@@ -42,7 +51,7 @@ export function ModalShell({ labelId, panelClass, onClose, closeOnOverlay = true
 
   return (
     <div
-      className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4"
+      className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4 overscroll-contain"
       onClick={closeOnOverlay ? onClose : undefined}
       data-testid="modal-overlay"
     >
@@ -252,7 +261,7 @@ export function LoginModal({ onClose, reason = null, user = null, result = null,
   const [withdrawError, setWithdrawError] = useState(false);
 
   return (
-    <ModalShell labelId="login-title" panelClass="max-w-sm p-6 sm:p-7 border border-brand-200" onClose={onClose}>
+    <ModalShell labelId="login-title" panelClass="max-w-sm p-6 sm:p-7 border border-brand-200 max-h-[90dvh] overflow-y-auto overscroll-contain" onClose={onClose}>
       <CloseButton onClose={onClose} />
       <div className="text-center mb-5">
         <div className="w-16 h-16 flex items-center justify-center mx-auto mb-2">

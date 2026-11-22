@@ -1,6 +1,6 @@
 "use client";
 
-import { BRIDGES, sectionLink } from "@/lib/premium/flow";
+import { BRIDGES, chapterOpening, sectionLink } from "@/lib/premium/flow";
 import { softToDeep } from "@/lib/premium/deepTone";
 import { getBrowserStorage } from "@/lib/drawCounter";
 import { readRealityPick, saveRealityPick } from "@/lib/realityPick";
@@ -1135,6 +1135,22 @@ export default function PremiumBook({ report, flush = false, finale, previewBlur
   const tp = titleParts(page.title);
   const mascot = mascotOf(report);
   const pic = avatarOf(mascot);
+  const curDaeun = report.daeun?.list.find((d) => d.current)?.ganzhi ?? null;
+  const dayP = report.pillars.find((x) => x.key === "day");
+  const opening =
+    !blurred && !page.key.startsWith("compat")
+      ? chapterOpening(page.key, {
+          dayFull: dayP?.full ?? null,
+          dayReading: dayP?.reading ?? null,
+          elements: report.elements.map((e) => ({ name: e.name, count: e.count })),
+          grade: report.strength?.grade ?? "",
+          geukguk: report.geukguk ?? "",
+          yongsin: report.yongsin ?? [],
+          daeunNow: curDaeun,
+          year: report.seyun?.year ?? null,
+          yearGanzhi: report.seyun?.ganzhi ?? null,
+        })
+      : null;
 
   return (
     <div
@@ -1243,6 +1259,12 @@ export default function PremiumBook({ report, flush = false, finale, previewBlur
         <div data-testid={page.key === "concernTop" ? "book-opening" : page.note ? "book-note" : "book-lead"}>
           <BubbleRow text={page.key === "concernTop" ? openingBubble(report.viewerName) : page.note ? dropLight(page.note) : page.lead} img={pic} />
         </div>
+
+        {opening && (
+          <p data-testid="chapter-opening" className="-mt-1 px-1 text-center text-[14.5px] leading-relaxed text-[#e6c887]/90">
+            {opening}
+          </p>
+        )}
 
         {/* 손님이 고른 고민에 대한 답은 첫 쪽 위가 아니라, 같은 주제를 다루는 '요즘 고민 맞춤 풀이' 쪽에 둬. */}
         {page.key === "concern" && report.concern && <ConcernCard concern={report.concern} dark />}
