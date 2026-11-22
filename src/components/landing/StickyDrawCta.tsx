@@ -50,7 +50,7 @@ export default function StickyDrawCta({ hidden = false }: { hidden?: boolean }) 
     <a
       href="#machines"
       data-testid="sticky-cta"
-      className="fixed bottom-[4.75rem] left-1/2 lg:bottom-4 z-40 inline-flex -translate-x-1/2 items-center gap-2 rounded-full bg-gradient-to-r from-brand-500 to-fuchsia-500 px-5 py-2.5 text-[13px] font-bold text-white shadow-xl shadow-brand-500/40 active:scale-95 focus:outline-none focus-visible:ring-4 focus-visible:ring-brand-300"
+      className="fixed bottom-[4rem] left-1/2 lg:bottom-4 z-40 inline-flex -translate-x-1/2 items-center gap-2 rounded-full bg-gradient-to-r from-brand-500 to-fuchsia-500 px-5 py-2.5 text-[13px] font-bold text-white shadow-xl shadow-brand-500/40 active:scale-95 focus:outline-none focus-visible:ring-4 focus-visible:ring-brand-300"
     >
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img src="/images/coin-500.webp" alt="" width={24} height={24} className="h-6 w-6 shrink-0 object-contain drop-shadow" aria-hidden="true" />

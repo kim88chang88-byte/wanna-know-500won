@@ -12,9 +12,9 @@ function scrollToId(id: string) {
   document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
-const base = "relative flex flex-1 flex-col items-center gap-1 pt-1.5 text-[12.5px] font-bold transition-colors";
+const base = "relative flex flex-1 flex-col items-center gap-0.5 pt-0.5 text-[11px] font-bold transition-colors";
 
-const svg = "h-[30px] w-[30px] stroke-current stroke-[1.8] [stroke-linecap:round] [stroke-linejoin:round]";
+const svg = "h-[22px] w-[22px] stroke-current stroke-[1.8] [stroke-linecap:round] [stroke-linejoin:round]";
 
 function HomeIcon() {
   return (
@@ -49,7 +49,7 @@ function VaultIcon() {
 }
 
 /** 새 항목이 있을 때 아이콘 오른쪽 위에 붙는 빨간 점 (숫자 없음) */
-const Dot = () => <i data-testid="nav-dot" aria-hidden="true" className="absolute left-[calc(50%+10px)] top-1 h-[10px] w-[10px] rounded-full border-2 border-white bg-red-500 box-content" />;
+const Dot = () => <i data-testid="nav-dot" aria-hidden="true" className="absolute left-[calc(50%+7px)] top-0 h-[8px] w-[8px] rounded-full border-2 border-white bg-red-500 box-content" />;
 
 /**
  * 휴대폰·태블릿 아래에 붙는 4칸 메뉴. (큰 화면에서는 숨겨요)
@@ -123,15 +123,15 @@ export default function BottomTabs({ page = false, onChatLogin }: { page?: "chat
   const off = "text-[#7a7f98] hover:text-brand-600";
   const tab = (key: TabKey) => `${base} ${active === key ? "text-brand-600" : off}`;
   // 선택된 칸 위에 보라색 막대
-  const bar = (key: TabKey) => (active === key ? <i aria-hidden="true" className="absolute -top-3 left-1/2 h-[5px] w-11 -translate-x-1/2 rounded-b-md bg-brand-600" /> : null);
+  const bar = (key: TabKey) => (active === key ? <i aria-hidden="true" className="absolute -top-2 left-1/2 h-[4px] w-9 -translate-x-1/2 rounded-b-md bg-brand-600" /> : null);
 
   return (
     <nav
       data-testid="bottom-tabs"
       aria-label="하단 메뉴"
-      className="fixed inset-x-0 bottom-0 z-30 mx-auto w-full max-w-[34rem] px-3 pb-[max(10px,env(safe-area-inset-bottom,0px))] lg:hidden"
+      className="fixed inset-x-0 bottom-0 z-30 mx-auto w-full max-w-[34rem] px-3 pb-[max(6px,env(safe-area-inset-bottom,0px))] lg:hidden"
     >
-      <div className="relative flex items-stretch rounded-[22px] bg-white/95 px-1 pb-2.5 pt-3 shadow-[0_6px_24px_rgba(59,42,138,0.16)] backdrop-blur-xl">
+      <div className="relative flex items-stretch rounded-[18px] bg-white/95 px-1 pb-1.5 pt-2 shadow-[0_6px_24px_rgba(59,42,138,0.16)] backdrop-blur-xl">
         {page ? (
           <Link href="/" className={`${base} ${off}`}>
             <HomeIcon />홈
@@ -165,7 +165,7 @@ export default function BottomTabs({ page = false, onChatLogin }: { page?: "chat
         )}
         {chatOn || page === "chat" ? (
           <Link href="/chat" className={`${base} ${page === "chat" ? "text-brand-600" : off}`} aria-current={page === "chat" ? "page" : undefined} onClick={() => seen("chat")}>
-            {page === "chat" && <i aria-hidden="true" className="absolute -top-3 left-1/2 h-[5px] w-11 -translate-x-1/2 rounded-b-md bg-brand-600" />}
+            {page === "chat" && <i aria-hidden="true" className="absolute -top-2 left-1/2 h-[4px] w-9 -translate-x-1/2 rounded-b-md bg-brand-600" />}
             <ChatIcon />
             {dots.chat && <Dot />}
             도유상담실
@@ -182,7 +182,7 @@ export default function BottomTabs({ page = false, onChatLogin }: { page?: "chat
           </button>
         )}
         <Link href="/vault" className={`${base} ${page === "vault" ? "text-brand-600" : off}`} aria-current={page === "vault" ? "page" : undefined} onClick={() => seen("vault")}>
-          {page === "vault" && <i aria-hidden="true" className="absolute -top-3 left-1/2 h-[5px] w-11 -translate-x-1/2 rounded-b-md bg-brand-600" />}
+          {page === "vault" && <i aria-hidden="true" className="absolute -top-2 left-1/2 h-[4px] w-9 -translate-x-1/2 rounded-b-md bg-brand-600" />}
           <VaultIcon />
           {dots.vault && <Dot />}
           보관함

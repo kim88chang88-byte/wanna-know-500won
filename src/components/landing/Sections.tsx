@@ -1,4 +1,5 @@
 import Link from "next/link";
+import HideOnScrollHeader from "./HideOnScrollHeader";
 import type React from "react";
 import { SERVICE_NAME } from "@/lib/siteInfo";
 import type { AuthUser } from "./useAuth";
@@ -53,7 +54,7 @@ export function firstGlyph(nickname: string | null | undefined): string {
 export function Header({ onOpenLogin, user = null, bubble = null, strip = null }: { onOpenLogin: () => void; user?: AuthUser | null; bubble?: React.ReactNode; strip?: React.ReactNode }) {
   return (
     <>
-      <header className="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-brand-100 shadow-[0_2px_15px_rgba(128,87,224,0.06)]">
+      <HideOnScrollHeader className="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-brand-100 shadow-[0_2px_15px_rgba(128,87,224,0.06)]">
         <div className="max-w-[34rem] lg:max-w-5xl mx-auto px-3 sm:px-6 lg:px-8 py-3.5 flex items-center justify-between gap-2 sm:gap-3">
           {/* 왼쪽 위: 로고 + Beta 스티커 */}
           <div className="flex flex-col items-start gap-1 min-w-0">
@@ -113,7 +114,7 @@ export function Header({ onOpenLogin, user = null, bubble = null, strip = null }
         </div>
         {/* 로고 줄 아래에 같이 고정되는 줄: 방문자 수 + 내 지갑 */}
         {strip}
-      </header>
+      </HideOnScrollHeader>
 
     </>
   );
