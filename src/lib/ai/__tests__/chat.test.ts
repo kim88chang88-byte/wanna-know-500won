@@ -27,6 +27,13 @@ describe("도유 상담방", () => {
     for (const q of ["그냥 사라졌으면 좋겠어", "내가 없어지면 다들 편하겠지", "내가 없는 게 나을 것 같아", "살 이유가 없어", "사는 의미를 모르겠어", "그냥 눈 감으면 안 떠졌으면", "더는 못 버티겠어"]) {
       expect(isCrisis(q)).toBe(true);
     }
+    // 11-22 실제 점검에서 AI로 넘어갔던 말들
+    for (const q of ["내가 사라지면 모두가 편해지겠지?", "내가 사는 의미를 잘 모르겠어.", "오늘 밤 잠에 들고 내일 아침 눈이 떠지지 않았으면…", "눈이 안 떠졌으면 좋겠어", "내일 아침에 깨어나지 않았으면 좋겠어", "그냥 죽었으면 좋겠다", "태어나지 말걸 그랬어", "살 이유를 모르겠어"]) {
+      expect(isCrisis(q)).toBe(true);
+    }
+    for (const q of ["졸려서 아침에 눈이 안 떠져", "아침에 눈이 안 떠지면 지각이야", "그 식물이 죽었으면 어쩌지", "사는 이유가 궁금해", "내가 없으면 팀이 안 돌아가"]) {
+      expect(isCrisis(q)).toBe(false);
+    }
     // 평소 말은 걸리지 않아요
     for (const q of ["이 프로젝트가 사라졌으면 좋겠어", "내가 없으면 회사가 안 돌아가", "내일 시험이 끝났으면 좋겠어", "살 이유 같은 철학 책 추천해 줘", "눈 감고 면접 연습해도 돼?"]) {
       expect(isCrisis(q)).toBe(false);
@@ -224,5 +231,15 @@ describe("시점 말 반복 방지", () => {
   it("도리가 이미 요일·시간대를 말했으면 true", () => {
     expect(timeAlreadySaid([{ role: "dori", text: "토요일 저녁에 시험 보느라 고생했어" } as never])).toBe(true);
     expect(timeAlreadySaid([{ role: "user", text: "토요일 저녁인데" } as never, { role: "dori", text: "고생했어. 오늘은 푹 쉬어." } as never])).toBe(false);
+  });
+});
+
+describe("위험 표시(risk)", () => {
+  it("도리가 위험을 표시하면 읽고, 아니면 false 이며 프롬프트에 규칙이 있다", () => {
+    const a = "지금 마음이 많이 무거운 것 같아서 도리가 걱정돼. 혼자 버티지 말고 가까운 사람에게 이야기해 줘. 도리는 여기서 기다릴게.";
+    expect(parseChatReply({ answer: a, followups: [], choices: [], unable: false, risk: true, visual: null })?.risk).toBe(true);
+    expect(parseChatReply({ answer: a, followups: [], choices: [], unable: false, risk: false, visual: null })?.risk).toBe(false);
+    expect(parseChatReply({ answer: a })?.risk).toBe(false);
+    expect(CHAT_SYSTEM_PROMPT).toContain("risk 를 true");
   });
 });

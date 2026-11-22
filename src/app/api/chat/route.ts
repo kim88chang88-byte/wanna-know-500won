@@ -116,6 +116,14 @@ export async function POST(request: Request) {
       history,
       { now },
     );
+    // 도리가 "자해·자살 위험이 보인다"고 표시한 답(말 고르기로 못 거른 돌려 말하기): AI 답 대신 정해 둔 안내만 보내고 질문은 돌려줘요
+    if (reply.risk) {
+      if (taken && taken.left >= 0) await refundQuestion(db, target, taken.via);
+      if (dayTaken) await refundLimit("chat-day", `u:${session.sub}`, DAY_CAP, DAY_MS);
+      taken = null;
+      dayTaken = false;
+      return NextResponse.json({ answer: CRISIS_ANSWER, safe: true, left: await quotaLeft(db, target) });
+    }
     // 도리가 "정확하게 답할 수 없는 질문"이라고 표시한 답: 사과로 다듬고 질문을 돌려줘요 (하루 상한 안에서만)
     if (reply.unable) {
       const refund = await takeLimit("chat-refund", `u:${session.sub}`, REFUND_DAY_CAP, DAY_MS);
