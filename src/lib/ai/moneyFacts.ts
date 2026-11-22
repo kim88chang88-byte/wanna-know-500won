@@ -2,7 +2,7 @@ import type { SajuChart } from "@/lib/saju/types";
 import { STEMS } from "@/lib/saju/constants";
 import { EL_KO, type Element } from "@/lib/ai/menuHobby";
 import { analyzeChart } from "@/lib/saju/analysis";
-import { tenGodOf, TEN_GOD_MOOD, type TenGod } from "@/lib/ai/dailyFacts";
+import { tenGodOf, type TenGod } from "@/lib/ai/dailyFacts";
 import { sewoonBranch } from "@/lib/ai/loveFacts";
 
 /*
@@ -58,7 +58,7 @@ export function moneyFacts(chart: SajuChart, now: Date): Record<string, unknown>
   const nxt = stemAt(sw.year + 1);
   const g1 = tenGodOf(chart.day.stem, cur.hanja);
   const g2 = tenGodOf(chart.day.stem, nxt.hanja);
-  out.올해세운 = `${sw.year}년 ${cur.hanja} — ${GOD_MONEY[g1] ?? g1}. 올해 분위기: ${TEN_GOD_MOOD[g1]}`;
-  out.내년세운 = `${sw.year + 1}년 ${nxt.hanja} — ${GOD_MONEY[g2] ?? g2}. 내년 분위기: ${TEN_GOD_MOOD[g2]}`;
+  out.올해세운 = `${sw.year}년 ${cur.hanja} — ${GOD_MONEY[g1] ?? g1}`;
+  out.내년세운 = `${sw.year + 1}년 ${nxt.hanja} — ${GOD_MONEY[g2] ?? g2}`;
   return out;
 }

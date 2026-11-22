@@ -26,6 +26,7 @@ describe("재물 재료", () => {
     expect(f.재성이드러난자리).toContain("연주 천간 편재");
     expect(f.올해세운).toContain("2026년");
     expect(f.내년세운).toContain("2027년");
+    expect(f.올해세운).not.toContain("올해 분위기");
   });
 
   it("프롬프트는 고정비·메모장·재물 달력을 기본 처방으로 박아 두지 않는다", () => {
