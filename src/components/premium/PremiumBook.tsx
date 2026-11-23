@@ -557,8 +557,9 @@ function DailyRoutine({ states }: { states: Partial<Record<BodyEl, BodyState>> }
 function PrefaceExtras({ withLater = true }: { withLater?: boolean }) {
   return (
     <div data-testid="preface-extras" className="mt-4 space-y-3">
-      <div className="flex flex-wrap justify-between gap-x-3 gap-y-1 text-[14px] text-[#e8dfca]/70">
+      <div className="flex flex-wrap items-center justify-center gap-x-2.5 gap-y-1 text-[14px] text-[#e8dfca]/70">
         <span>네 기둥 = <b className={GOLD}>사주 四柱</b></span>
+        <span aria-hidden="true" className="text-[#e8dfca]/40">/</span>
         <span>여덟 글자 = <b className={GOLD}>팔자 八字</b></span>
       </div>
       <p className="text-[15px] leading-relaxed text-[#e8dfca]/85">
