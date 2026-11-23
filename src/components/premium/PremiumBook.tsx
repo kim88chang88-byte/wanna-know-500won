@@ -55,8 +55,11 @@ function bold(text: string) {
   );
 }
 
-function RichBody({ text }: { text: string }) {
-  const blocks = text.split(/\n{2,}/).map((b) => b.trim()).filter(Boolean);
+/** 실천 목록·한 줄 마무리·읽는 방법은 강조 밑줄 없이 담백하게 보여요. (AI 가 별표로 감싼 곳도 밑줄 없이 글자만 보여요) */
+const PLAIN_HEADINGS = ["이렇게 해보자", "한 줄 마무리", "이 책을 읽는 방법", "이 리포트는 이렇게 읽어 줘", "이 리포트를 읽는 방법"];
+
+function RichBody({ text, plain = false }: { text: string; plain?: boolean }) {
+  const blocks = (plain ? text.replace(/\*\*/g, "") : text).split(/\n{2,}/).map((b) => b.trim()).filter(Boolean);
   return (
     <div className="mt-1.5 space-y-3 text-[15px] leading-[1.85] text-[#322f47] [word-break:keep-all]">
       {blocks.map((b, i) => {
@@ -1402,7 +1405,7 @@ export default function PremiumBook({ report, flush = false, finale, previewBlur
                       <SinsalReveal card={s.sinsalCard} body={fillLetterMbti(s.body, report.mbti)} />
                     ) : (
                       <>
-                        <RichBody text={fillMbti(s.body, s.mbti, report.mbti)} />
+                        <RichBody text={fillMbti(s.body, s.mbti, report.mbti)} plain={PLAIN_HEADINGS.includes(s.heading)} />
                       </>
                     )}
                     {!s.locked && s.checks && s.checks.length > 0 && <CheckList items={s.checks} />}
