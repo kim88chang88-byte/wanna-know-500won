@@ -39,7 +39,7 @@ const BAR: Record<ElementKind, string> = {
   unknown: "bg-amber-300",
 };
 
-const SCENE_BRIDGE = "일단 어려운 사주팔자 글자를 보기 전에, 네가 태어난 그 순간의 너만의 날씨 지도를 먼저 그려 줄게.";
+const SCENE_BRIDGE = "일단 사주팔자 글자를 보기 전에, 네가 태어난 그 순간의 너만의 날씨 지도를 먼저 그려 줄게.";
 const GOLD = "text-[#e6c887]";
 const HAIR = "border-[#e6c887]/25";
 
