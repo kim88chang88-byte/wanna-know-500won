@@ -1145,7 +1145,7 @@ export default function PremiumBook({ report, flush = false, finale, previewBlur
   // AI 편지가 있으면 같은 자리의 기본 "마무리 편지"는 빼요.
   // 서문(내 사주): 첫 소제목 뒤에 "날씨 지도를 그려 줄게" 한 문장을 잇고, 바로 그 아래에 날씨 지도(그림)를 놓아요.
   const sceneAfterFirst = page.key === "preface" && !report.compat && !blurred && page.sections.length > 1;
-  const cardSecs0 = page.letter ? page.sections.filter((x) => x.heading !== "마무리 편지") : page.sections;
+  const cardSecs0 = (page.letter ? page.sections.filter((x) => x.heading !== "마무리 편지") : page.sections).filter((x) => !(page.key === "preface" && x.heading === "한 줄 마무리"));
   const cardSecs = sceneAfterFirst ? [{ ...cardSecs0[0], body: `${cardSecs0[0].body}\n\n${SCENE_BRIDGE}` }, ...cardSecs0.slice(1)] : cardSecs0;
   const perCard = cardSecs.length > 6 ? 3 : 2;
   const groups: BookPage["sections"][] = [];
