@@ -1135,6 +1135,11 @@ export default function PremiumBook({ report, flush = false, finale, previewBlur
   const tp = titleParts(page.title);
   const mascot = mascotOf(report);
   const pic = avatarOf(mascot);
+  const visualBlock = (
+    <div className="rounded-[14px] border border-[#2c3260] bg-[#1a1f40] p-4 empty:hidden">
+      <Visual page={page} report={report} />
+    </div>
+  );
   const curDaeun = report.daeun?.list.find((d) => d.current)?.ganzhi ?? null;
   const dayP = report.pillars.find((x) => x.key === "day");
   const opening =
@@ -1270,11 +1275,8 @@ export default function PremiumBook({ report, flush = false, finale, previewBlur
         {page.key === "concern" && report.concern && <ConcernCard concern={report.concern} dark />}
 
         {/* 미리보기에서 가려진 쪽은 계산 값을 서버가 비워 보내서, 그림도 보여주지 않아. */}
-        {!blurred && (
-          <div className="rounded-[14px] border border-[#2c3260] bg-[#1a1f40] p-4 empty:hidden">
-            <Visual page={page} report={report} />
-          </div>
-        )}
+        {/* 서문은 사주팔자·오행 설명을 먼저 읽고, 그다음에 내 날씨 지도(그림)를 봐요. */}
+        {!blurred && page.key !== "preface" && visualBlock}
 
         {page.key === "topic:love" && !blurred && report.partnerImage && (
           <figure data-testid="partner-image" className="mx-auto w-full max-w-[340px] rounded-[14px] border border-[#2c3260] bg-[#1a1f40] p-4 text-center">
@@ -1367,6 +1369,8 @@ export default function PremiumBook({ report, flush = false, finale, previewBlur
             </div>
           </div>
         ))}
+
+        {!blurred && page.key === "preface" && visualBlock}
 
         {page.tables.filter((t) => t.title !== "재물 달력").map((t) => (
           <div key={t.title} aria-hidden={blurred ? "true" : undefined} className={`rounded-[14px] border border-[#2c3260] bg-[#1a1f40] px-4 pb-4 ${blurred ? BLUR : ""}`}>
