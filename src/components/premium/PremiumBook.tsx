@@ -1140,9 +1140,15 @@ export default function PremiumBook({ report, flush = false, finale, previewBlur
   if (sceneAfterFirst) {
     // [첫 설명] → 날씨 지도·해설 → [나의 여덟 글자 설명] → 네 기둥 그림 → 나머지 설명
     const pillarAt = Math.max(1, cardSecs.findIndex((x, n) => n > 0 && /여덟 글자|기둥/.test(x.heading)));
+    // '나의 여덟 글자' 설명은 첫 문단 바로 뒤에 네 기둥 그림을 놓고, 나머지 문단은 그림 아래에 이어서 보여요.
+    const paras = cardSecs[pillarAt].body.split(/\n\s*\n/);
+    const split = paras.length >= 2 && !cardSecs[pillarAt].locked;
+    const head = split ? { ...cardSecs[pillarAt], body: paras[0] } : cardSecs[pillarAt];
+    const rest = split ? [{ ...cardSecs[pillarAt], heading: "", body: paras.slice(1).join("\n\n") }] : [];
+    const tail = [...rest, ...cardSecs.slice(pillarAt + 1)];
     groups.push(cardSecs.slice(0, 1));
-    groups.push(cardSecs.slice(1, pillarAt + 1));
-    for (let k = pillarAt + 1; k < cardSecs.length; k += perCard) groups.push(cardSecs.slice(k, k + perCard));
+    groups.push([...cardSecs.slice(1, pillarAt), head]);
+    for (let k = 0; k < tail.length; k += perCard) groups.push(tail.slice(k, k + perCard));
   } else {
     for (let k = 0; k < cardSecs.length; k += perCard) groups.push(cardSecs.slice(k, k + perCard));
   }
@@ -1347,7 +1353,7 @@ export default function PremiumBook({ report, flush = false, finale, previewBlur
 
         {groups.map((g, gi) => (
           <div key={`${gi}-${g[0]?.heading}`} className="flex flex-col gap-[18px]">
-            {gi > 0 && !(sceneNotes && gi === 1) && <BubbleRow text={sectionLink(g[0].heading, gi)} img={pic} right={gi % 2 === 1} />}
+            {gi > 0 && !(sceneNotes && gi === 1) && g[0].heading !== "" && <BubbleRow text={sectionLink(g[0].heading, gi)} img={pic} right={gi % 2 === 1} />}
             <div className="hanji-wrap">
             <div className="hanji-page px-5 pb-[18px] pt-[22px] text-[#26233a]">
               <span aria-hidden="true" className="hanji-tex" />
@@ -1370,10 +1376,12 @@ export default function PremiumBook({ report, flush = false, finale, previewBlur
               <div className={`space-y-5 ${blurred ? "[&_p]:blur-[6px] [&_li]:blur-[6px] select-none" : ""}`} aria-hidden={blurred ? "true" : undefined}>
                 {g.map((s, n) => (
                   <section key={`${n}-${s.heading}`} data-testid={s.locked ? "book-section-locked" : "book-section"}>
-                    <h4 className="border-b border-dotted border-[#9a93b0] pb-1.5 text-[15px] font-bold text-[#26233a]">
-                      <span aria-hidden="true" className="mr-1.5">{s.locked ? "🔒" : ""}</span>
-                      {s.heading}
-                    </h4>
+                    {s.heading !== "" && (
+                      <h4 className="border-b border-dotted border-[#9a93b0] pb-1.5 text-[15px] font-bold text-[#26233a]">
+                        <span aria-hidden="true" className="mr-1.5">{s.locked ? "🔒" : ""}</span>
+                        {s.heading}
+                      </h4>
+                    )}
                     {s.locked ? (
                       <div className="relative mt-2">
                         <p aria-hidden="true" className="select-none text-[15px] leading-[1.85] text-[#322f47] blur-[6px]">
