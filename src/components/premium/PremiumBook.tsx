@@ -1262,7 +1262,7 @@ export default function PremiumBook({ report, flush = false, finale, previewBlur
 
         {/* 도리 한 마리에 말풍선 하나: AI 한 줄이 있으면 그것을, 없으면 쪽 첫 문장을 보여. */}
         <div data-testid={page.key === "concernTop" ? "book-opening" : page.note ? "book-note" : "book-lead"}>
-          <BubbleRow text={page.key === "concernTop" ? openingBubble(report.viewerName) : page.note ? dropLight(page.note) : page.lead} img={pic} />
+          <BubbleRow text={page.key === "concernTop" ? openingBubble(report.viewerName) : page.key !== "preface" && page.note ? dropLight(page.note) : page.lead} img={pic} />
         </div>
 
         {opening && (
