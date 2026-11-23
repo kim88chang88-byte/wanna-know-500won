@@ -12,6 +12,8 @@ import { containsForbidden, isGeneric } from "./reading";
  */
 
 export const CHAPTER_MAX_BOLD_RATIO = 0.35;
+/** 일간 글자의 성질 문장을 통째로 강조하는 소제목은 굵은 글씨 비율을 더 넉넉히 봐요. */
+const CORE_BOLD_HEADINGS = ["오행과 일간, 나를 읽는 열쇠", "일주가 말하는 나의 중심"];
 
 /** 짧게 써도 되는 소제목(실천 목록·한 줄 마무리·다음으로 이어 주는 말) */
 const SHORT_HEADINGS = ["한 줄 마무리", "이렇게 해보자", "가장 먼저 해볼 일", "이제 차근차근 풀어 줄게"];
@@ -229,7 +231,7 @@ export function parseChapterWhy(value: unknown, headings: string[]): { sections:
     if (/[○◯]{2}/.test(body)) return { sections: null, why: `자리표시(${tag})` };
     // 굵은 글씨가 본문의 대부분이면 강조가 아니라서 버려요.
     const boldLen = (body.match(/\*\*[^*]+\*\*/g) ?? []).reduce((n, m) => n + m.length - 4, 0);
-    if (!isShort && boldLen / body.length > CHAPTER_MAX_BOLD_RATIO) return { sections: null, why: `굵은글씨 과다(${tag})` };
+    if (!isShort && boldLen / body.length > (CORE_BOLD_HEADINGS.includes(headings[i]) ? 0.55 : CHAPTER_MAX_BOLD_RATIO)) return { sections: null, why: `굵은글씨 과다(${tag})` };
     out.push({ heading: headings[i], body });
   }
   return { sections: out, why: "" };
@@ -380,7 +382,7 @@ Object.assign(CHAPTER_SPECS, {
 Object.assign(CHAPTER_SPECS, {
   preface: spec6(
     ["사주팔자란 무엇인가", "나의 여덟 글자 (사주팔자 중 ‘팔자’)", "오행과 일간, 나를 읽는 열쇠", "이 리포트를 읽는 방법"],
-    ["사주팔자를 일상의 말로 쉽게. 이 사람의 이야기는 다음 소제목에서.", "첫 문장은 반드시 ‘앞서 말한 사주팔자라는 인생의 지도를 펼쳐보면,’ 로 시작해. 근거 사실의 네 기둥(간지)을 이 사람의 여덟 글자로 짚어 주기만.", "일간과 오행 분포 중 이 사람에게 해당하는 것만 쉽게.", "서문→장→부록 순서의 읽는 법만. 앞 내용을 반복하지 마."],
+    ["사주팔자를 일상의 말로 쉽게. 이 사람의 이야기는 다음 소제목에서.", "첫 문장은 반드시 ‘앞서 말한 사주팔자라는 인생의 지도를 펼쳐보면,’ 로 시작해. 근거 사실의 네 기둥(간지)을 이 사람의 여덟 글자로 짚어 주기만.", "일간과 오행 분포 중 이 사람에게 해당하는 것만 쉽게. 일간 글자 자체의 성질을 풀어 준 한두 문장(‘○○는 …이야’)은 이 소제목의 핵심이니 그 문장을 통째로 **로 감싸 강조해(이 경우에만 문장 전체 굵게를 허용).", "서문→장→부록 순서의 읽는 법만. 앞 내용을 반복하지 마."],
     "일상 비유를 한 가지 곁들여 일반인도 이해하게 써 줘.",
   ),
   overview: spec6(
@@ -389,7 +391,7 @@ Object.assign(CHAPTER_SPECS, {
   ),
   pillars: spec6(
     ["네 기둥으로 읽는 나의 지도", "일주가 말하는 나의 중심", "월주가 말하는 사회 속 모습", "기둥끼리 만나는 모습"],
-    ["연·월·일·시 기둥의 역할을 이 사람의 간지에 맞춰 한눈에.", "일간·일지(배우자 자리)만. 앞 내용을 반복하지 마.", "월주의 십성으로 본 일터·사회에서의 모습만.", "근거 사실에 나온 합·충·형만. 없으면 안정적인 구조라고 풀어 써."],
+    ["연·월·일·시 기둥의 역할을 이 사람의 간지에 맞춰 한눈에.", "일간·일지(배우자 자리)만. 앞 내용을 반복하지 마. 일간 글자 자체의 성질을 풀어 준 한두 문장(‘○○는 …이야’)은 이 소제목의 핵심이니 그 문장을 통째로 **로 감싸 강조해(이 경우에만 문장 전체 굵게를 허용).", "월주의 십성으로 본 일터·사회에서의 모습만.", "근거 사실에 나온 합·충·형만. 없으면 안정적인 구조라고 풀어 써."],
     "시간을 모른다고 적혀 있으면 시주는 풀지 마.",
   ),
   geukguk: spec6(
