@@ -584,6 +584,7 @@ function PrefaceLater({ bare = false }: { bare?: boolean }) {
   ];
   return (
     <div data-testid="preface-later" className={bare ? "space-y-3" : "mt-4 space-y-3"}>
+      <p className={`text-[13px] font-bold tracking-[0.12em] ${GOLD}`}>[참고사항]</p>
       <div className={`rounded-xl border-l-4 border-[#e6c887] bg-white/[0.05] px-3 py-2.5 text-[15px] font-bold leading-snug ${GOLD}`}>
         기둥은 태어날 때 한 번 세워졌는데, 왜 해마다 (그리고 매일) 운세를 다시 볼까?
       </div>
