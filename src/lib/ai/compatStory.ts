@@ -1,4 +1,5 @@
 import { concernLabel, hasConcern, type Concern } from "@/lib/concerns";
+import { scrubDeep } from "./nameRepair";
 import type { CompatView } from "@/lib/premium/types";
 import { callJson } from "./callJson";
 import { aiKey, modelFor } from "./llm";
@@ -26,7 +27,7 @@ export const COMPAT_SYSTEM_PROMPT = `너는 "도리", 맑은 옹달샘의 수달
 
 말투
 - 친한 친구에게 수다 떨듯 귀엽고 다정한 반말. 예: "~거든!", "~이야", "~해 보자", "~했을 수도 있어". 이모지는 한 글에 한두 개만.
-- "나"의 이름이 있으면 성을 뗀 이름으로 "은혁아"처럼 친근하게 불러(빈칸 표기 "○○" 금지, 실제 이름 사용, "님" 금지). 상대의 이름은 "원석님"처럼 님을 붙여 불러. 이름이 없으면 "나", "상대"라고 써. "나"는 이 글을 읽는 사람, "상대"는 상대방이야.
+- "나"의 이름이 있으면 성을 뗀 이름으로 친근하게 불러(빈칸 표기 "○○" 금지, 실제 이름 사용, "님" 금지). 상대의 이름은 "원석님"처럼 님을 붙여 불러. 이름이 없으면 "나", "상대"라고 써. "나"는 이 글을 읽는 사람, "상대"는 상대방이야.
 
 사실과 분량
 - 사실은 입력의 "사실"과 items 내용에 있는 것만 써. 없는 글자·관계·점수를 지어내지 마.
@@ -251,7 +252,7 @@ export async function addCompatAi(c: CompatView, opts: CompatAiOptions = {}): Pr
     const items: CompatItems | null = itemParts.some(Boolean)
       ? { body: new Map(itemParts.flatMap((p) => (p ? [...p.body] : []))), head: new Map(itemParts.flatMap((p) => (p ? [...p.head] : []))) }
       : null;
-    return applyCompatAi(c, core, items);
+    return scrubDeep(applyCompatAi(c, core, items), names.me, names.partner, concern?.text);
   } catch {
     return c;
   }

@@ -7,7 +7,7 @@ import { analyzeChart } from "@/lib/saju/analysis";
 import type { SajuChart } from "@/lib/saju/types";
 import type { ChatKind, ChatMsg } from "@/lib/chatContext";
 import { HISTORY_MAX, MSG_MAX, SUMMARY_MAX } from "@/lib/chatContext";
-import { callName } from "./nameRepair";
+import { callName, scrubExampleName } from "./nameRepair";
 import { callJson } from "./callJson";
 import type { CoreFacts } from "./coreFacts";
 import type { ChatMemo } from "./chatMemo";
@@ -33,7 +33,7 @@ export const CHAT_MAX = 700;
 export const CHAT_SYSTEM_PROMPT = `너는 "도리", 맑은 옹달샘의 수달 도사야. 지금은 사용자가 방금 본 사주 풀이를 이어서 물어보는 채팅 상담이야.
 
 말투
-- 친구에게 카톡하듯 다정한 반말. 이름은 대화의 첫 답에서만 성을 뗀 이름으로 "은혁아"처럼 한 번 부르고(받침 없으면 "하나야", "님" 금지, 실제 이름 사용), 이어지는 답에서는 이름으로 시작하지 마(부르더라도 가끔).
+- 친구에게 카톡하듯 다정한 반말. 이름은 입력 "이름"의 "나"에 실제 이름이 있을 때만, 대화의 첫 답에서 성을 뗀 이름으로 한 번 부르고(받침 있으면 "아", 없으면 "야", "님" 금지, 입력에 적힌 실제 이름만 사용). "나"가 "(없음)"이면 이름을 지어내지 말고 아무 이름으로도 부르지 마, 이어지는 답에서는 이름으로 시작하지 마(부르더라도 가끔).
 - 질문 종류에 따라 답하는 방식을 달리해(제일 중요해):
   · 인사·짧은 안부("안녕", "반가워"): 1~2문장으로 반갑게만 받아. 사주 분석·제안·되묻기 없이.
   · 가벼운 장난·외모·웃긴 질문(예: "나 잘생겨질 수 있어?"): 먼저 웃으며 가볍게 받아 주고(예: "에이, 지금도 충분히 멋있을걸? 😆") 짧게 1~2문단. 사주 근거는 입력에 있는 것 하나만 쓰고, 훈계·"내 안의 에너지" 같은 거창한 말은 하지 마. 사주로 외모를 단정하지 마.
@@ -285,7 +285,7 @@ export function polishChatAnswer(answer: string, history: ChatMsg[], name?: stri
   if (SYMPTOM.test(lastUser) && !a.includes("전문가") && a.length + PRO_NOTE.length + 2 <= CHAT_MAX) {
     a = `${a}\n\n${PRO_NOTE}`;
   }
-  return tidyMarkup(stripInternalTerms(fixTypos(a)));
+  return tidyMarkup(scrubExampleName(stripInternalTerms(fixTypos(a)), n, ...history.filter((m) => m.role === "user").map((m) => m.text)));
 }
 
 const CAREER_OFFTOPIC_CHIP = /세운|십성|지출|소비|차\s?(마시|한\s?잔)|따뜻한\s?차|연말|날씨|맛집|음식|산책|기분\s?전환|음악/;

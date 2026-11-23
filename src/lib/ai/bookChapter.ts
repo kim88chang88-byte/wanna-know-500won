@@ -1,5 +1,5 @@
 import { concernLabel, hasConcern, type Concern } from "@/lib/concerns";
-import { callName, repairName, subjName } from "./nameRepair";
+import { callName, repairName, scrubExampleName, subjName } from "./nameRepair";
 import type { BookPage, BookSection } from "@/lib/premium/types";
 import { callJson } from "./callJson";
 import { modelFor } from "./llm";
@@ -657,7 +657,7 @@ async function rewriteOne(pages: BookPage[], page: BookPage, spec: ChapterSpec, 
   if (results.some((r) => r === null)) return { sections: null, err: [...new Set(errs)].join("/").slice(0, 260) };
   const keep = page.sections.filter((s) => s.reality || (s.checks && s.checks.length > 0));
   // AI 가 이름을 한두 글자 잘못 쓴 곳(장능혁님, 장이름님 등)은 실제 이름으로 되돌려요.
-  const fixed = (results.flat() as BookSection[]).map((sec) => ({ ...sec, body: repairName(sec.body, opts.name) }));
+  const fixed = (results.flat() as BookSection[]).map((sec) => ({ ...sec, body: scrubExampleName(repairName(sec.body, opts.name), opts.name, opts.concern?.text) }));
   return { sections: [...fixed, ...keep], err: "" };
 }
 

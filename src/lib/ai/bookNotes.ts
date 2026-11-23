@@ -1,6 +1,6 @@
 import { softToDeep } from "@/lib/premium/deepTone";
 import { concernLabel, hasConcern, type Concern } from "@/lib/concerns";
-import { callName, repairName } from "./nameRepair";
+import { callName, repairName, scrubExampleName } from "./nameRepair";
 import type { BookPage } from "@/lib/premium/types";
 import { aiKey, callLlm, modelFor, PAID_MODEL } from "./llm";
 import { containsForbidden, isGeneric } from "./reading";
@@ -31,7 +31,7 @@ export const NOTES_SYSTEM_PROMPT = `너는 "도리", 맑은 옹달샘의 수달 
 - 겁주기, 단정, 예언 금지. 질병·이혼·사고·파산·투자·의료·법률 얘기 금지.
 - 쪽마다 시작과 끝맺음이 서로 다르게.
 - 한 줄들은 앞에서 뒤로 읽으면 한 편의 이야기가 되도록 써. 앞 쪽의 한 줄에서 말한 것을 한 구절로 받아서("그 중심이 ~니까, 이번엔 ~") 이어 가되, 모든 쪽에서 되풀이하지 말고 서너 쪽에 한 번 정도 자연스럽게. 첫 쪽은 바로 시작해.
-- "부르는이름"이 있으면 한 줄 중 몇 개(서너 쪽에 한 번쯤)에서 "부르는이름"에 적힌 호칭 그대로(예: 은혁아) 친근하게 불러. 그 외에는 "당신"을 쓰지 말고, "너"도 되도록 줄여서 주어를 생략해. "○○" 같은 빈칸 표기는 쓰지 말고 실제 이름을 넣어.
+- "부르는이름"이 있으면 한 줄 중 몇 개(서너 쪽에 한 번쯤)에서 "부르는이름"에 적힌 호칭 그대로 친근하게 불러. "부르는이름"이 없으면 이름을 지어내거나 어떤 이름으로도 부르지 마. 그 외에는 "당신"을 쓰지 말고, "너"도 되도록 줄여서 주어를 생략해. "○○" 같은 빈칸 표기는 쓰지 말고 실제 이름을 넣어.
 - 고민이 있으면 "advice" 에 그 고민에 직접 답하는 맞춤 조언을 한 문단(5~6문장, 300자 안팎)으로 써. 순서: ①마음을 먼저 알아주기 ②리포트 내용에 실제로 나온 사주 근거를 구체적인 글자·관계(예: 세운과 월간의 충, 대운이 일지와 합, 지장간에 숨은 재성 등)로 한두 가지 짚기 ③그래서 지금은 어떻게 하면 좋은지 방향 ④이번 주에 해 볼 작은 행동 하나 ⑤마지막에 가볍게 마음을 묻는 질문 한 줄. 고민이 없으면 advice 는 빈 문자열이야.
 - 쉽고 재밌게: 사주 용어(충·합·반합·정관·비견 등)는 한 번 짧게만 곁들이고, 곧바로 "그래서 실제로 어떤 모습인지"를 일상 장면으로 풀어 줘. 예: "월간 임수와 병화가 부딪혀요" 대신 "올해는 마음은 앞서가는데 몸이 못 따라와 괜히 피곤해지기 쉬워요(병임충)". 어려운 말이 두 개 이상 연달아 나오지 않게, 비유는 한 가지만.
 - "편지재료"가 있으면 "letter" 에 마지막 쪽에 실을 개인 편지를 한 문단(6~8문장, 350자 안팎)으로 써. 반드시 ①일주(예: 갑자일주)와 나이대를 한 번 짚고 ②"겉으로는 ~해 보여도, 속에서는 ~한 사람"처럼 겉과 속의 대비 문장 하나 ③글자 그대로 "⟦MBTI⟧" 표시를 한 번 넣되 뒤에 조사가 필요하면 "⟦MBTI⟧은(는)", "⟦MBTI⟧이(가)", "⟦MBTI⟧을(를)" 형태로만 붙여(표시를 풀어 쓰지 마) ④부족한 오행을 곁에 두는 작은 당부 한 가지 ⑤응원 한 줄로 끝내. "책속이야기"가 있으면 편지 중간에 그 값 중 두세 가지를 "앞에서 본 ~"처럼 되짚어서, 편지가 책 전체 이야기의 마지막 장면처럼 이어지게 써(값을 나열하지 말고 한 흐름의 문장으로). 단정·예언·겁주기 금지, 다정한 반말. 편지재료가 없으면 letter 는 빈 문자열이야.
@@ -164,11 +164,13 @@ export async function addBookNotes(pages: BookPage[], opts: BookNotesOptions): P
     const advice = hasConcern(opts.concern ?? null) ? parseAdvice(json) : null;
     const letter = opts.kind === "personal" && opts.letter ? parseLetter(json) : null;
     const lastNo = pages[pages.length - 1].no;
+    // 이름 오타를 바로잡고, 프롬프트 예시 이름(은혁)이 남의 글에 새어 들어간 것은 지워요.
+    const fix = (t: string) => scrubExampleName(repairName(t, opts.name), opts.name, opts.concern?.text);
     return pages.map((p) => {
       const got = notes.get(p.no);
-      const out = got ? { ...p, note: repairName(got, opts.name) } : p;
-      const withAdvice = p.no === lastNo && advice ? { ...out, advice: repairName(advice, opts.name) } : out;
-      return p.key === "lucky" && letter ? { ...withAdvice, letter: repairName(letter, opts.name) } : withAdvice;
+      const out = got ? { ...p, note: fix(got) } : p;
+      const withAdvice = p.no === lastNo && advice ? { ...out, advice: fix(advice) } : out;
+      return p.key === "lucky" && letter ? { ...withAdvice, letter: fix(letter) } : withAdvice;
     });
   } catch {
     return pages;
