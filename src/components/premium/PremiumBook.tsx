@@ -13,7 +13,8 @@ import { checkMessage } from "@/lib/premium/book/resonance";
 import type { BookChart, BookPage, BookRow, BookTable, ElementKind, PremiumReportView, RealityCheck } from "@/lib/premium/types";
 import { elementOfChar, elName } from "@/lib/elementColor";
 import ElementTile from "@/components/ElementTile";
-import DayMasterScene from "./DayMasterScene";
+import DayMasterScene, { CAPTION as DAY_MASTER_CAPTION } from "./DayMasterScene";
+import { dayMasterOf } from "@/lib/premium/dayMaster";
 import { MORE_LABELS, SENTENCE_LABELS } from "@/lib/premium/partnerProfile";
 import { DAYMASTER_BRIEF, MBTI_BRIEF, cleanMbti } from "@/lib/mbtiBrief";
 import { fillLetterMbti, mbtiDecadeLine } from "@/lib/mbtiLine";
@@ -1135,8 +1136,11 @@ export default function PremiumBook({ report, flush = false, finale, previewBlur
   const perCard = cardSecs.length > 6 ? 3 : 2;
   const groups: BookPage["sections"][] = [];
   if (sceneAfterFirst) {
+    // [첫 설명] → 날씨 지도·해설 → [나의 여덟 글자 설명] → 네 기둥 그림 → 나머지 설명
+    const pillarAt = Math.max(1, cardSecs.findIndex((x, n) => n > 0 && /여덟 글자|기둥/.test(x.heading)));
     groups.push(cardSecs.slice(0, 1));
-    for (let k = 1; k < cardSecs.length; k += perCard) groups.push(cardSecs.slice(k, k + perCard));
+    groups.push(cardSecs.slice(1, pillarAt + 1));
+    for (let k = pillarAt + 1; k < cardSecs.length; k += perCard) groups.push(cardSecs.slice(k, k + perCard));
   } else {
     for (let k = 0; k < cardSecs.length; k += perCard) groups.push(cardSecs.slice(k, k + perCard));
   }
@@ -1148,6 +1152,15 @@ export default function PremiumBook({ report, flush = false, finale, previewBlur
       <DayMasterScene stem={Array.from(report.pillars.find((p) => p.key === "day")?.full ?? "")[0]} name={report.viewerName} />
     </div>
   ) : null;
+  const dm = sceneAfterFirst ? dayMasterOf(Array.from(report.pillars.find((p) => p.key === "day")?.full ?? "")[0]) : null;
+  const dmStem = Array.from(report.pillars.find((p) => p.key === "day")?.full ?? "")[0] ?? "";
+  const sceneNotes =
+    sceneAfterFirst && dm && DAY_MASTER_CAPTION[dmStem]
+      ? [
+          `이 그림은 네 여덟 글자 중 가장 중요한 ‘대장 글자(일간)’를 자연의 모습으로 그려 본 거야. 타고난 결을 ‘${DAY_MASTER_CAPTION[dmStem]}’에 빗대 눈으로 보기 쉽게 한 거라, 좋고 나쁨을 가르는 그림은 아니야.`,
+          `그런데 그림에 ${dmStem}${dm.el}처럼 한자가 크게 써져 있지? 저게 무슨 뜻인지 조금 더 자세히 설명해 줄게.`,
+        ]
+      : null;
   const visualBlock = (
     <div className="rounded-[14px] border border-[#2c3260] bg-[#1a1f40] p-4 empty:hidden">
       <Visual page={page} report={report} />
@@ -1332,7 +1345,7 @@ export default function PremiumBook({ report, flush = false, finale, previewBlur
 
         {groups.map((g, gi) => (
           <div key={`${gi}-${g[0]?.heading}`} className="flex flex-col gap-[18px]">
-            {gi > 0 && <BubbleRow text={sectionLink(g[0].heading, gi)} img={pic} right={gi % 2 === 1} />}
+            {gi > 0 && !(sceneNotes && gi === 1) && <BubbleRow text={sectionLink(g[0].heading, gi)} img={pic} right={gi % 2 === 1} />}
             <div className="hanji-wrap">
             <div className="hanji-page px-5 pb-[18px] pt-[22px] text-[#26233a]">
               <span aria-hidden="true" className="hanji-tex" />
@@ -1381,10 +1394,12 @@ export default function PremiumBook({ report, flush = false, finale, previewBlur
             </div>
             </div>
             {gi === 0 && sceneBlock}
+            {gi === 0 && sceneNotes && sceneNotes.map((t, n) => <BubbleRow key={t} text={t} img={pic} right={n % 2 === 1} />)}
+            {gi === 1 && sceneAfterFirst && !blurred && visualBlock}
           </div>
         ))}
 
-        {!blurred && page.key === "preface" && visualBlock}
+        {!blurred && page.key === "preface" && !sceneAfterFirst && visualBlock}
 
         {page.tables.filter((t) => t.title !== "재물 달력").map((t) => (
           <div key={t.title} aria-hidden={blurred ? "true" : undefined} className={`rounded-[14px] border border-[#2c3260] bg-[#1a1f40] px-4 pb-4 ${blurred ? BLUR : ""}`}>
