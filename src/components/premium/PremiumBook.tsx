@@ -38,6 +38,7 @@ const BAR: Record<ElementKind, string> = {
   unknown: "bg-amber-300",
 };
 
+const SCENE_BRIDGE = "일단 어려운 사주팔자 글자를 보기 전에, 네가 태어난 그 순간의 너만의 날씨 지도를 먼저 그려 줄게.";
 const GOLD = "text-[#e6c887]";
 const HAIR = "border-[#e6c887]/25";
 
@@ -740,7 +741,6 @@ function Visual({ page, report }: { page: BookPage; report: PremiumReportView })
     case "pillars":
       return (
         <div className="mb-6">
-          {page.key === "preface" && !report.compat && <DayMasterScene stem={Array.from(report.pillars.find((p) => p.key === "day")?.full ?? "")[0]} name={report.viewerName} />}
           {page.key === "preface" && (
             <p className="mb-3 text-[15px] leading-relaxed text-[#e8dfca]/85">
               태어난 <b className={GOLD}>해·달·날·시간</b>, 이 네 가지마다 글자를 위아래 두 개씩 적어. 위는 하늘의 기운(천간), 아래는 땅의 기운(지지)이야.
@@ -1128,13 +1128,26 @@ export default function PremiumBook({ report, flush = false, finale, previewBlur
 
   // 풀이는 종이 카드(2~3개 소제목)로 나누고, 카드 사이에 도리의 말풍선을 넣어요.
   // AI 편지가 있으면 같은 자리의 기본 "마무리 편지"는 빼요.
-  const cardSecs = page.letter ? page.sections.filter((x) => x.heading !== "마무리 편지") : page.sections;
+  // 서문(내 사주): 첫 소제목 뒤에 "날씨 지도를 그려 줄게" 한 문장을 잇고, 바로 그 아래에 날씨 지도(그림)를 놓아요.
+  const sceneAfterFirst = page.key === "preface" && !report.compat && !blurred && page.sections.length > 1;
+  const cardSecs0 = page.letter ? page.sections.filter((x) => x.heading !== "마무리 편지") : page.sections;
+  const cardSecs = sceneAfterFirst ? [{ ...cardSecs0[0], body: `${cardSecs0[0].body}\n\n${SCENE_BRIDGE}` }, ...cardSecs0.slice(1)] : cardSecs0;
   const perCard = cardSecs.length > 6 ? 3 : 2;
   const groups: BookPage["sections"][] = [];
-  for (let k = 0; k < cardSecs.length; k += perCard) groups.push(cardSecs.slice(k, k + perCard));
+  if (sceneAfterFirst) {
+    groups.push(cardSecs.slice(0, 1));
+    for (let k = 1; k < cardSecs.length; k += perCard) groups.push(cardSecs.slice(k, k + perCard));
+  } else {
+    for (let k = 0; k < cardSecs.length; k += perCard) groups.push(cardSecs.slice(k, k + perCard));
+  }
   const tp = titleParts(page.title);
   const mascot = mascotOf(report);
   const pic = avatarOf(mascot);
+  const sceneBlock = sceneAfterFirst ? (
+    <div className="rounded-[14px] border border-[#2c3260] bg-[#1a1f40] p-4">
+      <DayMasterScene stem={Array.from(report.pillars.find((p) => p.key === "day")?.full ?? "")[0]} name={report.viewerName} />
+    </div>
+  ) : null;
   const visualBlock = (
     <div className="rounded-[14px] border border-[#2c3260] bg-[#1a1f40] p-4 empty:hidden">
       <Visual page={page} report={report} />
@@ -1367,6 +1380,7 @@ export default function PremiumBook({ report, flush = false, finale, previewBlur
               </div>
             </div>
             </div>
+            {gi === 0 && sceneBlock}
           </div>
         ))}
 
