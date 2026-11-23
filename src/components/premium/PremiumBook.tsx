@@ -48,7 +48,7 @@ const HAIR = "border-[#e6c887]/25";
 function bold(text: string) {
   return text.split(/(\*\*[^*]+\*\*)/g).map((t, i) =>
     t.startsWith("**") && t.endsWith("**") && t.length > 4 ? (
-      <strong key={i} className="font-bold text-[#5a36a8] bg-[linear-gradient(transparent_55%,#e0c9ff_55%)]">{t.slice(2, -2)}</strong>
+      <strong key={i} className="font-bold text-[#1d1a30] bg-[linear-gradient(transparent_55%,#e0c9ff_55%)]">{t.slice(2, -2)}</strong>
     ) : (
       <span key={i}>{t}</span>
     ),
