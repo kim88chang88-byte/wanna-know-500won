@@ -554,15 +554,7 @@ function DailyRoutine({ states }: { states: Partial<Record<BodyEl, BodyState>> }
 }
 
 /** 서문: 네 기둥 이름표 + "왜 해마다/매일 다시 보나" + 도유사주 이용 안내. 모두에게 같은 글이라 AI 를 쓰지 않아요. */
-function PrefaceExtras({ report }: { report: PremiumReportView }) {
-  void report;
-  const lane: Array<[string, string]> = [
-    ["타고난 집", "내 여덟 글자 (1~3장)"],
-    ["10년의 계절", "대운"],
-    ["한 해의 날씨", "세운"],
-    ["달마다의 분위기", "월운"],
-    ["오늘 하루의 기분", "일운"],
-  ];
+function PrefaceExtras({ withLater = true }: { withLater?: boolean }) {
   return (
     <div data-testid="preface-extras" className="mt-4 space-y-3">
       <div className="flex flex-wrap justify-between gap-x-3 gap-y-1 text-[14px] text-[#e8dfca]/70">
@@ -572,6 +564,22 @@ function PrefaceExtras({ report }: { report: PremiumReportView }) {
       <p className="text-[15px] leading-relaxed text-[#e8dfca]/85">
         여덟 글자는 따로 놀지 않고 서로 돕고, 부딪히고, 어울려. 그 어울림으로 타고난 바탕과 힘이 나는 때를 읽어.
       </p>
+      {withLater && <PrefaceLater bare />}
+    </div>
+  );
+}
+
+/** 서문 끝: 왜 해마다 운세를 다시 보는지, 대운·세운·월운·일운, 매일 곁에 있는 친구 안내 */
+function PrefaceLater({ bare = false }: { bare?: boolean }) {
+  const lane: Array<[string, string]> = [
+    ["타고난 집", "내 여덟 글자 (1~3장)"],
+    ["10년의 계절", "대운"],
+    ["한 해의 날씨", "세운"],
+    ["달마다의 분위기", "월운"],
+    ["오늘 하루의 기분", "일운"],
+  ];
+  return (
+    <div data-testid="preface-later" className={bare ? "space-y-3" : "mt-4 space-y-3"}>
       <div className={`rounded-xl border-l-4 border-[#e6c887] bg-white/[0.05] px-3 py-2.5 text-[15px] font-bold leading-snug ${GOLD}`}>
         기둥은 태어날 때 한 번 세워졌는데, 왜 해마다 (그리고 매일) 운세를 다시 볼까?
       </div>
@@ -723,7 +731,7 @@ function WealthCard({ w }: { w: NonNullable<BookPage["wealth"]> }) {
   );
 }
 
-function Visual({ page, report }: { page: BookPage; report: PremiumReportView }) {
+function Visual({ page, report, laterAtEnd = false }: { page: BookPage; report: PremiumReportView; laterAtEnd?: boolean }) {
   if (page.chart) {
     const cal = page.key === "topic:money" ? page.tables.find((t) => t.title === "재물 달력") : undefined;
     return cal || page.wealth ? (
@@ -791,7 +799,7 @@ function Visual({ page, report }: { page: BookPage; report: PremiumReportView })
               태어난 시간을 몰라 정오(12시)를 기준으로 계산했어. 신강·신약, 격국, 용신은 태어난 시간에 따라 달라질 수 있어.
             </p>
           )}
-          {page.key === "preface" && <PrefaceExtras report={report} />}
+          {page.key === "preface" && <PrefaceExtras withLater={!laterAtEnd} />}
         </div>
       );
     case "c-overview":
@@ -1171,7 +1179,7 @@ export default function PremiumBook({ report, flush = false, finale, previewBlur
       : null;
   const visualBlock = (
     <div className="rounded-[14px] border border-[#2c3260] bg-[#1a1f40] p-4 empty:hidden">
-      <Visual page={page} report={report} />
+      <Visual page={page} report={report} laterAtEnd={sceneAfterFirst} />
     </div>
   );
   const curDaeun = report.daeun?.list.find((d) => d.current)?.ganzhi ?? null;
@@ -1410,6 +1418,11 @@ export default function PremiumBook({ report, flush = false, finale, previewBlur
         ))}
 
         {!blurred && page.key === "preface" && !sceneAfterFirst && visualBlock}
+        {!blurred && sceneAfterFirst && (
+          <div className="rounded-[14px] border border-[#2c3260] bg-[#1a1f40] p-4">
+            <PrefaceLater bare />
+          </div>
+        )}
 
         {page.tables.filter((t) => t.title !== "재물 달력").map((t) => (
           <div key={t.title} aria-hidden={blurred ? "true" : undefined} className={`rounded-[14px] border border-[#2c3260] bg-[#1a1f40] px-4 pb-4 ${blurred ? BLUR : ""}`}>
