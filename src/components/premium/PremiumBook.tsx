@@ -990,7 +990,7 @@ function titleParts(title: string): { small: string; main: string; sub: string }
 
 /** 3쪽 "먼저 결론부터" 쪽의 도리 말풍선(고정 문구). 서문에서 사주 기본을 본 뒤 이어지는 말이야. */
 /** 서문 첫 말풍선: 이름을 부르며 시작해요. 이름이 없으면 "안녕!" 으로 시작해요. */
-export const prefaceBubble = (name?: string | null) => `안녕${name ? ` ${callName(name)}` : ""}! 내가 너의 사주팔자에 대해서 자세하게 분석하고 풀이해 볼게~ 그 전에 사주팔자가 뭔지만 간단히 설명해 줄게.`;
+export const prefaceBubble = (name?: string | null) => `안녕${name ? ` ${callName(name)}` : ""}! 내가 너의 사주팔자에 대해서 자세하게 분석하고 풀이해 볼게~ 그 전에 사주팔자가 뭔지만 알기 쉽게 설명해 줄게.`;
 export const openingBubble = (name?: string | null) => `${name ? `${callName(name)}, ` : ""}${OPENING_BODY}`;
 const OPENING_BODY = "여기까지 사주가 뭔지, 네 사주가 어떻게 생겼는지 한눈에 봤어. 이제 네 고민부터 얘기해 볼게. 먼저 결론부터 말하고, 그다음에 분야별로 하나씩 깊게 들어가 보자. 자, 렛츠 시작! 🚀";
 

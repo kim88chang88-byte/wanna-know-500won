@@ -23,6 +23,6 @@ describe("prefaceBubble", () => {
     expect(prefaceBubble("장은혁").startsWith("안녕 은혁아! 내가 너의 사주팔자에 대해서")).toBe(true);
     expect(prefaceBubble("김하나").startsWith("안녕 하나야! ")).toBe(true);
     expect(prefaceBubble(null).startsWith("안녕! 내가")).toBe(true);
-    expect(prefaceBubble("철수")).toContain("사주팔자가 뭔지만 간단히 설명해 줄게.");
+    expect(prefaceBubble("철수")).toContain("사주팔자가 뭔지만 알기 쉽게 설명해 줄게.");
   });
 });

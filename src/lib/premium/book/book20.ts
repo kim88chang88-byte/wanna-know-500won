@@ -162,7 +162,7 @@ export function buildBook20(r: SajuResult, ctx: BookContext): BookPage[] {
     { heading: CONCERN_TOP_BRIDGE, body: `사주가 뭔지, 내 사주가 어떻게 생겼는지는 앞에서 봤고, 이 결론도 거기서 나온 거야. 이제 이 결론이 어디서 왔는지, 내 기질·운의 흐름·분야별(재물·연애·직업·건강) 이야기로 하나씩 깊게 들어가 보자. 그리고 맨 뒤 19쪽에서는 이 고민에 대한 더 길고 자세한 답을 다시 이어서 줄게. 렛츠 시작!` },
   ];
   const seq: Array<{ key: string; title: string; subtitle: string; lead: string; sections: BookSection[]; tables: BookPage["tables"]; extra?: Partial<BookPage> }> = [
-    { key: "preface", title: "서문 · 사주팔자, 쉽게 알아보기", subtitle: "PREFACE · 01", lead: "안녕! 내가 너의 사주팔자에 대해서 자세하게 분석하고 풀이해 볼게~ 그 전에 사주팔자가 뭔지만 간단히 설명해 줄게.", sections: PREFACE, tables: [] },
+    { key: "preface", title: "서문 · 사주팔자, 쉽게 알아보기", subtitle: "PREFACE · 01", lead: "안녕! 내가 너의 사주팔자에 대해서 자세하게 분석하고 풀이해 볼게~ 그 전에 사주팔자가 뭔지만 알기 쉽게 설명해 줄게.", sections: PREFACE, tables: [] },
     { ...overview, title: "서문 · 나의 사주 한눈에 보기", subtitle: "PREFACE · 02", sections: [...overview.sections, ...PREFACE2], tables: overview.tables, extra: { evidence: overview.evidence } },
     { key: "concernTop", title: "먼저 결론부터 · 네 고민에 대한 해답", subtitle: "OPENING", lead: ctx.insight.headline, sections: concernTopSections, tables: [] },
     { ...pillars, title: "제1장 · 나의 사주팔자", subtitle: "CHAPTER 1", tables: pillars.tables },
