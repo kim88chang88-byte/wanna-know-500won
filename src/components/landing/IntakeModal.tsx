@@ -1215,11 +1215,13 @@ export default function IntakeModal({ target, wallet = null, onClose, onComplete
             <div className="space-y-3">
               <label className="flex items-center justify-between gap-3 text-xs text-gray-700 leading-relaxed">
                 <span>
-                  사주를 풀려면 생년월일이랑 성별{compat ? "(상대방 것도)" : ""}이 꼭 필요해! 이 개인정보를 풀이에만 쓰려고 하는데 동의해 줄래?{" "}
+                  사주를 풀려면 생년월일이랑 성별{compat ? "(상대방 것도)" : ""}이 꼭 필요해! 태어난 시간·고민 내용을 적었다면 그것도 풀이에 쓰려고 해. 이 개인정보를 풀이에만 쓰려고 하는데 동의해 줄래?{" "}
                   (<a href="/privacy" target="_blank" rel="noopener noreferrer" className="text-brand-600 underline">개인정보처리방침 보기</a>)
-                  <span className="mt-1 block text-[11px] text-gray-500">
-                    태어난 시간·고민 내용을 적었다면 그것도 풀이에 쓰려고 해.{compat ? " 상대방 정보는 궁합 계산에만 쓰고, 아래 선택에 동의하지 않으면 서버에 저장하지 않아." : ""}
-                  </span>
+                  {compat && (
+                    <span className="mt-1 block text-[11px] text-gray-500">
+                      상대방 정보는 궁합 계산에만 쓰고, 아래 선택에 동의하지 않으면 서버에 저장하지 않아.
+                    </span>
+                  )}
                 </span>
                 <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-brand-200 bg-brand-50 px-3 py-1.5 text-[13px] font-bold text-brand-700">
                   <input
@@ -1242,7 +1244,7 @@ export default function IntakeModal({ target, wallet = null, onClose, onComplete
 
               {loggedIn && (
                 <OptRow name="saveVault" checked={saveVault} onChange={setSaveVault} pill="응">
-                  풀이를 내 보관함에 담아 둘까? 담아 두면 너가 언제든 (추가 비용 없이) 다시 볼 수 있어서 편리할 거야.
+                  풀이를 내 보관함에 담아 둘까? 담아 두면 너가 언제든 (추가 비용 없이) 다시 볼 수 있어서 편리할 거야. 직접 지우거나 탈퇴하면 함께 삭제돼.
                 </OptRow>
               )}
 
@@ -1269,8 +1271,7 @@ export default function IntakeModal({ target, wallet = null, onClose, onComplete
 
               {buildConcern(form) && (
                 <OptRow name="shareConcern" checked={shareConcern} onChange={setShareConcern} pill="좋아">
-                  적어 준 고민을 도유사주 품질 개선 통계에 써도 될까? 된다고 해 주면 도유사주가 더 좋아져서 더 나은 서비스로 돌려줄게. 생년월일은 빼고 나이대·성별만 저장할 거고,
-                  {loggedIn ? " 만약 탈퇴하면 함께 삭제될 거니까 걱정 마." : " 로그인하지 않으면 누구 것인지 알 수 없게 저장돼서 나중에 지우기 어려워."}
+                  적어 준 고민을 도유사주 품질 개선 통계에 써도 될까? 된다고 해 주면 도유사주가 더 좋아져서 더 나은 서비스로 돌려줄게. 생년월일은 빼고 나이대·성별만 저장할 거고, 탈퇴하면 삭제돼.
                 </OptRow>
               )}
             </div>
