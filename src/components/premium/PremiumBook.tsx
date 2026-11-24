@@ -1423,11 +1423,6 @@ export default function PremiumBook({ report, flush = false, finale, previewBlur
         ))}
 
         {!blurred && page.key === "preface" && !sceneAfterFirst && visualBlock}
-        {!blurred && sceneAfterFirst && (
-          <div className="rounded-[14px] border border-[#2c3260] bg-[#1a1f40] p-4">
-            <PrefaceLater bare />
-          </div>
-        )}
 
         {page.tables.filter((t) => t.title !== "재물 달력").map((t) => (
           <div key={t.title} aria-hidden={blurred ? "true" : undefined} className={`rounded-[14px] border border-[#2c3260] bg-[#1a1f40] px-4 pb-4 ${blurred ? BLUR : ""}`}>
@@ -1446,6 +1441,13 @@ export default function PremiumBook({ report, flush = false, finale, previewBlur
           <div data-testid="book-letter" aria-hidden={blurred ? "true" : undefined} className={`rounded-2xl border border-[#e6c887]/40 bg-[#e6c887]/[0.08] px-4 py-4 ${blurred ? BLUR : ""}`}>
             <p className={`text-[14px] font-bold tracking-wide ${GOLD}`}><DoriIcon className="!h-6 !w-6" />도리의 편지</p>
             <p className="mt-1.5 whitespace-pre-line font-serifKr text-[15px] leading-[1.85] text-[#fbf3de]">{fillLetterMbti(page.letter, report.mbti)}</p>
+          </div>
+        )}
+
+        {/* [참고사항](왜 해마다 운세를 다시 보는지 + 매일 곁에 있는 친구 안내)은 첫 쪽이 아니라 책의 맨 끝에서 보여 줘요. */}
+        {!blurred && !report.compat && i === pages.length - 1 && pages.some((p) => p.key === "preface" && p.sections.length > 1) && (
+          <div className="rounded-[14px] border border-[#2c3260] bg-[#1a1f40] p-4">
+            <PrefaceLater bare />
           </div>
         )}
 
