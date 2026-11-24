@@ -18,6 +18,9 @@ describe("actionIdeas", () => {
     const r = actionIdeas("아무거나", 0, 300, [/책|독서|읽/, /톡|연락|안부/]);
     r.forEach((x) => expect(/책|독서|읽|톡|연락|안부/.test(x)).toBe(false));
   });
+  it("후보에 적어 보라는 항목은 없어요", () => {
+    ACTION_POOL.forEach((x) => expect(/적어|적기|기록|메모|노트|쪽지|가계부|쓰기/.test(x)).toBe(false));
+  });
   it("후보에 폰 끄고 산책하는 항목은 없어요", () => {
     ACTION_POOL.forEach((x) => expect(/산책|알림/.test(x)).toBe(false));
   });
