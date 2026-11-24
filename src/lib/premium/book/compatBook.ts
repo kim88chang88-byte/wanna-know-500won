@@ -164,8 +164,8 @@ export function buildCompatBook(me: BookSource, other: BookSource, ctx: CompatBo
       {
         title: "두 사람의 에너지",
         rows: [
-          { label: "나", value: `${meGrade} · ${me.advanced.dayStrength.score}점` },
-          { label: "상대", value: `${otGrade} · ${other.advanced.dayStrength.score}점` },
+          { label: "나", value: meGrade },
+          { label: "상대", value: otGrade },
         ],
       },
     ],

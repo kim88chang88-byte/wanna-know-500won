@@ -165,7 +165,7 @@ export function buildBook(r: SajuResult, ctx: BookContext): BookPage[] {
         title: "핵심 요약",
         rows: [
           { label: "일주", value: `${dayPillar} (${profile.image})` },
-          { label: "에너지", value: `${ctx.gradeLabel} · ${r.advanced.dayStrength.score}점` },
+          { label: "에너지", value: ctx.gradeLabel },
           { label: "격국", value: r.advanced.geukguk },
           { label: "용신", value: yongsinNames.map((y) => `${y.stem}(${y.el})`).join(" · ") || "-" },
           { label: `${year}년 세운`, value: sy ? sy.ganzhi : "-" },
@@ -188,7 +188,7 @@ export function buildBook(r: SajuResult, ctx: BookContext): BookPage[] {
   topPage.evidence = [
     ...resonance.traitBasis,
     { label: "일주", value: `${dayPillar} · ${profile.image}` },
-    { label: "에너지", value: `${ctx.gradeLabel} (${r.advanced.dayStrength.score}점) · ${r.advanced.geukguk}` },
+    { label: "에너지", value: `${ctx.gradeLabel} · ${r.advanced.geukguk}` },
     { label: "십성 분포", value: GROUPS.map((g) => `${g} ${counts[g]}`).join(" · ") },
     { label: "오행 분포", value: elements.map((e) => `${e.name} ${e.count}`).join(" · ") },
     ...(cur ? [{ label: "지금 대운", value: `${cur.ganzhi} (${cur.startAge}~${cur.endAge}세)` }] : []),

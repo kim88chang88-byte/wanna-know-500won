@@ -135,7 +135,6 @@ export default function ManseReport({ report, hideHeadline = false, flush = fals
         <div data-testid="strength-box">
           <div className="flex flex-wrap items-center gap-2">
             <span className="rounded-full bg-brand-500 text-white font-bold text-sm px-4 py-1.5">{report.strength.grade}</span>
-            <span className="text-xs text-slate-500">강도 점수 {report.strength.score}</span>
           </div>
           {report.level === "full" && (
           <dl className="mt-4 grid grid-cols-[4.5rem_1fr] gap-y-2 text-sm">

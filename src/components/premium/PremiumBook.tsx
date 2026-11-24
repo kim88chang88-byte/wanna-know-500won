@@ -878,7 +878,6 @@ function Visual({ page, report, laterAtEnd = false }: { page: BookPage; report: 
       return (
         <div data-testid="strength-box" className="mb-6 flex flex-wrap items-center gap-2">
           <span className="rounded-full bg-[#e6c887] text-[#1b1824] font-bold text-[15px] px-4 py-1.5">{report.strength.grade}</span>
-          <span className="text-[13px] text-[#e8dfca]/70">강도 점수 {report.strength.score}</span>
           {(() => {
             const mbti = cleanMbti(report.mbti);
             const stem = report.pillars.find((p) => p.key === "day")?.full?.[0] ?? null;
