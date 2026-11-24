@@ -16,7 +16,6 @@ import {
   yongsinRoleSection,
   type PosKey,
 } from "./insight";
-import { buildLookBack, buildTraits } from "./resonance";
 import { ELEMENT_INFO, FLOW_LINE, GROUP_TRAIT, GROUPS, groupOf, type Group } from "../topic";
 import type { BookPage, BookRow, BookSection, ElementView, PillarView, TopicInsight, TopicKey } from "../types";
 import { realityCheck } from "./reality";
@@ -175,25 +174,7 @@ export function buildBook(r: SajuResult, ctx: BookContext): BookPage[] {
     ],
   );
 
-  // 1쪽에 '내 얘기 같은' 장치를 넣어요: 행동 습관 3가지(이용자가 맞는지 눌러 봐요)와 지나간 해 되짚기, 그리고 계산 근거
-  const resonance = buildTraits({ dayStem, dayImage: profile.image, dominant, dominantCount: counts[dominant], gradeLabel: ctx.gradeLabel });
-  const lookBack = buildLookBack(
-    [year - 2, year - 1].map((y) => {
-      const s = r.seyun.find((x) => x.year === y);
-      return { year: y, ganzhi: s?.ganzhi ?? "", group: s ? (groupsOf(s.tenGodStem, s.tenGodBranch)[0] ?? null) : null, god: s?.tenGodStem };
-    }).filter((y) => y.ganzhi),
-  );
-  const topPage = pages.find((p) => p.key === "concernTop") ?? pages[0];
-  topPage.sections.splice(1, 0, resonance.traits, ...(lookBack ? [lookBack] : []));
-  topPage.evidence = [
-    ...resonance.traitBasis,
-    { label: "일주", value: `${dayPillar} · ${profile.image}` },
-    { label: "에너지", value: `${ctx.gradeLabel} · ${r.advanced.geukguk}` },
-    { label: "십성 분포", value: GROUPS.map((g) => `${g} ${counts[g]}`).join(" · ") },
-    { label: "오행 분포", value: elements.map((e) => `${e.name} ${e.count}`).join(" · ") },
-    ...(cur ? [{ label: "지금 대운", value: `${cur.ganzhi} (${cur.startAge}~${cur.endAge}세)` }] : []),
-    ...(sy ? [{ label: `${year}년 세운`, value: sy.ganzhi }] : []),
-  ];
+  // 3쪽(먼저 결론부터)에는 '이런 면, 있지 않나?'·'최근 흐름 되짚어 보기'와 '이 풀이의 근거 보기'를 넣지 않아요. (buildTraits·buildLookBack 은 다른 자리에 쓸 수 있게 resonance.ts 에 남겨 둬요)
 
   // ── 2. 명식 풀이
   // 기둥 사이의 합·충·형·해·원진을 '어느 자리끼리 만났는지'로 풀어요. (제목이 관계 이름으로 시작해야 잠금 규칙에 걸려요)
