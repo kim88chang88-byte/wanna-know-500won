@@ -5,7 +5,7 @@ import { chatDori, checkRisk, cleanHistory, CRISIS_ANSWER, isCrisis } from "@/li
 import { greetingReply, isFirstAsk, withoutCrisisTurns } from "@/lib/ai/chatFlow";
 import { apologyFirst, REFUND_DAY_CAP, REFUND_NOTICE, unableReply } from "@/lib/ai/outOfScope";
 import { buildCoreFacts, factsNowFor } from "@/lib/ai/coreFacts";
-import { buildChatMemo, buildCompatMemo, buildReadingMemo, type ChatMemo } from "@/lib/ai/chatMemo";
+import { buildChatMemo, buildCompatMemo, buildMonthMemo, buildReadingMemo, MONTH_ASK, type ChatMemo } from "@/lib/ai/chatMemo";
 import { buildDailyFacts, kstToday } from "@/lib/ai/dailyFacts";
 import { ReadingUnavailableError } from "@/lib/ai/interpret";
 import { hasAiKey } from "@/lib/ai/llm";
@@ -110,7 +110,11 @@ export async function POST(request: Request) {
     // 첫 질문에는 들어온 곳에 맞는 "도리 메모"를 붙여요 (코드 계산, AI 비용 없음). 답도 이 메모를 근거로 삼아요.
     const firstAsk = isFirstAsk(history);
     let memo: ChatMemo | null = null;
-    if (firstAsk) {
+    const lastQuestion = [...history].reverse().find((m) => m.role === "user")?.text ?? "";
+    // 시기·두 갈래 질문(풀이에서 들어온 경우)에는 첫 질문이 아니어도 지금부터 몇 달의 "월운 계산" 메모를 붙여요.
+    if (ctx.kind === "reading" && MONTH_ASK.test(lastQuestion)) {
+      memo = buildMonthMemo(chart, core, now, lastQuestion);
+    } else if (firstAsk) {
       if (ctx.kind === "daily" && daily) memo = buildChatMemo(daily, kstToday(now));
       else if (ctx.kind === "compat" && partnerChart) memo = buildCompatMemo(chart, partnerChart, { me: ctx.name, partner: ctx.partnerName });
       else if (ctx.kind === "reading") memo = buildReadingMemo(chart, core, factsNowFor(ctx.topic, now));

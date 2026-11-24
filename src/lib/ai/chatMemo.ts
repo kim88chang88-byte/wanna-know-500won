@@ -1,5 +1,6 @@
 import type { CivilDate, SajuChart } from "@/lib/saju/types";
-import { buildMonthTimeline, elKoOfStem } from "@/lib/premium/book/timeline";
+import { buildMonthTimeline, elKoOfStem, monthLine } from "@/lib/premium/book/timeline";
+import { BRANCHES, STEMS } from "@/lib/saju/constants";
 import { branchRelation, tenGodOf, TEN_GOD_MOOD, type DailyFacts, type TenGod } from "./dailyFacts";
 import type { CoreFacts } from "./coreFacts";
 
@@ -36,7 +37,7 @@ const REL_WORD = { 합: "어울림", 충: "자극", 해: "서운함이 쌓이기
 const DOW = ["일", "월", "화", "수", "목", "금", "토"];
 const clamp = (n: number) => Math.max(20, Math.min(95, n));
 
-type Unit = "날" | "해";
+type Unit = "날" | "해" | "달";
 export function toneOfScore(score: number, unit: Unit = "날"): string {
   return score >= 72 ? `힘이 붙는 ${unit}` : score >= 58 ? `순항하는 ${unit}` : score >= 44 ? `차분히 점검하는 ${unit}` : `쉬어 가는 ${unit}`;
 }
@@ -141,5 +142,36 @@ export function buildCompatMemo(me: SajuChart, partner: SajuChart, names: { me?:
     score,
     tone,
     line: rel === "합" ? "가까운 자리에서 손발이 잘 맞는 사이" : rel === "충" ? "서로 다른 점이 자극이 되니, 속도를 맞추면 좋은 사이" : "서로를 알아 가며 맞춰 가기 좋은 사이",
+  };
+}
+
+
+/** 시기·두 갈래 질문인지: "다음 달까지", "연장할까 돌아갈까", "내년에 이직" 처럼 달별 흐름이 답의 근거가 되는 질문 */
+export const MONTH_ASK = /다음\s?달|이번\s?달|다다음|내년|올해\s?(안|말|남은)|연말|\d{1,2}\s?월|언제|시기|타이밍|연장|복귀|이직|퇴사|이사|계약|(할까|갈까|말까|옮길까|기다릴까|돌아갈까|남을까).{0,30}(좋을까|나을까)/;
+const MONTH_LONG = /내년|올해\s?(안|말|남은)|연말|분기|몇\s?달|개월/;
+
+const ganzhiKo = (gz: string): string => {
+  const st = STEMS.find((x) => x.hanja === gz[0]);
+  const br = BRANCHES.find((x) => x.hanja === gz[1]);
+  return st && br ? `${st.hangul}${br.hangul}(${gz})` : gz;
+};
+
+/** 시기·두 갈래 질문에 붙이는 "월운 계산" 메모: 지금부터 몇 달의 월운 간지와 십성, 그 달의 한 줄. 코드 계산이라 AI 비용이 없어요. */
+export function buildMonthMemo(chart: SajuChart, core: CoreFacts | null, at: Date, question: string): ChatMemo {
+  const natal: Record<string, string> = { year: `${chart.year.stem}${chart.year.branch}`, month: `${chart.month.stem}${chart.month.branch}`, day: `${chart.day.stem}${chart.day.branch}` };
+  if (chart.hour) natal.hour = `${chart.hour.stem}${chart.hour.branch}`;
+  const yongsinEls = [...new Set((core?.용신 ?? []).map((y) => elKoOfStem(y[0])).filter(Boolean))];
+  const count = MONTH_LONG.test(question) ? 6 : 3;
+  const plans = buildMonthTimeline({ natal, dayStem: chart.day.stem, yongsinEls, now: at, count });
+  const score = Math.round(plans.reduce((a, p) => a + p.score, 0) / plans.length);
+  const best = [...plans].sort((a, b) => b.score - a.score || a.index - b.index)[0];
+  const first = plans[0];
+  return {
+    title: "월운 계산",
+    rows: plans.map((p): [string, string] => [`${p.month}월경`, `${ganzhiKo(p.ganzhi)} · ${p.stemGod}/${p.branchGod}`]),
+    scoreLabel: `앞으로 ${plans.length}개월 흐름 지수`,
+    score,
+    tone: toneOfScore(score, "달"),
+    line: best.index === first.index ? `지금 ${first.month}월경이 가장 힘이 붙는 때 · ${monthLine(first)}` : `${best.month}월경이 가장 힘이 붙는 달 · ${monthLine(best)}`,
   };
 }

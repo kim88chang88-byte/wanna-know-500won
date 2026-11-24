@@ -83,3 +83,25 @@ describe("풀이·궁합 메모", () => {
     expect(a.rows[0][1]).toContain("나");
   });
 });
+
+import { buildMonthMemo, MONTH_ASK } from "../ai/chatMemo";
+describe("월운 계산 메모", () => {
+  const chart = { year: { stem: "戊", branch: "辰" }, month: { stem: "甲", branch: "子" }, day: { stem: "戊", branch: "午" }, hour: { stem: "丁", branch: "巳" }, solarDate: { year: 1990, month: 1, day: 1 }, uncertainPillars: [] } as never;
+  const core = { 신강신약: "x", 용신: ["丙(병)"] } as never;
+  it("시기·두 갈래 질문만 골라요", () => {
+    expect(MONTH_ASK.test("파견 중인데 다음달까지야. 연장하는게 좋을까 돌아가는게 좋을까")).toBe(true);
+    expect(MONTH_ASK.test("내년에 이직해도 될까")).toBe(true);
+    expect(MONTH_ASK.test("오늘 기분이 별로야")).toBe(false);
+  });
+  it("지금부터 몇 달의 간지·십성을 만들고, 긴 기간 질문은 더 길게 보여요", () => {
+    const at = new Date("2026-11-25T00:00:00+09:00");
+    const short = buildMonthMemo(chart, core, at, "다음 달에 말해도 될까");
+    expect(short.title).toBe("월운 계산");
+    expect(short.rows).toHaveLength(3);
+    expect(short.rows[0][0]).toBe("11월경");
+    expect(short.rows[0][1]).toContain("기해(己亥)");
+    expect(short.rows[1][1]).toContain("경자(庚子)");
+    expect(short.tone.endsWith("달")).toBe(true);
+    expect(buildMonthMemo(chart, core, at, "내년까지 어떻게 될까").rows).toHaveLength(6);
+  });
+});
