@@ -172,6 +172,7 @@ describe("끝맺음 반복 막기", () => {
   it("프롬프트에 직전 끝맺음 경고가 들어가고, 시스템 프롬프트에 질문 종류별 규칙이 있어요", () => {
     expect(CHAT_SYSTEM_PROMPT).toContain("마음이 힘들다는 말");
     expect(CHAT_SYSTEM_PROMPT).toContain("인사·짧은 안부");
+    expect(CHAT_SYSTEM_PROMPT).toContain("두 갈래 고르기 질문");
     expect(CHAT_SYSTEM_PROMPT).toContain("구체적으로");
     expect(recentEndings(h).length).toBeGreaterThan(10);
   });
