@@ -1202,6 +1202,8 @@ export default function PremiumBook({ report, flush = false, finale, previewBlur
           yearGanzhi: report.seyun?.ganzhi ?? null,
         })
       : null;
+  // 5쪽(일주 분석): AI 한 줄 대신 "앞에서 세운 네 기둥 가운데 ‘나’를 뜻하는 건 일주 ○○야…" 이음 말을 말풍선에 넣어요.
+  const nature5Opening = page.key === "nature" && opening ? opening : null;
 
   return (
     <div
@@ -1308,10 +1310,10 @@ export default function PremiumBook({ report, flush = false, finale, previewBlur
 
         {/* 도리 한 마리에 말풍선 하나: AI 한 줄이 있으면 그것을, 없으면 쪽 첫 문장을 보여. */}
         <div data-testid={page.key === "concernTop" ? "book-opening" : page.note ? "book-note" : "book-lead"}>
-          <BubbleRow text={page.key === "concernTop" ? openingBubble(report.viewerName) : page.key === "preface" ? prefaceBubble(report.viewerName) : page.note ? dropLight(page.note) : page.lead} img={pic} />
+          <BubbleRow text={nature5Opening ?? (page.key === "concernTop" ? openingBubble(report.viewerName) : page.key === "preface" ? prefaceBubble(report.viewerName) : page.note ? dropLight(page.note) : page.lead)} img={pic} />
         </div>
 
-        {opening && (
+        {opening && !nature5Opening && (
           <p data-testid="chapter-opening" className="-mt-1 px-1 text-center text-[14.5px] leading-relaxed text-[#e6c887]/90">
             {opening}
           </p>
