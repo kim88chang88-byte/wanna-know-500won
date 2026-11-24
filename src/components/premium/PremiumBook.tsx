@@ -566,7 +566,7 @@ function PrefaceExtras({ withLater = true }: { withLater?: boolean }) {
         <span>여덟 글자 = <b className={GOLD}>팔자 八字</b></span>
       </div>
       <p className="text-[15px] leading-relaxed text-[#e8dfca]/85">
-        여덟 글자는 따로 놀지 않고 서로 돕고, 부딪히고, 어울려. 그 어울림으로 타고난 바탕과 힘이 나는 때를 읽어.
+        여덟 글자는 따로 놀지 않고 서로 돕고, 부딪히고, 어울려. 그 어울림으로 타고난 바탕과 힘이 나는 때를 읽어 나갈 거야.
       </p>
       {withLater && <PrefaceLater bare />}
     </div>
