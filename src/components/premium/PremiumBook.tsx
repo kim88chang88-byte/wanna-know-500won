@@ -1499,7 +1499,6 @@ export default function PremiumBook({ report, flush = false, finale, previewBlur
           다음 ›
         </button>
       </div>
-      <p className="mt-4 text-center text-[13px] leading-relaxed text-[#8f95c0]">명리학의 일반적인 관점으로 풀어 쓴 재미와 참고용 해석이야.</p>
     </div>
   );
 }
