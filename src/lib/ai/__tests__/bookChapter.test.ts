@@ -53,10 +53,13 @@ describe("장 구성", () => {
       expect(heads).toBeLessThanOrEqual(40);
     }
   });
-  it("모든 장은 마무리 소제목 두 개로 끝나고 소제목마다 역할이 있어요", () => {
+  it("모든 장은 정해진 마무리 소제목으로 끝나고 소제목마다 역할이 있어요", () => {
     for (const [k, spec] of Object.entries(CHAPTER_SPECS)) {
       const heads = spec.parts.flatMap((p) => p.headings);
-      expect(heads.slice(-2), k).toEqual(k === "concernTop" ? ["가장 먼저 해볼 일", "이제 차근차근 풀어 줄게"] : ["이렇게 해보자", "한 줄 마무리"]);
+      // 실천 목록('이렇게 해보자')은 제1장(pillars)에서는 빼고 고민 답 장(concern)에서만 줘요.
+      const tailHeads = k === "pillars" ? ["한 줄 마무리"] : k === "concernTop" ? ["가장 먼저 해볼 일", "이제 차근차근 풀어 줄게"] : ["이렇게 해보자", "한 줄 마무리"];
+      expect(heads.slice(-tailHeads.length), k).toEqual(tailHeads);
+      if (k === "pillars") expect(heads, k).not.toContain("이렇게 해보자");
       expect(spec.roles.map(([h]) => h), k).toEqual(heads);
     }
   });
