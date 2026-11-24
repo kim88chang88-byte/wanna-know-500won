@@ -8,6 +8,7 @@ import { MSG_MAX, TURN_CAP, type ChatCtx, type ChatKind, type ChatMsg } from "@/
 import type { RoomMsg } from "@/lib/chatRooms";
 import { chunkAnswer, plainAnswer, splitElements, splitMood } from "@/lib/chatMarkup";
 import type { ChatMemo } from "@/lib/ai/chatMemo";
+import PopularSheet from "@/components/chat/PopularSheet";
 import VisualCard from "@/components/chat/VisualCard";
 import type { ChatVisual } from "@/lib/ai/chat";
 import { buildIntro, type IntroBubble } from "@/lib/chatIntro";
@@ -192,6 +193,7 @@ export default function ChatApp({ initialCtx, initialMsgs, onChange, onBack, rea
   /** 서버가 알려 주는 남은 질문 수 (아직 모르면 null) 와 내 조약돌 수 */
   const [left, setLeft] = useState<number | null>(null);
   const [coins, setCoins] = useState(0);
+  const [popOpen, setPopOpen] = useState(false);
   const [buyOpen, setBuyOpen] = useState(false);
   const [buying, setBuying] = useState(false);
   const [payOpen, setPayOpen] = useState(false);
@@ -704,6 +706,13 @@ export default function ChatApp({ initialCtx, initialMsgs, onChange, onBack, rea
             </button>
           )}
         </div>
+        {leftNow > 0 && (
+          <div className="mx-1 mb-2">
+            <button type="button" onClick={() => setPopOpen(true)} className="min-h-[36px] rounded-full border border-[#f0c6dc] bg-[#fdeef6] px-3.5 text-[13px] font-bold text-[#b03a78] active:scale-95">
+              🔥 인기질문
+            </button>
+          </div>
+        )}
         <div className="flex items-end gap-2">
           <textarea
             ref={field}
@@ -733,6 +742,16 @@ export default function ChatApp({ initialCtx, initialMsgs, onChange, onBack, rea
         </div>
         {input.length > MSG_MAX - 60 && <p className="mr-2 mt-1 text-right text-[10px] text-[#a99bd0]">{input.length}/{MSG_MAX}</p>}
       </form>
+      )}
+      {popOpen && (
+        <PopularSheet
+          onClose={() => setPopOpen(false)}
+          onPick={(q) => {
+            setInput(q.slice(0, MSG_MAX));
+            setPopOpen(false);
+            setTimeout(() => field.current?.focus(), 0);
+          }}
+        />
       )}
       {buyOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 px-6" onClick={() => !buying && setBuyOpen(false)}>
