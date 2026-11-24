@@ -1423,7 +1423,7 @@ export default function PremiumBook({ report, flush = false, finale, previewBlur
 
         {!blurred && page.key === "preface" && !sceneAfterFirst && visualBlock}
 
-        {page.tables.filter((t) => t.title !== "재물 달력").map((t) => (
+        {page.tables.filter((t) => t.title !== "재물 달력" && !(page.key === "pillars" && t.title === "사주 원국")).map((t) => (
           <div key={t.title} aria-hidden={blurred ? "true" : undefined} className={`rounded-[14px] border border-[#2c3260] bg-[#1a1f40] px-4 pb-4 ${blurred ? BLUR : ""}`}>
             <Table t={t} />
           </div>
