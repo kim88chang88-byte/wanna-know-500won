@@ -886,9 +886,25 @@ function Visual({ page, report, laterAtEnd = false }: { page: BookPage; report: 
             return (
               <div data-testid="nature-mbti" className="mt-3 w-full rounded-xl bg-white/[0.06] px-3 py-2.5 text-[14.5px] leading-relaxed text-[#e8dfca]/90">
                 <b className={GOLD}>사주와 MBTI, 나란히 보면</b>
-                <div className="mt-1">🔮 사주가 말하는 나: {DAYMASTER_BRIEF[el]}</div>
-                <div>🧩 MBTI({mbti})가 말하는 나: {MBTI_BRIEF[mbti]}</div>
-                <p className="mt-1 text-[13px] text-[#e8dfca]/65">두 가지가 같은 말을 하는 곳은 진짜 내 모습일 가능성이 높고, 다른 말을 하는 곳은 상황에 따라 달라지는 모습일 수 있어.</p>
+                <table className="mt-2 w-full border-collapse text-left text-[14px]">
+                  <thead>
+                    <tr className={`border-b ${HAIR} text-[12.5px] text-[#e8dfca]/70`}>
+                      <th scope="col" className="w-[84px] py-1.5 pr-2 font-bold">구분</th>
+                      <th scope="col" className="py-1.5 font-bold">말하는 나</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr className={`border-b ${HAIR}`}>
+                      <th scope="row" className="py-2 pr-2 align-top font-bold">🔮 사주</th>
+                      <td className="py-2">{DAYMASTER_BRIEF[el]}</td>
+                    </tr>
+                    <tr>
+                      <th scope="row" className="py-2 pr-2 align-top font-bold">🧩 MBTI<br />({mbti})</th>
+                      <td className="py-2">{MBTI_BRIEF[mbti]}</td>
+                    </tr>
+                  </tbody>
+                </table>
+                <p className="mt-2 text-[13px] text-[#e8dfca]/65">두 가지가 같은 말을 하는 곳은 진짜 내 모습일 가능성이 높고, 다른 말을 하는 곳은 상황에 따라 달라지는 모습일 수 있어.</p>
               </div>
             );
           })()}
