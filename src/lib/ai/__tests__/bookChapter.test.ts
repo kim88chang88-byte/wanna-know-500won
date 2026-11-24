@@ -53,13 +53,17 @@ describe("장 구성", () => {
       expect(heads).toBeLessThanOrEqual(40);
     }
   });
-  it("모든 장은 정해진 마무리 소제목으로 끝나고 소제목마다 역할이 있어요", () => {
+  it("장마다 실천 목록·한 줄 마무리가 정해진 곳에만 있고 소제목마다 역할이 있어요", () => {
     for (const [k, spec] of Object.entries(CHAPTER_SPECS)) {
       const heads = spec.parts.flatMap((p) => p.headings);
-      // 실천 목록('이렇게 해보자')은 제1장(pillars)에서는 빼고 고민 답 장(concern)에서만 줘요.
-      const tailHeads = k === "pillars" ? ["한 줄 마무리"] : k === "concernTop" ? ["가장 먼저 해볼 일", "이제 차근차근 풀어 줄게"] : ["이렇게 해보자", "한 줄 마무리"];
-      expect(heads.slice(-tailHeads.length), k).toEqual(tailHeads);
-      if (k === "pillars") expect(heads, k).not.toContain("이렇게 해보자");
+      // 실천 목록('이렇게 해보자')은 분야 장·고민 답 장에만, '한 줄 마무리'는 분야 장·마지막 쪽에만 있어요.
+      const topics = ["topic:money", "topic:love", "topic:career", "topic:health"];
+      if (k === "concernTop") expect(heads.slice(-2), k).toEqual(["가장 먼저 해볼 일", "이제 차근차근 풀어 줄게"]);
+      else {
+        expect(heads.includes("이렇게 해보자"), k).toBe([...topics, "concern"].includes(k));
+        expect(heads.includes("한 줄 마무리"), k).toBe([...topics, "lucky"].includes(k));
+        if (topics.includes(k)) expect(heads.slice(-2), k).toEqual(["이렇게 해보자", "한 줄 마무리"]);
+      }
       expect(spec.roles.map(([h]) => h), k).toEqual(heads);
     }
   });

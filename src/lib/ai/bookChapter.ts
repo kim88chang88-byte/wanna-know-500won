@@ -573,6 +573,27 @@ Object.assign(CHAPTER_SPECS, {
 
 /** 동시에 보낼 AI 호출 수. 한꺼번에 너무 많이 보내면 429(요청 한도)가 나요. */
 const POOL = 40;
+/*
+ * 쪽마다 실천 목록과 한 줄 마무리가 붙으면 흐름이 끊기고 비슷한 말이 되풀이돼요.
+ * '이렇게 해보자'(실천 목록)는 분야 장(재물·연애·직업·건강)과 고민 답 장에만,
+ * '한 줄 마무리'는 분야 장과 마지막 쪽(슬로건·편지)에만 쓰고, 나머지 장은 AI 가 아예 쓰지 않게 소제목에서 빼요.
+ */
+const TOPIC_KEYS = ["topic:money", "topic:love", "topic:career", "topic:health"];
+const KEEP_ACTION = new Set([...TOPIC_KEYS, "concern"]);
+const KEEP_CLOSING = new Set([...TOPIC_KEYS, "lucky"]);
+for (const key of Object.keys(CHAPTER_SPECS)) {
+  const drop = new Set<string>();
+  if (!KEEP_ACTION.has(key)) drop.add("이렇게 해보자");
+  if (!KEEP_CLOSING.has(key)) drop.add("한 줄 마무리");
+  if (drop.size === 0) continue;
+  const spec = CHAPTER_SPECS[key];
+  CHAPTER_SPECS[key] = {
+    ...spec,
+    parts: spec.parts.map((p) => ({ ...p, headings: p.headings.filter((h) => !drop.has(h)) })).filter((p) => p.headings.length > 0),
+    roles: spec.roles.filter(([h]) => !drop.has(h)).map(([h, r]): [string, string] => [h, drop.has("이렇게 해보자") ? r.replace(/'이렇게 해보자'에 남겨 둬/g, "쓰지 마(행동 제안은 뒤의 분야 장과 고민 답 장에서 다뤄)") : r]),
+  };
+}
+
 let active = 0;
 let ramp = 0;
 const waiters: Array<() => void> = [];
