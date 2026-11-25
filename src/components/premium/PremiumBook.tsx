@@ -1,6 +1,6 @@
 "use client";
 
-import { BRIDGES, chapterOpening, sectionLink } from "@/lib/premium/flow";
+import { BRIDGES, chapterOpening, elementFocus, sectionLink } from "@/lib/premium/flow";
 import { softToDeep } from "@/lib/premium/deepTone";
 import { getBrowserStorage } from "@/lib/drawCounter";
 import { readRealityPick, saveRealityPick } from "@/lib/realityPick";
@@ -29,15 +29,6 @@ import { BODY_GROUPS, STATE_SHORT, STATE_TEXT, bodyElName, bodyStates, bodyWhy, 
  * 프리미엄 20페이지 리포트 리더. 한 번에 한 페이지씩 넘겨 보는 고급스러운 책 형태예요.
  * 색: 미드나잇 + 샴페인 골드. 글씨는 항상 충분히 밝은 대비를 유지해요.
  */
-
-const BAR: Record<ElementKind, string> = {
-  wood: "bg-emerald-400",
-  fire: "bg-rose-400",
-  earth: "bg-amber-400",
-  metal: "bg-slate-300",
-  water: "bg-blue-400",
-  unknown: "bg-amber-300",
-};
 
 const SCENE_BRIDGE = "일단 사주팔자 글자를 보기 전에, 네가 태어난 그 순간의 너만의 날씨 지도를 먼저 그려 줄게.";
 const GOLD = "text-[#e6c887]";
@@ -736,6 +727,67 @@ function WealthCard({ w }: { w: NonNullable<BookPage["wealth"]> }) {
   );
 }
 
+const STONE_PATH: Record<string, string> = {
+  목: "M12 2.5c-4.2 4-6.5 7.2-6.5 10.4a6.5 6.5 0 0 0 13 0c0-3.2-2.3-6.4-6.5-10.4zM12 8v13",
+  화: "M12 2c1 4 5 6 5 11a5 5 0 0 1-10 0c0-2 1-3 2-4 0 2 1 3 2 3 0-4-1-6 1-10z",
+  토: "M2 20l7-12 4 7 3-4 6 9z",
+  금: "M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8z",
+  수: "M12 2.5c4.2 5 6.5 8.2 6.5 11.4a6.5 6.5 0 0 1-13 0c0-3.2 2.3-6.4 6.5-11.4z",
+};
+const STONE_COLOR: Record<string, string> = { 목: "#5fbf6a", 화: "#f06a4a", 토: "#e0a93c", 금: "#cdd6e4", 수: "#5aa2f5" };
+const STONE_EASY: Record<string, string> = { 목: "나무", 화: "불", 토: "땅", 금: "쇠", 수: "물" };
+
+/** 오행 분포: 기운마다 돌을 개수만큼 쌓아서 한눈에 보여 줘요. 0개는 점선 빈 자리. */
+function ElementStones({ report }: { report: PremiumReportView }) {
+  const dayStem = report.pillars.find((p) => p.key === "day")?.full?.[0] ?? "";
+  const focus = elementFocus(report.elements, dayStem, report.yongsin);
+  const order = ["목", "화", "토", "금", "수"];
+  const list = order.map((n) => report.elements.find((e) => e.name === n)).filter((e): e is NonNullable<typeof e> => !!e);
+  const lows = list.filter((e) => e.count === 0).map((e) => STONE_EASY[e.name]);
+  const caption = [
+    "돌이 많이 쌓인 기운이 강한 기운이야.",
+    focus.center ? `개수가 같아도 ‘나 자신’을 뜻하는 ${STONE_EASY[focus.center]} 기운이 중심이야.` : "",
+    focus.need ? `${lows.length > 1 ? "빈 자리 중엔" : "비어 있는 것 중엔"} ${STONE_EASY[focus.need]}가 더 필요해.` : "",
+  ].filter(Boolean).join(" ");
+  const summary = list.map((e) => `${STONE_EASY[e.name]} ${e.count}개`).join(", ");
+  return (
+    <div className="mb-6">
+      <div data-testid="element-stones" role="img" aria-label={summary} className="flex items-end justify-between rounded-[20px] border border-[#2c3366] bg-[#1a1f40] px-2.5 pb-4 pt-4">
+        {list.map((e) => {
+          const color = STONE_COLOR[e.name] ?? "#e6c887";
+          const isCenter = focus.center === e.name;
+          const isNeed = focus.need === e.name;
+          return (
+            <div key={e.name} data-testid="element-row" className="flex w-[18%] min-w-0 flex-col items-center gap-1.5">
+              <div
+                className="min-h-[20px] whitespace-nowrap rounded-[9px] px-1.5 py-0.5 text-[11.5px] font-bold text-[#12132b]"
+                style={{ background: isCenter ? "#f1d8a0" : isNeed ? "#9be3a3" : "transparent", opacity: isCenter || isNeed ? 1 : 0 }}
+              >
+                {isCenter ? "나의 중심" : isNeed ? "더 필요" : "\u00a0"}
+              </div>
+              <div className="flex h-[150px] flex-col-reverse items-center gap-1 pb-0.5">
+                {e.count === 0 ? (
+                  <div className="h-[46px] w-[46px] rounded-full border-[1.5px] border-dashed border-[#4a5290] opacity-70" />
+                ) : (
+                  Array.from({ length: e.count }, (_, i) => (
+                    <div key={i} className="flex h-[46px] w-[46px] items-center justify-center rounded-full bg-[#232a55]" style={{ border: `1.5px solid ${color}` }}>
+                      <svg width="26" height="26" viewBox="0 0 24 24" aria-hidden="true"><path d={STONE_PATH[e.name]} fill={color} stroke={color} strokeWidth="1.4" strokeLinejoin="round" /></svg>
+                    </div>
+                  ))
+                )}
+              </div>
+              <div className="h-[1.5px] w-full bg-[#3a4380]" />
+              <div className={`text-[15px] font-bold ${GOLD}`}>{elName(e.name)}</div>
+              <div className="text-[18px] font-bold leading-none text-[#f5efe0]">{e.count}<span className="text-[11px] font-normal text-[#e8dfca]/70">개</span></div>
+            </div>
+          );
+        })}
+      </div>
+      <p className="mt-2 px-1 text-[13px] leading-relaxed text-[#e8dfca]/80">{caption}</p>
+    </div>
+  );
+}
+
 function Visual({ page, report, laterAtEnd = false }: { page: BookPage; report: PremiumReportView; laterAtEnd?: boolean }) {
   if (page.chart) {
     const cal = page.key === "topic:money" ? page.tables.find((t) => t.title === "재물 달력") : undefined;
@@ -749,7 +801,6 @@ function Visual({ page, report, laterAtEnd = false }: { page: BookPage; report: 
       <LifeChart chart={page.chart} />
     );
   }
-  const max = Math.max(1, ...report.elements.map((e) => e.count));
   switch (page.key) {
     case "preface":
     case "pillars":
@@ -911,19 +962,7 @@ function Visual({ page, report, laterAtEnd = false }: { page: BookPage; report: 
         </div>
       );
     case "elements":
-      return (
-        <ul className="mb-6 space-y-3">
-          {report.elements.map((e) => (
-            <li key={e.name} data-testid="element-row" className="flex items-center gap-3">
-              <span className={`w-10 shrink-0 text-center text-[13px] font-bold rounded-full py-1 border ${HAIR} ${GOLD}`}>{elName(e.name)}</span>
-              <div className="flex-1 h-2.5 rounded-full bg-white/10 overflow-hidden" role="img" aria-label={`${elName(e.name)} ${e.count}`}>
-                <div className={`h-full rounded-full ${BAR[e.kind]}`} style={{ width: `${(e.count / max) * 100}%` }} />
-              </div>
-              <span className="w-6 text-right text-[15px] font-bold text-[#f5efe0] tabular-nums">{e.count}</span>
-            </li>
-          ))}
-        </ul>
-      );
+      return <ElementStones report={report} />;
     case "geukguk":
       return (
         <dl className="mb-6 grid grid-cols-[4rem_1fr] gap-y-2 text-[15px]">
