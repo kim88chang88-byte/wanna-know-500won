@@ -319,28 +319,54 @@ function MonthBars({ table }: { table: BookTable }) {
   );
 }
 
-/** 십성 막대: 5가지 기운 중 어디에 힘이 실려 있는지 (오행 막대와 같은 모양) */
+const GOD_HANJA: Record<string, string> = { 비겁: "比", 식상: "食", 재성: "財", 관성: "官", 인성: "印" };
+
+/** 십성 돌 한 개: 어두운 남색 타일에 금빛 한자. 가장 두드러진 묶음은 금빛으로 채워 */
+function GodStone({ label, hot }: { label: string; hot: boolean }) {
+  return (
+    <div
+      className={`relative flex h-[48px] w-[48px] items-center justify-center overflow-hidden rounded-[15px] shadow-[0_3px_6px_rgba(0,0,0,0.45)] ring-1 ${hot ? "bg-gradient-to-br from-[#f6e2ae] to-[#c99f52] ring-white/40" : "bg-gradient-to-br from-[#2d3466] to-[#1d2247] ring-[#e6c887]/35"}`}
+    >
+      <div aria-hidden="true" className="absolute inset-x-0 top-0 h-1/3 bg-gradient-to-b from-white/25 to-transparent" />
+      <span aria-hidden="true" className={`font-serifKr text-[24px] font-black leading-none ${hot ? "text-[#3a2a07]" : "text-[#e6c887]"}`}>{GOD_HANJA[label] ?? label[0]}</span>
+    </div>
+  );
+}
+
+/** 십성 돌 쌓기: 5가지 기운마다 돌을 개수만큼 쌓아서 어디에 힘이 실려 있는지 보여 줘요 (오행 분포와 같은 모양) */
 function GodBars({ table }: { table: BookTable }) {
   const rows = table.rows.map((r) => ({ ...r, n: r.locked ? 0 : Number(r.value.match(/\d+/)?.[0] ?? 0) }));
   if (rows.length === 0) return null;
-  const max = Math.max(1, ...rows.map((r) => r.n));
+  const hotRows = rows.filter((r) => r.highlight && !r.locked && r.n > 0);
   return (
-    <div data-testid="god-bars">
+    <div data-testid="god-bars" className="mb-2">
       <p className={`text-[14px] font-bold tracking-[0.12em] ${GOLD}`}>내가 가진 기운의 크기</p>
-      <ul className="mt-3 space-y-3">
-        {rows.map((r) => (
-          <li key={r.label} data-testid="god-row">
-            <div className="flex items-center gap-3">
-              <span className={`w-12 shrink-0 rounded-full border py-1 text-center text-[13px] font-bold ${HAIR} ${GOLD}`}>{r.label}</span>
-              <div className="h-2.5 flex-1 overflow-hidden rounded-full bg-white/10" role="img" aria-label={`${r.label} ${r.n}`}>
-                <div className={`h-full rounded-full ${r.highlight ? "bg-gradient-to-r from-[#f0d9a0] to-[#d3ac62]" : "bg-[#e6c887]/60"}`} style={{ width: `${(r.n / max) * 100}%` }} />
+      <div role="img" aria-label={rows.map((r) => `${r.label} ${r.locked ? "잠김" : r.n}`).join(", ")} className="mt-3 flex items-end justify-between rounded-[20px] border border-[#2c3366] bg-[#1a1f40] px-2.5 pb-4 pt-4">
+        {rows.map((r) => {
+          const hot = r.highlight === true && !r.locked && r.n > 0;
+          return (
+            <div key={r.label} data-testid="god-row" className="flex w-[18%] min-w-0 flex-col items-center gap-1.5">
+              <div className="flex min-h-[110px] flex-col-reverse items-center gap-1 pb-0.5">
+                {r.locked ? (
+                  <div className="flex h-[48px] w-[48px] items-center justify-center rounded-[15px] border-[1.5px] border-dashed border-[#4a5290] text-[16px] opacity-70">🔒</div>
+                ) : r.n === 0 ? (
+                  <div className="h-[48px] w-[48px] rounded-[15px] border-[1.5px] border-dashed border-[#4a5290] opacity-70" />
+                ) : (
+                  Array.from({ length: r.n }, (_, i) => <GodStone key={i} label={r.label} hot={hot} />)
+                )}
               </div>
-              <span className="w-6 text-right text-[15px] font-bold tabular-nums text-[#f5efe0]">{r.locked ? "🔒" : r.n}</span>
+              <div className="h-[1.5px] w-full bg-[#3a4380]" />
+              <div className={`text-[14px] font-bold ${GOLD}`}>{r.label}</div>
+              <div className="text-[18px] font-bold leading-none text-[#f5efe0]">{r.locked ? "🔒" : r.n}<span className="text-[11px] font-normal text-[#e8dfca]/70">{r.locked ? "" : "개"}</span></div>
             </div>
-            {r.highlight && !r.locked && r.note && <p className="ml-[3.75rem] mt-1 text-[13px] text-[#e8dfca]/70">{r.note} · 가장 두드러져</p>}
-          </li>
-        ))}
-      </ul>
+          );
+        })}
+      </div>
+      {hotRows.map((r) => r.note && (
+        <p key={r.label} className="mt-2 px-1 text-[13px] leading-relaxed text-[#e8dfca]/80">
+          <b className={GOLD}>{r.label}</b>이 가장 두드러져 · {r.note}
+        </p>
+      ))}
     </div>
   );
 }
@@ -1429,7 +1455,7 @@ export default function PremiumBook({ report, flush = false, finale, previewBlur
         {page.explainer && !blurred && (
           <aside data-testid="book-explainer" className="rounded-[14px] border border-[#e6c887]/40 bg-[#e6c887]/[0.07] px-4 py-3.5">
             <p className={`text-[14px] font-bold tracking-[0.12em] ${GOLD}`}>{page.explainer.title}</p>
-            <p className="mt-2 text-[15px] leading-[1.7] text-[#f3ecdc]">{page.explainer.body}</p>
+            <p className="mt-2 whitespace-pre-line text-[15px] leading-[1.7] text-[#f3ecdc]">{page.explainer.body}</p>
           </aside>
         )}
 
