@@ -10,7 +10,7 @@ import ConcernCard from "./ConcernCard";
 import { josa } from "@/lib/premium/josa";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { checkMessage } from "@/lib/premium/book/resonance";
-import type { BookChart, BookPage, BookRow, BookTable, ElementKind, PremiumReportView, RealityCheck } from "@/lib/premium/types";
+import type { BookChart, BookPage, BookRow, BookTable, PremiumReportView, RealityCheck } from "@/lib/premium/types";
 import { elementOfChar, elName } from "@/lib/elementColor";
 import ElementTile from "@/components/ElementTile";
 import DayMasterScene, { CAPTION as DAY_MASTER_CAPTION } from "./DayMasterScene";
