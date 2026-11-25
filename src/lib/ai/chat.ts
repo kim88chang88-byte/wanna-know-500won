@@ -588,7 +588,7 @@ export async function chatDori(
   const q = [...history].reverse().find((m) => m.role === "user")?.text ?? "";
   // 분량 보강: 모델이 길이 지침을 무시하고 짧게 쓴 평범한 답은 한 번만 더 길게 써 달라고 해요 (되묻기·위로·거절·위기 표시는 짧아도 돼요).
   const firstAskNow = !history.some((m) => m.role === "dori" && m.text.length > 60);
-  const minLen = firstAskNow ? 380 : 250;
+  const minLen = firstAskNow ? 300 : 200;
   if (!r.unable && !r.risk && r.choices.length === 0 && !r.answer.trimStart().startsWith("🤍") && q.trim().length >= 8 && r.answer.length < minLen) {
     try {
       const more = await ask(

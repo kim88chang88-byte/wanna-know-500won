@@ -322,7 +322,7 @@ export default function ChatApp({ initialCtx, initialMsgs, onChange, onBack, rea
       setTyping(null);
       return;
     }
-    const id = setTimeout(() => setTyping((t) => (t ? { ...t, shown: Math.min(len, t.shown + 1) } : t)), 750);
+    const id = setTimeout(() => setTyping((t) => (t ? { ...t, shown: Math.min(len, t.shown + 1) } : t)), 400);
     return () => clearTimeout(id);
   }, [typing, msgs]);
 
