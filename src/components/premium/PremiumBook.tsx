@@ -1376,7 +1376,8 @@ export default function PremiumBook({ report, flush = false, finale, previewBlur
 
         {page.explainer && !blurred && (
           <aside data-testid="book-explainer" className="rounded-[14px] border border-[#e6c887]/40 bg-[#e6c887]/[0.07] px-4 py-3.5">
-            <p className="text-[15px] leading-[1.7] text-[#f3ecdc]">{page.explainer.body}</p>
+            <p className={`text-[14px] font-bold tracking-[0.12em] ${GOLD}`}>{page.explainer.title}</p>
+            <p className="mt-2 text-[15px] leading-[1.7] text-[#f3ecdc]">{page.explainer.body}</p>
           </aside>
         )}
 
