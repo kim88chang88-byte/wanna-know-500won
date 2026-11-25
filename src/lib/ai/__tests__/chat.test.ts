@@ -180,6 +180,12 @@ describe("끝맺음 반복 막기", () => {
     expect(CHAT_SYSTEM_PROMPT).toContain("마음이 힘들다는 말");
     expect(CHAT_SYSTEM_PROMPT).toContain("인사·짧은 안부");
     expect(CHAT_SYSTEM_PROMPT).toContain("두 갈래 고르기 질문");
+    // 11-25 점검: 주제별 행동 안내가 "점수 매기기·숫자로 적기·표 적기"를 직접 시키던 문장은 없어야 해요
+    expect(CHAT_SYSTEM_PROMPT).not.toContain("점수 매겨 보라는 행동");
+    expect(CHAT_SYSTEM_PROMPT).not.toContain("숫자로 정해 적고");
+    expect(CHAT_SYSTEM_PROMPT).not.toContain("표로 한 장 적어");
+    expect(CHAT_SYSTEM_PROMPT).not.toContain("두 줄로 쓰기");
+    expect(CHAT_SYSTEM_PROMPT).toContain("집안일 후보를 고르지 마");
     expect(CHAT_SYSTEM_PROMPT).toContain("구체적으로");
     expect(recentEndings(h).length).toBeGreaterThan(10);
   });
