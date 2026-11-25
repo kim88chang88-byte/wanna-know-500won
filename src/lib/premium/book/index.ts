@@ -244,21 +244,21 @@ export function buildBook(r: SajuResult, ctx: BookContext): BookPage[] {
 
   // ── 4. 오행 균형
   const topEls = elements.filter((e) => e.count === highest.count);
+  const lowEls = elements.filter((e) => e.count === lowest.count);
+  const lowNames = lowEls.map((e) => e.name).join("·");
   add(
     "elements",
     "오행 균형",
     "FIVE ELEMENTS · 04",
-    topEls.length > 1
-      ? `가장 많은 기운은 ${topEls.map((e) => e.name).join("·")}(각 ${highest.count}개), 가장 적은 기운은 ${lowest.name}(${lowest.count})야.`
-      : `가장 많은 기운은 ${highest.name}(${highest.count}), 가장 적은 기운은 ${lowest.name}(${lowest.count})야.`,
+    `가장 많은 기운은 ${topEls.map((e) => e.name).join("·")}(${topEls.length > 1 ? "각 " : ""}${highest.count}개), 가장 적은 기운은 ${lowNames}(${lowEls.length > 1 ? "각 " : ""}${lowest.count}개)야.`,
     [
       ...topEls.slice(0, 2).map((e) => ({ heading: `넘치는 ${e.name} 기운`, body: ELEMENT_EXCESS[e.name] })),
-      { heading: `비어 있는 ${lowest.name} 기운`, body: ELEMENT_LACK[lowest.name] },
+      ...lowEls.slice(0, 2).map((e) => ({ heading: `비어 있는 ${e.name} 기운`, body: ELEMENT_LACK[e.name] })),
       { heading: "균형 맞추는 생활 팁", body: `${lowest.name} 기운을 채우는 기분 전환 팁이야. 추천 습관: ${habit.habit}. 곁에 두면 좋은 것: ${habit.item}. 행운의 색은 ${lucky.color}, 방향은 ${lucky.direction}이야.` },
       ...elements.map((e) => ({ heading: `${ELEMENT_DOMAIN[e.name].title} — ${e.count}개`, body: ELEMENT_DOMAIN[e.name].body })),
       { heading: "오행은 '좋고 나쁨'이 아니야", body: "많다고 나쁘고 적다고 부족한 사람이 아니라, 나의 개성이 드러나는 방식이야. 균형을 의식하면 같은 강점도 더 부드럽게 쓸 수 있어." },
     ],
-    [{ title: "오행 분포", rows: elements.map((e) => ({ label: e.name, value: `${e.count}개`, highlight: e.name === highest.name || e.name === lowest.name, note: e.name === highest.name ? "가장 많음" : e.name === lowest.name ? "가장 적음" : undefined })) }],
+    [{ title: "오행 분포", rows: elements.map((e) => ({ label: e.name, value: `${e.count}개`, highlight: e.count === highest.count || e.count === lowest.count, note: e.count === highest.count ? "가장 많음" : e.count === lowest.count ? "가장 적음" : undefined })) }],
   );
 
   // ── 5. 십성 구조

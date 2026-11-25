@@ -103,7 +103,8 @@ export function weaveConcern(pages: BookPage[], r: SajuResult, ctx: { elements: 
   const why = body?.lead ?? "고민은 말로 꺼내 놓는 것만으로도 조금 가벼워져. 지금의 마음을 사주의 흐름과 나란히 놓고 천천히 읽어 보자.";
   const tip = body?.tip ?? "이번 주에는 이 고민을 한 줄로 적고, 오늘 할 수 있는 가장 작은 행동 하나만 골라 봐.";
   const stem = STEMS.find((s) => s.hanja === r.dayStem);
-  const lowest = ctx.elements.length ? ctx.elements.reduce((a, b) => (b.count < a.count ? b : a)).name : "";
+  const minC = ctx.elements.length ? Math.min(...ctx.elements.map((e) => e.count)) : 0;
+  const lowest = ctx.elements.filter((e) => e.count === minC).map((e) => e.name).join("·");
   const yongEl = r.advanced.yongsin.map((y) => STEMS.find((s) => s.hanja === y)?.element).map((e) => ({ wood: "목", fire: "화", earth: "토", metal: "금", water: "수" } as Record<string, string>)[e ?? ""]).find(Boolean) ?? null;
   const data: Data = {
     noun: TOPIC_NOUN[topic] ?? TOPIC_NOUN.general,

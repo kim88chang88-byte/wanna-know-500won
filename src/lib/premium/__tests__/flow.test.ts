@@ -22,6 +22,11 @@ describe("chapterOpening", () => {
     elements: [{ name: "수", count: 4 }, { name: "화", count: 0 }, { name: "목", count: 2 }],
     grade: "신강", geukguk: "인수격", yongsin: ["丙(병)"], daeunNow: "辛卯", year: 2026, yearGanzhi: "丙午",
   };
+  it("개수가 같은 오행은 한꺼번에 말해요 (토·수 3개, 목·화 0개)", () => {
+    const t = chapterOpening("elements", { ...f, elements: [{ name: "목", count: 0 }, { name: "화", count: 0 }, { name: "토", count: 3 }, { name: "금", count: 2 }, { name: "수", count: 3 }] });
+    expect(t).toContain("땅 기운·물 기운이 각 3개로 가장 많고");
+    expect(t).toContain("나무 기운·불 기운은 각 0개로 가장 적어");
+  });
   it("내 사주 값으로 한 줄을 만들어요", () => {
     expect(chapterOpening("elements", f)).toContain("물 기운이 4개");
     expect(chapterOpening("elements", f)).toContain("불 기운은 0개");

@@ -60,16 +60,18 @@ const TOPIC_WORD: Record<string, string> = { "topic:money": "돈", "topic:love":
  */
 export function chapterOpening(key: string, f: OpeningFacts): string | null {
   const el = (n: string) => `${EL_DISPLAY[n] ?? n} 기운`;
-  const sorted = [...f.elements].sort((a, b) => b.count - a.count);
-  const top = sorted[0];
-  const low = [...f.elements].sort((a, b) => a.count - b.count)[0];
+  const maxC = Math.max(...f.elements.map((e) => e.count));
+  const minC = Math.min(...f.elements.map((e) => e.count));
+  const tops = f.elements.filter((e) => e.count === maxC);
+  const lows = f.elements.filter((e) => e.count === minC);
+  const names = (xs: Array<{ name: string }>) => xs.map((x) => el(x.name)).join("·");
   const yong = f.yongsin[0]?.replace(/\(.*$/, "");
   switch (key) {
     case "nature":
       return f.dayFull ? `앞에서 세운 네 기둥 가운데 ‘나’를 뜻하는 건 일주 ${f.dayFull}${f.dayReading ? `(${f.dayReading})` : ""}야. 이제 이 두 글자 속으로 들어가 볼게.` : null;
     case "elements":
-      return top && low && top.name !== low.name
-        ? `제1장에서 일주 하나로 중심을 봤다면, 이번엔 사주 전체야. 네 사주에는 ${el(top.name)}이 ${top.count}개로 가장 많고, ${el(low.name)}은 ${low.count}개로 가장 적어.`
+      return f.elements.length && maxC !== minC
+        ? `제1장에서 일주 하나로 중심을 봤다면, 이번엔 사주 전체야. 네 사주에는 ${names(tops)}이 ${tops.length > 1 ? "각 " : ""}${maxC}개로 가장 많고, ${names(lows)}은 ${lows.length > 1 ? "각 " : ""}${minC}개로 가장 적어.`
         : null;
     case "tengods":
       return f.grade ? `기운의 양을 봤으니, ${f.grade} 사주인 네가 그 힘을 세상에 어떻게 쓰는지 볼게.` : null;
