@@ -261,7 +261,7 @@ export function buildBook(r: SajuResult, ctx: BookContext): BookPage[] {
       ...elements.map((e) => ({ heading: `${ELEMENT_DOMAIN[e.name].title} — ${e.count}개`, body: ELEMENT_DOMAIN[e.name].body })),
       { heading: "오행은 '좋고 나쁨'이 아니야", body: "많다고 나쁘고 적다고 부족한 사람이 아니라, 나의 개성이 드러나는 방식이야. 균형을 의식하면 같은 강점도 더 부드럽게 쓸 수 있어." },
     ],
-    [{ title: "오행 분포", rows: elements.map((e) => ({ label: e.name, value: `${e.count}개`, highlight: e.count === highest.count || e.count === lowest.count, note: focus.notes[e.name] })) }],
+    [],
   );
 
   // ── 5. 십성 구조
