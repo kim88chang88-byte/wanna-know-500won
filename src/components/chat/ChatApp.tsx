@@ -707,9 +707,18 @@ export default function ChatApp({ initialCtx, initialMsgs, onChange, onBack, rea
           )}
         </div>
         {leftNow > 0 && (
-          <div className="mx-1 mb-2">
-            <button type="button" onClick={() => setPopOpen(true)} className="min-h-[36px] rounded-full border border-[#f0c6dc] bg-[#fdeef6] px-3.5 text-[13px] font-bold text-[#b03a78] active:scale-95">
-              🔥 인기질문
+          <div className="mx-1 mb-1 flex justify-end">
+            <button type="button" onClick={() => setPopOpen(true)} aria-label="인기질문 보기" className="-my-1 py-1 active:scale-95">
+              <span className="flex h-8 items-center gap-[5px] rounded-full border border-[#ef6a7d] bg-gradient-to-b from-[#e8485c] to-[#d12f45] px-[3px] text-[12.5px] font-bold text-white shadow-[0_2px_6px_rgba(209,47,69,0.3)]">
+                <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-white">
+                  <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2c.8 4.6 2.4 8.2 3.2 8.8.6.5 4.2 1.4 6.8 1.2-2.6.2-6.2.7-6.8 1.2-.8.6-2.4 4.2-3.2 8.8-.8-4.6-2.4-8.2-3.2-8.8-.6-.5-4.2-1-6.8-1.2 2.6-.2 6.2-.7 6.8-1.2C9.6 10.2 11.2 6.6 12 2z" fill="#d12f45" /></svg>
+                </span>
+                <span>인기질문</span>
+                <span className="rounded-full bg-[#fdecef] px-1.5 py-[2px] text-[9.5px] font-bold leading-none text-[#c42a40]">HOT</span>
+                <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-white">
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#d12f45" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7" /></svg>
+                </span>
+              </span>
             </button>
           </div>
         )}
