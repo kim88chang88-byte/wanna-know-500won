@@ -54,6 +54,38 @@ const EL_DISPLAY: Record<string, string> = { 목: "나무", 화: "불", 토: "�
 
 const TOPIC_WORD: Record<string, string> = { "topic:money": "돈", "topic:love": "사랑", "topic:career": "일", "topic:health": "몸" };
 
+const STEM_EL: Record<string, string> = { 甲: "목", 乙: "목", 丙: "화", 丁: "화", 戊: "토", 己: "토", 庚: "금", 辛: "금", 壬: "수", 癸: "수" };
+
+/**
+ * 오행 개수가 같을 때 "하나만" 고르지 않고, 이유를 붙여 구분해요.
+ * - 가장 많은 기운이 여럿이고 일간(나 자신)의 오행이 그중 하나면 → "나의 중심"
+ * - 가장 적은 기운이 여럿이고 그중 하나만 용신이면 → "더 필요한 기운"
+ */
+export function elementFocus(elements: Array<{ name: string; count: number }>, dayStem: string, yongsinStems: string[]) {
+  const disp = (n: string) => `${EL_DISPLAY[n] ?? n} 기운`;
+  const out = { center: null as string | null, need: null as string | null, centerWhy: null as string | null, needWhy: null as string | null, notes: {} as Record<string, string> };
+  if (!elements.length) return out;
+  const maxC = Math.max(...elements.map((e) => e.count));
+  const minC = Math.min(...elements.map((e) => e.count));
+  if (maxC === minC) return out;
+  const tops = elements.filter((e) => e.count === maxC).map((e) => e.name);
+  const lows = elements.filter((e) => e.count === minC).map((e) => e.name);
+  const dayEl = STEM_EL[dayStem?.[0] ?? ""] ?? null;
+  const yongEls = [...new Set(yongsinStems.map((y) => STEM_EL[y?.[0] ?? ""]).filter(Boolean))];
+  if (tops.length > 1 && dayEl && tops.includes(dayEl)) {
+    out.center = dayEl;
+    out.centerWhy = `${tops.map(disp).join("과 ")}이 ${maxC}개로 같지만, ${disp(dayEl)}은 네 일간(${dayStem[0]})이 곧 ${EL_DISPLAY[dayEl]}이라 ‘나 자신’이야. 그래서 개수는 같아도 ${disp(dayEl)}을 네 사주의 중심으로 봐.`;
+  }
+  const needs = lows.filter((n) => yongEls.includes(n));
+  if (lows.length > 1 && needs.length === 1) {
+    out.need = needs[0];
+    out.needWhy = `${lows.map(disp).join("과 ")}은 둘 다 ${minC}개로 비어 있어. 그중 ${disp(needs[0])}은 사주의 균형을 잡아 주는 기운(용신)이라, 같은 ${minC}개여도 이쪽이 더 필요해.`;
+  }
+  for (const n of tops) out.notes[n] = n === out.center ? "나의 중심 · 가장 많음" : "가장 많음";
+  for (const n of lows) out.notes[n] = n === out.need ? "더 필요한 기운 · 가장 적음" : "가장 적음";
+  return out;
+}
+
 /**
  * 장 맨 앞에서 "앞에서 본 내 사주"를 한 줄로 받아 이어 줘요. 이 사람의 값(일주·오행·신강신약·용신…)으로 만들어서
  * 같은 책이어도 사람마다 다르게 이어져요. 값이 모자라면 null(아무것도 보이지 않아요).
@@ -71,7 +103,7 @@ export function chapterOpening(key: string, f: OpeningFacts): string | null {
       return f.dayFull ? `앞에서 세운 네 기둥 가운데 ‘나’를 뜻하는 건 일주 ${f.dayFull}${f.dayReading ? `(${f.dayReading})` : ""}야. 이제 이 두 글자 속으로 들어가 볼게.` : null;
     case "elements":
       return f.elements.length && maxC !== minC
-        ? `제1장에서 일주 하나로 중심을 봤다면, 이번엔 사주 전체야. 네 사주에는 ${names(tops)}이 ${tops.length > 1 ? "각 " : ""}${maxC}개로 가장 많고, ${names(lows)}은 ${lows.length > 1 ? "각 " : ""}${minC}개로 가장 적어.`
+        ? `제1장에서 일주 하나로 중심을 봤다면, 이번엔 사주 전체야. 네 사주에는 ${names(tops)}이 ${tops.length > 1 ? "각 " : ""}${maxC}개로 가장 많고, ${names(lows)}은 ${lows.length > 1 ? "각 " : ""}${minC}개로 가장 적어.${(() => { const ef = elementFocus(f.elements, f.dayFull?.[0] ?? "", f.yongsin); return [ef.centerWhy, ef.needWhy].filter(Boolean).map((t) => ` ${t}`).join(""); })()}`
         : null;
     case "tengods":
       return f.grade ? `기운의 양을 봤으니, ${f.grade} 사주인 네가 그 힘을 세상에 어떻게 쓰는지 볼게.` : null;

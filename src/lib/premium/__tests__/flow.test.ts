@@ -14,7 +14,7 @@ describe("이음 문장", () => {
   });
 });
 
-import { chapterOpening, type OpeningFacts } from "../flow";
+import { chapterOpening, elementFocus, type OpeningFacts } from "../flow";
 
 describe("chapterOpening", () => {
   const f: OpeningFacts = {
@@ -26,6 +26,25 @@ describe("chapterOpening", () => {
     const t = chapterOpening("elements", { ...f, elements: [{ name: "목", count: 0 }, { name: "화", count: 0 }, { name: "토", count: 3 }, { name: "금", count: 2 }, { name: "수", count: 3 }] });
     expect(t).toContain("땅 기운·물 기운이 각 3개로 가장 많고");
     expect(t).toContain("나무 기운·불 기운은 각 0개로 가장 적어");
+  });
+  it("동점이면 일간 오행을 중심으로, 용신 오행을 더 필요한 기운으로 구분해요", () => {
+    const els = [{ name: "목", count: 0 }, { name: "화", count: 0 }, { name: "토", count: 3 }, { name: "금", count: 2 }, { name: "수", count: 3 }];
+    const ef = elementFocus(els, "癸", ["乙"]);
+    expect(ef.center).toBe("수");
+    expect(ef.need).toBe("목");
+    expect(ef.notes["수"]).toBe("나의 중심 · 가장 많음");
+    expect(ef.notes["토"]).toBe("가장 많음");
+    expect(ef.notes["목"]).toBe("더 필요한 기운 · 가장 적음");
+    expect(ef.notes["화"]).toBe("가장 적음");
+    expect(ef.centerWhy).toContain("‘나 자신’");
+    expect(ef.needWhy).toContain("용신");
+    expect(chapterOpening("elements", { ...f, dayFull: "癸亥", elements: els, yongsin: ["乙(을)"] })).toContain("더 필요해");
+  });
+  it("용신이 둘 다 비어 있는 오행이거나 하나도 아니면 구분하지 않아요", () => {
+    const els = [{ name: "목", count: 0 }, { name: "화", count: 0 }, { name: "토", count: 3 }, { name: "금", count: 2 }, { name: "수", count: 3 }];
+    expect(elementFocus(els, "癸", ["乙", "丙"]).need).toBeNull();
+    expect(elementFocus(els, "癸", ["庚"]).need).toBeNull();
+    expect(elementFocus(els, "甲", ["乙"]).center).toBeNull();
   });
   it("내 사주 값으로 한 줄을 만들어요", () => {
     expect(chapterOpening("elements", f)).toContain("물 기운이 4개");
