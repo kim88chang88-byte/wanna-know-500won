@@ -727,14 +727,32 @@ function WealthCard({ w }: { w: NonNullable<BookPage["wealth"]> }) {
   );
 }
 
-const STONE_PATH: Record<string, string> = {
-  목: "M12 2.5c-4.2 4-6.5 7.2-6.5 10.4a6.5 6.5 0 0 0 13 0c0-3.2-2.3-6.4-6.5-10.4zM12 8v13",
-  화: "M12 2c1 4 5 6 5 11a5 5 0 0 1-10 0c0-2 1-3 2-4 0 2 1 3 2 3 0-4-1-6 1-10z",
-  토: "M2 20l7-12 4 7 3-4 6 9z",
-  금: "M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8z",
-  수: "M12 2.5c4.2 5 6.5 8.2 6.5 11.4a6.5 6.5 0 0 1-13 0c0-3.2 2.3-6.4 6.5-11.4z",
+const STONE_KIND: Record<string, "wood" | "fire" | "earth" | "metal" | "water"> = { 목: "wood", 화: "fire", 토: "earth", 금: "metal", 수: "water" };
+const STONE_HANJA: Record<string, string> = { 목: "木", 화: "火", 토: "土", 금: "金", 수: "水" };
+const STONE_FOCUS: Record<string, string> = { fire: "70%", earth: "60%", wood: "55%", water: "55%", metal: "45%" };
+const STONE_TONE: Record<string, { dark: string; tint: string; strength: number }> = {
+  fire: { dark: "140,20,10", tint: "255,60,30", strength: 0.75 },
+  earth: { dark: "100,55,10", tint: "230,150,40", strength: 0.75 },
+  wood: { dark: "10,70,30", tint: "40,200,90", strength: 0.5 },
+  water: { dark: "10,40,130", tint: "40,110,255", strength: 0.75 },
+  metal: { dark: "55,60,75", tint: "200,210,225", strength: 0.75 },
 };
-const STONE_COLOR: Record<string, string> = { 목: "#5fbf6a", 화: "#f06a4a", 토: "#e0a93c", 금: "#cdd6e4", 수: "#5aa2f5" };
+/** 돌 한 개: 사주 글자 칸과 같은 오행 그림을 깔고 한자를 얹어요 */
+function StoneTile({ name }: { name: string }) {
+  const kind = STONE_KIND[name] ?? "earth";
+  const t = STONE_TONE[kind];
+  return (
+    <div className="relative h-[54px] w-[54px] overflow-hidden rounded-[16px] shadow-[0_3px_6px_rgba(0,0,0,0.45)] ring-1 ring-white/25">
+      <div aria-hidden="true" className="absolute inset-0 bg-cover [filter:saturate(1.3)_contrast(1.05)]" style={{ backgroundImage: `url(/images/el-${kind}.webp)`, backgroundPosition: `50% ${STONE_FOCUS[kind]}` }} />
+      <div aria-hidden="true" className="absolute inset-0 mix-blend-soft-light" style={{ background: `rgb(${t.tint})`, opacity: t.strength }} />
+      <div aria-hidden="true" className="absolute inset-0" style={{ background: `radial-gradient(circle at 50% 50%, rgba(${t.dark},0.45) 0, rgba(${t.dark},0) 65%)` }} />
+      <div aria-hidden="true" className="absolute inset-x-0 top-0 h-1/3 bg-gradient-to-b from-white/30 to-transparent" />
+      <span aria-hidden="true" className="absolute inset-0 flex items-center justify-center font-serifKr text-[26px] font-black leading-none text-white [paint-order:stroke_fill] [-webkit-text-stroke:3px_rgba(20,10,8,0.9)] [text-shadow:0_2px_4px_rgba(0,0,0,0.4)]">
+        {STONE_HANJA[name]}
+      </span>
+    </div>
+  );
+}
 const STONE_EASY: Record<string, string> = { 목: "나무", 화: "불", 토: "땅", 금: "쇠", 수: "물" };
 
 /** 오행 분포: 기운마다 돌을 개수만큼 쌓아서 한눈에 보여 줘요. 0개는 점선 빈 자리. */
@@ -754,7 +772,6 @@ function ElementStones({ report }: { report: PremiumReportView }) {
     <div className="mb-6">
       <div data-testid="element-stones" role="img" aria-label={summary} className="flex items-end justify-between rounded-[20px] border border-[#2c3366] bg-[#1a1f40] px-2.5 pb-4 pt-4">
         {list.map((e) => {
-          const color = STONE_COLOR[e.name] ?? "#e6c887";
           const isCenter = focus.center === e.name;
           const isNeed = focus.need === e.name;
           return (
@@ -765,15 +782,11 @@ function ElementStones({ report }: { report: PremiumReportView }) {
               >
                 {isCenter ? "나의 중심" : isNeed ? "더 필요" : "\u00a0"}
               </div>
-              <div className="flex h-[150px] flex-col-reverse items-center gap-1 pb-0.5">
+              <div className="flex min-h-[120px] flex-col-reverse justify-start items-center gap-1 pb-0.5">
                 {e.count === 0 ? (
-                  <div className="h-[46px] w-[46px] rounded-full border-[1.5px] border-dashed border-[#4a5290] opacity-70" />
+                  <div className="h-[54px] w-[54px] rounded-[16px] border-[1.5px] border-dashed border-[#4a5290] opacity-70" />
                 ) : (
-                  Array.from({ length: e.count }, (_, i) => (
-                    <div key={i} className="flex h-[46px] w-[46px] items-center justify-center rounded-full bg-[#232a55]" style={{ border: `1.5px solid ${color}` }}>
-                      <svg width="26" height="26" viewBox="0 0 24 24" aria-hidden="true"><path d={STONE_PATH[e.name]} fill={color} stroke={color} strokeWidth="1.4" strokeLinejoin="round" /></svg>
-                    </div>
-                  ))
+                  Array.from({ length: e.count }, (_, i) => <StoneTile key={i} name={e.name} />)
                 )}
               </div>
               <div className="h-[1.5px] w-full bg-[#3a4380]" />
