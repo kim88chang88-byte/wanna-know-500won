@@ -25,7 +25,6 @@ import { saveChatCtx, type ChatCtx } from "@/lib/chatContext";
 import { useRouter } from "next/navigation";
 import { clearRef, isFinalRedeem, readRef, redeemMessage, refFromSearch, saveMyCode, saveRef } from "@/lib/referral";
 import { DailyLineCard } from "./DailyLineCard";
-import { FollowupCard } from "./FollowupCard";
 import dynamic from "next/dynamic";
 import type { IntakeTarget } from "./IntakeModal";
 
@@ -491,7 +490,6 @@ export default function Landing() {
           recordVisit(getBrowserStorage(), dayKey(new Date()));
           syncReward();
         }} />}
-        <FollowupCard />
         <MachinesSection onSpin={handleSpin} lastKey={lastKey} />
         <PremiumSection onSpin={handleSpin} />
         <SampleSection />
