@@ -36,7 +36,7 @@ describe("chapterOpening", () => {
     expect(ef.notes["토"]).toBe("가장 많음");
     expect(ef.notes["목"]).toBe("더 필요한 기운 · 가장 적음");
     expect(ef.notes["화"]).toBe("가장 적음");
-    expect(ef.centerWhy).toContain("‘나 자신’");
+    expect(ef.centerWhy).toContain("'나 자신'을 의미하는 네 일간(癸)이 곧 물이기에, 땅과 물의 개수는 같아도 물 기운을 네 사주의 중심으로 볼 거야.");
     expect(ef.needWhy).toContain("용신");
     expect(chapterOpening("elements", { ...f, dayFull: "癸亥", elements: els, yongsin: ["乙(을)"] })).toContain("더 필요해");
   });

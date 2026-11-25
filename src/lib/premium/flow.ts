@@ -74,7 +74,8 @@ export function elementFocus(elements: Array<{ name: string; count: number }>, d
   const yongEls = [...new Set(yongsinStems.map((y) => STEM_EL[y?.[0] ?? ""]).filter(Boolean))];
   if (tops.length > 1 && dayEl && tops.includes(dayEl)) {
     out.center = dayEl;
-    out.centerWhy = `${tops.map(disp).join("과 ")}이 ${maxC}개로 같지만, ${disp(dayEl)}은 네 일간(${dayStem[0]})이 곧 ${EL_DISPLAY[dayEl]}이라 ‘나 자신’이야. 그래서 개수는 같아도 ${disp(dayEl)}을 네 사주의 중심으로 봐.`;
+    const plain = tops.map((n) => EL_DISPLAY[n] ?? n).join(tops.length === 2 ? "과 " : "·");
+    out.centerWhy = `${tops.map(disp).join("과 ")}이 ${maxC}개로 같아. '나 자신'을 의미하는 네 일간(${dayStem[0]})이 곧 ${EL_DISPLAY[dayEl]}이기에, ${plain}의 개수는 같아도 ${disp(dayEl)}을 네 사주의 중심으로 볼 거야.`;
   }
   const needs = lows.filter((n) => yongEls.includes(n));
   if (lows.length > 1 && needs.length === 1) {
