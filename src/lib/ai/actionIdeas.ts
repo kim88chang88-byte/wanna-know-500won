@@ -32,6 +32,10 @@ export const ACTION_POOL: string[] = [
 
 /* 노트·메모·쪽지·가계부·기록처럼 "적어 보라"는 계열은 후보에서 뺐어요. (이용자가 싫어해요) */
 
+/** 일·돈·투자·시험처럼 "무거운 주제" 질문에는 집안 정돈·몸 돌봄 후보가 엉뚱해 보여서 빼요. (11-25 점검: "목숨 걸고 일할 해야?"에 방 환기·침구 정리) */
+const SERIOUS_TOPIC = /투자|주식|코인|펀드|부동산|재물|월급|빚|대출|돈|이직|퇴사|승진|회사|직장|업무|창업|부업|시험|합격|프로젝트|목숨|살\s?가치|가치가/;
+const HOME_CARE = /환기|침구|핸드크림|디퓨저|일찍 자리에|스트레칭|음미|입기 편한|물 한 컵|메뉴|요리|배경화면|카페|귀가|치우기/;
+
 /** 이미 권한 종류와 겹치는 후보는 빼고, 질문·대화 길이·날짜로 흩어서 3개를 골라요. */
 export function actionIdeas(question: string, turn: number, dayOfYear: number, skip: RegExp[] = []): string[] {
   let h = turn * 7 + dayOfYear;
@@ -42,6 +46,7 @@ export function actionIdeas(question: string, turn: number, dayOfYear: number, s
   for (let k = 0; k < n && out.length < 3; k++) {
     const item = ACTION_POOL[(start + k * 7) % n];
     if (skip.some((re) => re.test(item))) continue;
+    if (SERIOUS_TOPIC.test(question) && HOME_CARE.test(item)) continue;
     out.push(item);
   }
   return out;

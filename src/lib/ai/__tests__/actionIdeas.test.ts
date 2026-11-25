@@ -24,4 +24,14 @@ describe("actionIdeas", () => {
   it("후보에 폰 끄고 산책하는 항목은 없어요", () => {
     ACTION_POOL.forEach((x) => expect(/산책|알림/.test(x)).toBe(false));
   });
+  it("일·돈·시험 같은 무거운 주제에는 집안 정돈·몸 돌봄 후보를 안 줘요", () => {
+    const home = /환기|침구|핸드크림|디퓨저|일찍 자리에|스트레칭|음미|입기 편한|물 한 컵|메뉴|요리|배경화면|카페|귀가|치우기/;
+    for (const q of ["올해 목숨 걸고 일할 해야?", "올해 승진할 가치가 있는 일일까?", "이 프로젝트가 사라졌으면 좋겠어", "투자해도 되는 시기야?", "이직할 가치가 있을까?"]) {
+      for (let turn = 0; turn < 6; turn++) {
+        const r = actionIdeas(q, turn, 100 + turn * 37);
+        expect(r).toHaveLength(3);
+        r.forEach((i) => expect(home.test(i), `${q} → ${i}`).toBe(false));
+      }
+    }
+  });
 });
