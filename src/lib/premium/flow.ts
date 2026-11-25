@@ -69,7 +69,7 @@ export function chapterOpening(key: string, f: OpeningFacts): string | null {
       return f.dayFull ? `앞에서 세운 네 기둥 가운데 ‘나’를 뜻하는 건 일주 ${f.dayFull}${f.dayReading ? `(${f.dayReading})` : ""}야. 이제 이 두 글자 속으로 들어가 볼게.` : null;
     case "elements":
       return top && low && top.name !== low.name
-        ? `일주 하나로 중심을 봤다면, 이번엔 사주 전체야. 네 사주에는 ${el(top.name)}이 ${top.count}개로 가장 많고, ${el(low.name)}은 ${low.count}개로 가장 적어.`
+        ? `제1장에서 일주 하나로 중심을 봤다면, 이번엔 사주 전체야. 네 사주에는 ${el(top.name)}이 ${top.count}개로 가장 많고, ${el(low.name)}은 ${low.count}개로 가장 적어.`
         : null;
     case "tengods":
       return f.grade ? `기운의 양을 봤으니, ${f.grade} 사주인 네가 그 힘을 세상에 어떻게 쓰는지 볼게.` : null;
