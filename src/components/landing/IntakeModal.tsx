@@ -34,9 +34,6 @@ import { AskChips } from "./AskChips";
 import { ChatEntry } from "@/components/chat/ChatEntry";
 import AdminCopyResult from "@/components/admin/AdminCopyResult";
 import { summarizeReport } from "@/lib/chatContext";
-import { CompareCard } from "./CompareCard";
-import { HoursCard } from "./HoursCard";
-import { MbtiCard } from "./MbtiCard";
 import { cleanMbti } from "@/lib/mbtiBrief";
 import { UpsellTeaser } from "./UpsellTeaser";
 import { chipsForFortune, MAX_CONCERN_TAGS, MAX_CONCERN_TEXT, type Concern, type ConcernId } from "@/lib/concerns";
@@ -61,10 +58,8 @@ import ResultShareCard from "./ResultShareCard";
 import InviteNudge from "./InviteNudge";
 import SajuGuide from "./SajuGuide";
 import ResultBurst from "./ResultBurst";
-import ReviewBox from "./ReviewBox";
 import ScrollHint from "./ScrollHint";
 import ManseReport from "@/components/premium/ManseReport";
-import { NextProductBanner } from "@/components/premium/PremiumBook";
 import PurchaseModal from "@/components/pay/PurchaseModal";
 import type { PremiumReportView } from "@/lib/premium/types";
 import type { BirthInput } from "@/lib/saju/types";
@@ -940,24 +935,9 @@ export default function IntakeModal({ target, wallet = null, onClose, onComplete
                     <ManseReport report={premiumReport} hideHeadline flush={luxe} finale={bookMode ? <><ResultHero report={premiumReport} aiQuote={reading?.kkotgeoji ?? null} luxe /><ResultShareCard report={premiumReport} aiQuote={reading?.kkotgeoji ?? null} reading={reading} /></> : undefined} />
                   </div>
 
-                  {/* 3) 더 물어보기 */}
-                  {askInput && <AskChips input={askInput} luxe={luxe} topic={isStudy ? "study" : target.fortune} />}
                 </>
               )}
 
-              {askInput && !compat && (
-                <details data-testid="more-tools" className={`mt-6 rounded-2xl border group ${luxe ? "border-[#e6c887]/30 bg-[#fbf6ea]" : "border-brand-100 bg-brand-50/40"}`}>
-                  <summary className="cursor-pointer list-none px-4 py-3 flex items-center justify-between text-sm font-bold text-gray-900">
-                    <span>✨ 더 해보기 <span className="font-normal text-xs text-gray-500">고민 비교 · MBTI{askInput.hour === null || askInput.hour === undefined ? " · 시간 후보" : ""}</span></span>
-                    <span aria-hidden="true" className="text-gray-400 transition-transform group-open:rotate-180">⌄</span>
-                  </summary>
-                  <div className="px-3 pb-3">
-                    <CompareCard input={askInput} />
-                    <MbtiCard input={askInput} />
-                    {(askInput.hour === null || askInput.hour === undefined) && <HoursCard input={askInput} />}
-                  </div>
-                </details>
-              )}
               {!target.premium && (
                 <UpsellTeaser
                   fortune={target.fortune}
@@ -1023,14 +1003,15 @@ export default function IntakeModal({ target, wallet = null, onClose, onComplete
           </details>
           )}
 
-          {bookMode && premiumReport && <NextProductBanner report={premiumReport} />}
-
           {phase === "result" && premiumReport && (
             <AdminCopyResult report={premiumReport} reading={reading} topic={target.fortune} name={viewName?.trim() || null} partnerName={compat ? resultPartner?.name ?? null : null} />
           )}
 
           {phase === "result" && premiumReport && askInput && !(storyMode && !compat) && (
             <div className="mt-6 text-center">
+              <p data-testid="chat-guide" className={`mb-3 text-[13.5px] leading-relaxed ${luxe ? "text-[#e8dfca]/85" : "text-gray-600"}`}>
+                혹시 이번 장을 읽다가 조금 더 궁금하거나, 자잘하게라도 물어보고 싶은 게 있으면 도유 상담실로 와~
+              </p>
               <ChatEntry
                 luxe={luxe}
                 ctx={{
@@ -1046,14 +1027,6 @@ export default function IntakeModal({ target, wallet = null, onClose, onComplete
             </div>
           )}
 
-          {luxe ? (
-            <div className="mt-6 rounded-2xl border border-[#e6c887]/30 bg-[#fbf6ea] p-1">
-              <ReviewBox topic={target.fortune} premium={target.premium === true} loggedIn={loggedIn} />
-            </div>
-          ) : (
-            <ReviewBox topic={target.fortune} premium={target.premium === true} loggedIn={loggedIn} />
-          )}
-
           {!loggedIn && (
             <div data-testid="login-nudge-result" className={`mt-4 rounded-2xl border px-4 py-3 text-center ${luxe ? "bg-white/[0.04] border-[#e6c887]/30" : "bg-amber-50 border-amber-200"}`}>
               <p className={`text-xs font-bold ${luxe ? "text-[#f3e7c9]" : "text-amber-900"}`}>❄️ {LOGIN_NUDGE}</p>
@@ -1064,10 +1037,6 @@ export default function IntakeModal({ target, wallet = null, onClose, onComplete
               )}
             </div>
           )}
-
-          <p className={`mt-3 text-center text-[10px] ${luxe ? "text-[#e8dfca]/50" : "text-gray-400"}`}>
-            * 재미와 위로를 위한 풀이예요. 실제 일을 보장하지 않아요.
-          </p>
 
           <button
             type="button"
