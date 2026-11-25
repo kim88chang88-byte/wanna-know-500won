@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { EVAL_CATALOG, evalCategory } from "../evalSets";
+import { isCrisis } from "../chat";
 
 describe("관리자 상담 점검 카테고리", () => {
   it("500원 사주 6개 주제와 궁합이 모두 있고 프리미엄은 없어요", () => {
@@ -26,5 +27,12 @@ describe("관리자 상담 점검 카테고리", () => {
       expect(qs.some((q) => q.expect === "prefilter")).toBe(true);
       expect(qs.some((q) => q.expect === "crisis")).toBe(true);
     }
+  });
+
+  it("위기 오탐 점검 세트: 평범한 질문은 위기로 잡히지 않고, 진짜 위기는 잡혀요", () => {
+    const qs = evalCategory("crisisfp").qs;
+    expect(qs.some((q) => q.expect === "normal")).toBe(true);
+    expect(qs.some((q) => q.expect === "crisis")).toBe(true);
+    for (const q of qs) expect(isCrisis(q.q), q.q).toBe(q.expect === "crisis");
   });
 });
