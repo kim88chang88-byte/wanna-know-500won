@@ -941,7 +941,7 @@ function Visual({ page, report, laterAtEnd = false }: { page: BookPage; report: 
                   <thead>
                     <tr className={`border-b ${HAIR} text-[12.5px] text-[#e8dfca]/70`}>
                       <th scope="col" className="w-[84px] py-1.5 pr-2 font-bold">구분</th>
-                      <th scope="col" className="py-1.5 font-bold">말하는 나</th>
+                      <th scope="col" className="py-1.5 font-bold">나의 모습</th>
                     </tr>
                   </thead>
                   <tbody>
