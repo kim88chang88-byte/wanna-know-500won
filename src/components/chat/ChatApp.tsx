@@ -570,6 +570,10 @@ export default function ChatApp({ initialCtx, initialMsgs, onChange, onBack, rea
       >
         <p className="mx-auto w-fit rounded-full border border-brand-100 bg-white/60 px-3 py-1 text-[11px] text-[#8a7fa8]">오늘 · 도리의 달빛 서재에서 🌙</p>
         <DoriRow face={face} text={greetingFor(ctx)} />
+        <div className="ml-11 flex justify-end pr-3" data-testid="greeting-sticker">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/images/stickers/hello.webp" alt="" height={104} className="h-[104px] w-auto select-none" draggable={false} />
+        </div>
         {intro.slice(0, introShown).map((b, i) => (
           <IntroRow key={i} b={b} />
         ))}
