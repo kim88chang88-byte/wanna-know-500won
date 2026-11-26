@@ -321,7 +321,7 @@ describe("limitNameInHighlight", () => {
 
 describe("11-27 점검 후속 규칙", () => {
   it("적어 보라는 문장은 지우고, 사용자가 적는 법을 물었을 땐 둬요", () => {
-    const a = "오늘은 마음을 가라앉히는 게 먼저야. 이번 주 안에 마감 날짜를 적어 봐.\n\n그리고 천천히 이야기해 보자.";
+    const a = "오늘은 마음을 가라앉히는 게 먼저야. 이번 주 안에 마감 날짜를 적어 봐.\n\n그리고 상대와 천천히 이야기해 보면서 내 마음이 어디로 기우는지 살펴보자.";
     expect(dropBannedSuggestions(a, "연애 고민이야", false)).not.toContain("적어");
     expect(dropBannedSuggestions(a, "일기 쓰는 법 알려줘", false)).toContain("적어");
   });
