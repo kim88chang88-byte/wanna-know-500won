@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { BookPage } from "@/lib/premium/types";
-import { addBookNotes, parseNotes, summarizeBook } from "../bookNotes";
+import { NOTES_SYSTEM_PROMPT, addBookNotes, parseNotes, summarizeBook } from "../bookNotes";
 
 const pages: BookPage[] = [1, 2, 3].map((no) => ({
   no,
@@ -80,5 +80,10 @@ describe("맞춤 조언(advice)", () => {
     const b = await addBookNotes(pages, { kind: "personal", apiKey: "k", fetchImpl: mk(`${advice} 이혼수가 있어요.`), concern: c });
     expect(a[2].advice).toBeUndefined();
     expect(b[2].advice).toBeUndefined();
+  });
+
+  it("지시문: 설명 안 한 용어는 먼저 풀고, 한 문장에 비유는 하나만", () => {
+    expect(NOTES_SYSTEM_PROMPT).toContain("이름만 던지지 말고 쉬운 말로 먼저 풀어");
+    expect(NOTES_SYSTEM_PROMPT).toContain("비유를 하나만");
   });
 });
