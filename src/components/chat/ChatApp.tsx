@@ -11,7 +11,7 @@ import type { ChatMemo } from "@/lib/ai/chatMemo";
 import PopularSheet from "@/components/chat/PopularSheet";
 import VisualCard from "@/components/chat/VisualCard";
 import type { ChatVisual } from "@/lib/ai/chat";
-import { STICKER_IDS } from "@/lib/ai/stickers";
+import { STICKER_IDS, stickerAfter } from "@/lib/ai/stickers";
 import { buildIntro, type IntroBubble } from "@/lib/chatIntro";
 import { ELEMENT_BOX } from "@/lib/elementColor";
 import { ElIconName } from "@/components/ElIcon";
@@ -591,6 +591,7 @@ export default function ChatApp({ initialCtx, initialMsgs, onChange, onBack, rea
               text={m.text}
               count={live ? typing!.shown : undefined}
               memo={m.memo}
+              sticker={m.quiet ? null : m.sticker}
               error={m.error}
               onSkip={live ? () => setTyping(null) : undefined}
               actions={
@@ -617,12 +618,6 @@ export default function ChatApp({ initialCtx, initialMsgs, onChange, onBack, rea
               at={m.error ? undefined : m.at}
             />
             {m.visual && !live && !m.error && <VisualCard v={m.visual} onAsk={(q) => void send(q)} />}
-            {m.sticker && !live && !m.error && !m.quiet && (
-              <div className="ml-11 flex justify-start" data-testid="dori-sticker">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={`/images/stickers/${m.sticker}.webp`} alt="" height={104} className="h-[104px] w-auto select-none" draggable={false} />
-              </div>
-            )}
             {m.outfit && !live && !m.error && <OutfitCard pick={m.outfit} />}
             {m.links && m.links.length > 0 && !live && !m.error && (
               <div className="ml-11 flex flex-wrap gap-1.5" data-testid="reply-links">
@@ -865,11 +860,12 @@ function MemoCard({ memo }: { memo: ChatMemo }) {
   );
 }
 
-function DoriRow({ face, text, at, error, actions, onSkip, count, memo }: { face: ReactNode; text: string; at?: number; error?: boolean; actions?: ReactNode; onSkip?: () => void; count?: number; memo?: ChatMemo | null }) {
+function DoriRow({ face, text, at, error, actions, onSkip, count, memo, sticker }: { face: ReactNode; text: string; at?: number; error?: boolean; actions?: ReactNode; onSkip?: () => void; count?: number; memo?: ChatMemo | null; sticker?: string | null }) {
   const mood = error ? { emoji: null, rest: text } : splitMood(text);
   const all = error ? [mood.rest] : chunkAnswer(mood.rest);
   const chunks = count === undefined ? all : all.slice(0, Math.max(1, count));
   const done = chunks.length === all.length;
+  const stickerAt = sticker && !error ? stickerAfter(sticker, all.length) : -1;
   return (
     <div className="flex items-start gap-2">
       {face}
@@ -880,7 +876,8 @@ function DoriRow({ face, text, at, error, actions, onSkip, count, memo }: { face
           {chunks.map((c, i) => {
             const last = i === chunks.length - 1;
             return (
-              <div key={i} className="flex items-end gap-1.5 motion-safe:animate-[betaPop_.3s_ease_both]">
+              <Fragment key={i}>
+              <div className="flex items-end gap-1.5 motion-safe:animate-[betaPop_.3s_ease_both]">
                 <div
                   onClick={onSkip}
                   className={`${i === 0 ? "rounded-[4px_18px_18px_18px]" : "rounded-[18px]"} bg-white px-3.5 py-[10px] text-[14px] leading-[1.62] shadow-[0_2px_10px_#5a36a814] ${error ? "text-amber-800" : "text-gray-900"} ${onSkip ? "cursor-pointer" : ""}`}
@@ -894,6 +891,13 @@ function DoriRow({ face, text, at, error, actions, onSkip, count, memo }: { face
                 </div>
                 {last && done && at !== undefined && <span className="shrink-0 whitespace-nowrap text-[10px] text-[#a99bd0]">{timeOf(at)}</span>}
               </div>
+              {sticker && i === stickerAt && (
+                <div data-testid="dori-sticker" className="motion-safe:animate-[betaPop_.3s_ease_both]">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={`/images/stickers/${sticker}.webp`} alt="" height={104} className="h-[104px] w-auto select-none" draggable={false} />
+                </div>
+              )}
+            </Fragment>
             );
           })}
         </div>

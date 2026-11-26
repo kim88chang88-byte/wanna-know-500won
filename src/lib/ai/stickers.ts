@@ -15,7 +15,7 @@ export const STICKERS = [
   { id: "study", hint: "시험·공부 질문" },
   { id: "drained", hint: "번아웃·지쳐서 방전됐다는 말" },
   { id: "unfair", hint: "억울함·화나는 일(직장·관계)" },
-  { id: "tea", hint: "쉬어 가라고 권할 때" },
+  { id: "tea", hint: "정말 지쳤다고 한 사람에게 잠깐 쉬어 가자고 할 때" },
   { id: "money", hint: "돈 걱정·지출이 고민일 때" },
   { id: "nod", hint: "'이렇게 해 봐' 하고 한 가지를 짚어 주는 마무리" },
 ] as const;
@@ -27,4 +27,14 @@ export const STICKER_IDS: string[] = STICKERS.map((s) => s.id);
 /** 모르는 이름이거나 none 이면 null */
 export function cleanSticker(v: unknown): StickerId | null {
   return typeof v === "string" && STICKER_IDS.includes(v) ? (v as StickerId) : null;
+}
+
+/** 스티커가 들어갈 말풍선 자리: 말풍선 사이에 끼워 넣어 실제 대화처럼 보이게 해요. (0 = 첫 말풍선 바로 뒤) */
+const EARLY: string[] = ["hello", "pat", "cry", "shock", "thanks", "congrats", "heart", "unfair", "drained", "curious"];
+const MID: string[] = ["hmm", "study", "money", "fighting"];
+export function stickerAfter(id: string, bubbles: number): number {
+  const last = Math.max(0, bubbles - 1);
+  if (EARLY.includes(id)) return Math.min(0, last);
+  if (MID.includes(id)) return Math.floor(last / 2);
+  return last;
 }

@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { cleanSticker, STICKER_IDS } from "../stickers";
+import { cleanSticker, stickerAfter, STICKER_IDS } from "../stickers";
 import { CHAT_SCHEMA } from "../chat";
 import { existsSync } from "node:fs";
 import { join } from "node:path";
@@ -15,5 +15,11 @@ describe("도리 스티커", () => {
     for (const id of STICKER_IDS) expect(existsSync(join(process.cwd(), "public/images/stickers", `${id}.webp`))).toBe(true);
     expect(CHAT_SCHEMA.properties.sticker.enum).toContain("nod");
     expect(CHAT_SCHEMA.required).toContain("sticker");
+  });
+  it("스티커는 말풍선 사이에 끼고, 말풍선이 하나면 그 뒤에 와요", () => {
+    expect(stickerAfter("pat", 4)).toBe(0);
+    expect(stickerAfter("money", 4)).toBe(1);
+    expect(stickerAfter("nod", 4)).toBe(3);
+    expect(stickerAfter("pat", 1)).toBe(0);
   });
 });
