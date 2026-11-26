@@ -95,8 +95,8 @@ export function VaultSaveBar({ snapshot, autoSave, luxe = false, ready = true }:
         {(status === "error" || status === "full") && <span className={luxe ? "text-[#f6dfa8]" : "text-amber-800"}>{message}</span>}
       </span>
       {status === "saved" ? (
-        <Link href="/vault" className={`shrink-0 font-bold underline underline-offset-2 ${luxe ? "text-[#e6c887]" : "text-brand-600"}`}>
-          보관함 보기
+        <Link href="/vault" className={`shrink-0 whitespace-nowrap rounded-full border-[1.5px] px-3 py-[7px] font-bold active:scale-95 ${luxe ? "border-[#e6c887] text-[#e6c887]" : "border-brand-500 text-brand-600"}`}>
+          보관함으로 이동 ›
         </Link>
       ) : (
         status !== "saving" &&
