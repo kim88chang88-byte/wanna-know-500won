@@ -348,22 +348,22 @@ function GodBars({ table }: { table: BookTable }) {
   return (
     <div data-testid="god-bars" className="mb-2">
       <p className={`text-[14px] font-bold tracking-[0.12em] ${GOLD}`}>내가 가진 기운의 크기</p>
-      <div role="img" aria-label={rows.map((r) => `${r.label} ${r.locked ? "잠김" : r.n}`).join(", ")} className="mt-3 flex items-end justify-between rounded-[20px] border border-[#6a6684] bg-[#4b4863] px-2.5 pb-4 pt-4">
+      <div role="img" aria-label={rows.map((r) => `${r.label} ${r.locked ? "잠김" : r.n}`).join(", ")} className="mt-3 flex items-end justify-between rounded-[20px] border border-[#d9ccb0] bg-[#f1e8d6] px-2.5 pb-4 pt-4">
         {rows.map((r) => {
                     return (
             <div key={r.label} data-testid="god-row" className="flex w-[18%] min-w-0 flex-col items-center gap-1.5">
               <div className="flex min-h-[110px] flex-col-reverse items-center gap-1 pb-0.5">
                 {r.locked ? (
-                  <div className="flex h-[52px] w-[52px] items-center justify-center rounded-[15px] border-[1.5px] border-dashed border-[#8b87a6] text-[16px] opacity-70">🔒</div>
+                  <div className="flex h-[52px] w-[52px] items-center justify-center rounded-[15px] border-[1.5px] border-dashed border-[#b9aa8a] text-[16px] opacity-70">🔒</div>
                 ) : r.n === 0 ? (
-                  <div className="h-[52px] w-[52px] rounded-[15px] border-[1.5px] border-dashed border-[#8b87a6] opacity-70" />
+                  <div className="h-[52px] w-[52px] rounded-[15px] border-[1.5px] border-dashed border-[#b9aa8a] opacity-70" />
                 ) : (
                   Array.from({ length: r.n }, (_, i) => <GodStone key={i} label={r.label} />)
                 )}
               </div>
-              <div className="h-[1.5px] w-full bg-[#7a7699]" />
-              <div className={`text-[14px] font-bold ${GOLD}`}>{r.label}</div>
-              <div className="text-[18px] font-bold leading-none text-[#f5efe0]">{r.locked ? "🔒" : r.n}<span className="text-[11px] font-normal text-[#e8dfca]/70">{r.locked ? "" : "개"}</span></div>
+              <div className="h-[1.5px] w-full bg-[#b9aa8a]" />
+              <div className="text-[14px] font-bold text-[#8a5a12]">{r.label}</div>
+              <div className="text-[18px] font-bold leading-none text-[#3a3020]">{r.locked ? "🔒" : r.n}<span className="text-[11px] font-normal text-[#3a3020]/60">{r.locked ? "" : "개"}</span></div>
             </div>
           );
         })}
