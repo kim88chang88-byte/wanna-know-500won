@@ -1598,6 +1598,130 @@ export default function PremiumBook({ report, flush = false, finale, previewBlur
           다음 ›
         </button>
       </div>
+
+      {!report.compat && !blurred && (
+        <PillarsPeek report={report} rootRef={top} pageKey={page.key} afterChapter1={pages.findIndex((p) => p.key === "pillars") >= 0 && i > pages.findIndex((p) => p.key === "pillars")} />
+      )}
+    </div>
+  );
+}
+
+const PEEK_HINT_KEY = "doyu.pillarsPeekHintClosed";
+const PEEK_BAR: Record<string, string> = { wood: "#5fbf6a", fire: "#f06a4a", earth: "#e0a93c", metal: "#cdd6e4", water: "#5aa2f5" };
+
+/**
+ * 오른쪽 아래에 떠 있는 "내 사주팔자" 버튼. 2장부터 계속 보이고, 커서를 올리면(폰에서는 누르면) 네 기둥 그림이 떠요.
+ * 1장에서는 사주팔자 그림을 지나 스크롤한 뒤에야 나타나서, 말풍선으로 "여기서 언제든 다시 볼 수 있어"라고 알려 줘요.
+ * 말풍선은 저절로 사라지지 않고, ✕를 눌러야 닫혀요(닫으면 다시 안 떠요).
+ */
+function PillarsPeek({ report, rootRef, pageKey, afterChapter1 }: { report: PremiumReportView; rootRef: { current: HTMLDivElement | null }; pageKey: string; afterChapter1: boolean }) {
+  const [passed, setPassed] = useState(false);
+  const [open, setOpen] = useState(false);
+  const [hintClosed, setHintClosed] = useState(true);
+  const wrap = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    try {
+      setHintClosed(getBrowserStorage()?.getItem(PEEK_HINT_KEY) === "1");
+    } catch {
+      setHintClosed(false);
+    }
+  }, []);
+
+  // 1장: 사주팔자 그림(마지막 기둥 카드)이 화면 위로 지나갔는지 지켜봐요.
+  useEffect(() => {
+    if (pageKey !== "pillars") return;
+    const cards = rootRef.current?.querySelectorAll('[data-testid="pillar-card"]');
+    const last = cards && cards.length ? cards[cards.length - 1] : null;
+    if (!last || typeof IntersectionObserver === "undefined") return;
+    const io = new IntersectionObserver(([e]) => {
+      if (!e.isIntersecting && e.boundingClientRect.bottom < 0) setPassed(true);
+    });
+    io.observe(last);
+    return () => io.disconnect();
+  }, [pageKey, rootRef]);
+
+  // 바깥을 누르면 닫혀요(폰)
+  useEffect(() => {
+    if (!open) return;
+    const off = (ev: Event) => {
+      if (wrap.current && !wrap.current.contains(ev.target as Node)) setOpen(false);
+    };
+    document.addEventListener("pointerdown", off);
+    return () => document.removeEventListener("pointerdown", off);
+  }, [open]);
+
+  const onChapter1 = pageKey === "pillars";
+  const visible = afterChapter1 || (onChapter1 && passed);
+  if (!visible || report.pillars.length === 0) return null;
+  const showHint = onChapter1 && !hintClosed && !open;
+  const closeHint = () => {
+    setHintClosed(true);
+    try {
+      getBrowserStorage()?.setItem(PEEK_HINT_KEY, "1");
+    } catch {
+      // 저장이 막혀도 이번 화면에서는 닫혀 있어요
+    }
+  };
+  return (
+    <div data-testid="pillars-peek" className="pointer-events-none sticky bottom-14 z-20 flex h-0 justify-end pr-1">
+      <div ref={wrap} className="pointer-events-auto relative" onMouseEnter={() => setOpen(true)} onMouseLeave={() => setOpen(false)}>
+        {open && (
+          <div data-testid="pillars-peek-card" role="dialog" aria-label="내 사주팔자" className="absolute bottom-full right-0 mb-2 w-[min(340px,calc(100vw-2.5rem))] rounded-[18px] border border-[#2c3366] bg-[#1a1f40] p-3 shadow-[0_10px_30px_rgba(0,0,0,0.6)]">
+            <p className="mb-2 text-center text-[12px] text-[#b9b4d4]">내 사주팔자</p>
+            <div className="grid grid-cols-4 gap-1.5">
+              {report.pillars.map((p) => {
+                const [stem, branch] = p.full ? Array.from(p.full) : [null, null];
+                const me = p.key === "day";
+                return (
+                  <div key={p.key} className="min-w-0 text-center">
+                    <div className={`text-[11px] font-bold ${me ? "text-[#f6dfa8]" : GOLD}`}>{p.label}</div>
+                    <div className={`mt-1 rounded-xl border p-1 ${me ? "border-[#e6c887] bg-[#e6c887]/10" : "border-[#3a4380]"}`}>
+                      {p.full ? (
+                        <div className="space-y-1">
+                          <ElementTile ch={stem} el={elementOfChar(stem, false)} reading={p.reading?.[0] ?? ""} tone="dark" sizeClass="text-[22px]" compact />
+                          <ElementTile ch={branch} el={elementOfChar(branch, true)} reading={p.reading?.[1] ?? ""} tone="dark" sizeClass="text-[22px]" compact />
+                        </div>
+                      ) : (
+                        <div className="py-6 text-[10px] text-[#e8dfca]/50">시간 미상</div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+        {showHint && (
+          <div data-testid="pillars-peek-hint" role="status" className="absolute bottom-full right-0 mb-2 w-[230px] rounded-2xl bg-[#fffaf0] px-3.5 py-3 pr-7 text-[13px] leading-[1.55] text-[#1c1830] shadow-[0_8px_24px_rgba(0,0,0,0.5)]">
+            <button type="button" aria-label="안내 닫기" data-testid="pillars-peek-hint-close" onClick={closeHint} className="absolute right-1 top-1 flex h-6 w-6 items-center justify-center text-[12px] text-[#8a8399]">
+              ✕
+            </button>
+            <b>여기서 언제든 내 사주팔자를 다시 볼 수 있어.</b>
+            <br />
+            책을 읽다가 궁금할 때 눌러 봐.
+            <span aria-hidden="true" className="absolute -bottom-[7px] right-6 h-3.5 w-3.5 rotate-45 bg-[#fffaf0]" />
+          </div>
+        )}
+        <button
+          type="button"
+          data-testid="pillars-peek-button"
+          aria-label="내 사주팔자 보기"
+          aria-expanded={open}
+          onClick={() => {
+            setOpen((v) => !v);
+            if (showHint) closeHint();
+          }}
+          className="flex h-14 w-14 items-center justify-center rounded-2xl border-[1.5px] border-[#e6c887] bg-gradient-to-br from-[#2d3466] to-[#1b1f45] shadow-[0_4px_12px_rgba(0,0,0,0.5)] active:scale-95"
+        >
+          <span aria-hidden="true" className="flex gap-[3px]">
+            {report.pillars.map((p) => {
+              const el = elementOfChar(p.full ? Array.from(p.full)[0] : null, false);
+              return <i key={p.key} className={`block h-[30px] w-[7px] rounded-[2px] ${p.key === "day" ? "ring-[1.5px] ring-[#f1d8a0]" : ""}`} style={{ background: el ? PEEK_BAR[el] : "#4a5290" }} />;
+            })}
+          </span>
+        </button>
+      </div>
     </div>
   );
 }
