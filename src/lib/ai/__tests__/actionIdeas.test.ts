@@ -40,6 +40,6 @@ describe("actionIdeas", () => {
     expect(r.filter((x) => LACK_ACTIONS.water.includes(x))).toHaveLength(2);
   });
   it("식상한 집안 정돈·침구·저녁 메뉴 후보는 없어요", () => {
-    ACTION_POOL.forEach((x) => expect(/침구|환기|책상 위 물건|저녁 메뉴|음미/.test(x)).toBe(false));
+    ACTION_POOL.forEach((x) => expect(/침구|환기|책상 위 물건|저녁 메뉴|음미|서랍|타이머|한 가지에만 집중/.test(x)).toBe(false));
   });
 });

@@ -320,6 +320,12 @@ describe("limitNameInHighlight", () => {
 });
 
 describe("11-27 점검 후속 규칙", () => {
+  it("서랍·타이머 같은 식상한 팁 문장은 지운다", () => {
+    const a = "지금은 마음이 많이 지쳤지. 오늘 저녁에는 서랍이나 파일 한 칸만 골라 비워 봐. 그리고 이번 주 안에 가장 편한 친구에게 요즘 힘들었다고 먼저 말을 건네 봐.";
+    const r = dropBannedSuggestions(a, "사람 사이에서 지쳐", false);
+    expect(r).not.toContain("서랍");
+    expect(dropBannedSuggestions("지금은 쉬자. 5분 타이머를 맞추고 한 가지에만 집중해 봐. 이번 주 안에 친한 친구에게 고민을 말로 털어놓으면 한결 가벼워질 거야.", "집중이 안 돼", false)).not.toContain("타이머");
+  });
   it("적어 보라는 문장은 지우고, 사용자가 적는 법을 물었을 땐 둬요", () => {
     const a = "오늘은 마음을 가라앉히는 게 먼저야. 이번 주 안에 마감 날짜를 적어 봐.\n\n그리고 상대와 천천히 이야기해 보면서 내 마음이 어디로 기우는지 살펴보자.";
     expect(dropBannedSuggestions(a, "연애 고민이야", false)).not.toContain("적어");
