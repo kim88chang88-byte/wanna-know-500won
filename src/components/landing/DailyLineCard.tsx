@@ -2,6 +2,7 @@
 
 import DoriIcon from "./DoriIcon";
 import DoriScene from "./DoriScene";
+import SafeImage from "./SafeImage";
 import FitText from "./FitText";
 import { ganzhiMeaning } from "@/lib/ganzhiMeaning";
 import { useEffect, useState } from "react";
@@ -116,14 +117,22 @@ export function DailyLineCard({ onOpened, birth }: { onOpened?: () => void; /** 
           </div>
         </div>
       ) : (
-        <div className="flex items-center justify-between gap-3">
-          <p className="text-sm font-bold text-gray-900"><DoriIcon />오늘의 도리 한마디가 도착했어</p>
+        <div className="relative flex items-center justify-between gap-3">
+          <span aria-hidden="true" className="dl-spark pointer-events-none absolute -top-2.5 right-2 text-[12px] text-amber-400">✦</span>
+          <span aria-hidden="true" className="dl-spark pointer-events-none absolute left-[3.4rem] top-0 text-[11px] text-amber-400" style={{ animationDelay: "0.15s" }}>✦</span>
+          <div className="flex min-w-0 items-center gap-2">
+            <div className="dl-hop relative h-[54px] w-[54px] shrink-0">
+              <span aria-hidden="true" className="dl-bubble pointer-events-none absolute -top-3 left-10 z-10 whitespace-nowrap rounded-xl border-[1.5px] border-brand-500 bg-white px-2 py-0.5 text-[11px] font-bold text-brand-600">눌러 봐~</span>
+              <SafeImage src="/images/dori-icon.webp" alt="" className="h-[54px] w-[54px] object-contain" fallback="🦦" fallbackClass="text-3xl" />
+            </div>
+            <p className="text-sm font-bold text-gray-900">오늘의 도리 한마디가 도착했어</p>
+          </div>
           <button
             type="button"
             data-testid="daily-line-open"
             onClick={() => void open()}
             disabled={state === "loading"}
-            className="shrink-0 rounded-full bg-brand-500 px-4 py-1.5 text-center text-xs font-bold leading-tight text-white disabled:opacity-60"
+            className="dl-beat relative shrink-0 overflow-hidden rounded-full bg-brand-500 px-4 py-1.5 text-center text-xs font-bold leading-tight text-white disabled:opacity-60"
           >
             {state === "loading" ? "여는 중…" : <>지금 바로<br />열어보기</>}
           </button>
