@@ -323,17 +323,16 @@ const GOD_HANJA: Record<string, string> = { 비겁: "比", 식상: "食", 재성
 const GOD_IMG: Record<string, string> = { 비겁: "bigyeop", 식상: "siksang", 재성: "jaeseong", 관성: "gwanseong", 인성: "inseong" };
 
 /** 십성 돌 한 개: 묶음마다 다른 돌 그림 위에 한자를 얹어요. 가장 두드러진 묶음은 금빛 테두리로 빛나요 */
-function GodStone({ label, hot }: { label: string; hot: boolean }) {
+function GodStone({ label }: { label: string }) {
   const img = GOD_IMG[label];
   return (
-    <div className={`relative flex h-[52px] w-[52px] items-center justify-center ${hot ? "drop-shadow-[0_0_6px_rgba(240,217,160,0.85)]" : "drop-shadow-[0_3px_3px_rgba(0,0,0,0.5)]"}`}>
+    <div className="relative flex h-[52px] w-[52px] items-center justify-center drop-shadow-[0_3px_3px_rgba(0,0,0,0.45)]">
       {img ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img src={`/images/gods/${img}.webp`} alt="" width={52} height={52} className="absolute inset-0 h-full w-full select-none object-contain" draggable={false} />
       ) : (
         <span aria-hidden="true" className="absolute inset-0 rounded-[14px] bg-[#2d3466]" />
       )}
-      {hot && <span aria-hidden="true" className="absolute inset-0 rounded-[15px] ring-2 ring-[#f0d9a0]" />}
       <span aria-hidden="true" className="relative font-serifKr text-[22px] font-black leading-none text-[#fff3cf] [paint-order:stroke_fill] [-webkit-text-stroke:3px_rgba(10,8,20,0.85)] [text-shadow:0_1px_3px_rgba(0,0,0,0.6)]">
         {GOD_HANJA[label] ?? label[0]}
       </span>
@@ -349,21 +348,20 @@ function GodBars({ table }: { table: BookTable }) {
   return (
     <div data-testid="god-bars" className="mb-2">
       <p className={`text-[14px] font-bold tracking-[0.12em] ${GOLD}`}>내가 가진 기운의 크기</p>
-      <div role="img" aria-label={rows.map((r) => `${r.label} ${r.locked ? "잠김" : r.n}`).join(", ")} className="mt-3 flex items-end justify-between rounded-[20px] border border-[#2c3366] bg-[#1a1f40] px-2.5 pb-4 pt-4">
+      <div role="img" aria-label={rows.map((r) => `${r.label} ${r.locked ? "잠김" : r.n}`).join(", ")} className="mt-3 flex items-end justify-between rounded-[20px] border border-[#6a6684] bg-[#4b4863] px-2.5 pb-4 pt-4">
         {rows.map((r) => {
-          const hot = r.highlight === true && !r.locked && r.n > 0;
-          return (
+                    return (
             <div key={r.label} data-testid="god-row" className="flex w-[18%] min-w-0 flex-col items-center gap-1.5">
               <div className="flex min-h-[110px] flex-col-reverse items-center gap-1 pb-0.5">
                 {r.locked ? (
-                  <div className="flex h-[52px] w-[52px] items-center justify-center rounded-[15px] border-[1.5px] border-dashed border-[#4a5290] text-[16px] opacity-70">🔒</div>
+                  <div className="flex h-[52px] w-[52px] items-center justify-center rounded-[15px] border-[1.5px] border-dashed border-[#8b87a6] text-[16px] opacity-70">🔒</div>
                 ) : r.n === 0 ? (
-                  <div className="h-[52px] w-[52px] rounded-[15px] border-[1.5px] border-dashed border-[#4a5290] opacity-70" />
+                  <div className="h-[52px] w-[52px] rounded-[15px] border-[1.5px] border-dashed border-[#8b87a6] opacity-70" />
                 ) : (
-                  Array.from({ length: r.n }, (_, i) => <GodStone key={i} label={r.label} hot={hot} />)
+                  Array.from({ length: r.n }, (_, i) => <GodStone key={i} label={r.label} />)
                 )}
               </div>
-              <div className="h-[1.5px] w-full bg-[#3a4380]" />
+              <div className="h-[1.5px] w-full bg-[#7a7699]" />
               <div className={`text-[14px] font-bold ${GOLD}`}>{r.label}</div>
               <div className="text-[18px] font-bold leading-none text-[#f5efe0]">{r.locked ? "🔒" : r.n}<span className="text-[11px] font-normal text-[#e8dfca]/70">{r.locked ? "" : "개"}</span></div>
             </div>
