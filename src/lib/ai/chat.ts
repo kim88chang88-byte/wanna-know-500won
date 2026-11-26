@@ -33,7 +33,7 @@ export const CHAT_MAX = 1400;
 export const CHAT_SYSTEM_PROMPT = `너는 "도리", 맑은 옹달샘의 수달 도사야. 지금은 사용자가 방금 본 사주 풀이를 이어서 물어보는 채팅 상담이야.
 
 말투
-- 친구에게 카톡하듯 다정한 반말. 이름은 입력 "이름"의 "나"에 실제 이름이 있을 때만, 대화의 첫 답에서 성을 뗀 이름으로 한 번 부르고(받침 있으면 "아", 없으면 "야", "님" 금지, 입력에 적힌 실제 이름만 사용). "나"가 "(없음)"이면 이름을 지어내지 말고 아무 이름으로도 부르지 마, 이어지는 답에서는 이름으로 시작하지 마(부르더라도 가끔).
+- 친구에게 카톡하듯 다정한 반말. 이름은 입력 "이름"의 "나"에 실제 이름이 있을 때만, 대화의 첫 답에서 성을 뗀 이름으로 한 번 부르고(받침 있으면 "아", 없으면 "야", "님" 금지, 입력에 적힌 실제 이름만 사용). "나"가 "(없음)"이면 이름을 지어내지 말고 아무 이름으로도 부르지 마, 이어지는 답에서는 이름으로 시작하지 마(부르더라도 가끔). 예외: 정말 중요한 한 문장(서두르지 말라는 당부, 위기 앞의 위로, 이 질문의 핵심 결론)은 아래 **강조 문장** 안에서 맨 앞에 이름을 불러 줘("**지은아, 이번 달 안에 결정하려고 서두르지 마.**"). 이건 대화 중 두세 번 답에 한 번만, 바로 앞 답에서 이미 이름을 불렀으면 이번엔 부르지 마. 이름이 없으면 이 예외도 쓰지 마.
 - 질문 종류에 따라 답하는 방식을 달리해(제일 중요해):
   · 인사·짧은 안부("안녕", "반가워"): 1~2문장으로 반갑게만 받아. 사주 분석·제안·되묻기 없이.
   · 가벼운 장난·외모·웃긴 질문(예: "나 잘생겨질 수 있어?"): 먼저 웃으며 가볍게 받아 주고(예: "에이, 지금도 충분히 멋있을걸? 😆") 짧게 1~2문단. 사주 근거는 입력에 있는 것 하나만 쓰고, 훈계·"내 안의 에너지" 같은 거창한 말은 하지 마. 사주로 외모를 단정하지 마.
@@ -271,6 +271,19 @@ export function fixTypos(t: string): string {
   return t.replace(/고맙어/g, "고마워").replace(/뭐\s야\?/g, "뭐야?").replace(/지주가\s?없/g, "지장이 없");
 }
 
+/**
+ * 강조 문장(**…**) 맨 앞의 이름 호칭은 바로 앞 답(최근 2개)에서 이미 강조 속 이름을 불렀다면 뗀다.
+ * 정말 중요한 순간에만 이름이 나오게 해서, 자주 불러 닳는 걸 막아요.
+ */
+export function limitNameInHighlight(answer: string, name: string, prevDori: string[]): string {
+  const esc = (x: string) => x.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const forms = [`${name}님`, callName(name)].map(esc).join("|");
+  const inMark = new RegExp(`\\*\\*\\s*(?:${forms})[,，]?\\s*`);
+  if (!inMark.test(answer)) return answer;
+  if (!prevDori.some((t) => inMark.test(t))) return answer;
+  return answer.replace(new RegExp(`(\\*\\*)\\s*(?:${forms})[,，]?\\s*(?=[^*]{6,}\\*\\*)`), "$1");
+}
+
 export function polishChatAnswer(answer: string, history: ChatMsg[], name?: string | null): string {
   let a = answer.trim();
   const n = name?.trim();
@@ -285,6 +298,7 @@ export function polishChatAnswer(answer: string, history: ChatMsg[], name?: stri
       if (rest.length >= CHAT_MIN) a = rest;
     }
   }
+  if (n && prevDori.length > 0) a = limitNameInHighlight(a, n, prevDori.map((m) => m.text));
   if (SYMPTOM.test(lastUser) && !a.includes("전문가") && a.length + PRO_NOTE.length + 2 <= CHAT_MAX) {
     a = `${a}\n\n${PRO_NOTE}`;
   }

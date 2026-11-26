@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { timeAlreadySaid, fixTypos, cleanFollowups, cleanVisual, cleanHistory, CRISIS_ANSWER, earlierQuestions, isCrisis, parseChatAnswer, parseChatReply, parseRisk, polishChatAnswer, recentEndings, usedBasis, usedActions, nowContext, visualAllowed, CHAT_SYSTEM_PROMPT } from "../chat";
+import { timeAlreadySaid, fixTypos, cleanFollowups, cleanVisual, cleanHistory, CRISIS_ANSWER, earlierQuestions, isCrisis, parseChatAnswer, parseChatReply, parseRisk, limitNameInHighlight, polishChatAnswer, recentEndings, usedBasis, usedActions, nowContext, visualAllowed, CHAT_SYSTEM_PROMPT } from "../chat";
 import { parseCtx } from "@/lib/chatServer";
 import { summarizeReport } from "@/lib/chatContext";
 
@@ -277,5 +277,31 @@ describe("위험 분류기", () => {
     expect(parseRisk({ risk: false })).toEqual({ risk: false });
     expect(parseRisk({})).toBeNull();
     expect(parseRisk({ risk: "yes" })).toBeNull();
+  });
+});
+
+describe("limitNameInHighlight", () => {
+  const a = "남는 쪽이 유리해.\n\n**은혁아, 이번 달 안에 결정하려고 서두르지 마.** 다음 달이 더 안정적이야.";
+  it("바로 앞 답의 강조에서 이름을 불렀으면 이번 강조에서는 이름을 뗀다", () => {
+    const prev = ["**은혁아, 오늘은 쉬어 가도 괜찮아.** 천천히 해."];
+    expect(limitNameInHighlight(a, "은혁", prev)).toBe("남는 쪽이 유리해.\n\n**이번 달 안에 결정하려고 서두르지 마.** 다음 달이 더 안정적이야.");
+  });
+  it("앞 답에서 강조 속 이름이 없었으면 그대로 둔다", () => {
+    expect(limitNameInHighlight(a, "은혁", ["**오늘은 쉬어 가도 괜찮아.**", "은혁아, 안녕"])).toBe(a);
+  });
+  it("이름이 강조 밖에 있으면 건드리지 않는다", () => {
+    const b = "은혁아, 좋은 질문이야. **서두르지 마.**";
+    expect(limitNameInHighlight(b, "은혁", ["**은혁아, 쉬어.**"])).toBe(b);
+  });
+  it("polishChatAnswer 에서도 같은 규칙이 적용된다", () => {
+    const h = [
+      { role: "user" as const, text: "고민이야" },
+      { role: "dori" as const, text: "**은혁아, 쉬어 가도 괜찮아.** 천천히." },
+      { role: "user" as const, text: "이직할까" },
+    ];
+    expect(polishChatAnswer(a, h, "은혁")).not.toContain("은혁아");
+  });
+  it("프롬프트가 중요한 문장에서만 이름 강조를 허용한다", () => {
+    expect(CHAT_SYSTEM_PROMPT).toContain("강조 문장");
   });
 });

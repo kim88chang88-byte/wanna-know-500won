@@ -131,12 +131,26 @@ function rich(text: string): ReactNode[] {
   );
 }
 
+/** 이름을 부르며 시작하는 강조 문장("지은아, …")은 이름은 보라색 굵게, 문장은 노란 형광펜으로 보여 줘요 */
+const NAME_LEAD = /^([가-힣]{1,4}[아야]),\s*(.+)$/s;
+
+function Highlight({ text }: { text: string }) {
+  const m = NAME_LEAD.exec(text);
+  if (!m) {
+    return <mark className="bg-transparent bg-[linear-gradient(transparent_62%,#f3dcff_62%)] font-extrabold text-brand-700">{text}</mark>;
+  }
+  return (
+    <span data-testid="name-highlight">
+      <b className="font-extrabold text-brand-600">{m[1]},</b>{" "}
+      <mark className="rounded-[3px] bg-[#ffe9a8] px-[3px] py-px font-bold text-[#2A2140]">{m[2]}</mark>
+    </span>
+  );
+}
+
 function richBold(text: string, k: number): ReactNode[] {
   return text.split(/(\*\*[^*]+\*\*)/g).map((t, i) =>
     t.startsWith("**") && t.endsWith("**") && t.length > 4 ? (
-      <mark key={`${k}-${i}`} className="bg-transparent bg-[linear-gradient(transparent_62%,#f3dcff_62%)] font-extrabold text-brand-700">
-        {t.slice(2, -2)}
-      </mark>
+      <Highlight key={`${k}-${i}`} text={t.slice(2, -2)} />
     ) : (
       <span key={`${k}-${i}`}>{t}</span>
     ),
