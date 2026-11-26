@@ -180,6 +180,7 @@ describe("끝맺음 반복 막기", () => {
     expect(CHAT_SYSTEM_PROMPT).toContain("마음이 힘들다는 말");
     expect(CHAT_SYSTEM_PROMPT).toContain("인사·짧은 안부");
     expect(CHAT_SYSTEM_PROMPT).toContain("사주 근거 필수");
+    expect(CHAT_SYSTEM_PROMPT).toContain("도리 스티커(sticker)");
     expect(CHAT_SYSTEM_PROMPT).toContain("같은 기운·글자를 다시 써도 돼");
     expect(CHAT_SYSTEM_PROMPT).toContain("내용 없이 넘어가면 규칙 위반");
     expect(CHAT_SYSTEM_PROMPT).toContain("두 갈래 고르기 질문");

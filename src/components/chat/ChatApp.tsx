@@ -11,6 +11,7 @@ import type { ChatMemo } from "@/lib/ai/chatMemo";
 import PopularSheet from "@/components/chat/PopularSheet";
 import VisualCard from "@/components/chat/VisualCard";
 import type { ChatVisual } from "@/lib/ai/chat";
+import { STICKER_IDS } from "@/lib/ai/stickers";
 import { buildIntro, type IntroBubble } from "@/lib/chatIntro";
 import { ELEMENT_BOX } from "@/lib/elementColor";
 import { ElIconName } from "@/components/ElIcon";
@@ -95,6 +96,8 @@ interface Bubble extends ChatMsg {
   visual?: ChatVisual | null;
   /** 옷 질문에 붙는 착장 카드 */
   outfit?: OutfitPick | null;
+  /** 답 끝에 붙는 도리 스티커 이름 */
+  sticker?: string | null;
   /** 도리가 되물은 질문에 눌러서 답하는 선택지 */
   choices?: string[];
   /** 답 아래 바로가기 버튼 (예: 지도에서 찾기) */
@@ -384,7 +387,7 @@ export default function ChatApp({ initialCtx, initialMsgs, onChange, onBack, rea
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ctx, messages: next.filter((m) => !m.log).map(({ role, text: t }) => ({ role, text: t })) }),
       });
-      const data = (await res.json().catch(() => null)) as { answer?: string; followups?: unknown; visual?: ChatVisual | null; outfit?: OutfitPick | null; choices?: unknown; links?: unknown; memo?: ChatMemo | null; safe?: boolean; error?: string; code?: string; left?: number } | null;
+      const data = (await res.json().catch(() => null)) as { answer?: string; followups?: unknown; visual?: ChatVisual | null; outfit?: OutfitPick | null; sticker?: unknown; choices?: unknown; links?: unknown; memo?: ChatMemo | null; safe?: boolean; error?: string; code?: string; left?: number } | null;
       if (res.status === 402 && data?.code === "quota") {
         // 질문을 다 쓴 경우: 방금 보낸 말은 입력창으로 돌려놓고 "조약돌로 더하기" 카드를 보여 줘요
         setLeft(0);
@@ -396,7 +399,7 @@ export default function ChatApp({ initialCtx, initialMsgs, onChange, onBack, rea
       if (!res.ok || !data?.answer) throw new Error(data?.error ?? "도리가 잠깐 물놀이하러 갔어. 다시 보내 볼래?");
       if (typeof data.left === "number") setLeft(data.left);
       else setLeft((l) => (l === null ? null : Math.max(0, l - 1)));
-      const all: Bubble[] = [...next, { role: "dori", text: data.answer, at: Date.now(), ...(data.safe === true ? { quiet: true } : {}), follow: Array.isArray(data.followups) ? data.followups.filter((f): f is string => typeof f === "string").slice(0, 3) : undefined, visual: data.visual ?? null, outfit: data.outfit ?? null, choices: Array.isArray(data.choices) ? data.choices.filter((c): c is string => typeof c === "string").slice(0, 2) : undefined, memo: data.memo ?? null, links: Array.isArray(data.links) ? (data.links as Array<{ label?: unknown; url?: unknown }>).filter((l): l is { label: string; url: string } => typeof l.label === "string" && typeof l.url === "string" && l.url.startsWith("https://www.google.com/maps/search/")).slice(0, 2) : undefined }];
+      const all: Bubble[] = [...next, { role: "dori", text: data.answer, at: Date.now(), ...(data.safe === true ? { quiet: true } : {}), follow: Array.isArray(data.followups) ? data.followups.filter((f): f is string => typeof f === "string").slice(0, 3) : undefined, visual: data.visual ?? null, outfit: data.outfit ?? null, ...(typeof data.sticker === "string" && STICKER_IDS.includes(data.sticker) && !([...next].reverse().find((x) => x.role === "dori" && !x.log)?.sticker) ? { sticker: data.sticker } : {}), choices: Array.isArray(data.choices) ? data.choices.filter((c): c is string => typeof c === "string").slice(0, 2) : undefined, memo: data.memo ?? null, links: Array.isArray(data.links) ? (data.links as Array<{ label?: unknown; url?: unknown }>).filter((l): l is { label: string; url: string } => typeof l.label === "string" && typeof l.url === "string" && l.url.startsWith("https://www.google.com/maps/search/")).slice(0, 2) : undefined }];
       setMsgs(all);
       if (!prefersReducedMotion()) setTyping({ idx: all.length - 1, shown: 1 });
     } catch (e) {
@@ -610,6 +613,12 @@ export default function ChatApp({ initialCtx, initialMsgs, onChange, onBack, rea
               at={m.error ? undefined : m.at}
             />
             {m.visual && !live && !m.error && <VisualCard v={m.visual} onAsk={(q) => void send(q)} />}
+            {m.sticker && !live && !m.error && !m.quiet && (
+              <div className="ml-11 flex justify-end pr-3" data-testid="dori-sticker">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={`/images/stickers/${m.sticker}.webp`} alt="" height={104} className="h-[104px] w-auto select-none" draggable={false} />
+              </div>
+            )}
             {m.outfit && !live && !m.error && <OutfitCard pick={m.outfit} />}
             {m.links && m.links.length > 0 && !live && !m.error && (
               <div className="ml-11 flex flex-wrap gap-1.5" data-testid="reply-links">

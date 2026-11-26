@@ -1,4 +1,5 @@
 import { PALETTE, SPOTS } from "@/lib/visualPalette";
+import { STICKERS, STICKER_IDS, cleanSticker, type StickerId } from "./stickers";
 import { SCENTS } from "@/lib/scents";
 import { PROPS, propCatalog } from "@/lib/props";
 import { SONGS, songCatalog, stripUnknownSongs } from "@/lib/songs";
@@ -72,6 +73,7 @@ export const CHAT_SYSTEM_PROMPT = `너는 "도리", 맑은 옹달샘의 수달 �
 - 오행 이름(나무·불·땅·쇠·물)을 기운으로 말할 때는 [[물]]처럼 이중 대괄호로 감싸. 화면이 그림 알약으로 바꿔 줘. 한 답에 최대 3번, 입력의 사주 정보에 있는 오행만, 그 밖에는 대괄호를 쓰지 마.
 - 가장 핵심이 되는 한 문장만 **이렇게** 별표 두 개로 감싸(한 답에 한 곳만). 그 밖에는 마크다운을 쓰지 마.
 - 입력에 "추천재료"가 있으면 메뉴·취미 추천 질문이야. 재료의 후보 안에서 1~3가지만 골라 이름을 말하고, 근거는 "기준기운"을 쉬운 말로 한 줄만 써. 질문에 끼니가 없으면 재료의 끼니를 그대로 쓰되 "지금이면 점심 쪽이겠다"처럼 한 마디로 짚어. "규칙"을 반드시 지켜. 의학·다이어트·치료 표현은 쓰지 말고 기분 좋은 참고로만 말해.
+- 도리 스티커(sticker): 답 끝에 붙는 작은 그림이야. 답이 이 감정·상황과 딱 맞을 때만 하나 골라(전체 답의 3분의 1 이하, 보통은 "none"). 후보: ${STICKERS.map((x) => `${x.id}(${x.hint})`).join(", ")}. 억지로 맞추지 말고, 어울리는 게 없으면 "none". 위기·자해 얘기, 사기 의심 경고, 정확히 답할 수 없다는 사과에는 쓰지 마. 스티커에 박힌 글자(예: "안녕!", "토닥토닥")와 답의 내용이 어긋나면 안 돼. 스티커를 고르면 answer 본문에 그 스티커 이름이나 그림 이야기는 쓰지 마.
 - 큰 그림 카드(visual): 사용자가 "무엇을 적을지(노트)", "해 볼 일(체크리스트)", "언제가 좋은지(시간표)", "소품·음식 같은 추천(소품)", "어울리는 색(색 견본)", "어울리는 향(향 카드)", "들을 노래(노래 카드)", "여행지 후보(여행 카드)", "한 지역 코스(코스 카드)", "물건을 어디에 두면 좋은지(방 핀)"을 물을 때만 answer 와 함께 카드를 하나 붙여. 그 밖의 질문은 kind 를 "none" 으로 해. 카드는 answer 의 내용을 눈에 보이게 요약한 것이라 answer 와 어긋나면 안 돼. 연속된 답마다 붙이지 말고, 직전 도리 답에 카드가 있었다면 이번엔 "none". 사용자가 그 종류를 직접 묻지 않았는데 답에 소품·색·향이 나왔다는 이유로 카드를 붙이지 마(그런 건 글로만 말해).
   - note: 노트에 적어 볼 예시 문장 2~4줄(items[].label 에 문장, 나머지는 빈 글자). title 은 노트 제목(12자 이내).
   - checklist: 이번에 해 볼 작은 행동 2~5개(label). 아주 작고 쉬운 것만.
@@ -113,6 +115,7 @@ export const CHAT_SCHEMA = {
     choices: { type: "array", items: { type: "string" }, description: "도리의 되묻는 질문에 눌러서 답할 선택지 2개(각 12자 이내). 없으면 빈 배열" },
     risk: { type: "boolean", description: "사용자가 죽고 싶다·사라지고 싶다·자고 일어나지 않았으면·모든 게 다 끝났으면·다 내려놓고 싶다·내가 없어야 남들이 편하다·살 의미가 없다 같은 말을 직접 하거나 돌려 말해서 자해·자살 위험이 조금이라도 보이면 true (이때 answer 는 따뜻한 한 줄만, 서버가 안내 글로 바꿔요). 평범한 피곤·스트레스·고민이면 false" },
     unable: { type: "boolean", description: "이 질문이 도리가 정확하게 답할 수 없는 정보(가게 이름, 실시간 정보, 확인할 수 없는 사실)를 묻는 것이라, 구체적으로 도움이 되는 답을 하나도 못 줬으면 true. 조금이라도 구체적으로 도왔으면 false" },
+    sticker: { type: "string", enum: ["none", ...STICKER_IDS], description: "답 끝에 붙이는 도리 스티커 이름. 어울릴 때만 하나 고르고 보통은 none(전체 답의 3분의 1 이하)." },
     visual: {
       type: "object",
       description: "답에 붙이는 큰 그림 카드. 필요 없으면 kind 를 none 으로 하고 나머지는 비워요.",
@@ -138,7 +141,7 @@ export const CHAT_SCHEMA = {
       additionalProperties: false,
     },
   },
-  required: ["answer", "followups", "choices", "unable", "risk", "visual"],
+  required: ["answer", "followups", "choices", "unable", "risk", "visual", "sticker"],
   additionalProperties: false,
 } as const;
 
@@ -173,6 +176,8 @@ export interface ChatReply {
   /** 도리가 되물은 질문에 눌러서 답하는 선택지 (없으면 빈 목록) */
   choices: string[];
   visual: ChatVisual | null;
+  /** 답 끝에 붙는 도리 스티커 (없으면 생략) */
+  sticker?: StickerId;
   /** 도리가 "정확하게 답할 수 없는 질문"이라고 스스로 표시했는지 (true 면 사과 답이고 질문은 돌려줘요) */
   unable?: boolean;
   /** 도리가 "자해·자살 위험이 보인다"고 스스로 표시했는지 (true 면 서버가 정해 둔 안내로 바꾸고 질문은 돌려줘요) */
@@ -311,10 +316,11 @@ const CAREER_OFFTOPIC_CHIP = /세운|십성|지출|소비|차\s?(마시|한\s?�
 export function parseChatReply(value: unknown): ChatReply | null {
   const answer = parseChatAnswer(value);
   if (answer === null) return null;
-  const o = value as { followups?: unknown; choices?: unknown; visual?: unknown; unable?: unknown; risk?: unknown } | null;
+  const o = value as { followups?: unknown; choices?: unknown; visual?: unknown; unable?: unknown; risk?: unknown; sticker?: unknown } | null;
   const choices = cleanChoices(o?.choices);
+  const sticker = cleanSticker(o?.sticker);
   // 되묻는 답(선택지 2개)에서는 후속 질문 칩을 함께 보여 주지 않아요.
-  return { answer, followups: choices.length ? [] : cleanFollowups(o?.followups), choices, visual: cleanVisual(o?.visual), unable: o?.unable === true, risk: o?.risk === true };
+  return { answer, followups: choices.length ? [] : cleanFollowups(o?.followups), choices, visual: cleanVisual(o?.visual), unable: o?.unable === true, risk: o?.risk === true, ...(sticker ? { sticker } : {}) };
 }
 
 /** 마음이 많이 힘들다는 말이 보이면 AI 를 부르지 않고 정해 둔 답으로 안내해요. */

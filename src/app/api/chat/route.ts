@@ -163,7 +163,7 @@ export async function POST(request: Request) {
     const visual = outfit && reply.visual?.kind === "palette" ? null : reply.visual;
     // 마음을 달래는 답(🤍)에는 "가볍게 즐기면 기분이 풀리는 날" 같은 메모 카드를 붙이지 않아요
     const comfort = reply.answer.trimStart().startsWith("🤍");
-    return NextResponse.json({ answer: reply.answer, followups: reply.followups, choices: reply.choices, visual, outfit, memo: comfort ? null : memo, left: taken.left });
+    return NextResponse.json({ answer: reply.answer, followups: reply.followups, choices: reply.choices, visual, outfit, sticker: reply.sticker ?? null, memo: comfort ? null : memo, left: taken.left });
   } catch (err) {
     // 답을 못 만들었으면 쓴 질문을 돌려줘요.
     if (taken && taken.left >= 0) await refundQuestion(db, target, taken.via);
