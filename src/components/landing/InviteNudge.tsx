@@ -48,7 +48,7 @@ export default function InviteNudge() {
 
   return (
     <div data-testid="invite-nudge" className="mx-auto mt-5 max-w-xs rounded-2xl border border-amber-200 bg-amber-50 p-3 text-left">
-      <p className="text-xs font-bold text-amber-900">🎁 친구랑 같이 받자</p>
+      <p className="text-xs font-bold text-amber-900">🎁 친구 초대하고 친구랑 같이 선물도 받자!</p>
       <p className="mt-1 text-[11px] leading-relaxed text-amber-800">
         친구가 내 링크로 가입하고 첫 풀이를 마치면 <b>두 사람 모두 조약돌 {REF_REWARD}개</b>! 궁합을 한 번 볼 수 있어. (초대 보상은 한 달에 3번까지)
       </p>
