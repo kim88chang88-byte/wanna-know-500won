@@ -104,7 +104,7 @@ export function chapterOpening(key: string, f: OpeningFacts): string | null {
       return f.dayFull ? `앞에서 세운 네 기둥 가운데 ‘나’를 뜻하는 건 일주 ${f.dayFull}${f.dayReading ? `(${f.dayReading})` : ""}야. 이제 이 두 글자 속으로 들어가 볼게.` : null;
     case "elements":
       return f.elements.length && maxC !== minC
-        ? `제1장에서 일주 하나로 중심을 봤다면, 이번엔 사주 전체야. 네 사주에는 ${names(tops)}이 ${tops.length > 1 ? "각 " : ""}${maxC}개로 가장 많고, ${names(lows)}은 ${lows.length > 1 ? "각 " : ""}${minC}개로 가장 적어.${(() => { const ef = elementFocus(f.elements, f.dayFull?.[0] ?? "", f.yongsin); return [ef.centerWhy, ef.needWhy].filter(Boolean).map((t) => ` ${t}`).join(""); })()}`
+        ? `제1장에서 일주 하나로 중심을 봤다면, 이번엔 사주 전체야. 네 사주에는 ${names(tops)}이 ${tops.length > 1 ? "각 " : ""}${maxC}개로 가장 많고, ${names(lows)}은 ${lows.length > 1 ? "각 " : ""}${minC}개로 가장 적어.${(() => { const ef = elementFocus(f.elements, f.dayFull?.[0] ?? "", f.yongsin); return [ef.centerWhy, ef.needWhy].filter((t): t is string => !!t).map((t) => ` ${t.replace(/^[^.]*\.\s*/, "")}`).join(""); })()}`
         : null;
     case "tengods":
       return f.grade ? `기운의 양을 봤으니, ${f.grade} 사주인 네가 그 힘을 세상에 어떻게 쓰는지 볼게.` : null;

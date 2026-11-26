@@ -1299,8 +1299,8 @@ export default function PremiumBook({ report, flush = false, finale, previewBlur
           yearGanzhi: report.seyun?.ganzhi ?? null,
         })
       : null;
-  // 5쪽(일주 분석): AI 한 줄 대신 "앞에서 세운 네 기둥 가운데 ‘나’를 뜻하는 건 일주 ○○야…" 이음 말을 말풍선에 넣어요.
-  const nature5Opening = page.key === "nature" && opening ? opening : null;
+  // 5쪽(일주 분석)·오행 쪽: AI 한 줄 대신 "앞에서 세운 네 기둥 가운데 ‘나’를 뜻하는 건 일주 ○○야…" 이음 말을 말풍선에 넣어요.
+  const nature5Opening = (page.key === "nature" || page.key === "elements") && opening ? opening : null;
 
   return (
     <div

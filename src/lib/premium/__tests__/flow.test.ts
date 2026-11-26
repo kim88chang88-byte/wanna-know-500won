@@ -26,6 +26,9 @@ describe("chapterOpening", () => {
     const t = chapterOpening("elements", { ...f, elements: [{ name: "목", count: 0 }, { name: "화", count: 0 }, { name: "토", count: 3 }, { name: "금", count: 2 }, { name: "수", count: 3 }] });
     expect(t).toContain("땅 기운·물 기운이 각 3개로 가장 많고");
     expect(t).toContain("나무 기운·불 기운은 각 0개로 가장 적어");
+    // 같은 말을 두 번 하지 않아요 (앞 문장이 이미 개수를 말했으니 이유 문장만 이어요)
+    expect(t).not.toContain("3개로 같아");
+    expect(t).not.toContain("둘 다 0개");
   });
   it("동점이면 일간 오행을 중심으로, 용신 오행을 더 필요한 기운으로 구분해요", () => {
     const els = [{ name: "목", count: 0 }, { name: "화", count: 0 }, { name: "토", count: 3 }, { name: "금", count: 2 }, { name: "수", count: 3 }];
