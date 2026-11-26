@@ -570,7 +570,7 @@ export default function ChatApp({ initialCtx, initialMsgs, onChange, onBack, rea
       >
         <p className="mx-auto w-fit rounded-full border border-brand-100 bg-white/60 px-3 py-1 text-[11px] text-[#8a7fa8]">오늘 · 도리의 달빛 서재에서 🌙</p>
         <DoriRow face={face} text={greetingFor(ctx)} />
-        <div className="ml-11 flex justify-end pr-3" data-testid="greeting-sticker">
+        <div className="ml-11 flex justify-start" data-testid="greeting-sticker">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/images/stickers/hello.webp" alt="" height={104} className="h-[104px] w-auto select-none" draggable={false} />
         </div>
@@ -618,7 +618,7 @@ export default function ChatApp({ initialCtx, initialMsgs, onChange, onBack, rea
             />
             {m.visual && !live && !m.error && <VisualCard v={m.visual} onAsk={(q) => void send(q)} />}
             {m.sticker && !live && !m.error && !m.quiet && (
-              <div className="ml-11 flex justify-end pr-3" data-testid="dori-sticker">
+              <div className="ml-11 flex justify-start" data-testid="dori-sticker">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={`/images/stickers/${m.sticker}.webp`} alt="" height={104} className="h-[104px] w-auto select-none" draggable={false} />
               </div>
