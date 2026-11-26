@@ -777,8 +777,31 @@ export default function IntakeModal({ target, wallet = null, onClose, onComplete
     return () => clearTimeout(t);
   }, [resume, wallet]);
 
+  // "모두 동의하고 풀이 보기": 켜질 수 있는 선택 항목을 화면에 모두 켠 다음 바로 시작해요. (상대방 정보 저장은 따로 확인이 필요해서 켜지 않아요)
+  const [allGo, setAllGo] = useState(false);
+  useEffect(() => {
+    if (!allGo || !form.consent) return;
+    setAllGo(false);
+    proceed();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [allGo, form.consent]);
+  function agreeAllAndGo() {
+    setForm((f) => ({ ...f, consent: true }));
+    if (loggedIn) {
+      setSaveProfile(true);
+      setSaveOther(false);
+      setSaveVault(true);
+    }
+    if (buildConcern(form)) setShareConcern(true);
+    setAllGo(true);
+  }
+
   function next(e: React.FormEvent) {
     e.preventDefault();
+    proceed();
+  }
+
+  function proceed() {
     const problem = step === "pdate" || step === "ptime" || step === "pgender" ? validatePartnerStep(step as PartnerStepId, partner) : validateStep(step as StepId, form);
     if (problem) {
       setError(problem);
@@ -1291,7 +1314,20 @@ export default function IntakeModal({ target, wallet = null, onClose, onComplete
             />
           )}
 
-          <div className="mt-5 flex gap-2">
+          {isLast && step === "consent" && (
+            <div className="mt-4">
+              <button
+                type="button"
+                data-testid="consent-all-go"
+                onClick={agreeAllAndGo}
+                className="w-full rounded-full border-[1.5px] border-brand-500 bg-white py-2.5 text-sm font-bold text-brand-700 hover:bg-brand-50 active:scale-[0.99]"
+              >
+                모두 동의하고 풀이 보기 ✧
+              </button>
+              <p className="mt-1.5 text-center text-[10.5px] text-gray-400">위의 선택 항목까지 모두 켜고 바로 시작해. 필수만 동의하려면 아래 &lsquo;풀이 보기&rsquo;를 눌러.</p>
+            </div>
+          )}
+          <div className="mt-3 flex gap-2">
             {stepIndex > 0 && (
               <button
                 type="button"
