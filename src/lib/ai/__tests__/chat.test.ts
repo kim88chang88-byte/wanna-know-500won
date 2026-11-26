@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { timeAlreadySaid, fixTypos, cleanFollowups, cleanVisual, cleanHistory, CRISIS_ANSWER, earlierQuestions, isCrisis, parseChatAnswer, parseChatReply, parseRisk, limitNameInHighlight, polishChatAnswer, recentEndings, usedBasis, usedActions, nowContext, visualAllowed, CHAT_SYSTEM_PROMPT } from "../chat";
+import { dropBannedSuggestions, softenAskEnding, timeAlreadySaid, fixTypos, cleanFollowups, cleanVisual, cleanHistory, CRISIS_ANSWER, earlierQuestions, isCrisis, parseChatAnswer, parseChatReply, parseRisk, limitNameInHighlight, polishChatAnswer, recentEndings, usedBasis, usedActions, nowContext, visualAllowed, stripInternalTerms, CHAT_SYSTEM_PROMPT } from "../chat";
 import { parseCtx } from "@/lib/chatServer";
 import { summarizeReport } from "@/lib/chatContext";
 
@@ -316,5 +316,31 @@ describe("limitNameInHighlight", () => {
   });
   it("프롬프트가 중요한 문장에서만 이름 강조를 허용한다", () => {
     expect(CHAT_SYSTEM_PROMPT).toContain("강조 문장");
+  });
+});
+
+describe("11-27 점검 후속 규칙", () => {
+  it("적어 보라는 문장은 지우고, 사용자가 적는 법을 물었을 땐 둬요", () => {
+    const a = "오늘은 마음을 가라앉히는 게 먼저야. 이번 주 안에 마감 날짜를 적어 봐.\n\n그리고 천천히 이야기해 보자.";
+    expect(dropBannedSuggestions(a, "연애 고민이야", false)).not.toContain("적어");
+    expect(dropBannedSuggestions(a, "일기 쓰는 법 알려줘", false)).toContain("적어");
+  });
+  it("연애 질문에서는 알림 끄기 제안을 지워요", () => {
+    const a = "답장이 늦으면 속이 타고 자꾸 폰을 보게 되지. 오늘 밤에는 스마트폰 알림을 잠시 꺼 두고 쉬어 봐. 내일 가볍게 안부를 건네도 좋고, 상대의 평소 속도를 한 번 떠올려 보는 것도 도움이 돼.";
+    expect(dropBannedSuggestions(a, "답장이 느려", true)).not.toContain("알림");
+    expect(dropBannedSuggestions(a, "답장이 느려", false)).toContain("알림");
+  });
+  it("건 어때? 로 끝나는 답이 세 번째부터는 해 봐로 바뀐다", () => {
+    const prev = ["…해 보는 건 어때?", "…읽어 보는 건 어때?"];
+    expect(softenAskEnding("오늘 밤 환기해 보는 건 어때?", prev)).toBe("오늘 밤 환기해 봐.");
+    expect(softenAskEnding("오늘 밤 환기해 보는 건 어때?", prev.slice(0, 1))).toBe("오늘 밤 환기해 보는 건 어때?");
+  });
+  it("도리가 사용자에게 묻는 말투의 칩은 거른다", () => {
+    expect(cleanFollowups(["결혼을 생각할 때 가장 걸리는 부분은 뭐야?", "상대가 달라졌는지 어떻게 확인해?"])).toEqual(["상대가 달라졌는지 어떻게 확인해?"]);
+  });
+  it("오타 아니서·너가 와 어려운 말 원국을 바로잡는다", () => {
+    expect(fixTypos("기다려야 할지, 아니서 먼저 할지 고민이야.")).toContain("아니면 먼저");
+    expect(fixTypos("이거 저번에 너가 좋아한다고 했던")).toContain("네가 좋아한다고");
+    expect(stripInternalTerms("원국이 부딪히는 흐름")).toContain("타고난 사주가 부딪히는");
   });
 });
