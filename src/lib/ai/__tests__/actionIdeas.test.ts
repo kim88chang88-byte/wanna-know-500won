@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { ACTION_POOL, actionIdeas } from "../actionIdeas";
+import { ACTION_POOL, LACK_ACTIONS, actionIdeas } from "../actionIdeas";
 
 describe("actionIdeas", () => {
   it("3개를 서로 다르게 골라요", () => {
@@ -33,5 +33,13 @@ describe("actionIdeas", () => {
         r.forEach((i) => expect(home.test(i), `${q} → ${i}`).toBe(false));
       }
     }
+  });
+  it("부족한 기운이 있으면 그 기운을 채우는 행동 2개가 먼저 와요", () => {
+    const r = actionIdeas("요즘 피곤해", 0, 100, [], "water");
+    expect(r).toHaveLength(3);
+    expect(r.filter((x) => LACK_ACTIONS.water.includes(x))).toHaveLength(2);
+  });
+  it("식상한 집안 정돈·침구·저녁 메뉴 후보는 없어요", () => {
+    ACTION_POOL.forEach((x) => expect(/침구|환기|책상 위 물건|저녁 메뉴|음미/.test(x)).toBe(false));
   });
 });

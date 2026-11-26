@@ -144,6 +144,14 @@ describe("polishChatAnswer", () => {
     ];
     expect(polishChatAnswer(`은혁아, ${body}`, h, "은혁")).toBe(body);
   });
+  it("답 맨 앞에 이모지가 있어도 이어지는 답의 호명은 뗀다", () => {
+    const h = [
+      { role: "user" as const, text: "요즘 어때?" },
+      { role: "dori" as const, text: "요즘 흐름이 좋아." },
+      { role: "user" as const, text: "또 물어볼게" },
+    ];
+    expect(polishChatAnswer(`🌿\n은혁아, ${body}`, h, "은혁")).toBe(`🌿\n${body}`);
+  });
   it("첫 답에서는 이름을 그대로 둔다", () => {
     const h = [{ role: "user" as const, text: "처음 질문" }];
     expect(polishChatAnswer(`은혁님, ${body}`, h, "은혁")).toBe(`은혁님, ${body}`);
@@ -181,6 +189,7 @@ describe("끝맺음 반복 막기", () => {
     expect(CHAT_SYSTEM_PROMPT).toContain("인사·짧은 안부");
     expect(CHAT_SYSTEM_PROMPT).toContain("사주 근거 필수");
     expect(CHAT_SYSTEM_PROMPT).toContain("도리 스티커(sticker)");
+    expect(CHAT_SYSTEM_PROMPT).toContain("같은 문장 반복 금지");
     expect(CHAT_SYSTEM_PROMPT).toContain("같은 기운·글자를 다시 써도 돼");
     expect(CHAT_SYSTEM_PROMPT).toContain("내용 없이 넘어가면 규칙 위반");
     expect(CHAT_SYSTEM_PROMPT).toContain("두 갈래 고르기 질문");

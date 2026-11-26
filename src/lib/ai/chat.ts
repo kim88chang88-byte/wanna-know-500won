@@ -17,7 +17,7 @@ import { modelFor } from "./llm";
 import { containsForbidden, isGeneric } from "./reading";
 import { tidyMarkup } from "@/lib/chatMarkup";
 import { LOVE_Q, loveFacts } from "./loveFacts";
-import { actionIdeas } from "./actionIdeas";
+import { actionIdeas, LACK_LABEL, type LackEl } from "./actionIdeas";
 import { MONEY_Q, moneyFacts } from "./moneyFacts";
 import { CAREER_Q, MONEY_WORDS, careerFacts } from "./careerFacts";
 import { recommendFacts, recommendVisual } from "./menuHobby";
@@ -73,6 +73,7 @@ export const CHAT_SYSTEM_PROMPT = `너는 "도리", 맑은 옹달샘의 수달 �
 - 오행 이름(나무·불·땅·쇠·물)을 기운으로 말할 때는 [[물]]처럼 이중 대괄호로 감싸. 화면이 그림 알약으로 바꿔 줘. 한 답에 최대 3번, 입력의 사주 정보에 있는 오행만, 그 밖에는 대괄호를 쓰지 마.
 - 가장 핵심이 되는 한 문장만 **이렇게** 별표 두 개로 감싸(한 답에 한 곳만). 그 밖에는 마크다운을 쓰지 마.
 - 입력에 "추천재료"가 있으면 메뉴·취미 추천 질문이야. 재료의 후보 안에서 1~3가지만 골라 이름을 말하고, 근거는 "기준기운"을 쉬운 말로 한 줄만 써. 질문에 끼니가 없으면 재료의 끼니를 그대로 쓰되 "지금이면 점심 쪽이겠다"처럼 한 마디로 짚어. "규칙"을 반드시 지켜. 의학·다이어트·치료 표현은 쓰지 말고 기분 좋은 참고로만 말해.
+- 같은 문장 반복 금지: 대화 기록에서 도리가 이미 한 말과 같은 문장, 거의 같은 틀의 문장(예: "단단한 땅 기운에 불 기운이 세 개로 쏠려 있어서 머릿속이…")을 다시 쓰지 마. 같은 사주 근거를 다시 쓰더라도 문장은 새로 쓰고, 이번 질문에서 그 기운이 어떻게 다르게 작용하는지로 풀어 줘. 첫 문장도 직전 답과 같은 틀로 시작하지 마. 이름은 첫 답에서만 부르고 이어지는 답은 이름 없이 시작해.
 - 별 감흥 없는 일반 건강 팁은 제안하지 마: "따뜻한 물·차 한 잔 마시기", "물 한 컵", "창문 열고 숨 쉬기", "일찍 눕기", "스트레칭" 같은 말은 어느 질문에도 행동으로 권하지 마(사용자가 직접 물을 때만 예외). 행동은 이 질문의 내용(사람·돈·일·공부·마음)과 바로 이어지는 구체적인 것으로만 줘.
 - 도리 스티커(sticker): 답 끝에 붙는 작은 그림이야. 답이 이 감정·상황과 딱 맞을 때만 하나 골라(전체 답의 3분의 1 이하, 보통은 "none"). 후보: ${STICKERS.map((x) => `${x.id}(${x.hint})`).join(", ")}. 억지로 맞추지 말고, 어울리는 게 없으면 "none". 위기·자해 얘기, 사기 의심 경고, 정확히 답할 수 없다는 사과에는 쓰지 마. 스티커에 박힌 글자(예: "안녕!", "토닥토닥")와 답의 내용이 어긋나면 안 돼. 스티커를 고르면 answer 본문에 그 스티커 이름이나 그림 이야기는 쓰지 마.
 - 큰 그림 카드(visual): 사용자가 "무엇을 적을지(노트)", "해 볼 일(체크리스트)", "언제가 좋은지(시간표)", "소품·음식 같은 추천(소품)", "어울리는 색(색 견본)", "어울리는 향(향 카드)", "들을 노래(노래 카드)", "여행지 후보(여행 카드)", "한 지역 코스(코스 카드)", "물건을 어디에 두면 좋은지(방 핀)"을 물을 때만 answer 와 함께 카드를 하나 붙여. 그 밖의 질문은 kind 를 "none" 으로 해. 카드는 answer 의 내용을 눈에 보이게 요약한 것이라 answer 와 어긋나면 안 돼. 연속된 답마다 붙이지 말고, 직전 도리 답에 카드가 있었다면 이번엔 "none". 사용자가 그 종류를 직접 묻지 않았는데 답에 소품·색·향이 나왔다는 이유로 카드를 붙이지 마(그런 건 글로만 말해).
@@ -299,10 +300,11 @@ export function polishChatAnswer(answer: string, history: ChatMsg[], name?: stri
   if (n && prevDori.length > 0) {
     const esc = (x: string) => x.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
     const forms = [`${n}님`, callName(n)];
-    const lead = new RegExp(`^(?:${forms.map(esc).join("|")})[,，]?\\s*`);
-    if (lead.test(a) && prevDori.some((m) => forms.some((f) => m.text.includes(f)))) {
-      const rest = a.replace(lead, "").trim();
-      if (rest.length >= CHAT_MIN) a = rest;
+    // 답 맨 앞에 이모지가 있어도(🌿 같은) 그 뒤의 호명을 지워요. 이름은 첫 답에서만 불러요.
+    const lead = new RegExp(`^((?:[^\\s\\p{L}\\p{N}]+\\s*)?)(?:${forms.map(esc).join("|")})[,，]?\\s*`, "u");
+    if (lead.test(a)) {
+      const rest = a.replace(lead, "$1").trim();
+      if (rest.replace(/^[^\s\p{L}\p{N}]+\s*/u, "").length >= CHAT_MIN) a = rest;
     }
   }
   if (n && prevDori.length > 0) a = limitNameInHighlight(a, n, prevDori.map((m) => m.text));
@@ -421,6 +423,18 @@ export function earlierQuestions(history: ChatMsg[]): string {
 const EL_PILL: Record<string, string> = { wood: "나무", fire: "불", earth: "땅", metal: "쇠", water: "물" };
 const EL_WORDS = ["나무", "불", "땅", "쇠", "물"] as const;
 const EL_ALIAS: Record<string, (typeof EL_WORDS)[number]> = { 목: "나무", 화: "불", 토: "땅", 금: "쇠", 수: "물", 나무: "나무", 불: "불", 땅: "땅", 쇠: "쇠", 물: "물" };
+
+/** 사주에서 가장 적은 오행. 행동 제안을 "부족한 기운 채우기"와 이어 주려고 써요. (같으면 물·불·나무·땅·쇠 순) */
+export function weakestElement(chart: SajuChart): LackEl | null {
+  const f = analyzeChart(chart);
+  const order: LackEl[] = ["water", "fire", "wood", "earth", "metal"];
+  let best: LackEl | null = null;
+  for (const e of order) {
+    const n = f.elementCounts[e] ?? 0;
+    if (best === null || n < (f.elementCounts[best] ?? 0)) best = e;
+  }
+  return best;
+}
 
 /** 이 대화에서 사주 근거로 쓸 기운: 일간 기운과 가장 많은 오행. 답마다 다른 오행을 중심처럼 말하지 않게 고정해요. */
 export function coreElements(chart: SajuChart): string[] {
@@ -552,12 +566,13 @@ export function buildChatPrompt(i: ChatFactsInput, history: ChatMsg[], now: Date
   const used = usedBasis(history);
   const acts = usedActions(history);
   const dayOfYear = Math.floor((now.getTime() - Date.UTC(now.getUTCFullYear(), 0, 0)) / 86400000);
-  const ideas = actionIdeas(askedNow, history.length, dayOfYear, ACTION_KINDS.filter(([name]) => acts.some((x) => x.startsWith(name))).map(([, re]) => re));
+  const lack = weakestElement(i.chart);
+  const ideas = actionIdeas(askedNow, history.length, dayOfYear, ACTION_KINDS.filter(([name]) => acts.some((x) => x.startsWith(name))).map(([, re]) => re), lack ?? undefined);
   const lastQ = [...history].reverse().find((m) => m.role === "user")?.text ?? "";
   let regs = regionsIn(lastQ);
   if (regs.length === 0 && /코스|일정|짜\s?줘/.test(lastQ)) regs = regionsIn(history.slice(-4).map((m) => m.text).join(" ")).slice(0, 2);
   const travelBlock = regs.length ? `여행 코스 재료(이 안의 명소·활동만 써):\n${regs.slice(0, 3).map(travelFacts).join("\n")}\n\n` : "";
-  return `계산된 사주 정보:\n${JSON.stringify(facts, null, 2)}\n\n방금 본 풀이(요약):\n${i.summary.slice(0, SUMMARY_MAX) || "(없음)"}\n\n${earlier ? `앞서 물어본 것(오래된 대화 요약): ${earlier}\n\n` : ""}${endings ? `직전 도리 답의 끝맺음(같은 표현·문형으로 끝내지 마): ${endings}\n\n` : ""}${`지금 시점(한국 시간): ${nowContext(now)}. 직업·학교 여부는 사용자가 말하기 전까지 모름.${timeAlreadySaid(history) ? " 이미 시점을 말함: 요일·시간대·계절을 이번 답에서 다시 말하지 마." : ""}\n\n`}${travelBlock}${acts.length ? `이미 권한 행동(같은 종류를 또 권하지 마): ${acts.join(", ")}\n\n` : ""}${ideas.length ? `이번 답의 작은 행동 후보(어울리는 하나만 골라 구체적으로 써. 나열 금지): ${ideas.join(" / ")}\n\n` : ""}${used.length ? `이미 말한 사주 근거(더 맞으면 다시 써도 되지만 앞 문장을 반복하지 말고 이번 질문에 맞게 새로 해석해): ${used.join(", ")}\n\n` : ""}대화 기록(마지막 줄이 새 질문):\n${log}\n\n마지막 사용자 질문에 answer 와 followups 로 답해 줘.`;
+  return `계산된 사주 정보:\n${JSON.stringify(facts, null, 2)}\n\n방금 본 풀이(요약):\n${i.summary.slice(0, SUMMARY_MAX) || "(없음)"}\n\n${earlier ? `앞서 물어본 것(오래된 대화 요약): ${earlier}\n\n` : ""}${endings ? `직전 도리 답의 끝맺음(같은 표현·문형으로 끝내지 마): ${endings}\n\n` : ""}${`지금 시점(한국 시간): ${nowContext(now)}. 직업·학교 여부는 사용자가 말하기 전까지 모름.${timeAlreadySaid(history) ? " 이미 시점을 말함: 요일·시간대·계절을 이번 답에서 다시 말하지 마." : ""}\n\n`}${travelBlock}${acts.length ? `이미 권한 행동(같은 종류를 또 권하지 마): ${acts.join(", ")}\n\n` : ""}${ideas.length ? `이번 답의 작은 행동 후보${lack ? `(앞의 두 가지는 내 사주에 가장 적은 ${LACK_LABEL[lack]} 기운을 채우는 행동이야)` : ""}(이 질문과 바로 이어지는 하나만 골라 구체적으로 써. 어울리는 게 없으면 후보를 쓰지 말고 질문에 맞는 행동을 직접 만들어. ${lack ? `${LACK_LABEL[lack]} 기운 행동을 고르면 왜 그 행동인지 한 문장으로 사주 근거와 이어 줘. ` : ""}나열 금지): ${ideas.join(" / ")}\n\n` : ""}${used.length ? `이미 말한 사주 근거(더 맞으면 다시 써도 되지만 앞 문장을 반복하지 말고 이번 질문에 맞게 새로 해석해): ${used.join(", ")}\n\n` : ""}대화 기록(마지막 줄이 새 질문):\n${log}\n\n마지막 사용자 질문에 answer 와 followups 로 답해 줘.`;
 }
 
 const REST_SENTENCE = /(창문|산책|알림을?\s?(잠시\s?)?(끄|꺼)|세수|숨을\s?(길게|깊게)|머리를\s?식)/;
