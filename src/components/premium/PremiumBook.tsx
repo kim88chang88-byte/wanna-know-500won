@@ -320,15 +320,23 @@ function MonthBars({ table }: { table: BookTable }) {
 }
 
 const GOD_HANJA: Record<string, string> = { 비겁: "比", 식상: "食", 재성: "財", 관성: "官", 인성: "印" };
+const GOD_IMG: Record<string, string> = { 비겁: "bigyeop", 식상: "siksang", 재성: "jaeseong", 관성: "gwanseong", 인성: "inseong" };
 
-/** 십성 돌 한 개: 어두운 남색 타일에 금빛 한자. 가장 두드러진 묶음은 금빛으로 채워 */
+/** 십성 돌 한 개: 묶음마다 다른 돌 그림 위에 한자를 얹어요. 가장 두드러진 묶음은 금빛 테두리로 빛나요 */
 function GodStone({ label, hot }: { label: string; hot: boolean }) {
+  const img = GOD_IMG[label];
   return (
-    <div
-      className={`relative flex h-[48px] w-[48px] items-center justify-center overflow-hidden rounded-[15px] shadow-[0_3px_6px_rgba(0,0,0,0.45)] ring-1 ${hot ? "bg-gradient-to-br from-[#f6e2ae] to-[#c99f52] ring-white/40" : "bg-gradient-to-br from-[#2d3466] to-[#1d2247] ring-[#e6c887]/35"}`}
-    >
-      <div aria-hidden="true" className="absolute inset-x-0 top-0 h-1/3 bg-gradient-to-b from-white/25 to-transparent" />
-      <span aria-hidden="true" className={`font-serifKr text-[24px] font-black leading-none ${hot ? "text-[#3a2a07]" : "text-[#e6c887]"}`}>{GOD_HANJA[label] ?? label[0]}</span>
+    <div className={`relative flex h-[52px] w-[52px] items-center justify-center ${hot ? "drop-shadow-[0_0_6px_rgba(240,217,160,0.85)]" : "drop-shadow-[0_3px_3px_rgba(0,0,0,0.5)]"}`}>
+      {img ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={`/images/gods/${img}.webp`} alt="" width={52} height={52} className="absolute inset-0 h-full w-full select-none object-contain" draggable={false} />
+      ) : (
+        <span aria-hidden="true" className="absolute inset-0 rounded-[14px] bg-[#2d3466]" />
+      )}
+      {hot && <span aria-hidden="true" className="absolute inset-0 rounded-[15px] ring-2 ring-[#f0d9a0]" />}
+      <span aria-hidden="true" className="relative font-serifKr text-[22px] font-black leading-none text-[#fff3cf] [paint-order:stroke_fill] [-webkit-text-stroke:3px_rgba(10,8,20,0.85)] [text-shadow:0_1px_3px_rgba(0,0,0,0.6)]">
+        {GOD_HANJA[label] ?? label[0]}
+      </span>
     </div>
   );
 }
@@ -348,9 +356,9 @@ function GodBars({ table }: { table: BookTable }) {
             <div key={r.label} data-testid="god-row" className="flex w-[18%] min-w-0 flex-col items-center gap-1.5">
               <div className="flex min-h-[110px] flex-col-reverse items-center gap-1 pb-0.5">
                 {r.locked ? (
-                  <div className="flex h-[48px] w-[48px] items-center justify-center rounded-[15px] border-[1.5px] border-dashed border-[#4a5290] text-[16px] opacity-70">🔒</div>
+                  <div className="flex h-[52px] w-[52px] items-center justify-center rounded-[15px] border-[1.5px] border-dashed border-[#4a5290] text-[16px] opacity-70">🔒</div>
                 ) : r.n === 0 ? (
-                  <div className="h-[48px] w-[48px] rounded-[15px] border-[1.5px] border-dashed border-[#4a5290] opacity-70" />
+                  <div className="h-[52px] w-[52px] rounded-[15px] border-[1.5px] border-dashed border-[#4a5290] opacity-70" />
                 ) : (
                   Array.from({ length: r.n }, (_, i) => <GodStone key={i} label={r.label} hot={hot} />)
                 )}
