@@ -179,6 +179,8 @@ describe("끝맺음 반복 막기", () => {
   it("프롬프트에 직전 끝맺음 경고가 들어가고, 시스템 프롬프트에 질문 종류별 규칙이 있어요", () => {
     expect(CHAT_SYSTEM_PROMPT).toContain("마음이 힘들다는 말");
     expect(CHAT_SYSTEM_PROMPT).toContain("인사·짧은 안부");
+    expect(CHAT_SYSTEM_PROMPT).toContain("사주 근거 필수");
+    expect(CHAT_SYSTEM_PROMPT).toContain("내용 없이 넘어가면 규칙 위반");
     expect(CHAT_SYSTEM_PROMPT).toContain("두 갈래 고르기 질문");
     // 11-25 점검: 주제별 행동 안내가 "점수 매기기·숫자로 적기·표 적기"를 직접 시키던 문장은 없어야 해요
     expect(CHAT_SYSTEM_PROMPT).not.toContain("점수 매겨 보라는 행동");
