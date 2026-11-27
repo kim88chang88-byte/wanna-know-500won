@@ -288,20 +288,6 @@ const SCENE: Record<string, Record<string, string>> = {
 
 type Tense = "past" | "now" | "future";
 
-/** 지난 시기: 열어 두고 말하는 구체적인 이야기(그랬을 수 있어) */
-const PAST_DESC: Record<Group, string> = {
-  비겁: "내 방식과 주관이 또렷해서 남의 뜻에 맞추기보다 스스로 해 보려는 마음이 컸을 수 있어. 친구나 경쟁 상대와 부딪히며 ‘나는 누구지’를 배운 기억이 있다면 이 기운 때문일 수 있어.",
-  식상: "하고 싶은 말과 끼가 안에서 꿈틀대서 이것저것 해 보고 싶은 마음이 컸을 수 있어. 규칙이나 정해진 틀보다 호기심이 앞서 어른들과 부딪힌 기억이 있다면 이 기운 때문일 수 있어.",
-  재성: "돈과 현실, 눈에 보이는 결과에 눈을 뜨기 시작했을 수 있어. 일과 소비에서 시행착오를 겪으며 ‘세상은 이렇게 돌아가는구나’를 배운 기억이 있다면 이 기운 때문일 수 있어.",
-  관성: "해야 할 일과 책임, 사회의 시선이 어깨에 얹히는 느낌이 있었을 수 있어. 눈치를 보거나 버텨야 했던 순간이 있었다면 이 기운 때문일 수 있어.",
-  인성: "배우고 보호받는 흐름이 중심이라, 안쪽에서 생각이 깊어지고 혼자 곱씹는 시간이 많았을 수 있어. 공부나 사람에게서 힘을 얻은 기억이 있다면 이 기운 때문일 수 있어.",
-};
-const PAST_TILT: Record<0 | 1 | 2 | 3, string> = {
-  0: "이 시기에는 새로 시작하고 자라는 느낌이 컸을 수 있어.",
-  1: "힘이 한창 차올라서 마음먹은 만큼 밀고 나가던 때였을 수 있어.",
-  2: "속도가 더디게 느껴지고 한 템포 쉬어 가야 했던 때였을 수 있어.",
-  3: "겉으로 드러나기보다 안으로 쌓고 준비하던 시간이 길었을 수 있어.",
-};
 /** 지난 시기 마무리: 의지를 칭찬하는 문장(맞든 달랐든 똑같이 읽혀요) */
 const PAST_PRAISE: Record<Group, string> = {
   비겁: "혹시 이야기가 네 기억과 달랐어도 괜찮아. 사주가 준 재료보다 네가 의지로 더 좋게 만들어 온 시간이었고, 그때 지킨 주관이 지금 네 중심이 됐어.",
@@ -399,14 +385,6 @@ const SCENE_VOICE: Record<Group, Record<Tense, Array<[string, string]>>> = {
   },
 };
 
-/** 반전·의미: 좋은 시기(0·1)와 쉬어 가는 시기(2·3)를 나눠 써요. 단정하지 않아요. */
-const TURN_POOL: Record<0 | 1 | 2 | 3, string[]> = {
-  0: ["그런데 이 시기는 흔들림이 약점이라기보다, 새로 자라는 힘이 먼저 올라오는 때에 가까워. 작게 시작해 두면 뒤에서 크게 받쳐 줄 가능성이 있어.", "겉으로는 서툴러 보여도, 이 시기의 에너지는 오르막이라 시작한 만큼 붙는 편이야. 서두르기보다 꾸준히 쌓는 쪽이 잘 맞아."],
-  1: ["그런데 이 시기는 힘이 한창 찬 때라, 마음먹은 일을 밀고 나가기 좋은 편이야. 다만 힘이 넘칠수록 한 템포 쉬며 듣는 여유가 오래 가는 비결이야.", "이 시기의 에너지는 정점 근처라 성과가 눈에 보이기 쉬워. 그래도 ‘다 이뤄진다’고 단정할 수는 없고, 움직인 만큼 손에 잡힌다고 보는 게 정확해."],
-  2: ["그런데 이 시기는 성과를 더 밀어붙이라는 때가 아니라, 속도를 낮추고 정리하며 다음을 준비하라는 신호에 가까워. 쉬어 가는 것도 이 시기의 중요한 일이야.", "에너지가 한풀 가라앉는 시기라, 무리해서 넓히기보다 덜어 내고 지키는 쪽이 잘 맞아. 느려 보여도 뒤에서 힘이 되는 시간이야."],
-  3: ["그런데 이 시기는 겉으로 드러나는 일이 적은 대신, 안쪽에 씨앗을 심고 갈무리하는 때에 가까워. 보이지 않아도 쌓이는 시간이라고 생각해도 좋아.", "드러나는 성과보다 준비와 정리가 어울리는 시기라, 조급해하지 않고 기반을 만들면 다음 계절에 도움이 돼."],
-};
-
 /** MBTI 한 문장이 들어갈 자리. 화면에서 입력한 MBTI 가 있으면 문장으로 바뀌고, 없으면 지워져요. */
 export const MBTI_MARK = "⟦MBTI⟧";
 
@@ -452,12 +430,14 @@ export function decadeCards(r: SajuResult, hourUnknown: boolean): BookSection[] 
     const overlap = `${intro} ${elLine} ${link}`;
     // ② 장면과 속마음
     const sv = SCENE_VOICE[g][tense][i % 2];
-    const scenePara = `${child}${ageContext(mid)} ${sv[0]} ${sv[1]}`;
+    const sceneBase = `${child}${ageContext(mid)} ${sv[0]} ${sv[1]}`;
     // ③ 반전·의미 (좋은 시기와 쉬어 가는 시기를 나눠서)
-    const desc = tense === "past" ? `${PAST_DESC[g]} ${st ? PAST_TILT[cls] : ""}` : tense === "now" ? NOW_DESC[g] : FUTURE_DESC[g];
-    const turn = tense === "past" ? "" : ` ${TURN_POOL[cls][i % 2]}`;
+    // 길이를 줄이려고: 지난 시기는 ②(장면과 속마음)와 겹쳐서 이 문단을 빼고, 지금·앞으로는 일반론인 반전 문장(TURN_POOL)을 뺐어요.
+    const desc = tense === "past" ? "" : tense === "now" ? NOW_DESC[g] : FUTURE_DESC[g];
     const wantMbti = tense === "now" || i === peakIdx;
-    const turnPara = `${desc}${turn}${wantMbti ? ` ${MBTI_MARK}` : ""}`;
+    const turnPara = desc ? `${desc}${wantMbti ? ` ${MBTI_MARK}` : ""}` : "";
+    // 이 문단이 없는 카드에서 MBTI 한 문장이 필요하면 장면 문단 끝에 붙여요.
+    const scenePara = !desc && wantMbti ? `${sceneBase} ${MBTI_MARK}` : sceneBase;
     // ④ 지금의 나
     let nowPara = "";
     if (tense === "past") nowPara = PAST_PRAISE[g];
