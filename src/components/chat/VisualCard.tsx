@@ -126,7 +126,7 @@ function PickCard({ v, kind }: { v: ChatVisual; kind: "food" | "hobby" }) {
           return (
             <div key={i} className="min-w-0 text-center">
               <div
-                className={`grid aspect-square place-items-center rounded-full shadow-[inset_0_-6px_12px_rgba(255,255,255,0.6),inset_0_4px_8px_#fff,0_8px_14px_rgba(122,107,208,0.18)] ${i === 1 ? "translate-y-2" : ""}`}
+                className={`grid aspect-square place-items-center rounded-full shadow-[inset_0_-6px_12px_rgba(255,255,255,0.6),inset_0_4px_8px_#fff,0_8px_14px_rgba(122,107,208,0.18)] ${i === 1 && v.items.length === 3 ? "translate-y-2" : ""} ${v.items.length < 3 ? "mx-auto w-[78%]" : ""}`}
                 style={{ background: `radial-gradient(circle at 30% 25%, #fff, ${a} 55%, ${b})` }}
               >
                 <Sticker kind={kind} label={it.label} />
@@ -144,7 +144,7 @@ function Lucky({ v }: { v: ChatVisual }) {
   const tints: Array<[string, string]> = [["#cfe0ff", "#e9d9ff"], ["#ffe3ec", "#ffe9c9"], ["#d4f3e6", "#d6e6ff"]];
   return (
     <Paper title={v.title || "행운 세트"}>
-      <div className="grid grid-cols-3 gap-2 pt-1">
+      <div className={`grid gap-3 pt-1 ${v.items.length === 1 ? "mx-auto max-w-[210px] grid-cols-1" : v.items.length === 2 ? "grid-cols-2" : "grid-cols-3"}`}>
         {v.items.map((it, i) => {
           const src = propSrc(it.label);
           const [a, b] = tints[i % 3];

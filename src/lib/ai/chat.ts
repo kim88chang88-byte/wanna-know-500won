@@ -1,7 +1,7 @@
 import { PALETTE, SPOTS } from "@/lib/visualPalette";
 import { STICKERS, STICKER_IDS, cleanSticker, type StickerId } from "./stickers";
 import { SCENTS } from "@/lib/scents";
-import { PROPS, propCatalog } from "@/lib/props";
+import { PROPS, PROP_TAGS, placeInQuestion, propCatalog, propFitsPlace } from "@/lib/props";
 import { SONGS, songCatalog, stripUnknownSongs } from "@/lib/songs";
 import { TRAVEL, travelCatalog, travelFacts, regionsIn } from "@/lib/travel";
 import { analyzeChart } from "@/lib/saju/analysis";
@@ -82,7 +82,7 @@ export const CHAT_SYSTEM_PROMPT = `너는 "도리", 맑은 옹달샘의 수달 �
   - note: 노트에 적어 볼 예시 문장 2~4줄(items[].label 에 문장, 나머지는 빈 글자). title 은 노트 제목(12자 이내).
   - checklist: 이번에 해 볼 작은 행동 2~5개(label). 아주 작고 쉬운 것만.
   - timeline: 시간대 3개(icon 에 이모지 1개, label 에 "저녁 9시" 같은 시간, sub 에 그때 하면 좋은 일, 가장 추천하는 한 곳만 best 를 true).
-  - lucky: 어울리는 소품 3개. label 은 반드시 다음 중 하나만(괄호는 어울리는 오행, 라벨에는 쓰지 마): ${propCatalog()}. sub 는 그 소품을 곁에 두면 좋은 이유 짧게(icon 은 빈 글자). 입력의 사주 정보에 있는 오행과 연결되는 소품만. 특정 상품·브랜드·약·음식 효능 단정 금지.
+  - lucky: 어울리는 소품 1~2개(많아야 2개). label 은 반드시 다음 중 하나만(괄호는 어울리는 오행·역할·둘 곳, 라벨에는 쓰지 마): ${propCatalog()}. 고르는 순서: ① 입력의 사주 정보에서 넘치는 오행(가장 많은 것)과 부족한 오행(0~1개) 중 이 질문에 맞는 쪽을 정해. ② 넘치는 기운이 이유면 그 기운을 덜어 주는 오행(목→화, 화→토, 토→금, 금→수, 수→목)의 소품을, 부족한 기운이 이유면 그 오행(또는 그 오행을 낳아 주는 오행)의 소품을 골라. 이미 넘치는 오행의 소품을 또 권하지 마. ③ 질문에 장소(침실·책상·현관·거실·주방·가방)가 나오면 그 장소에 둘 수 있는 소품(괄호의 둘 곳)만 골라. ④ 사용자가 말한 상황(이사·이직·시험·연애 등)이 있으면 sub 에 한 번 녹여. sub 는 "사주 근거 → 이 소품이 해 주는 일"을 한 문장(60자 안쪽, icon 은 빈 글자)으로 써. 소품이 둘이면 오행이나 역할이 서로 달라야 해. 쿠션·담요·조약돌처럼 아무 질문에나 붙는 소품을 습관처럼 고르지 마(근거와 장소가 맞을 때만). 특정 상품·브랜드·약·음식 효능 단정 금지.
   - palette: 어울리는 색 2~3개. label 은 반드시 다음 중 하나만: ${Object.keys(PALETTE).join(", ")}. sub 는 그 색이 주는 느낌 한 줄(icon 은 빈 글자). 입력의 사주 정보에 있는 오행과 연결되는 색만. 카드의 색은 answer 에서 말한 색과 같아야 해(answer 에 없는 색을 카드에 넣지 마). 묻는 대상에 맞게 골라: 벽지·타일·가구·침구 같은 면의 색 질문에는 앞쪽 일반 색 이름을, 조명 질문에는 "웜 화이트(전구색)"·"소프트 앰버"·"내추럴 화이트(주백색)"·"쿨 화이트(주광색)" 같은 빛의 색만 써(조명 질문에 펄 화이트·크림 베이지·실버처럼 벽 색을 쓰지 마). 같은 대화에서 앞서 나온 색 카드와 대상이 다르면 색 조합도 다르게 해.
   - scent: 어울리는 향 2~3개(향 이야기일 때는 lucky 대신 scent). label 은 반드시 다음 중 하나만: ${Object.keys(SCENTS).join(", ")}. sub 는 그 향이 주는 느낌 한 줄(icon 은 빈 글자). 입력의 사주 정보에 있는 오행과 연결되는 향만. 향이 몸에 미치는 효능·치료는 말하지 마.
   - songs: 들을 노래 2~3곡(노래·음악·플레이리스트 추천을 물을 때). label 은 반드시 다음 중 하나만("가수 - 곡명" 그대로, 괄호는 어울리는 오행·분위기라 라벨에는 쓰지 마): ${songCatalog()}. sub 는 언제·어떻게 들으면 좋은지 20자 이내(icon 은 빈 글자). 지금 시점과 이용자의 기분(힘들면 차분·위로, 기운이 필요하면 신남, 집중은 연주, 연말 무렵엔 연말)에 맞는 곡을 고르고, 입력의 사주 정보에 있는 오행과 연결되면 더 좋아. answer 글에서도 같은 곡만 가수와 곡명으로 말하고, 목록에 없는 곡·가수는 글에서도 절대 말하지 마. 가사는 인용하지 말고 곡의 느낌만 말해.
@@ -188,11 +188,33 @@ export interface ChatReply {
   risk?: boolean;
 }
 
-const COUNT: Record<VisualKind, [number, number]> = { note: [2, 4], checklist: [2, 5], timeline: [3, 4], lucky: [2, 3], palette: [2, 3], spots: [1, 3], scent: [2, 3], songs: [2, 3], travel: [2, 3], course: [6, 9], food: [1, 3], hobby: [1, 3] };
+const COUNT: Record<VisualKind, [number, number]> = { note: [2, 4], checklist: [2, 5], timeline: [3, 4], lucky: [1, 2], palette: [2, 3], spots: [1, 3], scent: [2, 3], songs: [2, 3], travel: [2, 3], course: [6, 9], food: [1, 3], hobby: [1, 3] };
 const NEEDS_ICON: VisualKind[] = ["timeline", "course"];
 const HAS_SUB: VisualKind[] = ["timeline", "lucky", "palette", "spots", "scent", "songs", "travel", "course"];
 
 /** 그림 카드 검사: 종류·개수·길이·금지어를 통과하지 못하면 카드만 빼고 답은 그대로 보내요. */
+/** 소품 카드: 질문에 장소가 나오면 그 장소에 둘 수 없는 소품을 빼고, 같은 오행·같은 역할은 하나만 남겨요(많아야 2개). */
+export function narrowLucky(v: ChatVisual, question: string): ChatVisual | null {
+  const place = placeInQuestion(question);
+  let items = v.items;
+  if (place) {
+    const fit = items.filter((it) => propFitsPlace(it.label, place));
+    items = fit;
+  }
+  const seenEl = new Set<string>();
+  const seenRole = new Set<string>();
+  const out: VisualItem[] = [];
+  for (const it of items) {
+    const el = PROPS[it.label]?.el ?? "";
+    const role = PROP_TAGS[it.label]?.role ?? "";
+    if ((el && seenEl.has(el)) || (role && seenRole.has(role))) continue;
+    if (el) seenEl.add(el);
+    if (role) seenRole.add(role);
+    out.push(it);
+  }
+  return out.length ? { ...v, items: out.slice(0, 2) } : null;
+}
+
 export function cleanVisual(raw: unknown): ChatVisual | null {
   const v = raw as { kind?: unknown; title?: unknown; items?: unknown } | null;
   if (!v || typeof v.kind !== "string" || !(v.kind in COUNT) || !Array.isArray(v.items)) return null;
@@ -205,7 +227,7 @@ export function cleanVisual(raw: unknown): ChatVisual | null {
     const label = clip(o?.label, kind === "songs" ? 60 : 24);
     if (!label) continue;
     const icon = NEEDS_ICON.includes(kind) ? clip(o?.icon, 4) : "";
-    const sub = HAS_SUB.includes(kind) ? clip(o?.sub, kind === "travel" ? 40 : 24) : "";
+    const sub = HAS_SUB.includes(kind) ? clip(o?.sub, kind === "travel" ? 40 : kind === "lucky" ? 70 : 24) : "";
     if (kind === "palette" && !PALETTE[label]) continue;
     if (kind === "spots" && !SPOTS[label]) continue;
     if (kind === "scent" && !SCENTS[label]) continue;
@@ -680,7 +702,8 @@ export async function chatDori(
   // 메뉴·취미 추천은 답에 나온 후보로 코드가 그림 카드를 만들어요. 그 밖에는 질문이 허락한 카드만 붙여요.
   const rec = recommendFacts(q, history, i.chart, i.daily, opts.now ?? new Date());
   const recVisual = rec ? recommendVisual(rec, r.answer) : null;
-  const visual = recVisual ?? (r.visual && visualAllowed(r.visual.kind, q) ? r.visual : null);
+  const visual0 = recVisual ?? (r.visual && visualAllowed(r.visual.kind, q) ? r.visual : null);
+  const visual = visual0?.kind === "lucky" ? narrowLucky(visual0, q) : visual0;
   // 일·성공 이야기 중에는 지출·차 마시기·연말 같은 주제 밖 칩을 거르고 어긋난 칩만 남겨요.
   let answerText = r.answer;
   let choices = r.choices;

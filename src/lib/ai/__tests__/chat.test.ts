@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { dropBannedSuggestions, softenAskEnding, timeAlreadySaid, fixTypos, cleanFollowups, cleanVisual, cleanHistory, CRISIS_ANSWER, earlierQuestions, isCrisis, parseChatAnswer, parseChatReply, parseRisk, limitNameInHighlight, polishChatAnswer, recentEndings, usedBasis, usedActions, nowContext, visualAllowed, stripInternalTerms, CHAT_SYSTEM_PROMPT } from "../chat";
+import { narrowLucky, dropBannedSuggestions, softenAskEnding, timeAlreadySaid, fixTypos, cleanFollowups, cleanVisual, cleanHistory, CRISIS_ANSWER, earlierQuestions, isCrisis, parseChatAnswer, parseChatReply, parseRisk, limitNameInHighlight, polishChatAnswer, recentEndings, usedBasis, usedActions, nowContext, visualAllowed, stripInternalTerms, CHAT_SYSTEM_PROMPT } from "../chat";
 import { parseCtx } from "@/lib/chatServer";
 import { summarizeReport } from "@/lib/chatContext";
 
@@ -98,7 +98,8 @@ describe("도유 상담방", () => {
     expect(cleanVisual({ kind: "none", title: "", items: [] })).toBeNull();
     expect(cleanVisual({ kind: "note", title: "노트", items: [it("한 줄")] })).toBeNull();
     expect(cleanVisual({ kind: "lucky", title: "소품", items: [it("머그컵", "", "따뜻한 차 한 잔"), it("없는물건", "", "x"), it("화분", "", "나무 기운")] })?.items.map((i) => i.label)).toEqual(["머그컵", "화분"]);
-    expect(cleanVisual({ kind: "lucky", title: "소품", items: [it("머그컵", "", "a"), it("없는물건", "", "b"), it("또없는", "", "c")] })).toBeNull();
+    expect(cleanVisual({ kind: "lucky", title: "소품", items: [it("머그컵", "", "a"), it("없는물건", "", "b"), it("또없는", "", "c")] })?.items.map((i) => i.label)).toEqual(["머그컵"]);
+    expect(cleanVisual({ kind: "lucky", title: "소품", items: [it("없는물건", "", "b"), it("또없는", "", "c")] })).toBeNull();
     expect(cleanVisual({ kind: "checklist", title: "약속", items: [it("이혼 준비하기"), it("물 마시기")] })).toBeNull();
   });
 
@@ -358,5 +359,18 @@ describe("11-27 점검 후속 규칙", () => {
     const h = [{ role: "user" as const, text: "새 아파트로 이사 가는데 인테리어와 소화기 위치도 궁금해" }];
     const body3 = "새 집으로 옮기는 흐름이라 공간을 넓혀 가는 선택과 잘 맞아. 따뜻하고 안정감을 주는 색을 주로 쓰면 좋아. 집 안 에너지를 편안하게 잡아 주는 게 중요해.";
     expect(polishChatAnswer(body3, h, null)).not.toContain("전문가");
+  });
+});
+
+describe("소품 카드 좁히기", () => {
+  const v = (...labels: string[]) => ({ kind: "lucky" as const, title: "소품", items: labels.map((l) => ({ icon: "", label: l, sub: "근거 → 역할", best: false })) });
+  it("침실을 물으면 침실에 둘 수 없는 소품은 빠져요", () => {
+    expect(narrowLucky(v("텀블러", "담요", "시계"), "침실에 두면 좋은 소품 있어?")?.items.map((i) => i.label)).toEqual(["담요", "시계"]);
+  });
+  it("장소가 안 나오면 그대로 두되 같은 오행·같은 역할은 하나만, 많아야 둘이에요", () => {
+    expect(narrowLucky(v("쿠션", "담요", "화분", "시계"), "소품 추천해줘")?.items.map((i) => i.label)).toEqual(["쿠션", "화분"]);
+  });
+  it("맞는 소품이 하나도 없으면 카드를 빼요", () => {
+    expect(narrowLucky(v("텀블러", "물병"), "현관에 두면 좋은 소품")).toBeNull();
   });
 });

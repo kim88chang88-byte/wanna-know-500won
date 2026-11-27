@@ -60,5 +60,80 @@ export const propSrc = (label: string): string | null => {
   return p ? `/images/props/${p.key}.webp` : null;
 };
 
-/** 프롬프트에 넣는 "이름(오행)" 목록 */
-export const propCatalog = (): string => Object.entries(PROPS).map(([n, p]) => `${n}(${p.el})`).join(", ");
+/**
+ * 소품마다 "어디에 두는지(장소)"와 "무슨 일을 하는지(역할)". 오행만으로 고르면 아무 질문에나 쿠션·담요가 나와서,
+ * 질문의 장소와 사주 근거에 맞는 소품만 후보에 오르게 해요.
+ * 장소: 침실·책상·현관·거실·주방·휴대(들고 다니기)  /  역할: 수면·집중·마음안정·관계·결단·활력·기분전환·기록
+ */
+export const PROP_TAGS: Record<string, { at: string; role: string }> = {
+  "손수건": { at: "휴대", role: "마음안정" },
+  "키링": { at: "휴대", role: "기분전환" },
+  "파우치": { at: "휴대", role: "결단" },
+  "에코백": { at: "휴대", role: "활력" },
+  "목걸이": { at: "휴대", role: "결단" },
+  "팔찌": { at: "휴대", role: "마음안정" },
+  "목도리": { at: "휴대", role: "마음안정" },
+  "머리끈": { at: "휴대", role: "집중" },
+  "양말": { at: "침실", role: "수면" },
+  "메모장": { at: "책상", role: "기록" },
+  "펜": { at: "책상", role: "기록" },
+  "연필": { at: "책상", role: "집중" },
+  "포스트잇": { at: "책상", role: "결단" },
+  "다이어리": { at: "책상", role: "기록" },
+  "책": { at: "침실 책상", role: "집중" },
+  "화분 머그": { at: "책상", role: "활력" },
+  "책갈피": { at: "책상", role: "집중" },
+  "스티커": { at: "책상", role: "기분전환" },
+  "작은 달력": { at: "책상 현관", role: "결단" },
+  "머그컵": { at: "책상 주방", role: "마음안정" },
+  "텀블러": { at: "책상 휴대", role: "활력" },
+  "찻잔": { at: "주방 거실", role: "마음안정" },
+  "허브티": { at: "주방 침실", role: "수면" },
+  "물병": { at: "책상 휴대", role: "활력" },
+  "따뜻한 차": { at: "주방", role: "마음안정" },
+  "딸기": { at: "주방", role: "활력" },
+  "체리": { at: "주방", role: "활력" },
+  "초콜릿": { at: "책상 주방", role: "기분전환" },
+  "양초": { at: "침실 거실", role: "마음안정" },
+  "무드등": { at: "침실 거실", role: "수면" },
+  "쿠션": { at: "침실 거실", role: "마음안정" },
+  "담요": { at: "침실 거실", role: "수면" },
+  "화분": { at: "책상 거실", role: "활력" },
+  "작은 선인장": { at: "책상 현관", role: "활력" },
+  "디퓨저": { at: "침실 거실 현관", role: "수면" },
+  "방향제": { at: "현관 휴대", role: "기분전환" },
+  "조약돌": { at: "책상 거실", role: "마음안정" },
+  "유리병": { at: "책상 거실", role: "기록" },
+  "꽃 한 송이": { at: "거실 현관", role: "관계" },
+  "나뭇잎": { at: "책상", role: "기분전환" },
+  "조개껍데기": { at: "현관 거실", role: "관계" },
+  "작은 거울": { at: "현관 책상", role: "결단" },
+  "시계": { at: "책상 침실", role: "결단" },
+  "별 모양 소품": { at: "침실 책상", role: "기분전환" },
+  "달 모양 소품": { at: "침실", role: "수면" },
+  "우산": { at: "현관", role: "마음안정" },
+  "향초 받침": { at: "침실 거실", role: "마음안정" },
+  "작은 곰 인형": { at: "침실", role: "관계" },
+};
+
+/** 질문에 나온 "소품을 둘 곳". 없으면 null(아무 곳이나 괜찮아요). */
+export function placeInQuestion(q: string): string | null {
+  if (/침실|침대|머리맡|잠자리/.test(q)) return "침실";
+  if (/책상|공부방|사무실|작업실|회사 자리|업무/.test(q)) return "책상";
+  if (/현관|입구|문 앞|신발장/.test(q)) return "현관";
+  if (/거실|소파/.test(q)) return "거실";
+  if (/주방|부엌|식탁/.test(q)) return "주방";
+  if (/가방|들고 다니|지니고|가지고 다니|몸에 지니/.test(q)) return "휴대";
+  return null;
+}
+
+export const propFitsPlace = (label: string, place: string): boolean => (PROP_TAGS[label]?.at ?? "").split(" ").includes(place);
+
+/** 프롬프트에 넣는 "이름(오행·역할·둘 곳)" 목록 */
+export const propCatalog = (): string =>
+  Object.entries(PROPS)
+    .map(([n, p]) => {
+      const t = PROP_TAGS[n];
+      return t ? `${n}(${p.el}·${t.role}·${t.at.replace(/ /g, "/")})` : `${n}(${p.el})`;
+    })
+    .join(", ");
