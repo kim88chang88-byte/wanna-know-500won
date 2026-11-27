@@ -332,10 +332,10 @@ describe("11-27 점검 후속 규칙", () => {
     expect(dropBannedSuggestions(a, "연애 고민이야", false)).not.toContain("적어");
     expect(dropBannedSuggestions(a, "일기 쓰는 법 알려줘", false)).toContain("적어");
   });
-  it("연애 질문에서는 알림 끄기 제안을 지워요", () => {
+  it("알림 끄기 제안은 연애 질문이 아니어도 지워요", () => {
     const a = "답장이 늦으면 속이 타고 자꾸 폰을 보게 되지. 오늘 밤에는 스마트폰 알림을 잠시 꺼 두고 쉬어 봐. 내일 가볍게 안부를 건네도 좋고, 상대의 평소 속도를 한 번 떠올려 보는 것도 도움이 돼.";
     expect(dropBannedSuggestions(a, "답장이 느려", true)).not.toContain("알림");
-    expect(dropBannedSuggestions(a, "답장이 느려", false)).toContain("알림");
+    expect(dropBannedSuggestions(a, "답장이 느려", false)).not.toContain("알림");
   });
   it("건 어때? 로 끝나는 답이 세 번째부터는 해 봐로 바뀐다", () => {
     const prev = ["…해 보는 건 어때?", "…읽어 보는 건 어때?"];
@@ -421,7 +421,6 @@ describe("건강운 점검에서 나온 보완", () => {
   it("칩은 내년 칩 하나만, 앞서 물어본 것과 비슷한 칩과 차 칩은 걸러요", () => {
     const chips = ["내년에는 피로가 좀 나아질까?", "내년에 들어오는 기운은 어떤 편이야?", "피로를 풀기 좋은 방법이 있어?", "요즘 컨디션에 좋은 차가 있어?"];
     const out = varyFollowups(chips, [user("피로를 풀기 좋은 방법이 있어?")], "스트레스 풀고 싶어");
-    expect(out).toEqual(["내년에는 피로가 좀 나아질까?"].filter(() => false).concat(out));
     expect(out.filter((c) => /내년/.test(c)).length).toBeLessThanOrEqual(1);
     expect(out.some((c) => /차가 있어/.test(c))).toBe(false);
     expect(out.some((c) => c === "피로를 풀기 좋은 방법이 있어?")).toBe(false);

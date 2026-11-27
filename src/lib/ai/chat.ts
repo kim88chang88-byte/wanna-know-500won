@@ -415,7 +415,7 @@ export function dedupeSentences(answer: string): string {
 
 /** 우울·무기력이 이어진다는 말에는 혼자 안고 있지 말라는 가벼운 상담 권유 한 줄을 붙여요. (위기 안내와는 별개예요) */
 const PERSIST_DOWN = /(우울|무기력|가라앉|의욕\s?이?\s?없|아무것도\s?하기\s?싫)/;
-const PERSIST_WORD = /(계속|자주|많(아|이)|매일|오래|이유\s?없이|한\s?달|몇\s?주|늘)/;
+const PERSIST_WORD = /(계속|자주|많(아|이)|매일|오래|이유\s?없이|한\s?달|몇\s?주)/;
 const DOWN_NOTE = "이런 마음이 오래 이어진다면 혼자 안고 있지 말고, 가까운 사람이나 마음을 돌보는 전문 상담에 한 번 이야기해 봐도 좋아.";
 export function needsDownNote(history: ChatMsg[]): boolean {
   const users = history.filter((m) => m.role === "user").slice(-3).map((m) => m.text).join(" ");
@@ -424,7 +424,7 @@ export function needsDownNote(history: ChatMsg[]): boolean {
   return PERSIST_WORD.test(last) || PERSIST_WORD.test(users);
 }
 
-/** 칩이 매번 "내년에는 ~ 기운"으로 몰리지 않게: 앞서 물어본 것과 겹치는 칩, 두 번째 "내년" 칩, 차 칩을 걸러요(남는 게 2개 미만이면 처음 그대로). */
+/** 칩이 매번 "내년에는 ~ 기운"으로 몰리지 않게: 앞서 물어본 것과 겹치는 칩, 두 번째 "내년" 칩, 차 칩을 걸러요(남는 게 하나도 없으면 처음 그대로). */
 export function varyFollowups(chips: string[], history: ChatMsg[], lastUser: string): string[] {
   const grams = (t: string): Set<string> => {
     const c = t.replace(/[^가-힣A-Za-z0-9]/g, "");
@@ -442,7 +442,7 @@ export function varyFollowups(chips: string[], history: ChatMsg[], lastUser: str
     if (/내년/.test(c) && ++nextYear > 1) return false;
     return true;
   });
-  return out.length >= 2 || chips.length < 2 ? out : chips;
+  return out.length > 0 ? out : chips;
 }
 
 export function polishChatAnswer(answer: string, history: ChatMsg[], name?: string | null): string {
