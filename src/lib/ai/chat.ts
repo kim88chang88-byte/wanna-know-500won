@@ -8,7 +8,7 @@ import { analyzeChart } from "@/lib/saju/analysis";
 import type { SajuChart } from "@/lib/saju/types";
 import type { ChatKind, ChatMsg } from "@/lib/chatContext";
 import { HISTORY_MAX, MSG_MAX, SUMMARY_MAX } from "@/lib/chatContext";
-import { callName, scrubExampleName } from "./nameRepair";
+import { callName, givenName, scrubExampleName } from "./nameRepair";
 import { callJson } from "./callJson";
 import type { CoreFacts } from "./coreFacts";
 import type { ChatMemo } from "./chatMemo";
@@ -264,7 +264,8 @@ export function cleanChoices(raw: unknown): string[] {
   return out.length === 2 ? out : [];
 }
 
-const SYMPTOM = /저림|저려|붓기|부어|붓는|통증|아파|아픈|아프|쑤시|결리|어지러|두통|두근|소화|불면|못\s?자|피로|시리/;
+// "아파트"·"소화기"·"시리즈" 같은 말에 반응하지 않게 뒤따르는 글자를 가려요.
+const SYMPTOM = /저림|저려|붓기|부어|붓는|통증|아파(?!트)|아픈|아프|쑤시|결리|어지러|두통|두근|소화(?!기)|불면|못\s?자|피로(?!연)|시리(?!즈)/;
 const PRO_NOTE = "몸이 계속 불편하면 전문가와 꼭 이야기해 봐.";
 
 /** 답이 받은 뒤의 정리: 이름 호칭 반복 줄이기, 몸 증상 질문에 전문가 안내 한 줄 보장. */
@@ -335,6 +336,11 @@ export function polishChatAnswer(answer: string, history: ChatMsg[], name?: stri
     }
   }
   if (n && prevDori.length > 0) a = limitNameInHighlight(a, n, prevDori.map((m) => m.text));
+  // 성까지 붙은 호명("장은혁아")은 다정하게 이름만("은혁아")으로. 성+이름(한글 3~4자)일 때만 바꿔요.
+  if (name && /^[가-힣]{3,4}$/.test(name.trim())) {
+    const full = name.trim();
+    a = a.split(full).join(givenName(full));
+  }
   a = dropBannedSuggestions(a, lastUser, LOVE_Q.test(`${lastUser} ${history.slice(-4).map((m) => m.text).join(" ")}`));
   a = softenAskEnding(a, history.filter((m) => m.role === "dori").map((m) => m.text));
   if (SYMPTOM.test(lastUser) && !a.includes("전문가") && a.length + PRO_NOTE.length + 2 <= CHAT_MAX) {

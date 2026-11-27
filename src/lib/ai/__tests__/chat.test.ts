@@ -349,4 +349,14 @@ describe("11-27 점검 후속 규칙", () => {
     expect(fixTypos("이거 저번에 너가 좋아한다고 했던")).toContain("네가 좋아한다고");
     expect(stripInternalTerms("원국이 부딪히는 흐름")).toContain("타고난 사주가 부딪히는");
   });
+  it("성까지 붙은 호명은 이름만으로 바꾼다 (장은혁아 → 은혁아)", () => {
+    const h = [{ role: "user" as const, text: "이사 가는데 주의할 점 있어?" }];
+    const body2 = "내년 2월은 새로운 터전으로 움직이기 좋은 흐름이라 기대되는 결정이야. 집 안의 에너지를 편안하게 잡아 주는 게 중요해.";
+    expect(polishChatAnswer(`장은혁아, ${body2}`, h, "장은혁")).toBe(`은혁아, ${body2}`);
+  });
+  it("아파트·소화기 같은 말에는 전문가 안내를 붙이지 않는다", () => {
+    const h = [{ role: "user" as const, text: "새 아파트로 이사 가는데 인테리어와 소화기 위치도 궁금해" }];
+    const body3 = "새 집으로 옮기는 흐름이라 공간을 넓혀 가는 선택과 잘 맞아. 따뜻하고 안정감을 주는 색을 주로 쓰면 좋아. 집 안 에너지를 편안하게 잡아 주는 게 중요해.";
+    expect(polishChatAnswer(body3, h, null)).not.toContain("전문가");
+  });
 });
