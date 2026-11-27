@@ -83,7 +83,7 @@ describe("고민 결론 쪽과 합친 십성 장", () => {
   it("맨 앞 쪽은 첫 묶음의 첫 장이고, 십성은 한 장으로 합쳐졌어요", () => {
     expect(CHAPTER_BATCHES[0][0]).toBe("concernTop");
     expect(CHAPTER_SPECS["tengods:2"]).toBeUndefined();
-    expect(CHAPTER_SPECS.tengods.parts.flatMap((p) => p.headings)).toHaveLength(6);
+    expect(CHAPTER_SPECS.tengods.parts.flatMap((p) => p.headings)).toHaveLength(4);
   });
   it("고민 자세한 답은 9개 소제목으로 길게 써요", () => {
     expect(CHAPTER_SPECS.concern.parts.flatMap((p) => p.headings)).toHaveLength(9);
@@ -153,7 +153,7 @@ describe("19쪽이 3쪽 결론과 같은 방향으로 쓰이게 하는 근거", 
 describe("십성 장: 보이는 부분 + 더 깊이 보기", () => {
   const H1 = ["일터에서의 나"];
   const shownOk = "**규칙과 책임이 분명한 곳에서 힘이 나는 사람이야.** 월주에 관성이 앉아 있어서 맡은 역할이 정해진 자리에서 믿음을 얻는 편이야. 기획이나 운영처럼 흐름을 책임지는 일이 잘 맞아.";
-  const deepOk = "관성이 강하면 인정받는 속도는 느려도 신뢰는 오래 가는 편이라, 평가 때 믿을 만한 사람이라는 말이 중심이 되기 쉬워.";
+  const deepOk = "관성이 강하면 인정받는 속도는 느려도 신뢰는 오래 가는 편이라, 평가 때 믿을 만한 사람이라는 말이 중심이 되기 쉬워. 그래서 승진이나 이직을 고민하는 시기에는 얼마나 꾸준히 약속을 지켰는지가 가장 큰 무기가 돼. 반대로 기준이 자주 바뀌는 곳에서는 힘이 빠지기 쉬우니 역할이 분명한 자리를 먼저 살펴봐.";
   it("보이는 부분이 짧으면 받아요", () => {
     const r = parseChapterWhy({ sections: [{ heading: H1[0], body: `${shownOk}\n\n[더 깊이]\n\n${deepOk}` }] }, H1);
     expect(r.sections?.[0].body).toContain("[더 깊이]");
