@@ -4,6 +4,7 @@ import type { BookPage, BookSection } from "@/lib/premium/types";
 import { callJson } from "./callJson";
 import { modelFor } from "./llm";
 import { containsForbidden, isGeneric } from "./reading";
+import { DEEP_MARK, flattenDeep, splitDeep } from "@/lib/premium/deepMark";
 
 /*
  * 프리미엄 리포트의 "장" 하나를 AI 가 다시 써요. (지금은 재물운 장만)
@@ -119,7 +120,7 @@ export function isMoneyChapter(page: BookPage): boolean {
 }
 
 function brief(p: BookPage, n: number): string {
-  return `${p.title} — ${p.lead}\n` + p.sections.filter((s) => !s.locked).map((s) => `· ${s.heading}: ${s.body.slice(0, n)}`).join("\n");
+  return `${p.title} — ${p.lead}\n` + p.sections.filter((s) => !s.locked).map((s) => `· ${s.heading}: ${flattenDeep(s.body).slice(0, n)}`).join("\n");
 }
 
 /** 표에 담긴 사실(행운 색·방향, 월별 흐름 등)도 근거로 넘겨요. */
@@ -224,6 +225,7 @@ export function parseChapterWhy(value: unknown, headings: string[]): { sections:
     const min = isShort ? 30 : headings[i] === "먼저 결론부터" ? 120 : 220;
     const tag = `${headings[i]}`;
     if (body.length < min) return { sections: null, why: `짧음(${tag}:${body.length})` };
+    if (DEEP_HEADINGS.includes(headings[i]) && splitDeep(body).shown.length > DEEP_SHOWN_MAX) return { sections: null, why: `보이는 부분 김(${tag}:${splitDeep(body).shown.length})` };
     if (body.length > CHAPTER_BODY_MAX) return { sections: null, why: `김(${tag}:${body.length})` };
     if ((body.match(/\*\*/g) ?? []).length % 2 !== 0) return { sections: null, why: `굵은표시 짝 안 맞음(${tag})` };
     const bad = containsForbidden(body);
@@ -348,6 +350,11 @@ function spec5(h: [string, string, string, string], roles: [string, string, stri
 }
 
 const NO_INVENT = "근거 사실에 없는 것은 지어내지 말고, 없으면 없다고 솔직하게 쓰되 의미 있게 풀어 줘.";
+
+/** 십성 장: 읽는 사람이 끝까지 집중하도록 "보이는 부분(짧게) + 눌러서 펼치는 깊은 해설"로 써요. 이 장에서는 위의 일반 분량 규칙(4~5문단·500~650자) 대신 이 규칙을 따라요. */
+export const DEEP_HEADINGS = ["나의 주력 기운과 사람들과의 관계", "일터에서의 나", "비어 있는 기운과 채우는 법", "글자들이 만나 만드는 이야기"];
+export const DEEP_SHOWN_MAX = 750;
+const DEEP_NOTE = `이 장의 분량 규칙(위의 일반 분량·문단 수 규칙보다 우선): 소제목마다 본문을 다음 순서와 모양으로 써. ① 첫 문단은 이 소제목의 결론 한 줄을 통째로 **굵게**(별표 두 개로 감싸기, 한 문장, 40자 안팎). ② 이어서 1~2문단(문단마다 2문장). 여기까지가 처음부터 보이는 부분이고 합쳐서 300자 안팎(450자 넘기지 마). ③ 그다음 줄에 정확히 ${DEEP_MARK} 라고만 쓴 한 줄을 두고(앞뒤로 빈 줄), ④ 눌러서 펼치는 깊은 해설을 1~2문단, 300자 안팎(450자 넘기지 마)으로 써. 문단마다 새로운 정보 하나만 담고, 같은 말·같은 비유·같은 십성 설명을 다른 문단에서 되풀이하지 마(펼치는 부분은 보이는 부분의 말을 다시 풀지 말고 더 깊은 근거·장면·예시를 줘). 생활 장면은 소제목마다 하나만. 이 규칙에 따라 굵은 곳은 결론 한 줄 외에 한 군데까지만.`;
 
 Object.assign(CHAPTER_SPECS, {
   gui: spec6(
@@ -519,15 +526,14 @@ Object.assign(CHAPTER_SPECS, {
 /* 십성은 한 장으로 합쳐 깊게, 올해·내년은 분기별 행동과 3년 로드맵까지, 고민 답은 맨 뒤에서 길고 자세하게. */
 Object.assign(CHAPTER_SPECS, {
   tengods: specN(
-    ["나의 주력 기운", "사람들과의 관계", "사회에서 보이는 얼굴", "어울리는 분야와 환경", "비어 있는 기운과 채워 가는 법", "글자들이 만나 만드는 이야기"],
+    ["나의 주력 기운과 사람들과의 관계", "일터에서의 나", "비어 있는 기운과 채우는 법", "글자들이 만나 만드는 이야기"],
     [
-      "가장 두드러진 십성 묶음이 재능으로 드러나는 모습을 생활 장면과 함께. 관계 이야기는 다음 소제목에 남겨 둬.",
-      "그 기운이 사람 사이에서 만드는 모습과 잘 맞는/힘든 유형을 구체 장면으로. 앞 내용을 반복하지 마.",
-      "월주(사회 자리)의 십성으로 본 일터·사회에서의 인상과 평가를 구체적으로.",
-      `어울리는 분야·직무·환경을 서너 가지 구체적으로(직업명 단정 금지). ${NO_INVENT}`,
-      "원국에 없거나 약한 십성이 만드는 빈자리와, 그것을 채우는 구체 습관·만남·공부의 방향.",
-      "근거 사실에 나온 십성 조합과 지장간의 의미만. 없으면 이 사람 구조의 특징을 일상 이야기로 풀어 써.",
+      "가장 두드러진 십성 묶음이 재능으로 드러나는 모습과, 그 기운이 사람 사이에서 만드는 모습(잘 맞는/힘든 유형). 십성 하나의 이야기를 이 소제목 안에서 끝내.",
+      "월주(사회 자리)의 십성으로 본 일터·사회에서의 인상, 그리고 어울리는 분야·환경 서너 가지(직업명 단정 금지). 앞 소제목의 십성을 다시 설명하지 마. " + NO_INVENT,
+      "원국에 없거나 약한 십성이 만드는 빈자리와, 그것을 채우는 습관·만남·공부의 방향. 앞에서 말한 강한 십성은 반복하지 마.",
+      "근거 사실에 나온 십성 조합과 지장간의 의미만. 없으면 이 사람 구조의 특징을 일상 이야기로 풀어 써. 앞 내용을 반복하지 마.",
     ],
+    DEEP_NOTE,
   ),
   years: specN(
     ["올해의 흐름", "올해 분기별로 해 볼 일", "내년의 흐름", "내후년까지 3년 로드맵", "지난해 돌아보기와 올해 이어 가기", "올해와 내년을 잇는 법"],

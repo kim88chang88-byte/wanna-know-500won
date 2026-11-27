@@ -1,3 +1,4 @@
+import { flattenDeep } from "@/lib/premium/deepMark";
 import { softToDeep } from "@/lib/premium/deepTone";
 import { concernLabel, hasConcern, type Concern } from "@/lib/concerns";
 import { callName, repairName, scrubExampleName } from "./nameRepair";
@@ -76,7 +77,7 @@ export function summarizeBook(pages: BookPage[], kind: "compat" | "personal", co
       내용: p.sections
         .filter((s) => !s.locked)
         .slice(0, 5)
-        .map((s) => `${s.heading}: ${s.body.slice(0, 220)}`),
+        .map((s) => `${s.heading}: ${flattenDeep(s.body).slice(0, 220)}`),
     })),
   };
   return `리포트 내용:\n${JSON.stringify(payload, null, 2)}\n\n쪽 번호마다 도리의 한 줄을 써 줘.`;

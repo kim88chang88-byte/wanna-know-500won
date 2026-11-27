@@ -1,3 +1,4 @@
+import { flattenDeep } from "@/lib/premium/deepMark";
 import type { BookPage, PremiumReportView } from "@/lib/premium/types";
 import { FOLD_TITLES } from "@/lib/storyHelpers";
 
@@ -20,7 +21,7 @@ function pageText(p: BookPage): string {
   if (p.explainer) out.push(`[쉬운 설명: ${p.explainer.title}] ${p.explainer.body}`);
   for (const s of p.sections) {
     if (s.locked) continue;
-    out.push(`### ${s.heading}`, s.body);
+    out.push(`### ${s.heading}`, flattenDeep(s.body));
     if (s.checks?.length) out.push(...s.checks.map((c) => `- (나와 비슷해) ${c}`));
   }
   for (const t of p.tables) {

@@ -3,6 +3,8 @@
 import { BRIDGES, chapterOpening, elementFocus, sectionLink } from "@/lib/premium/flow";
 import { softToDeep } from "@/lib/premium/deepTone";
 import { getBrowserStorage } from "@/lib/drawCounter";
+import { splitDeep } from "@/lib/premium/deepMark";
+import { track } from "@/lib/track";
 import { readRealityPick, saveRealityPick } from "@/lib/realityPick";
 import { ConfirmChoice } from "@/components/ConfirmChoice";
 import { PREVIEW_OPEN_PAGES } from "@/lib/premium/config";
@@ -49,10 +51,10 @@ function bold(text: string) {
 /** 실천 목록·한 줄 마무리·읽는 방법은 강조 밑줄 없이 담백하게 보여요. (AI 가 별표로 감싼 곳도 밑줄 없이 글자만 보여요) */
 const PLAIN_HEADINGS = ["이렇게 해보자", "한 줄 마무리", "이 책을 읽는 방법", "이 리포트는 이렇게 읽어 줘", "이 리포트를 읽는 방법"];
 
-function RichBody({ text, plain = false }: { text: string; plain?: boolean }) {
+function RichBlocks({ text, plain }: { text: string; plain: boolean }) {
   const blocks = (plain ? text.replace(/\*\*/g, "") : text).split(/\n{2,}/).map((b) => b.trim()).filter(Boolean);
   return (
-    <div className="mt-1.5 space-y-3 text-[15px] leading-[1.85] text-[#322f47] [word-break:keep-all]">
+    <>
       {blocks.map((b, i) => {
         const lines = b.split("\n").map((l) => l.trim()).filter(Boolean);
         if (lines.length > 0 && lines.every((l) => l.startsWith("- "))) {
@@ -66,6 +68,32 @@ function RichBody({ text, plain = false }: { text: string; plain?: boolean }) {
         }
         return <p key={i}>{bold(lines.join(" "))}</p>;
       })}
+    </>
+  );
+}
+
+function RichBody({ text, plain = false }: { text: string; plain?: boolean }) {
+  const { shown, deep } = splitDeep(text);
+  return (
+    <div className="mt-1.5 space-y-3 text-[15px] leading-[1.85] text-[#322f47] [word-break:keep-all]">
+      <RichBlocks text={shown} plain={plain} />
+      {deep && (
+        <details
+          data-testid="book-deep"
+          className="group rounded-xl border border-dashed border-[#c9bfa8] bg-[#f6efdf]/60 px-3 py-2"
+          onToggle={(e) => {
+            if ((e.currentTarget as HTMLDetailsElement).open) track("deep_open");
+          }}
+        >
+          <summary className="cursor-pointer select-none text-[13.5px] font-bold text-[#8a5a12]">
+            <span className="group-open:hidden">더 깊이 보기 ▾</span>
+            <span className="hidden group-open:inline">접기 ▴</span>
+          </summary>
+          <div className="mt-2 space-y-3">
+            <RichBlocks text={deep} plain={plain} />
+          </div>
+        </details>
+      )}
     </div>
   );
 }

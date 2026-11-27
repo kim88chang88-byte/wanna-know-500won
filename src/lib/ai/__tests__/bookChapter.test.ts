@@ -149,3 +149,24 @@ describe("19쪽이 3쪽 결론과 같은 방향으로 쓰이게 하는 근거", 
     expect(chapterFacts([page("lucky")], page("lucky"), null, null)).toMatch(/올해는 20\d\d년/);
   });
 });
+
+describe("십성 장: 보이는 부분 + 더 깊이 보기", () => {
+  const H1 = ["일터에서의 나"];
+  const shownOk = "**규칙과 책임이 분명한 곳에서 힘이 나는 사람이야.** 월주에 관성이 앉아 있어서 맡은 역할이 정해진 자리에서 믿음을 얻는 편이야. 기획이나 운영처럼 흐름을 책임지는 일이 잘 맞아.";
+  const deepOk = "관성이 강하면 인정받는 속도는 느려도 신뢰는 오래 가는 편이라, 평가 때 믿을 만한 사람이라는 말이 중심이 되기 쉬워.";
+  it("보이는 부분이 짧으면 받아요", () => {
+    const r = parseChapterWhy({ sections: [{ heading: H1[0], body: `${shownOk}\n\n[더 깊이]\n\n${deepOk}` }] }, H1);
+    expect(r.sections?.[0].body).toContain("[더 깊이]");
+  });
+  it("보이는 부분이 너무 길면 이유와 함께 버려요", () => {
+    const longShown = (shownOk + " ").repeat(8);
+    const r = parseChapterWhy({ sections: [{ heading: H1[0], body: `${longShown}\n\n[더 깊이]\n\n${deepOk}` }] }, H1);
+    expect(r.sections).toBeNull();
+    expect(r.why).toContain("보이는 부분 김");
+  });
+  it("십성 장은 4개 소제목이고 지시문에 깊이 접기 규칙이 있어요", () => {
+    const spec = CHAPTER_SPECS.tengods;
+    expect(spec.roles.slice(0, 4).map((r) => r[0])).toEqual(["나의 주력 기운과 사람들과의 관계", "일터에서의 나", "비어 있는 기운과 채우는 법", "글자들이 만나 만드는 이야기"]);
+    expect(spec.parts[0].tail).toContain("[더 깊이]");
+  });
+});
