@@ -1102,6 +1102,7 @@ function titleParts(title: string): { small: string; main: string; sub: string }
 
 /** 3쪽 "먼저 결론부터" 쪽의 도리 말풍선(고정 문구). 서문에서 사주 기본을 본 뒤 이어지는 말이야. */
 /** 제1장(나의 사주팔자) 첫 말풍선: 사람마다 달라질 이유가 없어서 고정 문장이에요. */
+export const TENGODS_BUBBLE = "사주팔자의 여덟 글자는 전부 내가 타고난 나의 일부야. 그 중 태어난 날의 글자(일간)가 나의 중심이고, 나머지는 그 중심을 돕거나, 빛깔을 입히거나, 때로는 단련시키는 내 안의 여러 힘이야. 십성은 나의 중심(일간)에서 볼 때 나머지 각 글자가 어떤 역할을 하는지 붙인 이름이야.";
 export const PILLARS_BUBBLE = "먼저 네가 태어난 해·달·날·시간, 네 개의 기둥부터 하나씩 살펴볼게. 그중 ‘날의 기둥’인 ‘일주’가 바로 나를 뜻하는 기둥이야.";
 
 /** 서문 첫 말풍선: 이름을 부르며 시작해요. 이름이 없으면 "안녕!" 으로 시작해요. */
@@ -1413,7 +1414,7 @@ export default function PremiumBook({ report, flush = false, finale, previewBlur
 
         {/* 도리 한 마리에 말풍선 하나: AI 한 줄이 있으면 그것을, 없으면 쪽 첫 문장을 보여. */}
         <div data-testid={page.key === "concernTop" ? "book-opening" : page.note ? "book-note" : "book-lead"}>
-          <BubbleRow text={page.key === "pillars" ? PILLARS_BUBBLE : nature5Opening ?? (page.key === "concernTop" ? openingBubble(report.viewerName) : page.key === "preface" ? prefaceBubble(report.viewerName) : page.note ? dropLight(page.note) : page.lead)} img={pic} />
+          <BubbleRow text={page.key === "pillars" ? PILLARS_BUBBLE : page.key === "tengods" ? TENGODS_BUBBLE : nature5Opening ?? (page.key === "concernTop" ? openingBubble(report.viewerName) : page.key === "preface" ? prefaceBubble(report.viewerName) : page.note ? dropLight(page.note) : page.lead)} img={pic} />
         </div>
 
         {opening && !nature5Opening && (
