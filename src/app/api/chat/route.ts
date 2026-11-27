@@ -5,6 +5,7 @@ import { chatDori, checkRisk, cleanHistory, CRISIS_ANSWER, isCrisis } from "@/li
 import { greetingReply, isFirstAsk, withoutCrisisTurns } from "@/lib/ai/chatFlow";
 import { apologyFirst, REFUND_DAY_CAP, REFUND_NOTICE, unableReply } from "@/lib/ai/outOfScope";
 import { buildCoreFacts, factsNowFor } from "@/lib/ai/coreFacts";
+import { futureFacts } from "@/lib/ai/futureFacts";
 import { buildChatMemo, buildCompatMemo, buildMonthMemo, buildReadingMemo, MONTH_ASK, type ChatMemo } from "@/lib/ai/chatMemo";
 import { buildDailyFacts, kstToday } from "@/lib/ai/dailyFacts";
 import { ReadingUnavailableError } from "@/lib/ai/interpret";
@@ -119,8 +120,10 @@ export async function POST(request: Request) {
       else if (ctx.kind === "compat" && partnerChart) memo = buildCompatMemo(chart, partnerChart, { me: ctx.name, partner: ctx.partnerName });
       else if (ctx.kind === "reading") memo = buildReadingMemo(chart, core, factsNowFor(ctx.topic, now));
     }
+    const future = ctx.topic === "study" ? null : futureFacts(birth, lastQuestion, now);
     const reply = await chatDori(
       {
+        future,
         kind: ctx.kind,
         name: ctx.name,
         partnerName: ctx.partnerName,

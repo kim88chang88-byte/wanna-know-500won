@@ -2,7 +2,8 @@ import { calculateSaju as ssajuCalculate } from "ssaju";
 import { STEMS } from "@/lib/saju/constants";
 import { resolveBirth } from "@/lib/saju/birthPlace";
 import type { BirthInput } from "@/lib/saju/types";
-import { hiddenGods, interactions, natalRelations, POS_LABEL, type PosKey } from "@/lib/premium/book/insight";
+import { tenGodOf } from "@/lib/ai/dailyFacts";
+import { hiddenGods, mainStemOf, interactions, natalRelations, POS_LABEL, type PosKey } from "@/lib/premium/book/insight";
 
 /*
  * 프리미엄 리포트 엔진(ssaju)이 이미 계산하는 값 중, 오늘 풀이에 쓸 핵심만 추려서 AI 에게 넘겨요.
@@ -35,6 +36,7 @@ export interface CoreFacts {
   지금대운?: string;
   올해세운?: { 간지: string; 천간십성?: string; 지지십성?: string };
   /** 원국 안의 합·충·형 (예: 월주-일주 午戌반합) */
+  타고난자리?: string[];
   원국관계?: string[];
   /** 지장간 속에 숨은 십성 (겉으로 안 보이는 별) */
   숨은십성?: string[];
@@ -70,6 +72,12 @@ function addInteractionFacts(facts: CoreFacts, r: SsajuLike, hourKnown: boolean,
     if (rels.length) facts.원국관계 = rels;
 
     const dayStem = pl.day[0];
+    // 타고난 자리: 일지(안방·배우자 자리)와 월지(사회·환경 자리)가 일간에게 어떤 십성인지
+    try {
+      facts.타고난자리 = [`일지 ${pl.day[1]} — ${tenGodOf(dayStem, mainStemOf(pl.day[1]))}`, `월지 ${pl.month[1]} — ${tenGodOf(dayStem, mainStemOf(pl.month[1]))}`];
+    } catch {
+      /* 십성을 못 구해도 나머지는 나가요 */
+    }
     const hid = hiddenGods(dayStem, natal)
       .slice(0, 6)
       .map((h) => `${POS_LABEL[h.pos]} 속 ${h.stem}(${h.god})`);
