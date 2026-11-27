@@ -162,7 +162,7 @@ describe("십성 장: 보이는 부분 + 더 깊이 보기", () => {
     const longShown = (shownOk + " ").repeat(8);
     const r = parseChapterWhy({ sections: [{ heading: H1[0], body: `${longShown}\n\n[더 깊이]\n\n${deepOk}` }] }, H1);
     expect(r.sections).toBeNull();
-    expect(r.why).toContain("보이는 부분 김");
+    expect(r.why).toContain("앞부분 김");
   });
   it("십성 장은 4개 소제목이고 지시문에 깊이 접기 규칙이 있어요", () => {
     const spec = CHAPTER_SPECS.tengods;

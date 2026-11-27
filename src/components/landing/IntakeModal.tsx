@@ -1347,8 +1347,8 @@ export default function IntakeModal({ target, wallet = null, onClose, onComplete
           <p className="mt-3 text-center text-[10px] text-gray-400">* 베타 기간이라 결제는 발생하지 않아.</p>
         </form>
       )}
-      {/* 창이 길어서 아래에 더 볼 내용이 있을 때만 보이는 안내 */}
-      {phase !== "loading" && <ScrollHint luxe={luxe} label={phase === "result" ? "아래로 스크롤하면 사주 리포트가 더 있어" : "아래로 스크롤해 줘"} />}
+      {/* 창이 길어서 아래에 더 볼 내용이 있을 때만 보이는 안내(프리미엄 책에서는 보이지 않아요) */}
+      {phase !== "loading" && !luxe && <ScrollHint luxe={luxe} label={phase === "result" ? "아래로 스크롤하면 사주 리포트가 더 있어" : "아래로 스크롤해 줘"} />}
     </ModalShell>
   );
 }

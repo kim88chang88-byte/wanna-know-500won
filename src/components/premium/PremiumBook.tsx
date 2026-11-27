@@ -3,8 +3,7 @@
 import { BRIDGES, chapterOpening, elementFocus, sectionLink } from "@/lib/premium/flow";
 import { softToDeep } from "@/lib/premium/deepTone";
 import { getBrowserStorage } from "@/lib/drawCounter";
-import { splitDeep } from "@/lib/premium/deepMark";
-import { track } from "@/lib/track";
+import { flattenDeep } from "@/lib/premium/deepMark";
 import { readRealityPick, saveRealityPick } from "@/lib/realityPick";
 import { ConfirmChoice } from "@/components/ConfirmChoice";
 import { PREVIEW_OPEN_PAGES } from "@/lib/premium/config";
@@ -73,27 +72,10 @@ function RichBlocks({ text, plain }: { text: string; plain: boolean }) {
 }
 
 function RichBody({ text, plain = false }: { text: string; plain?: boolean }) {
-  const { shown, deep } = splitDeep(text);
+  // 십성 장처럼 [더 깊이] 표시가 있는 글은 접지 않고, 표시만 빼서 한 흐름으로 이어 보여 줘요.
   return (
     <div className="mt-1.5 space-y-3 text-[15px] leading-[1.85] text-[#322f47] [word-break:keep-all]">
-      <RichBlocks text={shown} plain={plain} />
-      {deep && (
-        <details
-          data-testid="book-deep"
-          className="group rounded-xl border border-dashed border-[#c9bfa8] bg-[#f6efdf]/60 px-3 py-2"
-          onToggle={(e) => {
-            if ((e.currentTarget as HTMLDetailsElement).open) track("deep_open");
-          }}
-        >
-          <summary className="cursor-pointer select-none text-[13.5px] font-bold text-[#8a5a12]">
-            <span className="group-open:hidden">더 깊이 보기 ▾</span>
-            <span className="hidden group-open:inline">접기 ▴</span>
-          </summary>
-          <div className="mt-2 space-y-3">
-            <RichBlocks text={deep} plain={plain} />
-          </div>
-        </details>
-      )}
+      <RichBlocks text={flattenDeep(text)} plain={plain} />
     </div>
   );
 }
