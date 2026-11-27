@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { narrowLucky, dropBannedSuggestions, softenAskEnding, timeAlreadySaid, fixTypos, cleanFollowups, cleanVisual, cleanHistory, CRISIS_ANSWER, earlierQuestions, isCrisis, parseChatAnswer, parseChatReply, parseRisk, limitNameInHighlight, polishChatAnswer, recentEndings, usedBasis, usedActions, nowContext, visualAllowed, stripInternalTerms, CHAT_SYSTEM_PROMPT } from "../chat";
+import { dedupeSentences, needsDownNote, varyFollowups, unifyElementWords, narrowLucky, dropBannedSuggestions, softenAskEnding, timeAlreadySaid, fixTypos, cleanFollowups, cleanVisual, cleanHistory, CRISIS_ANSWER, earlierQuestions, isCrisis, parseChatAnswer, parseChatReply, parseRisk, limitNameInHighlight, polishChatAnswer, recentEndings, usedBasis, usedActions, nowContext, visualAllowed, stripInternalTerms, CHAT_SYSTEM_PROMPT } from "../chat";
 import { parseCtx } from "@/lib/chatServer";
 import { summarizeReport } from "@/lib/chatContext";
 
@@ -372,5 +372,66 @@ describe("소품 카드 좁히기", () => {
   });
   it("맞는 소품이 하나도 없으면 카드를 빼요", () => {
     expect(narrowLucky(v("텀블러", "물병"), "현관에 두면 좋은 소품")).toBeNull();
+  });
+});
+
+describe("건강운 점검에서 나온 보완", () => {
+  const dori = (text: string) => ({ role: "dori" as const, text });
+  const user = (text: string) => ({ role: "user" as const, text });
+  it("같은 답 안에서 뜻이 같은 문장이 두 번 나오면 뒤의 것을 지워요", () => {
+    const a = "잠들기 전에 침대를 잠시 벗어나 가까운 동네 골목을 조용히 걸어 다녀와 봐. 그러면 머릿속이 한결 가벼워질 거야 정말로.\n\n잠들기 전에 침대를 벗어나 가까운 동네 골목을 조용히 걸어 다녀와 봐.";
+    const out = dedupeSentences(a);
+    expect(out.match(/동네 골목/g)?.length).toBe(1);
+  });
+  it("짧은 문장과 서로 다른 문장은 그대로 둬요", () => {
+    const a = "그래서 걱정이 됐겠구나. 올해는 불 기운이 세게 들어와서 마음이 바빴을 수 있어.\n\n쇠 기운이 하나도 없어서 목이 마르기 쉬운 결이야.";
+    expect(dedupeSentences(a)).toBe(a);
+  });
+  it("알림 끄기와 차 한 잔 제안은 어느 질문에서도 지워요", () => {
+    const a = "머릿속 생각이 많았겠다 싶어서 마음이 쓰였어. 스마트폰 알림을 잠시 꺼두고 창밖을 바라보며 쉬어 봐. 따뜻한 차 한 잔을 쥐고 잠깐 멍하니 있어 봐도 좋아. 올해는 네가 많이 달려왔으니 쉬어 가도 충분해.";
+    const out = dropBannedSuggestions(a, "요즘 지쳐서 힘들어", false);
+    expect(out).not.toContain("알림");
+    expect(out).not.toContain("차 한 잔");
+  });
+  it("차를 직접 물으면 차 이야기는 남겨요", () => {
+    const a = "몸이 차가운 날에는 생강차나 따뜻한 차 한 잔이 속을 데워 줘서 좋아. 한 번에 많이 말고 천천히 나눠 마셔 봐. 올해는 몸을 따뜻하게 두는 게 좋은 흐름이야.";
+    expect(dropBannedSuggestions(a, "몸에 좋은 차 추천해 줘", false)).toContain("차 한 잔");
+  });
+  it("잠이 안 오는 질문에는 밤에 밖으로 나가라는 제안을 지워요", () => {
+    const a = "밤마다 생각이 많아서 쉽게 잠들지 못해 답답했겠다. 오늘 밤에는 스마트폰을 멀리 두고 동네 골목을 가볍게 한 바퀴 걸어 다녀와 봐. 눕기 전에 불을 낮추고 몸의 힘을 한 번 빼 봐.";
+    const out = dropBannedSuggestions(a, "잠을 못 자는데 어떻게 해야 해?", false);
+    expect(out).not.toContain("골목");
+    expect(out).toContain("불을 낮추고");
+  });
+  it("오래 살 수 있냐는 질문에는 안 가던 식당 가 보기를 지워요", () => {
+    const a = "오래 건강할 수 있을지 걱정이 먼저 앞섰구나 싶어. 평소 안 가던 동네 식당에 한 곳 가 보기처럼 가볍게 바람을 쐬고 와 봐. 몸이 보내는 신호를 놓치지 않고 살피는 게 먼저야.";
+    expect(dropBannedSuggestions(a, "나 오래 살 수 있을까?", false)).not.toContain("식당");
+  });
+  it("오행은 화면과 같은 말로 통일해요", () => {
+    expect(unifyElementWords("금 기운이 없고 토 기운이 강해. 소화 기운은 그대로야.")).toBe("쇠 기운이 없고 땅 기운이 강해. 소화 기운은 그대로야.");
+  });
+  it("할머니 말투와 어려운 용어와 띄어쓰기를 고쳐요", () => {
+    expect(fixTypos("그런 거란다. 한템포 쉬어 가. 형살이 있어.")).toBe("그런 거야. 한 템포 쉬어 가. 서로 얽히는 기운이 있어.");
+  });
+  it("우울이 이어진다는 말에만 상담 권유를 붙여요", () => {
+    expect(needsDownNote([user("마음이 우울한 날이 많아"), dori("어휴"), user("그냥 계속 이래")])).toBe(true);
+    expect(needsDownNote([user("오늘 조금 우울해")])).toBe(false);
+    expect(needsDownNote([user("요즘 피곤해")])).toBe(false);
+  });
+  it("칩은 내년 칩 하나만, 앞서 물어본 것과 비슷한 칩과 차 칩은 걸러요", () => {
+    const chips = ["내년에는 피로가 좀 나아질까?", "내년에 들어오는 기운은 어떤 편이야?", "피로를 풀기 좋은 방법이 있어?", "요즘 컨디션에 좋은 차가 있어?"];
+    const out = varyFollowups(chips, [user("피로를 풀기 좋은 방법이 있어?")], "스트레스 풀고 싶어");
+    expect(out).toEqual(["내년에는 피로가 좀 나아질까?"].filter(() => false).concat(out));
+    expect(out.filter((c) => /내년/.test(c)).length).toBeLessThanOrEqual(1);
+    expect(out.some((c) => /차가 있어/.test(c))).toBe(false);
+    expect(out.some((c) => c === "피로를 풀기 좋은 방법이 있어?")).toBe(false);
+  });
+  it("위기 안내에는 109만 있고 1393은 없어요", () => {
+    expect(CRISIS_ANSWER).toContain("109");
+    expect(CRISIS_ANSWER).not.toContain("1393");
+  });
+  it("지시문에 모든 토픽 공통 풀이 순서가 들어 있어요", () => {
+    expect(CHAT_SYSTEM_PROMPT).toContain("이유·원인·상황 풀이 질문 공통");
+    expect(CHAT_SYSTEM_PROMPT).toContain("연애·진로·재물·성공·신년운·건강");
   });
 });
