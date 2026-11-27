@@ -113,7 +113,9 @@ export async function POST(request: Request) {
     let memo: ChatMemo | null = null;
     const lastQuestion = [...history].reverse().find((m) => m.role === "user")?.text ?? "";
     // 시기·두 갈래 질문(풀이에서 들어온 경우)에는 첫 질문이 아니어도 지금부터 몇 달의 "월운 계산" 메모를 붙여요.
-    if (ctx.kind === "reading" && MONTH_ASK.test(lastQuestion)) {
+    // 같은 월운 카드를 질문마다 또 붙이지 않아요(앞선 질문에서 이미 보여 줬으면 건너뜀)
+    const monthShown = history.slice(0, -1).some((m) => m.role === "user" && MONTH_ASK.test(m.text));
+    if (ctx.kind === "reading" && MONTH_ASK.test(lastQuestion) && !monthShown) {
       memo = buildMonthMemo(chart, core, now, lastQuestion);
     } else if (firstAsk) {
       if (ctx.kind === "daily" && daily) memo = buildChatMemo(daily, kstToday(now));

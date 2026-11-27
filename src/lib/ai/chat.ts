@@ -274,6 +274,8 @@ export function limitNameInHighlight(answer: string, name: string, prevDori: str
 }
 
 /** 적어 보라는 제안, 연애 질문의 알림 끄기 제안은 문장째 지워요(말투 규칙을 어긴 답을 코드로 한 번 더 막아요). */
+/** "적어 두지 말고"처럼 금지 규칙 자체를 사용자에게 말하는 문장 */
+const NO_WRITE_MENTION = /(적어|메모해?|기록해?)\s?(두|놓|보)?지\s?(말|마)/;
 const WRITE_SUGGEST = /적어\s?(봐|보|내려|두|볼|보는|보자|줘|놓)|적기|적어\s?보|기록해|메모해|노트에/;
 const ALARM_OFF = /알림(을|도)?\s?(잠시\s?)?(꺼|끄)|알림을?\s?(모두\s?)?(무음|차단)/;
 /** 아무 질문에나 붙는 차 한 잔 제안(사용자가 차를 직접 물을 때만 예외) */
@@ -285,12 +287,13 @@ const NEW_PLACE = /(평소|안\s?가\s?던|처음\s?가|낯선).{0,20}(가게|�
 /** 식상한 일반 팁: 서랍·파일 정리, 타이머 맞추고 집중, 책상 치우기 같은 말은 어느 질문에서도 문장째 지워요. */
 const BORING_TIP = /서랍|파일\s?한\s?칸|타이머|한\s?가지에만\s?집중|책상\s?(위|정리|을\s?치)|물건\s?(세|두|몇)\s?개|침구/;
 export function dropBannedSuggestions(answer: string, lastUser: string, love: boolean): string {
-  const userAsksWriting = /적|기록|메모|노트|일기/.test(lastUser);
+  const userAsksWriting = /적어|적을|적기|적고|기록|메모|노트|일기/.test(lastUser);
   const userAsksTea = /차\s?(추천|마시|종류)|어떤\s?차|무슨\s?차|좋은\s?차|차가\s?있/.test(lastUser);
   const sleepCtx = /잠|불면|뒤척|자다가/.test(lastUser);
   const lifeCtx = /오래\s?살|수명|언제\s?죽|얼마나\s?살/.test(lastUser);
   const bad = (sent: string) =>
     BORING_TIP.test(sent) ||
+    NO_WRITE_MENTION.test(sent) ||
     (!userAsksWriting && WRITE_SUGGEST.test(sent)) ||
     ALARM_OFF.test(sent) ||
     (!userAsksTea && TEA_TIP.test(sent)) ||
@@ -529,6 +532,15 @@ export function weakestElement(chart: SajuChart): LackEl | null {
   return best;
 }
 
+/** 오행 개수에서 부족한 기운·많은 기운. 추천을 "그래서 이런 곳·이런 일"로 이어 주는 근거예요. */
+export function elementBalance(chart: SajuChart): { 부족한기운: string; 많은기운: string } {
+  const f = analyzeChart(chart);
+  const lack = weakestElement(chart);
+  const top = Object.entries(f.elementCounts).sort((a, b) => b[1] - a[1])[0];
+  const nm = (e: string | null | undefined) => (e ? `${EL_PILL[e] ?? e} 기운 ${f.elementCounts[e as LackEl] ?? 0}개` : "없음");
+  return { 부족한기운: nm(lack), 많은기운: top ? nm(top[0]) : "없음" };
+}
+
 /** 이 대화에서 사주 근거로 쓸 기운: 일간 기운과 가장 많은 오행. 답마다 다른 오행을 중심처럼 말하지 않게 고정해요. */
 export function coreElements(chart: SajuChart): string[] {
   const f = analyzeChart(chart);
@@ -648,6 +660,7 @@ export function buildChatPrompt(i: ChatFactsInput, history: ChatMsg[], now: Date
     이름: { 나: i.name?.trim() || "(없음)", ...(i.kind === "compat" ? { 상대: i.partnerName?.trim() || "상대" } : {}) },
     나: chartFacts(i.chart),
     "이 대화에서 쓸 사주 기운": coreElements(i.chart).map((w) => `${w} 기운`),
+    기운균형: elementBalance(i.chart),
     ...(i.core ? { 사주핵심: i.core } : {}),
     ...(i.future ? { 미래시점사주: i.future } : {}),
     ...(LOVE_Q.test(`${askedNow} ${history.slice(-4).map((m) => m.text).join(" ")}`) ? { 연애재료: loveFacts(i.chart, now) } : {}),
