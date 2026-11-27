@@ -1,6 +1,7 @@
 import type { SajuChart } from "@/lib/saju/types";
 import { BRANCHES, STEMS } from "@/lib/saju/constants";
-import { branchRelation } from "@/lib/ai/dailyFacts";
+import { branchRelation, tenGodOf } from "@/lib/ai/dailyFacts";
+import { mainStemOf } from "@/lib/premium/book/insight";
 import { EL_KO, type Element } from "@/lib/ai/menuHobby";
 import { findSals, SAL_NAME } from "@/lib/premium/book/sinsalCombo";
 
@@ -41,6 +42,17 @@ export function loveFacts(chart: SajuChart, now: Date): Record<string, unknown> 
   const found = findSals({ pillars, dayStem: chart.day.stem } as never, !chart.hour);
   const dohwa = found.get("도화");
   out.도화 = dohwa ? `있음(${dohwa.map((p) => ({ year: "연주", month: "월주", day: "일주", hour: "시주" })[p]).join("·")}) — ${SAL_NAME["도화"].name}은 사람을 끄는 매력·인연이 많은 결` : "두드러지지 않음";
+  // 연애 근거 사슬(원국 → 올해 → 대운)의 첫 고리: 월지·일지가 일간에게 어떤 십성인지, 둘이 서로 어떤 관계인지
+  try {
+    const dm = chart.day.stem;
+    const mb = chart.month.branch;
+    out.월지십성 = `월지 ${mb} — 일간에게 ${tenGodOf(dm, mainStemOf(mb))}(사회·환경에서 드러나는 기운)`;
+    out.일지십성 = `일지 ${dayB} — 일간에게 ${tenGodOf(dm, mainStemOf(dayB))}(배우자 자리가 품은 기운)`;
+    const mr = branchRelation(mb, dayB);
+    if (mr) out.월지와일지 = `${mb}↔${dayB}: ${REL_TEXT[mr]}`;
+  } catch {
+    /* 십성을 못 구해도 나머지 재료는 나가요 */
+  }
   const sw = sewoonBranch(now);
   const next = BRANCHES[(BRANCHES.findIndex((b) => b.hanja === sw.branch) + 1) % 12].hanja;
   const rel = (b: string) => {

@@ -17,6 +17,17 @@ describe("연애 재료와 상담실 규칙", () => {
     expect(String(f.내년세운과배우자자리)).toContain("2027년 未");
     expect(f.올해남은기간).toMatch(/약 \d+주/);
   });
+  it("월지·일지 십성을 근거 사슬 재료로 줘요", () => {
+    const f = loveFacts(chart, new Date("2026-11-16T12:00:00+09:00"));
+    expect(String(f.월지십성)).toContain("편관");
+    expect(String(f.일지십성)).toContain("정재");
+    expect(f.월지와일지).toBeUndefined();
+  });
+  it("연애 시기형 규칙이 결론 먼저·근거 사슬·되묻기를 담아요", () => {
+    expect(CHAT_SYSTEM_PROMPT).toContain("첫 문장은 결론");
+    expect(CHAT_SYSTEM_PROMPT).toContain("월지십성");
+    expect(CHAT_SYSTEM_PROMPT).toContain("되묻는 질문");
+  });
   it("사전 차단 문구의 조사와 키워드가 맞아요", () => {
     expect(unableReply("홍대 근처 분위기 좋은 맛집 알려줘")?.answer).toContain("'홍대 맛집'으로");
     expect(unableReply("예약 가능한 레스토랑 알려줘")?.answer).toContain("'레스토랑'으로");
