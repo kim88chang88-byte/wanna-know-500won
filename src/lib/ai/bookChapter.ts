@@ -225,7 +225,7 @@ export function parseChapterWhy(value: unknown, headings: string[]): { sections:
     const min = isShort ? 30 : headings[i] === "먼저 결론부터" ? 120 : 220;
     const tag = `${headings[i]}`;
     if (body.length < min) return { sections: null, why: `짧음(${tag}:${body.length})` };
-    if (DEEP_HEADINGS.includes(headings[i]) && splitDeep(body).shown.length > DEEP_SHOWN_MAX) return { sections: null, why: `보이는 부분 김(${tag}:${splitDeep(body).shown.length})` };
+    if (DEEP_HEADINGS.includes(headings[i]) && splitDeep(body).shown.length > DEEP_SHOWN_MAX) return { sections: null, why: `앞부분 김(${tag}:${splitDeep(body).shown.length})` };
     if (body.length > CHAPTER_BODY_MAX) return { sections: null, why: `김(${tag}:${body.length})` };
     if ((body.match(/\*\*/g) ?? []).length % 2 !== 0) return { sections: null, why: `굵은표시 짝 안 맞음(${tag})` };
     const bad = containsForbidden(body);
