@@ -26,9 +26,9 @@ describe("상담실 기준 문서(md) → 프롬프트", () => {
   });
   it("프롬프트의 핵심 구간이 순서대로 있어요", () => {
     const at = (s: string) => CHAT_SYSTEM_PROMPT.indexOf(s);
-    expect(at("말투")).toBeGreaterThanOrEqual(0);
-    expect(at("사실과 한계")).toBeGreaterThan(at("말투"));
-    expect(at("지켜야 할 선")).toBeGreaterThan(at("사실과 한계"));
+    expect(at("\n말투\n")).toBeGreaterThanOrEqual(0);
+    expect(at("\n사실과 한계\n")).toBeGreaterThan(at("\n말투\n"));
+    expect(at("\n지켜야 할 선\n")).toBeGreaterThan(at("\n사실과 한계\n"));
     expect(CHAT_SYSTEM_PROMPT.trimEnd().endsWith("반드시 지정된 JSON 으로만 답해.")).toBe(true);
   });
 });
