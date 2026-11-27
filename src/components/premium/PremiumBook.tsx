@@ -1130,7 +1130,7 @@ function titleParts(title: string): { small: string; main: string; sub: string }
 
 /** 3쪽 "먼저 결론부터" 쪽의 도리 말풍선(고정 문구). 서문에서 사주 기본을 본 뒤 이어지는 말이야. */
 /** 제1장(나의 사주팔자) 첫 말풍선: 사람마다 달라질 이유가 없어서 고정 문장이에요. */
-export const TENGODS_BUBBLE = "사주팔자의 여덟 글자는 전부 내가 타고난 나의 일부야. 그 중 태어난 날을 의미하는 글자인 '일간'이 나의 중심이고, 나머지는 그 중심을 돕거나, 빛깔을 입히거나, 때로는 단련시키는 내 안의 여러 힘이야. 십성은 나의 중심(일간)에서 볼 때 나머지 각 글자가 어떤 역할을 하는지 붙인 이름이야.";
+export const TENGODS_BUBBLE = "사주팔자의 개별 글자들에 대해서 알아봤으니, 이제 각 개별 글자들이 어떤 관계를 맺고 있는지에 대해서 알아보자. 그게 십성이야.";
 export const PILLARS_BUBBLE = "먼저 네가 태어난 해·달·날·시간, 네 개의 기둥부터 하나씩 살펴볼게. 그중 ‘날의 기둥’인 ‘일주’가 바로 나를 뜻하는 기둥이야.";
 
 /** 서문 첫 말풍선: 이름을 부르며 시작해요. 이름이 없으면 "안녕!" 으로 시작해요. */
@@ -1318,6 +1318,15 @@ export default function PremiumBook({ report, flush = false, finale, previewBlur
       <Visual page={page} report={report} laterAtEnd={sceneAfterFirst} />
     </div>
   );
+  // 십성 쪽은 '십성이란?' 설명을 먼저 읽고, 그다음에 내가 가진 기운의 크기(돌 쌓기)를 봐요.
+  const explainerFirst = page.key === "tengods";
+  const explainerBlock =
+    page.explainer && !blurred ? (
+      <aside data-testid="book-explainer" className="rounded-[14px] border border-[#e6c887]/40 bg-[#e6c887]/[0.07] px-4 py-3.5">
+        <p className={`text-[14px] font-bold tracking-[0.12em] ${GOLD}`}>{page.explainer.title}</p>
+        <p className="mt-2 whitespace-pre-line text-[15px] leading-[1.7] text-[#f3ecdc]">{page.explainer.body}</p>
+      </aside>
+    ) : null;
   const curDaeun = report.daeun?.list.find((d) => d.current)?.ganzhi ?? null;
   const dayP = report.pillars.find((x) => x.key === "day");
   const opening =
@@ -1456,6 +1465,7 @@ export default function PremiumBook({ report, flush = false, finale, previewBlur
 
         {/* 미리보기에서 가려진 쪽은 계산 값을 서버가 비워 보내서, 그림도 보여주지 않아. */}
         {/* 서문은 사주팔자·오행 설명을 먼저 읽고, 그다음에 내 날씨 지도(그림)를 봐요. */}
+        {explainerFirst && explainerBlock}
         {!blurred && page.key !== "preface" && visualBlock}
 
         {page.key === "topic:love" && !blurred && report.partnerImage && (
@@ -1490,12 +1500,7 @@ export default function PremiumBook({ report, flush = false, finale, previewBlur
           </figure>
         )}
 
-        {page.explainer && !blurred && (
-          <aside data-testid="book-explainer" className="rounded-[14px] border border-[#e6c887]/40 bg-[#e6c887]/[0.07] px-4 py-3.5">
-            <p className={`text-[14px] font-bold tracking-[0.12em] ${GOLD}`}>{page.explainer.title}</p>
-            <p className="mt-2 whitespace-pre-line text-[15px] leading-[1.7] text-[#f3ecdc]">{page.explainer.body}</p>
-          </aside>
-        )}
+        {!explainerFirst && explainerBlock}
 
         {groups.map((g, gi) => (
           <div key={`${gi}-${g[0]?.heading}`} className="flex flex-col gap-[18px]">
