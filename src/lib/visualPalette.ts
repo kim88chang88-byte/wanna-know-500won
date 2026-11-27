@@ -16,6 +16,11 @@ export const PALETTE: Record<string, { hex: string; en: string }> = {
   "차콜 그레이": { hex: "#4A4E57", en: "CHARCOAL" },
   "브라운": { hex: "#7A5436", en: "BROWN" },
   "로열 퍼플": { hex: "#6B4FC4", en: "ROYAL PURPLE" },
+  /* 조명 색: 벽지·타일 같은 면의 색과 따로 골라요. */
+  "웜 화이트(전구색)": { hex: "#FFE2B0", en: "WARM WHITE" },
+  "소프트 앰버": { hex: "#FFC77A", en: "SOFT AMBER" },
+  "내추럴 화이트(주백색)": { hex: "#FFF3DA", en: "NATURAL WHITE" },
+  "쿨 화이트(주광색)": { hex: "#EAF3FF", en: "COOL WHITE" },
 };
 
 /* 방 그림(room-spots.webp, 905×632)에서 말풍선이 앉는 자리. 값은 그림 크기에 대한 % 예요. */
