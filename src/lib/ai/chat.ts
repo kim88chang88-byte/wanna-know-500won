@@ -321,6 +321,7 @@ export function unifyElementWords(t: string): string {
 
 export function fixTypos(t: string): string {
   return unifyElementWords(t)
+    .replace(/어린이원/g, "어린이집")
     .replace(/고맙어/g, "고마워")
     .replace(/뭐\s야\?/g, "뭐야?")
     .replace(/지주가\s?없/g, "지장이 없")
