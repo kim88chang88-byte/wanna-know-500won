@@ -1614,7 +1614,6 @@ export default function PremiumBook({ report, flush = false, finale, previewBlur
 }
 
 const PEEK_HINT_KEY = "doyu.pillarsPeekHintClosed";
-const PEEK_BAR: Record<string, string> = { wood: "#5fbf6a", fire: "#f06a4a", earth: "#e0a93c", metal: "#cdd6e4", water: "#5aa2f5" };
 
 /**
  * 오른쪽 아래에 떠 있는 "내 사주팔자" 버튼. 2장부터 계속 보이고, 커서를 올리면(폰에서는 누르면) 네 기둥 그림이 떠요.
@@ -1721,11 +1720,9 @@ function PillarsPeek({ report, rootRef, pageKey, afterChapter1 }: { report: Prem
           }}
           className="flex h-14 w-14 items-center justify-center rounded-2xl border-[1.5px] border-[#e6c887] bg-gradient-to-br from-[#2d3466] to-[#1b1f45] shadow-[0_4px_12px_rgba(0,0,0,0.5)] active:scale-95"
         >
-          <span aria-hidden="true" className="flex gap-[3px]">
-            {report.pillars.map((p) => {
-              const el = elementOfChar(p.full ? Array.from(p.full)[0] : null, false);
-              return <i key={p.key} className={`block h-[30px] w-[7px] rounded-[2px] ${p.key === "day" ? "ring-[1.5px] ring-[#f1d8a0]" : ""}`} style={{ background: el ? PEEK_BAR[el] : "#4a5290" }} />;
-            })}
+          <span aria-hidden="true" className="flex flex-col items-center font-serif text-[19px] font-bold leading-[1.05] text-[#f1d8a0]">
+            <span>八</span>
+            <span>字</span>
           </span>
         </button>
       </div>
