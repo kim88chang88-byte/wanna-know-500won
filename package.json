@@ -4,6 +4,8 @@
   "private": true,
   "scripts": {
     "fetch-images": "node scripts/fetch-images.mjs",
+    "rules:build": "node scripts/build-chat-rules.mjs",
+    "prebuild": "node scripts/build-chat-rules.mjs",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
