@@ -964,7 +964,7 @@ function Visual({ page, report, laterAtEnd = false }: { page: BookPage; report: 
         <div className="mb-6">
           {page.key === "preface" && (
             <p className="mb-3 text-[15px] leading-relaxed text-[#e8dfca]/85">
-              태어난 <b className={GOLD}>해·달·날·시간</b>, 이 네 가지마다 글자를 위아래 두 개씩 적어. 위는 하늘의 기운(천간), 아래는 땅의 기운(지지)이야.
+              태어난 <b className={GOLD}>해·달·날·시간</b>, 이 네 가지마다 글자를 위아래 두 개씩 적어. <mark className="rounded-md bg-[#e6c887]/25 px-1 py-0.5 font-bold text-[#fff3cf] [box-decoration-break:clone]">이 네 기둥을 연주·월주·일주·시주라고 불러. 이 용어는 이 분석서 전반에 나오니까 꼭 기억해 둬.</mark> 위는 하늘의 기운(천간), 아래는 땅의 기운(지지)이야.
             </p>
           )}
           <div className="grid grid-cols-4 gap-2">
