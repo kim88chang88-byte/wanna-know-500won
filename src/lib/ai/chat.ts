@@ -490,6 +490,8 @@ export interface ChatFactsInput {
   summary: string;
   chart: SajuChart;
   core: CoreFacts | null;
+  /** 사용자가 고른 "다른 사람" 풀이: chart·core 는 그 사람의 것이고, asker 는 질문한 사용자 본인의 사주 */
+  about?: { name: string; asker: SajuChart | null } | null;
   /** 질문에 앞으로의 시점(내년 2월 등)이 있을 때, 그 시점 기준 사주 흐름 */
   future?: Record<string, unknown> | null;
   daily?: DailyFacts | null;
@@ -660,8 +662,8 @@ export function buildChatPrompt(i: ChatFactsInput, history: ChatMsg[], now: Date
   const where = i.kind === "daily" ? "오늘의 도리 한마디 카드에서 들어왔어요" : i.kind === "compat" ? "궁합 결과서를 읽고 들어왔어요" : "사주 풀이 결과서를 읽고 들어왔어요";
   const facts = {
     들어온곳: where,
-    이름: { 나: i.name?.trim() || "(없음)", ...(i.kind === "compat" ? { 상대: i.partnerName?.trim() || "상대" } : {}) },
-    나: chartFacts(i.chart),
+    이름: i.about ? { 나: i.name?.trim() || "(없음)", 주인공: i.about.name } : { 나: i.name?.trim() || "(없음)", ...(i.kind === "compat" ? { 상대: i.partnerName?.trim() || "상대" } : {}) },
+    ...(i.about ? { "주인공(사용자가 아닌 다른 사람)": chartFacts(i.chart), ...(i.about.asker ? { "질문한 사람(사용자)": chartFacts(i.about.asker) } : {}) } : { 나: chartFacts(i.chart) }),
     "이 대화에서 쓸 사주 기운": coreElements(i.chart).map((w) => `${w} 기운`),
     기운균형: elementBalance(i.chart),
     ...(i.core ? { 사주핵심: i.core } : {}),

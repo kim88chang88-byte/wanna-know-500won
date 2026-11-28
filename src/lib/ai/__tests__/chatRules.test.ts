@@ -17,7 +17,7 @@ describe("상담실 기준 문서(md) → 프롬프트", () => {
   it("묶음 파일이 md 원본과 같아요 (고쳤으면 node scripts/build-chat-rules.mjs)", () => {
     const cur = readFileSync(join(root, "src/lib/ai/chatRules.generated.ts"), "utf8");
     expect(cur).toBe(buildChatRulesSource());
-    expect(CHAT_RULE_FILES.length).toBeGreaterThanOrEqual(16);
+    expect(CHAT_RULE_FILES.length).toBeGreaterThanOrEqual(17);
   });
   it("자리표시자가 모두 채워지고 프롬프트에 남지 않아요", () => {
     expect(CHAT_SYSTEM_PROMPT).not.toMatch(/\{\{[A-Z_]+\}\}/);
@@ -61,6 +61,23 @@ describe("연애 30문 점검 후속 보정", () => {
     expect(CHAT_SYSTEM_PROMPT).toContain("사주(기운·세운·충합)를 위험의 이유로 쓰지 마");
     expect(CHAT_SYSTEM_PROMPT).toContain("기운 개수에서 성격·행동을 억지로 끌어내지 마");
     expect(CHAT_SYSTEM_PROMPT).toContain("질문 유형별 필수 형태");
+  });
+});
+
+describe("다른 사람 풀이", () => {
+  it("프롬프트에 주인공 규칙이 있어요", () => {
+    expect(CHAT_SYSTEM_PROMPT).toContain("주인공(사용자가 아닌 다른 사람)");
+    expect(CHAT_SYSTEM_PROMPT).toContain("사용자의 사주를 주인공의 것처럼 말하지 마");
+  });
+  it("about 가 있으면 주인공과 질문한 사람을 나눠서 입력에 담아요", () => {
+    const other = calculateSaju({ year: 2007, month: 3, day: 9, hour: 14, minute: 0, calendar: "solar", gender: "male" } as never);
+    const me = calculateSaju(birth);
+    const p = buildChatPrompt({ kind: "reading", name: "은혁", summary: "요약", chart: other, core: null, about: { name: "형님 아들", asker: me } } as never, [{ role: "user", text: "그 아이는 앞으로 뭐 하면 좋을까?" }] as never, now);
+    expect(p).toContain("주인공(사용자가 아닌 다른 사람)");
+    expect(p).toContain("질문한 사람(사용자)");
+    expect(p).toContain('"주인공": "형님 아들"');
+    const solo = buildChatPrompt({ kind: "reading", name: "은혁", summary: "요약", chart: me, core: null } as never, [{ role: "user", text: "올해 어때?" }] as never, now);
+    expect(solo).not.toContain("주인공(사용자가 아닌 다른 사람)");
   });
 });
 

@@ -74,6 +74,16 @@ export function parseCtx(raw: unknown): ParsedCtx | null {
   };
 }
 
+/** 사용자가 고른 "다른 사람"(이름과 생년월일시). 이상하면 null */
+export function parseAbout(raw: unknown): { name: string; birth: BirthInput } | null {
+  if (typeof raw !== "object" || raw === null) return null;
+  const a = raw as { name?: unknown; birth?: unknown };
+  const birth = validBirth(a.birth);
+  const name = typeof a.name === "string" ? a.name.replace(/[\u0000-\u001f<>]/g, " ").replace(/\s+/g, " ").trim().slice(0, 20) : "";
+  if (!birth) return null;
+  return { name: name || "그 사람", birth };
+}
+
 export function dbOrNull(): Db | null {
   const cfg = loadDbConfig(process.env);
   return cfg ? createDb(cfg) : null;

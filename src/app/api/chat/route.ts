@@ -6,6 +6,7 @@ import { greetingReply, isFirstAsk, withoutCrisisTurns } from "@/lib/ai/chatFlow
 import { apologyFirst, REFUND_DAY_CAP, REFUND_NOTICE, unableReply } from "@/lib/ai/outOfScope";
 import { buildCoreFacts, factsNowFor } from "@/lib/ai/coreFacts";
 import { futureFacts } from "@/lib/ai/futureFacts";
+import { parseAbout } from "@/lib/chatServer";
 import { buildChatMemo, buildCompatMemo, buildMonthMemo, buildReadingMemo, MONTH_ASK, type ChatMemo } from "@/lib/ai/chatMemo";
 import { buildDailyFacts, kstToday } from "@/lib/ai/dailyFacts";
 import { ReadingUnavailableError } from "@/lib/ai/interpret";
@@ -34,9 +35,9 @@ export async function POST(request: Request) {
   if (!session) return NextResponse.json({ error: "로그인이 필요해." }, { status: 401 });
   if (!canChat(session.sub)) return NextResponse.json({ error: "도유 상담방은 곧 열려. 조금만 기다려 줘 ❄️" }, { status: 403 });
 
-  let body: { ctx?: unknown; messages?: unknown } | null;
+  let body: { ctx?: unknown; messages?: unknown; about?: unknown } | null;
   try {
-    body = (await request.json()) as { ctx?: unknown; messages?: unknown };
+    body = (await request.json()) as { ctx?: unknown; messages?: unknown; about?: unknown };
   } catch {
     return NextResponse.json({ error: "요청이 올바르지 않아. 다시 한 번 확인해 줘." }, { status: 400 });
   }
@@ -79,7 +80,12 @@ export async function POST(request: Request) {
       if (!profile) return NextResponse.json({ error: "내 정보를 먼저 저장해 줘." }, { status: 404 });
       birth = resolveBirth(profile).input;
     }
+    const selfBirth = birth;
+    // 사용자가 "다른 사람 사주로 보기"를 골랐으면 그 사람의 사주가 주인공이에요(궁합방은 제외)
+    const about = ctx.kind === "compat" ? null : parseAbout(body?.about);
+    if (about) birth = about.birth;
     const chart = calculateSaju(birth);
+    const askerChart = about ? calculateSaju(selfBirth) : null;
     const partnerChart = ctx.partnerBirth ? calculateSaju(ctx.partnerBirth) : null;
 
     const gate = await takeAiBudget(process.env, db);
@@ -111,11 +117,14 @@ export async function POST(request: Request) {
     // 첫 질문에는 들어온 곳에 맞는 "도리 메모"를 붙여요 (코드 계산, AI 비용 없음). 답도 이 메모를 근거로 삼아요.
     const firstAsk = isFirstAsk(history);
     let memo: ChatMemo | null = null;
+    const aboutName = about?.name ?? null;
     const lastQuestion = [...history].reverse().find((m) => m.role === "user")?.text ?? "";
     // 시기·두 갈래 질문(풀이에서 들어온 경우)에는 첫 질문이 아니어도 지금부터 몇 달의 "월운 계산" 메모를 붙여요.
     // 같은 월운 카드를 질문마다 또 붙이지 않아요(앞선 질문에서 이미 보여 줬으면 건너뜀)
     const monthShown = history.slice(0, -1).some((m) => m.role === "user" && MONTH_ASK.test(m.text));
-    if (ctx.kind === "reading" && MONTH_ASK.test(lastQuestion) && !monthShown) {
+    if (about) {
+      memo = null; // 다른 사람 풀이에는 사용자 본인의 오늘 메모를 붙이지 않아요
+    } else if (ctx.kind === "reading" && MONTH_ASK.test(lastQuestion) && !monthShown) {
       memo = buildMonthMemo(chart, core, now, lastQuestion);
     } else if (firstAsk) {
       if (ctx.kind === "daily" && daily) memo = buildChatMemo(daily, kstToday(now));
@@ -126,6 +135,7 @@ export async function POST(request: Request) {
     const reply = await chatDori(
       {
         future,
+        about: about && aboutName ? { name: aboutName, asker: askerChart } : null,
         kind: ctx.kind,
         name: ctx.name,
         partnerName: ctx.partnerName,
@@ -164,7 +174,7 @@ export async function POST(request: Request) {
     }
     // 옷 질문이면 이용자 성별과 색에 맞는 착장 이미지를 붙여요 (미리 만든 이미지 중에서 고르기만 해서 AI 비용이 없어요)
     const paletteLabels = reply.visual?.kind === "palette" ? reply.visual.items.map((i) => i.label) : [];
-    const outfit = isOutfitQuestion(last) ? pickOutfit(birth.gender, last, paletteLabels) : null;
+    const outfit = !about && isOutfitQuestion(last) ? pickOutfit(birth.gender, last, paletteLabels) : null;
     const visual = outfit && reply.visual?.kind === "palette" ? null : reply.visual;
     // 마음을 달래는 답(🤍)에는 "가볍게 즐기면 기분이 풀리는 날" 같은 메모 카드를 붙이지 않아요
     const comfort = reply.answer.trimStart().startsWith("🤍");

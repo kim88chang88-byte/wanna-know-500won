@@ -20,11 +20,13 @@ function Pill({ on, onClick, children, testId }: { on: boolean; onClick: () => v
 const pad = (n: number) => String(n).padStart(2, "0");
 
 /** 내 정보 창에서 다른 사람(가족·친구·연인)을 직접 추가해 두는 작은 입력 폼이에요. */
-export default function AddPersonForm({ onAdded, onCancel }: { onAdded: (p: SavedPerson) => void; onCancel: () => void }) {
+/** allowSessionOnly: 저장하지 않고 이번 대화에서만 쓰는 선택지를 보여 줘요(상담실에서 다른 사람을 고를 때). 이때 저장 안 한 사람은 id 가 "temp" 예요. */
+export default function AddPersonForm({ onAdded, onCancel, allowSessionOnly = false }: { onAdded: (p: SavedPerson) => void; onCancel: () => void; allowSessionOnly?: boolean }) {
   const [f, setF] = useState<BirthFields>(EMPTY_BIRTH);
   const [dateText, setDateText] = useState("");
   const [label, setLabel] = useState("");
   const [agree, setAgree] = useState(false);
+  const [keep, setKeep] = useState(!allowSessionOnly);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -42,6 +44,11 @@ export default function AddPersonForm({ onAdded, onCancel }: { onAdded: (p: Save
     const birth = buildBirthFields(f);
     if (!birth) {
       setError("생년월일, 성별, 태어난 시간을 다시 확인해 줘.");
+      return;
+    }
+    if (allowSessionOnly && !keep) {
+      const name = label.trim() || "그 사람";
+      onAdded({ id: "temp", label: name, birth });
       return;
     }
     if (!agree) {
@@ -80,7 +87,13 @@ export default function AddPersonForm({ onAdded, onCancel }: { onAdded: (p: Save
         placeholder="이름 또는 별명 (예: 엄마, 내 짝꿍)"
         className={INPUT}
       />
-      <label className="flex items-start gap-2 text-[11px] leading-relaxed text-gray-700">
+      {allowSessionOnly && (
+        <label className="flex items-start gap-2 text-[11px] leading-relaxed text-gray-700">
+          <input type="checkbox" name="addKeep" data-testid="add-person-keep" className="mt-0.5" checked={keep} onChange={(e) => setKeep(e.target.checked)} />
+          <span>다음에도 바로 고를 수 있게 이 사람을 저장해 둘게. (끄면 이번 대화에서만 쓰고 저장하지 않아)</span>
+        </label>
+      )}
+      <label className={`${keep ? "flex" : "hidden"} items-start gap-2 text-[11px] leading-relaxed text-gray-700`}>
         <input type="checkbox" name="addAgree" data-testid="add-person-agree" className="mt-0.5" checked={agree} onChange={(e) => setAgree(e.target.checked)} />
         <span>실명이나 별명을 적어도 괜찮고, 이 정보를 저장해도 되는 사람이야.</span>
       </label>
@@ -131,7 +144,7 @@ export default function AddPersonForm({ onAdded, onCancel }: { onAdded: (p: Save
           취소
         </button>
         <button type="button" data-testid="add-person-save" disabled={busy} onClick={save} className="rounded-full bg-brand-600 px-4 py-1.5 text-[11px] font-bold text-white disabled:opacity-50 active:scale-95 transition-transform">
-          {busy ? "저장 중…" : "저장하기"}
+          {busy ? "저장 중…" : allowSessionOnly && !keep ? "이 사람으로 보기" : allowSessionOnly ? "저장하고 보기" : "저장하기"}
         </button>
       </div>
     </div>

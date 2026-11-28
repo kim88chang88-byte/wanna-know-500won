@@ -9,6 +9,8 @@ import type { RoomMsg } from "@/lib/chatRooms";
 import { chunkAnswer, plainAnswer, splitElements, splitMood } from "@/lib/chatMarkup";
 import type { ChatMemo } from "@/lib/ai/chatMemo";
 import PopularSheet from "@/components/chat/PopularSheet";
+import AboutSheet from "@/components/chat/AboutSheet";
+import type { BirthInput } from "@/lib/saju/types";
 import VisualCard from "@/components/chat/VisualCard";
 import type { ChatVisual } from "@/lib/ai/chat";
 import { STICKER_IDS, stickerAfter } from "@/lib/ai/stickers";
@@ -200,6 +202,9 @@ export default function ChatApp({ initialCtx, initialMsgs, onChange, onBack, rea
   const [busy, setBusy] = useState(false);
   const [ready, setReady] = useState(false);
   const [menu, setMenu] = useState(false);
+  /** 사용자가 고른 "다른 사람"(이 대화에서만 쓰고 저장하지 않아요) */
+  const [about, setAbout] = useState<{ name: string; birth: BirthInput } | null>(null);
+  const [aboutOpen, setAboutOpen] = useState(false);
   const [ctxOpen, setCtxOpen] = useState(false);
   const [note, setNote] = useState<string | null>(null);
   const [cheer, setCheer] = useState<number | null>(null); // 질문 충전 축하 카드 (더해진 개수)
@@ -385,7 +390,7 @@ export default function ChatApp({ initialCtx, initialMsgs, onChange, onBack, rea
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ctx, messages: next.filter((m) => !m.log).map(({ role, text: t }) => ({ role, text: t })) }),
+        body: JSON.stringify({ ctx, ...(about ? { about } : {}), messages: next.filter((m) => !m.log).map(({ role, text: t }) => ({ role, text: t })) }),
       });
       const data = (await res.json().catch(() => null)) as { answer?: string; followups?: unknown; visual?: ChatVisual | null; outfit?: OutfitPick | null; sticker?: unknown; choices?: unknown; links?: unknown; memo?: ChatMemo | null; safe?: boolean; error?: string; code?: string; left?: number } | null;
       if (res.status === 402 && data?.code === "quota") {
@@ -524,6 +529,11 @@ export default function ChatApp({ initialCtx, initialMsgs, onChange, onBack, rea
             <>
               <button type="button" aria-label="메뉴 닫기" className="fixed inset-0 z-10 cursor-default" onClick={() => setMenu(false)} />
               <div role="menu" className="absolute right-0 top-10 z-20 w-44 overflow-hidden rounded-2xl border border-brand-100 bg-white py-1 shadow-lg">
+                {ctx.kind !== "compat" && !readOnly && (
+                  <button role="menuitem" type="button" data-testid="about-open" onClick={() => { setMenu(false); setAboutOpen(true); }} className="block w-full px-4 py-2.5 text-left text-sm hover:bg-brand-50">
+                    👤 다른 사람 사주로 보기
+                  </button>
+                )}
                 <button role="menuitem" type="button" onClick={() => void copyAll()} disabled={msgs.length === 0} className="block w-full px-4 py-2.5 text-left text-sm hover:bg-brand-50 disabled:opacity-40">
                   📋 대화 내용 복사
                 </button>
@@ -533,6 +543,28 @@ export default function ChatApp({ initialCtx, initialMsgs, onChange, onBack, rea
         </div>
       </header>
 
+      {about && (
+        <div data-testid="about-banner" role="status" className="z-10 mx-3.5 mt-2.5 flex items-center gap-2 rounded-2xl border border-[#e6c887] bg-[#fff8e6] px-3 py-2 text-xs text-[#7a5a12]">
+          <span aria-hidden="true">👤</span>
+          <span className="min-w-0 flex-1 truncate">
+            <b>{about.name}</b> 사주로 보는 중
+          </span>
+          <button type="button" onClick={() => setAboutOpen(true)} className="shrink-0 rounded-full border border-[#e6c887] px-2.5 py-1 font-bold active:scale-95">
+            바꾸기
+          </button>
+          <button
+            type="button"
+            data-testid="about-self"
+            onClick={() => {
+              setAbout(null);
+              setMsgs((m) => [...m, { role: "dori", text: "다시 네 사주로 볼게", at: Date.now(), log: true }]);
+            }}
+            className="shrink-0 rounded-full bg-[#7a5a12] px-2.5 py-1 font-bold text-white active:scale-95"
+          >
+            내 얘기로
+          </button>
+        </div>
+      )}
       {/* 도리가 기억하고 있는 풀이 */}
       <div className="z-10 mx-3.5 mt-2.5 overflow-hidden rounded-2xl border border-brand-200 bg-white/70 text-xs text-brand-700">
         <button
@@ -773,6 +805,24 @@ export default function ChatApp({ initialCtx, initialMsgs, onChange, onBack, rea
         </div>
         {input.length > MSG_MAX - 60 && <p className="mr-2 mt-1 text-right text-[10px] text-[#a99bd0]">{input.length}/{MSG_MAX}</p>}
       </form>
+      )}
+      {aboutOpen && (
+        <AboutSheet
+          onClose={() => setAboutOpen(false)}
+          onSelf={() => {
+            setAboutOpen(false);
+            if (about) {
+              setAbout(null);
+              setMsgs((m) => [...m, { role: "dori", text: "다시 네 사주로 볼게", at: Date.now(), log: true }]);
+            }
+          }}
+          onPick={(p) => {
+            setAbout({ name: p.label, birth: p.birth });
+            setAboutOpen(false);
+            setMsgs((m) => [...m, { role: "dori", text: `이제 ${p.label} 사주로 볼게`, at: Date.now(), log: true }]);
+            setTimeout(() => field.current?.focus(), 0);
+          }}
+        />
       )}
       {popOpen && (
         <PopularSheet
