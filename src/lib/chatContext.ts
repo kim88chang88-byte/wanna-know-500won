@@ -18,6 +18,8 @@ export interface ChatCtx {
   partnerName?: string;
   /** 부르는 이름 */
   name?: string | null;
+  /** 다른 사람(가족·친구 등)의 풀이를 보고 들어왔어요: birth·name 은 그 사람 것이고, 상담도 그 사람 사주로 이어가요 */
+  other?: boolean;
   /** 결과서의 주제 (신년운은 "study"): 상담실도 2027년 기준으로 맞춰요 */
   topic?: "study";
   /** 프리미엄 결과서에서 들어온 방 (각성한 도리 얼굴을 써요) */

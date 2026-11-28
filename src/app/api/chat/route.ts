@@ -96,17 +96,20 @@ export async function POST(request: Request) {
   try {
     // 누구의 사주인지: 결과서에서 왔으면 그 풀이의 생년월일시, 오늘 카드면 저장된 내 정보
     let birth = ctx.birth;
-    if (ctx.kind === "daily" || !birth) {
+    // 다른 사람의 풀이에서 온 방(ctx.other)은 ctx.birth 가 그 사람 것이라서, 내 사주는 저장된 내 정보를 읽어요.
+    let noOwn = false;
+    if (ctx.kind === "daily" || !birth || ctx.other) {
       const profile = db ? await db.getProfile(session.sub) : null;
-      if (!profile) return NextResponse.json({ error: "내 정보를 먼저 저장해 줘." }, { status: 404 });
-      birth = resolveBirth(profile).input;
+      if (profile) birth = resolveBirth(profile).input;
+      else if (ctx.other && birth) noOwn = true; // 내 정보가 없으면 그 사람 사주로만 이어가요
+      else return NextResponse.json({ error: "내 정보를 먼저 저장해 줘." }, { status: 404 });
     }
     const selfBirth = birth;
     // 사용자가 "다른 사람 사주로 보기"를 골랐으면 그 사람의 사주가 주인공이에요(궁합방은 제외)
     const about = ctx.kind === "compat" ? null : parseAbout(body?.about);
     if (about) birth = about.birth;
     const chart = calculateSaju(birth);
-    const askerChart = about ? calculateSaju(selfBirth) : null;
+    const askerChart = about && !noOwn ? calculateSaju(selfBirth) : null;
     const partnerChart = ctx.partnerBirth ? calculateSaju(ctx.partnerBirth) : null;
 
     const gate = await takeAiBudget(process.env, db);

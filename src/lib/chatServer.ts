@@ -54,12 +54,14 @@ export interface ParsedCtx {
   birth: BirthInput | null;
   partnerBirth: BirthInput | null;
   topic: "study" | null;
+  /** 다른 사람의 풀이에서 들어온 방 */
+  other?: boolean;
   /** 프리미엄 결과서에서 들어온 방 (무료 질문을 일반 풀이 방과 따로 세요) */
   premium?: boolean;
 }
 
 export function parseCtx(raw: unknown): ParsedCtx | null {
-  const c = (raw ?? {}) as { kind?: unknown; summary?: unknown; birth?: unknown; partnerBirth?: unknown; partnerName?: unknown; name?: unknown; topic?: unknown; premium?: unknown };
+  const c = (raw ?? {}) as { kind?: unknown; summary?: unknown; birth?: unknown; partnerBirth?: unknown; partnerName?: unknown; name?: unknown; topic?: unknown; premium?: unknown; other?: unknown };
   const kind: ChatKind | null = c.kind === "daily" || c.kind === "reading" || c.kind === "compat" ? c.kind : null;
   if (!kind) return null;
   return {
@@ -71,6 +73,7 @@ export function parseCtx(raw: unknown): ParsedCtx | null {
     partnerBirth: kind === "compat" ? validBirth(c.partnerBirth) : null,
     topic: kind === "reading" && c.topic === "study" ? "study" : null,
     premium: kind === "reading" && c.premium === true,
+    other: kind === "reading" && c.other === true,
   };
 }
 

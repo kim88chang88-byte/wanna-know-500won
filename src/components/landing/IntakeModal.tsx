@@ -951,7 +951,7 @@ export default function IntakeModal({ target, wallet = null, onClose, onComplete
                       <StoryReport report={premiumReport} reading={reading} intro={null} name={subject ? (subject.name ?? "") : nickname}
                         lastWord={<><ResultHero report={premiumReport} aiQuote={reading?.kkotgeoji ?? null} luxe={false} hideLucky /><ResultShareCard report={premiumReport} aiQuote={reading?.kkotgeoji ?? null} reading={reading} /><InviteNudge /></>}
                         closing={askInput ? <AskChips input={askInput} luxe={false} topic={isStudy ? "study" : target.fortune} hideTitle /> : undefined}
-                        chat={askInput ? <ChatEntry ctx={{ kind: "reading", summary: summarizeReport(premiumReport), birth: askInput, name: viewName?.trim() || null, ...(isStudy ? { topic: "study" as const } : {}) }} /> : undefined}
+                        chat={askInput ? <ChatEntry ctx={{ kind: "reading", summary: summarizeReport(premiumReport), birth: askInput, name: viewName?.trim() || null, ...(!compat && (subject !== null || newPerson) ? { other: true as const } : {}), ...(isStudy ? { topic: "study" as const } : {}) }} /> : undefined}
                       />
                     )}
                   </div>
@@ -1051,6 +1051,7 @@ export default function IntakeModal({ target, wallet = null, onClose, onComplete
                   birth: askInput,
                   ...(compat && resultPartner ? { partnerBirth: resultPartner.birth, partnerName: resultPartner.name } : {}),
                   name: viewName?.trim() || null,
+                  ...(!compat && (subject !== null || newPerson) ? { other: true as const } : {}),
                   ...(isStudy ? { topic: "study" as const } : {}),
                   ...(luxe ? { premium: true as const } : {}),
                 }}

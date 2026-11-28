@@ -203,7 +203,8 @@ export default function ChatApp({ initialCtx, initialMsgs, onChange, onBack, rea
   const [ready, setReady] = useState(false);
   const [menu, setMenu] = useState(false);
   /** 사용자가 고른 "다른 사람"(이 대화에서만 쓰고 저장하지 않아요) */
-  const [about, setAbout] = useState<{ name: string; birth: BirthInput } | null>(null);
+  // 다른 사람의 풀이에서 넘어왔으면 처음부터 그 사람 사주로 상담해요(위 알림 칸에서 내 얘기로 되돌릴 수 있어요)
+  const [about, setAbout] = useState<{ name: string; birth: BirthInput } | null>(() => (initialCtx.other && initialCtx.birth ? { name: initialCtx.name?.trim() || "그 사람", birth: initialCtx.birth } : null));
   const [aboutOpen, setAboutOpen] = useState(false);
   // 질문 속 주인공이 다른 사람이라 시트를 띄운 경우, 고른 뒤 다시 보낼 질문이에요
   const [pendingAsk, setPendingAsk] = useState<{ text: string; who: string } | null>(null);
@@ -727,6 +728,7 @@ export default function ChatApp({ initialCtx, initialMsgs, onChange, onBack, rea
           <span className="flex min-w-0 flex-1 items-center gap-1.5">
             <span className="shrink-0 rounded-full bg-brand-500 px-2 py-0.5 text-[10px] font-extrabold text-white">다른 사람</span>
             <b className="min-w-0 truncate text-[13px]">{about.name}</b>
+            <span className="shrink-0 text-[11px] text-gray-500">사주로 상담 중</span>
           </span>
           <button type="button" onClick={() => setAboutOpen(true)} className="shrink-0 rounded-full border border-brand-300 px-2.5 py-1.5 text-[12px] font-bold text-brand-600 active:scale-95">
             다른 사람으로 바꾸기
