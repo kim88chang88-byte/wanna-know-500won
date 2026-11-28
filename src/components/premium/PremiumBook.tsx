@@ -37,6 +37,74 @@ const GOLD = "text-[#e6c887]";
 const HAIR = "border-[#e6c887]/25";
 
 /** "나와 비슷해요"를 눌러 확인해 보는 목록. 누른 개수에 따라 한마디가 나와요. (저장하지 않고 화면에서만 써요) */
+/** '십성이란?' 안에서 "예를 들어" 문단이 끝나고 다음 문단이 시작되는 자리 */
+const TENGODS_MORE_AT = "\n\n이름이 붙고 나면";
+const REL_EL = ["목", "화", "토", "금", "수"] as const;
+const REL_COL: Record<string, string> = { 목: "text-[#8fd19a]", 화: "text-[#ff9d8a]", 토: "text-[#e0c27a]", 금: "text-[#d6dbe6]", 수: "text-[#8ec5ff]" };
+
+/** 접어 둔 "자세한 글자들 간의 관계": 오행이 서로 만들어 주고 눌러 주는 관계와 일간별 십성 표 */
+function TengodsRelations() {
+  const gives = ["목은 불(화)을 키워 줘", "불은 타고 남아 흙(토)이 돼", "흙은 안에서 쇠(금)를 길러", "쇠는 차게 맺혀 물(수)을 만들어", "물은 나무(목)를 자라게 해"];
+  const hits = ["나무(목)는 뿌리로 흙(토)을 뚫어", "흙(토)은 물(수)길을 막아", "물(수)은 불(화)을 꺼", "불(화)은 쇠(금)를 녹여", "쇠(금)는 나무(목)를 잘라"];
+  return (
+    <details data-testid="tengods-relations" className="group my-3 rounded-xl border border-[#e6c887]/30 bg-white/[0.04]">
+      <summary className="flex cursor-pointer list-none items-center justify-between gap-2 px-3 py-2.5 text-[14px] font-bold text-[#e6c887] [&::-webkit-details-marker]:hidden">
+        <span>자세한 글자들 간의 관계</span>
+        <span className="text-[12px] font-semibold text-[#e8dfca]/70 group-open:hidden">더 보기 ▾</span>
+        <span className="hidden text-[12px] font-semibold text-[#e8dfca]/70 group-open:inline">접기 ▴</span>
+      </summary>
+      <div className="space-y-3 px-3 pb-3.5 text-[13.5px] leading-[1.65] text-[#f3ecdc]">
+        <div>
+          <p className="font-bold text-[#e6c887]">서로 만들어 줘 (상생)</p>
+          <ul className="mt-1 space-y-0.5">
+            {gives.map((t) => (
+              <li key={t}>· {t}</li>
+            ))}
+          </ul>
+        </div>
+        <div>
+          <p className="font-bold text-[#e6c887]">서로 눌러 줘 (상극)</p>
+          <ul className="mt-1 space-y-0.5">
+            {hits.map((t) => (
+              <li key={t}>· {t}</li>
+            ))}
+          </ul>
+        </div>
+        <div>
+          <p className="font-bold text-[#e6c887]">내 일간이 ○일 때, 각 글자는 이런 십성</p>
+          <div className="mt-1.5 overflow-x-auto">
+            <table className="w-full min-w-[300px] border-collapse text-center text-[13px]">
+              <thead>
+                <tr className="text-[#e8dfca]/70">
+                  <th className="border-b border-[#e6c887]/25 px-1 py-1.5 font-semibold">내 일간</th>
+                  {["비겁", "식상", "재성", "관성", "인성"].map((g) => (
+                    <th key={g} className="border-b border-[#e6c887]/25 px-1 py-1.5 font-semibold">{g}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {REL_EL.map((el, i) => (
+                  <tr key={el}>
+                    <th className={`border-b border-white/10 px-1 py-1.5 font-bold ${REL_COL[el]}`}>{el}</th>
+                    {[0, 1, 2, 3, 4].map((k) => {
+                      // 같은 기운, 내가 만들어 주는 기운, 내가 다루는 기운, 나를 눌러 주는 기운, 나를 만들어 주는 기운 (오행 순서로 0·1·2·3·4칸)
+                      const idx = (i + k) % 5;
+                      return (
+                        <td key={k} className={`border-b border-white/10 px-1 py-1.5 font-bold ${REL_COL[REL_EL[idx]]}`}>{REL_EL[idx]}</td>
+                      );
+                    })}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <p className="mt-1.5 text-[12.5px] text-[#e8dfca]/70">예: 내 일간이 목이면 목=비겁, 화=식상, 토=재성, 금=관성, 수=인성. 여기에 음양이 같으면 ‘편’, 다르면 ‘정’이 붙어 열 가지 이름이 돼.</p>
+        </div>
+      </div>
+    </details>
+  );
+}
+
 /** AI 가 쓴 장은 문단(빈 줄)과 "- " 목록, **굵은 핵심**이 들어 있어요. 일반 문장은 그대로 한 문단이에요. */
 function bold(text: string) {
   return text.split(/(\*\*[^*]+\*\*)/g).map((t, i) =>
@@ -1341,7 +1409,15 @@ export default function PremiumBook({ report, flush = false, finale, previewBlur
     explainer && !blurred ? (
       <aside data-testid="book-explainer" className="rounded-[14px] border border-[#e6c887]/40 bg-[#e6c887]/[0.07] px-4 py-3.5">
         <p className={`text-[14px] font-bold tracking-[0.12em] ${GOLD}`}>{explainer.title}</p>
-        <p className="mt-2 whitespace-pre-line text-[15px] leading-[1.7] text-[#f3ecdc]">{explainer.body}</p>
+        {page.key === "tengods" && explainer.body.includes(TENGODS_MORE_AT) ? (
+          <>
+            <p className="mt-2 whitespace-pre-line text-[15px] leading-[1.7] text-[#f3ecdc]">{explainer.body.slice(0, explainer.body.indexOf(TENGODS_MORE_AT))}</p>
+            <TengodsRelations />
+            <p className="whitespace-pre-line text-[15px] leading-[1.7] text-[#f3ecdc]">{explainer.body.slice(explainer.body.indexOf(TENGODS_MORE_AT) + 2)}</p>
+          </>
+        ) : (
+          <p className="mt-2 whitespace-pre-line text-[15px] leading-[1.7] text-[#f3ecdc]">{explainer.body}</p>
+        )}
       </aside>
     ) : null;
   const curDaeun = report.daeun?.list.find((d) => d.current)?.ganzhi ?? null;
