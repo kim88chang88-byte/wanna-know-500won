@@ -4,6 +4,7 @@ import { useState } from "react";
 import BirthTimeSelect from "@/components/BirthTimeSelect";
 import { buildBirthFields, dateTextToFields, EMPTY_BIRTH, formatDateInput, type BirthFields } from "@/lib/intake";
 import { MAX_LABEL, type SavedPerson } from "@/lib/people";
+import { profileToForm, type SavedProfile } from "@/lib/profile";
 
 const INPUT = "w-full rounded-xl border border-brand-200 bg-white px-3 py-2 text-xs text-gray-800 focus:outline-none focus:ring-2 focus:ring-brand-300";
 const ON = "bg-brand-600 text-white border-brand-600";
@@ -21,10 +22,15 @@ const pad = (n: number) => String(n).padStart(2, "0");
 
 /** 내 정보 창에서 다른 사람(가족·친구·연인)을 직접 추가해 두는 작은 입력 폼이에요. */
 /** allowSessionOnly: 저장하지 않고 이번 대화에서만 쓰는 선택지를 보여 줘요(상담실에서 다른 사람을 고를 때). 이때 저장 안 한 사람은 id 가 "temp" 예요. */
-export default function AddPersonForm({ onAdded, onCancel, allowSessionOnly = false, defaultLabel = "" }: { onAdded: (p: SavedPerson) => void; onCancel: () => void; allowSessionOnly?: boolean; defaultLabel?: string }) {
-  const [f, setF] = useState<BirthFields>(EMPTY_BIRTH);
-  const [dateText, setDateText] = useState("");
-  const [label, setLabel] = useState(defaultLabel);
+export default function AddPersonForm({ onAdded, onCancel, allowSessionOnly = false, defaultLabel = "", edit = null }: { onAdded: (p: SavedPerson) => void; onCancel: () => void; allowSessionOnly?: boolean; defaultLabel?: string; edit?: { id: string; label: string; birth: SavedProfile } | null }) {
+  // edit: 이미 기억해 둔 정보를 고칠 때 (id "me" 는 내 정보, 그 밖엔 기억해 둔 사람)
+  const [f, setF] = useState<BirthFields>(() => (edit ? { ...EMPTY_BIRTH, ...profileToForm(edit.birth) } : EMPTY_BIRTH));
+  const [dateText, setDateText] = useState(() => {
+    if (!edit) return "";
+    const b = edit.birth;
+    return `${String(b.year).padStart(4, "0")}-${String(b.month).padStart(2, "0")}-${String(b.day).padStart(2, "0")}`;
+  });
+  const [label, setLabel] = useState(edit ? edit.label : defaultLabel);
   const [agree, setAgree] = useState(false);
   const [keep, setKeep] = useState(!allowSessionOnly);
   const [busy, setBusy] = useState(false);
@@ -44,6 +50,32 @@ export default function AddPersonForm({ onAdded, onCancel, allowSessionOnly = fa
     const birth = buildBirthFields(f);
     if (!birth) {
       setError("생년월일, 성별, 태어난 시간을 다시 확인해 줘.");
+      return;
+    }
+    if (edit) {
+      setBusy(true);
+      setError(null);
+      try {
+        const me = edit.id === "me";
+        const res = await fetch(me ? "/api/profile" : `/api/people/${edit.id}`, {
+          method: me ? "PUT" : "PATCH",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify(me ? { birth } : { label: label.trim() || `${birth.year}.${pad(birth.month)}.${pad(birth.day)}`, birth }),
+        });
+        const j = (await res.json().catch(() => null)) as { person?: SavedPerson | null; profile?: SavedProfile | null; error?: string } | null;
+        if (res.ok && me && j?.profile) {
+          onAdded({ id: "me", label: "", birth: j.profile });
+          return;
+        }
+        if (res.ok && !me && j?.person) {
+          onAdded(j.person);
+          return;
+        }
+        setError(j?.error ?? "저장하지 못했어. 잠시 뒤에 다시 시도해 줘.");
+      } catch {
+        setError("저장하지 못했어. 잠시 뒤에 다시 시도해 줘.");
+      }
+      setBusy(false);
       return;
     }
     if (allowSessionOnly && !keep) {
@@ -77,7 +109,7 @@ export default function AddPersonForm({ onAdded, onCancel, allowSessionOnly = fa
 
   return (
     <div data-testid="add-person-form" className="mt-2 space-y-2.5 rounded-xl border border-brand-200 bg-white p-3 text-left">
-      <input
+      {!(edit && edit.id === "me") && <input
         type="text"
         name="addLabel"
         data-testid="add-person-label"
@@ -86,14 +118,14 @@ export default function AddPersonForm({ onAdded, onCancel, allowSessionOnly = fa
         onChange={(e) => setLabel(e.target.value)}
         placeholder="이름 또는 별명 (예: 엄마, 내 짝꿍)"
         className={INPUT}
-      />
+      />}
       {allowSessionOnly && (
         <label className="flex items-start gap-2 text-[11px] leading-relaxed text-gray-700">
           <input type="checkbox" name="addKeep" data-testid="add-person-keep" className="mt-0.5" checked={keep} onChange={(e) => setKeep(e.target.checked)} />
           <span>다음에도 바로 고를 수 있게 이 사람을 저장해 둘게. (끄면 이번 대화에서만 쓰고 저장하지 않아)</span>
         </label>
       )}
-      <label className={`${keep ? "flex" : "hidden"} items-start gap-2 text-[11px] leading-relaxed text-gray-700`}>
+      <label className={`${keep && !edit ? "flex" : "hidden"} items-start gap-2 text-[11px] leading-relaxed text-gray-700`}>
         <input type="checkbox" name="addAgree" data-testid="add-person-agree" className="mt-0.5" checked={agree} onChange={(e) => setAgree(e.target.checked)} />
         <span>실명이나 별명을 적어도 괜찮고, 이 정보를 저장해도 되는 사람이야.</span>
       </label>
@@ -144,7 +176,7 @@ export default function AddPersonForm({ onAdded, onCancel, allowSessionOnly = fa
           취소
         </button>
         <button type="button" data-testid="add-person-save" disabled={busy} onClick={save} className="rounded-full bg-brand-600 px-4 py-1.5 text-[11px] font-bold text-white disabled:opacity-50 active:scale-95 transition-transform">
-          {busy ? "저장 중…" : allowSessionOnly && !keep ? "이 사람으로 보기" : allowSessionOnly ? "저장하고 보기" : "저장하기"}
+          {busy ? "저장 중…" : edit ? "고쳐서 저장" : allowSessionOnly && !keep ? "이 사람으로 보기" : allowSessionOnly ? "저장하고 보기" : "저장하기"}
         </button>
       </div>
     </div>

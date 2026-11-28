@@ -99,6 +99,8 @@ interface LoginModalProps {
   profile?: SavedProfile | null;
   /** 기억해 둔 생년월일시 삭제. 성공하면 true */
   onDeleteProfile?: () => Promise<boolean>;
+  /** 내 기억 정보를 고쳤을 때 화면 상태를 새 값으로 바꿔요 */
+  onProfileChange?: (p: SavedProfile) => void;
 }
 
 /** 기억해 둔 다른 사람 목록과 지우기 (로그인 창 안에서). 하나도 없거나 기능이 꺼져 있으면 아무것도 안 보여요. */
@@ -108,6 +110,7 @@ function SavedPeopleBox() {
   const [failed, setFailed] = useState(false);
   const [enabled, setEnabled] = useState(false);
   const [adding, setAdding] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
 
   useEffect(() => {
     let alive = true;
@@ -133,10 +136,33 @@ function SavedPeopleBox() {
       {people.length === 0 && !adding && <p className="mt-1 text-center text-[11px] text-gray-500">아직 없어. 가족·친구·연인을 추가해 두면 눌러서 바로 풀이할 수 있어.</p>}
       <ul className="mt-1.5 space-y-1">
         {people.map((p) => (
-          <li key={p.id} className="flex items-center justify-between gap-2 text-xs text-gray-700">
+          <li key={p.id} className="text-xs text-gray-700">
+           {editingId === p.id ? (
+            <AddPersonForm
+              edit={p}
+              onCancel={() => setEditingId(null)}
+              onAdded={(np) => {
+                setPeople((list) => list.map((x) => (x.id === np.id ? np : x)));
+                setEditingId(null);
+              }}
+            />
+           ) : (
+           <div className="flex items-center justify-between gap-2">
             <span className="min-w-0 truncate">
               <b>{p.label}</b> · {profileSummary(p.birth)}
             </span>
+            <span className="flex shrink-0 items-center gap-2.5">
+            <button
+              type="button"
+              data-testid="edit-person"
+              onClick={() => {
+                setAdding(false);
+                setEditingId(p.id);
+              }}
+              className="shrink-0 text-[11px] font-bold text-brand-600 underline underline-offset-2"
+            >
+              수정하기
+            </button>
             <button
               type="button"
               data-testid="delete-person"
@@ -157,6 +183,9 @@ function SavedPeopleBox() {
             >
               {busyId === p.id ? "지우는 중…" : "지우기"}
             </button>
+            </span>
+           </div>
+           )}
           </li>
         ))}
       </ul>
@@ -253,7 +282,8 @@ function RefCodeEntry() {
   );
 }
 
-export function LoginModal({ onClose, reason = null, user = null, result = null, onLogout, onWithdraw, profile = null, onDeleteProfile }: LoginModalProps) {
+export function LoginModal({ onClose, reason = null, user = null, result = null, onLogout, onWithdraw, profile = null, onDeleteProfile, onProfileChange }: LoginModalProps) {
+  const [editingProfile, setEditingProfile] = useState(false);
   const [profileBusy, setProfileBusy] = useState(false);
   const [profileError, setProfileError] = useState(false);
   const [confirmWithdraw, setConfirmWithdraw] = useState(false);
@@ -283,6 +313,22 @@ export function LoginModal({ onClose, reason = null, user = null, result = null,
             <div data-testid="saved-profile-box" className="rounded-2xl bg-brand-50 border border-brand-100 p-3 text-center">
               <p className="text-[11px] font-bold text-brand-700">도리가 기억하고 있는 정보</p>
               <p className="text-xs text-gray-700 mt-1">{profileSummary(profile)}</p>
+              {editingProfile && onProfileChange ? (
+                <AddPersonForm
+                  edit={{ id: "me", label: "", birth: profile }}
+                  onCancel={() => setEditingProfile(false)}
+                  onAdded={(np) => {
+                    onProfileChange(np.birth);
+                    setEditingProfile(false);
+                  }}
+                />
+              ) : (
+                onProfileChange && (
+                  <button type="button" data-testid="edit-my-profile" onClick={() => setEditingProfile(true)} className="mt-1.5 mr-3 text-[11px] font-bold text-brand-600 underline underline-offset-2">
+                    수정하기
+                  </button>
+                )
+              )}
               {profileError && (
                 <p role="alert" className="text-[11px] font-bold text-brand-600 mt-1">
                   지우지 못했어. 잠시 뒤에 다시 시도해 줘.

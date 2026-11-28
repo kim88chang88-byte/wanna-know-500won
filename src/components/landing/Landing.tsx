@@ -554,7 +554,7 @@ export default function Landing() {
         </div>
       )}
 
-      {loginOpen && <LoginModal onClose={closeLogin} reason={loginReason} user={user} result={loginResult} onLogout={logout} onWithdraw={withdraw} profile={profile} onDeleteProfile={deleteProfile} />}
+      {loginOpen && <LoginModal onClose={closeLogin} reason={loginReason} user={user} result={loginResult} onLogout={logout} onWithdraw={withdraw} profile={profile} onDeleteProfile={deleteProfile} onProfileChange={setProfile} />}
       {intake && (
         <IntakeModal
           target={intake}

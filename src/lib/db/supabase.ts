@@ -729,6 +729,28 @@ export function createDb(config: DbConfig, fetchImpl: FetchLike = fetch) {
       return Array.isArray(rows) && typeof rows[0]?.id === "string" ? rows[0].id : null;
     },
 
+    /** 기억해 둔 사람 한 명 고치기 (본인 것만) */
+    async updatePerson(userId: string, id: string, label: string, p: SavedProfile, now: Date = new Date()): Promise<void> {
+      if (!UUID.test(id)) throw new DbError("invalid id");
+      await call(`saved_people?id=eq.${id}&user_id=eq.${safeId(userId)}`, {
+        method: "PATCH",
+        headers: headers({ Prefer: "return=minimal" }),
+        body: JSON.stringify({
+          label: label.slice(0, 20),
+          calendar: p.calendar,
+          year: p.year,
+          month: p.month,
+          day: p.day,
+          is_leap: p.calendar === "lunar" && p.isLeapMonth === true,
+          hour: p.hour ?? null,
+          minute: p.hour === null || p.hour === undefined ? null : (p.minute ?? 0),
+          gender: p.gender,
+          consent_version: CONSENT_VERSION,
+          consented_at: now.toISOString(),
+        }),
+      });
+    },
+
     async deletePerson(userId: string, id: string): Promise<void> {
       if (!UUID.test(id)) throw new DbError("invalid id");
       await call(`saved_people?id=eq.${id}&user_id=eq.${safeId(userId)}`, { method: "DELETE", headers: headers({ Prefer: "return=minimal" }) });
