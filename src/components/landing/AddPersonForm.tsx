@@ -135,7 +135,7 @@ export default function AddPersonForm({ onAdded, onCancel, allowSessionOnly = fa
       <BirthTimeSelect time={f.time} known={f.timeKnown} onChange={(n) => patch({ time: n.time, timeKnown: n.known })} selectClassName={INPUT} />
       <p className="text-[11px] leading-relaxed text-gray-500">이 목록에서 언제든 지울 수 있고, 탈퇴하면 함께 삭제돼.</p>
       {error && (
-        <p role="alert" className="text-[11px] font-bold text-brand-600">
+        <p role="alert" className="block rounded-[10px] bg-[#fff0f0] px-2.5 py-2 text-[13px] font-extrabold text-[#d4202c]">
           {error}
         </p>
       )}
