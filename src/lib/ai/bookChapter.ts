@@ -104,7 +104,8 @@ export const CHAPTER_SCHEMA = {
 } as const;
 
 export function chapterName(nick: string | null | undefined): string | null {
-  const clean = (nick ?? "").replace(/[^0-9A-Za-z가-힣 ]/g, "").replace(/\s+/g, " ").trim();
+  const base = (nick ?? "").replace(/\([^)]*\)/g, " ").trim() || (nick ?? ""); // "장유안(자녀)" → "장유안"
+  const clean = base.replace(/[^0-9A-Za-z가-힣 ]/g, "").replace(/\s+/g, " ").trim();
   if (clean.length <= 10) return clean || null;
   // 길면 단어 단위로 자르고(중간에서 끊으면 "Kim88"이 "Ki"가 돼요), 첫 단어가 너무 길면 10자까지만 써요.
   let t = "";

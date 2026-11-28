@@ -706,7 +706,7 @@ export default function IntakeModal({ target, wallet = null, onClose, onComplete
     try {
       // 사주 리포트도 함께 받아요. 프리미엄은 전체, 일반 자판기는 기본(원국·오행·신강신약). 실패해도 기본 풀이는 그대로 보여줘요.
       const partnerLabel = compat ? ((l) => (l && partnerInput && l !== autoLabel(partnerInput) ? l : null))(people.find((x) => x.id === pickedPerson)?.label || personLabel.trim()) : null;
-      const callAs = subject ? (subject.name ?? "") : null;
+      const callAs = subject ? (subject.name ?? "") : newPerson ? otherLabel.trim() : null; // 다른 사람이면 그 사람 이름(없으면 빈 값 = 이름 없이)
       const premiumPromise = fetchPremiumReport(input, target.premium && !compat ? "full" : "basic", target.fortune, concern, partnerInput, ctrl.signal, partnerLabel, callAs);
       const res = await fetch("/api/reading", {
         method: "POST",

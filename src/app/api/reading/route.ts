@@ -33,7 +33,8 @@ type ReadingStatus = "ok" | "unavailable" | "failed";
 
 /** 글 속에서 부를 이름. 글자·숫자·공백만 남기고 10자까지만 써요. (닉네임은 이용자가 정한 값이라 지시문처럼 쓰이지 않게 걸러요) */
 function callName(nick: string | undefined | null): string | null {
-  const t = (nick ?? "").replace(/[^0-9A-Za-z가-힣 ]/g, "").trim().slice(0, 10);
+  const raw = (nick ?? "").replace(/\([^)]*\)/g, " ").trim() || (nick ?? ""); // "장유안(자녀)" → "장유안"
+  const t = raw.replace(/[^0-9A-Za-z가-힣 ]/g, "").trim().slice(0, 10);
   return t || null;
 }
 
