@@ -1,5 +1,6 @@
 import { givenName } from "@/lib/callName";
 import type { Detail } from "./detail";
+import { fixPossessive } from "./nameRepair";
 
 /*
  * 긴 풀이를 AI 가 쓴 뒤, 코드로 한 번 더 다듬어요. (프롬프트로 부탁해도 가끔 어기는 것들)
@@ -92,7 +93,7 @@ export function headEndsWell(h: string): boolean {
 /** 접이식 글 일곱 편 + 요약 + 제목을 한 번에 다듬어요. */
 export function polishDetail(d: Detail, name?: string | null): Detail {
   const keys = Object.keys(d.folds) as Array<keyof Detail["folds"]>;
-  const base = (t: string) => softenPredictions(fixTypos(fixNameSubject(fixKkondae(t), name)));
+  const base = (t: string) => softenPredictions(fixTypos(fixPossessive(fixNameSubject(fixKkondae(t), name), name)));
   const texts = [...keys.map((k) => base(d.folds[k] ?? "")), d.story ? base(d.story) : ""];
   const limited = limitRepeats(texts);
   const folds: Detail["folds"] = {};

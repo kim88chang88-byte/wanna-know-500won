@@ -9,7 +9,7 @@ import { analyzeChart } from "@/lib/saju/analysis";
 import type { SajuChart } from "@/lib/saju/types";
 import type { ChatKind, ChatMsg } from "@/lib/chatContext";
 import { HISTORY_MAX, MSG_MAX, SUMMARY_MAX } from "@/lib/chatContext";
-import { callName, givenName, scrubExampleName } from "./nameRepair";
+import { callName, fixPossessive, givenName, scrubExampleName } from "./nameRepair";
 import { callJson } from "./callJson";
 import type { CoreFacts } from "./coreFacts";
 import type { ChatMemo } from "./chatMemo";
@@ -408,7 +408,7 @@ export function polishChatAnswer(answer: string, history: ChatMsg[], name?: stri
   if (needsDownNote(history) && !/상담|전문가|병원/.test(a) && a.length + DOWN_NOTE.length + 2 <= CHAT_MAX) {
     a = `${a}\n\n${DOWN_NOTE}`;
   }
-  return tidyMarkup(scrubExampleName(stripInternalTerms(fixTypos(a)), n, ...history.filter((m) => m.role === "user").map((m) => m.text)));
+  return tidyMarkup(scrubExampleName(stripInternalTerms(fixTypos(fixPossessive(a, n))), n, ...history.filter((m) => m.role === "user").map((m) => m.text)));
 }
 
 const CAREER_OFFTOPIC_CHIP = /세운|십성|지출|소비|차\s?(마시|한\s?잔)|따뜻한\s?차|연말|날씨|맛집|음식|산책|기분\s?전환|음악/;

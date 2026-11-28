@@ -1,5 +1,5 @@
 import { concernLabel, hasConcern, type Concern } from "@/lib/concerns";
-import { callName, repairName, scrubExampleName, subjName } from "./nameRepair";
+import { callName, possessiveName, repairName, scrubExampleName, subjName } from "./nameRepair";
 import type { BookPage, BookSection } from "@/lib/premium/types";
 import { callJson } from "./callJson";
 import { modelFor } from "./llm";
@@ -197,7 +197,7 @@ export function chapterFacts(pages: BookPage[], page: BookPage, name: string | n
   const year = new Date(Date.now() + 9 * 3600_000).getUTCFullYear();
   const payload = [
     `오늘 기준: 올해는 ${year}년, 지난해는 ${year - 1}년, 내년은 ${year + 1}년이야. 다른 해를 "올해"라고 쓰지 마.`,
-    name ? `이름: ${name} (부를 때: ${callName(name)} / 주어로 쓸 때: ${subjName(name)})` : "이름: 없음",
+    name ? `이름: ${name} (부를 때: ${callName(name)} / 주어로 쓸 때: ${subjName(name)} / "~의"로 쓸 때: ${possessiveName(name)})` : "이름: 없음",
     hasConcern(concern) ? `고민: ${[...concern!.tags.map(concernLabel), concern!.text].filter(Boolean).join(" / ")}` : "고민: 없음",
     `\n[이 장의 근거 사실]\n${brief(page, 480)}${tableFacts(page)}${chartFacts(page)}`,
     `\n[이 사람의 핵심 사실]\n${others}`,
@@ -531,7 +531,7 @@ Object.assign(CHAPTER_SPECS, {
   tengods: specN(
     ["나의 주력 기운과 사람들과의 관계", "일터에서의 나", "비어 있는 기운과 채우는 법", "글자들이 만나 만드는 이야기"],
     [
-      "가장 두드러진 십성 묶음이 재능으로 드러나는 모습과, 그 기운이 사람 사이에서 만드는 모습(잘 맞는/힘든 유형). 첫 문장은 반드시 \"[이름]의 사주에서 가장 두드러진 십성인 ○○(돌) 덕분에, …\" 꼴로 시작해(이름은 사실의 이름을 넣어서 \"○○는/은\"이 아니라 \"○○의 사주에서\"로, ○○에는 그 십성 묶음 이름, 이름이 없으면 \"네 사주에서\"). 십성 하나의 이야기를 이 소제목 안에서 끝내.",
+      "가장 두드러진 십성 묶음이 재능으로 드러나는 모습과, 그 기운이 사람 사이에서 만드는 모습(잘 맞는/힘든 유형). 첫 문장은 반드시 \"[이름]의 사주에서 가장 두드러진 십성인 ○○(돌) 덕분에, …\" 꼴로 시작해(이름은 사실의 이름을 넣어서 \"○○는/은\"이 아니라 \"○○의 사주에서\"로(\"○○의\"는 사실에 적힌 \"~의\"로 쓸 때의 말 그대로, 예: \"재홍이의 사주에서\"), ○○에는 그 십성 묶음 이름, 이름이 없으면 \"네 사주에서\"). 십성 하나의 이야기를 이 소제목 안에서 끝내.",
       "월주(사회 자리)의 십성으로 본 일터·사회에서의 인상, 그리고 어울리는 분야·환경 서너 가지(직업명 단정 금지). 근거는 이 챕터의 주제대로 십성이어야 해: 근거 사실에 적힌 월주 두 글자의 십성 이름(예: 월간·월지의 십성)을 반드시 짚고, 그 십성이 일간과 어떤 관계(내가 만들어 주는 힘인지, 눌러 주는 힘인지 등)라서 그런 모습이 되는지 풀어. 월주 자체(사회 자리)는 한 구절로만 언급하고 월주만으로 설명을 끝내지 마. 앞 소제목에서 푼 십성 묶음을 그대로 다시 설명하지는 마. " + NO_INVENT,
       "원국에 없거나 약한 십성이 만드는 빈자리와, 그것을 채우는 습관·만남·공부의 방향. 앞에서 말한 강한 십성은 반복하지 마.",
       "근거 사실에 나온 십성 조합과 지장간의 의미만. 없으면 이 사람 구조의 특징을 일상 이야기로 풀어 써. 앞 내용을 반복하지 마.",

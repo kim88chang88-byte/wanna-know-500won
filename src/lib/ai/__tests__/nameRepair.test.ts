@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { repairName, scrubDeep, scrubExampleName } from "../nameRepair";
+import { fixPossessive, repairName, scrubDeep, scrubExampleName } from "../nameRepair";
 
 describe("이름 오타 바로잡기", () => {
   it("한 글자만 다른 이름을 되돌려요", () => {
@@ -34,5 +34,18 @@ describe("scrubExampleName", () => {
   });
   it("객체 안의 글도 고쳐요", () => {
     expect(scrubDeep({ a: ["은혁아, 응"], b: 3 }, "하나")).toEqual({ a: ["응"], b: 3 });
+  });
+});
+
+describe("이름 뒤 소유격", () => {
+  it("받침 있는 이름은 \"이의\"로 고쳐요", () => {
+    expect(fixPossessive("재홍의 사주에서 가장 두드러진 십성인 관성", "재홍")).toBe("재홍이의 사주에서 가장 두드러진 십성인 관성");
+    expect(fixPossessive("은혁의 사주는 단단해.", "장은혁")).toBe("은혁이의 사주는 단단해.");
+  });
+  it("받침 없는 이름·이미 맞는 말·다른 단어는 그대로 둬요", () => {
+    expect(fixPossessive("지수의 사주", "지수")).toBe("지수의 사주");
+    expect(fixPossessive("재홍이의 사주", "재홍")).toBe("재홍이의 사주");
+    expect(fixPossessive("재홍의미는 없어", "재홍")).toBe("재홍의미는 없어");
+    expect(fixPossessive("재홍의 사주", null)).toBe("재홍의 사주");
   });
 });

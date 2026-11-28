@@ -11,7 +11,21 @@ function hamming(a: string, b: string): number {
   return n;
 }
 
+/**
+ * 받침으로 끝나는 이름 뒤의 "의"는 "이의"로: "재홍의 사주" → "재홍이의 사주". (AI 가 놓친 곳을 고쳐요)
+ * 이름 뒤에 바로 한글이 붙은 말("재홍의미")은 건드리지 않아요. 이미 "재홍이의"면 그대로예요.
+ */
+export function fixPossessive(text: string, name: string | null | undefined): string {
+  const n = (name ?? "").trim();
+  const g = givenName(n);
+  const forms = [...new Set([n, g].filter((x) => x.length >= 2 && hasBatchim(x)))];
+  if (forms.length === 0) return text;
+  const alt = forms.map((x) => x.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).sort((a, b) => b.length - a.length).join("|");
+  return text.replace(new RegExp(`(?<![가-힣])(${alt})의(?![가-힣])`, "g"), "$1이의");
+}
+
 export function repairName(text: string, name: string | null | undefined): string {
+  text = fixPossessive(text, name);
   const n = (name ?? "").trim();
   if (!HANGUL3.test(n)) return text;
   return text.replace(/(?<![가-힣])([가-힣]{3})님/g, (whole, token: string) => {
@@ -34,6 +48,11 @@ export function hasBatchim(word: string): boolean {
 export function callName(name: string): string {
   const g = givenName(name);
   return g + (hasBatchim(g) ? "아" : "야");
+}
+/** "재홍이의" / "지수의". 글 속에서 "○○의 사주"처럼 쓸 때 */
+export function possessiveName(name: string): string {
+  const g = givenName(name);
+  return g + (hasBatchim(g) ? "이의" : "의");
 }
 export function subjName(name: string): string {
   const g = givenName(name);
