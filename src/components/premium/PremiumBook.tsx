@@ -1723,7 +1723,7 @@ function PillarsPeek({ report, rootRef, pageKey, afterChapter1 }: { report: Prem
             </button>
             <b>여기서 언제든 내 사주팔자를 다시 볼 수 있어.</b>
             <br />
-            책을 읽다가 궁금할 때 눌러 봐.
+            이 프리미엄 분석 책을 읽다가 궁금할 때 눌러 봐.
             <span aria-hidden="true" className="absolute -bottom-[7px] right-6 h-3.5 w-3.5 rotate-45 bg-[#fffaf0]" />
           </div>
         )}
