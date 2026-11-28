@@ -32,7 +32,7 @@ import { artFor } from "@/lib/foodArt";
  */
 
 export const CHAT_MIN = 40;
-export const CHAT_MAX = 1400;
+export const CHAT_MAX = 2800;
 
 /* 프롬프트 본문은 docs/상담실-기준/prompt/*.md 에 있어요(수정은 거기서). 빌드 때 chatRules.generated.ts 로 묶여요. */
 export const CHAT_SYSTEM_PROMPT = renderChatRules(CHAT_RULES, {
@@ -48,7 +48,7 @@ export const CHAT_SYSTEM_PROMPT = renderChatRules(CHAT_RULES, {
 export const CHAT_SCHEMA = {
   type: "object",
   properties: {
-    answer: { type: "string", description: `도리의 채팅 답. 질문 종류에 맞게: 인사는 1~2문장, 마음이 힘든 말은 80~200자, 고민 상담 질문은 5단계(공감 → 사주로 본 지금 상황 → 고민에 적용 → 해답·솔루션 → 되묻기)로 첫 질문 900~1250자·이어지는 질문 600~950자, 그 밖의 일반 첫 질문은 440~900자, 그 밖의 이어지는 질문은 300~600자(최대 ${CHAT_MAX}자), 빈 줄로 문단 나누기` },
+    answer: { type: "string", description: `도리의 채팅 답. 질문 종류에 맞게: 인사는 1~2문장, 마음이 힘든 말은 160~400자, 고민 상담 질문은 5단계(공감 → 사주로 본 지금 상황 → 고민에 적용 → 해답·솔루션 → 되묻기)로 첫 질문 1800~2500자·이어지는 질문 1200~1900자, 그 밖의 일반 첫 질문은 880~1800자, 그 밖의 이어지는 질문은 600~1200자(최대 ${CHAT_MAX}자), 빈 줄로 문단 나누기` },
     followups: { type: "array", items: { type: "string" }, description: "방금 답에서 이어지는 사용자의 다음 질문 3개 (각 20자 안팎). 칩은 사용자가 도리에게 묻는 말이어야 해(말투: ~알려줘, ~어때?, ~좋을까?, ~뭐야?). 도리가 사용자에게 되묻는 말(~가고 싶어?, 어떤 요일에 갈래?, 네가 ~했어?)은 절대 안 돼. 고민 상담 답이면 답 끝에서 짚은 더 알아볼 사항(시기·상대·선택지·다음 단계)으로 이어지게" },
     choices: { type: "array", items: { type: "string" }, description: "도리의 되묻는 질문에 눌러서 답할 선택지 2개(각 12자 이내). 없으면 빈 배열" },
     risk: { type: "boolean", description: "사용자가 죽고 싶다·사라지고 싶다·자고 일어나지 않았으면·모든 게 다 끝났으면·다 내려놓고 싶다·내가 없어야 남들이 편하다·살 의미가 없다 같은 말을 직접 하거나 돌려 말해서 자해·자살 위험이 조금이라도 보이면 true (이때 answer 는 따뜻한 한 줄만, 서버가 안내 글로 바꿔요). 평범한 피곤·스트레스·고민이면 false" },
@@ -783,11 +783,11 @@ export async function chatDori(
       system: CHAT_SYSTEM_PROMPT,
       user,
       schema: CHAT_SCHEMA,
-      maxTokens: 2800,
+      maxTokens: 6000,
       model: opts.model ?? modelFor("chat"),
       apiKey: opts.apiKey,
       fetchImpl: opts.fetchImpl,
-      timeoutMs: 40_000,
+      timeoutMs: 55_000,
       onUsage: opts.onUsage,
       parse: parseChatReply,
     });
@@ -799,7 +799,7 @@ export async function chatDori(
   if (!r.unable && !r.risk && r.choices.length === 0 && !r.answer.trimStart().startsWith("🤍") && q.trim().length >= 8 && r.answer.length < minLen) {
     try {
       const more = await ask(
-        `${baseUser}\n\n[분량 보강 요청] 방금 네가 쓴 답이 너무 짧아(${r.answer.length}자). 위 규칙의 분량(${firstAskNow ? "440~900자, 3~5문단" : "300~600자, 2~3문단"})에 맞게 처음부터 다시 써. 같은 말을 되풀이하지 말고, 사주 근거를 한 가지 더 풀어 쓰고 이 사람의 상황·왜 그런 마음이 드는지·조심할 점을 구체적으로 넣어. 결론은 첫 문단에 그대로 두고 마지막은 작은 행동 한 가지로 끝내. 방금 답(참고용): ${r.answer}`,
+        `${baseUser}\n\n[분량 보강 요청] 방금 네가 쓴 답이 너무 짧아(${r.answer.length}자). 위 규칙의 분량(${firstAskNow ? "880~1800자, 6~9문단" : "600~1200자, 4~6문단"})에 맞게 처음부터 다시 써. 같은 말을 되풀이하지 말고, 사주 근거를 한 가지 더 풀어 쓰고 이 사람의 상황·왜 그런 마음이 드는지·조심할 점을 구체적으로 넣어. 결론은 첫 문단에 그대로 두고 마지막은 작은 행동 한 가지로 끝내. 방금 답(참고용): ${r.answer}`,
       );
       if (!more.unable && !more.risk && more.answer.length > r.answer.length) r = more;
     } catch {
