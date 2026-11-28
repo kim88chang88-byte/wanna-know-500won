@@ -551,6 +551,7 @@ export default function IntakeModal({ target, wallet = null, onClose, onComplete
   const [meKey, setMeKey] = useState(0);
   // 누구의 운세인지: null 이면 "나", 아니면 고른 다른 사람(이름이 없으면 name 은 null). 궁합은 두 사람이 정해져 있어서 고르지 않아요.
   const [subject, setSubject] = useState<{ name: string | null } | null>(null);
+  const [newPerson, setNewPerson] = useState(false); // "다른 사람을 새로 입력"으로 들어온 경우
   const [whoDone, setWhoDone] = useState(false);
   const [stepIndex, setStepIndex] = useState(() => (savedProfile ? firstAfterMe : 0));
   // 선택 동의: 둘 다 기본은 꺼짐. (이미 저장해 둔 회원이 정보를 고치는 경우만, 전에 동의한 "기억하기"를 켜 둬요)
@@ -611,6 +612,8 @@ export default function IntakeModal({ target, wallet = null, onClose, onComplete
   const whoOpen = loggedIn && !compat && people.length > 0 && !whoDone;
   function chooseMe() {
     setSubject(null);
+    setNewPerson(false);
+    setSaveOther(false);
     if (savedProfile) {
       setForm({ ...EMPTY_FORM, ...profileToForm(savedProfile) });
       setSaveProfile(true);
@@ -621,12 +624,17 @@ export default function IntakeModal({ target, wallet = null, onClose, onComplete
     setWhoDone(true);
   }
   function choosePerson(p: SavedPerson) {
+    setNewPerson(false);
+    setSaveOther(false);
     pickForMe(p);
     setSubject({ name: p.label !== autoLabel(p.birth) ? p.label : null });
     setWhoDone(true);
   }
   function chooseNew() {
     setSubject(null);
+    setNewPerson(true);
+    setSaveOther(false);
+    setPersonOk(false);
     setForm(EMPTY_FORM);
     setSaveProfile(false);
     setMeKey((k) => k + 1);
@@ -635,7 +643,7 @@ export default function IntakeModal({ target, wallet = null, onClose, onComplete
     setWhoDone(true);
   }
   /** 보여 줄 이름: 다른 사람의 운세면 그 사람 이름, 아니면 내 닉네임 */
-  const viewName: string | null = subject ? subject.name : nickname;
+  const viewName: string | null = subject ? subject.name : newPerson ? otherLabel.trim() || null : nickname;
 
   /** 기억해 둔 사람을 고르면 상대방 질문을 건너뛰고 고민 단계로 가요. */
   function pickPerson(p: SavedPerson) {
@@ -1228,7 +1236,7 @@ export default function IntakeModal({ target, wallet = null, onClose, onComplete
               </label>
               {!(loggedIn || buildConcern(form)) && <p className="text-[11px] text-gray-400">입력한 정보는 서버에 저장하지 않아.</p>}
 
-              {loggedIn && !(savedProfile && sameBirth(savedProfile, buildBirthInput({ ...form, consent: true }))) && (
+              {loggedIn && !newPerson && !(savedProfile && sameBirth(savedProfile, buildBirthInput({ ...form, consent: true }))) && (
                 <OptRow name="saveProfile" checked={saveProfile} onChange={(v) => { setSaveProfile(v); if (v) setSaveOther(false); }} pill="응">
                   도리가 내 생년월일시·성별을 기억해 둘까? 기억해 두면 다음부터 다시 안 적어도 돼서 편해. 로그인 창에서 언제든 지울 수 있고, 탈퇴하면 함께 삭제돼.
                 </OptRow>
@@ -1238,6 +1246,30 @@ export default function IntakeModal({ target, wallet = null, onClose, onComplete
                 <OptRow name="saveVault" checked={saveVault} onChange={setSaveVault} pill="응">
                   풀이를 내 보관함에 담아 둘까? 담아 두면 너가 언제든 (추가 비용 없이) 다시 볼 수 있어서 편리할 거야. 직접 지우거나 탈퇴하면 함께 삭제돼.
                 </OptRow>
+              )}
+
+              {newPerson && !compat && loggedIn && people.length >= MAX_PEOPLE && (
+                <p className="text-[11px] text-gray-500" data-testid="people-full">기억해 둔 사람이 가득 찼어(최대 {MAX_PEOPLE}명). 로그인 창에서 한 명을 지우면 이 사람도 기억해 둘 수 있어.</p>
+              )}
+              {newPerson && !compat && loggedIn && people.length < MAX_PEOPLE && (
+                <div className="space-y-1.5">
+                  <OptRow name="saveOther" checked={saveOther} onChange={setSaveOther} pill="응">
+                    이 사람의 생년월일시·성별도 기억해 둘까? 다음에 &ldquo;누구의 운세를 볼까?&rdquo;에서 눌러서 바로 고를 수 있어서 편해. 로그인 창에서 언제든 지울 수 있고, 탈퇴하면 함께 삭제돼.
+                  </OptRow>
+                  {saveOther && (
+                    <input
+                      type="text"
+                      name="otherLabel"
+                      data-testid="other-label"
+                      value={otherLabel}
+                      maxLength={MAX_LABEL}
+                      onChange={(e) => setOtherLabel(e.target.value)}
+                      placeholder="이름 또는 별명 (선택, 예: 내 짝꿍)"
+                      className="w-full rounded-xl border border-brand-200 px-3 py-2 text-xs"
+                    />
+                  )}
+                  {saveOther && <PersonOkCheck checked={personOk} onChange={setPersonOk} />}
+                </div>
               )}
 
               {compat && loggedIn && !pickedPerson && !fromInvite && people.length < MAX_PEOPLE && (
