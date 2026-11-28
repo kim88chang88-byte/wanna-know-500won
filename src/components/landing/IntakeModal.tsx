@@ -1122,6 +1122,36 @@ export default function IntakeModal({ target, wallet = null, onClose, onComplete
             </p>
           </div>
 
+          {newPerson && !compat && stepIndex === 0 && (
+            <div data-testid="other-who" className="mb-4 rounded-xl border border-brand-100 bg-white px-3 py-3 space-y-2">
+              <p className="text-xs font-bold text-gray-800">이 사람은 누구야? <span className="font-normal text-gray-500">(선택)</span></p>
+              <div className="flex flex-wrap gap-1.5">
+                {["엄마", "아빠", "배우자", "연인", "자녀", "친구", "직장 동료"].map((w) => (
+                  <button
+                    key={w}
+                    type="button"
+                    data-testid="other-rel"
+                    onClick={() => setOtherLabel(w)}
+                    className={`rounded-full border px-3 py-1.5 text-xs font-bold ${otherLabel === w ? "border-brand-500 bg-brand-500 text-white" : "border-brand-200 bg-white text-brand-700 hover:bg-brand-50"}`}
+                  >
+                    {w}
+                  </button>
+                ))}
+              </div>
+              <input
+                type="text"
+                name="otherLabel"
+                data-testid="other-label"
+                value={otherLabel}
+                maxLength={MAX_LABEL}
+                onChange={(e) => setOtherLabel(e.target.value)}
+                placeholder="나와의 관계나 이름·별명 (예: 엄마, 내 짝꿍, 민수)"
+                className="w-full rounded-xl border border-brand-200 px-3 py-2 text-sm"
+              />
+              <p className="text-[11px] text-gray-500">적어 주면 풀이와 상담에서 이 이름으로 불러 줄게.</p>
+            </div>
+          )}
+
           {savedProfile && stepIndex >= firstAfterMe && step !== "pdate" && step !== "ptime" && step !== "pgender" && (
             <div data-testid="saved-profile" className="mb-3 flex items-center justify-between gap-2 rounded-xl bg-brand-50 border border-brand-100 px-3 py-2">
               <span className="text-[11px] text-gray-600 leading-snug">
@@ -1254,20 +1284,8 @@ export default function IntakeModal({ target, wallet = null, onClose, onComplete
               {newPerson && !compat && loggedIn && people.length < MAX_PEOPLE && (
                 <div className="space-y-1.5">
                   <OptRow name="saveOther" checked={saveOther} onChange={setSaveOther} pill="응">
-                    이 사람의 생년월일시·성별도 기억해 둘까? 다음에 &ldquo;누구의 운세를 볼까?&rdquo;에서 눌러서 바로 고를 수 있어서 편해. 로그인 창에서 언제든 지울 수 있고, 탈퇴하면 함께 삭제돼.
+                    이 사람의 생년월일시·성별과 위에 적은 이름도 기억해 둘까? 다음에 &ldquo;누구의 운세를 볼까?&rdquo;에서 눌러서 바로 고를 수 있어서 편해. 로그인 창에서 언제든 지울 수 있고, 탈퇴하면 함께 삭제돼.
                   </OptRow>
-                  {saveOther && (
-                    <input
-                      type="text"
-                      name="otherLabel"
-                      data-testid="other-label"
-                      value={otherLabel}
-                      maxLength={MAX_LABEL}
-                      onChange={(e) => setOtherLabel(e.target.value)}
-                      placeholder="이름 또는 별명 (선택, 예: 내 짝꿍)"
-                      className="w-full rounded-xl border border-brand-200 px-3 py-2 text-xs"
-                    />
-                  )}
                   {saveOther && <PersonOkCheck checked={personOk} onChange={setPersonOk} />}
                 </div>
               )}
