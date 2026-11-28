@@ -28,6 +28,10 @@ export async function GET(request: Request) {
   return NextResponse.json({ enabled: canChat(s?.sub), loggedIn: Boolean(s) }, { headers: { "Cache-Control": "no-store" } });
 }
 
+function genderWord(g: unknown): string | null {
+  return g === "male" ? "남성" : g === "female" ? "여성" : null;
+}
+
 export async function POST(request: Request) {
   const denied = guardOrigin(request) ?? (await enforceLimits(request, { name: "chat", windowMs: 60000, ip: 10, user: 12 }, "질문이 너무 빨라. 잠시 뒤에 다시 물어봐 줘."));
   if (denied) return denied;
@@ -145,7 +149,8 @@ export async function POST(request: Request) {
     const reply = await chatDori(
       {
         future,
-        about: about && aboutName ? { name: aboutName, asker: askerChart } : null,
+        about: about && aboutName ? { name: aboutName, asker: askerChart, askerGender: genderWord(selfBirth.gender) } : null,
+        gender: genderWord(birth.gender),
         kind: ctx.kind,
         name: ctx.name,
         partnerName: ctx.partnerName,

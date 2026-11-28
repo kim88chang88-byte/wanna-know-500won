@@ -535,7 +535,9 @@ export interface ChatFactsInput {
   chart: SajuChart;
   core: CoreFacts | null;
   /** 사용자가 고른 "다른 사람" 풀이: chart·core 는 그 사람의 것이고, asker 는 질문한 사용자 본인의 사주 */
-  about?: { name: string; asker: SajuChart | null } | null;
+  about?: { name: string; asker: SajuChart | null; askerGender?: string | null } | null;
+  /** chart 주인의 성별("남성"/"여성"). 호칭(엄마·아빠 등)을 지레짐작하지 않게 사실로 알려 줘요 */
+  gender?: string | null;
   /** 질문에 앞으로의 시점(내년 2월 등)이 있을 때, 그 시점 기준 사주 흐름 */
   future?: Record<string, unknown> | null;
   daily?: DailyFacts | null;
@@ -707,7 +709,7 @@ export function buildChatPrompt(i: ChatFactsInput, history: ChatMsg[], now: Date
   const facts = {
     들어온곳: where,
     이름: i.about ? { 나: i.name?.trim() || "(없음)", 주인공: i.about.name } : { 나: i.name?.trim() || "(없음)", ...(i.kind === "compat" ? { 상대: i.partnerName?.trim() || "상대" } : {}) },
-    ...(i.about ? { "주인공(사용자가 아닌 다른 사람)": chartFacts(i.chart), ...(i.about.asker ? { "질문한 사람(사용자)": chartFacts(i.about.asker) } : {}) } : { 나: chartFacts(i.chart) }),
+    ...(i.about ? { "주인공(사용자가 아닌 다른 사람)": { ...chartFacts(i.chart), ...(i.gender ? { 성별: i.gender } : {}) }, ...(i.about.asker ? { "질문한 사람(사용자)": { ...chartFacts(i.about.asker), ...(i.about.askerGender ? { 성별: i.about.askerGender } : {}) } } : {}) } : { 나: { ...chartFacts(i.chart), ...(i.gender ? { 성별: i.gender } : {}) } }),
     "이 대화에서 쓸 사주 기운": coreElements(i.chart).map((w) => `${w} 기운`),
     기운균형: elementBalance(i.chart),
     ...(i.core ? { 사주핵심: i.core } : {}),
