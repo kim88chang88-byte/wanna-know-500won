@@ -21,10 +21,10 @@ const pad = (n: number) => String(n).padStart(2, "0");
 
 /** 내 정보 창에서 다른 사람(가족·친구·연인)을 직접 추가해 두는 작은 입력 폼이에요. */
 /** allowSessionOnly: 저장하지 않고 이번 대화에서만 쓰는 선택지를 보여 줘요(상담실에서 다른 사람을 고를 때). 이때 저장 안 한 사람은 id 가 "temp" 예요. */
-export default function AddPersonForm({ onAdded, onCancel, allowSessionOnly = false }: { onAdded: (p: SavedPerson) => void; onCancel: () => void; allowSessionOnly?: boolean }) {
+export default function AddPersonForm({ onAdded, onCancel, allowSessionOnly = false, defaultLabel = "" }: { onAdded: (p: SavedPerson) => void; onCancel: () => void; allowSessionOnly?: boolean; defaultLabel?: string }) {
   const [f, setF] = useState<BirthFields>(EMPTY_BIRTH);
   const [dateText, setDateText] = useState("");
-  const [label, setLabel] = useState("");
+  const [label, setLabel] = useState(defaultLabel);
   const [agree, setAgree] = useState(false);
   const [keep, setKeep] = useState(!allowSessionOnly);
   const [busy, setBusy] = useState(false);

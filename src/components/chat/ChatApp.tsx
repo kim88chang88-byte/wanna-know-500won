@@ -205,6 +205,8 @@ export default function ChatApp({ initialCtx, initialMsgs, onChange, onBack, rea
   /** 사용자가 고른 "다른 사람"(이 대화에서만 쓰고 저장하지 않아요) */
   const [about, setAbout] = useState<{ name: string; birth: BirthInput } | null>(null);
   const [aboutOpen, setAboutOpen] = useState(false);
+  // 질문 속 주인공이 다른 사람이라 시트를 띄운 경우, 고른 뒤 다시 보낼 질문이에요
+  const [pendingAsk, setPendingAsk] = useState<{ text: string; who: string } | null>(null);
   const [ctxOpen, setCtxOpen] = useState(false);
   const [note, setNote] = useState<string | null>(null);
   const [cheer, setCheer] = useState<number | null>(null); // 질문 충전 축하 카드 (더해진 개수)
@@ -373,7 +375,8 @@ export default function ChatApp({ initialCtx, initialMsgs, onChange, onBack, rea
   }, [msgs, ctx.kind, ctx.topic]);
   const typingNow = typing !== null;
 
-  async function send(raw: string) {
+  async function send(raw: string, opts: { noAsk?: boolean; about?: { name: string; birth: BirthInput } | null } = {}) {
+    const useAbout = opts.about !== undefined ? opts.about : about;
     const text = raw.trim().slice(0, MSG_MAX);
     // 질문이 0번이어도 보내 볼 수 있어요: 서버가 위기 문장은 질문을 쓰지 않고 안내로 답하고, 그 밖의 말은 402 로 돌려보내요
     if (!text || inflight.current) return;
@@ -390,15 +393,23 @@ export default function ChatApp({ initialCtx, initialMsgs, onChange, onBack, rea
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ctx, ...(about ? { about } : {}), messages: next.filter((m) => !m.log).map(({ role, text: t }) => ({ role, text: t })) }),
+        body: JSON.stringify({ ctx, ...(useAbout ? { about: useAbout } : {}), ...(opts.noAsk ? { noAsk: true } : {}), messages: next.filter((m) => !m.log).map(({ role, text: t }) => ({ role, text: t })) }),
       });
-      const data = (await res.json().catch(() => null)) as { answer?: string; followups?: unknown; visual?: ChatVisual | null; outfit?: OutfitPick | null; sticker?: unknown; choices?: unknown; links?: unknown; memo?: ChatMemo | null; safe?: boolean; error?: string; code?: string; left?: number } | null;
+      const data = (await res.json().catch(() => null)) as { answer?: string; followups?: unknown; visual?: ChatVisual | null; outfit?: OutfitPick | null; sticker?: unknown; choices?: unknown; links?: unknown; memo?: ChatMemo | null; safe?: boolean; needSubject?: boolean; who?: string; error?: string; code?: string; left?: number } | null;
       if (res.status === 402 && data?.code === "quota") {
         // 질문을 다 쓴 경우: 방금 보낸 말은 입력창으로 돌려놓고 "조약돌로 더하기" 카드를 보여 줘요
         setLeft(0);
         setMsgs(next.slice(0, -1));
         setInput(text);
         blockedQ.current = text;
+        return;
+      }
+      if (res.ok && data?.needSubject === true) {
+        // 다른 사람 얘기: 질문은 입력창에서 잠시 빼 두고 "누구 사주로 볼까?"를 먼저 물어요(질문 횟수는 쓰지 않았어요)
+        if (typeof data.left === "number") setLeft(data.left);
+        setMsgs(next.slice(0, -1));
+        setPendingAsk({ text, who: typeof data.who === "string" ? data.who : "" });
+        setAboutOpen(true);
         return;
       }
       if (!res.ok || !data?.answer) throw new Error(data?.error ?? "도리가 잠깐 물놀이하러 갔어. 다시 보내 볼래?");
@@ -808,17 +819,37 @@ export default function ChatApp({ initialCtx, initialMsgs, onChange, onBack, rea
       )}
       {aboutOpen && (
         <AboutSheet
-          onClose={() => setAboutOpen(false)}
+          who={pendingAsk?.who}
+          onClose={() => {
+            setAboutOpen(false);
+            if (pendingAsk) {
+              setInput(pendingAsk.text);
+              setPendingAsk(null);
+            }
+          }}
           onSelf={() => {
             setAboutOpen(false);
+            if (pendingAsk) {
+              const t = pendingAsk.text;
+              setPendingAsk(null);
+              void send(t, { noAsk: true });
+              return;
+            }
             if (about) {
               setAbout(null);
               setMsgs((m) => [...m, { role: "dori", text: "다시 네 사주로 볼게", at: Date.now(), log: true }]);
             }
           }}
           onPick={(p) => {
-            setAbout({ name: p.label, birth: p.birth });
+            const picked = { name: p.label, birth: p.birth };
+            setAbout(picked);
             setAboutOpen(false);
+            if (pendingAsk) {
+              const t = pendingAsk.text;
+              setPendingAsk(null);
+              void send(t, { about: picked });
+              return;
+            }
             setMsgs((m) => [...m, { role: "dori", text: `이제 ${p.label} 사주로 볼게`, at: Date.now(), log: true }]);
             setTimeout(() => field.current?.focus(), 0);
           }}

@@ -468,6 +468,50 @@ export async function checkRisk(history: ChatMsg[], opts: { apiKey?: string; mod
   return r.risk;
 }
 
+/* ---------- 질문의 주인공이 다른 사람인지 알아채기 ---------- */
+
+/** 다른 사람이 나올 법한 낱말이 있을 때만 분류 호출을 해요(없으면 AI 호출 없음). */
+export const SUBJECT_GATE = /(친구|친한|형님?|누나|오빠|언니|동생|엄마|어머니|아빠|아버지|부모|아들|딸|자녀|아이|조카|손주|손자|손녀|남편|아내|와이프|배우자|시어머니|시아버지|장모|장인|삼촌|이모|고모|할머니|할아버지|선배|후배|동료|상사|팀장|사장|직원|지인|이웃|제자|학생|그\s?(사람|친구|아이|애|분)|걔|그분)/;
+
+const SUBJECT_SYSTEM = `너는 질문 분류기야. 사용자의 마지막 말이 사용자 본인이 아니라 "다른 사람 한 명" 자체의 운명·성향·진로·미래·시기·건강운 등을 사주로 풀어 달라는 질문인지 판단해.
+other=true: 친한 형님 아들의 수능 후 진로, 엄마의 올해 운, 친구가 이직하면 잘될지, 조카의 성향처럼 그 사람 자체를 풀이해 달라는 말.
+other=false: 그 사람이 사용자 고민의 배경으로만 나오는 말(남친이 나한테 차가워졌어, 상사 때문에 힘들어, 친구가 내 전남친과 사귀어서 어떻게 해야 해, 부모님 때문에 지친 내 마음), 사용자 본인 이야기, 궁합 질문, 일반 질문.
+other 가 true 면 who 에 그 사람을 부르는 말을 12자 안으로(예: 형님 아들, 어머니, 친구), 아니면 빈 글자. 대화 기록에서 이미 그 사람 이야기를 이어 가는 중이어도 마지막 말 기준으로 판단해. JSON 으로만 답해.`;
+
+const SUBJECT_SCHEMA = {
+  type: "object",
+  properties: {
+    other: { type: "boolean", description: "다른 사람 자체를 풀이해 달라는 질문이면 true" },
+    who: { type: "string", description: "other 가 true 일 때 그 사람 호칭(12자 이내), 아니면 빈 글자" },
+  },
+  required: ["other", "who"],
+  additionalProperties: false,
+} as const;
+
+export function parseSubject(value: unknown): { other: boolean; who: string } | null {
+  const v = value as { other?: unknown; who?: unknown } | null;
+  if (typeof v?.other !== "boolean") return null;
+  const who = typeof v.who === "string" ? v.who.replace(/[\u0000-\u001f<>]/g, " ").replace(/\s+/g, " ").trim().slice(0, 12) : "";
+  return { other: v.other, who };
+}
+
+/** 질문의 주인공이 다른 사람인지 짧게 분류해요. 실패하면 던져요(부르는 쪽은 평소대로 이어가요). */
+export async function classifySubject(history: ChatMsg[], opts: { apiKey?: string; model?: string; fetchImpl?: typeof fetch } = {}): Promise<{ other: boolean; who: string }> {
+  const recent = history.slice(-4).map((m) => `${m.role === "user" ? "사용자" : "도리"}: ${m.text.slice(0, 200)}`).join("\n");
+  return callJson<{ other: boolean; who: string }>({
+    system: SUBJECT_SYSTEM,
+    user: `대화 기록:\n${recent}\n\n마지막 사용자 말의 주인공이 다른 사람인지 판단해.`,
+    schema: SUBJECT_SCHEMA,
+    maxTokens: 60,
+    attempts: 1,
+    timeoutMs: 6_000,
+    model: opts.model ?? modelFor("chat"),
+    apiKey: opts.apiKey,
+    fetchImpl: opts.fetchImpl,
+    parse: parseSubject,
+  });
+}
+
 /** 서버에서 대화 기록을 다시 정리해요 (길이·개수 제한, 마지막은 반드시 사용자의 말). */
 export function cleanHistory(raw: unknown): ChatMsg[] | null {
   if (!Array.isArray(raw) || raw.length > 80) return null;

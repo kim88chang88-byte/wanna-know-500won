@@ -1,7 +1,7 @@
 import { isOutfitQuestion, pickOutfit } from "@/lib/outfits";
 import { NextResponse } from "next/server";
 import { takeAiBudget } from "@/lib/ai/budget";
-import { chatDori, checkRisk, cleanHistory, CRISIS_ANSWER, isCrisis } from "@/lib/ai/chat";
+import { chatDori, checkRisk, classifySubject, cleanHistory, CRISIS_ANSWER, isCrisis, SUBJECT_GATE } from "@/lib/ai/chat";
 import { greetingReply, isFirstAsk, withoutCrisisTurns } from "@/lib/ai/chatFlow";
 import { apologyFirst, REFUND_DAY_CAP, REFUND_NOTICE, unableReply } from "@/lib/ai/outOfScope";
 import { buildCoreFacts, factsNowFor } from "@/lib/ai/coreFacts";
@@ -35,9 +35,9 @@ export async function POST(request: Request) {
   if (!session) return NextResponse.json({ error: "로그인이 필요해." }, { status: 401 });
   if (!canChat(session.sub)) return NextResponse.json({ error: "도유 상담방은 곧 열려. 조금만 기다려 줘 ❄️" }, { status: 403 });
 
-  let body: { ctx?: unknown; messages?: unknown; about?: unknown } | null;
+  let body: { ctx?: unknown; messages?: unknown; about?: unknown; noAsk?: unknown } | null;
   try {
-    body = (await request.json()) as { ctx?: unknown; messages?: unknown; about?: unknown };
+    body = (await request.json()) as { ctx?: unknown; messages?: unknown; about?: unknown; noAsk?: unknown };
   } catch {
     return NextResponse.json({ error: "요청이 올바르지 않아. 다시 한 번 확인해 줘." }, { status: 400 });
   }
@@ -67,6 +67,16 @@ export async function POST(request: Request) {
     if (await checkRisk(history)) return NextResponse.json({ answer: CRISIS_ANSWER, safe: true, left: await quotaLeft(db, target) });
   } catch {
     /* 분류가 실패하면 평소 흐름으로 이어가요 (아래에서 답 안의 위험 표시로 한 번 더 살펴요) */
+  }
+
+  // 질문의 주인공이 다른 사람이면(예: "친한 형님 아들 진로") 누구 사주로 볼지 먼저 고르게 해요. 질문 횟수는 쓰지 않아요.
+  if (ctx.kind !== "compat" && !parseAbout(body?.about) && body?.noAsk !== true && SUBJECT_GATE.test(last)) {
+    try {
+      const s = await classifySubject(history);
+      if (s.other) return NextResponse.json({ needSubject: true, who: s.who, left: await quotaLeft(db, target) });
+    } catch {
+      /* 분류가 실패하면 평소대로 본인 사주로 답해요 */
+    }
   }
 
   let taken: { left: number; via: "db" | "mem" } | null = null;

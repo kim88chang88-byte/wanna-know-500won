@@ -8,7 +8,7 @@ import type { SavedPerson } from "@/lib/people";
  * "누구 사주로 볼까?" 바텀시트: 저장해 둔 사람을 고르거나, 새 사람의 생년월일시를 입력해요.
  * 새 사람은 저장하지 않고 이번 대화에서만 쓸 수도 있어요(id "temp").
  */
-export default function AboutSheet({ onPick, onSelf, onClose }: { onPick: (p: SavedPerson) => void; onSelf: () => void; onClose: () => void }) {
+export default function AboutSheet({ onPick, onSelf, onClose, who }: { onPick: (p: SavedPerson) => void; onSelf: () => void; onClose: () => void; who?: string }) {
   const [people, setPeople] = useState<SavedPerson[] | null>(null);
   const [adding, setAdding] = useState(false);
   useEffect(() => {
@@ -30,7 +30,7 @@ export default function AboutSheet({ onPick, onSelf, onClose }: { onPick: (p: Sa
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" /></svg>
           </button>
         </div>
-        <p className="shrink-0 px-5 pb-2 text-xs text-[#6f6385]">다른 사람 얘기를 물을 땐 그 사람의 사주로 풀어 줄게. 저장해 둔 사람을 고르거나 새로 입력해 줘.</p>
+        <p className="shrink-0 px-5 pb-2 text-xs text-[#6f6385]">{who ? `'${who}' 이야기구나! 그 사람 사주로 풀어 줄게. ` : "다른 사람 얘기를 물을 땐 그 사람의 사주로 풀어 줄게. "}저장해 둔 사람을 고르거나 새로 입력해 줘.</p>
         <div className="flex-1 overflow-y-auto px-3 pb-[max(20px,env(safe-area-inset-bottom))]">
           {people === null && <p className="px-2 py-4 text-sm text-gray-500">불러오는 중…</p>}
           {people?.map((p) => (
@@ -41,14 +41,14 @@ export default function AboutSheet({ onPick, onSelf, onClose }: { onPick: (p: Sa
           ))}
           {people !== null && people.length === 0 && !adding && <p className="px-3 py-3 text-sm text-gray-500">저장해 둔 사람이 아직 없어.</p>}
           {adding ? (
-            <AddPersonForm allowSessionOnly onAdded={onPick} onCancel={() => setAdding(false)} />
+            <AddPersonForm allowSessionOnly defaultLabel={who} onAdded={onPick} onCancel={() => setAdding(false)} />
           ) : (
             <button type="button" data-testid="about-new" onClick={() => setAdding(true)} className="mt-2 flex min-h-[52px] w-full items-center gap-2 rounded-xl border border-dashed border-brand-300 px-3 text-left text-[15px] font-bold text-brand-600 active:bg-brand-50">
               ＋ 새로운 사람 입력하기
             </button>
           )}
           <button type="button" onClick={onSelf} className="mt-3 w-full rounded-xl px-3 py-3 text-center text-sm text-gray-500 underline underline-offset-2">
-            내 얘기로 계속할래
+            {who ? "내 얘기로 물어볼래" : "내 얘기로 계속할래"}
           </button>
         </div>
       </div>
