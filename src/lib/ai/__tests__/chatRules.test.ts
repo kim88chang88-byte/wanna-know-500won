@@ -5,7 +5,7 @@ import { join } from "node:path";
 import { buildChatRulesSource } from "../../../../scripts/build-chat-rules.mjs";
 import { CHAT_RULES, CHAT_RULE_FILES } from "../chatRules.generated";
 import { renderChatRules } from "../chatRules";
-import { CHAT_SYSTEM_PROMPT, buildChatPrompt, dropBannedSuggestions, elementBalance } from "../chat";
+import { CHAT_SYSTEM_PROMPT, buildChatPrompt, cleanFollowups, dropBannedSuggestions, elementBalance, fixTypos } from "../chat";
 import { futureFacts } from "../futureFacts";
 import { calculateSaju } from "@/lib/saju/calculate";
 
@@ -43,6 +43,24 @@ describe("고민 상담 5단계", () => {
   });
   it("분량이 답 길이 상한 안에 있어요", () => {
     expect(CHAT_SYSTEM_PROMPT).toContain("1350자를 넘기지 마");
+  });
+});
+
+describe("연애 30문 점검 후속 보정", () => {
+  it("알림 내려두기 제안과 도리의 질문 꼴 칩을 걸러요", () => {
+    const out = dropBannedSuggestions("답장은 기다려 봐. 이번 주말에는 스마트폰 알림을 잠시 내려두고 걸어 봐. 먼저 상대 일정을 살펴봐.", "썸 답장이 느려", true);
+    expect(out).not.toContain("알림");
+    expect(cleanFollowups(["요즘 일상에서 가장 마음이 쓰이는 건 뭐야?", "마음이 복잡할 때 어떤 생각을 주로 해?", "내년 연애운은 어떤 흐름이야?"])).toEqual(["내년 연애운은 어떤 흐름이야?"]);
+  });
+  it("오타·예언 표현을 고쳐요", () => {
+    expect(fixTypos("신경 쓸 점은 속도를 지키는 것임.")).toContain("거야.");
+    expect(fixTypos("불 기운이 세 개로 강하고쇠 기운이 없어서")).toContain("강하고 쇠 기운");
+    expect(fixTypos("비슷한 불안이 반복될 확률이 높아서 조심해.")).toContain("반복될 수 있어서");
+  });
+  it("사기 경고는 사주를 이유로 쓰지 않는 규칙이 있어요", () => {
+    expect(CHAT_SYSTEM_PROMPT).toContain("사주(기운·세운·충합)를 위험의 이유로 쓰지 마");
+    expect(CHAT_SYSTEM_PROMPT).toContain("기운 개수에서 성격·행동을 억지로 끌어내지 마");
+    expect(CHAT_SYSTEM_PROMPT).toContain("질문 유형별 필수 형태");
   });
 });
 

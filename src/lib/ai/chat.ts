@@ -192,7 +192,7 @@ export function cleanVisual(raw: unknown): ChatVisual | null {
 
 /** 후속 질문 칩: 길이·금지어·중복을 거르고 3개까지. 하나도 못 쓰면 빈 목록(화면은 기본 칩을 보여 줘요). */
 /** 도리가 사용자에게 묻는 말투의 칩("가장 걸리는 부분은 뭐야?", "~했던 적이 있어?")은 걸러요. 칩은 사용자가 도리에게 묻는 말이에요. */
-const DORI_ASKS = /(뭐였지|뭐였어|있었어|느껴졌던|걸리는\s?(부분|점)|네가|너는|너가|어땠어|해\s?봤어|힘들었던\s?점)/;
+const DORI_ASKS = /(마음이\s?쓰이는|다시\s?만나고\s?싶어|주로\s?해\?|어떤\s?생각을|요즘\s?일상|어떻게\s?지내|뭐였지|뭐였어|있었어|느껴졌던|걸리는\s?(부분|점)|네가|너는|너가|어땠어|해\s?봤어|힘들었던\s?점)/;
 
 export function cleanFollowups(raw: unknown): string[] {
   if (!Array.isArray(raw)) return [];
@@ -247,6 +247,9 @@ export function unifyElementWords(t: string): string {
 export function fixTypos(t: string): string {
   return unifyElementWords(t)
     .replace(/어린이원/g, "어린이집")
+    .replace(/(것|거)임([.!?]|\s|$)/g, "거야$2")
+    .replace(/([가-힣])(고|며)(쇠|물|불|땅|나무) 기운/g, "$1$2 $3 기운")
+    .replace(/(\S*[될할질올갈]) 확률이 (?:매우 |아주 |꽤 )?높(아서|아|은데)/g, (_m, a: string, e: string) => `${a} 수 있${e === "아서" ? "어서" : e === "아" ? "어" : "는데"}`)
     .replace(/고맙어/g, "고마워")
     .replace(/뭐\s야\?/g, "뭐야?")
     .replace(/지주가\s?없/g, "지장이 없")
@@ -277,7 +280,7 @@ export function limitNameInHighlight(answer: string, name: string, prevDori: str
 /** "적어 두지 말고"처럼 금지 규칙 자체를 사용자에게 말하는 문장 */
 const NO_WRITE_MENTION = /(적어|메모해?|기록해?)\s?(두|놓|보)?지\s?(말|마)/;
 const WRITE_SUGGEST = /적어\s?(봐|보|내려|두|볼|보는|보자|줘|놓)|적기|적어\s?보|기록해|메모해|노트에/;
-const ALARM_OFF = /알림(을|도)?\s?(잠시\s?)?(꺼|끄)|알림을?\s?(모두\s?)?(무음|차단)/;
+const ALARM_OFF = /알림(을|도)?\s?(잠시\s?)?(꺼|끄|내려\s?(두|놓)|치워|멈춰)|알림을?\s?(모두\s?)?(무음|차단)/;
 /** 아무 질문에나 붙는 차 한 잔 제안(사용자가 차를 직접 물을 때만 예외) */
 const TEA_TIP = /따뜻한\s?차|차\s?한\s?잔|티\s?한\s?잔|따뜻한\s?음료/;
 /** 잠 못 자는 사람에게 밤에 밖으로 나가라는 제안은 맥락에 안 맞아요 */
