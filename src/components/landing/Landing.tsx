@@ -6,7 +6,7 @@ import BottomTabs from "./BottomTabs";
 import CoinRitual from "./CoinRitual";
 import { splitPearls } from "@/lib/currency";
 import PurchaseModal from "@/components/pay/PurchaseModal";
-import BetaOpenPopup from "./BetaOpenPopup";
+import ExamWelcomePopup from "./ExamWelcomePopup";
 import PremiumSoonPopup from "./PremiumSoonPopup";
 import { PREMIUM_SOON } from "@/lib/premiumSoon";
 import PaywallPopup, { type PaywallInfo } from "./PaywallPopup";
@@ -501,7 +501,7 @@ export default function Landing() {
       <div aria-hidden="true" className="h-24 lg:hidden" />
       <BottomTabs onChatLogin={openChatTabLogin} />
 
-      <BetaOpenPopup />
+      <ExamWelcomePopup />
       {premiumSoon && <PremiumSoonPopup onClose={() => setPremiumSoon(false)} />}
       {payOpen && <PurchaseModal onClose={() => { setPayOpen(false); void refreshCoins(); }} />}
       {paywall && (
