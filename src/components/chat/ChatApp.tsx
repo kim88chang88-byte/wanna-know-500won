@@ -721,24 +721,28 @@ export default function ChatApp({ initialCtx, initialMsgs, onChange, onBack, rea
       )}
 
       {about && !readOnly && (
-        <div data-testid="about-banner" role="status" className="z-10 mx-3.5 mb-2 flex flex-wrap items-center gap-x-2 gap-y-1.5 rounded-2xl border border-[#e6c887] bg-[#fff8e6] px-3 py-2 text-xs text-[#7a5a12]">
-          <span aria-hidden="true">👤</span>
-          <span className="min-w-0 flex-[1_1_100%] truncate">
-            <b>{about.name}</b> 사주로 보는 중
+        <div data-testid="about-banner" role="status" className="z-10 mx-3.5 mb-2 flex items-center gap-1.5 rounded-full border-2 border-brand-500 bg-white py-1 pl-2.5 pr-1.5 text-xs text-gray-800 shadow-[0_2px_8px_rgba(122,79,214,0.14)]">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/images/swap-person.webp" alt="" width={34} height={34} className="h-[34px] w-[34px] shrink-0 select-none" draggable={false} />
+          <span className="flex min-w-0 flex-1 items-center gap-1.5">
+            <span className="shrink-0 rounded-full bg-brand-500 px-2 py-0.5 text-[10px] font-extrabold text-white">다른 사람</span>
+            <b className="min-w-0 truncate text-[13px]">{about.name}</b>
           </span>
-          <button type="button" onClick={() => setAboutOpen(true)} className="shrink-0 rounded-full border border-[#e6c887] px-2.5 py-1 font-bold active:scale-95">
+          <button type="button" onClick={() => setAboutOpen(true)} className="shrink-0 rounded-full border border-brand-300 px-2.5 py-1.5 text-[12px] font-bold text-brand-600 active:scale-95">
             다른 사람으로 바꾸기
           </button>
           <button
             type="button"
             data-testid="about-self"
+            aria-label="내 얘기로 되돌아가기"
+            title="내 얘기로 되돌아가기"
             onClick={() => {
               setAbout(null);
               setMsgs((m) => [...m, { role: "dori", text: "다시 네 사주로 볼게", at: Date.now(), log: true }]);
             }}
-            className="shrink-0 rounded-full bg-[#7a5a12] px-2.5 py-1 font-bold text-white active:scale-95"
+            className="grid h-8 w-8 shrink-0 place-items-center rounded-full text-base text-gray-500 active:scale-95"
           >
-            내 얘기로 되돌아가기
+            ✕
           </button>
         </div>
       )}
