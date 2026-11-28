@@ -131,6 +131,34 @@ function InlineStone({ group }: { group: string }) {
   );
 }
 
+/** 글 속 작은 사주 글자(천간·지지) 아이콘: "임(壬, 임수)"·"술(戌, 술토)"의 풀이 뒤에 그 글자 칸을 작게 보여 줘요 */
+function InlineChar({ ch, branch }: { ch: string; branch: boolean }) {
+  const el = elementOfChar(ch, branch);
+  if (!el) return null;
+  return (
+    <span aria-hidden="true" className="relative mx-0.5 inline-flex h-[22px] w-[22px] -translate-y-[1px] items-center justify-center overflow-hidden rounded-md align-middle shadow-[0_1px_2px_rgba(0,0,0,0.3)]">
+      <span className="absolute inset-0 bg-cover [filter:saturate(1.3)_contrast(1.05)]" style={{ backgroundImage: `url(/images/el-${el}.webp)`, backgroundPosition: "50% 55%" }} />
+      <span className="relative font-serifKr text-[13px] font-black leading-none text-[#fff3cf] [paint-order:stroke_fill] [-webkit-text-stroke:2.5px_rgba(10,8,20,0.85)]">{ch}</span>
+    </span>
+  );
+}
+const BRANCH_HANJA = "子丑寅卯辰巳午未申酉戌亥";
+const CHAR_RE = /([甲乙丙丁戊己庚辛壬癸子丑寅卯辰巳午未申酉戌亥])\s*,\s*([가-힣]{2})(?=\s*\))/g;
+/** 글 조각에서 "壬, 임수)" 같은 곳을 찾아 작은 글자 아이콘을 넣어요 */
+function withChars(text: string, keyBase: number): React.ReactNode {
+  const out: React.ReactNode[] = [];
+  let last = 0;
+  for (const m of text.matchAll(CHAR_RE)) {
+    const at = m.index ?? 0;
+    out.push(text.slice(last, at));
+    out.push(<span key={`c${keyBase + at}`}>{m[1]}, {m[2]}<InlineChar ch={m[1]} branch={BRANCH_HANJA.includes(m[1])} /></span>);
+    last = at + m[0].length;
+  }
+  if (last === 0) return text;
+  out.push(text.slice(last));
+  return out;
+}
+
 const PILLAR_TERMS = ["연주", "월주", "일주", "시주"];
 /** 사주 용어(기둥 이름·십성 이름)를 찾는 식. 앞뒤 따옴표와 예전 풀이 괄호("(쉽게 말하면 …)"·"(돌)")는 같이 먹어서 새로 정리해요.
  * 한글 낱말 가운데이거나(일주일·상관없다), 조사·문장부호가 바로 뒤에 오지 않으면 다른 뜻으로 보고 건드리지 않아요. */
@@ -143,7 +171,7 @@ function withStones(text: string) {
   for (const m of text.matchAll(TERM_RE)) {
     const at = m.index ?? 0;
     const term = m[1];
-    out.push(text.slice(last, at));
+    out.push(withChars(text.slice(last, at), last));
     last = at + m[0].length;
     if (PILLAR_TERMS.includes(term)) {
       out.push(`‘${term}’`);
@@ -152,8 +180,8 @@ function withStones(text: string) {
     const g = GOD_GROUP[term] ?? term;
     out.push(<span key={at}>‘{term}’({<InlineStone group={g} />})</span>);
   }
-  if (last === 0) return text;
-  out.push(text.slice(last));
+  if (last === 0) return withChars(text, 0);
+  out.push(withChars(text.slice(last), last));
   return out;
 }
 
