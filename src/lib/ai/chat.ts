@@ -48,8 +48,8 @@ export const CHAT_SYSTEM_PROMPT = renderChatRules(CHAT_RULES, {
 export const CHAT_SCHEMA = {
   type: "object",
   properties: {
-    answer: { type: "string", description: `도리의 채팅 답. 질문 종류에 맞게: 인사는 1~2문장, 마음이 힘든 말은 80~200자, 일반 첫 질문은 440~900자(두 갈래 고르기 질문은 840~1200자, 몸·컨디션 원인 질문은 900~1300자·5~7문단), 이어지는 질문은 300~600자(최대 ${CHAT_MAX}자), 빈 줄로 2~5문단` },
-    followups: { type: "array", items: { type: "string" }, description: "방금 답에서 이어지는 사용자의 다음 질문 3개 (각 20자 안팎)" },
+    answer: { type: "string", description: `도리의 채팅 답. 질문 종류에 맞게: 인사는 1~2문장, 마음이 힘든 말은 80~200자, 고민 상담 질문은 5단계(공감 → 사주로 본 지금 상황 → 고민에 적용 → 해답·솔루션 → 되묻기)로 첫 질문 900~1250자·이어지는 질문 600~950자, 그 밖의 일반 첫 질문은 440~900자, 그 밖의 이어지는 질문은 300~600자(최대 ${CHAT_MAX}자), 빈 줄로 문단 나누기` },
+    followups: { type: "array", items: { type: "string" }, description: "방금 답에서 이어지는 사용자의 다음 질문 3개 (각 20자 안팎). 고민 상담 답이면 답 끝에서 짚은 더 알아볼 사항(시기·상대·선택지·다음 단계)으로 이어지게" },
     choices: { type: "array", items: { type: "string" }, description: "도리의 되묻는 질문에 눌러서 답할 선택지 2개(각 12자 이내). 없으면 빈 배열" },
     risk: { type: "boolean", description: "사용자가 죽고 싶다·사라지고 싶다·자고 일어나지 않았으면·모든 게 다 끝났으면·다 내려놓고 싶다·내가 없어야 남들이 편하다·살 의미가 없다 같은 말을 직접 하거나 돌려 말해서 자해·자살 위험이 조금이라도 보이면 true (이때 answer 는 따뜻한 한 줄만, 서버가 안내 글로 바꿔요). 평범한 피곤·스트레스·고민이면 false" },
     unable: { type: "boolean", description: "이 질문이 도리가 정확하게 답할 수 없는 정보(가게 이름, 실시간 정보, 확인할 수 없는 사실)를 묻는 것이라, 구체적으로 도움이 되는 답을 하나도 못 줬으면 true. 조금이라도 구체적으로 도왔으면 false" },

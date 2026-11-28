@@ -17,7 +17,7 @@ describe("상담실 기준 문서(md) → 프롬프트", () => {
   it("묶음 파일이 md 원본과 같아요 (고쳤으면 node scripts/build-chat-rules.mjs)", () => {
     const cur = readFileSync(join(root, "src/lib/ai/chatRules.generated.ts"), "utf8");
     expect(cur).toBe(buildChatRulesSource());
-    expect(CHAT_RULE_FILES.length).toBeGreaterThanOrEqual(15);
+    expect(CHAT_RULE_FILES.length).toBeGreaterThanOrEqual(16);
   });
   it("자리표시자가 모두 채워지고 프롬프트에 남지 않아요", () => {
     expect(CHAT_SYSTEM_PROMPT).not.toMatch(/\{\{[A-Z_]+\}\}/);
@@ -30,6 +30,19 @@ describe("상담실 기준 문서(md) → 프롬프트", () => {
     expect(at("\n사실과 한계\n")).toBeGreaterThan(at("\n말투\n"));
     expect(at("\n지켜야 할 선\n")).toBeGreaterThan(at("\n사실과 한계\n"));
     expect(CHAT_SYSTEM_PROMPT.trimEnd().endsWith("반드시 지정된 JSON 으로만 답해.")).toBe(true);
+  });
+});
+
+describe("고민 상담 5단계", () => {
+  it("5단계와 솔루션 기준이 프롬프트 앞쪽에 있어요", () => {
+    const i5 = CHAT_SYSTEM_PROMPT.indexOf("고민 상담 답변 5단계");
+    expect(i5).toBeGreaterThan(0);
+    for (const k of ["① 공감", "② 사주로 본 지금 상황", "③ 고민에 적용", "④ 해답·솔루션", "⑤ 대화 잇기", "소름 돋는 솔루션 기준"]) expect(CHAT_SYSTEM_PROMPT).toContain(k);
+    expect(CHAT_SYSTEM_PROMPT.indexOf("소름 돋는 솔루션 기준")).toBeGreaterThan(i5);
+    expect(CHAT_SYSTEM_PROMPT.indexOf("그 밖의 첫 질문")).toBeGreaterThan(i5);
+  });
+  it("분량이 답 길이 상한 안에 있어요", () => {
+    expect(CHAT_SYSTEM_PROMPT).toContain("1350자를 넘기지 마");
   });
 });
 
