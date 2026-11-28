@@ -132,7 +132,14 @@ function InlineStone({ group }: { group: string }) {
   );
 }
 
-function withStones(text: string) {
+/** 사주 용어(연주·월주·일주·시주)는 일상 낱말과 구분되게 작은따옴표로 감싸요. 이미 따옴표가 있거나, 일주일·연주하다처럼 다른 뜻이면 건드리지 않아요 */
+const PILLAR_TERM_RE = /(?<![‘'"“])(연주|월주|일주|시주)(?=(?:은|는|이|가|의|에|를|을|와|과|로|도|만|란|라|,|\.|\)|\s|$))(?![’'"”])/g;
+function quoteTerms(text: string) {
+  return text.replace(PILLAR_TERM_RE, "‘$1’");
+}
+
+function withStones(rawText: string) {
+  const text = quoteTerms(rawText);
   if (!text.includes("(")) return text;
   const out: React.ReactNode[] = [];
   let last = 0;
@@ -964,7 +971,7 @@ function Visual({ page, report, laterAtEnd = false }: { page: BookPage; report: 
         <div className="mb-6">
           {page.key === "preface" && (
             <p className="mb-3 text-[15px] leading-relaxed text-[#e8dfca]/85">
-              태어난 <b className={GOLD}>해·달·날·시간</b>, 이 네 가지마다 글자를 위아래 두 개씩 적어. <mark className="rounded-md bg-[#e6c887]/25 px-1 py-0.5 font-bold text-[#fff3cf] [box-decoration-break:clone]">이 네 기둥을 연주·월주·일주·시주라고 불러. 이 용어는 이 분석서 전반에 나오니까 꼭 기억해 둬.</mark> 위는 하늘의 기운(천간), 아래는 땅의 기운(지지)이야.
+              태어난 <b className={GOLD}>해·달·날·시간</b>, 이 네 가지마다 글자를 위아래 두 개씩 적어. <mark className="rounded-md bg-[#e6c887]/25 px-1 py-0.5 font-bold text-[#fff3cf] [box-decoration-break:clone]">이 네 기둥을 ‘연주’·‘월주’·‘일주’·‘시주’라고 불러. 이 용어는 이 분석서 전반에 나오니까 꼭 기억해 둬.</mark> 위는 하늘의 기운(천간), 아래는 땅의 기운(지지)이야.
             </p>
           )}
           <div className="grid grid-cols-4 gap-2">
