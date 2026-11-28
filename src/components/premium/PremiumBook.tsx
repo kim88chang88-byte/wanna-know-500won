@@ -1685,7 +1685,7 @@ function PillarsPeek({ report, rootRef, pageKey, afterChapter1 }: { report: Prem
     }
   };
   return (
-    <div data-testid="pillars-peek" className="pointer-events-none sticky bottom-14 z-20 flex h-0 justify-end pr-1">
+    <div data-testid="pillars-peek" className="pointer-events-none sticky bottom-20 z-20 flex h-0 justify-end pr-1">
       <div ref={wrap} className="pointer-events-auto relative" onMouseEnter={() => setOpen(true)} onMouseLeave={() => setOpen(false)}>
         {open && (
           <div data-testid="pillars-peek-card" role="dialog" aria-label="내 사주팔자" className="absolute bottom-full right-0 mb-2 w-[min(340px,calc(100vw-2.5rem))] rounded-[18px] border border-[#2c3366] bg-[#1a1f40] p-3 shadow-[0_10px_30px_rgba(0,0,0,0.6)]">
