@@ -117,7 +117,6 @@ function bold(text: string) {
 }
 
 const GOD_GROUP: Record<string, string> = { 비견: "비겁", 겁재: "비겁", 식신: "식상", 상관: "식상", 편재: "재성", 정재: "재성", 편관: "관성", 정관: "관성", 편인: "인성", 정인: "인성" };
-const GOD_NAME_RE = /(비겁|식상|재성|관성|인성|비견|겁재|식신|상관|편재|정재|편관|정관|편인|정인)\s*\(\s*(?:쉽게 (?:말하면|말해|풀면)[^)]*|돌)\)/g;
 
 /** 글 속 작은 십성 돌: 관성 같은 이름 뒤 괄호 풀이("쉽게 말하면 …") 자리에 돌 그림을 넣어요 */
 function InlineStone({ group }: { group: string }) {
@@ -132,23 +131,32 @@ function InlineStone({ group }: { group: string }) {
   );
 }
 
-/** 사주 용어(연주·월주·일주·시주)는 일상 낱말과 구분되게 작은따옴표로 감싸요. 이미 따옴표가 있거나, 일주일·연주하다처럼 다른 뜻이면 건드리지 않아요 */
-const PILLAR_TERM_RE = /(?<![‘'"“])(연주|월주|일주|시주)(?=(?:은|는|이|가|의|에|를|을|와|과|로|도|만|란|라|,|\.|\)|\s|$))(?![’'"”])/g;
-function quoteTerms(text: string) {
-  return text.replace(PILLAR_TERM_RE, "‘$1’");
-}
+const PILLAR_TERMS = ["연주", "월주", "일주", "시주"];
+/** 사주 용어(기둥 이름·십성 이름)를 찾는 식. 앞뒤 따옴표와 예전 풀이 괄호("(쉽게 말하면 …)"·"(돌)")는 같이 먹어서 새로 정리해요.
+ * 한글 낱말 가운데이거나(일주일·상관없다), 조사·문장부호가 바로 뒤에 오지 않으면 다른 뜻으로 보고 건드리지 않아요. */
+const TERM_RE = /(?<![가-힣])(?:‘|')?(연주|월주|일주|시주|비겁|식상|재성|관성|인성|비견|겁재|식신|상관|편재|정재|편관|정관|편인|정인)(?:’|')?(?:\s*\(\s*(?:쉽게 (?:말하면|말해|풀면)[^)]*|돌)\))?(?=(?:은|는|이|가|의|에|를|을|와|과|로|으로|도|만|란|라|,|\.|\)|\s|$|’|'))/g;
 
-function withStones(rawText: string) {
-  const text = quoteTerms(rawText);
-  if (!text.includes("(")) return text;
+/** 글 속 사주 용어 꾸미기: 작은따옴표로 감싸고, 십성 이름 뒤에는 작은 십성 돌을 괄호 안에 넣어요(한 덩어리 글에서 처음 나올 때만) */
+function withStones(text: string) {
   const out: React.ReactNode[] = [];
+  const shown = new Set<string>();
   let last = 0;
-  for (const m of text.matchAll(GOD_NAME_RE)) {
+  for (const m of text.matchAll(TERM_RE)) {
     const at = m.index ?? 0;
+    const term = m[1];
     out.push(text.slice(last, at));
-    const g = GOD_GROUP[m[1]] ?? m[1];
-    out.push(<span key={at}>{m[1]}({<InlineStone group={g} />})</span>);
     last = at + m[0].length;
+    if (PILLAR_TERMS.includes(term)) {
+      out.push(`‘${term}’`);
+      continue;
+    }
+    const g = GOD_GROUP[term] ?? term;
+    if (shown.has(g)) {
+      out.push(`‘${term}’`);
+      continue;
+    }
+    shown.add(g);
+    out.push(<span key={at}>‘{term}’({<InlineStone group={g} />})</span>);
   }
   if (last === 0) return text;
   out.push(text.slice(last));
