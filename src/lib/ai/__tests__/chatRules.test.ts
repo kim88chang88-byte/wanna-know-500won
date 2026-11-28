@@ -42,7 +42,7 @@ describe("고민 상담 5단계", () => {
     expect(CHAT_SYSTEM_PROMPT.indexOf("그 밖의 첫 질문")).toBeGreaterThan(i5);
   });
   it("분량이 답 길이 상한 안에 있어요", () => {
-    expect(CHAT_SYSTEM_PROMPT).toContain("1350자를 넘기지 마");
+    expect(CHAT_SYSTEM_PROMPT).toContain("2800자를 넘기지 마");
   });
 });
 
