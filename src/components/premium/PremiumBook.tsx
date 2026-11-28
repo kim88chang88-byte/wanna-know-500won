@@ -136,10 +136,9 @@ const PILLAR_TERMS = ["연주", "월주", "일주", "시주"];
  * 한글 낱말 가운데이거나(일주일·상관없다), 조사·문장부호가 바로 뒤에 오지 않으면 다른 뜻으로 보고 건드리지 않아요. */
 const TERM_RE = /(?<![가-힣])(?:‘|')?(연주|월주|일주|시주|비겁|식상|재성|관성|인성|비견|겁재|식신|상관|편재|정재|편관|정관|편인|정인)(?:’|')?(?:\s*\(\s*(?:쉽게 (?:말하면|말해|풀면)[^)]*|돌)\))?(?=(?:은|는|이|가|의|에|를|을|와|과|로|으로|도|만|란|라|,|\.|\)|\s|$|’|'))/g;
 
-/** 글 속 사주 용어 꾸미기: 작은따옴표로 감싸고, 십성 이름 뒤에는 작은 십성 돌을 괄호 안에 넣어요(한 덩어리 글에서 처음 나올 때만) */
+/** 글 속 사주 용어 꾸미기: 작은따옴표로 감싸고, 십성 이름 뒤에는 작은 십성 돌을 괄호 안에 넣어요(나올 때마다. 번잡하면 다시 줄여요) */
 function withStones(text: string) {
   const out: React.ReactNode[] = [];
-  const shown = new Set<string>();
   let last = 0;
   for (const m of text.matchAll(TERM_RE)) {
     const at = m.index ?? 0;
@@ -151,11 +150,6 @@ function withStones(text: string) {
       continue;
     }
     const g = GOD_GROUP[term] ?? term;
-    if (shown.has(g)) {
-      out.push(`‘${term}’`);
-      continue;
-    }
-    shown.add(g);
     out.push(<span key={at}>‘{term}’({<InlineStone group={g} />})</span>);
   }
   if (last === 0) return text;
