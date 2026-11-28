@@ -1,5 +1,6 @@
 "use client";
 
+import { TENGODS_EXPLAINER } from "@/lib/premium/book/tengodsExplainer";
 import { BRIDGES, chapterOpening, elementFocus, sectionLink } from "@/lib/premium/flow";
 import { softToDeep } from "@/lib/premium/deepTone";
 import { getBrowserStorage } from "@/lib/drawCounter";
@@ -1302,11 +1303,13 @@ export default function PremiumBook({ report, flush = false, finale, previewBlur
   );
   // 십성 쪽은 '십성이란?' 설명을 먼저 읽고, 그다음에 내가 가진 기운의 크기(돌 쌓기)를 봐요.
   const explainerFirst = page.key === "tengods";
+  // 십성 설명은 보관함의 예전 결과서에도 최신 글이 보이게 저장본이 아니라 현재 글을 써요
+  const explainer = page.key === "tengods" && page.explainer ? TENGODS_EXPLAINER : page.explainer;
   const explainerBlock =
-    page.explainer && !blurred ? (
+    explainer && !blurred ? (
       <aside data-testid="book-explainer" className="rounded-[14px] border border-[#e6c887]/40 bg-[#e6c887]/[0.07] px-4 py-3.5">
-        <p className={`text-[14px] font-bold tracking-[0.12em] ${GOLD}`}>{page.explainer.title}</p>
-        <p className="mt-2 whitespace-pre-line text-[15px] leading-[1.7] text-[#f3ecdc]">{page.explainer.body}</p>
+        <p className={`text-[14px] font-bold tracking-[0.12em] ${GOLD}`}>{explainer.title}</p>
+        <p className="mt-2 whitespace-pre-line text-[15px] leading-[1.7] text-[#f3ecdc]">{explainer.body}</p>
       </aside>
     ) : null;
   const curDaeun = report.daeun?.list.find((d) => d.current)?.ganzhi ?? null;
