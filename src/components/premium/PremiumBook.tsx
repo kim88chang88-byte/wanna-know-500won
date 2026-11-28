@@ -41,11 +41,43 @@ const HAIR = "border-[#e6c887]/25";
 function bold(text: string) {
   return text.split(/(\*\*[^*]+\*\*)/g).map((t, i) =>
     t.startsWith("**") && t.endsWith("**") && t.length > 4 ? (
-      <strong key={i} className="font-bold text-[#1d1a30] bg-[linear-gradient(transparent_50%,#cdaeff_50%)]">{t.slice(2, -2)}</strong>
+      <strong key={i} className="font-bold text-[#1d1a30] bg-[linear-gradient(transparent_50%,#cdaeff_50%)]">{withStones(t.slice(2, -2))}</strong>
     ) : (
-      <span key={i}>{t}</span>
+      <span key={i}>{withStones(t)}</span>
     ),
   );
+}
+
+const GOD_GROUP: Record<string, string> = { 비견: "비겁", 겁재: "비겁", 식신: "식상", 상관: "식상", 편재: "재성", 정재: "재성", 편관: "관성", 정관: "관성", 편인: "인성", 정인: "인성" };
+const GOD_NAME_RE = /(비겁|식상|재성|관성|인성|비견|겁재|식신|상관|편재|정재|편관|정관|편인|정인)\s*\(\s*(?:쉽게 (?:말하면|말해|풀면)[^)]*|돌)\)/g;
+
+/** 글 속 작은 십성 돌: 관성 같은 이름 뒤 괄호 풀이("쉽게 말하면 …") 자리에 돌 그림을 넣어요 */
+function InlineStone({ group }: { group: string }) {
+  const img = GOD_IMG[group];
+  if (!img) return null;
+  return (
+    <span aria-hidden="true" className="relative mx-0.5 inline-flex h-[22px] w-[22px] translate-y-[5px] items-center justify-center align-baseline">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src={`/images/gods/${img}.webp`} alt="" width={22} height={22} className="absolute inset-0 h-full w-full select-none object-contain" draggable={false} />
+      <span className="relative font-serifKr text-[10px] font-black leading-none text-[#fff3cf] [paint-order:stroke_fill] [-webkit-text-stroke:2px_rgba(10,8,20,0.85)]">{GOD_HANJA[group]}</span>
+    </span>
+  );
+}
+
+function withStones(text: string) {
+  if (!text.includes("(")) return text;
+  const out: React.ReactNode[] = [];
+  let last = 0;
+  for (const m of text.matchAll(GOD_NAME_RE)) {
+    const at = m.index ?? 0;
+    out.push(text.slice(last, at));
+    const g = GOD_GROUP[m[1]] ?? m[1];
+    out.push(<span key={at}>{m[1]}({<InlineStone group={g} />})</span>);
+    last = at + m[0].length;
+  }
+  if (last === 0) return text;
+  out.push(text.slice(last));
+  return out;
 }
 
 /** 실천 목록·한 줄 마무리·읽는 방법은 강조 밑줄 없이 담백하게 보여요. (AI 가 별표로 감싼 곳도 밑줄 없이 글자만 보여요) */
