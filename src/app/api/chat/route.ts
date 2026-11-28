@@ -28,6 +28,13 @@ export async function GET(request: Request) {
   return NextResponse.json({ enabled: canChat(s?.sub), loggedIn: Boolean(s) }, { headers: { "Cache-Control": "no-store" } });
 }
 
+function birthWord(b: { year?: number; month?: number; day?: number; hour?: number | null; minute?: number | null; calendar?: string; isLeapMonth?: boolean }): string | null {
+  if (!b || typeof b.year !== "number" || typeof b.month !== "number" || typeof b.day !== "number") return null;
+  const cal = b.calendar === "lunar" ? `음력${b.isLeapMonth ? " 윤달" : ""}` : "양력";
+  const t = typeof b.hour === "number" ? `${b.hour}시${typeof b.minute === "number" && b.minute > 0 ? ` ${b.minute}분` : ""}` : "모름";
+  return `${b.year}년 ${b.month}월 ${b.day}일(${cal}), 태어난 시간 ${t}`;
+}
+
 function genderWord(g: unknown): string | null {
   return g === "male" ? "남성" : g === "female" ? "여성" : null;
 }
@@ -149,10 +156,11 @@ export async function POST(request: Request) {
     const reply = await chatDori(
       {
         future,
-        about: about && aboutName ? { name: aboutName, asker: askerChart, askerGender: genderWord(selfBirth.gender) } : null,
+        about: about && aboutName ? { name: aboutName, asker: askerChart, askerGender: genderWord(selfBirth.gender), askerBirthText: birthWord(selfBirth) } : null,
         gender: genderWord(birth.gender),
+        birthText: birthWord(birth),
         kind: ctx.kind,
-        name: ctx.name,
+        name: ctx.name ?? (about ? null : session.nick ?? null),
         partnerName: ctx.partnerName,
         summary: ctx.summary,
         chart,
