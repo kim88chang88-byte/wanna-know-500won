@@ -554,28 +554,6 @@ export default function ChatApp({ initialCtx, initialMsgs, onChange, onBack, rea
         </div>
       </header>
 
-      {about && (
-        <div data-testid="about-banner" role="status" className="z-10 mx-3.5 mt-2.5 flex items-center gap-2 rounded-2xl border border-[#e6c887] bg-[#fff8e6] px-3 py-2 text-xs text-[#7a5a12]">
-          <span aria-hidden="true">👤</span>
-          <span className="min-w-0 flex-1 truncate">
-            <b>{about.name}</b> 사주로 보는 중
-          </span>
-          <button type="button" onClick={() => setAboutOpen(true)} className="shrink-0 rounded-full border border-[#e6c887] px-2.5 py-1 font-bold active:scale-95">
-            바꾸기
-          </button>
-          <button
-            type="button"
-            data-testid="about-self"
-            onClick={() => {
-              setAbout(null);
-              setMsgs((m) => [...m, { role: "dori", text: "다시 네 사주로 볼게", at: Date.now(), log: true }]);
-            }}
-            className="shrink-0 rounded-full bg-[#7a5a12] px-2.5 py-1 font-bold text-white active:scale-95"
-          >
-            내 얘기로
-          </button>
-        </div>
-      )}
       {/* 도리가 기억하고 있는 풀이 */}
       <div className="z-10 mx-3.5 mt-2.5 overflow-hidden rounded-2xl border border-brand-200 bg-white/70 text-xs text-brand-700">
         <button
@@ -742,6 +720,28 @@ export default function ChatApp({ initialCtx, initialMsgs, onChange, onBack, rea
         </div>
       )}
 
+      {about && !readOnly && (
+        <div data-testid="about-banner" role="status" className="z-10 mx-3.5 mb-2 flex flex-wrap items-center gap-x-2 gap-y-1.5 rounded-2xl border border-[#e6c887] bg-[#fff8e6] px-3 py-2 text-xs text-[#7a5a12]">
+          <span aria-hidden="true">👤</span>
+          <span className="min-w-0 flex-[1_1_100%] truncate">
+            <b>{about.name}</b> 사주로 보는 중
+          </span>
+          <button type="button" onClick={() => setAboutOpen(true)} className="shrink-0 rounded-full border border-[#e6c887] px-2.5 py-1 font-bold active:scale-95">
+            다른 사람으로 바꾸기
+          </button>
+          <button
+            type="button"
+            data-testid="about-self"
+            onClick={() => {
+              setAbout(null);
+              setMsgs((m) => [...m, { role: "dori", text: "다시 네 사주로 볼게", at: Date.now(), log: true }]);
+            }}
+            className="shrink-0 rounded-full bg-[#7a5a12] px-2.5 py-1 font-bold text-white active:scale-95"
+          >
+            내 얘기로 되돌아가기
+          </button>
+        </div>
+      )}
       {readOnly ? (
         <div data-testid="past-daily-note" role="status" className="z-20 border-t border-brand-100 bg-white/90 px-4 pb-[max(14px,env(safe-area-inset-bottom))] pt-3 text-center">
           <p className="text-[13px] leading-relaxed text-[#6b5f8f]">{readOnlyNote}</p>
