@@ -56,7 +56,7 @@ function InlineStone({ group }: { group: string }) {
   const img = GOD_IMG[group];
   if (!img) return null;
   return (
-    <span aria-hidden="true" className="relative mx-0.5 inline-flex h-[22px] w-[22px] translate-y-[5px] items-center justify-center align-baseline">
+    <span aria-hidden="true" className="relative mx-0.5 inline-flex h-[22px] w-[22px] -translate-y-[1px] items-center justify-center align-middle">
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img src={`/images/gods/${img}.webp`} alt="" width={22} height={22} className="absolute inset-0 h-full w-full select-none object-contain" draggable={false} />
       <span className="relative font-serifKr text-[10px] font-black leading-none text-[#fff3cf] [paint-order:stroke_fill] [-webkit-text-stroke:2px_rgba(10,8,20,0.85)]">{GOD_HANJA[group]}</span>
