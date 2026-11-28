@@ -1733,9 +1733,12 @@ function PillarsPeek({ report, rootRef, pageKey, afterChapter1 }: { report: Prem
             setOpen((v) => !v);
             if (showHint) closeHint();
           }}
-          className="flex h-14 w-14 items-center justify-center rounded-2xl border-[1.5px] border-[#e6c887] bg-gradient-to-br from-[#2d3466] to-[#1b1f45] shadow-[0_4px_12px_rgba(0,0,0,0.5)] active:scale-95"
+          className="flex h-[66px] w-[58px] flex-col items-center justify-center gap-[2px] rounded-2xl border-[1.5px] border-[#e6c887] bg-gradient-to-br from-[#2d3466] to-[#1b1f45] shadow-[0_4px_12px_rgba(0,0,0,0.5)] active:scale-95"
         >
-          <span aria-hidden="true" className="grid grid-cols-2 font-serif text-[17px] font-bold leading-[1.1] text-[#f1d8a0]">
+          <span aria-hidden="true" className="text-[9px] font-extrabold leading-none tracking-[0.18em] text-[#e6c887]">
+            MY
+          </span>
+          <span aria-hidden="true" className="grid grid-cols-2 font-serif text-[16px] font-bold leading-[1.1] text-[#f1d8a0]">
             <span>四</span>
             <span>柱</span>
             <span>八</span>
