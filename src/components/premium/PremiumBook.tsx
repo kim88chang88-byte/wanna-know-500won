@@ -381,7 +381,7 @@ function GodBars({ table }: { table: BookTable }) {
       </div>
       {hotRows.map((r) => r.note && (
         <p key={r.label} className="mt-2 px-1 text-[13px] leading-relaxed text-[#e8dfca]/80">
-          <b className={GOLD}>{r.label}</b>이 가장 많이 쌓여 있으니, {josa(r.note, "이/가")} 강한 편이야.
+          <b className={GOLD}>{r.label}</b>이 가장 많이 쌓여 있으니, {josa(r.note, "이/가")} 강하다는 뜻이야.
         </p>
       ))}
     </div>
