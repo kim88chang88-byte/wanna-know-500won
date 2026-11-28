@@ -201,7 +201,6 @@ export default function ChatApp({ initialCtx, initialMsgs, onChange, onBack, rea
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
   const [ready, setReady] = useState(false);
-  const [menu, setMenu] = useState(false);
   /** 사용자가 고른 "다른 사람"(이 대화에서만 쓰고 저장하지 않아요) */
   // 다른 사람의 풀이에서 넘어왔으면 처음부터 그 사람 사주로 상담해요(위 알림 칸에서 내 얘기로 되돌릴 수 있어요)
   const [about, setAbout] = useState<{ name: string; birth: BirthInput } | null>(() => (initialCtx.other && initialCtx.birth ? { name: initialCtx.name?.trim() || "그 사람", birth: initialCtx.birth } : null));
@@ -491,7 +490,6 @@ export default function ChatApp({ initialCtx, initialMsgs, onChange, onBack, rea
   }
 
   async function copyAll() {
-    setMenu(false);
     const t = msgs.filter((m) => !m.error && !m.log).map((m) => `${m.role === "user" ? "나" : "도리"}: ${plainAnswer(m.text)}`).join("\n\n");
     try {
       await navigator.clipboard.writeText(t);
@@ -532,26 +530,6 @@ export default function ChatApp({ initialCtx, initialMsgs, onChange, onBack, rea
         <div className="min-w-0 flex-1">
           <p className="font-bold leading-tight text-gray-900">도유 상담실</p>
           <p className="text-[11px] text-[#8a7fa8]">초승달 아래 고민 상담 중</p>
-        </div>
-        <div className="relative">
-          <button type="button" aria-label="메뉴" aria-expanded={menu} onClick={() => setMenu((m) => !m)} className="grid h-9 w-9 place-items-center rounded-full text-xl text-gray-500 hover:bg-gray-100">
-            ⋯
-          </button>
-          {menu && (
-            <>
-              <button type="button" aria-label="메뉴 닫기" className="fixed inset-0 z-10 cursor-default" onClick={() => setMenu(false)} />
-              <div role="menu" className="absolute right-0 top-10 z-20 w-44 overflow-hidden rounded-2xl border border-brand-100 bg-white py-1 shadow-lg">
-                {ctx.kind !== "compat" && !readOnly && (
-                  <button role="menuitem" type="button" data-testid="about-open" onClick={() => { setMenu(false); setAboutOpen(true); }} className="block w-full px-4 py-2.5 text-left text-sm hover:bg-brand-50">
-                    👤 다른 사람 사주로 보기
-                  </button>
-                )}
-                <button role="menuitem" type="button" onClick={() => void copyAll()} disabled={msgs.length === 0} className="block w-full px-4 py-2.5 text-left text-sm hover:bg-brand-50 disabled:opacity-40">
-                  📋 대화 내용 복사
-                </button>
-              </div>
-            </>
-          )}
         </div>
       </header>
 
@@ -721,33 +699,6 @@ export default function ChatApp({ initialCtx, initialMsgs, onChange, onBack, rea
         </div>
       )}
 
-      {about && !readOnly && (
-        <div data-testid="about-banner" role="status" className="z-10 mx-3.5 mb-2 flex items-center gap-1.5 rounded-full border-2 border-brand-500 bg-white py-1 pl-2.5 pr-1.5 text-xs text-gray-800 shadow-[0_2px_8px_rgba(122,79,214,0.14)]">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/images/swap-person.webp" alt="" width={34} height={34} className="h-[34px] w-[34px] shrink-0 select-none" draggable={false} />
-          <span className="flex min-w-0 flex-1 items-center gap-1.5">
-            <span className="shrink-0 rounded-full bg-brand-500 px-2 py-0.5 text-[10px] font-extrabold text-white">다른 사람</span>
-            <b className="min-w-0 truncate text-[13px]">{about.name}</b>
-            <span className="shrink-0 text-[11px] text-gray-500">사주로 상담 중</span>
-          </span>
-          <button type="button" onClick={() => setAboutOpen(true)} className="shrink-0 rounded-full border border-brand-300 px-2.5 py-1.5 text-[12px] font-bold text-brand-600 active:scale-95">
-            다른 사람으로 바꾸기
-          </button>
-          <button
-            type="button"
-            data-testid="about-self"
-            aria-label="내 얘기로 되돌아가기"
-            title="내 얘기로 되돌아가기"
-            onClick={() => {
-              setAbout(null);
-              setMsgs((m) => [...m, { role: "dori", text: "다시 네 사주로 볼게", at: Date.now(), log: true }]);
-            }}
-            className="grid h-8 w-8 shrink-0 place-items-center rounded-full text-base text-gray-500 active:scale-95"
-          >
-            ✕
-          </button>
-        </div>
-      )}
       {readOnly ? (
         <div data-testid="past-daily-note" role="status" className="z-20 border-t border-brand-100 bg-white/90 px-4 pb-[max(14px,env(safe-area-inset-bottom))] pt-3 text-center">
           <p className="text-[13px] leading-relaxed text-[#6b5f8f]">{readOnlyNote}</p>
@@ -790,6 +741,55 @@ export default function ChatApp({ initialCtx, initialMsgs, onChange, onBack, rea
                   <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#d12f45" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7" /></svg>
                 </span>
               </span>
+            </button>
+          </div>
+        )}
+        <div className="mx-1 mb-2 flex gap-2" data-testid="chat-actions">
+          {ctx.kind !== "compat" && !about && (
+            <button
+              type="button"
+              data-testid="about-open"
+              onClick={() => setAboutOpen(true)}
+              className="flex flex-1 items-center justify-center gap-1.5 rounded-full border-[1.5px] border-brand-500 bg-white px-2 py-1.5 text-[12.5px] font-extrabold text-brand-600 shadow-[0_1px_4px_rgba(107,63,201,0.18)] active:scale-95"
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/images/swap-person-btn.webp" alt="" width={24} height={24} className="h-6 w-6 shrink-0 select-none" draggable={false} />
+              다른 사람 사주로 보기
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={() => void copyAll()}
+            disabled={msgs.length === 0}
+            className={`flex items-center justify-center gap-1.5 rounded-full border-[1.5px] border-brand-500 bg-white px-4 py-1.5 text-[12.5px] font-extrabold text-brand-600 shadow-[0_1px_4px_rgba(107,63,201,0.18)] active:scale-95 disabled:opacity-40 ${ctx.kind !== "compat" && !about ? "flex-1" : ""}`}
+          >
+            📋 대화 내용 복사
+          </button>
+        </div>
+        {about && !readOnly && (
+          <div data-testid="about-banner" role="status" className="z-10 mx-1 mb-2 flex items-center gap-1.5 rounded-full border-2 border-brand-500 bg-white py-1 pl-2.5 pr-1.5 text-xs text-gray-800 shadow-[0_2px_8px_rgba(122,79,214,0.14)]">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/images/swap-person.webp" alt="" width={34} height={34} className="h-[34px] w-[34px] shrink-0 select-none" draggable={false} />
+            <span className="flex min-w-0 flex-1 items-center gap-1.5">
+              <span className="shrink-0 rounded-full bg-brand-500 px-2 py-0.5 text-[10px] font-extrabold text-white">다른 사람</span>
+              <b className="min-w-0 truncate text-[13px]">{about.name}</b>
+              <span className="shrink-0 text-[11px] text-gray-500">사주로 상담 중</span>
+            </span>
+            <button type="button" onClick={() => setAboutOpen(true)} className="shrink-0 rounded-full border border-brand-300 px-2.5 py-1.5 text-[12px] font-bold text-brand-600 active:scale-95">
+              다른 사람으로 바꾸기
+            </button>
+            <button
+              type="button"
+              data-testid="about-self"
+              aria-label="내 얘기로 되돌아가기"
+              title="내 얘기로 되돌아가기"
+              onClick={() => {
+                setAbout(null);
+                setMsgs((m) => [...m, { role: "dori", text: "다시 네 사주로 볼게", at: Date.now(), log: true }]);
+              }}
+              className="grid h-8 w-8 shrink-0 place-items-center rounded-full text-base text-gray-500 active:scale-95"
+            >
+              ✕
             </button>
           </div>
         )}
